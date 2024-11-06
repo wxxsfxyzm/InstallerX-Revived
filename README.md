@@ -12,17 +12,7 @@
 
 Android 5.0 ~ 13
 
-## 下载
 
-- [酷安](https://www.coolapk.com/apk/933870)
-- [QQ频道](https://pd.qq.com/s/nx7jpup8)
-- [QQ群组（官方）](https://qm.qq.com/cgi-bin/qm/qr?k=YMyAigxnns_FkISlRaormMiApHr2RmU7&jump_from=webapi&qr=1)
-
-## 捐赠支持
-
-- [支付宝](https://qr.alipay.com/fkx18580lfpydiop04dze47)
-- [微信](https://missuo.ru/file/fee5df1381671c996b127.png)
-- [币安](https://missuo.ru/file/28368c28d4ff28d59ed4b.jpg)
 
 ## 开源协议
 

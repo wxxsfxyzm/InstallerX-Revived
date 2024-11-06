@@ -9,13 +9,13 @@ plugins {
     id("kotlinx-serialization")
 }
 
-val keystoreProps = Properties().apply {
+/*val keystoreProps = Properties().apply {
     load(FileInputStream(rootProject.file("keystore/r0s.properties")))
-}
+}*/
 
-@Suppress("UnstableApiUsage")
+//@Suppress("UnstableApiUsage")
 android {
-    compileSdk = 33
+    compileSdk = 35
 
     defaultConfig {
         // 你如果根据InstallerX的源码进行打包成apk或其他安装包格式
@@ -25,7 +25,7 @@ android {
         applicationId = "com.rosan.installer.x"
         namespace = "com.rosan.installer"
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 26
         versionName = "1.7"
 
@@ -43,7 +43,7 @@ android {
         }
     }
 
-    signingConfigs {
+/*    signingConfigs {
         getByName("debug") {
             keyAlias = keystoreProps.getProperty("keyAlias")
             keyPassword = keystoreProps.getProperty("keyPassword")
@@ -61,11 +61,11 @@ android {
             enableV1Signing = true
             enableV2Signing = true
         }
-    }
+    }*/
 
     buildTypes {
         getByName("debug") {
-            signingConfig = signingConfigs.getByName("debug")
+            //signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -74,7 +74,7 @@ android {
         }
 
         getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
+            //signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

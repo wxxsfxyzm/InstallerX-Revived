@@ -80,7 +80,7 @@ class ApplyViewModel(
                     versionCode = it.compatVersionCode,
                     firstInstallTime = it.firstInstallTime,
                     lastUpdateTime = it.lastUpdateTime,
-                    isSystemApp = it.applicationInfo.flags.hasFlag(ApplicationInfo.FLAG_SYSTEM),
+                    isSystemApp = it.applicationInfo!!.flags.hasFlag(ApplicationInfo.FLAG_SYSTEM),
                     label = it.applicationInfo?.loadLabel(packageManager)?.toString() ?: ""
                 )
             }

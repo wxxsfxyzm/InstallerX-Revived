@@ -8,11 +8,11 @@
 # https://mvnrepository.com/
 
 [versions]
-agp = "8.0.2"
+agp = "8.6.1"
 kotlin = "1.8.21"
 compose-compiler = "1.4.7"
-compose = "1.4.3"
-room = "2.5.1"
+compose = "1.7.5"
+room = "2.6.1"
 ktx-serialization = "1.5.1"
 accompanist = "0.30.1"
 rikka-shizuku = "13.1.1"
@@ -25,22 +25,22 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
 [libraries]
-androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.10.1" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.7.2" }
-androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.6.1" }
+androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.15.0" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.9.3" }
+androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.8.7" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose" }
-compose-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.1.0" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.3.1" }
 compose-uiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
 
-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.5.3" }
-compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.4.3" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.8.3" }
+compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.5" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.8.1" }
+work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.10.0" }
 
 # Kotlin Serialization
 # https://github.com/Kotlin/kotlinx.serialization/blob/master/README.md#setup

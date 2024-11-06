@@ -34,9 +34,9 @@ import androidx.compose.ui.window.DialogProperties
 
 @Composable
 fun PositionDialog(
+    modifier: Modifier = Modifier,
     properties: DialogProperties = DialogProperties(),
     onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
     shape: Shape = AlertDialogDefaults.shape,
     containerColor: Color = AlertDialogDefaults.containerColor,
     iconContentColor: Color = AlertDialogDefaults.iconContentColor,

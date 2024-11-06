@@ -37,7 +37,7 @@ data class InstalledAppInfo(
                 icon = applicationInfo?.loadIcon(packageManager),
                 label = applicationInfo?.loadLabel(packageManager)?.toString() ?: "",
                 versionCode = packageInfo.compatVersionCode,
-                versionName = packageInfo.versionName
+                versionName = packageInfo.versionName!!
             )
         }
     }

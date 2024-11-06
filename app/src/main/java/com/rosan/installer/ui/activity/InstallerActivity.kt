@@ -43,7 +43,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     override fun onNewIntent(intent: Intent?) {
         this.intent = intent
-        super.onNewIntent(intent)
+        super.onNewIntent(intent!!)
         restoreInstaller()
     }
 
