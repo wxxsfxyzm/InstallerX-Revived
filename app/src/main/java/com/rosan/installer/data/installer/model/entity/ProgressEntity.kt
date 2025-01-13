@@ -1,27 +1,27 @@
 package com.rosan.installer.data.installer.model.entity
 
 sealed class ProgressEntity {
-    object Finish : ProgressEntity()
+    data object Finish : ProgressEntity()
 
-    object Ready : ProgressEntity()
+    data object Ready : ProgressEntity()
 
-    object Error : ProgressEntity()
+    data object Error : ProgressEntity()
 
-    object Resolving : ProgressEntity()
+    data object Resolving : ProgressEntity()
 
-    object ResolvedFailed : ProgressEntity()
+    data object ResolvedFailed : ProgressEntity()
 
-    object ResolveSuccess : ProgressEntity()
+    data object ResolveSuccess : ProgressEntity()
 
-    object Analysing : ProgressEntity()
+    data object Analysing : ProgressEntity()
 
-    object AnalysedFailed : ProgressEntity()
+    data object AnalysedFailed : ProgressEntity()
 
-    object AnalysedSuccess : ProgressEntity()
+    data object AnalysedSuccess : ProgressEntity()
 
-    object Installing : ProgressEntity()
+    data object Installing : ProgressEntity()
 
-    object InstallFailed : ProgressEntity()
+    data object InstallFailed : ProgressEntity()
 
-    object InstallSuccess : ProgressEntity()
+    data object InstallSuccess : ProgressEntity()
 }

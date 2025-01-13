@@ -15,9 +15,34 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.twotone.ClearAll
+import androidx.compose.material.icons.twotone.Downloading
+import androidx.compose.material.icons.twotone.Favorite
+import androidx.compose.material.icons.twotone.FavoriteBorder
+import androidx.compose.material.icons.twotone.Memory
+import androidx.compose.material.icons.twotone.Terminal
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -81,8 +106,8 @@ fun PreferredPage(
             item { DefaultInstaller(snackBarHostState, false) }
             item { ClearCache() }
             item { LabelWidget(label = stringResource(id = R.string.more)) }
-            item { UserTerms() }
-            item { PrivacyPolicy() }
+            // item { UserTerms() }
+            // item { PrivacyPolicy() }
         }
     }
 }
@@ -289,7 +314,7 @@ fun ClearCache() {
     ) {}
 }
 
-@Composable
+/*@Composable
 fun UserTerms() {
     val context = LocalContext.current
     BaseWidget(
@@ -299,8 +324,9 @@ fun UserTerms() {
             openUrl(context, "https://iamr0s.github.io/InstallerXDocs/terms")
         }
     ) {}
-}
+}*/
 
+/*
 @Composable
 fun PrivacyPolicy() {
     val context = LocalContext.current
@@ -311,4 +337,4 @@ fun PrivacyPolicy() {
             openUrl(context, "https://iamr0s.github.io/InstallerXDocs/privacy")
         }
     ) {}
-}
+}*/

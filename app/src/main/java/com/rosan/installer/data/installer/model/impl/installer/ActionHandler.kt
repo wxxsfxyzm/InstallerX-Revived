@@ -7,12 +7,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.Os
-import androidx.annotation.RequiresApi
 import com.hjq.permissions.XXPermissions
-import com.rosan.installer.data.app.model.entity.*
+import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
+import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.model.entity.DataEntity
+import com.rosan.installer.data.app.model.entity.InstallEntity
+import com.rosan.installer.data.app.model.entity.InstallExtraEntity
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
@@ -75,7 +77,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun resolve(activity: Activity) {
         installer.progress.emit(ProgressEntity.Resolving)
         kotlin.runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestNotificationPermission(
+            requestNotificationPermission(
                 activity
             )
             installer.config = resolveConfig(activity)
@@ -100,7 +102,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun resolveConfig(activity: Activity): ConfigEntity {
         val packageName = activity.callingPackage
-            ?: (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) activity.referrer?.host else null)
+            ?: (activity.referrer?.host)
         var config = ConfigUtil.getByPackageName(packageName)
         if (config.installer == null) config = config.copy(
             installer = packageName
@@ -108,7 +110,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return config
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun requestNotificationPermission(activity: Activity) {
         callbackFlow<Any?> {
             val permissions = listOf(Manifest.permission.POST_NOTIFICATIONS)

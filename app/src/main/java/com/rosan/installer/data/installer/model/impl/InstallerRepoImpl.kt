@@ -34,7 +34,7 @@ class InstallerRepoImpl private constructor() : InstallerRepo, KoinComponent {
             return impls[id]
         }
 
-        fun create(): InstallerRepo {
+        private fun create(): InstallerRepo {
             synchronized(this) {
                 val impl = InstallerRepoImpl()
                 impls[impl.id] = impl
@@ -95,10 +95,10 @@ class InstallerRepoImpl private constructor() : InstallerRepo, KoinComponent {
     sealed class Action {
         data class Resolve(val activity: Activity) : Action()
 
-        object Analyse : Action()
+        data object Analyse : Action()
 
-        object Install : Action()
+        data object Install : Action()
 
-        object Finish : Action()
+        data object Finish : Action()
     }
 }

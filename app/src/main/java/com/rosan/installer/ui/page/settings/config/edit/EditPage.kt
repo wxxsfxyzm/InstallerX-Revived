@@ -16,9 +16,33 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.More
 import androidx.compose.material.icons.automirrored.twotone.TrendingDown
-import androidx.compose.material.icons.twotone.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.twotone.BugReport
+import androidx.compose.material.icons.twotone.Delete
+import androidx.compose.material.icons.twotone.Downloading
+import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.icons.twotone.Face
+import androidx.compose.material.icons.twotone.Memory
+import androidx.compose.material.icons.twotone.People
+import androidx.compose.material.icons.twotone.PsychologyAlt
+import androidx.compose.material.icons.twotone.Save
+import androidx.compose.material.icons.twotone.Terminal
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -46,7 +70,7 @@ import kotlin.math.absoluteValue
 fun EditPage(
     navController: NavController,
     id: Long? = null,
-    viewModel: EditViewModel = koinViewModel() { parametersOf(id) }
+    viewModel: EditViewModel = koinViewModel { parametersOf(id) }
 ) {
     LaunchedEffect(true) {
         viewModel.dispatch(EditViewAction.Init)
@@ -155,7 +179,6 @@ class ShowFloatingActionButtonNestedScrollConnection(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DataNameWidget(viewModel: EditViewModel) {
     OutlinedTextField(
@@ -174,6 +197,7 @@ fun DataNameWidget(viewModel: EditViewModel) {
             viewModel.dispatch(EditViewAction.ChangeDataName(it))
         },
         singleLine = true,
+        // TODO do not allow create another Default name
         isError = viewModel.state.data.errorName
     )
 }

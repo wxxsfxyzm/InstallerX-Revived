@@ -18,7 +18,7 @@ data class EditViewState(
         val allowDowngrade: Boolean,
         val autoDelete: Boolean,
     ) {
-        val errorName = name.isEmpty()
+        val errorName = name.isEmpty()// || name == "Default"
 
         val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 

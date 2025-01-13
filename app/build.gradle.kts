@@ -19,7 +19,11 @@ plugins {
 //@Suppress("UnstableApiUsage")
 android {
     compileSdk = 35
-
+    // 加载 keystore.properties
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProps = Properties().apply {
+        load(FileInputStream(keystorePropertiesFile))
+    }
     defaultConfig {
         // 你如果根据InstallerX的源码进行打包成apk或其他安装包格式
         // 请换一个applicationId，不要和官方的任何发布版本产生冲突。
@@ -29,8 +33,8 @@ android {
         namespace = "com.rosan.installer"
         minSdk = 34
         targetSdk = 35
-        versionCode = 26
-        versionName = "1.7"
+        versionCode = 30
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -47,11 +51,11 @@ android {
         }
     }
 
-/*    signingConfigs {
+    signingConfigs {
         getByName("debug") {
             keyAlias = keystoreProps.getProperty("keyAlias")
             keyPassword = keystoreProps.getProperty("keyPassword")
-            storeFile = file(keystoreProps.getProperty("storeFile"))
+            storeFile = rootProject.file(keystoreProps["storeFile"] as String)
             storePassword = keystoreProps.getProperty("storePassword")
             enableV1Signing = true
             enableV2Signing = true
@@ -60,12 +64,12 @@ android {
         create("release") {
             keyAlias = keystoreProps.getProperty("keyAlias")
             keyPassword = keystoreProps.getProperty("keyPassword")
-            storeFile = file(keystoreProps.getProperty("storeFile"))
+            storeFile = rootProject.file(keystoreProps["storeFile"] as String)
             storePassword = keystoreProps.getProperty("storePassword")
             enableV1Signing = true
             enableV2Signing = true
         }
-    }*/
+    }
 
     buildTypes {
         getByName("debug") {
@@ -78,7 +82,7 @@ android {
         }
 
         getByName("release") {
-            //signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -192,8 +196,6 @@ dependencies {
     implementation(libs.accompanist.navigationAnimation)
     implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.drawablepainter)
-    implementation(libs.accompanist.systemuicontroller)
-    // implementation(libs.accompanist.swiperefresh)
 
     implementation(libs.rikka.shizuku.api)
     implementation(libs.rikka.shizuku.provider)

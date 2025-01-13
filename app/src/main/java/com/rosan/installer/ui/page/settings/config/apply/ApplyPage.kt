@@ -8,7 +8,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -37,21 +36,17 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Sort
-import androidx.compose.material.icons.twotone.ArrowBack
 import androidx.compose.material.icons.twotone.ArrowUpward
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Menu
 import androidx.compose.material.icons.twotone.Search
 import androidx.compose.material.icons.twotone.Shield
-import androidx.compose.material.icons.twotone.Sort
 import androidx.compose.material.icons.twotone.Visibility
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -72,7 +67,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -300,7 +294,6 @@ fun LottieWidget(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ItemsWidget(
     modifier: Modifier,
@@ -324,12 +317,13 @@ fun ItemsWidget(
                 mutableFloatStateOf(0f)
             }
             ItemWidget(
-                modifier = Modifier.animateItem(
-                    fadeInSpec = null, fadeOutSpec = null, placementSpec = spring(
-                        stiffness = Spring.StiffnessMediumLow,
-                        visibilityThreshold = IntOffset.VisibilityThreshold
+                modifier = Modifier
+                    .animateItem(
+                        fadeInSpec = null, fadeOutSpec = null, placementSpec = spring(
+                            stiffness = Spring.StiffnessMediumLow,
+                            visibilityThreshold = IntOffset.VisibilityThreshold
+                        )
                     )
-                )
                     .graphicsLayer(
                         alpha = animateFloatAsState(
                             targetValue = alpha,

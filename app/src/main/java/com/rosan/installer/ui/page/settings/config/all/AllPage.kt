@@ -1,7 +1,6 @@
 package com.rosan.installer.ui.page.settings.config.all
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -26,8 +25,6 @@ import androidx.compose.material.icons.automirrored.twotone.Rule
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.Edit
-import androidx.compose.material.icons.twotone.Rule
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -39,7 +36,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -48,7 +44,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -72,7 +67,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.absoluteValue
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllPage(
     navController: NavController,
@@ -282,12 +277,15 @@ fun DataItemWidget(
                         contentDescription = stringResource(id = R.string.edit)
                     )
                 }
+                // TODO Do not allow to delete default config
+                //if (entity.name != "Default") {
                 IconButton(onClick = { viewModel.dispatch(AllViewAction.DeleteDataConfig(entity)) }) {
                     Icon(
                         imageVector = Icons.TwoTone.Delete,
                         contentDescription = stringResource(id = R.string.delete)
                     )
                 }
+                //}
                 IconButton(onClick = {
                     viewModel.dispatch(AllViewAction.ApplyConfig(entity))
                 }) {
@@ -297,21 +295,21 @@ fun DataItemWidget(
                     )
                 }
             }
-            Row(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                var enabled by remember {
-                    mutableStateOf(false)
-                }
-                Switch(
-                    checked = enabled,
-                    onCheckedChange = { enabled = !enabled }
-                )
-            }
+            /*            Row(
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            var enabled by remember {
+                                mutableStateOf(false)
+                            }
+                            Switch(
+                                checked = enabled,
+                                onCheckedChange = { enabled = !enabled }
+                            )
+                        }*/
         }
     }
 }

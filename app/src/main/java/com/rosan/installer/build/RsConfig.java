@@ -26,7 +26,7 @@ public final class RsConfig {
     public static final int versionCode = BuildConfig.VERSION_CODE;
 
     private static String getSystemVersion() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.PREVIEW_SDK_INT != 0)
+        if (Build.VERSION.PREVIEW_SDK_INT != 0)
             return String.format("%1$s Preview (API %2$s)",
                     Build.VERSION.CODENAME,
                     Build.VERSION.SDK_INT);
@@ -54,10 +54,10 @@ public final class RsConfig {
         if (abis.length == 0)
             struct += " (Not Supported Native ABI)";
         else {
-            String supportABIs = "";
+            StringBuilder supportABIs = new StringBuilder();
             for (int i = 0; i < abis.length; i++) {
-                supportABIs += abis[i];
-                if (i + 1 < abis.length) supportABIs += ", ";
+                supportABIs.append(abis[i]);
+                if (i + 1 < abis.length) supportABIs.append(", ");
             }
             struct += " (" + supportABIs + ")";
         }
