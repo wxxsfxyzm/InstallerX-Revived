@@ -41,7 +41,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    /AgreementDialog()
+                    // AgreementDialog()
                     SettingsPage()
                 }
             }
