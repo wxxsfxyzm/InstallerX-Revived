@@ -10,12 +10,13 @@
 
 ## 支持版本
 
-Android 5.0 ~ 13
+Android 14 以上
 
-
+如有旧版本要求可以前往原仓库下载
 
 ## 开源协议
 
-InstallerX目前基于 [**GNU General Public License v3 (GPL-3)**](http://www.gnu.org/copyleft/gpl.html) 开源，但不保证未来依然继续遵循此协议或开源，有权更改开源协议或开源状态。
+InstallerX目前基于 [**GNU General Public License v3 (GPL-3)**](http://www.gnu.org/copyleft/gpl.html)
+开源，但不保证未来依然继续遵循此协议或开源，有权更改开源协议或开源状态。
 
 当您选择基于InstallerX进行开发时，需遵循所当前依赖的上游源码所规定的开源协议，不受新上游源码的开源协议影响。
