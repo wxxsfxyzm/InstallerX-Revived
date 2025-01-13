@@ -36,7 +36,7 @@ import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.util.help
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,7 +44,7 @@ import java.io.File
 fun PreferredPage(
     navController: NavController,
     windowInsets: WindowInsets,
-    viewModel: PreferredViewModel = getViewModel()
+    viewModel: PreferredViewModel = koinViewModel()
 ) {
     LaunchedEffect(true) {
         viewModel.dispatch(PreferredViewAction.Init)

@@ -22,7 +22,7 @@ import com.rosan.installer.ui.page.installer.dialog.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun InstallChoiceDialog(
+fun installChoiceDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     val entities = installer.entities.toMutableStateList()

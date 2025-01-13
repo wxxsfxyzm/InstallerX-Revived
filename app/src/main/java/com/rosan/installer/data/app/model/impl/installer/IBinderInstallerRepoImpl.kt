@@ -72,42 +72,22 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             IPackageInstaller.Stub.asInterface(iBinderWrapper(iPackageManager.packageInstaller.asBinder()))
 
         val installerPackageName = when (config.authorizer) {
-            ConfigEntity.Authorizer.Dhizuku -> DhizukuVariables.PACKAGE_NAME
+            ConfigEntity.Authorizer.Dhizuku -> DhizukuVariables.OFFICIAL_PACKAGE_NAME
             ConfigEntity.Authorizer.None -> BuildConfig.APPLICATION_ID
             else -> config.installer
         }
 
-        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            reflect.getDeclaredConstructor(
-                PackageInstaller::class.java,
-                IPackageInstaller::class.java,
-                String::class.java,
-                String::class.java,
-                Int::class.java,
-            )!!.also {
-                it.isAccessible = true
-            }.newInstance(iPackageInstaller, installerPackageName, null, extra.userId)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            reflect.getDeclaredConstructor(
-                PackageInstaller::class.java,
-                IPackageInstaller::class.java,
-                String::class.java,
-                Int::class.java,
-            )!!.also {
-                it.isAccessible = true
-            }.newInstance(iPackageInstaller, installerPackageName, extra.userId)
-        } else {
-            reflect.getDeclaredConstructor(
-                PackageInstaller::class.java,
-                Context::class.java,
-                PackageInstaller::class.java,
-                IPackageInstaller::class.java,
-                String::class.java,
-                Int::class.java
-            )!!.also {
-                it.isAccessible = true
-            }.newInstance(null, null, iPackageInstaller, installerPackageName, extra.userId)
-        }) as PackageInstaller
+        return (
+                reflect.getDeclaredConstructor(
+                    PackageInstaller::class.java,
+                    IPackageInstaller::class.java,
+                    String::class.java,
+                    String::class.java,
+                    Int::class.java,
+                )!!.also {
+                    it.isAccessible = true
+                }.newInstance(iPackageInstaller, installerPackageName, null, extra.userId)
+                ) as PackageInstaller
     }
 
     private suspend fun setSessionIBinder(session: Session) {

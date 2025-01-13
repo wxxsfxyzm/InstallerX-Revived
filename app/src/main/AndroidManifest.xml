@@ -17,7 +17,6 @@
 
     <application
         android:name=".App"
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
@@ -57,9 +56,8 @@
                 <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:mimeType="application/vnd.android.package-archive" />
-                <data
-                    android:mimeType="*/*"
-                    android:pathPattern=".*" />
+                <data android:pathPattern=".*"/>
+                <data android:mimeType="*/*"/>
             </intent-filter>
 
             <intent-filter>
@@ -70,13 +68,16 @@
 
                 <data android:mimeType="application/vnd.android.package-archive" />
 
-                <data
-                    android:mimeType="*/*"
-                    android:pathPattern=".*" />
+                <data android:pathPattern=".*"/>
+                <data android:mimeType="*/*"/>
             </intent-filter>
         </activity>
 
-        <service android:name="com.rosan.installer.data.installer.model.impl.InstallerService" />
+        <service
+            android:name="com.rosan.installer.data.installer.model.impl.InstallerService"
+            android:permission="android.permission.FOREGROUND_SERVICE"
+            android:foregroundServiceType="shortService"
+            />
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"

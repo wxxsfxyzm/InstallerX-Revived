@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.twotone.ArrowRight
 import androidx.compose.material.icons.twotone.AutoFixHigh
 import androidx.compose.material3.*
@@ -31,7 +32,7 @@ import org.koin.compose.getKoin
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun InstallInfoDialog(
+fun installInfoDialog(
     installer: InstallerRepo, viewModel: DialogViewModel, onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
     val context: Context = getKoin().get()
@@ -111,7 +112,7 @@ fun InstallInfoDialog(
                     modifier = Modifier
                         .size(24.dp)
                         .align(Alignment.CenterVertically),
-                    imageVector = Icons.TwoTone.ArrowRight,
+                    imageVector = Icons.AutoMirrored.TwoTone.ArrowRight,
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = null
                 )

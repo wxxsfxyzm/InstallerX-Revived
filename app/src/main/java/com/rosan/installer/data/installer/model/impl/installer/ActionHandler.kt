@@ -160,18 +160,16 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val uris = when (intentAction) {
             Intent.ACTION_SEND -> {
                 val uri =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) intent.getParcelableExtra(
+                    intent.getParcelableExtra(
                         Intent.EXTRA_STREAM, Uri::class.java
                     )
-                    else intent.getParcelableExtra(Intent.EXTRA_STREAM)
                 if (uri == null) emptyList() else listOf(uri)
             }
 
             Intent.ACTION_SEND_MULTIPLE -> {
-                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) intent.getParcelableArrayListExtra(
+                (intent.getParcelableArrayListExtra(
                     Intent.EXTRA_STREAM, Uri::class.java
-                )
-                else intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)) ?: emptyList()
+                )) ?: emptyList()
             }
 
             else -> {

@@ -5,8 +5,11 @@ import java.util.*
 plugins {
     alias(libs.plugins.agp.app)
     alias(libs.plugins.kotlin)
-    id("kotlin-kapt")
-    id("kotlinx-serialization")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.compose.compiler)
+    //id("kotlinx-serialization")
 }
 
 /*val keystoreProps = Properties().apply {
@@ -22,10 +25,10 @@ android {
         // 请换一个applicationId，不要和官方的任何发布版本产生冲突。
         // If you use InstallerX source code, package it into apk or other installation package format
         // Please change the applicationId to one that does not conflict with any official release.
-        applicationId = "com.rosan.installer.x"
+        applicationId = "com.carlyu.installer.x"
         namespace = "com.rosan.installer"
-        minSdk = 21
-        targetSdk = 34
+        minSdk = 34
+        targetSdk = 35
         versionCode = 26
         versionName = "1.7"
 
@@ -37,8 +40,9 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 compilerArgumentProviders(
-                    RoomSchemaArgProvider(File(projectDir, "schemas"))
+                    //RoomSchemaArgProvider(File(projectDir, "schemas"))
                 )
+                //arguments["room.schemaLocation"] = "$projectDir/schemas"
             }
         }
     }
@@ -126,17 +130,22 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
+        //kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
 
-    packagingOptions {
+    packaging {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
     }
 }
 
-class RoomSchemaArgProvider(
+room {
+    // Specify the schema directory
+    schemaDirectory("$projectDir/schemas")
+}
+
+/*class RoomSchemaArgProvider(
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     val schemaDir: File
@@ -145,7 +154,7 @@ class RoomSchemaArgProvider(
     override fun asArguments(): Iterable<String> {
         return listOf("room.schemaLocation=${schemaDir.path}")
     }
-}
+}*/
 
 dependencies {
     compileOnly(project(":hidden-api"))
@@ -154,15 +163,16 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.activity.compose)
     implementation(libs.compose.ui)
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.compose.material)
     implementation(libs.compose.material3)
     implementation(libs.compose.uiToolingPreview)
-
+    implementation(libs.androidx.material3)
     implementation(libs.compose.navigation)
     implementation(libs.compose.materialIcons)
 
     implementation(libs.room.runtime)
-    kapt(libs.room.compiler)
+    ksp(libs.room.compiler)
     implementation(libs.room.ktx)
 
     implementation(libs.work.runtime.ktx)
@@ -171,9 +181,11 @@ dependencies {
 
     implementation(libs.lsposed.hiddenapibypass)
 
+    implementation(project.dependencies.platform(libs.koin.bom))
     implementation(libs.koin.core)
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
+    implementation(libs.koin.compose.viewmodel)
 
     implementation(libs.lottie.compose)
 
@@ -181,6 +193,7 @@ dependencies {
     implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.drawablepainter)
     implementation(libs.accompanist.systemuicontroller)
+    // implementation(libs.accompanist.swiperefresh)
 
     implementation(libs.rikka.shizuku.api)
     implementation(libs.rikka.shizuku.provider)
@@ -192,4 +205,6 @@ dependencies {
     implementation(libs.iamr0s.dhizuku.api)
 
     implementation(libs.iamr0s.androidAppProcess)
+
+    implementation(libs.okhttp)
 }

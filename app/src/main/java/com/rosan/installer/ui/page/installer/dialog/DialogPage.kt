@@ -6,19 +6,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.widget.dialog.PositionDialog
-import org.koin.androidx.compose.getViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
 fun DialogPage(
-    installer: InstallerRepo, viewModel: DialogViewModel = getViewModel {
+    installer: InstallerRepo, viewModel: DialogViewModel = koinViewModel() {
         parametersOf(installer)
     }
 ) {
     LaunchedEffect(installer.id) {
         viewModel.dispatch(DialogViewAction.CollectRepo(installer))
     }
-    val params = DialogGenerateParams(installer, viewModel)
+    val params = dialogGenerateParams(installer, viewModel)
 
     PositionDialog(
         onDismissRequest = {

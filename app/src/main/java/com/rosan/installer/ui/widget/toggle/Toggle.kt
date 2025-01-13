@@ -11,6 +11,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -47,7 +48,7 @@ fun Toggle(
                     interactionSource = remember {
                         MutableInteractionSource()
                     },
-                    indication = rememberRipple(color = contentColor)
+                    indication = ripple(color = contentColor)
                 )
                 .padding(vertical = 8.dp, horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

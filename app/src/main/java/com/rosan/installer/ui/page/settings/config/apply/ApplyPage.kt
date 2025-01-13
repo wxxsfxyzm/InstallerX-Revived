@@ -2,7 +2,8 @@ package com.rosan.installer.ui.page.settings.config.apply
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
@@ -34,6 +35,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowBack
+import androidx.compose.material.icons.automirrored.twotone.Sort
 import androidx.compose.material.icons.twotone.ArrowBack
 import androidx.compose.material.icons.twotone.ArrowUpward
 import androidx.compose.material.icons.twotone.Close
@@ -48,6 +51,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -62,12 +66,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -84,6 +91,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
@@ -100,16 +108,15 @@ import com.rosan.installer.ui.widget.toggle.Toggle
 import com.rosan.installer.ui.widget.toggle.ToggleRow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.absoluteValue
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, ExperimentalAnimationApi::class
-)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ApplyPage(
-    navController: NavController, id: Long, viewModel: ApplyViewModel = getViewModel {
+    navController: NavController, id: Long, viewModel: ApplyViewModel = koinViewModel() {
         parametersOf(id)
     }
 ) {
@@ -141,11 +148,11 @@ fun ApplyPage(
         ),
         contentWindowInsets = WindowInsets.none,
         topBar = {
-            var searchBarActived by remember {
+            var searchBarActivated by remember {
                 mutableStateOf(false)
             }
             TopAppBar(title = {
-                @Suppress("AnimatedContentLabel") AnimatedContent(targetState = searchBarActived) {
+                @Suppress("AnimatedContentLabel") AnimatedContent(targetState = searchBarActivated) {
                     if (!it) Text(stringResource(R.string.app))
                     else {
                         val focusRequester = remember {
@@ -163,7 +170,7 @@ fun ApplyPage(
                             },
                             trailingIcon = {
                                 IconButton(onClick = {
-                                    searchBarActived = false
+                                    searchBarActivated = false
                                     viewModel.dispatch(ApplyViewAction.Search(""))
                                 }) {
                                     Icon(
@@ -181,13 +188,13 @@ fun ApplyPage(
             }, navigationIcon = {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
-                        imageVector = Icons.TwoTone.ArrowBack,
+                        imageVector = Icons.AutoMirrored.TwoTone.ArrowBack,
                         contentDescription = stringResource(R.string.back)
                     )
                 }
             }, actions = {
-                AnimatedVisibility(visible = !searchBarActived) {
-                    IconButton(onClick = { searchBarActived = !searchBarActived }) {
+                AnimatedVisibility(visible = !searchBarActivated) {
+                    IconButton(onClick = { searchBarActivated = !searchBarActivated }) {
                         Icon(imageVector = Icons.TwoTone.Search, contentDescription = null)
                     }
                 }
@@ -236,7 +243,9 @@ fun ApplyPage(
                             refreshing = refreshing,
                             state = pullRefreshState
                         )
+
                     }
+
                 }
             }
         }
@@ -312,15 +321,19 @@ fun ItemsWidget(
 //        }
         items(viewModel.state.checkedApps, key = { it.packageName }) {
             var alpha by remember {
-                mutableStateOf(0f)
+                mutableFloatStateOf(0f)
             }
             ItemWidget(
-                modifier = Modifier
-                    .animateItemPlacement()
+                modifier = Modifier.animateItem(
+                    fadeInSpec = null, fadeOutSpec = null, placementSpec = spring(
+                        stiffness = Spring.StiffnessMediumLow,
+                        visibilityThreshold = IntOffset.VisibilityThreshold
+                    )
+                )
                     .graphicsLayer(
                         alpha = animateFloatAsState(
                             targetValue = alpha,
-                            animationSpec = spring(stiffness = 100f)
+                            animationSpec = spring(stiffness = 100f), label = ""
                         ).value
                     ),
                 viewModel = viewModel,
@@ -360,7 +373,7 @@ fun ItemWidget(
                     interactionSource = remember {
                         MutableInteractionSource()
                     },
-                    indication = rememberRipple(
+                    indication = ripple(
                         color = MaterialTheme.colorScheme.primary
                     )
                 )
@@ -479,7 +492,7 @@ private fun ChipsWidget(viewModel: ApplyViewModel) {
         Chip(
             selected = orderInReverse,
             label = stringResource(R.string.sort_by_reverse_order),
-            icon = Icons.TwoTone.Sort,
+            icon = Icons.AutoMirrored.TwoTone.Sort,
             onClick = { viewModel.dispatch(ApplyViewAction.OrderInReverse(!orderInReverse)) }
         )
         Chip(

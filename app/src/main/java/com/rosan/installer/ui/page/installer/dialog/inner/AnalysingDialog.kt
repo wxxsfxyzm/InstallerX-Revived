@@ -8,7 +8,7 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.*
 
 @Composable
-fun AnalysingDialog(
+fun analysingDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     return DialogParams(icon = DialogInnerParams(

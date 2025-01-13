@@ -11,10 +11,10 @@ import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 
 @Composable
-fun InstallingDialog(
+fun installingDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
-    return InstallInfoDialog(installer, viewModel).copy(
+    return installInfoDialog(installer, viewModel).copy(
         text = DialogInnerParams(
             DialogParamsType.InstallerInstalling.id
         ) {

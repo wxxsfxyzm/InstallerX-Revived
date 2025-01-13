@@ -11,13 +11,13 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.*
 
 @Composable
-fun InstallFailedDialog(
+fun installFailedDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     val context = LocalContext.current
     val packageName =
         installer.entities.filter { it.selected }.map { it.app }.first().packageName
-    return InstallInfoDialog(installer, viewModel) {
+    return installInfoDialog(installer, viewModel) {
         context.startActivity(
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 .setData(Uri.fromParts("package", packageName, null))

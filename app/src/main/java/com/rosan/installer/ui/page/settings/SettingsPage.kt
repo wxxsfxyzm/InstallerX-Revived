@@ -1,14 +1,14 @@
 package com.rosan.installer.ui.page.settings
 
-import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.navigation.NavType
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import com.rosan.installer.ui.page.settings.config.apply.ApplyPage
 import com.rosan.installer.ui.page.settings.config.edit.EditPage
 import com.rosan.installer.ui.page.settings.main.MainPage
@@ -16,9 +16,9 @@ import com.rosan.installer.ui.page.settings.main.MainPage
 @OptIn(ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SettingsPage() {
-    val navController = rememberAnimatedNavController()
+    val navController = rememberNavController()
 
-    AnimatedNavHost(
+    NavHost(
         navController = navController,
         startDestination = SettingsScreen.Main.route,
     ) {
@@ -48,7 +48,7 @@ fun SettingsPage() {
             ),
             enterTransition = {
                 slideIntoContainer(
-                    AnimatedContentScope.SlideDirection.Up,
+                    AnimatedContentTransitionScope.SlideDirection.Up,
                 )
             },
             exitTransition = {
@@ -59,7 +59,7 @@ fun SettingsPage() {
             },
             popExitTransition = {
                 slideOutOfContainer(
-                    AnimatedContentScope.SlideDirection.Down,
+                    AnimatedContentTransitionScope.SlideDirection.Down,
                 )
             }
         ) {

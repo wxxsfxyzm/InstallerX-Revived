@@ -33,7 +33,7 @@ class InstallerService : Service() {
         Ready("ready"), Finish("finish"), Destroy("destroy");
 
         companion object {
-            fun revert(value: String): Action = Action.values().first { it.value == value }
+            fun revert(value: String): Action = entries.first { it.value == value }
         }
     }
 
@@ -49,9 +49,7 @@ class InstallerService : Service() {
 
     private fun setForeground(enable: Boolean) {
         if (!enable) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                stopForeground(STOP_FOREGROUND_REMOVE)
-            else stopForeground(true)
+            stopForeground(STOP_FOREGROUND_REMOVE)
             return
         }
 
@@ -65,13 +63,10 @@ class InstallerService : Service() {
             )
                 .setName(getString(R.string.installer_background_channel_name)).build()
         val manager = NotificationManagerCompat.from(this)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(
-            channel
-        )
+        manager.createNotificationChannel(channel)
 
         val flags =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            else PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
 
         val cancelIntent = Intent(Action.Destroy.value)
         cancelIntent.component = ComponentName(this, InstallerService::class.java)

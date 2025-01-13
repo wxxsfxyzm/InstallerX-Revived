@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.installer.dialog
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
@@ -7,7 +8,7 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.inner.*
 
 // change the content when the id been changed
-@OptIn(ExperimentalAnimationApi::class)
+@SuppressLint("UnusedContentLambdaTargetStateParameter")
 fun dialogInnerWidget(
     installer: InstallerRepo,
     params: DialogInnerParams
@@ -24,20 +25,20 @@ fun dialogInnerWidget(
     }
 
 @Composable
-fun DialogGenerateParams(
+fun dialogGenerateParams(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     return when (viewModel.state) {
-        is DialogViewState.Ready -> ReadyDialog(installer, viewModel)
-        is DialogViewState.Resolving -> ResolvingDialog(installer, viewModel)
-        is DialogViewState.ResolveFailed -> ResolveFailedDialog(installer, viewModel)
-        is DialogViewState.Analysing -> AnalysingDialog(installer, viewModel)
-        is DialogViewState.AnalyseFailed -> AnalyseFailedDialog(installer, viewModel)
-        is DialogViewState.InstallChoice -> InstallChoiceDialog(installer, viewModel)
-        is DialogViewState.InstallPrepare -> InstallPrepareDialog(installer, viewModel)
-        is DialogViewState.Installing -> InstallingDialog(installer, viewModel)
-        is DialogViewState.InstallSuccess -> InstallSuccessDialog(installer, viewModel)
-        is DialogViewState.InstallFailed -> InstallFailedDialog(installer, viewModel)
-        else -> ReadyDialog(installer, viewModel)
+        is DialogViewState.Ready -> readyDialog(installer, viewModel)
+        is DialogViewState.Resolving -> resolvingDialog(installer, viewModel)
+        is DialogViewState.ResolveFailed -> resolveFailedDialog(installer, viewModel)
+        is DialogViewState.Analysing -> analysingDialog(installer, viewModel)
+        is DialogViewState.AnalyseFailed -> analyseFailedDialog(installer, viewModel)
+        is DialogViewState.InstallChoice -> installChoiceDialog(installer, viewModel)
+        is DialogViewState.InstallPrepare -> installPrepareDialog(installer, viewModel)
+        is DialogViewState.Installing -> installingDialog(installer, viewModel)
+        is DialogViewState.InstallSuccess -> installSuccessDialog(installer, viewModel)
+        is DialogViewState.InstallFailed -> installFailedDialog(installer, viewModel)
+        else -> readyDialog(installer, viewModel)
     }
 }

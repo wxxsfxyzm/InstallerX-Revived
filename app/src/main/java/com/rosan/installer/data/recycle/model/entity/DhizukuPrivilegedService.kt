@@ -3,6 +3,7 @@ package com.rosan.installer.data.recycle.model.entity
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
+import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.dhizuku.shared.DhizukuVariables
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.delete
@@ -15,12 +16,16 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
 
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
         devicePolicyManager.clearPackagePersistentPreferredActivities(
-            DhizukuVariables.COMPONENT_NAME,
+            // TODO
+            // DhizukuVariables.PARAM_COMPONENT
+            Dhizuku.getOwnerComponent(),
             component.packageName
         )
         if (!enable) return
         devicePolicyManager.addPersistentPreferredActivity(
-            DhizukuVariables.COMPONENT_NAME,
+            // TODO
+            // DhizukuVariables.PARAM_COMPONENT,
+            Dhizuku.getOwnerComponent(),
             InstallIntentFilter, component
         )
     }

@@ -52,12 +52,12 @@ fun HomePage(
             item {
                 StatusWidget()
             }
-            item {
+/*            item {
                 DonateWidget()
             }
             item {
                 DiscussWidget()
-            }
+            }*/
         }
     }
 }
@@ -125,7 +125,7 @@ fun openUrl(context: Context, url: String) {
     context.startActivity(intent)
 }
 
-@Composable
+/*@Composable
 fun DonateWidget() {
     val context = LocalContext.current
 
@@ -193,7 +193,7 @@ fun DiscussWidget() {
         },
         items = items
     )
-}
+}*/
 
 @Composable
 fun ItemsCardWidget(

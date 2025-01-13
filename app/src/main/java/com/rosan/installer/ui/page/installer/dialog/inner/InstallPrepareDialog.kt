@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.People
-import androidx.compose.material.icons.twotone.TrendingDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,8 +24,8 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.*
 
 @Composable
-private fun InstallPrepareEmptyDialog(
-    installer: InstallerRepo, viewModel: DialogViewModel
+private fun installPrepareEmptyDialog(
+    viewModel: DialogViewModel
 ): DialogParams {
     return DialogParams(icon = DialogInnerParams(
         DialogParamsType.IconPausing.id, pausingIcon
@@ -49,8 +49,8 @@ private fun InstallPrepareEmptyDialog(
 }
 
 @Composable
-private fun InstallPrepareTooManyDialog(
-    installer: InstallerRepo, viewModel: DialogViewModel
+private fun installPrepareTooManyDialog(
+    viewModel: DialogViewModel
 ): DialogParams {
     return DialogParams(icon = DialogInnerParams(
         DialogParamsType.IconPausing.id, pausingIcon
@@ -92,18 +92,18 @@ fun Chip(
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun InstallPrepareDialog(
+fun installPrepareDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     val entities = installer.entities.filter { it.selected }.map { it.app }.sortedBest()
-    if (entities.isEmpty()) return InstallPrepareEmptyDialog(installer, viewModel)
-    if (entities.groupBy { it.packageName }.size > 1) return InstallPrepareTooManyDialog(
-        installer, viewModel
+    if (entities.isEmpty()) return installPrepareEmptyDialog(viewModel)
+    if (entities.groupBy { it.packageName }.size > 1) return installPrepareTooManyDialog(
+        viewModel
     )
     var showChips by remember {
         mutableStateOf(false)
     }
-    return InstallInfoDialog(installer, viewModel) {
+    return installInfoDialog(installer, viewModel) {
         showChips = !showChips
     }.copy(text = DialogInnerParams(
         DialogParamsType.InstallerPrepareInstall.id
@@ -154,7 +154,7 @@ fun InstallPrepareDialog(
                         label = stringResource(
                             id = R.string.config_allow_downgrade
                         ),
-                        icon = Icons.TwoTone.TrendingDown
+                        icon = Icons.AutoMirrored.TwoTone.TrendingDown
                     )
                     Chip(
                         selected = autoDelete,

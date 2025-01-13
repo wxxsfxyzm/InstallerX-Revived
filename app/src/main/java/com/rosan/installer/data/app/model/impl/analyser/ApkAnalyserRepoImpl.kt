@@ -58,9 +58,7 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
     private fun doFileWork(config: ConfigEntity, data: DataEntity.FileEntity): List<AppEntity> {
         val path = data.path
         return useResources { resources ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
-            else addAssetPath(resources.assets, path)
+            setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
             listOf(loadAppEntity(resources, resources.newTheme(), data))
         }
     }

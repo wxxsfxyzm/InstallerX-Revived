@@ -41,11 +41,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         super.onSaveInstanceState(outState)
     }
 
-    override fun onNewIntent(intent: Intent?) {
+/*    override fun onNewIntent(intent: Intent?) {
         this.intent = intent
         super.onNewIntent(intent!!)
         restoreInstaller()
-    }
+    }*/
 
     private var job: Job? = null
 

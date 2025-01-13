@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.Rule
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.Edit
@@ -30,6 +31,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -66,7 +68,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.page.settings.SettingsScreen
 import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.absoluteValue
 
@@ -75,7 +77,7 @@ import kotlin.math.absoluteValue
 fun AllPage(
     navController: NavController,
     windowInsets: WindowInsets,
-    viewModel: AllViewModel = getViewModel {
+    viewModel: AllViewModel = koinViewModel() {
         parametersOf(navController)
     }
 ) {
@@ -257,7 +259,7 @@ fun DataItemWidget(
                 }
             }
         }
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
@@ -290,7 +292,7 @@ fun DataItemWidget(
                     viewModel.dispatch(AllViewAction.ApplyConfig(entity))
                 }) {
                     Icon(
-                        imageVector = Icons.TwoTone.Rule,
+                        imageVector = Icons.AutoMirrored.TwoTone.Rule,
                         contentDescription = stringResource(id = R.string.apply)
                     )
                 }

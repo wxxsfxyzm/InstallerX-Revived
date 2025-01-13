@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowBack
+import androidx.compose.material.icons.automirrored.twotone.More
+import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.twotone.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,7 +35,7 @@ import com.rosan.installer.ui.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.ui.widget.setting.SwitchWidget
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.absoluteValue
 
@@ -43,7 +46,7 @@ import kotlin.math.absoluteValue
 fun EditPage(
     navController: NavController,
     id: Long? = null,
-    viewModel: EditViewModel = getViewModel { parametersOf(id) }
+    viewModel: EditViewModel = koinViewModel() { parametersOf(id) }
 ) {
     LaunchedEffect(true) {
         viewModel.dispatch(EditViewAction.Init)
@@ -88,7 +91,7 @@ fun EditPage(
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
-                            imageVector = Icons.TwoTone.ArrowBack,
+                            imageVector = Icons.AutoMirrored.TwoTone.ArrowBack,
                             contentDescription = stringResource(
                                 id = R.string.back
                             )
@@ -183,7 +186,7 @@ fun DataDescriptionWidget(viewModel: EditViewModel) {
             .padding(vertical = 8.dp, horizontal = 16.dp)
             .focusable(),
         leadingIcon = {
-            Icon(imageVector = Icons.TwoTone.More, contentDescription = null)
+            Icon(imageVector = Icons.AutoMirrored.TwoTone.More, contentDescription = null)
         },
         label = {
             Text(text = stringResource(id = R.string.config_description))
@@ -335,7 +338,7 @@ fun DataAllowTestOnlyWidget(viewModel: EditViewModel) {
 @Composable
 fun DataAllowDowngradeWidget(viewModel: EditViewModel) {
     SwitchWidget(
-        icon = Icons.TwoTone.TrendingDown,
+        icon = Icons.AutoMirrored.TwoTone.TrendingDown,
         title = stringResource(id = R.string.config_allow_downgrade),
         description = stringResource(id = R.string.config_allow_downgrade_dsp),
         checked = viewModel.state.data.allowDowngrade,

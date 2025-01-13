@@ -9,13 +9,16 @@
 
 [versions]
 agp = "8.6.1"
-kotlin = "1.8.21"
-compose-compiler = "1.4.7"
-compose = "1.7.5"
+kotlin = "2.1.0"
+ksp="2.1.0-1.0.29"
+compose-compiler = "1.5.15"
+composeBom = "2024.12.01"
+compose = "1.7.6"
 room = "2.6.1"
-ktx-serialization = "1.5.1"
-accompanist = "0.30.1"
-rikka-shizuku = "13.1.1"
+ktx-serialization = "1.8.0"
+accompanist = "0.36.0"
+rikka-shizuku = "13.1.5"
+koin-bom = "4.0.1"
 
 [plugins]
 agp-lib = { id = "com.android.library", version.ref = "agp" }
@@ -23,18 +26,23 @@ agp-app = { id = "com.android.application", version.ref = "agp" }
 kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "room" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 [libraries]
 androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.15.0" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.9.3" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.8.7" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose" }
-compose-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.3.1" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3", version = "compose" }
 compose-uiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
-
-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.8.3" }
-compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.5" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.8.5" }
+compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.6" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
@@ -53,13 +61,15 @@ lsposed-hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hidde
 
 # Koin Inject
 # https://insert-koin.io/docs/setup/koin
-koin-core = { group = "io.insert-koin", name = "koin-core", version = "3.4.0" }
-koin-android = { group = "io.insert-koin", name = "koin-android", version = "3.4.0" }
-koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version = "3.4.4" }
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
+koin-core = { module = "io.insert-koin:koin-core" }
+koin-android = { group = "io.insert-koin", name = "koin-android"}
+koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose"}
+koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel"}
 
 # Lottie for Android Compose
 # http://airbnb.io/lottie/#/android-compose
-lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version = "6.0.0" }
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version = "6.6.2" }
 
 # Pager layouts
 # https://google.github.io/accompanist/pager/
@@ -67,6 +77,7 @@ accompanist-navigationAnimation = { group = "com.google.accompanist", name = "ac
 accompanist-flowlayout = { group = "com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 accompanist-systemuicontroller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist" }
+accompanist-swiperefresh = { group = "com.google.accompanist", name = "accompanist-swiperefresh", version.ref = "accompanist" }
 
 # Rikka Shizuku
 # https://github.com/RikkaApps/Shizuku-API
@@ -75,16 +86,18 @@ rikka-shizuku-provider = { group = "dev.rikka.shizuku", name = "provider", versi
 
 # Coil: An image loader for Compose
 # https://coil-kt.github.io/coil/compose/
-compose-coil = { group = "io.coil-kt", name = "coil-compose", version = "2.4.0" }
+compose-coil = { group = "io.coil-kt.coil3", name = "coil-compose", version = "3.0.4" }
 
 # XXPermissions
 # https://github.com/getActivity/XXPermissions
-xxpermissions = { group = "com.github.getActivity", name = "XXPermissions", version = "16.6" }
+xxpermissions = { group = "com.github.getActivity", name = "XXPermissions", version = "20.0" }
 
 # Dhizuku-API
 # https://github.com/iamr0s/Dhizuku-API
-iamr0s-dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version = "2.3" }
+iamr0s-dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version = "2.5.3" }
 
 # AndroidAppProcess
 # https://github.com/iamr0s/AndroidAppProcess
-iamr0s-androidAppProcess = { group = "io.github.iamr0s", name = "AndroidAppProcess", version = "1.2" }
+iamr0s-androidAppProcess = { group = "io.github.iamr0s", name = "AndroidAppProcess", version = "1.3.2" }
+
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "4.9.3" }

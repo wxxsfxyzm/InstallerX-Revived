@@ -92,43 +92,24 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         userId: Int,
         removeExisting: Boolean
     ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            reflect.getDeclaredMethod(
-                IPackageManager::class.java,
-                "addPreferredActivity",
-                IntentFilter::class.java,
-                Int::class.java,
-                Array<ComponentName>::class.java,
-                ComponentName::class.java,
-                Int::class.java,
-                Boolean::class.java,
-            )?.invoke(
-                iPackageManager,
-                filter,
-                match,
-                names,
-                name,
-                userId,
-                removeExisting
-            )
-        } else {
-            reflect.getDeclaredMethod(
-                IPackageManager::class.java,
-                "addPreferredActivity",
-                IntentFilter::class.java,
-                Int::class.java,
-                Array<ComponentName>::class.java,
-                ComponentName::class.java,
-                Int::class.java
-            )?.invoke(
-                iPackageManager,
-                filter,
-                match,
-                names,
-                name,
-                userId
-            )
-        }
+        reflect.getDeclaredMethod(
+            IPackageManager::class.java,
+            "addPreferredActivity",
+            IntentFilter::class.java,
+            Int::class.java,
+            Array<ComponentName>::class.java,
+            ComponentName::class.java,
+            Int::class.java,
+            Boolean::class.java,
+        )?.invoke(
+            iPackageManager,
+            filter,
+            match,
+            names,
+            name,
+            userId,
+            removeExisting
+        )
     }
 
     private fun addPersistentPreferredActivity(
@@ -158,24 +139,15 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         flags: Int,
         userId: Int
     ): List<ResolveInfo> {
-        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            reflect.getDeclaredMethod(
-                IPackageManager::class.java,
-                "queryIntentActivities",
-                Intent::class.java,
-                String::class.java,
-                Long::class.java,
-                Int::class.java
-            )?.invoke(iPackageManager, intent, resolvedType, flags.toLong(), userId)
-        } else {
-            reflect.getDeclaredMethod(
-                IPackageManager::class.java,
-                "queryIntentActivities",
-                Intent::class.java,
-                String::class.java,
-                Int::class.java,
-                Int::class.java
-            )?.invoke(iPackageManager, intent, resolvedType, flags, userId)
-        } as ParceledListSlice<ResolveInfo>).list
+        return (
+                reflect.getDeclaredMethod(
+                    IPackageManager::class.java,
+                    "queryIntentActivities",
+                    Intent::class.java,
+                    String::class.java,
+                    Long::class.java,
+                    Int::class.java
+                )?.invoke(iPackageManager, intent, resolvedType, flags.toLong(), userId)
+                        as ParceledListSlice<ResolveInfo>).list
     }
 }

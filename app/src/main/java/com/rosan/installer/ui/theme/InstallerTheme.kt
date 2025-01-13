@@ -3,6 +3,7 @@ package com.rosan.installer.ui.theme
 import android.app.Activity
 import android.os.Build
 import android.view.WindowManager
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -22,12 +23,11 @@ import com.rosan.installer.R
 @Composable
 fun InstallerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        dynamicColor -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
@@ -47,13 +47,12 @@ fun InstallerTheme(
             tertiary = colorResource(R.color.light_tertiary)
         )
     }
-    val view = LocalView.current
+/*    val view = LocalView.current
     SideEffect {
         val window = (view.context as Activity).window
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-            window.attributes.layoutInDisplayCutoutMode =
-                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        window.attributes.layoutInDisplayCutoutMode =
+            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -62,11 +61,20 @@ fun InstallerTheme(
             !darkTheme
 
         window.navigationBarColor = Color.Transparent.toArgb()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-            window.navigationBarDividerColor = Color.Transparent.toArgb()
+        window.navigationBarDividerColor = Color.Transparent.toArgb()
 
         WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars =
             !darkTheme
+    }*/
+
+    // New Status Bar Color Logic
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as ComponentActivity).window
+            //window.statusBarColor = colorScheme.primary.toArgb() // change color status bar here
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
     }
 
     MaterialTheme(

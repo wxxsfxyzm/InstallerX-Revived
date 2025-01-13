@@ -6,6 +6,7 @@ import android.text.method.LinkMovementMethod
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
@@ -31,6 +32,7 @@ import org.koin.core.component.KoinComponent
 
 class SettingsActivity : ComponentActivity(), KoinComponent {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
             // A surface based on material design theme.
@@ -39,7 +41,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    AgreementDialog()
+                    /AgreementDialog()
                     SettingsPage()
                 }
             }
