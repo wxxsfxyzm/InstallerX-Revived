@@ -20,4 +20,6 @@
     <color name="dark_secondary">#FFBFCBAD</color>
     <color name="dark_tertiary">#FFA0CFCC</color>
     <color name="dark_error">#FFF2B8B5</color>
+
+    <color name="dynamic_icon_background">@android:color/system_surface_light</color>
 </resources>

@@ -30,7 +30,7 @@ data class ValueEntity(
             const val LAST_INT: UByte = 0x1fu
 
             fun build(value: UByte): Type {
-                return values().find { it.value == value } ?: NULL
+                return entries.find { it.value == value } ?: NULL
             }
         }
     }

@@ -7,7 +7,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedAlreadyExistsEx
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedContainerErrorException
 import com.rosan.installer.data.app.model.exception.InstallFailedCpuAbiIncompatibleException
-import com.rosan.installer.data.app.model.exception.InstallFailedDexoptException
+import com.rosan.installer.data.app.model.exception.InstallFailedDexOptException
 import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedInsufficientStorageException
 import com.rosan.installer.data.app.model.exception.InstallFailedInvalidAPKException
@@ -46,7 +46,7 @@ fun Throwable.help(): String {
         is InstallFailedSharedUserIncompatibleException -> stringResource(R.string.exception_install_failed_shared_user_incompatible)
         is InstallFailedMissingSharedLibraryException -> stringResource(R.string.exception_install_failed_missing_shared_library)
         is InstallFailedReplaceCouldntDeleteException -> stringResource(R.string.exception_install_failed_replace_couldnt_delete)
-        is InstallFailedDexoptException -> stringResource(R.string.exception_install_failed_dexopt)
+        is InstallFailedDexOptException -> stringResource(R.string.exception_install_failed_dexopt)
         is InstallFailedOlderSdkException -> stringResource(R.string.exception_install_failed_older_sdk)
         is InstallFailedConflictingProviderException -> stringResource(R.string.exception_install_failed_conflicting_provider)
         is InstallFailedNewerSDKException -> stringResource(R.string.exception_install_failed_newer_sdk)

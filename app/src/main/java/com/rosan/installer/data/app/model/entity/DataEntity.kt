@@ -1,5 +1,6 @@
 package com.rosan.installer.data.app.model.entity
 
+import android.annotation.SuppressLint
 import android.system.Os
 import android.system.OsConstants
 import java.io.File
@@ -33,7 +34,8 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         override fun toString() = "$parent!$name"
     }
 
-    class FileDescriptorEntity(val pid: Int, val descriptor: Int) : DataEntity() {
+    class FileDescriptorEntity(private val pid: Int, private val descriptor: Int) : DataEntity() {
+        @SuppressLint("DiscouragedPrivateApi")
         fun getFileDescriptor(): FileDescriptor? {
             if (Os.getpid() != pid) return null
             val fileDescriptor = FileDescriptor()

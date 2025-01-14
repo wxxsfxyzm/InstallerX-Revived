@@ -10,12 +10,11 @@ import android.content.pm.IPackageInstallerSession
 import android.content.pm.IPackageManager
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.Session
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.IInterface
-import android.os.Parcel
 import android.os.ServiceManager
+import android.util.Log
 import com.rosan.dhizuku.shared.DhizukuVariables
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.app.model.entity.InstallEntity
@@ -31,6 +30,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.internal.closeQuietly
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -181,7 +181,12 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     ) {
         val inputStream = entity.data.getInputStreamWhileNotEmpty()
             ?: throw Exception("can't open input stream for this data: '${entity.data}'")
-        session.openWrite(entity.name, 0, inputStream.available().toUInt().toLong()).use {
+        session.openWrite(
+            entity.name, 0,
+            withContext(Dispatchers.IO) {
+                inputStream.available()
+            }.toUInt().toLong()
+        ).use {
             inputStream.copyTo(it)
             session.fsync(it)
         }
@@ -206,6 +211,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     ) {
 
         if (result.isSuccess && config.autoDelete) {
+            Log.d("doFinishWork", "autoDelete is enabled, do delete work")
             coroutineScope.launch {
                 kotlin.runCatching { onDeleteWork(config, entities, extra) }.exceptionOrNull()
                     ?.printStackTrace()
@@ -266,33 +272,33 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                 )
             }
 
-            override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) return super.onTransact(
+            /* override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
+                return super.onTransact(
                     code, data, reply, flags
                 )
-                val descriptor = "android.content.IIntentSender"
-                return when (code) {
-                    1 -> {
-                        data.enforceInterface(descriptor)
-                        send(
-                            data.readInt(),
-                            if (data.readInt() != 0) Intent.CREATOR.createFromParcel(data) else null,
-                            data.readString(),
-                            IIntentReceiver.Stub.asInterface(data.readStrongBinder()),
-                            data.readString(),
-                            if (data.readInt() != 0) Bundle.CREATOR.createFromParcel(data) else null
-                        )
-                        true
-                    }
+                                val descriptor = "android.content.IIntentSender"
+                                return when (code) {
+                                    1 -> {
+                                        data.enforceInterface(descriptor)
+                                        send(
+                                            data.readInt(),
+                                            if (data.readInt() != 0) Intent.CREATOR.createFromParcel(data) else null,
+                                            data.readString(),
+                                            IIntentReceiver.Stub.asInterface(data.readStrongBinder()),
+                                            data.readString(),
+                                            if (data.readInt() != 0) Bundle.CREATOR.createFromParcel(data) else null
+                                        )
+                                        true
+                                    }
 
-                    0x5F4E5446 -> {
-                        reply?.writeString(descriptor)
-                        true
-                    }
+                                    0x5F4E5446 -> {
+                                        reply?.writeString(descriptor)
+                                        true
+                                    }
 
-                    else -> return super.onTransact(code, data, reply, flags)
-                }
-            }
+                                    else -> return super.onTransact(code, data, reply, flags)
+                                }
+            }*/
         }
 
         fun getIntentSender(): IntentSender {

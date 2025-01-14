@@ -1,8 +1,5 @@
 package com.rosan.installer.ui.page.settings.preferred
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -105,18 +102,18 @@ fun PreferredPage(
             item { DefaultInstaller(snackBarHostState, true) }
             item { DefaultInstaller(snackBarHostState, false) }
             item { ClearCache() }
-            item { LabelWidget(label = stringResource(id = R.string.more)) }
+            // item { LabelWidget(label = stringResource(id = R.string.more)) }
             // item { UserTerms() }
             // item { PrivacyPolicy() }
         }
     }
 }
 
-fun openUrl(context: Context, url: String) {
+/*fun openUrl(context: Context, url: String) {
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     context.startActivity(intent)
-}
+}*/
 
 @Composable
 fun DataAuthorizerWidget(viewModel: PreferredViewModel) {

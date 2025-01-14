@@ -8,7 +8,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedAlreadyExistsEx
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedContainerErrorException
 import com.rosan.installer.data.app.model.exception.InstallFailedCpuAbiIncompatibleException
-import com.rosan.installer.data.app.model.exception.InstallFailedDexoptException
+import com.rosan.installer.data.app.model.exception.InstallFailedDexOptException
 import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedInsufficientStorageException
 import com.rosan.installer.data.app.model.exception.InstallFailedInvalidAPKException
@@ -131,7 +131,7 @@ class PackageManagerUtil {
                     ecpMsg
                 )
 
-                INSTALL_FAILED_DEXOPT -> InstallFailedDexoptException(ecpMsg)
+                INSTALL_FAILED_DEXOPT -> InstallFailedDexOptException(ecpMsg)
                 INSTALL_FAILED_OLDER_SDK -> InstallFailedOlderSdkException(ecpMsg)
                 INSTALL_FAILED_CONFLICTING_PROVIDER -> InstallFailedConflictingProviderException(
                     ecpMsg

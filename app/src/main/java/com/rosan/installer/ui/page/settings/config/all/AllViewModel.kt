@@ -43,12 +43,12 @@ class AllViewModel(
         }
     }
 
-    private var isInited = false
+    private var isInit = false
 
     private fun init() {
         synchronized(this) {
-            if (isInited) return
-            isInited = true
+            if (isInit) return
+            isInit = true
             loadData()
         }
     }
