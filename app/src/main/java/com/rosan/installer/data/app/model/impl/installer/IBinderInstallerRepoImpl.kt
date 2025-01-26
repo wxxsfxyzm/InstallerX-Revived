@@ -48,7 +48,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
 
-    private suspend fun getFiled(any: Class<*>, name: String, clazz: Class<*>): Field? {
+    private fun getFiled(any: Class<*>, name: String, clazz: Class<*>): Field? {
         var field = reflect.getDeclaredField(any, name)
         field?.isAccessible = true
         if (field?.type != clazz) {
@@ -192,7 +192,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         }
     }
 
-    private suspend fun commit(
+    private fun commit(
         config: ConfigEntity,
         entities: List<InstallEntity>,
         extra: InstallExtraEntity,
@@ -233,6 +233,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             ) ::special
             else null
         ) {
+            Log.d("onDeleteWork", "onDeleteWork: ${entities.sourcePath()}")
             it.privileged.delete(entities.sourcePath())
         }
     }

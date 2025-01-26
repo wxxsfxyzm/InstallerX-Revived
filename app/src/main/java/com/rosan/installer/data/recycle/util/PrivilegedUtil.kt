@@ -7,7 +7,11 @@ import java.io.File
 
 fun Array<out String>.delete() {
     for (path in this) {
-        val file = File(path)
+        val file = File(
+            if (path.startsWith("/mnt/user/0/emulated/0")) {
+                path.replace("/mnt/user/0/emulated/0", "/storage/emulated/0")
+            } else path
+        )
         if (file.exists()) file.delete()
     }
 }

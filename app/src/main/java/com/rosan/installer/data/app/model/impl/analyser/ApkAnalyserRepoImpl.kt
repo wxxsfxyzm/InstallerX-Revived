@@ -4,8 +4,6 @@ import android.content.res.ApkAssets
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
@@ -66,7 +64,6 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
     private fun doFileDescriptorWork(
         config: ConfigEntity, data: DataEntity.FileDescriptorEntity
     ): List<AppEntity> {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) throw Exception("FileDescriptor Analyser only work on Android P or greater")
         val fileDescriptor =
             data.getFileDescriptor() ?: throw Exception("can't get fd from '$data'")
         return useResources { resources ->
@@ -84,7 +81,6 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         if (cookie == 0) throw Exception("the cookie of the added asset, or 0 on failure.")
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.P)
     private fun setAssetPath(assetManager: AssetManager, assets: Array<ApkAssets>) {
         val setApkAssetsMtd = reflect.getDeclaredMethod(
             AssetManager::class.java,
@@ -96,13 +92,11 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         setApkAssetsMtd.invoke(assetManager, assets, true)
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.P)
     private fun loadFromFd(fileDescriptor: FileDescriptor): ApkAssets {
         val friendlyName = "${fileDescriptor.hashCode()}.apk"
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ApkAssets.loadFromFd(
+        return ApkAssets.loadFromFd(
             fileDescriptor, friendlyName, 0, null
         )
-        else ApkAssets.loadFromFd(fileDescriptor, friendlyName, true, false)
     }
 
     private fun loadAppEntity(

@@ -1,5 +1,5 @@
 import java.io.FileInputStream
-import java.util.*
+import java.util.Properties
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -12,11 +12,6 @@ plugins {
     //id("kotlinx-serialization")
 }
 
-/*val keystoreProps = Properties().apply {
-    load(FileInputStream(rootProject.file("keystore/r0s.properties")))
-}*/
-
-//@Suppress("UnstableApiUsage")
 android {
     compileSdk = 35
     // 加载 keystore.properties
@@ -29,7 +24,7 @@ android {
         // 请换一个applicationId，不要和官方的任何发布版本产生冲突。
         // If you use InstallerX source code, package it into apk or other installation package format
         // Please change the applicationId to one that does not conflict with any official release.
-        applicationId = "com.carlyu.installer.x"
+        applicationId = "com.rosan.installer.x.revived"
         namespace = "com.rosan.installer"
         minSdk = 34
         targetSdk = 35
@@ -46,7 +41,6 @@ android {
                 compilerArgumentProviders(
                     //RoomSchemaArgProvider(File(projectDir, "schemas"))
                 )
-                //arguments["room.schemaLocation"] = "$projectDir/schemas"
             }
         }
     }
@@ -73,7 +67,7 @@ android {
 
     buildTypes {
         getByName("debug") {
-            //signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

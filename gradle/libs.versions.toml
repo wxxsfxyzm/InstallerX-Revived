@@ -10,9 +10,8 @@
 [versions]
 agp = "8.6.1"
 kotlin = "2.1.0"
-ksp="2.1.0-1.0.29"
-compose-compiler = "1.5.15"
-composeBom = "2024.12.01"
+ksp = "2.1.0-1.0.29"
+composeBom = "2025.01.00"
 compose = "1.7.6"
 room = "2.6.1"
 ktx-serialization = "1.8.0"
@@ -33,7 +32,7 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 [libraries]
 androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.15.0" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.9.3" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.0" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.8.7" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 
@@ -63,9 +62,9 @@ lsposed-hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hidde
 # https://insert-koin.io/docs/setup/koin
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-core = { module = "io.insert-koin:koin-core" }
-koin-android = { group = "io.insert-koin", name = "koin-android"}
-koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose"}
-koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel"}
+koin-android = { group = "io.insert-koin", name = "koin-android" }
+koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
+koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel" }
 
 # Lottie for Android Compose
 # http://airbnb.io/lottie/#/android-compose
@@ -76,7 +75,6 @@ lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", versio
 accompanist-navigationAnimation = { group = "com.google.accompanist", name = "accompanist-navigation-animation", version.ref = "accompanist" }
 accompanist-flowlayout = { group = "com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
-accompanist-systemuicontroller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist" }
 
 # Rikka Shizuku
 # https://github.com/RikkaApps/Shizuku-API
