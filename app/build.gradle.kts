@@ -88,16 +88,16 @@ android {
     flavorDimensions += "level"
 
     productFlavors {
-        create("unstable") {
+        create("Unstable") {
             dimension = "level"
             isDefault = true
         }
 
-        create("preview") {
+        create("Preview") {
             dimension = "level"
         }
 
-        create("stable") {
+        create("Stable") {
             dimension = "level"
         }
     }
