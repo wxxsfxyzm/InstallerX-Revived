@@ -1,13 +1,29 @@
 package com.rosan.installer.ui.page.settings.home
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -16,28 +32,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
-import com.rosan.installer.ui.theme.none
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomePage(
-    navController: NavController,
-    windowInsets: WindowInsets
-) {
+fun HomePage() {
     Scaffold(
         modifier = Modifier
-            .windowInsetsPadding(windowInsets)
             .fillMaxSize(),
-        contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(id = R.string.home))
+                    Text(text = stringResource(id = R.string.about))
+                    //Text(text = "About")
                 },
             )
         },
@@ -52,12 +62,12 @@ fun HomePage(
             item {
                 StatusWidget()
             }
-/*            item {
-                DonateWidget()
-            }
-            item {
-                DiscussWidget()
-            }*/
+            /*            item {
+                            DonateWidget()
+                        }
+                        item {
+                            DiscussWidget()
+                        }*/
         }
     }
 }
@@ -111,18 +121,12 @@ fun StatusWidget() {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
-                    text = "$level [${RsConfig.versionName} (${RsConfig.versionCode})]",
+                    text = "$level ${RsConfig.versionName} (${RsConfig.versionCode})",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
     )
-}
-
-fun openUrl(context: Context, url: String) {
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    context.startActivity(intent)
 }
 
 /*@Composable

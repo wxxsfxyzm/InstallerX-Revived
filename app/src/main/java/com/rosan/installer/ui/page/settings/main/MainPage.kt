@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.settings.main
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Home
 import androidx.compose.material.icons.twotone.RoomPreferences
 import androidx.compose.material.icons.twotone.SettingsSuggest
 import androidx.compose.material3.Icon
@@ -31,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.settings.config.all.AllPage
-import com.rosan.installer.ui.page.settings.home.HomePage
 import com.rosan.installer.ui.page.settings.preferred.PreferredPage
 import com.rosan.installer.ui.theme.exclude
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -43,12 +40,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainPage(navController: NavController) {
     val data = arrayOf(
-        NavigationData(
-            icon = Icons.TwoTone.Home,
-            label = stringResource(R.string.home)
-        ) {
-            HomePage(navController, it)
-        },
+        /*        NavigationData(
+                    icon = Icons.TwoTone.Home,
+                    label = stringResource(R.string.home)
+                ) {
+                    HomePage(it)
+                },*/
         NavigationData(
             icon = Icons.TwoTone.RoomPreferences,
             label = stringResource(R.string.config)
@@ -59,7 +56,7 @@ fun MainPage(navController: NavController) {
             icon = Icons.TwoTone.SettingsSuggest,
             label = stringResource(R.string.preferred)
         ) {
-            PreferredPage(navController, it)
+            PreferredPage(it)
         }
     )
 

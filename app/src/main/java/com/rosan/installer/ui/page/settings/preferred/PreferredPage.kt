@@ -1,6 +1,10 @@
 package com.rosan.installer.ui.page.settings.preferred
 
+import android.content.Intent
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.twotone.ClearAll
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Favorite
@@ -21,6 +26,7 @@ import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -46,11 +52,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.impl.DSRepoImpl
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.ui.activity.AboutPageActivity
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.widget.setting.BaseWidget
 import com.rosan.installer.ui.widget.setting.DropDownMenuWidget
@@ -64,10 +70,11 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferredPage(
-    navController: NavController,
     windowInsets: WindowInsets,
     viewModel: PreferredViewModel = koinViewModel()
 ) {
+    val context = LocalContext.current
+
     LaunchedEffect(true) {
         viewModel.dispatch(PreferredViewAction.Init)
     }
@@ -98,13 +105,22 @@ fun PreferredPage(
             item { DataAuthorizerWidget(viewModel) }
             item { DataCustomizeAuthorizerWidget(viewModel) }
             item { DataInstallModeWidget(viewModel) }
-            item { LabelWidget(label = stringResource(id = R.string.basic)) }
+            item { LabelWidget(stringResource(R.string.basic)) }
             item { DefaultInstaller(snackBarHostState, true) }
             item { DefaultInstaller(snackBarHostState, false) }
             item { ClearCache() }
             // item { LabelWidget(label = stringResource(id = R.string.more)) }
             // item { UserTerms() }
             // item { PrivacyPolicy() }
+            item { LabelWidget(stringResource(R.string.about)) }
+            item {
+                SettingsAboutItem(
+                    onClick = {
+                        val intent = Intent(context, AboutPageActivity::class.java)
+                        context.startActivity(intent)
+                    }
+                )
+            }
         }
     }
 }
@@ -335,3 +351,26 @@ fun PrivacyPolicy() {
         }
     ) {}
 }*/
+
+@Composable
+fun SettingsAboutItem(
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val vibrator = context.getSystemService(Vibrator::class.java)
+    ListItem(
+        leadingContent = {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = null,
+                modifier = Modifier
+            )
+        },
+        headlineContent = { Text(text = stringResource(R.string.about)) },
+        supportingContent = { Text(text = stringResource(R.string.about_detail)) },
+        modifier = Modifier.clickable {
+            onClick()
+            vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+        }
+    )
+}

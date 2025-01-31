@@ -14,6 +14,8 @@
     <string name="config">Profiles</string>
     <string name="app">App</string>
     <string name="preferred">Preferences</string>
+    <string name="about">About</string>
+    <string name="about_detail">About InstallerX</string>
 
     <string name="stable">Stable</string>
     <string name="preview">Preview</string>
@@ -52,9 +54,9 @@
     <string name="delete">Delete</string>
     <string name="restore">Undo</string>
 
-    <string name="delete_success">Succesfully deleted</string>
+    <string name="delete_success">Successfully deleted</string>
 
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading…</string>
     <string name="empty_configs">No profiles, add one below</string>
     <string name="filter">Filter</string>
     <string name="order">Sort</string>
@@ -114,17 +116,17 @@
     <string name="sort_by_show_package_name">Display package name</string>
 
     <string name="installer_ready">Ready</string>
-    <string name="installer_resolving">Checking...</string>
+    <string name="installer_resolving">Checking…</string>
     <string name="installer_resolve_failed">Resolve failed</string>
     <string name="installer_resolve_success">Resolve passed</string>
-    <string name="installer_analysing">Analysing...</string>
+    <string name="installer_analysing">Analysing…</string>
     <string name="installer_analyse_failed">Analyse failed</string>
     <string name="installer_select_install">Select apps to install</string>
     <string name="installer_prepare_install">Before you install</string>
     <string name="installer_prepare_install_empty">Please select at least one package</string>
     <string name="installer_prepare_install_too_many">Please select only one base.apk</string>
     <string name="installer_prepare_install_dsp">Are you sure you want to install?</string>
-    <string name="installer_installing">Installing...</string>
+    <string name="installer_installing">Installing…</string>
     <string name="installer_install_failed">Install failed</string>
     <string name="installer_install_success">Install complete</string>
 

@@ -12,6 +12,8 @@
     <string name="config">配置</string>
     <string name="app">应用</string>
     <string name="preferred">设置</string>
+    <string name="about">关于</string>
+    <string name="about_detail">关于 InstallerX</string>
 
     <string name="stable">正式版</string>
     <string name="preview">预览版</string>
@@ -52,7 +54,7 @@
 
     <string name="delete_success">删除成功</string>
 
-    <string name="loading">加载中...</string>
+    <string name="loading">加载中…</string>
     <string name="empty_configs">没有配置</string>
     <string name="filter">过滤</string>
     <string name="order">排序</string>
