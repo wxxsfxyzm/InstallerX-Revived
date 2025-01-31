@@ -28,8 +28,8 @@ android {
         namespace = "com.rosan.installer"
         minSdk = 34
         targetSdk = 35
-        versionCode = 30
-        versionName = "2.0"
+        versionCode = 31
+        versionName = "2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -104,9 +104,9 @@ android {
 
     applicationVariants.all {
         val level = when (flavorName) {
-            "unstable" -> 0
-            "preview" -> 1
-            "stable" -> 2
+            "Unstable" -> 0
+            "Preview" -> 1
+            "Stable" -> 2
             else -> 0
         }.toString()
         buildConfigField("int", "BUILD_LEVEL", level)
@@ -169,7 +169,7 @@ dependencies {
     implementation(libs.compose.navigation)
     implementation(libs.compose.materialIcons)
     implementation(libs.material)
-    
+
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
