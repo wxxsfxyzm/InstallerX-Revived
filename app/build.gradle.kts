@@ -168,7 +168,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.compose.navigation)
     implementation(libs.compose.materialIcons)
-
+    implementation(libs.material)
+    
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
