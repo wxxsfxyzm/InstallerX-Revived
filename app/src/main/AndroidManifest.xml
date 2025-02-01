@@ -59,7 +59,6 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="${applicationId}.fileprovider" />
                 <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:mimeType="application/vnd.android.package-archive" />

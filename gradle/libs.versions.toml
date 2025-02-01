@@ -42,8 +42,8 @@ compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compos
 compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version = "compose" }
 compose-uiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.8.5" }
-compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.6" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.8.6" }
+compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.7" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
