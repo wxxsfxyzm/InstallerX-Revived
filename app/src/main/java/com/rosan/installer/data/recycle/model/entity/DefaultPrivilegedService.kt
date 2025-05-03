@@ -7,10 +7,9 @@ import android.content.pm.IPackageManager
 import android.content.pm.PackageManager
 import android.content.pm.ParceledListSlice
 import android.content.pm.ResolveInfo
-import android.net.Uri
-import android.os.Build
 import android.os.Process
 import android.os.ServiceManager
+import androidx.core.net.toUri
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.delete
 import com.rosan.installer.data.reflect.repo.ReflectRepo
@@ -29,7 +28,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         val intent = Intent(Intent.ACTION_VIEW)
             .addCategory(Intent.CATEGORY_DEFAULT)
             .setDataAndType(
-                Uri.parse("content://storage/emulated/0/test.apk"),
+                "content://storage/emulated/0/test.apk".toUri(),
                 "application/vnd.android.package-archive"
             )
         val list = queryIntentActivities(

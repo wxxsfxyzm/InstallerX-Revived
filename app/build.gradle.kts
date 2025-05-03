@@ -1,7 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.agp.app)
     alias(libs.plugins.kotlin)
@@ -28,7 +27,7 @@ android {
         namespace = "com.rosan.installer"
         minSdk = 34
         targetSdk = 35
-        versionCode = 31
+        versionCode = 32
         versionName = "2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -127,9 +126,9 @@ android {
         aidl = true
     }
 
-    composeOptions {
-        //kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
+    /*    composeOptions {
+            //kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
+        }*/
 
     packaging {
         resources {

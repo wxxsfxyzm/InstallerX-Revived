@@ -1,5 +1,6 @@
 package com.rosan.installer.data.recycle.util
 
+import android.util.Log
 import com.rosan.installer.IPrivilegedService
 import com.rosan.installer.data.recycle.model.entity.DefaultPrivilegedService
 import com.rosan.installer.data.recycle.model.impl.DhizukuUserServiceRecycler
@@ -35,6 +36,11 @@ fun useUserService(
         // special回调null时，不使用授权器
         special.invoke()?.let { ProcessUserServiceRecyclers.get(it).make() }
     }
-    if (recycler != null) recycler.use { action.invoke(it.entity) }
-    else action.invoke(DefaultUserService)
+    if (recycler != null) {
+        Log.e("useUserService", "use Privileged Service: $recycler")
+        recycler.use { action.invoke(it.entity) }
+    } else {
+        Log.e("useUserService", "Use Default User Service")
+        action.invoke(DefaultUserService)
+    }
 }

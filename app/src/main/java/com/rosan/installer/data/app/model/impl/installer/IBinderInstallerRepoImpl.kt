@@ -226,7 +226,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     ) {
         fun special() = null
         val authorizer = config.authorizer
-
+        Log.d("useUserservice", "calling useUserService...")
         useUserService(
             config, if (authorizer == ConfigEntity.Authorizer.None
                 || authorizer == ConfigEntity.Authorizer.Dhizuku

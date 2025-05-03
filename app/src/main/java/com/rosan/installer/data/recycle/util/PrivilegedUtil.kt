@@ -3,15 +3,18 @@ package com.rosan.installer.data.recycle.util
 import android.content.ContentResolver
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
 import java.io.File
 
 fun Array<out String>.delete() {
     for (path in this) {
+        Log.d("DELETE_PATH", "path: $path")
         val file = File(
             if (path.startsWith("/mnt/user/0/emulated/0")) {
                 path.replace("/mnt/user/0/emulated/0", "/storage/emulated/0")
             } else path
         )
+        Log.d("DELETE_PATH", "file: $file")
         if (file.exists()) file.delete()
     }
 }
