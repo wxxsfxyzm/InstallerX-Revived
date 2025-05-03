@@ -1,22 +1,25 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
+// 导入需要的库
+// 可能需要导入 InstalledAppInfo
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-// 导入需要的库
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-// 可能需要导入 InstalledAppInfo
-import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.* // 导入 DialogButton, DialogButtons 等
+import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
+import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 
 @Composable
-fun InstallFailedDialog(
+fun installFailedDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     val context = LocalContext.current
@@ -24,11 +27,12 @@ fun InstallFailedDialog(
     // --- 开始: 从 ViewModel 收集状态 ---
     val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
     val currentPackageName by viewModel.currentPackageName.collectAsState()
-    val packageName = currentPackageName ?: installer.entities.filter { it.selected }.map { it.app }.firstOrNull()?.packageName ?: ""
+    val packageName = currentPackageName ?: installer.entities.filter { it.selected }.map { it.app }
+        .firstOrNull()?.packageName ?: ""
     // --- 结束: 从 ViewModel 收集状态 ---
 
     // --- 调用 InstallInfoDialog 时传入 preInstallAppInfo ---
-    return InstallInfoDialog(
+    return installInfoDialog(
         installer = installer,
         viewModel = viewModel,
         preInstallAppInfo = preInstallAppInfo, // <-- 传递从 ViewModel 获取的值

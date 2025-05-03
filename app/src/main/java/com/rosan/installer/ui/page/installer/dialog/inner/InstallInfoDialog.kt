@@ -1,21 +1,36 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
+// import android.util.Log // 移除 Log 导入
+// import androidx.compose.runtime.LaunchedEffect // 移除 LaunchedEffect 导入
+
 import android.content.Context
 import android.graphics.drawable.Drawable
-// import android.util.Log // 移除 Log 导入
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.absolutePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.ArrowRight
+import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.twotone.AutoFixHigh
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-// import androidx.compose.runtime.LaunchedEffect // 移除 LaunchedEffect 导入
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,21 +43,19 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.*
+import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
+import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.installer.dialog.DialogViewState
 import org.koin.compose.getKoin
 
-import androidx.compose.runtime.LaunchedEffect // <-- 需要导入
-import androidx.compose.runtime.getValue       // <-- 需要导入
-import androidx.compose.runtime.mutableStateOf  // <-- 需要导入
-import androidx.compose.runtime.remember     // <-- 需要导入
-import androidx.compose.runtime.setValue
-import com.rosan.installer.ui.page.installer.dialog.DialogViewModel // <-- 需要导入
-import com.rosan.installer.ui.page.installer.dialog.DialogViewState
 // private const val TAG = "InstallInfoDialog" // 移除 TAG
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun InstallInfoDialog(
+fun installInfoDialog(
     installer: InstallerRepo,
     viewModel: DialogViewModel,
     preInstallAppInfo: InstalledAppInfo?,
@@ -74,15 +87,17 @@ fun InstallInfoDialog(
     // --- 新增状态管理结束 ---
 
 
-    val iconDrawable: Drawable? = (if (entity is AppEntity.BaseEntity) entity.icon else preInstallAppInfo?.icon)
-        ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+    val iconDrawable: Drawable? =
+        (if (entity is AppEntity.BaseEntity) entity.icon else preInstallAppInfo?.icon)
+            ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
 
-    val appLabel: String = (if (entity is AppEntity.BaseEntity) entity.label else preInstallAppInfo?.label)
-        ?: when (entity) {
-            is AppEntity.SplitEntity -> entity.splitName
-            is AppEntity.DexMetadataEntity -> entity.dmName
-            else -> entity.packageName
-        }
+    val appLabel: String =
+        (if (entity is AppEntity.BaseEntity) entity.label else preInstallAppInfo?.label)
+            ?: when (entity) {
+                is AppEntity.SplitEntity -> entity.splitName
+                is AppEntity.DexMetadataEntity -> entity.dmName
+                else -> entity.packageName
+            }
 
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.InstallerInfo.id) {
@@ -146,7 +161,8 @@ fun InstallInfoDialog(
                     } else { // 如果有旧信息
                         // 显示版本对比
                         Row(modifier = Modifier.basicMarquee()) {
-                            Text( // 旧版本 (使用 effectiveOldInfo)
+                            Text(
+                                // 旧版本 (使用 effectiveOldInfo)
                                 stringResource(
                                     R.string.installer_version,
                                     effectiveOldInfo.versionName,
@@ -159,7 +175,7 @@ fun InstallInfoDialog(
                                     .size(24.dp)
                                     .align(Alignment.CenterVertically)
                                     .padding(horizontal = 4.dp),
-                                imageVector = Icons.TwoTone.ArrowRight,
+                                imageVector = Icons.AutoMirrored.TwoTone.ArrowRight,
                                 tint = MaterialTheme.colorScheme.primary,
                                 contentDescription = null
                             )

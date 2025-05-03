@@ -1,27 +1,26 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
+// 导入需要的库
+// --- ***** 确认必要的导入 ***** ---
+// --- ***** 结束确认导入 ***** ---
+// 可能需要导入 InstalledAppInfo
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LinearProgressIndicator
-// 导入需要的库
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-// --- ***** 确认必要的导入 ***** ---
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.installer.dialog.DialogViewAction // 导入 DialogViewAction
-// --- ***** 结束确认导入 ***** ---
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
-// 可能需要导入 InstalledAppInfo
-import com.rosan.installer.data.app.util.InstalledAppInfo
 
 @Composable
-fun InstallingDialog(
+fun installingDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     // --- 开始: 从 ViewModel 收集 preInstallAppInfo 状态 ---
@@ -29,7 +28,7 @@ fun InstallingDialog(
     // --- 结束: 从 ViewModel 收集状态 ---
 
     // --- 调用 InstallInfoDialog 时传入 preInstallAppInfo ---
-    return InstallInfoDialog(
+    return installInfoDialog(
         installer = installer,
         viewModel = viewModel,
         preInstallAppInfo = preInstallAppInfo, // <-- 传递从 ViewModel 获取的值

@@ -1,19 +1,29 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
-import android.annotation.SuppressLint
 // 导入需要的 Compose 相关库
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.People
-import androidx.compose.material.icons.twotone.TrendingDown
-import androidx.compose.material3.*
-import androidx.compose.runtime.* // 导入 collectAsState, getValue 等
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -22,60 +32,66 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.*
+import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
+import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 
 // InstallPrepareEmptyDialog 和 InstallPrepareTooManyDialog 保持不变
 
 @Composable
-private fun InstallPrepareEmptyDialog(
+private fun installPrepareEmptyDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     // ... (代码不变) ...
-    return DialogParams(icon = DialogInnerParams(
-        DialogParamsType.IconPausing.id, pausingIcon
-    ), title = DialogInnerParams(
-        DialogParamsType.InstallerPrepare.id,
-    ) {
-        Text(stringResource(R.string.installer_prepare_install))
-    }, text = DialogInnerParams(
-        DialogParamsType.InstallerPrepareEmpty.id
-    ) {
-        Text(stringResource(R.string.installer_prepare_install_empty))
-    }, buttons = DialogButtons(
-        DialogParamsType.ButtonsCancel.id
-    ) {
-        listOf(DialogButton(stringResource(R.string.previous)) {
-            viewModel.dispatch(DialogViewAction.InstallChoice)
-        }, DialogButton(stringResource(R.string.cancel)) {
-            viewModel.dispatch(DialogViewAction.Close)
+    return DialogParams(
+        icon = DialogInnerParams(
+            DialogParamsType.IconPausing.id, pausingIcon
+        ), title = DialogInnerParams(
+            DialogParamsType.InstallerPrepare.id,
+        ) {
+            Text(stringResource(R.string.installer_prepare_install))
+        }, text = DialogInnerParams(
+            DialogParamsType.InstallerPrepareEmpty.id
+        ) {
+            Text(stringResource(R.string.installer_prepare_install_empty))
+        }, buttons = DialogButtons(
+            DialogParamsType.ButtonsCancel.id
+        ) {
+            listOf(DialogButton(stringResource(R.string.previous)) {
+                viewModel.dispatch(DialogViewAction.InstallChoice)
+            }, DialogButton(stringResource(R.string.cancel)) {
+                viewModel.dispatch(DialogViewAction.Close)
+            })
         })
-    })
 }
 
 @Composable
-private fun InstallPrepareTooManyDialog(
+private fun installPrepareTooManyDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     // ... (代码不变) ...
-    return DialogParams(icon = DialogInnerParams(
-        DialogParamsType.IconPausing.id, pausingIcon
-    ), title = DialogInnerParams(
-        DialogParamsType.InstallerPrepare.id,
-    ) {
-        Text(stringResource(R.string.installer_prepare_install))
-    }, text = DialogInnerParams(
-        DialogParamsType.InstallerPrepareTooMany.id
-    ) {
-        Text(stringResource(R.string.installer_prepare_install_too_many))
-    }, buttons = DialogButtons(
-        DialogParamsType.ButtonsCancel.id
-    ) {
-        listOf(DialogButton(stringResource(R.string.previous)) {
-            viewModel.dispatch(DialogViewAction.InstallChoice)
-        }, DialogButton(stringResource(R.string.cancel)) {
-            viewModel.dispatch(DialogViewAction.Close)
+    return DialogParams(
+        icon = DialogInnerParams(
+            DialogParamsType.IconPausing.id, pausingIcon
+        ), title = DialogInnerParams(
+            DialogParamsType.InstallerPrepare.id,
+        ) {
+            Text(stringResource(R.string.installer_prepare_install))
+        }, text = DialogInnerParams(
+            DialogParamsType.InstallerPrepareTooMany.id
+        ) {
+            Text(stringResource(R.string.installer_prepare_install_too_many))
+        }, buttons = DialogButtons(
+            DialogParamsType.ButtonsCancel.id
+        ) {
+            listOf(DialogButton(stringResource(R.string.previous)) {
+                viewModel.dispatch(DialogViewAction.InstallChoice)
+            }, DialogButton(stringResource(R.string.cancel)) {
+                viewModel.dispatch(DialogViewAction.Close)
+            })
         })
-    })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,12 +114,12 @@ fun Chip(
 @SuppressLint("UnrememberedMutableState") // 这个注解可能需要保留，取决于你的具体逻辑
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun InstallPrepareDialog(
+fun installPrepareDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     val entities = installer.entities.filter { it.selected }.map { it.app }.sortedBest()
-    if (entities.isEmpty()) return InstallPrepareEmptyDialog(installer, viewModel)
-    if (entities.groupBy { it.packageName }.size > 1) return InstallPrepareTooManyDialog(
+    if (entities.isEmpty()) return installPrepareEmptyDialog(installer, viewModel)
+    if (entities.groupBy { it.packageName }.size > 1) return installPrepareTooManyDialog(
         installer, viewModel
     )
 
@@ -114,7 +130,7 @@ fun InstallPrepareDialog(
     var showChips by remember { mutableStateOf(false) }
 
     // --- 调用 InstallInfoDialog 时传入 preInstallAppInfo ---
-    return InstallInfoDialog(
+    return installInfoDialog(
         installer = installer,
         viewModel = viewModel,
         preInstallAppInfo = preInstallAppInfo, // <-- 传递从 ViewModel 获取的值
@@ -147,10 +163,30 @@ fun InstallPrepareDialog(
                             )
                         }
 
-                        Chip(selected = forAllUser, onClick = { forAllUser = !forAllUser }, label = stringResource(id = R.string.config_for_all_user), icon = Icons.TwoTone.People)
-                        Chip(selected = allowTestOnly, onClick = { allowTestOnly = !allowTestOnly }, label = stringResource(id = R.string.config_allow_test_only), icon = Icons.TwoTone.BugReport)
-                        Chip(selected = allowDowngrade, onClick = { allowDowngrade = !allowDowngrade }, label = stringResource(id = R.string.config_allow_downgrade), icon = Icons.TwoTone.TrendingDown)
-                        Chip(selected = autoDelete, onClick = { autoDelete = !autoDelete }, label = stringResource(id = R.string.config_auto_delete), icon = Icons.TwoTone.Delete)
+                        Chip(
+                            selected = forAllUser,
+                            onClick = { forAllUser = !forAllUser },
+                            label = stringResource(id = R.string.config_for_all_user),
+                            icon = Icons.TwoTone.People
+                        )
+                        Chip(
+                            selected = allowTestOnly,
+                            onClick = { allowTestOnly = !allowTestOnly },
+                            label = stringResource(id = R.string.config_allow_test_only),
+                            icon = Icons.TwoTone.BugReport
+                        )
+                        Chip(
+                            selected = allowDowngrade,
+                            onClick = { allowDowngrade = !allowDowngrade },
+                            label = stringResource(id = R.string.config_allow_downgrade),
+                            icon = Icons.AutoMirrored.TwoTone.TrendingDown
+                        )
+                        Chip(
+                            selected = autoDelete,
+                            onClick = { autoDelete = !autoDelete },
+                            label = stringResource(id = R.string.config_auto_delete),
+                            icon = Icons.TwoTone.Delete
+                        )
                     }
                 }
             }
@@ -161,8 +197,16 @@ fun InstallPrepareDialog(
             // 按钮逻辑保持不变
             listOf(
                 DialogButton(stringResource(R.string.install)) { viewModel.dispatch(DialogViewAction.Install) },
-                DialogButton(stringResource(R.string.previous), 2f) { viewModel.dispatch(DialogViewAction.InstallChoice) },
-                DialogButton(stringResource(R.string.cancel), 1f) { viewModel.dispatch(DialogViewAction.Close) }
+                DialogButton(stringResource(R.string.previous), 2f) {
+                    viewModel.dispatch(
+                        DialogViewAction.InstallChoice
+                    )
+                },
+                DialogButton(stringResource(R.string.cancel), 1f) {
+                    viewModel.dispatch(
+                        DialogViewAction.Close
+                    )
+                }
             )
         }
     )

@@ -1,23 +1,25 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
+// 导入需要的库
+// 可能需要导入 InstalledAppInfo
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-// 导入需要的库
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-// 可能需要导入 InstalledAppInfo
-import com.rosan.installer.data.app.util.InstalledAppInfo
-import com.rosan.installer.data.common.util.addAll // 确保导入 addAll
+import com.rosan.installer.data.common.util.addAll
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.* // 导入 DialogButton, DialogButtons 等
+import com.rosan.installer.ui.page.installer.dialog.DialogParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
+import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 
 @Composable
-fun InstallSuccessDialog(
+fun installSuccessDialog(
     installer: InstallerRepo, // 如果所有信息都来自 VM，这个参数可能可以移除
     viewModel: DialogViewModel
 ): DialogParams {
@@ -27,11 +29,12 @@ fun InstallSuccessDialog(
     val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     // 优先使用 ViewModel 中的包名，如果为空则尝试从 repo 获取 (作为备选)
-    val packageName = currentPackageName ?: installer.entities.filter { it.selected }.map { it.app }.firstOrNull()?.packageName ?: ""
+    val packageName = currentPackageName ?: installer.entities.filter { it.selected }.map { it.app }
+        .firstOrNull()?.packageName ?: ""
     // --- 结束: 从 ViewModel 收集状态 ---
 
     // --- 调用 InstallInfoDialog 时传入 preInstallAppInfo ---
-    return InstallInfoDialog(
+    return installInfoDialog(
         installer = installer, // 如果需要，继续传递 installer
         viewModel = viewModel,
         preInstallAppInfo = preInstallAppInfo, // <-- 传递从 ViewModel 获取的值
@@ -51,7 +54,10 @@ fun InstallSuccessDialog(
         ) {
             val list = mutableListOf<DialogButton>()
             // 尝试获取启动 Intent
-            val intent = if (packageName.isNotEmpty()) context.packageManager.getLaunchIntentForPackage(packageName) else null
+            val intent =
+                if (packageName.isNotEmpty()) context.packageManager.getLaunchIntentForPackage(
+                    packageName
+                ) else null
             // 如果可以启动，添加 "打开" 按钮
             if (intent != null) {
                 list.add(DialogButton(stringResource(R.string.open)) {
