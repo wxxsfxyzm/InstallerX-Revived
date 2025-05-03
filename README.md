@@ -18,6 +18,8 @@ Android 14 以上
 
 修复了原仓库项目无法正确删除安装包的问题
 
+安装成功后提示仍然保留前版本号
+
 ## 开源协议
 
 InstallerX目前基于 [**GNU General Public License v3 (GPL-3)**](http://www.gnu.org/copyleft/gpl.html)
