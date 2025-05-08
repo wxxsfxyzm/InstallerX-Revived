@@ -10,10 +10,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.* // 使用 * 导入
+import com.rosan.installer.ui.page.installer.dialog.*
 
-// 假设 errorText 在 dialog 包下可访问
-// import com.rosan.installer.ui.page.installer.dialog.errorText
+// Assume errorText is accessible
 
 @Composable
 fun installFailedDialog( // 小写开头
@@ -26,7 +25,8 @@ fun installFailedDialog( // 小写开头
     val packageName = currentPackageName ?: installer.entities.filter { it.selected }.map { it.app }
         .firstOrNull()?.packageName ?: ""
 
-    return InstallInfoDialog( // 调用大写开头的 InstallInfoDialog
+    // Call InstallInfoDialog for base structure
+    val baseParams = InstallInfoDialog(
         installer = installer,
         viewModel = viewModel,
         preInstallAppInfo = preInstallAppInfo,
@@ -39,10 +39,13 @@ fun installFailedDialog( // 小写开头
                 )
             }
         }
-    ).copy(
+    )
+
+    // Override text and buttons
+    return baseParams.copy(
         text = DialogInnerParams(
             DialogParamsType.InstallerInstallFailed.id,
-            errorText(installer, viewModel) // 假设 errorText 可访问
+            errorText(installer, viewModel) // Assume errorText is accessible
         ),
         buttons = DialogButtons(
             DialogParamsType.InstallerInstallFailed.id
