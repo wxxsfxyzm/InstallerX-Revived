@@ -21,17 +21,16 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.* // 使用 * 导入需要的 Dialog 相关类
+import com.rosan.installer.ui.page.installer.dialog.*
 
-// 假设 pausingIcon 在 dialog 包下可访问
-// import com.rosan.installer.ui.page.installer.dialog.pausingIcon
+// Assume pausingIcon is accessible
 
 @Composable
 private fun InstallPrepareEmptyDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     return DialogParams(icon = DialogInnerParams(
-        DialogParamsType.IconPausing.id, pausingIcon // 假设 pausingIcon 可访问
+        DialogParamsType.IconPausing.id, pausingIcon
     ), title = DialogInnerParams(
         DialogParamsType.InstallerPrepare.id,
     ) {
@@ -56,7 +55,7 @@ private fun InstallPrepareTooManyDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     return DialogParams(icon = DialogInnerParams(
-        DialogParamsType.IconPausing.id, pausingIcon // 假设 pausingIcon 可访问
+        DialogParamsType.IconPausing.id, pausingIcon
     ), title = DialogInnerParams(
         DialogParamsType.InstallerPrepare.id,
     ) {
@@ -120,12 +119,17 @@ fun installPrepareDialog( // 小写开头
         if (currentConfig.autoDelete != autoDelete) installer.config.autoDelete = autoDelete
     }
 
-    return InstallInfoDialog( // 调用大写开头的 InstallInfoDialog
+    // Call InstallInfoDialog for base structure
+    val baseParams = InstallInfoDialog(
         installer = installer,
         viewModel = viewModel,
         preInstallAppInfo = preInstallAppInfo,
         onTitleExtraClick = { showChips = !showChips }
-    ).copy(
+    )
+
+    // Override text and buttons
+    return baseParams.copy(
+        // Subtitle is inherited from InstallInfoDialog (shows new version + package name)
         text = DialogInnerParams(
             DialogParamsType.InstallerPrepareInstall.id
         ) {
