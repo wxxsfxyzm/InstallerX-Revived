@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.* // 使用 * 导入
+import com.rosan.installer.ui.page.installer.dialog.*
 
 @Composable
 fun installingDialog( // 小写开头
@@ -17,12 +17,16 @@ fun installingDialog( // 小写开头
 ): DialogParams {
     val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
 
-    return InstallInfoDialog( // 调用大写开头的 InstallInfoDialog
+    // Call InstallInfoDialog for base structure (icon, title, subtitle with new version)
+    val baseParams = InstallInfoDialog(
         installer = installer,
         viewModel = viewModel,
         preInstallAppInfo = preInstallAppInfo,
-        onTitleExtraClick = {} // 安装中无额外点击操作
-    ).copy(
+        onTitleExtraClick = {}
+    )
+
+    // Override text and buttons
+    return baseParams.copy(
         text = DialogInnerParams(
             DialogParamsType.InstallerInstalling.id
         ) {
