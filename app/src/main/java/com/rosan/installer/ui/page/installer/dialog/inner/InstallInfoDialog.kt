@@ -9,7 +9,6 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,11 +23,11 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+// import androidx.compose.runtime.LaunchedEffect // No longer needed here
+// import androidx.compose.runtime.getValue // No longer needed here
+// import androidx.compose.runtime.mutableStateOf // No longer needed here
+// import androidx.compose.runtime.remember // No longer needed here
+// import androidx.compose.runtime.setValue // No longer needed here
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,35 +45,26 @@ import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.page.installer.dialog.DialogViewState
+// import com.rosan.installer.ui.page.installer.dialog.DialogViewState // No longer needed here
 import org.koin.compose.getKoin
 
+/**
+ * Provides info display: Icon, Title, Subtitle (with version logic).
+ * Shows comparison if preInstallAppInfo is provided, otherwise shows only new version.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun InstallInfoDialog( // 大写开头
     installer: InstallerRepo,
-    viewModel: DialogViewModel,
-    preInstallAppInfo: InstalledAppInfo?,
+    viewModel: DialogViewModel, // Keep for consistency or future use
+    preInstallAppInfo: InstalledAppInfo?, // Crucial parameter: Info *before* install operation
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
     val context: Context = getKoin().get()
     val entityToInstall = installer.entities.filter { it.selected }.map { it.app }.sortedBest().firstOrNull()
         ?: return DialogParams()
 
-    val currentState = viewModel.state
-    var rememberedOldVersionInfo by remember { mutableStateOf<InstalledAppInfo?>(null) }
-
-    LaunchedEffect(currentState, preInstallAppInfo) {
-        if (currentState is DialogViewState.InstallSuccess && preInstallAppInfo != null) {
-            if (rememberedOldVersionInfo?.packageName != preInstallAppInfo.packageName || rememberedOldVersionInfo?.versionCode != preInstallAppInfo.versionCode) {
-                rememberedOldVersionInfo = preInstallAppInfo
-            }
-        } else if (currentState !is DialogViewState.InstallSuccess) {
-            if (rememberedOldVersionInfo != null) {
-                rememberedOldVersionInfo = null
-            }
-        }
-    }
+    // No need for remembered state or LaunchedEffect here, logic depends directly on passed preInstallAppInfo
 
     val displayIcon: Drawable? =
         (if (entityToInstall is AppEntity.BaseEntity) entityToInstall.icon else preInstallAppInfo?.icon)
@@ -126,22 +116,21 @@ fun InstallInfoDialog( // 大写开头
                 }
             }
         },
+        // --- 修改：恢复版本显示逻辑，依赖传入的 preInstallAppInfo ---
         subtitle = DialogInnerParams(DialogParamsType.InstallerInfo.id) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (entityToInstall is AppEntity.BaseEntity) {
-                    val oldInfoForDisplay = if (currentState is DialogViewState.InstallSuccess) {
-                        rememberedOldVersionInfo
-                    } else {
-                        preInstallAppInfo
-                    }
+                    // 直接使用传入的 preInstallAppInfo 作为旧版本信息
+                    val oldInfo = preInstallAppInfo
 
-                    if (oldInfoForDisplay == null) {
+                    if (oldInfo == null) {
+                        // 首次安装或无法获取旧信息: 只显示新版本，不带前缀
                         Text(
-                            text = stringResource(R.string.new_version_prefix) + stringResource(
-                                R.string.installer_version,
+                            text = stringResource(
+                                R.string.installer_version, // Use base version string
                                 entityToInstall.versionName,
                                 entityToInstall.versionCode.toLong()
                             ),
@@ -149,11 +138,12 @@ fun InstallInfoDialog( // 大写开头
                             modifier = Modifier.basicMarquee()
                         )
                     } else {
-                        Text(
+                        // 更新安装: 显示对比，带前缀
+                        Text( // 旧版本带前缀
                             text = stringResource(R.string.old_version_prefix) + stringResource(
                                 R.string.installer_version,
-                                oldInfoForDisplay.versionName,
-                                oldInfoForDisplay.versionCode.toLong()
+                                oldInfo.versionName,
+                                oldInfo.versionCode.toLong()
                             ),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.basicMarquee()
@@ -164,7 +154,7 @@ fun InstallInfoDialog( // 大写开头
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(16.dp)
                         )
-                        Text(
+                        Text( // 新版本带前缀
                             text = stringResource(R.string.new_version_prefix) + stringResource(
                                 R.string.installer_version,
                                 entityToInstall.versionName,
@@ -176,7 +166,7 @@ fun InstallInfoDialog( // 大写开头
                         )
                     }
                 }
-
+                // 总是显示包名
                 Text(
                     stringResource(R.string.installer_package_name, entityToInstall.packageName),
                     textAlign = TextAlign.Center,
@@ -184,5 +174,7 @@ fun InstallInfoDialog( // 大写开头
                 )
             }
         }
+        // --- 修改结束 ---
+        // buttons parameter removed, to be set by caller via .copy()
     )
 }
