@@ -176,12 +176,18 @@ class DialogViewModel(
                     InstalledAppInfo.buildByPackageName(packageNameAtFetchStart)
                 }
             } catch (e: Exception) {
-                // In production, consider logging to a crash reporting tool or a local file if needed
                 null
             }
-            if (_currentPackageName.value == packageNameAtFetchStart) {
+
+            // --- 关键修改：增加状态检查 ---
+            // 只在状态不是最终状态（成功/失败）时更新 preInstallAppInfo
+            // 并且包名仍然匹配
+            if (state !is DialogViewState.InstallSuccess &&
+                state !is DialogViewState.InstallFailed &&
+                _currentPackageName.value == packageNameAtFetchStart) {
                 _preInstallAppInfo.value = info
             }
+            // --- 修改结束 ---
         }
     }
 
@@ -222,6 +228,7 @@ class DialogViewModel(
                 _currentPackageName.value = targetPackageName
                 _preInstallAppInfo.value = null
             }
+            // Fetch info if needed when entering or already in prepare state
             if ((targetStateIsPrepare && _preInstallAppInfo.value == null) || !targetStateIsPrepare) {
                 fetchPreInstallAppInfo(targetPackageName)
             }
