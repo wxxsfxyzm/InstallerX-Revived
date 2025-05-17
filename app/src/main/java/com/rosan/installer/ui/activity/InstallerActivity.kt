@@ -1,9 +1,9 @@
 package com.rosan.installer.ui.activity
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
@@ -31,6 +31,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     private var installer by mutableStateOf<InstallerRepo?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         restoreInstaller(savedInstanceState)
         showContent()
@@ -41,11 +42,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         super.onSaveInstanceState(outState)
     }
 
-/*    override fun onNewIntent(intent: Intent?) {
-        this.intent = intent
-        super.onNewIntent(intent!!)
-        restoreInstaller()
-    }*/
+    /*    override fun onNewIntent(intent: Intent?) {
+            this.intent = intent
+            super.onNewIntent(intent!!)
+            restoreInstaller()
+        }*/
 
     private var job: Job? = null
 
