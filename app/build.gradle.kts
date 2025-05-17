@@ -25,7 +25,7 @@ android {
         // Please change the applicationId to one that does not conflict with any official release.
         applicationId = "com.rosan.installer.x.revived"
         namespace = "com.rosan.installer"
-        minSdk = 34
+        minSdk = 30
         targetSdk = 35
         versionCode = 33
         versionName = "2.2"

@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
-// 导入需要的 Compose 相关库
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -12,18 +11,8 @@ import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.People
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,66 +21,58 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
-import com.rosan.installer.ui.page.installer.dialog.DialogParams
-import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.installer.dialog.*
 
-// InstallPrepareEmptyDialog 和 InstallPrepareTooManyDialog 保持不变
+// Assume pausingIcon is accessible
 
 @Composable
-private fun installPrepareEmptyDialog(
+private fun InstallPrepareEmptyDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
-    // ... (代码不变) ...
-    return DialogParams(
-        icon = DialogInnerParams(
-            DialogParamsType.IconPausing.id, pausingIcon
-        ), title = DialogInnerParams(
-            DialogParamsType.InstallerPrepare.id,
-        ) {
-            Text(stringResource(R.string.installer_prepare_install))
-        }, text = DialogInnerParams(
-            DialogParamsType.InstallerPrepareEmpty.id
-        ) {
-            Text(stringResource(R.string.installer_prepare_install_empty))
-        }, buttons = DialogButtons(
-            DialogParamsType.ButtonsCancel.id
-        ) {
-            listOf(DialogButton(stringResource(R.string.previous)) {
-                viewModel.dispatch(DialogViewAction.InstallChoice)
-            }, DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(DialogViewAction.Close)
-            })
+    return DialogParams(icon = DialogInnerParams(
+        DialogParamsType.IconPausing.id, pausingIcon
+    ), title = DialogInnerParams(
+        DialogParamsType.InstallerPrepare.id,
+    ) {
+        Text(stringResource(R.string.installer_prepare_install))
+    }, text = DialogInnerParams(
+        DialogParamsType.InstallerPrepareEmpty.id
+    ) {
+        Text(stringResource(R.string.installer_prepare_install_empty))
+    }, buttons = DialogButtons(
+        DialogParamsType.ButtonsCancel.id
+    ) {
+        listOf(DialogButton(stringResource(R.string.previous)) {
+            viewModel.dispatch(DialogViewAction.InstallChoice)
+        }, DialogButton(stringResource(R.string.cancel)) {
+            viewModel.dispatch(DialogViewAction.Close)
         })
+    })
 }
 
 @Composable
-private fun installPrepareTooManyDialog(
+private fun InstallPrepareTooManyDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
-    // ... (代码不变) ...
-    return DialogParams(
-        icon = DialogInnerParams(
-            DialogParamsType.IconPausing.id, pausingIcon
-        ), title = DialogInnerParams(
-            DialogParamsType.InstallerPrepare.id,
-        ) {
-            Text(stringResource(R.string.installer_prepare_install))
-        }, text = DialogInnerParams(
-            DialogParamsType.InstallerPrepareTooMany.id
-        ) {
-            Text(stringResource(R.string.installer_prepare_install_too_many))
-        }, buttons = DialogButtons(
-            DialogParamsType.ButtonsCancel.id
-        ) {
-            listOf(DialogButton(stringResource(R.string.previous)) {
-                viewModel.dispatch(DialogViewAction.InstallChoice)
-            }, DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(DialogViewAction.Close)
-            })
+    return DialogParams(icon = DialogInnerParams(
+        DialogParamsType.IconPausing.id, pausingIcon
+    ), title = DialogInnerParams(
+        DialogParamsType.InstallerPrepare.id,
+    ) {
+        Text(stringResource(R.string.installer_prepare_install))
+    }, text = DialogInnerParams(
+        DialogParamsType.InstallerPrepareTooMany.id
+    ) {
+        Text(stringResource(R.string.installer_prepare_install_too_many))
+    }, buttons = DialogButtons(
+        DialogParamsType.ButtonsCancel.id
+    ) {
+        listOf(DialogButton(stringResource(R.string.previous)) {
+            viewModel.dispatch(DialogViewAction.InstallChoice)
+        }, DialogButton(stringResource(R.string.cancel)) {
+            viewModel.dispatch(DialogViewAction.Close)
         })
+    })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,7 +80,6 @@ private fun installPrepareTooManyDialog(
 fun Chip(
     selected: Boolean, onClick: () -> Unit, label: String, icon: ImageVector
 ) {
-    // ... (代码不变) ...
     FilterChip(selected = selected, onClick = onClick, leadingIcon = {
         Icon(
             modifier = Modifier.size(FilterChipDefaults.IconSize),
@@ -111,33 +91,47 @@ fun Chip(
     })
 }
 
-@SuppressLint("UnrememberedMutableState") // 这个注解可能需要保留，取决于你的具体逻辑
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun installPrepareDialog(
+fun installPrepareDialog( // 小写开头
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     val entities = installer.entities.filter { it.selected }.map { it.app }.sortedBest()
-    if (entities.isEmpty()) return installPrepareEmptyDialog(installer, viewModel)
-    if (entities.groupBy { it.packageName }.size > 1) return installPrepareTooManyDialog(
+    if (entities.isEmpty()) return InstallPrepareEmptyDialog(installer, viewModel)
+    if (entities.groupBy { it.packageName }.size > 1) return InstallPrepareTooManyDialog(
         installer, viewModel
     )
 
-    // --- 开始: 从 ViewModel 收集 preInstallAppInfo 状态 ---
     val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
-    // --- 结束: 从 ViewModel 收集状态 ---
-
     var showChips by remember { mutableStateOf(false) }
 
-    // --- 调用 InstallInfoDialog 时传入 preInstallAppInfo ---
-    return installInfoDialog(
+    var forAllUser by remember(installer.config.forAllUser) { mutableStateOf(installer.config.forAllUser) }
+    var allowTestOnly by remember(installer.config.allowTestOnly) { mutableStateOf(installer.config.allowTestOnly) }
+    var allowDowngrade by remember(installer.config.allowDowngrade) { mutableStateOf(installer.config.allowDowngrade) }
+    var autoDelete by remember(installer.config.autoDelete) { mutableStateOf(installer.config.autoDelete) }
+
+    LaunchedEffect(forAllUser, allowTestOnly, allowDowngrade, autoDelete) {
+        val currentConfig = installer.config
+        if (currentConfig.forAllUser != forAllUser) installer.config.forAllUser = forAllUser
+        if (currentConfig.allowTestOnly != allowTestOnly) installer.config.allowTestOnly = allowTestOnly
+        if (currentConfig.allowDowngrade != allowDowngrade) installer.config.allowDowngrade = allowDowngrade
+        if (currentConfig.autoDelete != autoDelete) installer.config.autoDelete = autoDelete
+    }
+
+    // Call InstallInfoDialog for base structure
+    val baseParams = InstallInfoDialog(
         installer = installer,
         viewModel = viewModel,
-        preInstallAppInfo = preInstallAppInfo, // <-- 传递从 ViewModel 获取的值
-        onTitleExtraClick = { showChips = !showChips } // 保持原有的标题点击逻辑
-    ).copy( // 使用 copy 修改 InstallInfoDialog 返回的基础 DialogParams
-        text = DialogInnerParams( // 添加或替换 text 部分
-            DialogParamsType.InstallerPrepareInstall.id // 使用正确的 ID
+        preInstallAppInfo = preInstallAppInfo,
+        onTitleExtraClick = { showChips = !showChips }
+    )
+
+    // Override text and buttons
+    return baseParams.copy(
+        // Subtitle is inherited from InstallInfoDialog (shows new version + package name)
+        text = DialogInnerParams(
+            DialogParamsType.InstallerPrepareInstall.id
         ) {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
                 item {
@@ -147,66 +141,21 @@ fun installPrepareDialog(
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Chip 相关的状态和逻辑保持不变
-                        var forAllUser by remember { mutableStateOf(installer.config.forAllUser) }
-                        var allowTestOnly by remember { mutableStateOf(installer.config.allowTestOnly) }
-                        var allowDowngrade by remember { mutableStateOf(installer.config.allowDowngrade) }
-                        var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
-
-                        // 更新 installer.config 的逻辑可能移到 ViewModel 更佳，但暂时保留
-                        LaunchedEffect(forAllUser, allowTestOnly, allowDowngrade, autoDelete) {
-                            installer.config = installer.config.copy(
-                                forAllUser = forAllUser,
-                                allowTestOnly = allowTestOnly,
-                                allowDowngrade = allowDowngrade,
-                                autoDelete = autoDelete
-                            )
-                        }
-
-                        Chip(
-                            selected = forAllUser,
-                            onClick = { forAllUser = !forAllUser },
-                            label = stringResource(id = R.string.config_for_all_user),
-                            icon = Icons.TwoTone.People
-                        )
-                        Chip(
-                            selected = allowTestOnly,
-                            onClick = { allowTestOnly = !allowTestOnly },
-                            label = stringResource(id = R.string.config_allow_test_only),
-                            icon = Icons.TwoTone.BugReport
-                        )
-                        Chip(
-                            selected = allowDowngrade,
-                            onClick = { allowDowngrade = !allowDowngrade },
-                            label = stringResource(id = R.string.config_allow_downgrade),
-                            icon = Icons.AutoMirrored.TwoTone.TrendingDown
-                        )
-                        Chip(
-                            selected = autoDelete,
-                            onClick = { autoDelete = !autoDelete },
-                            label = stringResource(id = R.string.config_auto_delete),
-                            icon = Icons.TwoTone.Delete
-                        )
+                        Chip(selected = forAllUser, onClick = { forAllUser = !forAllUser }, label = stringResource(id = R.string.config_for_all_user), icon = Icons.TwoTone.People)
+                        Chip(selected = allowTestOnly, onClick = { allowTestOnly = !allowTestOnly }, label = stringResource(id = R.string.config_allow_test_only), icon = Icons.TwoTone.BugReport)
+                        Chip(selected = allowDowngrade, onClick = { allowDowngrade = !allowDowngrade }, label = stringResource(id = R.string.config_allow_downgrade), icon = Icons.AutoMirrored.TwoTone.TrendingDown)
+                        Chip(selected = autoDelete, onClick = { autoDelete = !autoDelete }, label = stringResource(id = R.string.config_auto_delete), icon = Icons.TwoTone.Delete)
                     }
                 }
             }
         },
-        buttons = DialogButtons( // 替换按钮部分
-            DialogParamsType.InstallerPrepareInstall.id // 使用正确的 ID
+        buttons = DialogButtons(
+            DialogParamsType.InstallerPrepareInstall.id
         ) {
-            // 按钮逻辑保持不变
             listOf(
                 DialogButton(stringResource(R.string.install)) { viewModel.dispatch(DialogViewAction.Install) },
-                DialogButton(stringResource(R.string.previous), 2f) {
-                    viewModel.dispatch(
-                        DialogViewAction.InstallChoice
-                    )
-                },
-                DialogButton(stringResource(R.string.cancel), 1f) {
-                    viewModel.dispatch(
-                        DialogViewAction.Close
-                    )
-                }
+                DialogButton(stringResource(R.string.previous), 2f) { viewModel.dispatch(DialogViewAction.InstallChoice) },
+                DialogButton(stringResource(R.string.cancel), 1f) { viewModel.dispatch(DialogViewAction.Close) }
             )
         }
     )
