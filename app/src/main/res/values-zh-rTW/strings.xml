@@ -19,11 +19,6 @@
     <string name="preview">預覽版</string>
     <string name="unstable">測試版</string>
 
-    <string name="donate">捐贈</string>
-    <string name="alipay">支付寶</string>
-    <string name="wechat">微信</string>
-    <string name="binance">幣安</string>
-
     <string name="discuss">討論 &amp; 回饋 &amp; 更新</string>
     <string name="qq_channel">QQ頻道</string>
     <string name="qq_group_official">QQ群组（官方）</string>
@@ -170,4 +165,6 @@
     <string name="exception_dhizuku_not_work">請啟用Dhizuku，並授於權限</string>
     <string name="exception_root_not_work">請授於ROOT權限</string>
     <string name="exception_app_process_not_work">授權器啟動失敗</string>
+    <string name="old_version_prefix">當前</string>
+    <string name="new_version_prefix">新</string>
 </resources>

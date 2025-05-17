@@ -21,10 +21,6 @@
     <string name="preview">Preview</string>
     <string name="unstable">Unstable</string>
 
-    <string name="donate">Donate</string>
-    <string name="alipay">Alipay</string>
-    <string name="wechat">Wechat</string>
-    <string name="binance">Binance</string>
 
     <string name="discuss">Chat &amp; Feedback &amp; Update</string>
     <string name="qq_channel">QQ channel</string>
@@ -172,4 +168,6 @@
     <string name="exception_dhizuku_not_work">Please activate Dhizuku and grant permission</string>
     <string name="exception_root_not_work">Couldn\'t access root</string>
     <string name="exception_app_process_not_work">Couldn\'t connect the authorizer</string>
+    <string name="old_version_prefix">Current</string>
+    <string name="new_version_prefix">New</string>
 </resources>

@@ -8,11 +8,11 @@
 # https://mvnrepository.com/
 
 [versions]
-agp = "8.9.2"
+agp = "8.10.0"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
-composeBom = "2025.04.01"
-compose = "1.8.0"
+composeBom = "2025.05.00"
+compose = "1.8.1"
 room = "2.7.1"
 ktx-serialization = "1.8.0"
 accompanist = "0.36.0"
