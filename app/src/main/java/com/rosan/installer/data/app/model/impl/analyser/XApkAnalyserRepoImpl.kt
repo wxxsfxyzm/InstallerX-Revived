@@ -132,21 +132,26 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             "dm" -> dmName = File(split.name).nameWithoutExtension
             else -> return listOf()
         }
+        // XAPK 无法获取到SDK
+        var sdk = null
         val app = if (splitName?.isNotEmpty() == true) AppEntity.SplitEntity(
             packageName = manifest.packageName,
             data = data,
-            splitName = splitName
+            splitName = splitName,
+            sdk = sdk
         ) else if (dmName?.isNotEmpty() == true) AppEntity.DexMetadataEntity(
             packageName = manifest.packageName,
             data = data,
-            dmName = dmName
+            dmName = dmName,
+            sdk = sdk
         ) else AppEntity.BaseEntity(
             packageName = manifest.packageName,
             data = data,
             versionCode = manifest.versionCode,
             versionName = manifest.versionName,
             label = manifest.label,
-            icon = icon
+            icon = icon,
+            sdk = sdk
         )
         return listOf(app)
     }
@@ -157,7 +162,7 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         @SerialName("version_code") val versionCodeStr: String,
         @SerialName("version_name") val versionNameStr: String?,
         @SerialName("name") val label: String?,
-        @SerialName("split_apks") val splits: List<Split>
+        @SerialName("split_apks") val splits: List<Split>,
     ) {
         val versionCode: Long = versionCodeStr.toLong()
         val versionName: String = versionNameStr ?: ""

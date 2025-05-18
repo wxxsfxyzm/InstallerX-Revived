@@ -109,6 +109,9 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         var label: String? = null
         var icon: Drawable? = null
         var roundIcon: Drawable? = null
+        var sdk: String? = null
+        var minSdk: String? = null
+        var targetSdk: String? = null
         AxmlTreeRepoImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml")).register("/manifest") {
             packageName = getAttributeValue(null, "package")
             splitName = getAttributeValue(null, "split")
@@ -121,6 +124,9 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
             versionName =
                 getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName") ?: versionName
+        }.register("/manifest/uses-sdk") {
+            minSdk = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "minSdkVersion")
+            targetSdk = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "targetSdkVersion")
         }.register("/manifest/application") {
             label = when (val resId =
                 getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "label", -1)) {
@@ -142,18 +148,22 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
                 else -> ResourcesCompat.getDrawable(resources, resId, theme)
             }
         }.map { }
+        // 组装 sdk 字符串，格式为 min->target->max
+        sdk = listOf(minSdk, targetSdk).joinToString("->") { it ?: "" }
         if (packageName.isNullOrEmpty()) throw Exception("can't get the package from this package")
         return if (splitName.isNullOrEmpty()) AppEntity.BaseEntity(
-            packageName = packageName!!,
+            packageName = packageName,
             data = data,
             versionCode = versionCode,
             versionName = versionName,
             label = label,
-            icon = roundIcon ?: icon
+            icon = roundIcon ?: icon,
+            sdk = sdk
         ) else AppEntity.SplitEntity(
-            packageName = packageName!!,
+            packageName = packageName,
             data = data,
-            splitName = splitName!!
+            splitName = splitName,
+            sdk = sdk
         )
     }
 }

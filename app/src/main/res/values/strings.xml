@@ -170,4 +170,5 @@
     <string name="exception_app_process_not_work">Couldn\'t connect the authorizer</string>
     <string name="old_version_prefix">Current</string>
     <string name="new_version_prefix">New</string>
+    <string name="installer_package_sdk" translatable="false">SDK: %s</string>
 </resources>

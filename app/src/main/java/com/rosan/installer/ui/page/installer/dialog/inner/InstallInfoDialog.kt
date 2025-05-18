@@ -61,8 +61,9 @@ fun InstallInfoDialog( // 大写开头
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
     val context: Context = getKoin().get()
-    val entityToInstall = installer.entities.filter { it.selected }.map { it.app }.sortedBest().firstOrNull()
-        ?: return DialogParams()
+    val entityToInstall =
+        installer.entities.filter { it.selected }.map { it.app }.sortedBest().firstOrNull()
+            ?: return DialogParams()
 
     // No need for remembered state or LaunchedEffect here, logic depends directly on passed preInstallAppInfo
 
@@ -165,6 +166,14 @@ fun InstallInfoDialog( // 大写开头
                             modifier = Modifier.basicMarquee()
                         )
                     }
+                }
+                // 如果有SDK信息则显示SDK
+                entityToInstall.sdk?.let {
+                    Text(
+                        stringResource(R.string.installer_package_sdk, it),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.basicMarquee()
+                    )
                 }
                 // 总是显示包名
                 Text(
