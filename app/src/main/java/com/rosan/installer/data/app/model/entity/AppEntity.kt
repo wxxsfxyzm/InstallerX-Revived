@@ -7,7 +7,9 @@ sealed class AppEntity {
 
     abstract val name: String
 
-    abstract val sdk: String?
+    abstract val targetSdk: String?
+
+    abstract val minSdk: String?
 
     data class BaseEntity(
         override val packageName: String,
@@ -16,7 +18,8 @@ sealed class AppEntity {
         val versionName: String,
         val label: String?,
         val icon: Drawable?,
-        override val sdk: String?
+        override val targetSdk: String?,
+        override val minSdk: String?,
     ) : AppEntity() {
         override val name = "base.apk"
     }
@@ -25,7 +28,8 @@ sealed class AppEntity {
         override val packageName: String,
         val data: DataEntity,
         val splitName: String,
-        override val sdk: String?
+        override val targetSdk: String?,
+        override val minSdk: String?,
     ) : AppEntity() {
         override val name = "$splitName.apk"
     }
@@ -34,7 +38,8 @@ sealed class AppEntity {
         override val packageName: String,
         val data: DataEntity,
         val dmName: String,
-        override val sdk: String?
+        override val targetSdk: String?,
+        override val minSdk: String?,
     ) : AppEntity() {
         override val name = "base.dm"
     }

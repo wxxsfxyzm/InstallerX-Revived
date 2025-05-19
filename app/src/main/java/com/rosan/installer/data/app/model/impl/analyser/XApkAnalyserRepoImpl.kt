@@ -133,17 +133,20 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             else -> return listOf()
         }
         // XAPK 无法获取到SDK
-        var sdk = null
+        var targetSdk = null
+        val minSdk = null
         val app = if (splitName?.isNotEmpty() == true) AppEntity.SplitEntity(
             packageName = manifest.packageName,
             data = data,
             splitName = splitName,
-            sdk = sdk
+            targetSdk = targetSdk,
+            minSdk = minSdk
         ) else if (dmName?.isNotEmpty() == true) AppEntity.DexMetadataEntity(
             packageName = manifest.packageName,
             data = data,
             dmName = dmName,
-            sdk = sdk
+            targetSdk = targetSdk,
+            minSdk = minSdk
         ) else AppEntity.BaseEntity(
             packageName = manifest.packageName,
             data = data,
@@ -151,7 +154,8 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             versionName = manifest.versionName,
             label = manifest.label,
             icon = icon,
-            sdk = sdk
+            targetSdk = targetSdk,
+            minSdk = minSdk
         )
         return listOf(app)
     }

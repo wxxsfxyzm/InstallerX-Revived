@@ -168,9 +168,16 @@ fun InstallInfoDialog( // 大写开头
                     }
                 }
                 // 如果有SDK信息则显示SDK
-                entityToInstall.sdk?.let {
+                entityToInstall.minSdk?.let {
                     Text(
-                        stringResource(R.string.installer_package_sdk, it),
+                        stringResource(R.string.installer_package_target_sdk, it),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.basicMarquee()
+                    )
+                }
+                entityToInstall.targetSdk?.let {
+                    Text(
+                        stringResource(R.string.installer_package_min_sdk, it),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.basicMarquee()
                     )

@@ -141,17 +141,20 @@ object ApkMAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             else -> return listOf()
         }
         // APKM格式仅能获取到 MIN_API
-        val sdk = manifest.minApi!!
+        val minSdk = manifest.minApi!!
+        val targetSdk = null
         val app = if (splitName?.isNotEmpty() == true) AppEntity.SplitEntity(
             packageName = manifest.packageName,
             data = data,
             splitName = splitName,
-            sdk = sdk
+            targetSdk = targetSdk,
+            minSdk = minSdk
         ) else if (dmName?.isNotEmpty() == true) AppEntity.DexMetadataEntity(
             packageName = manifest.packageName,
             data = data,
             dmName = dmName,
-            sdk = sdk
+            targetSdk = targetSdk,
+            minSdk = minSdk
         ) else AppEntity.BaseEntity(
             packageName = manifest.packageName,
             data = data,
@@ -159,7 +162,8 @@ object ApkMAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             versionName = manifest.versionName,
             label = manifest.label,
             icon = icon,
-            sdk = sdk
+            targetSdk = targetSdk,
+            minSdk = minSdk
         )
         return listOf(app)
     }

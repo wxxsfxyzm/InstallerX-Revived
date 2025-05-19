@@ -109,7 +109,6 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         var label: String? = null
         var icon: Drawable? = null
         var roundIcon: Drawable? = null
-        var sdk: String? = null
         var minSdk: String? = null
         var targetSdk: String? = null
         AxmlTreeRepoImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml")).register("/manifest") {
@@ -148,8 +147,6 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
                 else -> ResourcesCompat.getDrawable(resources, resId, theme)
             }
         }.map { }
-        // 组装 sdk 字符串，格式为 min->target->max
-        sdk = listOf(minSdk, targetSdk).joinToString("->") { it ?: "" }
         if (packageName.isNullOrEmpty()) throw Exception("can't get the package from this package")
         return if (splitName.isNullOrEmpty()) AppEntity.BaseEntity(
             packageName = packageName,
@@ -158,12 +155,14 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             versionName = versionName,
             label = label,
             icon = roundIcon ?: icon,
-            sdk = sdk
+            targetSdk = targetSdk,
+            minSdk = minSdk
         ) else AppEntity.SplitEntity(
             packageName = packageName,
             data = data,
             splitName = splitName,
-            sdk = sdk
+            targetSdk = targetSdk,
+            minSdk = minSdk
         )
     }
 }
