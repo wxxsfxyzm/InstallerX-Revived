@@ -163,6 +163,7 @@
     <string name="exception_install_failed_package_changed">The calling program expects the wrapper of the call to change</string>
     <string name="exception_install_failed_uid_changed">The UID has changed, please uninstall and try again</string>
     <string name="exception_install_failed_version_downgrade">Downgrade failed, please uninstall the app and try again</string>
+    <string name="exception_install_failed_rejected_by_build_type">Rejected by system build type</string>
 
     <string name="exception_shizuku_not_work">Please activate Sui or Shizuku and grant permission</string>
     <string name="exception_dhizuku_not_work">Please activate Dhizuku and grant permission</string>

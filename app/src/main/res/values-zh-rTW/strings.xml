@@ -161,6 +161,7 @@
     <string name="exception_install_failed_uid_changed">UID發生改變，請先解除安裝後再安裝</string>
     <string name="exception_install_failed_version_downgrade">應用降級失敗，請先解除安裝後再安装</string>
 
+    <string name="exception_install_failed_rejected_by_build_type">系統禁止跨區安裝</string>
     <string name="exception_shizuku_not_work">請啟用Sui或Shizuku，並授於權限</string>
     <string name="exception_dhizuku_not_work">請啟用Dhizuku，並授於權限</string>
     <string name="exception_root_not_work">請授於ROOT權限</string>

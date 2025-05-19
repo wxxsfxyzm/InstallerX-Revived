@@ -20,6 +20,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedNewerSDKExcepti
 import com.rosan.installer.data.app.model.exception.InstallFailedNoSharedUserException
 import com.rosan.installer.data.app.model.exception.InstallFailedOlderSdkException
 import com.rosan.installer.data.app.model.exception.InstallFailedPackageChangedException
+import com.rosan.installer.data.app.model.exception.InstallFailedRejectedByBuildTypeException
 import com.rosan.installer.data.app.model.exception.InstallFailedReplaceCouldntDeleteException
 import com.rosan.installer.data.app.model.exception.InstallFailedSharedUserIncompatibleException
 import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
@@ -61,6 +62,7 @@ fun Throwable.help(): String {
         is InstallFailedPackageChangedException -> stringResource(R.string.exception_install_failed_package_changed)
         is InstallFailedUidChangedException -> stringResource(R.string.exception_install_failed_uid_changed)
         is InstallFailedVersionDowngradeException -> stringResource(R.string.exception_install_failed_version_downgrade)
+        is InstallFailedRejectedByBuildTypeException -> stringResource(R.string.exception_install_failed_rejected_by_build_type)
 
         is ShizukuNotWorkException -> stringResource(R.string.exception_shizuku_not_work)
         is DhizukuNotWorkException -> stringResource(R.string.exception_dhizuku_not_work)

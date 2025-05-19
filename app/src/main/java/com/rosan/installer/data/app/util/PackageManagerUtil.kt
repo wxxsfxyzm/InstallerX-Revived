@@ -21,6 +21,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedNewerSDKExcepti
 import com.rosan.installer.data.app.model.exception.InstallFailedNoSharedUserException
 import com.rosan.installer.data.app.model.exception.InstallFailedOlderSdkException
 import com.rosan.installer.data.app.model.exception.InstallFailedPackageChangedException
+import com.rosan.installer.data.app.model.exception.InstallFailedRejectedByBuildTypeException
 import com.rosan.installer.data.app.model.exception.InstallFailedReplaceCouldntDeleteException
 import com.rosan.installer.data.app.model.exception.InstallFailedSharedUserIncompatibleException
 import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
@@ -82,6 +83,8 @@ class PackageManagerUtil {
         const val INSTALL_FAILED_UID_CHANGED = -24
 
         const val INSTALL_FAILED_VERSION_DOWNGRADE = -25
+
+        const val INSTALL_FAILED_REJECTED_BY_BUILDTYPE = -3001
 
         fun installResultVerify(
             context: Context,
@@ -161,6 +164,11 @@ class PackageManagerUtil {
                 INSTALL_FAILED_PACKAGE_CHANGED -> InstallFailedPackageChangedException(ecpMsg)
                 INSTALL_FAILED_UID_CHANGED -> InstallFailedUidChangedException(ecpMsg)
                 INSTALL_FAILED_VERSION_DOWNGRADE -> InstallFailedVersionDowngradeException(ecpMsg)
+
+                INSTALL_FAILED_REJECTED_BY_BUILDTYPE -> InstallFailedRejectedByBuildTypeException(
+                    ecpMsg
+                )
+
                 else -> IllegalStateException(ecpMsg)
             }
         }
