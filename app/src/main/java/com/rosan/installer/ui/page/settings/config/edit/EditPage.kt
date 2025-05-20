@@ -21,6 +21,7 @@ import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Face
+import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.PsychologyAlt
@@ -166,6 +167,7 @@ fun EditPage(
             item { DataAllowTestOnlyWidget(viewModel = viewModel) }
             item { DataAllowDowngradeWidget(viewModel = viewModel) }
             item { DataAutoDeleteWidget(viewModel = viewModel) }
+            item { DisplaySdkWidget(viewModel = viewModel) }
         }
     }
 }
@@ -385,8 +387,15 @@ fun DataAutoDeleteWidget(viewModel: EditViewModel) {
     )
 }
 
-
-
-
-
-
+@Composable
+fun DisplaySdkWidget(viewModel: EditViewModel) {
+    SwitchWidget(
+        icon = Icons.TwoTone.Info,
+        title = stringResource(id = R.string.config_display_sdk_version),
+        description = stringResource(id = R.string.config_display_sdk_version_sdp),
+        checked = viewModel.state.data.displaySdk,
+        onCheckedChange = {
+            viewModel.dispatch(EditViewAction.ChangeDisplaySdk(it))
+        }
+    )
+}

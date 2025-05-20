@@ -15,6 +15,7 @@ sealed class EditViewAction {
     data class ChangeDataAllowTestOnly(val allowTestOnly: Boolean) : EditViewAction()
     data class ChangeDataAllowDowngrade(val allowDowngrade: Boolean) : EditViewAction()
     data class ChangeDataAutoDelete(val autoDelete: Boolean) : EditViewAction()
+    data class ChangeDisplaySdk(val displaySdk: Boolean) : EditViewAction()
     object LoadData : EditViewAction()
     object SaveData : EditViewAction()
 }

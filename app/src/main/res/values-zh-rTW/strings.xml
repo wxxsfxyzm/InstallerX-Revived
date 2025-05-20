@@ -81,6 +81,8 @@
     <string name="config_allow_downgrade_dsp">允許降级安裝低版本的安装包（部分系统禁止此方法，請参考核心破解）</string>
     <string name="config_auto_delete">自動刪除</string>
     <string name="config_auto_delete_dsp">安裝成功後自動刪除安裝包</string>
+    <string name="config_display_sdk_version">顯示SDK資訊</string>
+    <string name="config_display_sdk_version_sdp">在安裝介面顯示target與min資訊</string>
 
     <string name="config_error_name">名稱不得為空</string>
     <string name="config_error_customize_authorizer">自定授權器不得為空</string>

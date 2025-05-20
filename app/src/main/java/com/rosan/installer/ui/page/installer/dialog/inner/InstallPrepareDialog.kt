@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.Delete
+import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.People
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -110,13 +111,15 @@ fun installPrepareDialog( // 小写开头
     var allowTestOnly by remember(installer.config.allowTestOnly) { mutableStateOf(installer.config.allowTestOnly) }
     var allowDowngrade by remember(installer.config.allowDowngrade) { mutableStateOf(installer.config.allowDowngrade) }
     var autoDelete by remember(installer.config.autoDelete) { mutableStateOf(installer.config.autoDelete) }
+    var displaySdk by remember(installer.config.displaySdk) { mutableStateOf(installer.config.displaySdk) }
 
-    LaunchedEffect(forAllUser, allowTestOnly, allowDowngrade, autoDelete) {
+    LaunchedEffect(forAllUser, allowTestOnly, allowDowngrade, autoDelete, displaySdk) {
         val currentConfig = installer.config
         if (currentConfig.forAllUser != forAllUser) installer.config.forAllUser = forAllUser
         if (currentConfig.allowTestOnly != allowTestOnly) installer.config.allowTestOnly = allowTestOnly
         if (currentConfig.allowDowngrade != allowDowngrade) installer.config.allowDowngrade = allowDowngrade
         if (currentConfig.autoDelete != autoDelete) installer.config.autoDelete = autoDelete
+        if (currentConfig.displaySdk != displaySdk) installer.config.displaySdk = displaySdk
     }
 
     // Call InstallInfoDialog for base structure
@@ -145,6 +148,7 @@ fun installPrepareDialog( // 小写开头
                         Chip(selected = allowTestOnly, onClick = { allowTestOnly = !allowTestOnly }, label = stringResource(id = R.string.config_allow_test_only), icon = Icons.TwoTone.BugReport)
                         Chip(selected = allowDowngrade, onClick = { allowDowngrade = !allowDowngrade }, label = stringResource(id = R.string.config_allow_downgrade), icon = Icons.AutoMirrored.TwoTone.TrendingDown)
                         Chip(selected = autoDelete, onClick = { autoDelete = !autoDelete }, label = stringResource(id = R.string.config_auto_delete), icon = Icons.TwoTone.Delete)
+                        Chip(selected = displaySdk, onClick = { displaySdk = !displaySdk }, label = stringResource(id = R.string.config_display_sdk_version), icon = Icons.TwoTone.Info)
                     }
                 }
             }

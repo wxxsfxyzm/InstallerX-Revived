@@ -17,6 +17,7 @@ data class EditViewState(
         val allowTestOnly: Boolean,
         val allowDowngrade: Boolean,
         val autoDelete: Boolean,
+        val displaySdk: Boolean,
     ) {
         val errorName = name.isEmpty()// || name == "Default"
 
@@ -42,7 +43,8 @@ data class EditViewState(
             forAllUser = this.forAllUser,
             allowTestOnly = this.allowTestOnly,
             allowDowngrade = this.allowDowngrade,
-            autoDelete = this.autoDelete
+            autoDelete = this.autoDelete,
+            displaySdk = this.displaySdk
         )
 
         companion object {
@@ -57,7 +59,8 @@ data class EditViewState(
                 forAllUser = config.forAllUser,
                 allowTestOnly = config.allowTestOnly,
                 allowDowngrade = config.allowDowngrade,
-                autoDelete = config.autoDelete
+                autoDelete = config.autoDelete,
+                displaySdk = config.displaySdk
             )
         }
     }
