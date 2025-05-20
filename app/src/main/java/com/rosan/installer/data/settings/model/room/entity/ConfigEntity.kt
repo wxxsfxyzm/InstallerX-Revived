@@ -24,7 +24,7 @@ data class ConfigEntity(
     @ColumnInfo(name = "allow_test_only") var allowTestOnly: Boolean,
     @ColumnInfo(name = "allow_downgrade") var allowDowngrade: Boolean,
     @ColumnInfo(name = "auto_delete") var autoDelete: Boolean,
-    @ColumnInfo(name = "display_sdk") var displaySdk: Boolean,
+    @ColumnInfo(name = "display_sdk", defaultValue = "0") var displaySdk: Boolean,
     @ColumnInfo(name = "created_at") var createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "modified_at") var modifiedAt: Long = System.currentTimeMillis(),
 ) {
