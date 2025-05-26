@@ -14,7 +14,7 @@ data class ConfigEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     var id: Long = 0L,
-    @ColumnInfo(name = "name") var name: String,
+    @ColumnInfo(name = "name", defaultValue = "'Default'") var name: String = "Default",
     @ColumnInfo(name = "description") var description: String,
     @ColumnInfo(name = "authorizer") var authorizer: Authorizer,
     @ColumnInfo(name = "customize_authorizer") var customizeAuthorizer: String,
@@ -24,13 +24,13 @@ data class ConfigEntity(
     @ColumnInfo(name = "allow_test_only") var allowTestOnly: Boolean,
     @ColumnInfo(name = "allow_downgrade") var allowDowngrade: Boolean,
     @ColumnInfo(name = "auto_delete") var autoDelete: Boolean,
-    @ColumnInfo(name = "display_sdk", defaultValue = "0") var displaySdk: Boolean,
+    @ColumnInfo(name = "display_sdk", defaultValue = "0") var displaySdk: Boolean = false,
     @ColumnInfo(name = "created_at") var createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "modified_at") var modifiedAt: Long = System.currentTimeMillis(),
 ) {
     companion object : KoinComponent {
         var default = ConfigEntity(
-            name = "",
+            name = "Default",
             description = "",
             authorizer = Authorizer.Global,
             customizeAuthorizer = "",

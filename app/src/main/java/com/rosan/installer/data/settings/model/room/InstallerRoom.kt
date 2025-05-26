@@ -7,18 +7,25 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rosan.installer.data.settings.model.room.dao.AppDao
 import com.rosan.installer.data.settings.model.room.dao.ConfigDao
 import com.rosan.installer.data.settings.model.room.entity.AppEntity
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
+import kotlinx.coroutines.CoroutineScope
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
 @Database(
     entities = [AppEntity::class, ConfigEntity::class],
     version = 4,
+    exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3, spec = InstallerRoom.AUTO_MIGRATION_2_3::class),
@@ -35,12 +42,29 @@ abstract class InstallerRoom : RoomDatabase() {
     class AUTO_MIGRATION_2_3 : AutoMigrationSpec
 
     companion object : KoinComponent {
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE config ADD COLUMN display_sdk INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun createInstance(): InstallerRoom {
             return Room.databaseBuilder(
                 get(),
                 InstallerRoom::class.java,
                 "installer.db",
-            ).build()
+            )
+                .addCallback(object : Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        // 延迟获取已初始化的 Database 实例
+                        val database = get<InstallerRoom>()
+                        CoroutineScope(Dispatchers.IO).launch {
+                            database.configDao.insert(ConfigEntity.default)
+                        }
+                    }
+                })
+                .addMigrations(MIGRATION_3_4) // 添加手动迁移
+                .build()
         }
     }
 
@@ -48,3 +72,4 @@ abstract class InstallerRoom : RoomDatabase() {
 
     abstract val configDao: ConfigDao
 }
+
