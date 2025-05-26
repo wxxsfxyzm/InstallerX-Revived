@@ -49,6 +49,7 @@ class EditViewModel(
                     is EditViewAction.ChangeDataAllowTestOnly -> changeDataAllowTestOnly(action.allowTestOnly)
                     is EditViewAction.ChangeDataAllowDowngrade -> changeDataAllowDowngrade(action.allowDowngrade)
                     is EditViewAction.ChangeDataAutoDelete -> changeDataAutoDelete(action.autoDelete)
+                    is EditViewAction.ChangeDisplaySdk -> changeDisplaySdk(action.displaySdk)
                     is EditViewAction.LoadData -> loadData()
                     is EditViewAction.SaveData -> saveData()
                 }
@@ -157,6 +158,14 @@ class EditViewModel(
         state = state.copy(
             data = state.data.copy(
                 autoDelete = autoDelete
+            )
+        )
+    }
+
+    private fun changeDisplaySdk(displaySdk: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                displaySdk = displaySdk
             )
         )
     }

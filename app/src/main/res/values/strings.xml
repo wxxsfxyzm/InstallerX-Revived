@@ -84,6 +84,8 @@
     <string name="config_allow_downgrade_dsp">Allow applications to be downgraded (may not work on all ROMs)</string>
     <string name="config_auto_delete">Auto deletion</string>
     <string name="config_auto_delete_dsp">Automatically delete the apk after it\'s been installed</string>
+    <string name="config_display_sdk_version">Display SDK information</string>
+    <string name="config_display_sdk_version_sdp">Show target and min information on the installation interface</string>
 
     <string name="config_error_name">Name can\'t be empty</string>
     <string name="config_error_customize_authorizer">Custom authorizer can\'t be empty</string>
@@ -135,6 +137,8 @@
     <string name="installer_version">Version: %s (%s)</string>
     <string name="installer_version2">%s (%s)</string>
     <string name="installer_package_name">Package: %s</string>
+    <string name="installer_package_min_sdk" translatable="false">MinSdk: %s</string>
+    <string name="installer_package_target_sdk" translatable="false">TargetSdk: %s</string>
     <string name="installer_file_path">Path: %s</string>
 
     <string name="exception_install_failed_unknown">Unknown error</string>
