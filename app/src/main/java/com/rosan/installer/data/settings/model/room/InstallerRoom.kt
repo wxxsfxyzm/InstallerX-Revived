@@ -7,7 +7,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
-import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rosan.installer.data.settings.model.room.dao.AppDao
 import com.rosan.installer.data.settings.model.room.dao.ConfigDao
@@ -16,7 +15,6 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
 import kotlinx.coroutines.CoroutineScope
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -42,11 +40,6 @@ abstract class InstallerRoom : RoomDatabase() {
     class AUTO_MIGRATION_2_3 : AutoMigrationSpec
 
     companion object : KoinComponent {
-        private val MIGRATION_3_4 = object : Migration(3, 4) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE config ADD COLUMN display_sdk INTEGER NOT NULL DEFAULT 0")
-            }
-        }
 
         fun createInstance(): InstallerRoom {
             return Room.databaseBuilder(
@@ -63,7 +56,6 @@ abstract class InstallerRoom : RoomDatabase() {
                         }
                     }
                 })
-                .addMigrations(MIGRATION_3_4) // 添加手动迁移
                 .build()
         }
     }
