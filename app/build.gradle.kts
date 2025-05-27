@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
-    //id("kotlinx-serialization")
+    // id("kotlinx-serialization")
 }
 
 android {
@@ -27,8 +27,8 @@ android {
         namespace = "com.rosan.installer"
         minSdk = 30
         targetSdk = 35
-        versionCode = 33
-        versionName = "2.2"
+        versionCode = 34
+        versionName = "2.2.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -38,7 +38,6 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 compilerArgumentProviders(
-                    //RoomSchemaArgProvider(File(projectDir, "schemas"))
                 )
             }
         }
