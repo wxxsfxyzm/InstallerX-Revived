@@ -1,4 +1,10 @@
-# InstallerX
+# InstallerX Revived (Community Edition)
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![Latest Release](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=稳定版)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![Prerelease](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=测试版)](https://github.com/wxxsfxyzm/InstallerX/releases)
+
+- 这是一个由社区维护的分支版本， [原项目](https://github.com/iamr0s/InstallerX)已被作者归档。
+- 提供有限的开源更新和支持
+- 此分支严格遵循 GNU GPLv3，所有修改均开放源代码。
 
 ## 介绍
 
@@ -12,17 +18,17 @@
 
 SDK 30 以上
 
-如有旧版本要求可以前往原仓库下载
-
 ## 变更内容
 
 - UI简化
 - 修复了原仓库项目无法正确删除安装包的问题
-- 文本调整，支持繁体中文。更多语言欢迎pr
-- 修改更新版本号的显示效果
+- 文本调整，支持繁体中文。更多语言欢迎PR
+- 修改待安装应用版本号的显示效果
 - 加入了安装时显示targetSDK与minSDK的功能
 
 ## 开源协议
+
+Copyright (C)  [iamr0s](https://github.com/iamr0s) and contributors
 
 InstallerX目前基于 [**GNU General Public License v3 (GPL-3)**](http://www.gnu.org/copyleft/gpl.html)
 开源，但不保证未来依然继续遵循此协议或开源，有权更改开源协议或开源状态。
