@@ -7,6 +7,7 @@ import android.content.pm.IPackageManager
 import android.content.pm.PackageManager
 import android.content.pm.ParceledListSlice
 import android.content.pm.ResolveInfo
+import android.os.Build
 import android.os.Process
 import android.os.ServiceManager
 import androidx.core.net.toUri
@@ -91,24 +92,43 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         userId: Int,
         removeExisting: Boolean
     ) {
-        reflect.getDeclaredMethod(
-            IPackageManager::class.java,
-            "addPreferredActivity",
-            IntentFilter::class.java,
-            Int::class.java,
-            Array<ComponentName>::class.java,
-            ComponentName::class.java,
-            Int::class.java,
-            Boolean::class.java,
-        )?.invoke(
-            iPackageManager,
-            filter,
-            match,
-            names,
-            name,
-            userId,
-            removeExisting
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            reflect.getDeclaredMethod(
+                IPackageManager::class.java,
+                "addPreferredActivity",
+                IntentFilter::class.java,
+                Int::class.java,
+                Array<ComponentName>::class.java,
+                ComponentName::class.java,
+                Int::class.java,
+                Boolean::class.java,
+            )?.invoke(
+                iPackageManager,
+                filter,
+                match,
+                names,
+                name,
+                userId,
+                removeExisting
+            )
+        } else {
+            reflect.getDeclaredMethod(
+                IPackageManager::class.java,
+                "addPreferredActivity",
+                IntentFilter::class.java,
+                Int::class.java,
+                Array<ComponentName>::class.java,
+                ComponentName::class.java,
+                Int::class.java
+            )?.invoke(
+                iPackageManager,
+                filter,
+                match,
+                names,
+                name,
+                userId
+            )
+        }
     }
 
     private fun addPersistentPreferredActivity(
@@ -138,15 +158,24 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         flags: Int,
         userId: Int
     ): List<ResolveInfo> {
-        return (
-                reflect.getDeclaredMethod(
-                    IPackageManager::class.java,
-                    "queryIntentActivities",
-                    Intent::class.java,
-                    String::class.java,
-                    Long::class.java,
-                    Int::class.java
-                )?.invoke(iPackageManager, intent, resolvedType, flags.toLong(), userId)
-                        as ParceledListSlice<ResolveInfo>).list
+        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            reflect.getDeclaredMethod(
+                IPackageManager::class.java,
+                "queryIntentActivities",
+                Intent::class.java,
+                String::class.java,
+                Long::class.java,
+                Int::class.java
+            )?.invoke(iPackageManager, intent, resolvedType, flags.toLong(), userId)
+        } else {
+            reflect.getDeclaredMethod(
+                IPackageManager::class.java,
+                "queryIntentActivities",
+                Intent::class.java,
+                String::class.java,
+                Int::class.java,
+                Int::class.java
+            )?.invoke(iPackageManager, intent, resolvedType, flags, userId)
+        } as ParceledListSlice<ResolveInfo>).list
     }
 }

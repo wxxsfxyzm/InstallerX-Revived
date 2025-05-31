@@ -10,6 +10,7 @@ import android.content.pm.IPackageInstallerSession
 import android.content.pm.IPackageManager
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.Session
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.IInterface
@@ -77,17 +78,29 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             else -> config.installer
         }
 
-        return (
-                reflect.getDeclaredConstructor(
-                    PackageInstaller::class.java,
-                    IPackageInstaller::class.java,
-                    String::class.java,
-                    String::class.java,
-                    Int::class.java,
-                )!!.also {
-                    it.isAccessible = true
-                }.newInstance(iPackageInstaller, installerPackageName, null, extra.userId)
-                ) as PackageInstaller
+        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            reflect.getDeclaredConstructor(
+                PackageInstaller::class.java,
+                IPackageInstaller::class.java,
+                String::class.java,
+                String::class.java,
+                Int::class.java,
+            )!!.also {
+                it.isAccessible = true
+            }.newInstance(iPackageInstaller, installerPackageName, null, extra.userId)
+        } else
+            reflect.getDeclaredConstructor(
+                PackageInstaller::class.java,
+                IPackageInstaller::class.java,
+                String::class.java,
+                Int::class.java,
+            )!!.also {
+                it.isAccessible = true
+            }.newInstance(
+                iPackageInstaller,
+                installerPackageName,
+                extra.userId
+            )) as PackageInstaller
     }
 
     private suspend fun setSessionIBinder(session: Session) {

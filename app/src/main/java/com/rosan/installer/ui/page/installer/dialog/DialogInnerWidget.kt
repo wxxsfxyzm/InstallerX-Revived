@@ -2,10 +2,18 @@ package com.rosan.installer.ui.page.installer.dialog
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.inner.*
+import com.rosan.installer.ui.page.installer.dialog.inner.analyseFailedDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.analysingDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.installChoiceDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.installFailedDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.installPrepareDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.installSuccessDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.installingDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.readyDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.resolveFailedDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.resolvingDialog
 
 // change the content when the id been changed
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
@@ -39,6 +47,7 @@ fun dialogGenerateParams(
         is DialogViewState.Installing -> installingDialog(installer, viewModel)
         is DialogViewState.InstallSuccess -> installSuccessDialog(installer, viewModel)
         is DialogViewState.InstallFailed -> installFailedDialog(installer, viewModel)
-        else -> readyDialog(installer, viewModel)
+        // when is exhaustive, so no need to handle the else case
+        // else -> readyDialog(installer, viewModel)
     }
 }

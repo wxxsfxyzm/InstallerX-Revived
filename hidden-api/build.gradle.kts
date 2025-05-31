@@ -1,4 +1,3 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.agp.lib)
 }
@@ -8,7 +7,12 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        minSdk = 34
+        minSdk = 30
+    }
+
+    compileOptions {
+        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_21
     }
 }
 

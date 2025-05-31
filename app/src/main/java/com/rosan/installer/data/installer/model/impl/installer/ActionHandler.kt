@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.Os
 import com.hjq.permissions.XXPermissions
@@ -168,8 +169,12 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
 
             Intent.ACTION_SEND_MULTIPLE -> {
-                (intent.getParcelableArrayListExtra(
-                    Intent.EXTRA_STREAM, Uri::class.java
+                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                    intent.getParcelableArrayListExtra(
+                        Intent.EXTRA_STREAM, Uri::class.java
+                    )
+                else intent.getParcelableArrayListExtra(
+                    Intent.EXTRA_STREAM
                 )) ?: emptyList()
             }
 
