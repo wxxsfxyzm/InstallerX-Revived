@@ -123,11 +123,11 @@ fun installPrepareDialog( // 小写开头
     val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
     var showChips by remember { mutableStateOf(false) }
 
-    var forAllUser by remember(installer.config.forAllUser) { mutableStateOf(installer.config.forAllUser) }
-    var allowTestOnly by remember(installer.config.allowTestOnly) { mutableStateOf(installer.config.allowTestOnly) }
-    var allowDowngrade by remember(installer.config.allowDowngrade) { mutableStateOf(installer.config.allowDowngrade) }
-    var autoDelete by remember(installer.config.autoDelete) { mutableStateOf(installer.config.autoDelete) }
-    var displaySdk by remember(installer.config.displaySdk) { mutableStateOf(installer.config.displaySdk) }
+    var forAllUser by remember { mutableStateOf(installer.config.forAllUser) }
+    var allowTestOnly by remember { mutableStateOf(installer.config.allowTestOnly) }
+    var allowDowngrade by remember { mutableStateOf(installer.config.allowDowngrade) }
+    var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
+    var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
 
     LaunchedEffect(forAllUser, allowTestOnly, allowDowngrade, autoDelete, displaySdk) {
         val currentConfig = installer.config
@@ -164,31 +164,51 @@ fun installPrepareDialog( // 小写开头
                     ) {
                         Chip(
                             selected = forAllUser,
-                            onClick = { forAllUser = !forAllUser },
+                            onClick = {
+                                val newValue = !forAllUser
+                                forAllUser = newValue
+                                installer.config.forAllUser = newValue
+                            },
                             label = stringResource(id = R.string.config_for_all_user),
                             icon = Icons.TwoTone.People
                         )
                         Chip(
                             selected = allowTestOnly,
-                            onClick = { allowTestOnly = !allowTestOnly },
+                            onClick = {
+                                val newValue = !allowTestOnly
+                                allowTestOnly = newValue
+                                installer.config.allowTestOnly = newValue
+                            },
                             label = stringResource(id = R.string.config_allow_test_only),
                             icon = Icons.TwoTone.BugReport
                         )
                         Chip(
                             selected = allowDowngrade,
-                            onClick = { allowDowngrade = !allowDowngrade },
+                            onClick = {
+                                val newValue = !allowDowngrade
+                                allowDowngrade = newValue
+                                installer.config.allowDowngrade = newValue
+                            },
                             label = stringResource(id = R.string.config_allow_downgrade),
                             icon = Icons.AutoMirrored.TwoTone.TrendingDown
                         )
                         Chip(
                             selected = autoDelete,
-                            onClick = { autoDelete = !autoDelete },
+                            onClick = {
+                                val newValue = !autoDelete
+                                autoDelete = newValue
+                                installer.config.autoDelete = newValue
+                            },
                             label = stringResource(id = R.string.config_auto_delete),
                             icon = Icons.TwoTone.Delete
                         )
                         Chip(
                             selected = displaySdk,
-                            onClick = { displaySdk = !displaySdk },
+                            onClick = {
+                                val newValue = !displaySdk
+                                displaySdk = newValue
+                                installer.config.displaySdk = newValue
+                            },
                             label = stringResource(id = R.string.config_display_sdk_version),
                             icon = Icons.TwoTone.Info
                         )

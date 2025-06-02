@@ -17,7 +17,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -83,12 +83,12 @@ fun PositionDialog(
                 ) {
                     Box(
                         modifier = Modifier
-                            .sizeIn(minWidth = MinWidth, maxHeight = MaxWidth)
+                            .sizeIn(minWidth = MinWidth, maxHeight = MaxHeight)
                             .padding(DialogPadding)
                     ) {
                         // set the button always in bottom
                         var buttonHeightPx by remember {
-                            mutableStateOf(0)
+                            mutableIntStateOf(0)
                         }
                         val buttonHeight = (buttonHeightPx / LocalDensity.current.density).dp
                         Box(modifier = Modifier
@@ -226,4 +226,4 @@ private val ContentPadding = PaddingValues.Absolute(bottom = 12.dp)
 private val ButtonPadding = PaddingValues(horizontal = DialogSinglePadding)
 
 private val MinWidth = 280.dp
-private val MaxWidth = 560.dp
+private val MaxHeight = 600.dp
