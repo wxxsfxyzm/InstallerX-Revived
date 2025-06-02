@@ -8,6 +8,8 @@
 
 ## 介绍
 
+> A modern and functional Android app installer. (You know some birds are not meant to be caged, their feathers are just too bright.) 
+
 一款应用安装程序，为什么不试试【InstallerX】？
 
 在国产系统的魔改下，许多系统的自带安装程序体验并不是很好，你可以使用【InstallerX】替换掉系统默认安装程序。
