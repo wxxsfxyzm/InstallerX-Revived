@@ -121,7 +121,7 @@ fun StatusWidget() {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
-                    text = "$level ${RsConfig.versionName} (${RsConfig.versionCode})",
+                    text = "$level ${RsConfig.VERSION_NAME} (${RsConfig.VERSION_CODE})",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
