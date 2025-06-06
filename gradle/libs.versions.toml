@@ -11,14 +11,16 @@
 agp = "8.10.1"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
-composeBom = "2025.05.00"
-compose = "1.8.1"
+composeBom = "2025.06.00"
+compose = "1.8.2"
+material3 = "1.4.0-alpha15"
 room = "2.7.1"
 ktx-serialization = "1.8.0"
 accompanist = "0.36.0"
 rikka-shizuku = "13.1.5"
 koin-bom = "4.0.1"
 materialVersion = "1.12.0"
+datastoreCoreAndroid = "1.2.0-alpha02"
 
 [plugins]
 agp-lib = { id = "com.android.library", version.ref = "agp" }
@@ -34,15 +36,15 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.16.0" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
-androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.8.7" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
+androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.1" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
 
+material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose" }
-compose-material3 = { group = "androidx.compose.material3", name = "material3", version = "compose" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 compose-uiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.8.9" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.0" }
 compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }

@@ -6,6 +6,7 @@
     <style name="Theme.Installer.Translucent" parent="Theme.Installer">
         <item name="android:windowIsTranslucent">true</item>
         <!--沉浸状态栏和导航栏-->
+        <!--  use enableEdgeToEdge() instead  -->
         <!--        <item name="android:windowTranslucentStatus">true</item>
                 <item name="android:windowTranslucentNavigation">true</item>-->
         <item name="android:windowBackground">@android:color/transparent</item>
