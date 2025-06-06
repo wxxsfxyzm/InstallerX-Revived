@@ -39,24 +39,7 @@ fun dialogInnerWidget(
     else {
         {
             AnimatedContent(
-                targetState = "${installer.id}_${params.id}",
-                transitionSpec = {
-                    // 定义进入动画：淡入 + 从下方轻微向上滑动
-                    val enter = fadeIn(animationSpec = tween(220, delayMillis = 90)) +
-                            slideInVertically(
-                                initialOffsetY = { height -> height / 10 }, // 从内容高度10%的位置开始
-                                animationSpec = tween(220, delayMillis = 90)
-                            )
-
-                    // 定义退出动画：快速淡出
-                    val exit = fadeOut(animationSpec = tween(90))
-
-                    // 组合进入和退出动画，并指定尺寸变换的方式
-                    enter.togetherWith(exit).using(
-                        // 关键：确保尺寸变化也是平滑的，并且不裁剪内容
-                        SizeTransform(clip = false)
-                    )
-                }
+                targetState = "${installer.id}_${params.id}"
             ) {
                 params.content.invoke()
             }

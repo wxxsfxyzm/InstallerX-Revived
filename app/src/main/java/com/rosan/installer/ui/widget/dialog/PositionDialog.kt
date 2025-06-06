@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.widget.dialog
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -103,12 +104,12 @@ fun PositionDialog(
                             ),
                             label = "button_height"
                         )
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .onSizeChanged {
-                                    buttonHeightPx = it.height
-                                }) {
+
+                        Box(modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .onSizeChanged {
+                                buttonHeightPx = it.height
+                            }) {
                             PositionChildWidget(
                                 leftButton, centerButton, rightButton
                             ) { button ->
@@ -126,7 +127,15 @@ fun PositionDialog(
                         }
 
                         Column(
-                            modifier = Modifier.padding(bottom = animateDpAsState(targetValue = buttonHeight).value)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = animatedButtonHeight)
+                                .animateContentSize(
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                    )
+                                )
                         ) {
                             PositionChildWidget(
                                 leftIcon, centerIcon, rightIcon
