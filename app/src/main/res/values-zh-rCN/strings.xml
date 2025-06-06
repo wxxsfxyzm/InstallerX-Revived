@@ -20,6 +20,7 @@
     <string name="unstable">测试版</string>
 
 
+    <string name="enable_notification_hint">请启用通知以显示安装进度</string>
     <string name="discuss">讨论 &amp; 反馈 &amp; 更新</string>
     <string name="qq_channel">QQ频道</string>
     <string name="qq_group_official">QQ群组（官方）</string>
@@ -126,6 +127,7 @@
     <string name="installer_install_failed">安装失败</string>
     <string name="installer_install_success">安装成功</string>
 
+    <string name="installer_unknown_error">未知错误</string>
     <string name="installer_channel_name">安装通知</string>
     <string name="installer_progress_channel_name">安装过程通知</string>
     <string name="installer_background_channel_name">后台通知</string>
@@ -172,4 +174,5 @@
     <string name="old_version_prefix">当前</string>
     <string name="new_version_prefix">新</string>
     <string name="install_choice">安装包选择</string>
+    <string name="installer_error_reason">错误原因</string>
 </resources>

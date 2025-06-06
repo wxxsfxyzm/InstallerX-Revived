@@ -1,17 +1,23 @@
 package com.rosan.installer.data.installer.model.impl.installer
 
+import android.Manifest
 import android.app.Notification
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
 import com.rosan.installer.R
 import com.rosan.installer.data.app.util.getInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -148,6 +154,28 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             notificationManager.cancel(notificationId)
             return
         }
+        // 检查版本是否为 Android 13 (Tiramisu) 或更高
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // 检查 POST_NOTIFICATIONS 权限是否已被授予
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // 如果权限未被授予
+                // 在这里不应该调用 notify()
+                // TODO 应该在这里引导用户去开启权限
+                // 显示一条 Toast 提示用户开启通知权限
+                Toast.makeText(
+                    context,
+                    getString(R.string.enable_notification_hint),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+        }
+
+        // 如果权限已被授予，或者系统版本低于 Android 13，则正常显示通知
         notificationManager.notify(notificationId, notification)
     }
 
@@ -210,10 +238,22 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .addAction(0, getString(R.string.cancel), finishIntent).build()
     }
 
-    private fun onInstallFailed(builder: NotificationCompat.Builder): Notification {
+    private fun onInstallFailed(
+        builder: NotificationCompat.Builder
+    ): Notification {
         val info = installer.entities.filter { it.selected }.map { it.app }.getInfo(context)
+        val reason = installer.error.getErrorMessage(context)
+        val contentText = getString(R.string.installer_install_failed)
+        val bigTextStyle = NotificationCompat.BigTextStyle()
+            .setBigContentTitle(info.title)
+            .bigText(
+                "$contentText\n" +
+                        getString(R.string.installer_error_reason) +
+                        ": $reason"
+            )
         return builder.setContentTitle(info.title)
-            .setContentText(getString(R.string.installer_install_failed))
+            .setContentText(contentText)
+            .setStyle(bigTextStyle)
             .setLargeIcon(info.icon?.toBitmapOrNull())
             .addAction(0, getString(R.string.retry), installIntent)
             .addAction(0, getString(R.string.cancel), finishIntent).build()
