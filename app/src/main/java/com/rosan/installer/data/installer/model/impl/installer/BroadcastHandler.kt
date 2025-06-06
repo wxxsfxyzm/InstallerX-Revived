@@ -4,8 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.installer.util.pendingActivity
 import com.rosan.installer.data.installer.util.pendingBroadcast
@@ -52,18 +51,24 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     private fun registerReceiver(receiver: Receiver) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) registerReceiverTiramisu(receiver)
-        else context.registerReceiver(receiver, IntentFilter(ACTION))
+        // ContextCompat 会自动处理 API 版本的差异
+        ContextCompat.registerReceiver(
+            context,
+            receiver,
+            IntentFilter(ACTION),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    // No longer needed as ContextCompat handles it
+    /*@RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun registerReceiverTiramisu(receiver: Receiver) {
         context.registerReceiver(
             receiver,
             IntentFilter(ACTION),
             Context.RECEIVER_NOT_EXPORTED
         )
-    }
+    }*/
 
     override suspend fun onFinish() {
         context.unregisterReceiver(receiver)
@@ -98,7 +103,7 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Launch("launch");
 
         companion object {
-            fun revert(value: String): Name = Name.values().first { it.value == value }
+            fun revert(value: String): Name = entries.first { it.value == value }
         }
     }
 }
