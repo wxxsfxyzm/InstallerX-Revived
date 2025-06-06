@@ -37,7 +37,8 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 .pendingActivity(context, getRequestCode(installer, Name.Launch))
 
         fun namedIntent(context: Context, installer: InstallerRepo, name: Name) =
-            Intent(ACTION).putExtra(KEY_ID, installer.id)
+            Intent(ACTION).setPackage(context.packageName)
+                .putExtra(KEY_ID, installer.id)
                 .putExtra(KEY_NAME, name.value)
                 .pendingBroadcast(context, getRequestCode(installer, name))
     }
