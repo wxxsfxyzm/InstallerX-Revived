@@ -43,7 +43,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -298,14 +297,7 @@ fun DataInstallModeWidget(viewModel: EditViewModel) {
 fun DataDeclareInstallerWidget(viewModel: EditViewModel) {
     var authorizer = viewModel.state.data.authorizer
     if (authorizer == ConfigEntity.Authorizer.Global)
-    // authorizer = ConfigUtil.globalAuthorizer
-    {
-        val globalAuthorizer by produceState<ConfigEntity.Authorizer?>(null) {
-            value = ConfigUtil.getGlobalAuthorizer()
-        }
-        if (globalAuthorizer == null) return // 等待异步结果
-        authorizer = globalAuthorizer!!
-    }
+        authorizer = ConfigUtil.globalAuthorizer
     val declareInstaller = viewModel.state.data.declareInstaller
     if (authorizer == ConfigEntity.Authorizer.Dhizuku) {
         viewModel.dispatch(EditViewAction.ChangeDataDeclareInstaller(false))

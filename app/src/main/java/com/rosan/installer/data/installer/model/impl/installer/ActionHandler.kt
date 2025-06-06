@@ -113,9 +113,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun requestNotificationPermission(activity: Activity) {
         callbackFlow<Any?> {
-            val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                listOf(Manifest.permission.POST_NOTIFICATIONS)
-            } else emptyList()
+            val permissions = listOf(Manifest.permission.POST_NOTIFICATIONS)
             if (XXPermissions.isGranted(activity, permissions)) {
                 send(null)
             } else {
@@ -164,11 +162,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val uris = when (intentAction) {
             Intent.ACTION_SEND -> {
                 val uri =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                        intent.getParcelableExtra(
-                            Intent.EXTRA_STREAM, Uri::class.java
-                        )
-                    else intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                    intent.getParcelableExtra(
+                        Intent.EXTRA_STREAM, Uri::class.java
+                    )
                 if (uri == null) emptyList() else listOf(uri)
             }
 
