@@ -17,6 +17,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.util.getInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -237,10 +238,22 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .addAction(0, getString(R.string.cancel), finishIntent).build()
     }
 
-    private fun onInstallFailed(builder: NotificationCompat.Builder): Notification {
+    private fun onInstallFailed(
+        builder: NotificationCompat.Builder
+    ): Notification {
         val info = installer.entities.filter { it.selected }.map { it.app }.getInfo(context)
+        val reason = installer.error.getErrorMessage(context)
+        val contentText = getString(R.string.installer_install_failed)
+        val bigTextStyle = NotificationCompat.BigTextStyle()
+            .setBigContentTitle(info.title)
+            .bigText(
+                "$contentText\n" +
+                        getString(R.string.installer_error_reason) +
+                        ": $reason"
+            )
         return builder.setContentTitle(info.title)
-            .setContentText(getString(R.string.installer_install_failed))
+            .setContentText(contentText)
+            .setStyle(bigTextStyle)
             .setLargeIcon(info.icon?.toBitmapOrNull())
             .addAction(0, getString(R.string.retry), installIntent)
             .addAction(0, getString(R.string.cancel), finishIntent).build()

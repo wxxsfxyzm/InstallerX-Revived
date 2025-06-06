@@ -126,6 +126,7 @@
     <string name="installer_install_failed">安裝失敗</string>
     <string name="installer_install_success">安裝成功</string>
 
+    <string name="installer_unknown_error">未知錯誤</string>
     <string name="installer_channel_name">安裝通知</string>
     <string name="installer_progress_channel_name">安裝過程通知</string>
     <string name="installer_background_channel_name">後臺通知</string>
@@ -172,4 +173,5 @@
     <string name="old_version_prefix">當前</string>
     <string name="new_version_prefix">新</string>
     <string name="install_choice">安裝包選擇</string>
+    <string name="installer_error_reason">錯誤原因</string>
 </resources>
