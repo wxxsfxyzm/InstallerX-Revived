@@ -1,68 +1,48 @@
-package com.rosan.installer.build;
+package com.rosan.installer.build
 
-import android.os.Build;
-import android.text.TextUtils;
+import android.os.Build
+import android.text.TextUtils
+import com.rosan.installer.BuildConfig
 
-import com.rosan.installer.BuildConfig;
+object RsConfig {
+    val LEVEL: Level = getLevel()
 
-public final class RsConfig {
-    public static final Level LEVEL = getLevel();
-
-    private static Level getLevel() {
-        Level level = Level.UNSTABLE;
-        switch (BuildConfig.BUILD_LEVEL) {
-            case 1:
-                level = Level.PREVIEW;
-                break;
-            case 2:
-                level = Level.STABLE;
-                break;
+    private fun getLevel(): Level {
+        return when (BuildConfig.BUILD_LEVEL) {
+            1 -> Level.PREVIEW
+            2 -> Level.STABLE
+            else -> Level.UNSTABLE
         }
-        return level;
     }
 
-    public static final String versionName = BuildConfig.VERSION_NAME;
+    const val VERSION_NAME: String = BuildConfig.VERSION_NAME
+    const val VERSION_CODE: Int = BuildConfig.VERSION_CODE
 
-    public static final int versionCode = BuildConfig.VERSION_CODE;
+    val systemVersion: String
+        get() = if (Build.VERSION.PREVIEW_SDK_INT != 0)
+            "%s Preview (API %s)".format(Build.VERSION.CODENAME, Build.VERSION.SDK_INT)
+        else
+            "%s (API %s)".format(Build.VERSION.RELEASE, Build.VERSION.SDK_INT)
 
-    private static String getSystemVersion() {
-        if (Build.VERSION.PREVIEW_SDK_INT != 0)
-            return String.format("%1$s Preview (API %2$s)",
-                    Build.VERSION.CODENAME,
-                    Build.VERSION.SDK_INT);
-        else return String.format("%1$s (API %2$s)",
-                Build.VERSION.RELEASE,
-                Build.VERSION.SDK_INT);
-    }
+    val deviceName: String
+        get() {
+            var manufacturer = Build.MANUFACTURER.uppercase()
+            val brand = Build.BRAND.uppercase()
+            if (!TextUtils.equals(brand, manufacturer)) manufacturer += " $brand"
+            manufacturer += " " + Build.MODEL
+            return manufacturer
+        }
 
-    public static final String systemVersion = getSystemVersion();
-
-    private static String getDeviceName() {
-        String manufacturer = Build.MANUFACTURER.toUpperCase();
-        String brand = Build.BRAND.toUpperCase();
-        if (!TextUtils.equals(brand, manufacturer)) manufacturer += " " + brand;
-        manufacturer += " " + Build.MODEL;
-        return manufacturer;
-    }
-
-    public static final String deviceName = getDeviceName();
-
-    private static String getSystemStruct() {
-        String struct = System.getProperty("os.arch");
-        if (struct == null) struct = "unknown";
-        String[] abis = Build.SUPPORTED_ABIS;
-        if (abis.length == 0)
-            struct += " (Not Supported Native ABI)";
-        else {
-            StringBuilder supportABIs = new StringBuilder();
-            for (int i = 0; i < abis.length; i++) {
-                supportABIs.append(abis[i]);
-                if (i + 1 < abis.length) supportABIs.append(", ");
+    val systemStruct: String
+        get() {
+            var struct = System.getProperty("os.arch") ?: "unknown"
+            val abis = Build.SUPPORTED_ABIS
+            struct += if (abis.isEmpty()) {
+                " (Not Supported Native ABI)"
+            } else {
+                val supportABIs = abis.joinToString(", ")
+                " ($supportABIs)"
             }
-            struct += " (" + supportABIs + ")";
+            return struct
         }
-        return struct;
-    }
-
-    public static final String systemStruct = getSystemStruct();
 }
