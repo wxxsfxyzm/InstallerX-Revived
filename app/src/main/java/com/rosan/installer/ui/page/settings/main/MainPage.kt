@@ -72,7 +72,7 @@ fun MainPage(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        val isLandscapeScreen = maxHeight / maxWidth > 1.4
+        val isLandscapeScreen = this.maxHeight.value / this.maxWidth.value > 1.4
 
         val navigationSide =
             if (isLandscapeScreen) WindowInsetsSides.Bottom
