@@ -23,7 +23,6 @@ class AboutPageActivity : ComponentActivity(), KoinComponent {
                         .fillMaxSize()
                 ) {
                     // AgreementDialog()
-
                     HomePage()
                 }
             }
