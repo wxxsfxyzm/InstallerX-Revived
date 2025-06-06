@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.settings.preferred
 
-import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,15 +12,12 @@ import com.rosan.installer.data.settings.model.room.entity.converter.InstallMode
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 class PreferredViewModel(
     private val appDataStore: AppDataStore
 ) : ViewModel(), KoinComponent {
-    // TODO manage context injection properly, avoid using context directly in ViewModel
-    private val context by inject<Context>()
-
     // TODO migrate to DataStore instead of SharedPreferences
+    //private val context by inject<Context>()
     // private val appSharedPreferences = context.getSharedPreferences("app", Context.MODE_PRIVATE)
 
     var state by mutableStateOf(PreferredViewState())

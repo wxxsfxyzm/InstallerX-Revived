@@ -303,6 +303,7 @@ fun DataDeclareInstallerWidget(viewModel: EditViewModel) {
         val globalAuthorizer by produceState<ConfigEntity.Authorizer?>(null) {
             value = ConfigUtil.getGlobalAuthorizer()
         }
+        if (globalAuthorizer == null) return // 等待异步结果
         authorizer = globalAuthorizer!!
     }
     val declareInstaller = viewModel.state.data.declareInstaller
