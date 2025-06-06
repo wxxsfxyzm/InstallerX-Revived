@@ -16,7 +16,7 @@ val viewModelModule = module {
     }
 
     viewModel {
-        PreferredViewModel()
+        PreferredViewModel(get())
     }
 
     viewModel { (navController: NavController) ->

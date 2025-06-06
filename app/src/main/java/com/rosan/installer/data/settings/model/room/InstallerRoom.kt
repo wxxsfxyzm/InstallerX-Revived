@@ -2,11 +2,9 @@ package com.rosan.installer.data.settings.model.room
 
 import androidx.room.AutoMigration
 import androidx.room.Database
-import androidx.room.DeleteColumn
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.AutoMigrationSpec
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rosan.installer.data.settings.model.room.dao.AppDao
 import com.rosan.installer.data.settings.model.room.dao.ConfigDao
@@ -25,8 +23,8 @@ import org.koin.core.component.get
     version = 4,
     exportSchema = true,
     autoMigrations = [
-        AutoMigration(from = 1, to = 2),
-        AutoMigration(from = 2, to = 3, spec = InstallerRoom.AUTO_MIGRATION_2_3::class),
+        /*        AutoMigration(from = 1, to = 2),
+                AutoMigration(from = 2, to = 3, spec = InstallerRoom.AUTO_MIGRATION_2_3::class),*/
         AutoMigration(from = 3, to = 4),
     ]
 )
@@ -35,9 +33,10 @@ import org.koin.core.component.get
     InstallModeConverter::class
 )
 abstract class InstallerRoom : RoomDatabase() {
-    @DeleteColumn(tableName = "config", columnName = "analyser")
-    @DeleteColumn(tableName = "config", columnName = "compat_mode")
-    class AUTO_MIGRATION_2_3 : AutoMigrationSpec
+    // Since this fork starts from version 3, we can remove the auto migration from 2 to 3
+    /*    @DeleteColumn(tableName = "config", columnName = "analyser")
+        @DeleteColumn(tableName = "config", columnName = "compat_mode")
+        class AUTO_MIGRATION_2_3 : AutoMigrationSpec*/
 
     companion object : KoinComponent {
 

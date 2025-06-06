@@ -6,7 +6,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 object AuthorizerConverter {
     @TypeConverter
     fun revert(value: String?): ConfigEntity.Authorizer =
-        (if (value != null) ConfigEntity.Authorizer.values().find { it.value == value }
+        (if (value != null) ConfigEntity.Authorizer.entries.find { it.value == value }
         else null) ?: ConfigEntity.Authorizer.Shizuku
 
     @TypeConverter

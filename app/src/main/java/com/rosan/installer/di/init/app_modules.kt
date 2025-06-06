@@ -1,5 +1,6 @@
 package com.rosan.installer.di.init
 
+import com.rosan.installer.di.datastoreModule
 import com.rosan.installer.di.installerModule
 import com.rosan.installer.di.reflectModule
 import com.rosan.installer.di.roomModule
@@ -13,5 +14,6 @@ val appModules = listOf(
     serializationModule,
     workerModule,
     installerModule,
-    reflectModule
+    reflectModule,
+    datastoreModule
 )

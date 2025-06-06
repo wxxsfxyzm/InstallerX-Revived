@@ -11,7 +11,7 @@ import org.koin.core.parameter.parametersOf
 
 @Composable
 fun DialogPage(
-    installer: InstallerRepo, viewModel: DialogViewModel = koinViewModel() {
+    installer: InstallerRepo, viewModel: DialogViewModel = koinViewModel {
         parametersOf(installer)
     }
 ) {
