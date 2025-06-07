@@ -5,6 +5,7 @@ import android.app.Notification
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
@@ -116,7 +117,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallFailed -> onInstallFailed(builder)
             is ProgressEntity.InstallSuccess -> onInstallSuccess(builder)
             is ProgressEntity.Finish -> null
-            else -> onReady(builder)
+            else -> null
         }
     }
 
@@ -150,6 +151,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private fun getString(@StringRes resId: Int): String = context.getString(resId)
 
     private fun setNotification(notification: Notification? = null) {
+        // ======================= 在这里加上日志 =======================
+        val title = notification?.extras?.getCharSequence(Notification.EXTRA_TITLE)
+        Log.d("NotificationIdDebug", "setNotification called. ID: $notificationId, Title: $title")
+        // ==============================================================
         if (notification == null) {
             notificationManager.cancel(notificationId)
             return
@@ -173,7 +178,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 return
             }
         }
-
         // 如果权限已被授予，或者系统版本低于 Android 13，则正常显示通知
         notificationManager.notify(notificationId, notification)
     }
