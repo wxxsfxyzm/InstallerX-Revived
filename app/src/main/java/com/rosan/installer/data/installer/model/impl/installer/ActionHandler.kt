@@ -112,17 +112,30 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     private suspend fun requestNotificationPermission(activity: Activity) {
-        callbackFlow<Any?> {
-            val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                listOf(Manifest.permission.POST_NOTIFICATIONS)
-            } else emptyList()
+        // Determine the required permissions based on the Android version
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            listOf(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            emptyList() // No runtime permission needed for Android versions below 13
+        }
+
+        // If the permission list is empty, no runtime request is needed.
+        // This is the case for Android versions below 13.
+        if (permissions.isEmpty()) {
+            return // Successfully return as no permission is required
+        }
+        // If permissions are required (Android 13+), proceed with the request.
+        callbackFlow {
             if (XXPermissions.isGranted(activity, permissions)) {
-                send(null)
+                trySend(true) // Permission already granted
+                close()
             } else {
-                XXPermissions.with(activity).permission(permissions).request { _, all ->
-                    if (all) trySend(null)
-                    else close()
-                }
+                XXPermissions.with(activity)
+                    .permission(permissions)
+                    .request { _, allGranted ->
+                        trySend(allGranted) // Send the result of the request
+                        close()
+                    }
             }
             awaitClose { }
         }.first()
