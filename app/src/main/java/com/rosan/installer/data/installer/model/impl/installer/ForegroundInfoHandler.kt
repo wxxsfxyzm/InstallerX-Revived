@@ -2,7 +2,9 @@ package com.rosan.installer.data.installer.model.impl.installer
 
 import android.Manifest
 import android.app.Notification
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.DrawableRes
@@ -17,6 +19,8 @@ import com.rosan.installer.data.app.util.getInfo
 import com.rosan.installer.data.installer.model.entity.InstallerEvent
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.ui.activity.InstallTriggerActivity
+import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -186,8 +190,24 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val analyseIntent =
         BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Analyse)
 
-    private val installIntent =
-        BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Install)
+    // 将 installIntent 的目标从 InstallerActivity 改为 InstallTriggerActivity
+    private val installIntent by lazy {
+        // 创建一个指向我们新的透明Activity的 Intent
+        val intent = Intent(context, InstallTriggerActivity::class.java).apply { // <--- 修改这里
+            putExtra(InstallerActivity.KEY_ID, installer.id)
+            // 这里不再需要 action，因为TriggerActivity只有一个功能
+        }
+
+        PendingIntent.getActivity(
+            context,
+            installer.id.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+//    private val installIntent =
+//        BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Install)
 
     private val finishIntent =
         BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Finish)
