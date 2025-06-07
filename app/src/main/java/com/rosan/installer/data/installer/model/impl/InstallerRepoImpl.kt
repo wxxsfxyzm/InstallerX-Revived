@@ -26,21 +26,20 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         @Volatile // 增加 Volatile 保证多线程可见性
         private var impls = mutableMapOf<String, InstallerRepoImpl>()
 
-        // 用于追踪“匿名”安装实例的ID
-        @Volatile
+        @Volatile // 用于追踪“匿名”安装实例的ID
         private var anonymousInstanceId: String? = null
 
         private val context by inject<Context>()
 
         fun getOrCreate(id: String? = null): InstallerRepo {
-// 2. 如果传入了具体的ID，走标准逻辑
+            // 如果传入了具体的ID，走标准逻辑
             if (id != null) {
                 return impls[id] ?: synchronized(this) {
                     impls[id] ?: create(id)
                 }
             }
 
-            // 3. 如果是匿名调用 (id == null)，则走新的、经过加固的逻辑
+            // 如果是匿名调用 (id == null)，则走新的、经过加固的逻辑
             synchronized(this) {
                 // 先检查是否已存在一个正在运行的匿名实例
                 anonymousInstanceId?.let { existingId ->
@@ -75,7 +74,7 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
 
         fun remove(id: String) {
             synchronized(this) {
-                // 4. 当一个实例被移除时，检查它是否是那个匿名实例
+                // 当一个实例被移除时，检查它是否是那个匿名实例
                 if (id == anonymousInstanceId) {
                     anonymousInstanceId = null // 如果是，则清空记录，以便下次可以创建新的匿名实例
                 }
@@ -84,7 +83,6 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         }
     }
 
-    //override val id: String = UUID.randomUUID().toString()
 
     override var error: Throwable = Throwable()
 
@@ -103,19 +101,13 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     override val background: MutableSharedFlow<Boolean> =
         MutableStateFlow(false)
 
-    /**
-     * 1. 私有的、可变的 SharedFlow，用于在内部发送一次性事件。
-     */
+    // 私有的、可变的 SharedFlow，用于在内部发送一次性事件。
     private val _events = MutableSharedFlow<InstallerEvent>()
 
-    /**
-     * 2. 实现接口中定义的只读 events 属性。
-     */
+    // 实现接口中定义的只读 events 属性。
     override val events = _events.asSharedFlow()
 
-    /**
-     * 3. 实现接口中定义的 postEvent 挂起函数。
-     */
+    // 实现接口中定义的 postEvent 挂起函数。
     override suspend fun postEvent(event: InstallerEvent) {
         _events.emit(event)
     }

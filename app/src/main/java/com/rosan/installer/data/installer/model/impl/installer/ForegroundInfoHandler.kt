@@ -5,7 +5,6 @@ import android.app.Notification
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
@@ -151,10 +150,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private fun getString(@StringRes resId: Int): String = context.getString(resId)
 
     private fun setNotification(notification: Notification? = null) {
-        // ======================= 在这里加上日志 =======================
-        val title = notification?.extras?.getCharSequence(Notification.EXTRA_TITLE)
-        Log.d("NotificationIdDebug", "setNotification called. ID: $notificationId, Title: $title")
-        // ==============================================================
+        /*        // ======================= 在这里加上日志 =======================
+                val title = notification?.extras?.getCharSequence(Notification.EXTRA_TITLE)
+                Log.d("NotificationIdDebug", "setNotification called. ID: $notificationId, Title: $title")
+                // ==============================================================*/
         if (notification == null) {
             notificationManager.cancel(notificationId)
             return
