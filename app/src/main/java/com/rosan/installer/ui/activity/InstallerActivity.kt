@@ -76,9 +76,21 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     private fun restoreInstaller(savedInstanceState: Bundle? = null) {
-        job?.cancel()
         val installerId = if (savedInstanceState == null) intent?.getStringExtra(KEY_ID)
         else savedInstanceState.getString(KEY_ID)
+
+        // 关键检查：如果当前已经有一个 installer，并且它的 ID 和将要恢复的 ID 相同，
+        // 那么就什么都不做，直接返回，避免重复创建。
+        if (this.installer != null && this.installer?.id == installerId) {
+            android.util.Log.d(
+                "InstallerDebug",
+                "Installer already exists with the same ID. Skipping restore."
+            )
+            return
+        }
+
+        job?.cancel() // 只有在确定需要恢复新实例时才取消旧的 job
+
         val installer: InstallerRepo = get {
             parametersOf(installerId)
         }
@@ -90,6 +102,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 installer.progress.collect { progress ->
                     when (progress) {
                         is ProgressEntity.Ready -> {
+                            // 在调用 resolve 前加日志
+                            android.util.Log.d(
+                                "InstallerDebug",
+                                "Installer(${installer.id}) is Ready. Calling resolve()."
+                            )
                             installer.resolve(this@InstallerActivity)
                         }
 

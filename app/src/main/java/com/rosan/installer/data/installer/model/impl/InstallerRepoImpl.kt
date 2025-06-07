@@ -20,41 +20,69 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.UUID
 
-class InstallerRepoImpl private constructor() : InstallerRepo, KoinComponent {
+class InstallerRepoImpl private constructor(override val id: String) : InstallerRepo,
+    KoinComponent {
     companion object : KoinComponent {
-        private val impls = mutableMapOf<String, InstallerRepoImpl>()
+        @Volatile // 增加 Volatile 保证多线程可见性
+        private var impls = mutableMapOf<String, InstallerRepoImpl>()
+
+        @Volatile // 用于追踪“匿名”安装实例的ID
+        private var anonymousInstanceId: String? = null
 
         private val context by inject<Context>()
 
         fun getOrCreate(id: String? = null): InstallerRepo {
-            if (id == null) return create()
-            return get(id) ?: create()
+            // 如果传入了具体的ID，走标准逻辑
+            if (id != null) {
+                return impls[id] ?: synchronized(this) {
+                    impls[id] ?: create(id)
+                }
+            }
+
+            // 如果是匿名调用 (id == null)，则走新的、经过加固的逻辑
+            synchronized(this) {
+                // 先检查是否已存在一个正在运行的匿名实例
+                anonymousInstanceId?.let { existingId ->
+                    impls[existingId]?.let {
+                        return it // 如果有，直接返回它
+                    }
+                }
+
+                // 如果不存在匿名实例，则创建一个新的
+                val newId = UUID.randomUUID().toString()
+                val newInstance = create(newId)
+                anonymousInstanceId = newId // 记录下这个新创建的匿名实例的ID
+                return newInstance
+            }
         }
 
         fun get(id: String): InstallerRepo? {
             return impls[id]
         }
 
-        private fun create(): InstallerRepo {
-            synchronized(this) {
-                val impl = InstallerRepoImpl()
-                impls[impl.id] = impl
-                val intent = Intent(InstallerService.Action.Ready.value)
-                intent.component = ComponentName(context, InstallerService::class.java)
-                intent.putExtra(InstallerService.EXTRA_ID, impl.id)
-                context.startService(intent)
-                return impl
-            }
+        // 让 create 方法接收 ID
+        private fun create(id: String): InstallerRepo {
+            // 使用传入的 id 创建实例，并用该 id 作为 key 存入缓存
+            val impl = InstallerRepoImpl(id)
+            impls[id] = impl
+            val intent = Intent(InstallerService.Action.Ready.value)
+            intent.component = ComponentName(context, InstallerService::class.java)
+            intent.putExtra(InstallerService.EXTRA_ID, impl.id)
+            context.startService(intent)
+            return impl
         }
 
         fun remove(id: String) {
             synchronized(this) {
+                // 当一个实例被移除时，检查它是否是那个匿名实例
+                if (id == anonymousInstanceId) {
+                    anonymousInstanceId = null // 如果是，则清空记录，以便下次可以创建新的匿名实例
+                }
                 impls.remove(id)
             }
         }
     }
 
-    override val id: String = UUID.randomUUID().toString()
 
     override var error: Throwable = Throwable()
 
@@ -73,19 +101,13 @@ class InstallerRepoImpl private constructor() : InstallerRepo, KoinComponent {
     override val background: MutableSharedFlow<Boolean> =
         MutableStateFlow(false)
 
-    /**
-     * 1. 私有的、可变的 SharedFlow，用于在内部发送一次性事件。
-     */
+    // 私有的、可变的 SharedFlow，用于在内部发送一次性事件。
     private val _events = MutableSharedFlow<InstallerEvent>()
 
-    /**
-     * 2. 实现接口中定义的只读 events 属性。
-     */
+    // 实现接口中定义的只读 events 属性。
     override val events = _events.asSharedFlow()
 
-    /**
-     * 3. 实现接口中定义的 postEvent 挂起函数。
-     */
+    // 实现接口中定义的 postEvent 挂起函数。
     override suspend fun postEvent(event: InstallerEvent) {
         _events.emit(event)
     }
