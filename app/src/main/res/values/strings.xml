@@ -21,7 +21,7 @@
     <string name="preview">Preview</string>
     <string name="unstable">Unstable</string>
 
-    <string name="enable_notification_hint">Please enable Notification Permission.</string>
+    <string name="enable_notification_hint">Please enable notification permission to install!</string>
 
     <string name="discuss">Chat &amp; Feedback &amp; Update</string>
     <string name="qq_channel">QQ channel</string>

@@ -5,7 +5,6 @@ import android.app.Notification
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
@@ -15,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
 import com.rosan.installer.R
 import com.rosan.installer.data.app.util.getInfo
+import com.rosan.installer.data.installer.model.entity.InstallerEvent
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.util.getErrorMessage
@@ -165,12 +165,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 // 如果权限未被授予
                 // 在这里不应该调用 notify()
                 // TODO 应该在这里引导用户去开启权限
-                // 显示一条 Toast 提示用户开启通知权限
-                Toast.makeText(
-                    context,
-                    getString(R.string.enable_notification_hint),
-                    Toast.LENGTH_SHORT
-                ).show()
+                // 权限未被授予，不再直接显示 Toast
+                // 而是通过 Repo 发送一个事件
+                scope.launch {
+                    installer.postEvent(InstallerEvent.NOTIFICATION_PERMISSION_MISSING)
+                }
                 return
             }
         }
