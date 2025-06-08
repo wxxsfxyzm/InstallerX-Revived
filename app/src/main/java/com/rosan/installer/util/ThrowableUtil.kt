@@ -41,6 +41,7 @@ import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
  * 一个私有的辅助函数，它作为唯一的真实来源，
  * 负责将一个 Throwable 映射到其对应的字符串资源 ID。
  *
+ * @author iamr0s
  * @return R.string 的资源 ID。
  */
 private fun Throwable.getStringResourceId(): Int {
@@ -83,6 +84,7 @@ private fun Throwable.getStringResourceId(): Int {
  * [公开API - Composable]
  *
  * 用于在 Jetpack Compose UI 中获取用户友好的错误信息。
+ * @author iamr0s
  */
 @Composable
 fun Throwable.help(): String {
@@ -96,6 +98,8 @@ fun Throwable.help(): String {
  * [公开API - Non-Composable]
  *
  * 用于在 Service, BroadcastReceiver, Handler 等非 Compose 环境中获取用户友好的错误信息。
+ *
+ * @author wxxsfxyzm
  */
 fun Throwable.getErrorMessage(context: Context): String {
     // 1. 调用私有函数获取资源 ID
