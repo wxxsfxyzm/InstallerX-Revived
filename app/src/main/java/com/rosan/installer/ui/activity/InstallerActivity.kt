@@ -5,6 +5,8 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -19,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
@@ -39,8 +42,8 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     private var installer by mutableStateOf<InstallerRepo?>(null)
 
-    // 1. 使用官方推荐的方式，在 Activity 顶部注册一个权限请求结果的“启动器”
-    private val requestPermissionLauncher =
+    // 使用官方推荐的方式，在 Activity 顶部注册一个权限请求结果的“启动器”
+    private val requestNotificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             // 这是权限请求完成后的回调
             // 检查通知权限是否被授予 (Tiramisu及以上版本)
@@ -51,11 +54,27 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             }
 
             if (allGranted) {
-                Log.d("InstallerDebug", "Native permission GRANTED. Calling resolve().")
-                installer?.resolve(this)
+                Log.d(
+                    "InstallerDebug",
+                    "Notification permission GRANTED. Proceeding to check storage permission."
+                )
+                checkStoragePermissionAndProceed()
             } else {
                 Log.d("InstallerDebug", "Native permission DENIED.")
                 Toast.makeText(this, R.string.enable_notification_hint, Toast.LENGTH_LONG).show()
+                finish()
+            }
+        }
+
+    private val requestStoragePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            // 从设置页面返回后，再次检查权限是否已被授予
+            if (Environment.isExternalStorageManager()) {
+                Log.d("InstallerDebug", "Storage permission GRANTED. Calling resolve().")
+                installer?.resolve(this)
+            } else {
+                Log.d("InstallerDebug", "Storage permission DENIED.")
+                Toast.makeText(this, "需要授予文件访问权限以继续安装", Toast.LENGTH_LONG).show()
                 finish()
             }
         }
@@ -70,7 +89,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         restoreInstaller(savedInstanceState)
-        checkPermissionAndStartProcess()
+        checkPermissionsAndStartProcess()
         showContent()
     }
 
@@ -140,13 +159,15 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
     }
 
-    private fun checkPermissionAndStartProcess() {
-        // 仅在 Activity 第一次创建时检查权限
-        // 如果是从 onNewIntent 进来，则不重复检查
+    private fun checkPermissionsAndStartProcess() {
         if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) {
             return
         }
+        // 总是先从检查通知权限开始
+        checkNotificationPermissionAndProceed()
+    }
 
+    private fun checkNotificationPermissionAndProceed() {
         val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             arrayOf(Manifest.permission.POST_NOTIFICATIONS)
         } else {
@@ -154,14 +175,41 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
 
         if (permissionsToRequest.isEmpty()) {
-            // 无需请求权限，直接开始流程
-            installer?.resolve(this)
+            // 无需通知权限，直接去检查存储权限
+            checkStoragePermissionAndProceed()
             return
         }
 
-        // 使用启动器来发起权限请求，这是最安全的方式
-        Log.d("InstallerDebug", "Launching native permission request...")
-        requestPermissionLauncher.launch(permissionsToRequest)
+        // 检查是否已有权限
+        var allGranted = true
+        for (permission in permissionsToRequest) {
+            if (checkSelfPermission(permission) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                allGranted = false
+                break
+            }
+        }
+
+        if (allGranted) {
+            checkStoragePermissionAndProceed()
+        } else {
+            requestNotificationPermissionLauncher.launch(permissionsToRequest)
+        }
+    }
+
+    // 5. 新增：检查并请求存储权限的方法
+    private fun checkStoragePermissionAndProceed() {
+        // MANAGE_EXTERNAL_STORAGE 权限只在 Android 11 (R) 及以上版本需要
+        if (Environment.isExternalStorageManager()) {
+            // 已有权限，直接开始最终的 resolve 流程
+            Log.d("InstallerDebug", "Storage permission already granted. Calling resolve().")
+            installer?.resolve(this)
+        } else {
+            // 没有权限，跳转到系统设置页面
+            Log.d("InstallerDebug", "Requesting storage permission by opening settings.")
+            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+            intent.data = "package:$packageName".toUri()
+            requestStoragePermissionLauncher.launch(intent)
+        }
     }
 
     private fun showContent() {

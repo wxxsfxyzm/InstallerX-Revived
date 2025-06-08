@@ -1,6 +1,5 @@
 package com.rosan.installer.data.installer.model.impl.installer
 
-import android.Manifest
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
@@ -10,7 +9,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.Os
-import com.hjq.permissions.XXPermissions
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
@@ -26,9 +24,6 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okhttp3.internal.closeQuietly
 import org.koin.core.component.KoinComponent
@@ -142,7 +137,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }*/
 
     private suspend fun resolveData(activity: Activity): List<DataEntity> {
-        requestStoragePermissions(activity)
+        // requestStoragePermissions(activity)
         val uris = resolveDataUris(activity)
         val data = mutableListOf<DataEntity>()
         uris.forEach {
@@ -151,20 +146,20 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return data
     }
 
-    private suspend fun requestStoragePermissions(activity: Activity) {
-        callbackFlow<Any?> {
-            val permissions = listOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
-            if (XXPermissions.isGranted(activity, permissions)) {
-                send(null)
-            } else {
-                XXPermissions.with(activity).permission(permissions).request { _, all ->
-                    if (all) trySend(null)
-                    else close()
+    /*    private suspend fun requestStoragePermissions(activity: Activity) {
+            callbackFlow<Any?> {
+                val permissions = listOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                if (XXPermissions.isGranted(activity, permissions)) {
+                    send(null)
+                } else {
+                    XXPermissions.with(activity).permission(permissions).request { _, all ->
+                        if (all) trySend(null)
+                        else close()
+                    }
                 }
-            }
-            awaitClose { }
-        }.first()
-    }
+                awaitClose { }
+            }.first()
+        }*/
 
     private fun resolveDataUris(activity: Activity): List<Uri> {
         val intent = activity.intent ?: throw ResolveException(
