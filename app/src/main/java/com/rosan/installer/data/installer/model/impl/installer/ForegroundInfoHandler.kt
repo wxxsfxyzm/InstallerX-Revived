@@ -1,22 +1,17 @@
 package com.rosan.installer.data.installer.model.impl.installer
 
-import android.Manifest
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
 import com.rosan.installer.R
 import com.rosan.installer.data.app.util.getInfo
-import com.rosan.installer.data.installer.model.entity.InstallerEvent
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.activity.InstallTriggerActivity
@@ -153,11 +148,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private fun getString(@StringRes resId: Int): String = context.getString(resId)
 
-    private fun setNotification(notification: Notification? = null) {
-        /*        // ======================= 在这里加上日志 =======================
+    /*private fun setNotification(notification: Notification? = null) {
+        *//*        // ======================= 在这里加上日志 =======================
                 val title = notification?.extras?.getCharSequence(Notification.EXTRA_TITLE)
                 Log.d("NotificationIdDebug", "setNotification called. ID: $notificationId, Title: $title")
-                // ==============================================================*/
+                // ==============================================================*//*
         if (notification == null) {
             notificationManager.cancel(notificationId)
             return
@@ -182,6 +177,33 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
         }
         // 如果权限已被授予，或者系统版本低于 Android 13，则正常显示通知
+        notificationManager.notify(notificationId, notification)
+    }*/
+
+    // 简化 setNotification 方法，移除其中的权限检查逻辑
+    private fun setNotification(notification: Notification? = null) {
+        if (notification == null) {
+            notificationManager.cancel(notificationId)
+            return
+        }
+
+        // 此处的权限检查逻辑已被 ActionHandler 取代，可以直接移除
+        /*
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                scope.launch {
+                    installer.postEvent(InstallerEvent.NOTIFICATION_PERMISSION_MISSING)
+                }
+                return
+            }
+        }
+        */
+
+        // 直接显示通知
         notificationManager.notify(notificationId, notification)
     }
 

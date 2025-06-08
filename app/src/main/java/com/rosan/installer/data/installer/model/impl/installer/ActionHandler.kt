@@ -1,6 +1,5 @@
 package com.rosan.installer.data.installer.model.impl.installer
 
-import android.Manifest
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
@@ -10,7 +9,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.Os
-import com.hjq.permissions.XXPermissions
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
@@ -26,9 +24,6 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okhttp3.internal.closeQuietly
 import org.koin.core.component.KoinComponent
@@ -77,24 +72,24 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun resolve(activity: Activity) {
         installer.progress.emit(ProgressEntity.Resolving)
-        kotlin.runCatching {
-            requestNotificationPermission(
-                activity
-            )
-            installer.config = resolveConfig(activity)
-        }.getOrElse {
-            installer.error = it
+
+        // 直接开始执行核心的解析逻辑
+        installer.config = try {
+            resolveConfig(activity)
+        } catch (e: Exception) {
+            installer.error = e
             installer.progress.emit(ProgressEntity.ResolvedFailed)
             return
         }
+
         if (installer.config.installMode == ConfigEntity.InstallMode.Ignore) {
             installer.progress.emit(ProgressEntity.Finish)
             return
         }
-        installer.data = kotlin.runCatching {
+        installer.data = try {
             resolveData(activity)
-        }.getOrElse {
-            installer.error = it
+        } catch (e: Exception) {
+            installer.error = e
             installer.progress.emit(ProgressEntity.ResolvedFailed)
             return
         }
@@ -111,38 +106,38 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return config
     }
 
-    private suspend fun requestNotificationPermission(activity: Activity) {
-        // Determine the required permissions based on the Android version
-        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            listOf(Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            emptyList() // No runtime permission needed for Android versions below 13
-        }
-
-        // If the permission list is empty, no runtime request is needed.
-        // This is the case for Android versions below 13.
-        if (permissions.isEmpty()) {
-            return // Successfully return as no permission is required
-        }
-        // If permissions are required (Android 13+), proceed with the request.
-        callbackFlow {
-            if (XXPermissions.isGranted(activity, permissions)) {
-                trySend(true) // Permission already granted
-                close()
+    /*    private suspend fun requestNotificationPermission(activity: Activity) {
+            // Determine the required permissions based on the Android version
+            val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                listOf(Manifest.permission.POST_NOTIFICATIONS)
             } else {
-                XXPermissions.with(activity)
-                    .permission(permissions)
-                    .request { _, allGranted ->
-                        trySend(allGranted) // Send the result of the request
-                        close()
-                    }
+                emptyList() // No runtime permission needed for Android versions below 13
             }
-            awaitClose { }
-        }.first()
-    }
+
+            // If the permission list is empty, no runtime request is needed.
+            // This is the case for Android versions below 13.
+            if (permissions.isEmpty()) {
+                return // Successfully return as no permission is required
+            }
+            // If permissions are required (Android 13+), proceed with the request.
+            callbackFlow {
+                if (XXPermissions.isGranted(activity, permissions)) {
+                    trySend(true) // Permission already granted
+                    close()
+                } else {
+                    XXPermissions.with(activity)
+                        .permission(permissions)
+                        .request { _, allGranted ->
+                            trySend(allGranted) // Send the result of the request
+                            close()
+                        }
+                }
+                awaitClose { }
+            }.first()
+        }*/
 
     private suspend fun resolveData(activity: Activity): List<DataEntity> {
-        requestStoragePermissions(activity)
+        // requestStoragePermissions(activity)
         val uris = resolveDataUris(activity)
         val data = mutableListOf<DataEntity>()
         uris.forEach {
@@ -151,20 +146,20 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return data
     }
 
-    private suspend fun requestStoragePermissions(activity: Activity) {
-        callbackFlow<Any?> {
-            val permissions = listOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
-            if (XXPermissions.isGranted(activity, permissions)) {
-                send(null)
-            } else {
-                XXPermissions.with(activity).permission(permissions).request { _, all ->
-                    if (all) trySend(null)
-                    else close()
+    /*    private suspend fun requestStoragePermissions(activity: Activity) {
+            callbackFlow<Any?> {
+                val permissions = listOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                if (XXPermissions.isGranted(activity, permissions)) {
+                    send(null)
+                } else {
+                    XXPermissions.with(activity).permission(permissions).request { _, all ->
+                        if (all) trySend(null)
+                        else close()
+                    }
                 }
-            }
-            awaitClose { }
-        }.first()
-    }
+                awaitClose { }
+            }.first()
+        }*/
 
     private fun resolveDataUris(activity: Activity): List<Uri> {
         val intent = activity.intent ?: throw ResolveException(
