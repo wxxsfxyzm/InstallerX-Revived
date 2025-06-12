@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,7 +57,7 @@ fun HomePage() {
                 },
             )
         },
-    ) {
+    ) { paddingValues ->
         /**
          * @author iamr0s
          */
@@ -86,10 +85,10 @@ fun HomePage() {
             libraries = libraries,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it), // 作为页面主滚动体，填满屏幕
-            contentPadding = PaddingValues(16.dp),
+                .padding(horizontal = 16.dp),
+            contentPadding = paddingValues,// PaddingValues(horizontal = 16.dp),
             divider = {
-                //Spacer(modifier = Modifier.height(16.dp))
+                // Spacer(modifier = Modifier.height(16.dp))
                 // 线 + 间距
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             },
@@ -101,6 +100,9 @@ fun HomePage() {
     }
 }
 
+/**
+ * @author iamr0s
+ */
 @Composable
 fun StatusWidget() {
     val containerColor = when (RsConfig.LEVEL) {
@@ -157,8 +159,11 @@ fun StatusWidget() {
         }
     )
 }
-
-/*@Composable
+/*
+/**
+ * @author iamr0s
+ */
+@Composable
 fun DonateWidget() {
     val context = LocalContext.current
 
@@ -228,6 +233,9 @@ fun DiscussWidget() {
     )
 }*/
 
+/**
+ * @author iamr0s
+ */
 @Composable
 fun ItemsCardWidget(
     colors: CardColors = CardDefaults.elevatedCardColors(),
@@ -280,6 +288,9 @@ fun ItemsCardWidget(
     )
 }
 
+/**
+ * @author iamr0s
+ */
 @Composable
 fun CardWidget(
     colors: CardColors = CardDefaults.elevatedCardColors(),

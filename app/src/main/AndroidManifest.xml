@@ -40,7 +40,8 @@
 
         <activity
             android:name="com.rosan.installer.ui.activity.AboutPageActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Installer" />
 
         <activity
             android:name="com.rosan.installer.ui.activity.InstallerActivity"
