@@ -30,6 +30,15 @@ SDK 30-33有限支持，有问题发issue
 - 修改待安装应用版本号的显示效果
 - 加入了安装时显示targetSDK与minSDK的功能
 
+## 常见问题
+
+- HyperOS更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
+  - 系统安全限制，需要在配置中声明安装者为系统app，推荐 `com.android.fileexplorer` 或 `com.android.vending`
+  - 考虑以后增加 `检测到系统为HyperOS自动为Default配置加上安装者` 的功能
+ 
+- Oppo/Vivo/联想的系统用不了了怎么办
+  - 手头没有这些品牌的手机，可以前往 [Disscussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions) 进行讨论
+
 ## 开源协议
 
 Copyright (C)  [iamr0s](https://github.com/iamr0s) and contributors
