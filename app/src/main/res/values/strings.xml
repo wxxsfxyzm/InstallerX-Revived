@@ -171,6 +171,7 @@
     <string name="exception_install_failed_uid_changed">The UID has changed, please uninstall and try again</string>
     <string name="exception_install_failed_version_downgrade">Downgrade failed, please uninstall the app and try again</string>
     <string name="exception_install_failed_rejected_by_build_type">Rejected by system build type</string>
+    <string name="exception_install_failed_hyperos_isolation_violation">Please Add a valid install source for installing system app</string>
 
     <string name="exception_shizuku_not_work">Please activate Sui or Shizuku and grant permission</string>
     <string name="exception_dhizuku_not_work">Please activate Dhizuku and grant permission</string>
@@ -179,4 +180,5 @@
     <string name="old_version_prefix">Current</string>
     <string name="new_version_prefix">New</string>
     <string name="install_choice">Select PKG</string>
+
 </resources>

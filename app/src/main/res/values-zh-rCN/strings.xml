@@ -175,4 +175,5 @@
     <string name="new_version_prefix">新</string>
     <string name="install_choice">安装包选择</string>
     <string name="installer_error_reason">错误原因</string>
+    <string name="exception_install_failed_hyperos_isolation_violation">HyperOS安装系统app需要声明有效安装者！</string>
 </resources>
