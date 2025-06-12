@@ -10,6 +10,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedContainerErrorE
 import com.rosan.installer.data.app.model.exception.InstallFailedCpuAbiIncompatibleException
 import com.rosan.installer.data.app.model.exception.InstallFailedDexOptException
 import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePackageException
+import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolation
 import com.rosan.installer.data.app.model.exception.InstallFailedInsufficientStorageException
 import com.rosan.installer.data.app.model.exception.InstallFailedInvalidAPKException
 import com.rosan.installer.data.app.model.exception.InstallFailedInvalidInstallLocationException
@@ -72,6 +73,7 @@ private fun Throwable.getStringResourceId(): Int {
         is InstallFailedUidChangedException -> R.string.exception_install_failed_uid_changed
         is InstallFailedVersionDowngradeException -> R.string.exception_install_failed_version_downgrade
         is InstallFailedRejectedByBuildTypeException -> R.string.exception_install_failed_rejected_by_build_type
+        is InstallFailedHyperOSIsolationViolation -> R.string.exception_install_failed_hyperos_isolation_violation
         is ShizukuNotWorkException -> R.string.exception_shizuku_not_work
         is DhizukuNotWorkException -> R.string.exception_dhizuku_not_work
         is RootNotWorkException -> R.string.exception_root_not_work
