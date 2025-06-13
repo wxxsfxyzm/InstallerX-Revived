@@ -72,7 +72,7 @@ import kotlin.math.absoluteValue
 fun AllPage(
     navController: NavController,
     windowInsets: WindowInsets,
-    viewModel: AllViewModel = koinViewModel() {
+    viewModel: AllViewModel = koinViewModel {
         parametersOf(navController)
     }
 ) {

@@ -24,6 +24,7 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
@@ -32,8 +33,6 @@ import com.rosan.installer.ui.page.settings.config.all.AllPage
 import com.rosan.installer.ui.page.settings.preferred.PreferredPage
 import com.rosan.installer.ui.theme.exclude
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -59,11 +58,12 @@ fun MainPage(navController: NavController) {
             PreferredPage(it)
         }
     )
-
+    val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { data.size })
     val currentPage = pagerState.currentPage
     fun onPageChanged(page: Int) {
-        GlobalScope.launch(Dispatchers.Main) {
+        //GlobalScope.launch(Dispatchers.Main) {
+        scope.launch { // 使用 rememberCoroutineScope更安全
             pagerState.scrollToPage(page = page)
         }
     }
