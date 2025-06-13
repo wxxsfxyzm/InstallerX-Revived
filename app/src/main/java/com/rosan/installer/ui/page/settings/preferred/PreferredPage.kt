@@ -70,6 +70,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.build.Level
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.impl.DSRepoImpl
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
@@ -93,6 +95,12 @@ fun PreferredPage(
     val context = LocalContext.current
     val state = viewModel.state
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    val revLevel = when (RsConfig.LEVEL) {
+        Level.STABLE -> stringResource(id = R.string.stable)
+        Level.PREVIEW -> stringResource(id = R.string.preview)
+        Level.UNSTABLE -> stringResource(id = R.string.unstable)
+    }
 
     LaunchedEffect(true) {
         viewModel.dispatch(PreferredViewAction.Init)
@@ -167,7 +175,7 @@ fun PreferredPage(
                     context = context,
                     imageVector = Icons.TwoTone.Info,
                     headlineContentText = stringResource(R.string.about_detail),
-                    supportingContentText = stringResource(R.string.about),
+                    supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
                     onClick = {
                         val intent = Intent(context, AboutPageActivity::class.java)
                         context.startActivity(intent)
