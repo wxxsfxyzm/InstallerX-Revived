@@ -258,10 +258,10 @@ fun DataAuthorizerWidget(
             R.string.config_authorizer_dhizuku,
             AppIcons.Android
         ),
-        ConfigEntity.Authorizer.Customize to AuthorizerInfo(
-            R.string.config_authorizer_customize,
-            AppIcons.Customize
-        ),
+        /*        ConfigEntity.Authorizer.Customize to AuthorizerInfo(
+                    R.string.config_authorizer_customize,
+                    AppIcons.Customize
+                ),*/
     )
 
     ListItem(
@@ -396,10 +396,10 @@ fun DataInstallModeWidget(
             R.string.config_install_mode_auto_notification,
             AppIcons.AutoNotification
         ),
-        ConfigEntity.InstallMode.Ignore to InstallModeInfo(
-            R.string.config_install_mode_ignore,
-            AppIcons.Ignore
-        ),
+        /*        ConfigEntity.InstallMode.Ignore to InstallModeInfo(
+                    R.string.config_install_mode_ignore,
+                    AppIcons.Ignore
+                ),*/
     )
 
     ListItem(
