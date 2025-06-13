@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -51,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +63,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -73,10 +74,8 @@ import com.rosan.installer.data.app.model.impl.DSRepoImpl
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.AboutPageActivity
-import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.widget.icons.AppIcons
 import com.rosan.installer.ui.widget.setting.BaseWidget
-import com.rosan.installer.ui.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.util.help
 import com.rosan.installer.util.openUrl
@@ -93,6 +92,7 @@ fun PreferredPage(
 ) {
     val context = LocalContext.current
     val state = viewModel.state
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     LaunchedEffect(true) {
         viewModel.dispatch(PreferredViewAction.Init)
@@ -107,11 +107,17 @@ fun PreferredPage(
 
     Scaffold(
         modifier = Modifier
-            .windowInsetsPadding(windowInsets)
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            //.windowInsetsPadding(windowInsets)
             .fillMaxSize(),
-        contentWindowInsets = WindowInsets.none,
+        contentWindowInsets = windowInsets,
         topBar = {
             TopAppBar(
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
                 title = {
                     Text(text = stringResource(id = R.string.preferred))
                 }
@@ -137,7 +143,17 @@ fun PreferredPage(
                 )
             }
             item { DataCustomizeAuthorizerWidget(viewModel) }
-            item { DataInstallModeWidget(viewModel) }
+            // item { DataInstallModeWidget(viewModel) }
+            item {
+                DataInstallModeWidget(
+                    context = context,
+                    currentInstallMode = state.installMode,
+                    changeInstallMode = { newMode ->
+                        viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(newMode))
+                    },
+                    onClick = {}
+                )
+            }
             item { LabelWidget(stringResource(R.string.basic)) }
             item { DefaultInstaller(snackBarHostState, true) }
             item { DefaultInstaller(snackBarHostState, false) }
@@ -150,8 +166,8 @@ fun PreferredPage(
                 SettingsAboutItem(
                     context = context,
                     imageVector = Icons.TwoTone.Info,
-                    headlineContentText = stringResource(R.string.about),
-                    supportingContentText = stringResource(R.string.about_detail),
+                    headlineContentText = stringResource(R.string.about_detail),
+                    supportingContentText = stringResource(R.string.about),
                     onClick = {
                         val intent = Intent(context, AboutPageActivity::class.java)
                         context.startActivity(intent)
@@ -317,7 +333,10 @@ fun DataCustomizeAuthorizerWidget(viewModel: PreferredViewModel) {
     )
 }
 
-@Composable
+/**
+ * @author iamr0s
+ */
+/*@Composable
 fun DataInstallModeWidget(viewModel: PreferredViewModel) {
     val installMode = viewModel.state.installMode
     val data = mapOf(
@@ -338,6 +357,90 @@ fun DataInstallModeWidget(viewModel: PreferredViewModel) {
             viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(it))
         }
     }
+}*/
+
+data class InstallModeInfo(
+    @StringRes val labelResId: Int,
+    val icon: ImageVector
+)
+
+/**
+ * @author wxxsfxyzm
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun DataInstallModeWidget(
+    context: Context,
+    modifier: Modifier = Modifier,
+    currentInstallMode: ConfigEntity.InstallMode,
+    changeInstallMode: (ConfigEntity.InstallMode) -> Unit,
+    onClick: () -> Unit = {} // 提供一个默认的空实现
+) {
+    val vibrator = context.getSystemService(Vibrator::class.java)
+
+    // 使用新的数据类来定义选项
+    val installModeOptions = mapOf(
+        ConfigEntity.InstallMode.Dialog to InstallModeInfo(
+            R.string.config_install_mode_dialog,
+            AppIcons.Dialog
+        ),
+        ConfigEntity.InstallMode.AutoDialog to InstallModeInfo(
+            R.string.config_install_mode_auto_dialog,
+            AppIcons.AutoDialog
+        ),
+        ConfigEntity.InstallMode.Notification to InstallModeInfo(
+            R.string.config_install_mode_notification,
+            AppIcons.Notification
+        ),
+        ConfigEntity.InstallMode.AutoNotification to InstallModeInfo(
+            R.string.config_install_mode_auto_notification,
+            AppIcons.AutoNotification
+        ),
+        ConfigEntity.InstallMode.Ignore to InstallModeInfo(
+            R.string.config_install_mode_ignore,
+            AppIcons.Ignore
+        ),
+    )
+
+    ListItem(
+        leadingContent = {
+            Icon(
+                imageVector = Icons.TwoTone.Downloading, // 来自原代码的图标
+                contentDescription = null
+            )
+        },
+        headlineContent = { Text(stringResource(R.string.config_install_mode)) }, // 来自原代码的标题
+        supportingContent = {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+                modifier = modifier
+            ) {
+                installModeOptions.forEach { (modeType, modeInfo) ->
+                    InputChip(
+                        selected = currentInstallMode == modeType,
+                        onClick = {
+                            vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                            if (currentInstallMode != modeType) {
+                                changeInstallMode(modeType)
+                            }
+                        },
+                        label = { Text(text = stringResource(modeInfo.labelResId)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = modeInfo.icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(AssistChipDefaults.IconSize)
+                            )
+                        }
+                    )
+                }
+            }
+        },
+        modifier = Modifier.clickable {
+            onClick()
+            vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+        }
+    )
 }
 
 @Composable
