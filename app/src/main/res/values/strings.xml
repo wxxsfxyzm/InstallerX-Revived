@@ -14,8 +14,13 @@
     <string name="config">Profiles</string>
     <string name="app">App</string>
     <string name="preferred">Preferences</string>
+    <string name="search">Search</string>
+    <string name="menu">Menu</string>
     <string name="about">About</string>
+    <string name="other">Other</string>
     <string name="about_detail">About InstallerX</string>
+    <string name="get_update">Get update</string>
+    <string name="get_update_detail">Check for software updates and new features.</string>
 
     <string name="stable">Stable</string>
     <string name="preview">Preview</string>

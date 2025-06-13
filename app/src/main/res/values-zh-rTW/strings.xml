@@ -12,9 +12,13 @@
     <string name="config">配置</string>
     <string name="app">應用</string>
     <string name="preferred">設定</string>
+    <string name="search">搜尋</string>
+    <string name="menu">菜單</string>
     <string name="about">關於</string>
+    <string name="other">其他</string>
     <string name="about_detail">關於 InstallerX</string>
 
+    <string name="get_update_detail">檢查軟體更新和新功能</string>
     <string name="stable">正式版</string>
     <string name="preview">預覽版</string>
     <string name="unstable">測試版</string>
@@ -175,4 +179,5 @@
     <string name="install_choice">安裝包選擇</string>
     <string name="installer_error_reason">錯誤原因</string>
     <string name="exception_install_failed_hyperos_isolation_violation">HyperOS 安裝系統應用程式需要聲明有效的安裝者！</string>
+    <string name="get_update">取得更新</string>
 </resources>

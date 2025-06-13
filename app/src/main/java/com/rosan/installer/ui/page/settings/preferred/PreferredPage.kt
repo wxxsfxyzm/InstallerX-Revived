@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.settings.preferred
 
+import android.content.Context
 import android.content.Intent
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -7,28 +8,35 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.twotone.ClearAll
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Favorite
 import androidx.compose.material.icons.twotone.FavoriteBorder
+import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.Memory
+import androidx.compose.material.icons.twotone.SystemUpdate
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -46,10 +54,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
@@ -62,6 +73,7 @@ import com.rosan.installer.ui.widget.setting.BaseWidget
 import com.rosan.installer.ui.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.util.help
+import com.rosan.installer.util.openUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -82,6 +94,10 @@ fun PreferredPage(
     val snackBarHostState = remember {
         SnackbarHostState()
     }
+    var showBottomSheet by remember {
+        mutableStateOf(false)
+    }
+
     Scaffold(
         modifier = Modifier
             .windowInsetsPadding(windowInsets)
@@ -112,24 +128,38 @@ fun PreferredPage(
             // item { LabelWidget(label = stringResource(id = R.string.more)) }
             // item { UserTerms() }
             // item { PrivacyPolicy() }
-            item { LabelWidget(stringResource(R.string.about)) }
+            item { LabelWidget(stringResource(R.string.other)) }
             item {
                 SettingsAboutItem(
+                    context = context,
+                    imageVector = Icons.TwoTone.Info,
+                    headlineContentText = stringResource(R.string.about),
+                    supportingContentText = stringResource(R.string.about_detail),
                     onClick = {
                         val intent = Intent(context, AboutPageActivity::class.java)
                         context.startActivity(intent)
                     }
                 )
             }
+            item {
+                SettingsAboutItem(
+                    context = context,
+                    imageVector = Icons.TwoTone.SystemUpdate,
+                    headlineContentText = stringResource(R.string.get_update),
+                    supportingContentText = stringResource(R.string.get_update_detail),
+                    onClick = { showBottomSheet = true }
+                )
+            }
         }
+    }
+    if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+        BottomSheetContent(
+            context = context,
+            title = stringResource(R.string.get_update)
+        )
     }
 }
 
-/*fun openUrl(context: Context, url: String) {
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    context.startActivity(intent)
-}*/
 
 @Composable
 fun DataAuthorizerWidget(viewModel: PreferredViewModel) {
@@ -212,7 +242,7 @@ fun DefaultInstaller(snackBarHostState: SnackbarHostState, lock: Boolean) {
     fun workIt() {
         synchronized(scope) {
             scope.launch(Dispatchers.IO) {
-                val exceptionOrNull = kotlin.runCatching {
+                val exceptionOrNull = runCatching {
                     DSRepoImpl.doWork(ConfigUtil.getByPackageName(null), lock)
                 }.exceptionOrNull()
                 exceptionOrNull?.printStackTrace()
@@ -245,9 +275,9 @@ fun DefaultInstaller(snackBarHostState: SnackbarHostState, lock: Boolean) {
     BaseWidget(
         icon = if (lock) Icons.TwoTone.Favorite else Icons.TwoTone.FavoriteBorder,
         title =
-        stringResource(if (lock) R.string.lock_default_installer else R.string.unlock_default_installer),
+            stringResource(if (lock) R.string.lock_default_installer else R.string.unlock_default_installer),
         description =
-        stringResource(if (lock) R.string.lock_default_installer_dsp else R.string.unlock_default_installer_dsp),
+            stringResource(if (lock) R.string.lock_default_installer_dsp else R.string.unlock_default_installer_dsp),
         onClick = {
             workIt()
         }
@@ -354,23 +384,69 @@ fun PrivacyPolicy() {
 
 @Composable
 fun SettingsAboutItem(
+    context: Context,
+    modifier: Modifier = Modifier,
+    imageVector: ImageVector,
+    imageContentDescription: String? = null,
+    headlineContentText: String,
+    supportingContentText: String? = null,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
     val vibrator = context.getSystemService(Vibrator::class.java)
     ListItem(
         leadingContent = {
             Icon(
-                imageVector = Icons.Default.Info,
-                contentDescription = null,
-                modifier = Modifier
+                imageVector = imageVector,
+                contentDescription = imageContentDescription,
+                modifier = modifier
             )
         },
-        headlineContent = { Text(text = stringResource(R.string.about)) },
-        supportingContent = { Text(text = stringResource(R.string.about_detail)) },
+        headlineContent = { Text(text = headlineContentText) },
+        supportingContent = { supportingContentText?.let { Text(text = it) } },
         modifier = Modifier.clickable {
             onClick()
             vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
         }
     )
+}
+
+@Composable
+fun BottomSheetContent(
+    context: Context,
+    title: String
+) {
+    val vibrator = context.getSystemService(Vibrator::class.java)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth() // 填充横向宽度
+            .padding(16.dp, 0.dp, 16.dp, 16.dp), // 整体内边距
+        horizontalAlignment = Alignment.CenterHorizontally // 左对齐内容
+    ) {
+        // 标题
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineMedium, // 使用合适的标题样式
+            modifier = Modifier.padding(bottom = 20.dp) // 标题下方留白
+        )
+
+        // GitHub 按钮
+        Button(
+            onClick = {
+                vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                // 点击按钮时调用 openUrl 工具函数
+                openUrl(context, "https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
+            },
+            modifier = Modifier.fillMaxWidth() // 按钮填充横向宽度
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_github),
+                contentDescription = "GitHub Icon", // 辅助功能描述
+                modifier = Modifier.size(24.dp) // 图标大小
+            )
+            Spacer(modifier = Modifier.width(8.dp)) // 图标与文字之间的间隔
+            Text(text = "GitHub") // 按钮文本
+        }
+
+        Spacer(modifier = Modifier.size(60.dp)) // 按钮下方留白
+    }
 }
