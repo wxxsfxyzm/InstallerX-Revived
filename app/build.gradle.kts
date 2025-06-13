@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
     // id("kotlinx-serialization")
+    alias(libs.plugins.aboutLibraries)
 }
 
 android {
@@ -136,6 +137,15 @@ android {
     }
 }
 
+aboutLibraries {
+    library {
+        // Enable the duplication mode, allows to merge, or link dependencies which relate
+        duplicationMode = com.mikepenz.aboutlibraries.plugin.DuplicateMode.MERGE
+        // Configure the duplication rule, to match "duplicates" with
+        duplicationRule = com.mikepenz.aboutlibraries.plugin.DuplicateRule.SIMPLE
+    }
+}
+
 room {
     // Specify the schema directory
     schemaDirectory("$projectDir/schemas")
@@ -159,6 +169,7 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.datastore.preferences)
+    //implementation(libs.androidx.foundation)
     implementation(libs.compose.ui)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.compose.material)
@@ -195,11 +206,12 @@ dependencies {
 
     implementation(libs.compose.coil)
 
-    implementation(libs.xxpermissions)
-
     implementation(libs.iamr0s.dhizuku.api)
 
     implementation(libs.iamr0s.androidAppProcess)
 
     implementation(libs.okhttp)
+
+    implementation(libs.aboutlibraries.core)
+    implementation(libs.aboutlibraries.compose.m3)
 }

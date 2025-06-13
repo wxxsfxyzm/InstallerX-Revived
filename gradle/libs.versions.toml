@@ -21,6 +21,7 @@ rikka-shizuku = "13.1.5"
 koin-bom = "4.0.1"
 materialVersion = "1.12.0"
 datastoreCoreAndroid = "1.2.0-alpha02"
+aboutLibraries = "12.2.2"
 
 [plugins]
 agp-lib = { id = "com.android.library", version.ref = "agp" }
@@ -31,6 +32,8 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
+
 
 [libraries]
 androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.16.0" }
@@ -38,6 +41,7 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.1" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
+# androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "compose" }
 
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
@@ -102,3 +106,8 @@ iamr0s-dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version
 iamr0s-androidAppProcess = { group = "io.github.iamr0s", name = "AndroidAppProcess", version = "1.3.2" }
 
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "4.9.3" }
+
+# Core module (required for accessing library data)
+aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
+# Compose UI modules (choose one or both)
+aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }      # Material 3 UI

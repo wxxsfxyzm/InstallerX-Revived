@@ -110,7 +110,7 @@ import kotlin.math.absoluteValue
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ApplyPage(
-    navController: NavController, id: Long, viewModel: ApplyViewModel = koinViewModel() {
+    navController: NavController, id: Long, viewModel: ApplyViewModel = koinViewModel {
         parametersOf(id)
     }
 ) {
@@ -131,15 +131,16 @@ fun ApplyPage(
 
     val lazyListState = rememberLazyListState()
 
-    Scaffold(modifier = Modifier
-        .fillMaxSize()
-        .windowInsetsPadding(WindowInsets.safeDrawing)
-        .nestedScroll(
-            ShowFloatingActionButtonNestedScrollConnection(
-                showFloatingState,
-                lazyListState
-            )
-        ),
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .nestedScroll(
+                ShowFloatingActionButtonNestedScrollConnection(
+                    showFloatingState,
+                    lazyListState
+                )
+            ),
         contentWindowInsets = WindowInsets.none,
         topBar = {
             var searchBarActivated by remember {
@@ -159,7 +160,8 @@ fun ApplyPage(
                             singleLine = true,
                             leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.TwoTone.Search, contentDescription = null
+                                    imageVector = Icons.TwoTone.Search,
+                                    contentDescription = stringResource(R.string.search)
                                 )
                             },
                             trailingIcon = {
@@ -168,7 +170,8 @@ fun ApplyPage(
                                     viewModel.dispatch(ApplyViewAction.Search(""))
                                 }) {
                                     Icon(
-                                        imageVector = Icons.TwoTone.Close, contentDescription = null
+                                        imageVector = Icons.TwoTone.Close,
+                                        contentDescription = stringResource(R.string.close)
                                     )
                                 }
                             },
@@ -189,11 +192,17 @@ fun ApplyPage(
             }, actions = {
                 AnimatedVisibility(visible = !searchBarActivated) {
                     IconButton(onClick = { searchBarActivated = !searchBarActivated }) {
-                        Icon(imageVector = Icons.TwoTone.Search, contentDescription = null)
+                        Icon(
+                            imageVector = Icons.TwoTone.Search,
+                            contentDescription = stringResource(R.string.search)
+                        )
                     }
                 }
                 IconButton(onClick = { showBottomSheet = true }) {
-                    Icon(imageVector = Icons.TwoTone.Menu, contentDescription = null)
+                    Icon(
+                        imageVector = Icons.TwoTone.Menu,
+                        contentDescription = stringResource(R.string.menu)
+                    )
                 }
             })
         }, floatingActionButton = {
@@ -224,7 +233,8 @@ fun ApplyPage(
 
                 else -> {
                     val refreshing = viewModel.state.apps.progress is ViewContent.Progress.Loading
-                    val pullRefreshState = rememberPullRefreshState(refreshing = refreshing,
+                    val pullRefreshState = rememberPullRefreshState(
+                        refreshing = refreshing,
                         onRefresh = { viewModel.dispatch(ApplyViewAction.LoadApps) })
                     Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
                         ItemsWidget(
@@ -284,7 +294,8 @@ fun LottieWidget(
                 composition = composition,
                 iterations = LottieConstants.IterateForever,
             )
-            LottieAnimation(modifier = Modifier.size(200.dp),
+            LottieAnimation(
+                modifier = Modifier.size(200.dp),
                 composition = composition,
                 progress = { progress })
             Text(
@@ -406,7 +417,8 @@ fun ItemWidget(
                     )
                 }
             }
-            Switch(modifier = Modifier.align(Alignment.CenterVertically),
+            Switch(
+                modifier = Modifier.align(Alignment.CenterVertically),
                 checked = applied,
                 onCheckedChange = {
                     viewModel.dispatch(
