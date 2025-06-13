@@ -4,11 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.VibrationEffect
 import android.os.Vibrator
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,9 +33,11 @@ import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material.icons.twotone.SystemUpdate
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -69,6 +74,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.AboutPageActivity
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.widget.icons.AppIcons
 import com.rosan.installer.ui.widget.setting.BaseWidget
 import com.rosan.installer.ui.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
@@ -86,6 +92,7 @@ fun PreferredPage(
     viewModel: PreferredViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
+    val state = viewModel.state
 
     LaunchedEffect(true) {
         viewModel.dispatch(PreferredViewAction.Init)
@@ -118,7 +125,17 @@ fun PreferredPage(
                 .padding(it)
         ) {
             item { LabelWidget(stringResource(R.string.global)) }
-            item { DataAuthorizerWidget(viewModel) }
+            // item { DataAuthorizerWidget(viewModel) }
+            item {
+                DataAuthorizerWidget(
+                    context = context,
+                    currentAuthorizer = state.authorizer,
+                    changeAuthorizer = { newAuthorizer ->
+                        viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(newAuthorizer))
+                    },
+                    onClick = {}
+                )
+            }
             item { DataCustomizeAuthorizerWidget(viewModel) }
             item { DataInstallModeWidget(viewModel) }
             item { LabelWidget(stringResource(R.string.basic)) }
@@ -160,8 +177,10 @@ fun PreferredPage(
     }
 }
 
-
-@Composable
+/**
+ * @author iamr0s
+ */
+/*@Composable
 fun DataAuthorizerWidget(viewModel: PreferredViewModel) {
     val authorizer = viewModel.state.authorizer
     val data = mapOf(
@@ -182,6 +201,99 @@ fun DataAuthorizerWidget(viewModel: PreferredViewModel) {
             viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(it))
         }
     }
+}*/
+
+data class AuthorizerInfo(
+    @StringRes val labelResId: Int,
+    val icon: ImageVector
+)
+
+/**
+ * @author wxxsfxyzm
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun DataAuthorizerWidget(
+    context: Context,
+    modifier: Modifier = Modifier,
+    // 直接传入当前选中的授权者，而不是整个 ViewModel
+    currentAuthorizer: ConfigEntity.Authorizer,
+    // 使用一个回调函数来处理变更
+    changeAuthorizer: (ConfigEntity.Authorizer) -> Unit,
+    onClick: () -> Unit
+) {
+    val vibrator = context.getSystemService(Vibrator::class.java)
+
+    // 数据源和原代码保持一致
+    val authorizerOptions = mapOf(
+        ConfigEntity.Authorizer.None to AuthorizerInfo(
+            R.string.config_authorizer_none,
+            AppIcons.None
+        ),
+        ConfigEntity.Authorizer.Root to AuthorizerInfo(
+            R.string.config_authorizer_root,
+            AppIcons.Root
+        ),
+        ConfigEntity.Authorizer.Shizuku to AuthorizerInfo(
+            R.string.config_authorizer_shizuku,
+            AppIcons.Android
+        ),
+        ConfigEntity.Authorizer.Dhizuku to AuthorizerInfo(
+            R.string.config_authorizer_dhizuku,
+            AppIcons.Android
+        ),
+        ConfigEntity.Authorizer.Customize to AuthorizerInfo(
+            R.string.config_authorizer_customize,
+            AppIcons.Customize
+        ),
+    )
+
+    ListItem(
+        // 左侧图标，使用原代码的图标
+        leadingContent = {
+            Icon(
+                imageVector = Icons.TwoTone.Memory,
+                contentDescription = null
+            )
+        },
+        // 标题
+        headlineContent = { Text(stringResource(R.string.config_authorizer)) },
+        // 下方的 InputChip 区域
+        supportingContent = {
+            // 使用 FlowRow 可以让 Chip 自动换行，适应不同宽度的屏幕
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+                modifier = modifier
+            ) {
+                // 遍历 Map 来动态创建 InputChip
+                authorizerOptions.forEach { (authorizerType, authorizerInfo) ->
+                    InputChip(
+                        selected = currentAuthorizer == authorizerType,
+                        onClick = {
+                            vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                            if (currentAuthorizer != authorizerType) {
+                                changeAuthorizer(authorizerType)
+                            }
+                        },
+                        label = { Text(text = stringResource(authorizerInfo.labelResId)) },
+                        // 为每个 Chip 设置 leadingIcon
+                        leadingIcon = {
+                            Icon(
+                                imageVector = authorizerInfo.icon,
+                                contentDescription = null, // 装饰性图标
+                                modifier = Modifier.size(AssistChipDefaults.IconSize)
+                            )
+                        }
+                    )
+                }
+            }
+        },
+        // 整个 ListItem 的点击事件
+        modifier = Modifier.clickable {
+            onClick()
+            vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+        }
+    )
 }
 
 @Composable
