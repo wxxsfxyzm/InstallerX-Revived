@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Installer" parent="Theme.Material3.DayNight" />
+    <style name="Theme.Installer" parent="Theme.Material3.DayNight">
+        <!--    Compat Navigation Bar Color when ModalBottomSheet activated    -->
+        <item name="android:enforceNavigationBarContrast">false</item>
+    </style>
 
     <style name="Theme.Installer.Translucent" parent="Theme.Installer">
         <item name="android:windowIsTranslucent">true</item>
