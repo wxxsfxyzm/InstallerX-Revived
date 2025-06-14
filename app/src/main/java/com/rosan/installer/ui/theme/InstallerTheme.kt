@@ -1,6 +1,8 @@
 package com.rosan.installer.ui.theme
 
+import android.app.Activity
 import android.os.Build
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -55,9 +57,27 @@ fun InstallerTheme(
         }
     }
 
+    DisableNavigationBarContrast(view)
+
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
     )
+}
+
+/**
+ * Disable navigation bar contrast enforcement.
+ * This is useful for devices where the navigation bar color should not be enforced
+ * to match the system theme, allowing for custom colors.
+ */
+@Composable
+fun DisableNavigationBarContrast(view: View) {
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.isNavigationBarContrastEnforced = false
+        }
+    }
 }
