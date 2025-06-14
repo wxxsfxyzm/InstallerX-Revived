@@ -31,8 +31,15 @@ jobs:
       # 4. 修改 versionName 格式为 A.B.C.hash
       - name: Update versionName format
         run: |
-          # 在 build.gradle.kts 中添加短哈希后缀
-          sed -i "s/versionName = \"\([0-9]\+\.[0-9]\+\.[0-9]\+\)\"/versionName = \"\1.${{ steps.commit_sha.outputs.SHORT_SHA }}\"/" app/build.gradle.kts
+          # 提取 A.B.C
+          VERSION=$(grep -oP 'versionName = "\K([0-9]+\.[0-9]+\.[0-9]+)' app/build.gradle.kts)
+          A=$(echo $VERSION | cut -d. -f1)
+          B=$(echo $VERSION | cut -d. -f2)
+          C=$(echo $VERSION | cut -d. -f3)
+          C_NEW=$((C + 1))
+          NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
+          # 替换 versionName
+          sed -i "s/versionName = \".*\"/versionName = \"${NEW_VERSION}\"/" app/build.gradle.kts
 
       # 5. gradlew 权限
       - name: Grant execute permission for gradlew
@@ -65,16 +72,22 @@ jobs:
         id: changelog
         run: |
           PREV_TAG=$(git tag --list | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -Vr | head -n 1)
+          
           if [ -z "$PREV_TAG" ]; then
-            git log --pretty=format:"- %s (%an)" > body.md
+            CHANGELOG_BODY=$(git log --pretty=format:"- %s (%an)")
           else
-            git log $PREV_TAG..HEAD --pretty=format:"- %s (%an)" > body.md
+            CHANGELOG_BODY=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%an)")
           fi
+          
+          if [ -z "$CHANGELOG_BODY" ]; then
+            CHANGELOG_BODY="No changes since the last stable release."
+          fi
+          
           {
-            echo 'changelog<<EOF'
-            cat body.md
-            echo 'EOF'
-          } >> "$GITHUB_OUTPUT"
+            echo "changelog<<EOF"
+            echo "$CHANGELOG_BODY"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       # 10. 新建带哈希后缀的 Alpha Release
       - name: Create Latest Alpha Pre-Release
