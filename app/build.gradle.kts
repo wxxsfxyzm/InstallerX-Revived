@@ -102,7 +102,7 @@ android {
     }
 
     val isReleaseBuild = gradle.startParameter.taskNames.any {
-        it.contains(Regex(":app:assemble.*Release"))
+        it.contains("Release", ignoreCase = true)
     }
 
     splits {
