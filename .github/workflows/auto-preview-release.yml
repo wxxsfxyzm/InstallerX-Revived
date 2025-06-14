@@ -14,6 +14,8 @@ jobs:
       # 1. 检出代码
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # 2. 获取提交短哈希值
       - name: Get commit short SHA
@@ -40,7 +42,6 @@ jobs:
           C=$(echo $VERSION | cut -d. -f3)
           C_NEW=$((C + 1))
           NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
-          # 替换 versionName
           sed -i "s/versionName = \".*\"/versionName = \"${NEW_VERSION}\"/" app/build.gradle.kts
           echo "VNEW_VERSION=v${A}.${B}.${C_NEW}" >> $GITHUB_OUTPUT
 
@@ -96,6 +97,8 @@ jobs:
             echo "$CHANGELOG_BODY"
             echo "EOF"
           } >> $GITHUB_OUTPUT
+          
+           echo "$CHANGELOG_BODY"
 
       # 10. 新建带哈希后缀的 Alpha Release
       - name: Create Latest Alpha Pre-Release
@@ -103,6 +106,7 @@ jobs:
         with:
           name: "InstallerX Revived Alpha (${{ steps.commit_sha.outputs.SHORT_SHA }})"
           tag_name: "${{ steps.version.outputs.VNEW_VERSION }}-alpha-latest"
+          target_commitish: ${{ github.sha }}
           body: |
             ## 这是自动构建的最新 Alpha 测试版。
             
@@ -118,7 +122,9 @@ jobs:
             **更新日志（Changelog）:**
             <details>
             <summary>点击展开完整更新日志</summary>
+            
             ${{ steps.changelog.outputs.changelog }}
+            
             </details>
           prerelease: true
           files: app/build/outputs/apk/Preview/release/*.apk
