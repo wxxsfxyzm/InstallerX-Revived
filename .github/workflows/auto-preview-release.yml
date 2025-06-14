@@ -30,9 +30,11 @@ jobs:
 
       # 4. 修改 versionName 格式为 A.B.C.hash
       - name: Update versionName format
+        id: version
         run: |
           # 提取 A.B.C
           VERSION=$(grep -oP 'versionName = "\K([0-9]+\.[0-9]+\.[0-9]+)' app/build.gradle.kts)
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           A=$(echo $VERSION | cut -d. -f1)
           B=$(echo $VERSION | cut -d. -f2)
           C=$(echo $VERSION | cut -d. -f3)
@@ -40,6 +42,7 @@ jobs:
           NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
           # 替换 versionName
           sed -i "s/versionName = \".*\"/versionName = \"${NEW_VERSION}\"/" app/build.gradle.kts
+          echo "VNEW_VERSION=v${A}.${B}.${C_NEW}" >> $GITHUB_OUTPUT
 
       # 5. gradlew 权限
       - name: Grant execute permission for gradlew
@@ -64,8 +67,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete alpha-latest --yes || echo "No previous alpha release found."
-          git push origin --delete alpha-latest || echo "No previous alpha tag found."
+          LATEST_TAG=$(git tag --list "*-alpha-latest" | sort -Vr | head -n 1)
+          if [[ -n "$LATEST_TAG" ]]; then
+            gh release delete "$LATEST_TAG" --yes || echo "No previous alpha release found."
+            git push origin --delete "$LATEST_TAG" || echo "No previous alpha tag found."
+          else
+            echo "No alpha-latest tag to delete."
+          fi
 
       # 9. 自动生成commit changelog
       - name: Generate changelog
@@ -93,12 +101,12 @@ jobs:
       - name: Create Latest Alpha Pre-Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "Latest Alpha Build (${{ steps.commit_sha.outputs.SHORT_SHA }})"
-          tag_name: "alpha-latest"
+          name: "InstallerX Revived Alpha (${{ steps.commit_sha.outputs.SHORT_SHA }})"
+          tag_name: "${{ steps.version.outputs.VNEW_VERSION }}-alpha-latest"
           body: |
             ## 这是自动构建的最新 Alpha 测试版。
             
-            - **这是一个预发布版本，并非为生产环境准备就绪。**它仅用于测试和评估目的。请勿在实际生产环境中使用此版本。
+            - **这是一个预发布版本，并非为生产环境准备就绪。** 它仅用于测试和评估目的。请勿在实际生产环境中使用此版本。
             - 我们非常鼓励您分享您的看法！如果您有任何反馈、建议，或者遇到了任何问题，请随时在GitHub上提交Issue或Pull Request。
             
             ## This is an automatically built latest Alpha pre-release.

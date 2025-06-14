@@ -101,6 +101,19 @@ android {
         }
     }
 
+    val isReleaseBuild = gradle.startParameter.taskNames.any {
+        it.contains(Regex(":app:assemble.*Release"))
+    }
+
+    splits {
+        abi {
+            isEnable = isReleaseBuild
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = false
+        }
+    }
+
     applicationVariants.all {
         val level = when (flavorName) {
             "Unstable" -> 0
