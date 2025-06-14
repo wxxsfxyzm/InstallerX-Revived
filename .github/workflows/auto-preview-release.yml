@@ -1,0 +1,103 @@
+name: Automatic Alpha Pre-Release (Latest Only)
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build_and_prerelease:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. 获取提交短哈希值
+      - name: Get commit short SHA
+        id: commit_sha
+        run: echo "SHORT_SHA=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
+
+      # 3. 设置 JDK 环境
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+          cache: gradle
+
+      # 4. 修改 versionName 格式为 A.B.C.hash
+      - name: Update versionName format
+        run: |
+          # 在 build.gradle.kts 中添加短哈希后缀
+          sed -i "s/versionName = \"\([0-9]\+\.[0-9]\+\.[0-9]\+\)\"/versionName = \"\1.${{ steps.commit_sha.outputs.SHORT_SHA }}\"/" app/build.gradle.kts
+
+      # 5. gradlew 权限
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # 6. 签名准备
+      - name: Decode and set up signing key
+        run: |
+          mkdir -p keystore
+          echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > keystore/carlyu.jks
+          echo "storeFile=keystore/carlyu.jks" > keystore.properties
+          echo "keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}" >> keystore.properties
+          echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> keystore.properties
+          echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> keystore.properties
+
+      # 7. 构建 APK
+      - name: Build Preview Release APK
+        run: ./gradlew assemblePreviewRelease
+
+      # 8. 删除旧的 Alpha Release 和 tag
+      - name: Delete old alpha release and tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete alpha-latest --yes || echo "No previous alpha release found."
+          git push origin --delete alpha-latest || echo "No previous alpha tag found."
+
+      # 9. 自动生成commit changelog
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --list | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -Vr | head -n 1)
+          if [ -z "$PREV_TAG" ]; then
+            git log --pretty=format:"- %s (%an)" > body.md
+          else
+            git log $PREV_TAG..HEAD --pretty=format:"- %s (%an)" > body.md
+          fi
+          {
+            echo 'changelog<<EOF'
+            cat body.md
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      # 10. 新建带哈希后缀的 Alpha Release
+      - name: Create Latest Alpha Pre-Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Latest Alpha Build (${{ steps.commit_sha.outputs.SHORT_SHA }})"
+          tag_name: "alpha-latest"
+          body: |
+            ## 这是自动构建的最新 Alpha 测试版。
+            
+            - **这是一个预发布版本，并非为生产环境准备就绪。**它仅用于测试和评估目的。请勿在实际生产环境中使用此版本。
+            - 我们非常鼓励您分享您的看法！如果您有任何反馈、建议，或者遇到了任何问题，请随时在GitHub上提交Issue或Pull Request。
+            
+            ## This is an automatically built latest Alpha pre-release.
+            - **This is a pre-release version and is not intended for production use.** It is for testing and evaluation purposes only. Please do not use this version in a production environment.
+            - We highly encourage you to share your thoughts! If you have any feedback, suggestions, or encounter any issues, please feel free to submit an Issue or Pull Request on GitHub.
+            
+            **提交哈希:** ${{ steps.commit_sha.outputs.SHORT_SHA }}
+            
+            **更新日志（Changelog）:**
+            <details>
+            <summary>点击展开完整更新日志</summary>
+            ${{ steps.changelog.outputs.changelog }}
+            </details>
+          prerelease: true
+          files: app/build/outputs/apk/Preview/release/*.apk

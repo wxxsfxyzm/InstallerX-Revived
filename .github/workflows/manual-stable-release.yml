@@ -1,0 +1,74 @@
+name: Manual Stable Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: '输入版本标签 (例如 v2.2.3)'
+        required: true
+      changelog:
+        description: '填写更新日志 (支持 Markdown)'
+        required: true
+        type: string
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 必须添加release权限
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整提交历史
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Verify Keystore
+        run: |
+          if [ -z "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" ]; then
+            echo "ERROR: SIGNING_KEY_STORE_BASE64 secret is missing"
+            exit 1
+          fi
+          # 添加签名配置验证
+
+      - name: Setup Signing Keys
+        run: |
+          mkdir -p keystore
+          echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > keystore/carlyu.jks
+          cat <<EOF > keystore.properties
+          storeFile=keystore/carlyu.jks
+          keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}
+          keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}
+          storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}
+          EOF
+
+      - name: Build Stable Release APK
+        run: ./gradlew assembleStableRelease
+
+      - name: Verify APK Exists
+        run: |
+          if ! compgen -G "app/build/outputs/apk/Stable/release/*.apk" > /dev/null; then
+            echo "ERROR: APK file not found!"
+            ls -R app/build/outputs/apk
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Release ${{ inputs.version_tag }}"
+          tag_name: ${{ inputs.version_tag }}
+          body: ${{ inputs.changelog }}
+          prerelease: false
+          files: |
+            app/build/outputs/apk/Stable/release/*.apk
