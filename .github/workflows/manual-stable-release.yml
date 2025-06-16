@@ -66,14 +66,24 @@ jobs:
       - name: Rename APK
         run: |
           PROJECT_NAME="InstallerX-Revived"
-          APK_NAME="${{PROJECT_NAME}}-${{ inputs.version_tag }}-arm64-v8a.apk"
-          APK_PATH=$(find app/build/outputs/apk/Stable/release/ -name "*.apk")
-          if [ -f "$APK_PATH" ]; then
-            mv "$APK_PATH" "app/build/outputs/apk/Stable/release/$APK_NAME"
-          else
-            echo "ERROR: APK file not found!"
-            exit 1
-          fi
+          VERSION_TAG="${{ inputs.version_tag }}"
+          APK_DIR="app/build/outputs/apk/Stable/release/"
+          
+          for APK_PATH in "$APK_DIR"*.apk; do
+            if [[ "$APK_PATH" == *"arm64-v8a"* ]]; then
+              ABI="arm64-v8a"
+            elif [[ "$APK_PATH" == *"armeabi-v7a"* ]]; then
+              ABI="armeabi-v7a"
+            elif [[ "$APK_PATH" == *"x86_64"* ]]; then
+              ABI="x86_64"
+            elif [[ "$APK_PATH" == *"x86"* ]]; then
+              ABI="x86"
+            else
+              ABI="unknown"
+            fi
+            APK_NAME="${PROJECT_NAME}-${VERSION_TAG}-${ABI}.apk"
+            mv "$APK_PATH" "${APK_DIR}${APK_NAME}"
+          done
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
