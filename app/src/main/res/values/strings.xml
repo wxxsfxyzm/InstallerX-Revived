@@ -183,7 +183,8 @@
     <string name="exception_root_not_work">Couldn\'t access root</string>
     <string name="exception_app_process_not_work">Couldn\'t connect the authorizer</string>
     <string name="old_version_prefix">Current</string>
-    <string name="new_version_prefix">New</string>
+    <string name="upgrade_version_prefix">Upgrade</string>
+    <string name="downgrade_version_prefix">Downgrade</string>
     <string name="install_choice">Select PKG</string>
 
 </resources>

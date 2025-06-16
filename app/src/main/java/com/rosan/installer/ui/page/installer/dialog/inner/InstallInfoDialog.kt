@@ -7,6 +7,7 @@ package com.rosan.installer.ui.page.installer.dialog.inner
 // import androidx.compose.runtime.setValue // No longer needed here
 // import com.rosan.installer.ui.page.installer.dialog.DialogViewState // No longer needed here
 import android.content.Context
+import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,13 +15,14 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.twotone.AutoFixHigh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,6 +54,7 @@ import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.widget.icons.AppIcons
 import org.koin.compose.getKoin
 
 /**
@@ -172,6 +175,16 @@ fun InstallInfoDialog( // 大写开头
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                // --- 显示包名 ---
+                Text(
+                    stringResource(R.string.installer_package_name, entityToInstall.packageName),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.basicMarquee()
+                )
+
+                Spacer(modifier = Modifier.size(8.dp))
+
+                // --- 显示版本信息 ---
                 if (entityToInstall is AppEntity.BaseEntity) {
                     // 直接使用传入的 preInstallAppInfo 作为旧版本信息
                     val oldInfo = preInstallAppInfo
@@ -189,56 +202,129 @@ fun InstallInfoDialog( // 大写开头
                         )
                     } else {
                         // 更新安装: 显示对比，带前缀
-                        Text( // 旧版本带前缀
-                            text = stringResource(R.string.old_version_prefix) + stringResource(
-                                R.string.installer_version,
-                                oldInfo.versionName,
-                                oldInfo.versionCode.toLong()
-                            ),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.basicMarquee()
-                        )
-                        Icon(
-                            imageVector = Icons.Filled.ArrowDownward,
-                            contentDescription = "to",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text( // 新版本带前缀
-                            text = stringResource(R.string.new_version_prefix) + stringResource(
-                                R.string.installer_version,
-                                entityToInstall.versionName,
-                                entityToInstall.versionCode.toLong()
-                            ),
-                            color = MaterialTheme.colorScheme.primary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.basicMarquee()
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text( // 旧版本带前缀
+                                text = stringResource(R.string.old_version_prefix) + stringResource(
+                                    R.string.installer_version,
+                                    oldInfo.versionName,
+                                    oldInfo.versionCode.toLong()
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.basicMarquee()
+                            )
+                            Icon(
+                                imageVector = AppIcons.ArrowDropDown,
+                                contentDescription = "to",
+                                tint =
+                                    if (oldInfo.versionCode > entityToInstall.versionCode)
+                                        MaterialTheme.colorScheme.error
+                                    else
+                                        MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text( // 新版本带前缀
+                                text = if (entityToInstall.versionCode >= oldInfo.versionCode)
+                                    stringResource(R.string.upgrade_version_prefix) + stringResource(
+                                        R.string.installer_version,
+                                        entityToInstall.versionName,
+                                        entityToInstall.versionCode.toLong()
+                                    ) else stringResource(R.string.downgrade_version_prefix) + stringResource(
+                                    R.string.installer_version,
+                                    entityToInstall.versionName,
+                                    entityToInstall.versionCode.toLong()
+                                ),
+                                color = if (oldInfo.versionCode > entityToInstall.versionCode)
+                                    MaterialTheme.colorScheme.error
+                                else
+                                    MaterialTheme.colorScheme.primary,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.basicMarquee()
+                            )
+                        }
                     }
                 }
+                // --- SDK版本变动显示 ---
                 // 如果有SDK信息则显示SDK
                 if (installer.config.displaySdk) {
-                    entityToInstall.minSdk?.let {
-                        Text(
-                            stringResource(R.string.installer_package_min_sdk, it),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.basicMarquee()
-                        )
+                    val oldInfo = preInstallAppInfo
+                    // Min SDK
+                    entityToInstall.minSdk?.let { newMinSdk ->
+                        val oldMinSdk = oldInfo?.minSdk
+                        if (oldMinSdk != null && oldMinSdk.toString() != newMinSdk) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.installer_package_min_sdk,
+                                        oldMinSdk.toString()
+                                    )
+                                )
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    imageVector = AppIcons.ArrowRight,
+                                    tint =
+                                        if (newMinSdk.toInt() > Build.VERSION.SDK_INT)
+                                            MaterialTheme.colorScheme.error
+                                        else
+                                            MaterialTheme.colorScheme.primary,
+                                    contentDescription = null
+                                )
+                                Text(
+                                    text = newMinSdk,
+                                    color =
+                                        if (newMinSdk.toInt() > Build.VERSION.SDK_INT)
+                                            MaterialTheme.colorScheme.error
+                                        else
+                                            MaterialTheme.colorScheme.primary,
+                                )
+
+                            }
+                        } else {
+                            Text(
+                                text = stringResource(
+                                    R.string.installer_package_min_sdk,
+                                    newMinSdk
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.basicMarquee()
+                            )
+                        }
                     }
-                    entityToInstall.targetSdk?.let {
-                        Text(
-                            stringResource(R.string.installer_package_target_sdk, it),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.basicMarquee()
-                        )
+                    // Target SDK
+                    entityToInstall.targetSdk?.let { newTargetSdk ->
+                        val oldTargetSdk = oldInfo?.targetSdk
+                        if (oldTargetSdk != null && oldTargetSdk.toString() != newTargetSdk) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.installer_package_target_sdk,
+                                        oldTargetSdk.toString()
+                                    )
+                                )
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    imageVector = AppIcons.ArrowRight,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    contentDescription = null
+                                )
+                                Text(
+                                    text = newTargetSdk,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = stringResource(
+                                    R.string.installer_package_target_sdk,
+                                    newTargetSdk
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.basicMarquee()
+                            )
+                        }
                     }
                 }
-                // 总是显示包名
-                Text(
-                    stringResource(R.string.installer_package_name, entityToInstall.packageName),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.basicMarquee()
-                )
             }
         }
         // --- 修改结束 ---
