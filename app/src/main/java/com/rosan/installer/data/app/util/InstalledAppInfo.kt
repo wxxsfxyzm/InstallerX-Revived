@@ -1,6 +1,7 @@
 package com.rosan.installer.data.app.util
 
 import android.content.Context
+import android.content.pm.ApplicationInfo // Import ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -13,7 +14,8 @@ data class InstalledAppInfo(
     val icon: Drawable?,
     val label: String,
     val versionCode: Long,
-    val versionName: String
+    val versionName: String,
+    val applicationInfo: ApplicationInfo? // Add this field
 ) {
     companion object : KoinComponent {
         fun buildByPackageName(packageName: String): InstalledAppInfo? {
@@ -37,7 +39,8 @@ data class InstalledAppInfo(
                 icon = applicationInfo?.loadIcon(packageManager),
                 label = applicationInfo?.loadLabel(packageManager)?.toString() ?: "",
                 versionCode = packageInfo.compatVersionCode,
-                versionName = packageInfo.versionName!!
+                versionName = packageInfo.versionName!!,
+                applicationInfo = applicationInfo // Populate the new field
             )
         }
     }
