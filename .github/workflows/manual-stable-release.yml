@@ -63,6 +63,18 @@ jobs:
             exit 1
           fi
 
+      - name: Rename APK
+        run: |
+          PROJECT_NAME="InstallerX-Revived"
+          APK_NAME="${{PROJECT_NAME}}-${{ inputs.version_tag }}-arm64-v8a.apk"
+          APK_PATH=$(find app/build/outputs/apk/Stable/release/ -name "*.apk")
+          if [ -f "$APK_PATH" ]; then
+            mv "$APK_PATH" "app/build/outputs/apk/Stable/release/$APK_NAME"
+          else
+            echo "ERROR: APK file not found!"
+            exit 1
+          fi
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
