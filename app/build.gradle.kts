@@ -217,6 +217,7 @@ dependencies {
     implementation(libs.rikka.shizuku.api)
     implementation(libs.rikka.shizuku.provider)
 
+    implementation(libs.appiconloader)
     implementation(libs.compose.coil)
 
     implementation(libs.iamr0s.dhizuku.api)

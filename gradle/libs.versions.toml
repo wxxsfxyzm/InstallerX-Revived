@@ -22,6 +22,7 @@ koin-bom = "4.0.1"
 materialVersion = "1.12.0"
 datastoreCoreAndroid = "1.2.0-alpha02"
 aboutLibraries = "12.2.2"
+appiconloader = "1.5.0"
 
 [plugins]
 agp-lib = { id = "com.android.library", version.ref = "agp" }
@@ -92,6 +93,9 @@ rikka-shizuku-provider = { group = "dev.rikka.shizuku", name = "provider", versi
 # Coil: An image loader for Compose
 # https://coil-kt.github.io/coil/compose/
 compose-coil = { group = "io.coil-kt.coil3", name = "coil-compose", version = "3.0.4" }
+
+# AppIconLoader
+appiconloader = { module = "me.zhanghai.android.appiconloader:appiconloader", version.ref = "appiconloader" }
 
 # XXPermissions
 # https://github.com/getActivity/XXPermissions

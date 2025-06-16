@@ -1,7 +1,12 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
+// import androidx.compose.runtime.LaunchedEffect // No longer needed here
+// import androidx.compose.runtime.getValue // No longer needed here
+// import androidx.compose.runtime.mutableStateOf // No longer needed here
+// import androidx.compose.runtime.remember // No longer needed here
+// import androidx.compose.runtime.setValue // No longer needed here
+// import com.rosan.installer.ui.page.installer.dialog.DialogViewState // No longer needed here
 import android.content.Context
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,14 +28,15 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-// import androidx.compose.runtime.LaunchedEffect // No longer needed here
-// import androidx.compose.runtime.getValue // No longer needed here
-// import androidx.compose.runtime.mutableStateOf // No longer needed here
-// import androidx.compose.runtime.remember // No longer needed here
-// import androidx.compose.runtime.setValue // No longer needed here
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,6 +44,7 @@ import androidx.core.content.ContextCompat
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.util.AppIconCache
 import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
@@ -45,7 +52,6 @@ import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
-// import com.rosan.installer.ui.page.installer.dialog.DialogViewState // No longer needed here
 import org.koin.compose.getKoin
 
 /**
@@ -61,15 +67,53 @@ fun InstallInfoDialog( // 大写开头
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
     val context: Context = getKoin().get()
+    val density = LocalDensity.current
+
     val entityToInstall =
         installer.entities.filter { it.selected }.map { it.app }.sortedBest().firstOrNull()
             ?: return DialogParams()
 
     // No need for remembered state or LaunchedEffect here, logic depends directly on passed preInstallAppInfo
 
-    val displayIcon: Drawable? =
-        (if (entityToInstall is AppEntity.BaseEntity) entityToInstall.icon else preInstallAppInfo?.icon)
-            ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+    /*    val displayIcon: Drawable? =
+            (if (entityToInstall is AppEntity.BaseEntity) entityToInstall.icon else preInstallAppInfo?.icon)
+                ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)*/
+
+    // --- ICON INTEGRATION LOGIC ---
+
+    // 1. Set an initial icon to prevent flickering. For upgrades, use the already-loaded
+    //    low-res icon. For new installs, use the icon from the APK.
+    val initialIcon = if (preInstallAppInfo != null) {
+        preInstallAppInfo.icon
+    } else {
+        (entityToInstall as? AppEntity.BaseEntity)?.icon
+    }
+
+    // 2. Create a state for the icon, initialized with our best first guess.
+    var displayIcon by remember { mutableStateOf(initialIcon) }
+
+    // 3. Use LaunchedEffect to load the high-quality icon asynchronously.
+    LaunchedEffect(preInstallAppInfo) {
+        val iconSizePx = with(density) { 64.dp.toPx().toInt() }
+
+        val finalIcon =
+            if (preInstallAppInfo != null && preInstallAppInfo.applicationInfo != null) {
+                // UPGRADE: Use the new AppIconLoaderUtil for the installed app's icon.
+                AppIconCache.loadIconDrawable(
+                    context,
+                    preInstallAppInfo.applicationInfo,
+                    iconSizePx
+                )
+            } else {
+                // NEW INSTALL: Use the icon from the new package entity.
+                (entityToInstall as? AppEntity.BaseEntity)?.icon
+            }
+
+        // Update state if the loaded icon is not null.
+        if (finalIcon != null) {
+            displayIcon = finalIcon
+        }
+    }
 
     val displayLabel: String =
         (if (entityToInstall is AppEntity.BaseEntity) entityToInstall.label else preInstallAppInfo?.label)
@@ -79,13 +123,18 @@ fun InstallInfoDialog( // 大写开头
                 else -> entityToInstall.packageName
             }
 
+    // Fallback to a default system icon if displayIcon is ever null.
+    val painterIcon =
+        displayIcon ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+
+
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.InstallerInfo.id) {
             Image(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(RoundedCornerShape(12.dp)),
-                painter = rememberDrawablePainter(displayIcon),
+                painter = rememberDrawablePainter(painterIcon),
                 contentDescription = null
             )
         },
