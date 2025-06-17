@@ -13,7 +13,7 @@ plugins {
 }
 
 android {
-    compileSdk = 35
+    compileSdk = 36
     // 加载 keystore.properties
     val keystorePropertiesFile = rootProject.file("keystore.properties")
     val keystoreProps = Properties().apply {
@@ -27,7 +27,10 @@ android {
         applicationId = "com.rosan.installer.x.revived"
         namespace = "com.rosan.installer"
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 36
+        // Version control
+        // Github Actions will automatically use versionName A.B.C+1 when building preview releases
+        // update versionCode and versionName before manually trigger a stable release
         versionCode = 35
         versionName = "2.2.3"
 
