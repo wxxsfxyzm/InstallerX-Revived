@@ -15,7 +15,9 @@ data class InstalledAppInfo(
     val label: String,
     val versionCode: Long,
     val versionName: String,
-    val applicationInfo: ApplicationInfo? // Add this field
+    val applicationInfo: ApplicationInfo?, // Add this field
+    val minSdk: Int?,
+    val targetSdk: Int?
 ) {
     companion object : KoinComponent {
         fun buildByPackageName(packageName: String): InstalledAppInfo? {
@@ -40,7 +42,9 @@ data class InstalledAppInfo(
                 label = applicationInfo?.loadLabel(packageManager)?.toString() ?: "",
                 versionCode = packageInfo.compatVersionCode,
                 versionName = packageInfo.versionName!!,
-                applicationInfo = applicationInfo // Populate the new field
+                applicationInfo = applicationInfo, // Populate the new field
+                minSdk = applicationInfo?.minSdkVersion,
+                targetSdk = applicationInfo?.targetSdkVersion
             )
         }
     }

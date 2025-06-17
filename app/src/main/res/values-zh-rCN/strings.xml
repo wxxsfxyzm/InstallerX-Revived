@@ -138,6 +138,7 @@
 
     <string name="installer_running">InstallerX 运行中</string>
 
+    <string name="installer_version_short">版本：%s (%s)</string>
     <string name="installer_version">版本：%s (%s)</string>
     <string name="installer_version2">%s (%s)</string>
     <string name="installer_package_name">包名：%s</string>
@@ -176,7 +177,8 @@
     <string name="exception_root_not_work">请授予ROOT权限</string>
     <string name="exception_app_process_not_work">授权器启动失败</string>
     <string name="old_version_prefix">当前</string>
-    <string name="new_version_prefix">新</string>
+    <string name="upgrade_version_prefix">升级</string>
+    <string name="downgrade_version_prefix">降级</string>
     <string name="install_choice">安装包选择</string>
     <string name="installer_error_reason">错误原因</string>
     <string name="exception_install_failed_hyperos_isolation_violation">HyperOS安装系统app需要声明有效安装者！</string>

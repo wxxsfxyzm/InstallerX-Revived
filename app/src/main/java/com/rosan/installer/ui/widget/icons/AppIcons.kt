@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.widget.icons
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.NotInterested
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.outlined.WebAsset
+import androidx.compose.material.icons.twotone.ArrowDropDown
 
 /**
  * 将图标统一管理在一个对象中
@@ -39,4 +41,10 @@ object AppIcons {
     val Notification = Icons.Outlined.Notifications
     val AutoNotification = Icons.Outlined.NotificationsActive
     val Ignore = Icons.Outlined.NotInterested
+
+    /**
+     * 安装对话框图标集合
+     */
+    val ArrowDropDown = Icons.TwoTone.ArrowDropDown
+    val ArrowRight = Icons.AutoMirrored.TwoTone.ArrowRight
 }
