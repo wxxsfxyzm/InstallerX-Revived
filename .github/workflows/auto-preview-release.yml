@@ -81,24 +81,39 @@ jobs:
         id: changelog
         run: |
           PREV_TAG=$(git tag --list | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -Vr | head -n 1)
-          
+          CURR_TAG="${{ steps.version.outputs.VNEW_VERSION }}-alpha-latest"
+
           if [ -z "$PREV_TAG" ]; then
-            CHANGELOG_BODY=$(git log --pretty=format:"- %s (%an)")
+            LOG_RANGE=""
           else
-            CHANGELOG_BODY=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%an)")
+            LOG_RANGE="$PREV_TAG..HEAD"
           fi
-          
-          if [ -z "$CHANGELOG_BODY" ]; then
+
+          # 获取不包含 Merge pull request 的提交
+          CHANGELOG_LIST=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge pull request' | head -n 5)
+          CHANGELOG_COUNT=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge pull request' | wc -l)
+
+          if [ -z "$CHANGELOG_LIST" ]; then
             CHANGELOG_BODY="No changes since the last stable release."
+          else
+            CHANGELOG_BODY="$CHANGELOG_LIST"
+            if [ "$CHANGELOG_COUNT" -gt 5 ]; then
+              if [ -z "$PREV_TAG" ]; then
+                COMPARE_URL="https://github.com/wxxsfxyzm/InstallerX-Revived/commits/main"
+              else
+                COMPARE_URL="https://github.com/wxxsfxyzm/InstallerX-Revived/compare/${PREV_TAG}...${CURR_TAG}"
+              fi
+              CHANGELOG_BODY="$CHANGELOG_BODY\n\n**Full Changelog:** [\`${PREV_TAG}...${CURR_TAG}\`]($COMPARE_URL)"
+            fi
           fi
-          
+
           {
             echo "changelog<<EOF"
-            echo "$CHANGELOG_BODY"
+            echo -e "$CHANGELOG_BODY"
             echo "EOF"
           } >> $GITHUB_OUTPUT
-          
-           echo "$CHANGELOG_BODY"
+
+          echo -e "$CHANGELOG_BODY"
 
       # 10. 新建带哈希后缀的 Alpha Release
       - name: Create Latest Alpha Pre-Release
@@ -120,11 +135,8 @@ jobs:
             **提交哈希:** ${{ steps.commit_sha.outputs.SHORT_SHA }}
             
             **更新日志（Changelog）:**
-            <details>
-            <summary>点击展开完整更新日志</summary>
             
             ${{ steps.changelog.outputs.changelog }}
-            
-            </details>
+
           prerelease: true
           files: app/build/outputs/apk/Preview/release/*.apk
