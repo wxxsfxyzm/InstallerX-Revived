@@ -8,6 +8,7 @@ package com.rosan.installer.ui.page.installer.dialog.inner
 // import com.rosan.installer.ui.page.installer.dialog.DialogViewState // No longer needed here
 import android.content.Context
 import android.os.Build
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -247,10 +248,12 @@ fun InstallInfoDialog( // 大写开头
                 }
                 // --- SDK版本变动显示 ---
                 // 如果有SDK信息则显示SDK
-                if (installer.config.displaySdk) {
-                    val oldInfo = preInstallAppInfo
-                    // Min SDK
-                    entityToInstall.minSdk?.let { newMinSdk ->
+
+                val oldInfo = preInstallAppInfo
+                // Min SDK
+                entityToInstall.minSdk?.let { newMinSdk ->
+                    AnimatedVisibility(visible = installer.config.displaySdk) {
+
                         val oldMinSdk = oldInfo?.minSdk
                         if (oldMinSdk != null && oldMinSdk.toString() != newMinSdk) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -291,8 +294,10 @@ fun InstallInfoDialog( // 大写开头
                             )
                         }
                     }
-                    // Target SDK
-                    entityToInstall.targetSdk?.let { newTargetSdk ->
+                }
+                // Target SDK
+                entityToInstall.targetSdk?.let { newTargetSdk ->
+                    AnimatedVisibility(visible = installer.config.displaySdk) {
                         val oldTargetSdk = oldInfo?.targetSdk
                         if (oldTargetSdk != null && oldTargetSdk.toString() != newTargetSdk) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -326,7 +331,6 @@ fun InstallInfoDialog( // 大写开头
                     }
                 }
             }
-
         }
         // --- 修改结束 ---
         // buttons parameter removed, to be set by caller via .copy()

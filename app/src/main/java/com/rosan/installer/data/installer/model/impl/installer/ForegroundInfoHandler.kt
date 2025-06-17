@@ -267,7 +267,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         else {
             val info = selected.map { it.app }.getInfo(context)
             builder.setContentTitle(info.title)
-                .setContentText(getString(R.string.installer_prepare_install_dsp))
+                .setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
                 .setLargeIcon(info.icon?.toBitmapOrNull())
                 .addAction(0, getString(R.string.install), installIntent)
                 .addAction(0, getString(R.string.cancel), finishIntent)
