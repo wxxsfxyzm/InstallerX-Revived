@@ -1,6 +1,12 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -16,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,10 +33,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
@@ -120,6 +131,7 @@ fun installPrepareDialog( // 小写开头
         installer, viewModel
     )
 
+    val entityToInstall = entities.first()
     val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
     var showChips by remember { mutableStateOf(false) }
 
@@ -149,7 +161,56 @@ fun installPrepareDialog( // 小写开头
     )
 
     // --- NEW LOGIC: Determine message, color, and error state ---
+    val context = LocalContext.current
+    val (summaryText, summaryColorKey) = remember(entityToInstall, preInstallAppInfo) {
+        val newEntity = entityToInstall as? AppEntity.BaseEntity
+        val oldInfo = preInstallAppInfo
 
+        // Highest priority: SDK check
+        val newMinSdk = newEntity?.minSdk?.toIntOrNull()
+        if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
+            return@remember Pair(
+                context.getString(R.string.installer_prepare_sdk_incompatible),
+                "error"
+            )
+        }
+
+        // Determine install type
+        if (newEntity != null) {
+            if (oldInfo == null) {
+                Pair(context.getString(R.string.installer_prepare_type_new_install), "default")
+            } else {
+                when {
+                    newEntity.versionCode > oldInfo.versionCode ->
+                        Pair(context.getString(R.string.installer_prepare_type_upgrade), "default")
+
+                    newEntity.versionCode < oldInfo.versionCode ->
+                        Pair(context.getString(R.string.installer_prepare_type_downgrade), "error")
+                    // newEntity.versionCode == oldInfo.versionCode already inferred
+                    newEntity.versionName == oldInfo.versionName ->
+                        Pair(
+                            context.getString(R.string.installer_prepare_type_reinstall),
+                            "default"
+                        )
+                    // versionCode same, versionName different
+                    else ->
+                        Pair(
+                            context.getString(R.string.installer_prepare_type_sidegrade),
+                            "default"
+                        )
+                }
+            }
+        } else {
+            // Fallback for splits or other cases
+            Pair(context.getString(R.string.installer_prepare_type_unknown_confirm), "default")
+        }
+    }
+
+    val summaryColor = if (summaryColorKey == "error") {
+        MaterialTheme.colorScheme.error
+    } else {
+        Color.Unspecified
+    }
     // --- LOGIC END ---
 
     // Override text and buttons
@@ -160,82 +221,109 @@ fun installPrepareDialog( // 小写开头
         ) {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
                 item {
-                    Text(stringResource(R.string.installer_prepare_install_dsp))
+                    Text(
+                        text = summaryText,
+                        color = summaryColor,
+                        textAlign = TextAlign.Center
+                    )
                 }
-                if (showChips) item {
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                // --- NEW LOGIC: Show package name and version with animation ---
+                item {
+                    // Use AnimatedVisibility to show package name and version
+                    AnimatedVisibility(
+                        visible = showChips,
+                        enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
+                        exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
                     ) {
-                        Chip(
-                            selected = forAllUser,
-                            onClick = {
-                                val newValue = !forAllUser
-                                forAllUser = newValue
-                                installer.config.forAllUser = newValue
-                            },
-                            label = stringResource(id = R.string.config_for_all_user),
-                            icon = Icons.TwoTone.People
-                        )
-                        Chip(
-                            selected = allowTestOnly,
-                            onClick = {
-                                val newValue = !allowTestOnly
-                                allowTestOnly = newValue
-                                installer.config.allowTestOnly = newValue
-                            },
-                            label = stringResource(id = R.string.config_allow_test_only),
-                            icon = Icons.TwoTone.BugReport
-                        )
-                        Chip(
-                            selected = allowDowngrade,
-                            onClick = {
-                                val newValue = !allowDowngrade
-                                allowDowngrade = newValue
-                                installer.config.allowDowngrade = newValue
-                            },
-                            label = stringResource(id = R.string.config_allow_downgrade),
-                            icon = Icons.AutoMirrored.TwoTone.TrendingDown
-                        )
-                        Chip(
-                            selected = autoDelete,
-                            onClick = {
-                                val newValue = !autoDelete
-                                autoDelete = newValue
-                                installer.config.autoDelete = newValue
-                            },
-                            label = stringResource(id = R.string.config_auto_delete),
-                            icon = Icons.TwoTone.Delete
-                        )
-                        Chip(
-                            selected = displaySdk,
-                            onClick = {
-                                val newValue = !displaySdk
-                                displaySdk = newValue
-                                installer.config.displaySdk = newValue
-                            },
-                            label = stringResource(id = R.string.config_display_sdk_version),
-                            icon = Icons.TwoTone.Info
-                        )
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Chip(
+                                selected = forAllUser,
+                                onClick = {
+                                    val newValue = !forAllUser
+                                    forAllUser = newValue
+                                    installer.config.forAllUser = newValue
+                                },
+                                label = stringResource(id = R.string.config_for_all_user),
+                                icon = Icons.TwoTone.People
+                            )
+                            Chip(
+                                selected = allowTestOnly,
+                                onClick = {
+                                    val newValue = !allowTestOnly
+                                    allowTestOnly = newValue
+                                    installer.config.allowTestOnly = newValue
+                                },
+                                label = stringResource(id = R.string.config_allow_test_only),
+                                icon = Icons.TwoTone.BugReport
+                            )
+                            Chip(
+                                selected = allowDowngrade,
+                                onClick = {
+                                    val newValue = !allowDowngrade
+                                    allowDowngrade = newValue
+                                    installer.config.allowDowngrade = newValue
+                                },
+                                label = stringResource(id = R.string.config_allow_downgrade),
+                                icon = Icons.AutoMirrored.TwoTone.TrendingDown
+                            )
+                            Chip(
+                                selected = autoDelete,
+                                onClick = {
+                                    val newValue = !autoDelete
+                                    autoDelete = newValue
+                                    installer.config.autoDelete = newValue
+                                },
+                                label = stringResource(id = R.string.config_auto_delete),
+                                icon = Icons.TwoTone.Delete
+                            )
+                            Chip(
+                                selected = displaySdk,
+                                onClick = {
+                                    val newValue = !displaySdk
+                                    displaySdk = newValue
+                                    installer.config.displaySdk = newValue
+                                },
+                                label = stringResource(id = R.string.config_display_sdk_version),
+                                icon = Icons.TwoTone.Info
+                            )
+                        }
                     }
                 }
+                // --- LOGIC END ---
             }
         },
         buttons = DialogButtons(
             DialogParamsType.InstallerPrepareInstall.id
         ) {
-            listOf(
-                DialogButton(stringResource(R.string.install)) { viewModel.dispatch(DialogViewAction.Install) },
-                DialogButton(stringResource(R.string.install_choice), 2f) {
-                    viewModel.dispatch(
-                        DialogViewAction.InstallChoice
-                    )
-                },
-                DialogButton(stringResource(R.string.cancel), 1f) {
-                    viewModel.dispatch(
-                        DialogViewAction.Close
-                    )
+            // --- NEW LOGIC: Use buildList to dynamically create buttons ---
+            // Use buildList to create a list of buttons
+            buildList {
+                // Install button is shown if the entity's minSdk is compatible
+                entities.first().minSdk?.let {
+                    if (it.toInt() <= Build.VERSION.SDK_INT)
+                        add(DialogButton(stringResource(R.string.install)) {
+                            viewModel.dispatch(DialogViewAction.Install)
+                        })
                 }
-            )
+
+                // if there are multiple entities, show the install choice button
+                if (entities.size > 1) {
+                    add(DialogButton(stringResource(R.string.install_choice), 2f) {
+                        viewModel.dispatch(DialogViewAction.InstallChoice)
+                    })
+                }
+                // TODO make a new dialog for installing apk file
+                // Add Permission review and comparison button if needed
+                // Add more buttons as needed
+
+                // Cancel button always shown
+                add(DialogButton(stringResource(R.string.cancel), 1f) {
+                    viewModel.dispatch(DialogViewAction.Close)
+                })
+            }
+            // --- LOGIC END ---
         }
     )
 }

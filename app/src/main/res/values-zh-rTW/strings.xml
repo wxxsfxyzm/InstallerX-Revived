@@ -125,7 +125,13 @@
     <string name="installer_prepare_install">準備安裝</string>
     <string name="installer_prepare_install_empty">請至少選擇一個安裝包！</string>
     <string name="installer_prepare_install_too_many">請至多選擇一個主包（base.apk）！</string>
-    <string name="installer_prepare_install_dsp">確定要安裝嗎？</string>
+    <string name="installer_prepare_sdk_incompatible">系統 SDK 不符合應用程式要求</string>
+    <string name="installer_prepare_type_new_install">準備安裝新應用程式</string>
+    <string name="installer_prepare_type_upgrade">準備升級應用程式</string>
+    <string name="installer_prepare_type_downgrade">這是一個降級操作，可能會導致資料遺失或應用程式不穩定。</string>
+    <string name="installer_prepare_type_reinstall">將重新安裝目前版本的應用程式</string>
+    <string name="installer_prepare_type_sidegrade">將變更目前版本的應用程式</string>
+    <string name="installer_prepare_type_unknown_confirm">您確定要安裝嗎？</string>
     <string name="installer_installing">安裝中…</string>
     <string name="installer_install_failed">安裝失敗</string>
     <string name="installer_install_success">安裝成功</string>
