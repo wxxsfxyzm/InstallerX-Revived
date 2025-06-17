@@ -148,6 +148,10 @@ fun installPrepareDialog( // 小写开头
         onTitleExtraClick = { showChips = !showChips }
     )
 
+    // --- NEW LOGIC: Determine message, color, and error state ---
+
+    // --- LOGIC END ---
+
     // Override text and buttons
     return baseParams.copy(
         // Subtitle is inherited from InstallInfoDialog (shows new version + package name)

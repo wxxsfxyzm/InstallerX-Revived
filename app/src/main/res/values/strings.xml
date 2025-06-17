@@ -142,6 +142,7 @@
 
     <string name="installer_running">InstallerX running</string>
 
+    <string name="installer_version_short">" Ver. %s (%s)"</string>
     <string name="installer_version">Version: %s (%s)</string>
     <string name="installer_version2">%s (%s)</string>
     <string name="installer_package_name">Package: %s</string>

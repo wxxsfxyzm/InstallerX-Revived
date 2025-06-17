@@ -207,7 +207,7 @@ fun InstallInfoDialog( // 大写开头
                         ) {
                             Text( // 旧版本带前缀
                                 text = stringResource(R.string.old_version_prefix) + stringResource(
-                                    R.string.installer_version,
+                                    R.string.installer_version_short,
                                     oldInfo.versionName,
                                     oldInfo.versionCode.toLong()
                                 ),
@@ -227,11 +227,11 @@ fun InstallInfoDialog( // 大写开头
                             Text( // 新版本带前缀
                                 text = if (entityToInstall.versionCode >= oldInfo.versionCode)
                                     stringResource(R.string.upgrade_version_prefix) + stringResource(
-                                        R.string.installer_version,
+                                        R.string.installer_version_short,
                                         entityToInstall.versionName,
                                         entityToInstall.versionCode.toLong()
                                     ) else stringResource(R.string.downgrade_version_prefix) + stringResource(
-                                    R.string.installer_version,
+                                    R.string.installer_version_short,
                                     entityToInstall.versionName,
                                     entityToInstall.versionCode.toLong()
                                 ),
@@ -326,6 +326,7 @@ fun InstallInfoDialog( // 大写开头
                     }
                 }
             }
+
         }
         // --- 修改结束 ---
         // buttons parameter removed, to be set by caller via .copy()

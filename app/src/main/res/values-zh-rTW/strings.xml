@@ -137,6 +137,7 @@
 
     <string name="installer_running">InstallerX 執行中</string>
 
+    <string name="installer_version_short">版本：%s (%s)</string>
     <string name="installer_version">版本：%s (%s)</string>
     <string name="installer_version2">%s (%s)</string>
     <string name="installer_package_name">包名：%s</string>
