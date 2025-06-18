@@ -12,7 +12,11 @@ import com.rosan.installer.data.app.model.impl.analyser.XApkAnalyserRepoImpl
 import com.rosan.installer.data.app.repo.AnalyserRepo
 import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import java.io.BufferedReader
 import java.io.File
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
@@ -46,15 +50,23 @@ object AnalyserRepoImpl : AnalyserRepo {
         return apps
     }
 
-    private fun getDataType(config: ConfigEntity, data: DataEntity): DataType? {
-        return when (data) {
-            is DataEntity.FileEntity -> ZipFile(data.path).use {
+    private fun getDataType(config: ConfigEntity, data: DataEntity): DataType? =
+        when (data) {
+            is DataEntity.FileEntity -> ZipFile(data.path).use { zipFile ->
                 when {
-                    it.getEntry("AndroidManifest.xml") != null -> DataType.APK
-                    it.getEntry("info.json") != null -> DataType.APKM
-                    it.getEntry("manifest.json") != null -> DataType.XAPK
+                    zipFile.getEntry("AndroidManifest.xml") != null -> DataType.APK
+                    zipFile.getEntry("info.json") != null -> if (isGenuineApkmInfo(
+                            zipFile,
+                            zipFile.getEntry("info.json")
+                        )
+                    )
+                        DataType.APKM
+                    else
+                        DataType.APKS
+
+                    zipFile.getEntry("manifest.json") != null -> DataType.XAPK
                     else -> {
-                        val entries = it.entries().toList()
+                        val entries = zipFile.entries().toList()
                         var containsApk = false
                         for (entry in entries) {
                             if (File(entry.name).extension.toLowerCase(Locale.current) != "apk") continue
@@ -73,7 +85,16 @@ object AnalyserRepoImpl : AnalyserRepo {
                     val entry = zip.nextEntry ?: break
                     type = when (entry.name) {
                         "AndroidManifest.xml" -> DataType.APK
-                        "info.json" -> DataType.APKM
+                        "info.json" -> {
+                            val content = zip.bufferedReader().use(BufferedReader::readText)
+                            val jsonElement = Json.parseToJsonElement(content)
+                            if (jsonElement is JsonObject && jsonElement.containsKey("apkm_version"))
+                                DataType.APKM
+                            else
+                                DataType.APKS
+
+                        }
+
                         "manifest.json" -> DataType.XAPK
                         else -> null
                     }
@@ -85,6 +106,31 @@ object AnalyserRepoImpl : AnalyserRepo {
                 if (type == null && containsApk) type = DataType.APKS
                 return@use type
             }
+        }
+
+    /**
+     * 辅助函数：使用 kotlinx.serialization 检查 zip 条目是否为真正的 APKM 的 info.json。
+     *
+     * @author wxxsfxyzm
+     * @param zipFile ZipFile 对象
+     * @param entry 要检查的 ZipEntry (info.json)
+     * @return 如果是真正的 APKM info.json，返回 true
+     */
+    private fun isGenuineApkmInfo(zipFile: ZipFile, entry: ZipEntry): Boolean {
+        return try {
+            zipFile.getInputStream(entry).use { inputStream ->
+                val content = inputStream.bufferedReader().use(BufferedReader::readText)
+
+                // 1. 使用 kotlinx.serialization 将字符串解析为通用的 JsonElement
+                val jsonElement = Json.parseToJsonElement(content)
+
+                // 2. 检查它是否为一个 JsonObject，并且是否包含 "apkm_version" 键
+                jsonElement is JsonObject && jsonElement.containsKey("apkm_version")
+            }
+        } catch (e: Exception) {
+            // 捕获所有可能的异常，包括 IO 异常和序列化异常 (SerializationException)
+            // e.printStackTrace() // 在调试时可以打开此行
+            false
         }
     }
 }
