@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
-    // id("kotlinx-serialization")
     alias(libs.plugins.aboutLibraries)
 }
 
