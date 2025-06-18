@@ -11,11 +11,11 @@
 agp = "8.10.1"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
-composeBom = "2025.06.00"
-compose = "1.8.2"
-material3 = "1.4.0-alpha15"
-room = "2.7.1"
-ktx-serialization = "1.8.0"
+composeBom = "2025.06.01"
+compose = "1.8.3"
+material3 = "1.4.0-alpha16"
+room = "2.7.2"
+ktx-serialization = "1.8.1"
 accompanist = "0.36.0"
 rikka-shizuku = "13.1.5"
 koin-bom = "4.0.1"
@@ -56,7 +56,7 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.10.1" }
+work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.10.2" }
 
 # Kotlin Serialization
 # https://github.com/Kotlin/kotlinx.serialization/blob/master/README.md#setup
