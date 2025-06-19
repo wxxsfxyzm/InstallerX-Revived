@@ -25,6 +25,7 @@
 
 
     <string name="enable_notification_hint">请启用通知以进行安装！</string>
+    <string name="enable_storage_permission_hint">请启用存储权限！</string>
     <string name="discuss">讨论 &amp; 反馈 &amp; 更新</string>
     <string name="qq_channel">QQ频道</string>
     <string name="qq_group_official">QQ群组（官方）</string>

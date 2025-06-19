@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,6 +33,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 
 class InstallerActivity : ComponentActivity(), KoinComponent {
     companion object {
@@ -54,13 +54,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             }
 
             if (allGranted) {
-                Log.d(
-                    "InstallerDebug",
-                    "Notification permission GRANTED. Proceeding to check storage permission."
-                )
+                Timber.tag("InstallerDebug")
+                    .d("Notification permission GRANTED. Proceeding to check storage permission.")
                 checkStoragePermissionAndProceed()
             } else {
-                Log.d("InstallerDebug", "Native permission DENIED.")
+                Timber.tag("InstallerDebug").d("Native permission DENIED.")
                 Toast.makeText(this, R.string.enable_notification_hint, Toast.LENGTH_LONG).show()
                 finish()
             }
@@ -70,11 +68,12 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             // 从设置页面返回后，再次检查权限是否已被授予
             if (Environment.isExternalStorageManager()) {
-                Log.d("InstallerDebug", "Storage permission GRANTED. Calling resolve().")
+                Timber.tag("InstallerDebug").d("Storage permission GRANTED. Calling resolve().")
                 installer?.resolve(this)
             } else {
-                Log.d("InstallerDebug", "Storage permission DENIED.")
-                Toast.makeText(this, "需要授予文件访问权限以继续安装", Toast.LENGTH_LONG).show()
+                Timber.tag("InstallerDebug").d("Storage permission DENIED.")
+                Toast.makeText(this, R.string.enable_storage_permission_hint, Toast.LENGTH_LONG)
+                    .show()
                 finish()
             }
         }
@@ -201,11 +200,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         // MANAGE_EXTERNAL_STORAGE 权限只在 Android 11 (R) 及以上版本需要
         if (Environment.isExternalStorageManager()) {
             // 已有权限，直接开始最终的 resolve 流程
-            Log.d("InstallerDebug", "Storage permission already granted. Calling resolve().")
+            Timber.tag("InstallerDebug").d("Storage permission already granted. Calling resolve().")
             installer?.resolve(this)
         } else {
             // 没有权限，跳转到系统设置页面
-            Log.d("InstallerDebug", "Requesting storage permission by opening settings.")
+            Timber.tag("InstallerDebug").d("Requesting storage permission by opening settings.")
             val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
             intent.data = "package:$packageName".toUri()
             requestStoragePermissionLauncher.launch(intent)

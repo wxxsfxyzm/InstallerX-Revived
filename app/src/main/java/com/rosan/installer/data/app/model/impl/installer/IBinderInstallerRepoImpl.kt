@@ -15,7 +15,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.IInterface
 import android.os.ServiceManager
-import android.util.Log
 import com.rosan.dhizuku.shared.DhizukuVariables
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.app.model.entity.InstallEntity
@@ -36,6 +35,7 @@ import okhttp3.internal.closeQuietly
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
+import timber.log.Timber
 import java.lang.reflect.Field
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
@@ -224,7 +224,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     ) {
 
         if (result.isSuccess && config.autoDelete) {
-            Log.d("doFinishWork", "autoDelete is enabled, do delete work")
+            Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
             coroutineScope.launch {
                 kotlin.runCatching { onDeleteWork(config, entities, extra) }.exceptionOrNull()
                     ?.printStackTrace()
@@ -239,14 +239,16 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     ) {
         fun special() = null
         val authorizer = config.authorizer
-        Log.d("useUserService", "calling useUserService...")
+        Timber.tag("useUserService").d(
+            "useUserService: authorizer=$authorizer, entities=${entities.sourcePath()}"
+        )
         useUserService(
             config, if (authorizer == ConfigEntity.Authorizer.None
                 || authorizer == ConfigEntity.Authorizer.Dhizuku
             ) ::special
             else null
         ) {
-            Log.d("onDeleteWork", "onDeleteWork: ${entities.sourcePath()}")
+            Timber.tag("onDeleteWork").d("onDeleteWork: ${entities.sourcePath()}")
             it.privileged.delete(entities.sourcePath())
         }
     }

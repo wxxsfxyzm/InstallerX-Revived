@@ -1,12 +1,12 @@
 package com.rosan.installer.ui.activity
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 
 /**
  * 这是一个透明的代理Activity，其唯一作用是：
@@ -22,7 +22,7 @@ class InstallTriggerActivity : ComponentActivity(), KoinComponent {
         val installerId = intent?.getStringExtra(InstallerActivity.KEY_ID)
 
         if (installerId == null) {
-            Log.e("InstallTriggerActivity", "Installer ID is null, cannot trigger install.")
+            Timber.tag("InstallTriggerActivity").e("Installer ID is null, cannot trigger install.")
             finish() // 如果没有ID，直接销毁
             return
         }
@@ -31,7 +31,7 @@ class InstallTriggerActivity : ComponentActivity(), KoinComponent {
         val installer: InstallerRepo = get { parametersOf(installerId) }
 
         // 3. 触发安装指令
-        Log.d("InstallTriggerActivity", "Triggering install for ID: $installerId")
+        Timber.tag("InstallTriggerActivity").d("Triggering install for ID: $installerId")
         installer.install()
 
         // 4. 立即销毁自己，用户不会看到任何界面
