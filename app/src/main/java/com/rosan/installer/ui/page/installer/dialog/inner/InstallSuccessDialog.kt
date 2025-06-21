@@ -79,7 +79,6 @@ fun installSuccessDialog( // 小写开头
         buttons = DialogButtons(
             DialogParamsType.InstallerInstallSuccess.id
         ) {
-            installer.config.authorizer
             val list = mutableListOf<DialogButton>()
             val intent =
                 if (packageName.isNotEmpty()) context.packageManager.getLaunchIntentForPackage(
