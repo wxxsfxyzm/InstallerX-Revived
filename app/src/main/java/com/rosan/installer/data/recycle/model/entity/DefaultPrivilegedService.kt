@@ -8,13 +8,16 @@ import android.content.pm.PackageManager
 import android.content.pm.ParceledListSlice
 import android.content.pm.ResolveInfo
 import android.os.Build
-import android.os.Process
+import android.os.RemoteException
 import android.os.ServiceManager
 import androidx.core.net.toUri
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.delete
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.inject
+import java.io.IOException
+import android.os.Process as AndroidProcess
+
 
 class DefaultPrivilegedService : BasePrivilegedService() {
     private val reflect by inject<ReflectRepo>()
@@ -22,7 +25,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
     override fun delete(paths: Array<out String>) = paths.delete()
 
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
-        val uid = Process.myUid()
+        val uid = AndroidProcess.myUid()
         val userId = uid / 100000
         val iPackageManager = IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
 
@@ -81,6 +84,42 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             component,
             userId
         )
+    }
+
+    @Throws(RemoteException::class)
+    override fun execLine(command: String): String {
+        return try {
+            // 执行 shell 命令
+            val process = Runtime.getRuntime().exec(command)
+            // 读取执行结果
+            readResult(process)
+        } catch (e: IOException) {
+            // 将 IOException 包装成 RemoteException 抛出
+            throw RemoteException(e.message)
+        } catch (e: InterruptedException) {
+            // 恢复线程的中断状态
+            Thread.currentThread().interrupt()
+            // 将 InterruptedException 包装成 RemoteException 抛出
+            throw RemoteException(e.message)
+        }
+    }
+
+    @Throws(RemoteException::class)
+    override fun execArr(command: Array<String>): String {
+        return try {
+            // 执行 shell 命令
+            val process = Runtime.getRuntime().exec(command)
+            // 读取执行结果
+            readResult(process)
+        } catch (e: IOException) {
+            // 将 IOException 包装成 RemoteException 抛出
+            throw RemoteException(e.message)
+        } catch (e: InterruptedException) {
+            // 恢复线程的中断状态
+            Thread.currentThread().interrupt()
+            // 将 InterruptedException 包装成 RemoteException 抛出
+            throw RemoteException(e.message)
+        }
     }
 
     private fun addPreferredActivity(
@@ -177,5 +216,19 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                 Int::class.java
             )?.invoke(iPackageManager, intent, resolvedType, flags, userId)
         } as ParceledListSlice<ResolveInfo>).list
+    }
+
+    /**
+     * 读取执行结果，利用 Kotlin 的扩展函数简化代码。
+     * 如果有异常会向上抛出。
+     */
+    @Throws(IOException::class, InterruptedException::class)
+    private fun readResult(process: Process): String {
+        // 使用 'use' 块可以自动关闭流，更安全、简洁
+        val output = process.inputStream.bufferedReader().use { reader ->
+            reader.readText()
+        }
+        process.waitFor()
+        return output
     }
 }
