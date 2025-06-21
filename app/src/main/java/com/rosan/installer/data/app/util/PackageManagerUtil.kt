@@ -88,6 +88,8 @@ class PackageManagerUtil {
 
         const val INSTALL_FAILED_DUPLICATE_PERMISSION = -112
 
+        const val INSTALL_FAILED_NO_MATCHING_ABIS = -113
+
         const val INSTALL_FAILED_REJECTED_BY_BUILDTYPE = -3001
 
         const val INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION = -1000
@@ -153,6 +155,10 @@ class PackageManagerUtil {
                 INSTALL_FAILED_NEWER_SDK -> InstallFailedNewerSDKException(ecpMsg)
                 INSTALL_FAILED_TEST_ONLY -> InstallFailedTestOnlyException(ecpMsg)
                 INSTALL_FAILED_CPU_ABI_INCOMPATIBLE -> InstallFailedCpuAbiIncompatibleException(
+                    ecpMsg
+                )
+
+                INSTALL_FAILED_NO_MATCHING_ABIS -> InstallFailedCpuAbiIncompatibleException(
                     ecpMsg
                 )
 
