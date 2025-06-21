@@ -230,4 +230,7 @@ dependencies {
 
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)
+
+    // log
+    implementation(libs.timber)
 }

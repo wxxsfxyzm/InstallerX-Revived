@@ -1,6 +1,5 @@
 package com.rosan.installer.data.recycle.util
 
-import android.util.Log
 import com.rosan.installer.IPrivilegedService
 import com.rosan.installer.data.recycle.model.entity.DefaultPrivilegedService
 import com.rosan.installer.data.recycle.model.impl.DhizukuUserServiceRecycler
@@ -8,6 +7,7 @@ import com.rosan.installer.data.recycle.model.impl.ProcessUserServiceRecyclers
 import com.rosan.installer.data.recycle.model.impl.ShizukuUserServiceRecycler
 import com.rosan.installer.data.recycle.repo.recyclable.UserService
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import timber.log.Timber
 
 private object DefaultUserService : UserService {
     override val privileged: IPrivilegedService = DefaultPrivilegedService()
@@ -37,10 +37,10 @@ fun useUserService(
         special.invoke()?.let { ProcessUserServiceRecyclers.get(it).make() }
     }
     if (recycler != null) {
-        Log.e("useUserService", "use Privileged Service: $recycler")
+        Timber.tag("useUserService").e("use Privileged Service: $recycler")
         recycler.use { action.invoke(it.entity) }
     } else {
-        Log.e("useUserService", "Use Default User Service")
+        Timber.tag("useUserService").e("Use Default User Service")
         action.invoke(DefaultUserService)
     }
 }

@@ -10,7 +10,8 @@ import com.rosan.installer.data.app.model.exception.InstallFailedContainerErrorE
 import com.rosan.installer.data.app.model.exception.InstallFailedCpuAbiIncompatibleException
 import com.rosan.installer.data.app.model.exception.InstallFailedDexOptException
 import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePackageException
-import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolation
+import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePermissionException
+import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolationException
 import com.rosan.installer.data.app.model.exception.InstallFailedInsufficientStorageException
 import com.rosan.installer.data.app.model.exception.InstallFailedInvalidAPKException
 import com.rosan.installer.data.app.model.exception.InstallFailedInvalidInstallLocationException
@@ -85,6 +86,8 @@ class PackageManagerUtil {
 
         const val INSTALL_FAILED_VERSION_DOWNGRADE = -25
 
+        const val INSTALL_FAILED_DUPLICATE_PERMISSION = -112
+
         const val INSTALL_FAILED_REJECTED_BY_BUILDTYPE = -3001
 
         const val INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION = -1000
@@ -120,6 +123,10 @@ class PackageManagerUtil {
                 )
 
                 INSTALL_FAILED_DUPLICATE_PACKAGE -> InstallFailedDuplicatePackageException(ecpMsg)
+                INSTALL_FAILED_DUPLICATE_PERMISSION -> InstallFailedDuplicatePermissionException(
+                    ecpMsg
+                )
+
                 INSTALL_FAILED_NO_SHARED_USER -> InstallFailedNoSharedUserException(ecpMsg)
                 INSTALL_FAILED_UPDATE_INCOMPATIBLE -> InstallFailedUpdateIncompatibleException(
                     ecpMsg
@@ -172,7 +179,7 @@ class PackageManagerUtil {
                     ecpMsg
                 )
 
-                INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION -> InstallFailedHyperOSIsolationViolation(
+                INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION -> InstallFailedHyperOSIsolationViolationException(
                     ecpMsg
                 )
 
