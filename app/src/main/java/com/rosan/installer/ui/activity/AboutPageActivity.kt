@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.rosan.installer.ui.page.settings.home.HomePage
 import com.rosan.installer.ui.theme.InstallerTheme
+import org.koin.androidx.compose.KoinAndroidContext
 import org.koin.core.component.KoinComponent
 
 class AboutPageActivity : ComponentActivity(), KoinComponent {
@@ -18,11 +19,13 @@ class AboutPageActivity : ComponentActivity(), KoinComponent {
         setContent {
             // A surface based on material design theme.
             InstallerTheme {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    HomePage()
+                KoinAndroidContext {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        HomePage()
+                    }
                 }
             }
         }
