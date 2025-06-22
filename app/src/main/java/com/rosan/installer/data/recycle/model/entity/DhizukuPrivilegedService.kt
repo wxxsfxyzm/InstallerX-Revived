@@ -4,6 +4,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.dhizuku.shared.DhizukuVariables
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.delete
 import timber.log.Timber
