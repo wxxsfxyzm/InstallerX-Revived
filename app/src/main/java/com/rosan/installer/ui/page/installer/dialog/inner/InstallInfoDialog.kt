@@ -216,7 +216,7 @@ fun InstallInfoDialog( // 大写开头
                                 modifier = Modifier.basicMarquee()
                             )
                             Icon(
-                                imageVector = AppIcons.ArrowDropDown,
+                                imageVector = AppIcons.ArrowDropDownFilled,
                                 contentDescription = "to",
                                 tint =
                                     if (oldInfo.versionCode > entityToInstall.versionCode)

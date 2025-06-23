@@ -10,7 +10,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.*
+import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
+import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 
 // Assume errorText is accessible
 
@@ -45,7 +49,7 @@ fun installFailedDialog( // 小写开头
     return baseParams.copy(
         text = DialogInnerParams(
             DialogParamsType.InstallerInstallFailed.id,
-            errorText(installer, viewModel) // Assume errorText is accessible
+            errorTextBlock(installer, viewModel) // Assume errorText is accessible
         ),
         buttons = DialogButtons(
             DialogParamsType.InstallerInstallFailed.id
