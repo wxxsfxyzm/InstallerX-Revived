@@ -94,10 +94,9 @@ val errorTextBlock: ((installer: InstallerRepo, viewModel: DialogViewModel) -> (
                     item {
                         AnimatedVisibility(
                             visible = expanded,
-                            enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
-                            exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                            enter = fadeIn() + expandVertically(expandFrom = Alignment.Top), // 进入动画：淡入 + 垂直展开
+                            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)  // 退出动画：淡出 + 垂直收起
                         ) {
-
                             BasicTextField(
                                 value = installer.error.stackTraceToString().trim(),
                                 onValueChange = {},
