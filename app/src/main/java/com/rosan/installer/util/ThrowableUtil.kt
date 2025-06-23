@@ -29,6 +29,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedSharedUserIncom
 import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
 import com.rosan.installer.data.app.model.exception.InstallFailedUidChangedException
 import com.rosan.installer.data.app.model.exception.InstallFailedUpdateIncompatibleException
+import com.rosan.installer.data.app.model.exception.InstallFailedUserRestrictedException
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationFailureException
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationTimeoutException
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
@@ -38,12 +39,12 @@ import com.rosan.installer.data.recycle.model.exception.RootNotWorkException
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
 
 /**
- * [公共实现]
+ * 公共实现
  *
  * 一个私有的辅助函数，它作为唯一的真实来源，
  * 负责将一个 Throwable 映射到其对应的字符串资源 ID。
  *
- * @author iamr0s
+ * @author iamr0s wxxsfxyzm
  * @return R.string 的资源 ID。
  */
 private fun Throwable.getStringResourceId(): Int {
@@ -76,6 +77,7 @@ private fun Throwable.getStringResourceId(): Int {
         is InstallFailedVersionDowngradeException -> R.string.exception_install_failed_version_downgrade
         is InstallFailedRejectedByBuildTypeException -> R.string.exception_install_failed_rejected_by_build_type
         is InstallFailedHyperOSIsolationViolationException -> R.string.exception_install_failed_hyperos_isolation_violation
+        is InstallFailedUserRestrictedException -> R.string.exception_install_failed_user_restricted
         is ShizukuNotWorkException -> R.string.exception_shizuku_not_work
         is DhizukuNotWorkException -> R.string.exception_dhizuku_not_work
         is RootNotWorkException -> R.string.exception_root_not_work
