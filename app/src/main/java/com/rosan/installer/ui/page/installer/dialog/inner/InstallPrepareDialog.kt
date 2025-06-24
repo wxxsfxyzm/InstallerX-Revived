@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,6 +44,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
@@ -134,6 +136,9 @@ fun installPrepareDialog( // 小写开头
     val entityToInstall = entities.first()
     val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
     var showChips by remember { mutableStateOf(false) }
+    val showDialogInstallExtendedMenu by produceState(initialValue = false) {
+        value = ConfigUtil.getShowDialogInstallExtendedMenu()
+    }
 
     var forAllUser by remember { mutableStateOf(installer.config.forAllUser) }
     var allowTestOnly by remember { mutableStateOf(installer.config.allowTestOnly) }
@@ -307,17 +312,20 @@ fun installPrepareDialog( // 小写开头
                             viewModel.dispatch(DialogViewAction.Install)
                         })
                 }
-
                 // if there are multiple entities, show the install choice button
                 if (entities.size > 1) {
                     add(DialogButton(stringResource(R.string.install_choice), 2f) {
                         viewModel.dispatch(DialogViewAction.InstallChoice)
                     })
                 }
-                // TODO make a new dialog for installing apk file
+                // TODO make a new dialog only for installing apk file
                 // Add Permission review and comparison button if needed
                 // Add more buttons as needed
-
+                else if (showDialogInstallExtendedMenu) {
+                    add(DialogButton("菜单", 2f) {
+                        viewModel.dispatch(DialogViewAction.InstallExtendedMenu)
+                    })
+                }
                 // Cancel button always shown
                 add(DialogButton(stringResource(R.string.cancel), 1f) {
                     viewModel.dispatch(DialogViewAction.Close)

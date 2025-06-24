@@ -13,6 +13,7 @@ import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.Dispatchers
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -50,9 +50,11 @@ class DialogViewModel(
             is DialogViewAction.Analyse -> analyse()
             is DialogViewAction.InstallChoice -> installChoice()
             is DialogViewAction.InstallPrepare -> installPrepare()
+            is DialogViewAction.InstallExtendedMenu -> installExtendedMenu()
             is DialogViewAction.Install -> {
                 install()
             }
+
             is DialogViewAction.Background -> background()
         }
     }
@@ -76,6 +78,7 @@ class DialogViewModel(
                         newState = DialogViewState.Ready
                         newPackageNameFromProgress = null
                     }
+
                     is ProgressEntity.Resolving -> newState = DialogViewState.Resolving
                     is ProgressEntity.ResolvedFailed -> newState = DialogViewState.ResolveFailed
                     is ProgressEntity.Analysing -> newState = DialogViewState.Analysing
@@ -83,7 +86,8 @@ class DialogViewModel(
                     is ProgressEntity.AnalysedSuccess -> {
                         val selectedEntities = repo.entities.filter { it.selected }
                         val mappedApps = selectedEntities.map { it.app }
-                        val uniquePackages = mappedApps.groupBy { appEntity: AppEntity -> appEntity.packageName }
+                        val uniquePackages =
+                            mappedApps.groupBy { appEntity: AppEntity -> appEntity.packageName }
 
                         if (uniquePackages.size != 1) {
                             newState = DialogViewState.InstallChoice
@@ -93,26 +97,32 @@ class DialogViewModel(
                             newPackageNameFromProgress = selectedEntities.first().app.packageName
                         }
                     }
+
                     is ProgressEntity.Installing -> {
                         newState = DialogViewState.Installing
                         autoInstallJob?.cancel()
                         if (newPackageNameFromProgress == null && repo.entities.isNotEmpty()) {
                             val selectedEntities = repo.entities.filter { it.selected }
                             val mappedApps = selectedEntities.map { it.app }
-                            val uniquePackages = mappedApps.groupBy { appEntity: AppEntity -> appEntity.packageName }
+                            val uniquePackages =
+                                mappedApps.groupBy { appEntity: AppEntity -> appEntity.packageName }
                             if (uniquePackages.size == 1) {
-                                newPackageNameFromProgress = selectedEntities.first().app.packageName
+                                newPackageNameFromProgress =
+                                    selectedEntities.first().app.packageName
                             }
                         }
                     }
+
                     is ProgressEntity.InstallFailed -> {
                         newState = DialogViewState.InstallFailed
                         autoInstallJob?.cancel()
                     }
+
                     is ProgressEntity.InstallSuccess -> {
                         newState = DialogViewState.InstallSuccess
                         autoInstallJob?.cancel()
                     }
+
                     else -> newState = DialogViewState.Ready
                 }
 
@@ -184,15 +194,21 @@ class DialogViewModel(
             // 并且包名仍然匹配
             if (state !is DialogViewState.InstallSuccess &&
                 state !is DialogViewState.InstallFailed &&
-                _currentPackageName.value == packageNameAtFetchStart) {
+                _currentPackageName.value == packageNameAtFetchStart
+            ) {
                 _preInstallAppInfo.value = info
             }
             // --- 修改结束 ---
         }
     }
 
-    private fun toast(message: String) { Toast.makeText(context, message, Toast.LENGTH_LONG).show() }
-    private fun toast(@StringRes resId: Int) { Toast.makeText(context, resId, Toast.LENGTH_LONG).show() }
+    private fun toast(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun toast(@StringRes resId: Int) {
+        Toast.makeText(context, resId, Toast.LENGTH_LONG).show()
+    }
 
     private fun close() {
         autoInstallJob?.cancel()
@@ -204,7 +220,9 @@ class DialogViewModel(
         state = DialogViewState.Ready
     }
 
-    private fun analyse() { repo.analyse() }
+    private fun analyse() {
+        repo.analyse()
+    }
 
     private fun installChoice() {
         autoInstallJob?.cancel()
@@ -241,10 +259,20 @@ class DialogViewModel(
         }
     }
 
+    private fun installExtendedMenu() {
+        if (state is DialogViewState.InstallPrepare) {
+            state = DialogViewState.InstallExtendedMenu
+        } else {
+            toast(""/*R.string.dialog_install_extended_menu_not_available*/)
+        }
+    }
+
     private fun install() {
         autoInstallJob?.cancel()
         repo.install()
     }
 
-    private fun background() { repo.background(true) }
+    private fun background() {
+        repo.background(true)
+    }
 }

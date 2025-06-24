@@ -3,6 +3,7 @@ package com.rosan.installer.ui.page.installer.dialog
 sealed class DialogParamsType(val id: String) {
     object IconWorking : DialogParamsType("icon_working")
     object IconPausing : DialogParamsType("icon_pausing")
+    object IconMenu : DialogParamsType("icon_menu")
 
     object ButtonsCancel : DialogParamsType("buttons_cancel")
 
@@ -12,6 +13,7 @@ sealed class DialogParamsType(val id: String) {
     object InstallerAnalysing : DialogParamsType("installer_analysing")
     object InstallerAnalyseFailed : DialogParamsType("installer_analyse_failed")
     object InstallChoice : DialogParamsType("installer_choice")
+    object InstallExtendedMenu : DialogParamsType("installer_extended_menu")
     object InstallerPrepare : DialogParamsType("installer_prepare")
     object InstallerPrepareEmpty : DialogParamsType("installer_prepare_empty")
     object InstallerPrepareTooMany : DialogParamsType("installer_prepare_too_many")

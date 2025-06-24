@@ -1,7 +1,8 @@
-package com.rosan.installer.ui.widget.icons
+package com.rosan.installer.ui.icons
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
+import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.NotInterested
@@ -63,4 +64,8 @@ object AppIcons {
     val Pausing = Icons.TwoTone.HourglassDisabled
     val Working = Icons.TwoTone.HourglassEmpty
 
+    /**
+     * 菜单图标
+     */
+    val MenuOpen = Icons.AutoMirrored.TwoTone.MenuOpen
 }

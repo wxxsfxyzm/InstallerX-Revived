@@ -33,8 +33,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.widget.icons.AppIcons
 import com.rosan.installer.util.help
 
 val pausingIcon: @Composable () -> Unit = {
@@ -46,6 +46,12 @@ val pausingIcon: @Composable () -> Unit = {
 val workingIcon: @Composable () -> Unit = {
     Icon(
         imageVector = AppIcons.Working, contentDescription = null
+    )
+}
+
+val menuIcon: @Composable () -> Unit = {
+    Icon(
+        imageVector = AppIcons.MenuOpen, contentDescription = null
     )
 }
 
