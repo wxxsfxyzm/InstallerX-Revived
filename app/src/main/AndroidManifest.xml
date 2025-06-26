@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -91,7 +92,7 @@
         <service
             android:name="com.rosan.installer.data.installer.model.impl.InstallerService"
             android:permission="android.permission.FOREGROUND_SERVICE"
-            android:foregroundServiceType="shortService" />
+            android:foregroundServiceType="dataSync" />
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
