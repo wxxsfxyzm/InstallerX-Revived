@@ -8,6 +8,7 @@ sealed class DialogViewAction {
     object Analyse : DialogViewAction()
     object InstallChoice : DialogViewAction()
     object InstallExtendedMenu : DialogViewAction()
+    object InstallExtendedSubMenu : DialogViewAction()
     object InstallPrepare : DialogViewAction()
     object Install : DialogViewAction()
     object Background : DialogViewAction()

@@ -10,12 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LabelWidget(label: String) {
+fun LabelWidget(label: String, horizontalPadding: Int = 56) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 56.dp)
-//            .padding(vertical = 8.dp, horizontal = 16.dp)
+            .padding(vertical = 8.dp, horizontal = horizontalPadding.dp)
             .padding(top = 8.dp)
     ) {
         Text(

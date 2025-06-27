@@ -28,7 +28,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.twotone.ClearAll
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Favorite
@@ -179,7 +178,7 @@ fun PreferredPage(
                     exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
                 ) {
                     SwitchWidget(
-                        icon = Icons.AutoMirrored.TwoTone.MenuOpen,
+                        icon = AppIcons.MenuOpen,
                         title = "显示扩展菜单",// stringResource(id = R.string.show_dialog_install_extended_menu),
                         description = "在安装对话框中显示更多操作选项",
                         checked = viewModel.state.showDialogInstallExtendedMenu

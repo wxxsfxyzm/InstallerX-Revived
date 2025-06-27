@@ -9,6 +9,7 @@ sealed class DialogViewState {
     object InstallChoice : DialogViewState()
     object InstallPrepare : DialogViewState()
     object InstallExtendedMenu : DialogViewState()
+    object InstallExtendedSubMenu : DialogViewState()
     object Installing : DialogViewState()
     object InstallFailed : DialogViewState()
     object InstallSuccess : DialogViewState()

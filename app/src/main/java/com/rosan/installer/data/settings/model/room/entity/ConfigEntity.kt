@@ -2,6 +2,7 @@ package com.rosan.installer.data.settings.model.room.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import org.koin.core.component.KoinComponent
 
@@ -30,7 +31,6 @@ data class ConfigEntity(
 ) {
     companion object : KoinComponent {
         var default = ConfigEntity(
-            name = "Default",
             description = "",
             authorizer = Authorizer.Global,
             customizeAuthorizer = "",
@@ -40,9 +40,11 @@ data class ConfigEntity(
             allowTestOnly = false,
             allowDowngrade = false,
             autoDelete = false,
-            displaySdk = false,
         )
     }
+
+    @Ignore
+    var isExtendedMenuEnabled: Boolean = false
 
     val isCustomizeAuthorizer: Boolean
         get() = authorizer == Authorizer.Customize

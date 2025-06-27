@@ -60,7 +60,11 @@ class ConfigUtil {
                 )
             if (entity.installMode == ConfigEntity.InstallMode.Global)
                 entity = entity.copy(installMode = getGlobalInstallMode())
-            return entity
+            // 使用 apply 来设置非构造函数属性，代码更紧凑
+            return entity.apply {
+                // --- 如果需要获取全局配置的其他字段，可以在这里添加 ---
+                this.isExtendedMenuEnabled = getShowDialogInstallExtendedMenu()
+            }
         }
 
         private suspend fun getByPackageNameInner(packageName: String? = null): ConfigEntity =

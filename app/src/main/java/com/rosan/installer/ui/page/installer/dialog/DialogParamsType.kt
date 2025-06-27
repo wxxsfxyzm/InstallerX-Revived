@@ -14,6 +14,7 @@ sealed class DialogParamsType(val id: String) {
     object InstallerAnalyseFailed : DialogParamsType("installer_analyse_failed")
     object InstallChoice : DialogParamsType("installer_choice")
     object InstallExtendedMenu : DialogParamsType("installer_extended_menu")
+    object InstallExtendedSubMenu : DialogParamsType("install_extended_sub_menu")
     object InstallerPrepare : DialogParamsType("installer_prepare")
     object InstallerPrepareEmpty : DialogParamsType("installer_prepare_empty")
     object InstallerPrepareTooMany : DialogParamsType("installer_prepare_too_many")

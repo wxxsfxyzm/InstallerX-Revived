@@ -13,7 +13,7 @@ import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.InstallEntity
-import com.rosan.installer.data.app.model.entity.InstallExtraEntity
+import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
@@ -305,7 +305,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                         is AppEntity.DexMetadataEntity -> app.data
                     }
                 )
-            }, InstallExtraEntity(Os.getuid() / 100000, cacheDirectory))
+            }, InstallExtraInfoEntity(Os.getuid() / 100000, cacheDirectory))
         }.getOrElse {
             installer.error = it
             installer.progress.emit(ProgressEntity.InstallFailed)
@@ -315,7 +315,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     private suspend fun installEntities(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraEntity
+        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
     ) = com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doWork(config, entities, extra)
 
     private suspend fun finish() = installer.progress.emit(ProgressEntity.Finish)

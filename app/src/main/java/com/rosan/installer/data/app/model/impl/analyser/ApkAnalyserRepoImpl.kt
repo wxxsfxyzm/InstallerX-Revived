@@ -45,6 +45,7 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun createResources(): Resources {
         val resources = Resources.getSystem()
         val constructor = reflect.getDeclaredConstructor(AssetManager::class.java)
@@ -111,42 +112,53 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         var roundIcon: Drawable? = null
         var minSdk: String? = null
         var targetSdk: String? = null
-        AxmlTreeRepoImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml")).register("/manifest") {
-            packageName = getAttributeValue(null, "package")
-            splitName = getAttributeValue(null, "split")
-            val versionCodeMajor = getAttributeIntValue(
-                AxmlTreeRepo.ANDROID_NAMESPACE, "versionCodeMajor", 0
-            ).toLong()
-            val versionCodeMinor = getAttributeIntValue(
-                AxmlTreeRepo.ANDROID_NAMESPACE, "versionCode", 0
-            ).toLong()
-            versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
-            versionName =
-                getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName") ?: versionName
-        }.register("/manifest/uses-sdk") {
-            minSdk = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "minSdkVersion")
-            targetSdk = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "targetSdkVersion")
-        }.register("/manifest/application") {
-            label = when (val resId =
-                getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "label", -1)) {
-                -1 -> getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "label") ?: label
-                0 -> null
-                else -> resources.getString(resId)
+        val permissions = mutableListOf<String>()
+        AxmlTreeRepoImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml"))
+            .register("/manifest") {
+                packageName = getAttributeValue(null, "package")
+                splitName = getAttributeValue(null, "split")
+                val versionCodeMajor = getAttributeIntValue(
+                    AxmlTreeRepo.ANDROID_NAMESPACE, "versionCodeMajor", 0
+                ).toLong()
+                val versionCodeMinor = getAttributeIntValue(
+                    AxmlTreeRepo.ANDROID_NAMESPACE, "versionCode", 0
+                ).toLong()
+                versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
+                versionName =
+                    getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName") ?: versionName
             }
-            icon = when (val resId =
-                getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "icon", -1)) {
-                -1 -> null
-                0 -> null
-                else -> ResourcesCompat.getDrawable(resources, resId, theme)
+            .register("/manifest/uses-sdk") {
+                minSdk = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "minSdkVersion")
+                targetSdk = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "targetSdkVersion")
             }
-            roundIcon = when (val resId = getAttributeResourceValue(
-                AxmlTreeRepo.ANDROID_NAMESPACE, "roundIcon", -1
-            )) {
-                -1 -> null
-                0 -> null
-                else -> ResourcesCompat.getDrawable(resources, resId, theme)
+            .register("/manifest/application") {
+                label = when (val resId =
+                    getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "label", -1)) {
+                    -1 -> getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "label") ?: label
+                    0 -> null
+                    else -> resources.getString(resId)
+                }
+                icon = when (val resId =
+                    getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "icon", -1)) {
+                    -1 -> null
+                    0 -> null
+                    else -> ResourcesCompat.getDrawable(resources, resId, theme)
+                }
+                roundIcon = when (val resId = getAttributeResourceValue(
+                    AxmlTreeRepo.ANDROID_NAMESPACE, "roundIcon", -1
+                )) {
+                    -1 -> null
+                    0 -> null
+                    else -> ResourcesCompat.getDrawable(resources, resId, theme)
+                }
             }
-        }.map { }
+            .register("/manifest/uses-permission") {
+                val permissionName = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")
+                if (!permissionName.isNullOrBlank()) {
+                    permissions.add(permissionName)
+                }
+            }
+            .map { }
         if (packageName.isNullOrEmpty()) throw Exception("can't get the package from this package")
         return if (splitName.isNullOrEmpty()) AppEntity.BaseEntity(
             packageName = packageName,
@@ -156,7 +168,8 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             label = label,
             icon = roundIcon ?: icon,
             targetSdk = targetSdk,
-            minSdk = minSdk
+            minSdk = minSdk,
+            permissions = permissions
         ) else AppEntity.SplitEntity(
             packageName = packageName,
             data = data,

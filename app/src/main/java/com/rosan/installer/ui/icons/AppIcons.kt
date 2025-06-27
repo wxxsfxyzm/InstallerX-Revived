@@ -16,6 +16,7 @@ import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
+import androidx.compose.material.icons.twotone.PermDeviceInformation
 
 /**
  * 将图标统一管理在一个对象中
@@ -68,4 +69,9 @@ object AppIcons {
      * 菜单图标
      */
     val MenuOpen = Icons.AutoMirrored.TwoTone.MenuOpen
+
+    /**
+     * 权限管理
+     */
+    val Permission = Icons.TwoTone.PermDeviceInformation
 }

@@ -38,6 +38,13 @@ class DialogViewModel(
     private val _currentPackageName = MutableStateFlow<String?>(null)
     val currentPackageName: StateFlow<String?> = _currentPackageName.asStateFlow()
 
+    private val _permissionsToGrant = MutableStateFlow<Set<String>>(emptySet())
+    val permissionsToGrant: StateFlow<Set<String>> = _permissionsToGrant.asStateFlow()
+
+    // 新增一个标志位，来判断是否已经初始化过
+    private var isInitialPermissionsSet = false
+
+
     private var fetchPreInstallInfoJob: Job? = null
     private var autoInstallJob: Job? = null
     private var collectRepoJob: Job? = null
@@ -51,6 +58,7 @@ class DialogViewModel(
             is DialogViewAction.InstallChoice -> installChoice()
             is DialogViewAction.InstallPrepare -> installPrepare()
             is DialogViewAction.InstallExtendedMenu -> installExtendedMenu()
+            is DialogViewAction.InstallExtendedSubMenu -> installExtendedSubMenu()
             is DialogViewAction.Install -> {
                 install()
             }
@@ -166,6 +174,33 @@ class DialogViewModel(
         }
     }
 
+    fun togglePermissionGrant(permission: String) {
+        val currentSet = _permissionsToGrant.value.toMutableSet()
+        if (currentSet.contains(permission)) {
+            currentSet.remove(permission)
+        } else {
+            currentSet.add(permission)
+        }
+        _permissionsToGrant.value = currentSet
+    }
+
+    /**
+     * 初始化权限列表，但仅在第一次调用时有效。
+     * @param entity 从中获取初始权限的应用实体。
+     */
+    fun initializePermissionsIfNeeded(entity: AppEntity?) {
+        // 如果已经初始化过了，就直接返回，防止覆盖用户修改过的状态
+        if (isInitialPermissionsSet) {
+            return
+        }
+
+        val initialPermissions = (entity as? AppEntity.BaseEntity)?.permissionsToGrant
+        _permissionsToGrant.value = initialPermissions?.toSet() ?: emptySet()
+
+        // 将标志位置为 true，确保这个逻辑块不会再次执行
+        isInitialPermissionsSet = true
+    }
+
     private fun fetchPreInstallAppInfo(packageName: String) {
         if (packageName.isBlank()) {
             _preInstallAppInfo.value = null
@@ -260,10 +295,27 @@ class DialogViewModel(
     }
 
     private fun installExtendedMenu() {
-        if (state is DialogViewState.InstallPrepare) {
-            state = DialogViewState.InstallExtendedMenu
+        when (state) {
+            is DialogViewState.InstallPrepare -> {
+                state = DialogViewState.InstallExtendedMenu
+            }
+
+            is DialogViewState.InstallExtendedSubMenu -> {
+                state = DialogViewState.InstallExtendedMenu
+
+            }
+
+            else -> {
+                toast("dialog_install_extended_menu_not_available"/*R.string.dialog_install_extended_menu_not_available*/)
+            }
+        }
+    }
+
+    private fun installExtendedSubMenu() {
+        if (state is DialogViewState.InstallExtendedMenu) {
+            state = DialogViewState.InstallExtendedSubMenu
         } else {
-            toast(""/*R.string.dialog_install_extended_menu_not_available*/)
+            toast("dialog_install_extended_sub_menu_not_available"/*R.string.dialog_install_extended_sub_menu_not_available*/)
         }
     }
 

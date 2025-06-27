@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -51,7 +52,15 @@ val workingIcon: @Composable () -> Unit = {
 
 val menuIcon: @Composable () -> Unit = {
     Icon(
-        imageVector = AppIcons.MenuOpen, contentDescription = null
+        imageVector = AppIcons.MenuOpen, contentDescription = null, modifier = Modifier.size(32.dp)
+    )
+}
+
+val permissionIcon: @Composable () -> Unit = {
+    Icon(
+        imageVector = AppIcons.Permission,
+        contentDescription = null,
+        modifier = Modifier.size(32.dp)
     )
 }
 
