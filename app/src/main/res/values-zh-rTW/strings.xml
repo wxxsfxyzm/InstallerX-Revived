@@ -244,5 +244,9 @@
     <string name="exception_install_failed_hyperos_isolation_violation">HyperOS 安裝系統應用程式需要聲明有效的安裝者！</string>
     <string name="get_update">取得更新</string>
 
+    <string name="show_dialog_install_extended_menu">顯示擴展選單</string>
+    <string name="show_dialog_install_extended_menu_desc">在安裝對話框中顯示更多操作選項</string>
+    <string name="set_countdown">設定倒數計時</string>
+    <string name="dhizuku_auto_close_countdown_desc">Dhizuku安裝成功後自動關閉的倒數計時</string>
     <string name="grant_permission_after_install">点击以在安装完成后授予权限</string>
 </resources>

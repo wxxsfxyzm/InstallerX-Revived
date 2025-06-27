@@ -34,7 +34,6 @@ import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
-import com.rosan.installer.util.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -90,7 +89,12 @@ fun installSuccessDialog( // 小写开头
                     coroutineScope.launch(Dispatchers.IO) {
                         // --- 第一步：尝试高权限强制启动 (主方法) ---
                         Timber.tag("HybridStart").i("Attempting force start for $packageName...")
-                        val forceStartSuccess = forceStartApp(packageName, 0, installer.config)
+
+                        val forceStartSuccess =
+                            if (installer.config.authorizer == ConfigEntity.Authorizer.Dhizuku)
+                                false
+                            else
+                                forceStartApp(packageName, 0, installer.config)
 
                         if (forceStartSuccess) {
                             // 主方法成功，任务完成
@@ -106,25 +110,25 @@ fun installSuccessDialog( // 小写开头
                             withContext(Dispatchers.Main) {
                                 context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                                 coroutineScope.launch {
-                                    if (isAppInForeground(packageName, installer.config)) {
+                                    if (isAppInForeground(
+                                            packageName,
+                                            installer.config,
+                                            viewModel
+                                        )
+                                    ) {
                                         Timber.tag("InstallSuccessDialog").d(
                                             "App $packageName is in foreground, closing dialog."
                                         )
                                         viewModel.dispatch(DialogViewAction.Close)
                                     } else {
-                                        // Explicitly handle the case where the app is not in the foreground
-                                        // or the check timed out. This makes the logic clearer.
                                         if (installer.config.authorizer == ConfigEntity.Authorizer.Dhizuku) {
                                             Timber.tag("InstallSuccessDialog").d(
-                                                "Dhizuku expected, closing dialog."
+                                                "App $packageName not detected in foreground after ${viewModel.autoCloseCountDown} seconds. Dialog will close itself."
                                             )
                                         } else {
-                                            Timber.tag("InstallSuccessDialog").d(
+                                            Timber.tag("InstallSuccessDialog").w(
                                                 "App $packageName not detected in foreground after 10 seconds. Dialog will close itself."
                                             )
-                                            withContext(Dispatchers.Main) {
-                                                context.toast("等待应用启动超时，自动关闭安装窗口。")
-                                            }
                                         }
                                         // ALWAYS close the dialog afterwards, regardless of whether the app
                                         // was detected in the foreground or the check timed out.
@@ -158,29 +162,37 @@ fun installSuccessDialog( // 小写开头
  */
 private suspend fun isAppInForeground(
     targetPackageName: String,
-    config: ConfigEntity
+    config: ConfigEntity,
+    viewModel: DialogViewModel
 ): Boolean {
+    if (config.authorizer == ConfigEntity.Authorizer.Dhizuku) {
+        Timber.tag("isAppInForeground")
+            .d("Dhizuku does not support shell commands, waiting for auto-close countdown.")
+        delay(viewModel.autoCloseCountDown * 1000L) // Wait for the auto-close countdown
+        Timber.tag("isAppInForeground")
+            .d("Auto-close countdown finished, returning false.")
+        return false // Dhizuku does not support shell commands
+    }
     // Use withTimeoutOrNull to limit the execution time to 10 seconds
-    val result =
-        withTimeoutOrNull(10000L) {
-            while (true) {
-                // Execute the function in IO thread
-                val topApp = withContext(Dispatchers.IO) {
-                    // Call the function to get the top app package name
-                    getTopApp(config)
-                }
-
-                Timber.tag("isAppInForeground").d("Checking foreground app: $topApp")
-
-                if (topApp == targetPackageName) {
-                    Timber.tag("isAppInForeground")
-                        .d("Target App $targetPackageName is in foreground.")
-                    return@withTimeoutOrNull true
-                }
-
-                delay(1000L) // Perform a check every 1 second
+    val result = withTimeoutOrNull(10000L) {
+        while (true) {
+            // Execute the function in IO thread
+            val topApp = withContext(Dispatchers.IO) {
+                // Call the function to get the top app package name
+                getTopApp(config)
             }
+
+            Timber.tag("isAppInForeground").d("Checking foreground app: $topApp")
+
+            if (topApp == targetPackageName) {
+                Timber.tag("isAppInForeground")
+                    .d("Target App $targetPackageName is in foreground.")
+                return@withTimeoutOrNull true
+            }
+
+            delay(1000L) // Perform a check every 1 second
         }
+    }
     return result == true // Return true if the app was found in foreground, false if timed out
 }
 
@@ -190,7 +202,7 @@ private suspend fun isAppInForeground(
  * @param config 用于执行高权限Shell命令的配置实体。
  * @return 当前前台应用的包名，如果无法获取则返回空字符串。
  */
-// TODO 使用 UsageStatsManager API 来替代 dumpsys 命令。
+// TODO Dhizuku在SDK36上调用命令会直接内部错误，不能使用
 private fun getTopApp(
     config: ConfigEntity
 ): String {

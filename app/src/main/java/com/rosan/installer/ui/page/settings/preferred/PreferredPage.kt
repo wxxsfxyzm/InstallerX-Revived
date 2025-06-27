@@ -169,8 +169,8 @@ fun PreferredPage(
                     IntNumberPickerWidget(
                         context = context,
                         icon = AppIcons.Working,
-                        title = "设定倒计时",// stringResource(id = R.string.show_dialog_install_extended_menu),
-                        description = "Dhizuku安装成功后自动关闭的倒计时",
+                        title = stringResource(R.string.set_countdown),
+                        description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
                         value = state.dhizukuAutoCloseCountDown,
                         startInt = 1,
                         endInt = 10
@@ -201,8 +201,8 @@ fun PreferredPage(
                 ) {
                     SwitchWidget(
                         icon = AppIcons.MenuOpen,
-                        title = "显示扩展菜单",// stringResource(id = R.string.show_dialog_install_extended_menu),
-                        description = "在安装对话框中显示更多操作选项",
+                        title = stringResource(id = R.string.show_dialog_install_extended_menu),
+                        description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
                         checked = viewModel.state.showDialogInstallExtendedMenu
                     ) {
                         viewModel.dispatch(
