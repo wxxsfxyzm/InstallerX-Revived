@@ -83,6 +83,7 @@ import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.AboutPageActivity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.widget.setting.BaseWidget
+import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.ui.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.widget.setting.SwitchWidget
@@ -159,7 +160,28 @@ fun PreferredPage(
                     onClick = {}
                 )
             }
-            item { DataCustomizeAuthorizerWidget(viewModel) }
+            item {
+                AnimatedVisibility(
+                    visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                    enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
+                    exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                ) {
+                    IntNumberPickerWidget(
+                        context = context,
+                        icon = AppIcons.Working,
+                        title = "设定倒计时",// stringResource(id = R.string.show_dialog_install_extended_menu),
+                        description = "Dhizuku安装成功后自动关闭的倒计时",
+                        value = state.dhizukuAutoCloseCountDown,
+                        startInt = 1,
+                        endInt = 10
+                    ) {
+                        viewModel.dispatch(
+                            PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
+                        )
+                    }
+                }
+            }
+            // item { DataCustomizeAuthorizerWidget(viewModel) }
             // item { DataInstallModeWidget(viewModel) }
             item {
                 DataInstallModeWidget(

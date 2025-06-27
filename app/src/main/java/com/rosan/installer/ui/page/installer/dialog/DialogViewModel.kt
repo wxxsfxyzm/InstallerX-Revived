@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -12,6 +13,7 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -19,17 +21,22 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class DialogViewModel(
-    private var repo: InstallerRepo
+    private var repo: InstallerRepo,
+    private val appDataStore: AppDataStore
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
     var state by mutableStateOf<DialogViewState>(DialogViewState.Ready)
+        private set
+
+    var autoCloseCountDown by mutableIntStateOf(3)
         private set
 
     private val _preInstallAppInfo = MutableStateFlow<InstalledAppInfo?>(null)
@@ -49,6 +56,13 @@ class DialogViewModel(
     private var autoInstallJob: Job? = null
     private var collectRepoJob: Job? = null
 
+    init {
+        viewModelScope.launch {
+            // 读取设置，假设 settingsRepo.getInt 支持默认值
+            autoCloseCountDown =
+                appDataStore.getInt("show_dhizuku_auto_close_count_down_menu", 3).first()
+        }
+    }
 
     fun dispatch(action: DialogViewAction) {
         when (action) {

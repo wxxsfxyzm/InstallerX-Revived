@@ -87,31 +87,51 @@ fun installSuccessDialog( // 小写开头
                 ) else null
             if (intent != null) {
                 list.add(DialogButton(stringResource(R.string.open)) {
-                    context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                    coroutineScope.launch {
-                        if (isAppInForeground(packageName, installer.config)) {
-                            Timber.tag("InstallSuccessDialog").d(
-                                "App $packageName is in foreground, closing dialog."
-                            )
+                    coroutineScope.launch(Dispatchers.IO) {
+                        // --- 第一步：尝试高权限强制启动 (主方法) ---
+                        Timber.tag("HybridStart").i("Attempting force start for $packageName...")
+                        val forceStartSuccess = forceStartApp(packageName, 0, installer.config)
+
+                        if (forceStartSuccess) {
+                            // 主方法成功，任务完成
+                            Timber.tag("HybridStart")
+                                .i("Force start succeeded for $packageName. Closing dialog.")
                             viewModel.dispatch(DialogViewAction.Close)
                         } else {
-                            // Explicitly handle the case where the app is not in the foreground
-                            // or the check timed out. This makes the logic clearer.
-                            if (installer.config.authorizer == ConfigEntity.Authorizer.Dhizuku) {
-                                Timber.tag("InstallSuccessDialog").d(
-                                    "Dhizuku expected, closing dialog."
-                                )
-                            } else {
-                                Timber.tag("InstallSuccessDialog").d(
-                                    "App $packageName not detected in foreground after 10 seconds. Dialog will close itself."
-                                )
-                                withContext(Dispatchers.Main) {
-                                    context.toast("等待应用启动超时，自动关闭安装窗口。")
+                            // --- 第二步：主方法失败，回退到您完整的原始逻辑 (备用方案) ---
+                            Timber.tag("HybridStart")
+                                .w("Force start failed. Falling back to original standard method.")
+
+                            // 切换到主线程以执行UI操作 (startActivity)，这是安卓框架的要求
+                            withContext(Dispatchers.Main) {
+                                context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                                coroutineScope.launch {
+                                    if (isAppInForeground(packageName, installer.config)) {
+                                        Timber.tag("InstallSuccessDialog").d(
+                                            "App $packageName is in foreground, closing dialog."
+                                        )
+                                        viewModel.dispatch(DialogViewAction.Close)
+                                    } else {
+                                        // Explicitly handle the case where the app is not in the foreground
+                                        // or the check timed out. This makes the logic clearer.
+                                        if (installer.config.authorizer == ConfigEntity.Authorizer.Dhizuku) {
+                                            Timber.tag("InstallSuccessDialog").d(
+                                                "Dhizuku expected, closing dialog."
+                                            )
+                                        } else {
+                                            Timber.tag("InstallSuccessDialog").d(
+                                                "App $packageName not detected in foreground after 10 seconds. Dialog will close itself."
+                                            )
+                                            withContext(Dispatchers.Main) {
+                                                context.toast("等待应用启动超时，自动关闭安装窗口。")
+                                            }
+                                        }
+                                        // ALWAYS close the dialog afterwards, regardless of whether the app
+                                        // was detected in the foreground or the check timed out.
+                                        viewModel.dispatch(DialogViewAction.Close)
+                                    }
                                 }
                             }
-                            // ALWAYS close the dialog afterwards, regardless of whether the app
-                            // was detected in the foreground or the check timed out.
-                            viewModel.dispatch(DialogViewAction.Close)
                         }
                     }
                 })
@@ -160,15 +180,6 @@ private suspend fun isAppInForeground(
 
                 delay(1000L) // Perform a check every 1 second
             }
-
-            if (config.authorizer == ConfigEntity.Authorizer.Dhizuku) {
-                Timber.tag("isAppInForeground").d("Dhizuku detected, false as default.")
-            } else {
-                Timber.tag("isAppInForeground")
-                    .d("Target App $targetPackageName not found in foreground, timing out.")
-            }
-
-            false
         }
     return result == true // Return true if the app was found in foreground, false if timed out
 }
@@ -224,4 +235,98 @@ private fun getTopApp(
     // Return the package name of the top app extracted in the lambda
     Timber.tag("getTopApp").d("Acquired Top App Package Name: $topAppPackage")
     return topAppPackage
+}
+
+/**
+ * 使用高权限强制启动一个应用程序。
+ *
+ * @param packageName 要启动的应用的包名。
+ * @param userId 用户ID，默认为0（主用户）。
+ * @param config 用于执行高权限Shell命令的配置实体。
+ * @return 如果启动命令成功执行，则返回 true，否则返回 false。
+ */
+fun forceStartApp(
+    packageName: String,
+    userId: Int = 0,
+    config: ConfigEntity
+): Boolean {
+    // 1. 解析启动 Activity
+    val launchActivityComponent = getLaunchActivity(packageName, config)
+
+    if (launchActivityComponent == null) {
+        Timber.tag("forceStartApp").e("Failed to resolve launch activity for $packageName")
+        return false
+    }
+
+    Timber.tag("forceStartApp")
+        .d("Resolved launch activity for $packageName: $launchActivityComponent")
+
+    // 2. 构造并执行高权限 am start 命令
+    var success = false
+    useUserService(config) { userService ->
+        try {
+            /**
+             * 构造一个高权限、高优先级的 am start 命令
+             * -n component: 直接指定启动的组件，绕过 Intent 解析，这是最关键的一步。
+             * --user 0: 在作为 shell/root 用户执行时，明确指定为设备主用户（user 0）启动。
+             * 在多用户环境下至关重要，能避免很多启动失败的问题。
+             * --activity-brought-to-front: 一个标志，确保 Activity 被带到前台。
+             */
+            val command =
+                "am start -n $launchActivityComponent --user $userId --activity-brought-to-front"
+            val cmdArray = arrayOf("/system/bin/sh", "-c", command)
+
+            // 执行命令。对于 am start，我们通常不关心其输出，只关心是否抛出异常。
+            userService.privileged.execArr(cmdArray)
+
+            // 如果没有抛出异常，我们乐观地认为命令已成功发送。
+            success = true
+            Timber.tag("forceStartApp")
+                .d("Successfully executed force start command for $launchActivityComponent")
+
+        } catch (e: Exception) {
+            Timber.tag("forceStartApp").e(e, "Exception while force starting app $packageName")
+            success = false
+        }
+    }
+
+    // 注意：这里返回的 true 仅表示 am 命令成功执行，不代表应用UI一定立即渲染完成。
+    // 但相比普通 Intent，它的成功率和直接性已经高出很多。
+    return success
+}
+
+/**
+ * 使用高权限 Shell 命令解析应用的启动 Activity。
+ *
+ * @param packageName 目标应用的包名。
+ * @param config 用于执行高权限Shell命令的配置实体。
+ * @return 启动 Activity 的完整组件名 (e.g., "com.example.app/.MainActivity")，如果找不到则返回 null。
+ */
+private fun getLaunchActivity(
+    packageName: String,
+    config: ConfigEntity
+): String? {
+    var launchActivity: String? = null
+    useUserService(config) { userService ->
+        try {
+            // 命令：解析指定包名的 LAUNCHER Activity，并只保留最后一行有效输出
+            val command =
+                "cmd package resolve-activity --brief -c android.intent.category.LAUNCHER $packageName | tail -n 1"
+            val cmdArray = arrayOf("/system/bin/sh", "-c", command)
+
+            val result = userService.privileged.execArr(cmdArray).trim()
+            Timber.tag("getLaunchActivity")
+                .d("Result of resolving '$packageName': $result")
+
+            // 如果结果不为空且包含 '/'，则认为是有效的组件名
+            if (result.isNotBlank() && result.contains('/')) {
+                launchActivity = result
+            }
+        } catch (e: Exception) {
+            Timber.tag("getLaunchActivity")
+                .e(e, "Exception while resolving launch activity for $packageName")
+            launchActivity = null
+        }
+    }
+    return launchActivity
 }
