@@ -19,10 +19,9 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import okhttp3.internal.closeQuietly
-import kotlin.time.Duration.Companion.seconds
 
 class InstallerService : Service() {
     companion object {
@@ -122,12 +121,23 @@ class InstallerService : Service() {
             BroadcastHandler(scope, installer)
         )
 
+        /*        scope.launch {
+                    handlers.forEach { it.onStart() }
+                    installer.progress.collect {
+                        if (it is ProgressEntity.Finish) {
+                            handlers.forEach { it.onFinish() }
+                            scopes.remove(id)
+                            finish(installer)
+                        }
+                    }
+                }*/
         scope.launch {
             handlers.forEach { it.onStart() }
-            installer.progress.collect {
-                if (it is ProgressEntity.Finish) {
+            installer.progress.collect { progress ->
+                if (progress is ProgressEntity.Finish) {
                     handlers.forEach { it.onFinish() }
-                    scopes.remove(id)
+                    // 任务完成，直接调用 finish 方法处理后续清理和服务生命周期检查
+                    // 不需要在这里再做 scopes.remove(id) 等操作，统一在 finish 方法中处理
                     finish(installer)
                 }
             }
@@ -136,20 +146,43 @@ class InstallerService : Service() {
     }
 
     private fun finish(installer: InstallerRepo) {
+        /*        val id = installer.id
+
+                if (scopes[id] != null) {
+                    installer.closeQuietly()
+                    return
+                }
+
+                InstallerRepoImpl.remove(id)
+
+                timeoutJob?.cancel()
+                timeoutJob = lifecycleScope.launch {
+                    autoForeground()
+                    delay(15.seconds)
+                    if (scopes.isEmpty()) destroy()
+                }*/
+        // --- Logic to finish the installer process ---
         val id = installer.id
 
-        if (scopes[id] != null) {
-            installer.closeQuietly()
-            return
-        }
+        // 如果任务仍在 scopes 中，取消其协程并移除
+        scopes.remove(id)?.cancel() // 好习惯：取消协程以释放资源
 
+        // 清理与该 installer 相关的资源
         InstallerRepoImpl.remove(id)
+        installer.closeQuietly()
 
+        // 取消任何可能存在的旧的 timeoutJob
         timeoutJob?.cancel()
-        timeoutJob = lifecycleScope.launch {
-            autoForeground()
-            delay(15.seconds)
-            if (scopes.isEmpty()) destroy()
+
+        // 立即检查服务是否应该停止，不再延迟
+        synchronized(this) {
+            if (scopes.isEmpty()) {
+                // 没有正在运行的任务了，立即销毁服务
+                destroy() // destroy() 会调用 stopSelf()
+            } else {
+                // 如果还有其他任务，仅更新前台状态
+                autoForeground()
+            }
         }
     }
 

@@ -30,21 +30,8 @@ import org.koin.core.component.inject
  **/
 class ConfigUtil {
     companion object : KoinComponent {
-        // SharedPreferences
-//        private val context by inject<Context>()
-//        private val sharedPreferences = context.getSharedPreferences("app", Context.MODE_PRIVATE)
 
-        // DataStore
         private val appDataStore by inject<AppDataStore>()
-
-        /*        val globalAuthorizer: ConfigEntity.Authorizer
-                    get() = AuthorizerConverter.revert(sharedPreferences.getString("authorizer", null))
-
-                val globalCustomizeAuthorizer: String
-                    get() = sharedPreferences.getString("customize_authorizer", null) ?: ""
-
-                val globalInstallMode: ConfigEntity.InstallMode
-                    get() = InstallModeConverter.revert(sharedPreferences.getString("install_mode", null))*/
 
         suspend fun getGlobalAuthorizer(): ConfigEntity.Authorizer {
             val str = appDataStore.getString("authorizer", "").first()
@@ -60,17 +47,9 @@ class ConfigUtil {
             return InstallModeConverter.revert(str)
         }
 
-        /*        suspend fun getByPackageName(packageName: String? = null): ConfigEntity {
-                    var entity = getByPackageNameInner(packageName)
-                    if (entity.authorizer == ConfigEntity.Authorizer.Global)
-                        entity = entity.copy(
-                            authorizer = globalAuthorizer,
-                            customizeAuthorizer = globalCustomizeAuthorizer
-                        )
-                    if (entity.installMode == ConfigEntity.InstallMode.Global)
-                        entity = entity.copy(installMode = globalInstallMode)
-                    return entity
-                }*/
+        suspend fun getShowDialogInstallExtendedMenu(): Boolean {
+            return appDataStore.getBoolean("show_dialog_install_extended_menu", false).first()
+        }
 
         suspend fun getByPackageName(packageName: String? = null): ConfigEntity {
             var entity = getByPackageNameInner(packageName)
@@ -81,7 +60,11 @@ class ConfigUtil {
                 )
             if (entity.installMode == ConfigEntity.InstallMode.Global)
                 entity = entity.copy(installMode = getGlobalInstallMode())
-            return entity
+            // 使用 apply 来设置非构造函数属性，代码更紧凑
+            return entity.apply {
+                // --- 如果需要获取全局配置的其他字段，可以在这里添加 ---
+                this.isExtendedMenuEnabled = getShowDialogInstallExtendedMenu()
+            }
         }
 
         private suspend fun getByPackageNameInner(packageName: String? = null): ConfigEntity =

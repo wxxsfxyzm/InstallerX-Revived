@@ -40,6 +40,7 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.rosan.installer.R
 import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.ui.widget.setting.LabelWidget
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,9 +104,8 @@ fun HomePage() {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             },
             header = {
-                item {
-                    StatusWidget()
-                }
+                item { StatusWidget() }
+                item { LabelWidget("开放源代码许可", 18) }
             })
     }
 }

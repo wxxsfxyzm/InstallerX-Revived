@@ -143,6 +143,58 @@
     <string name="installer_progress_channel_name">安装过程通知</string>
     <string name="installer_background_channel_name">后台通知</string>
 
+    <string name="permission_read_external_storage">读取外部存储</string>
+    <string name="permission_write_external_storage">写入外部存储</string>
+    <string name="permission_access_fine_location">精确位置</string>
+    <string name="permission_access_coarse_location">粗略位置</string>
+    <string name="permission_camera">相机</string>
+    <string name="permission_record_audio">录音</string>
+    <string name="permission_read_contacts">读取联系人</string>
+    <string name="permission_write_contacts">写入联系人</string>
+    <string name="permission_read_phone_state">读取电话状态</string>
+    <string name="permission_call_phone">拨打电话</string>
+    <string name="permission_send_sms">发送短信</string>
+    <string name="permission_receive_sms">接收短信</string>
+    <string name="permission_read_sms">读取短信</string>
+    <string name="permission_receive_mms">接收彩信</string>
+    <string name="permission_read_calendar">读取日历</string>
+    <string name="permission_write_calendar">写入日历</string>
+    <string name="permission_access_background_location">后台定位</string>
+    <string name="permission_system_alert_window">悬浮窗</string>
+    <string name="permission_access_network_state">访问网络状态</string>
+    <string name="permission_access_wifi_state">访问 Wi-Fi 状态</string>
+    <string name="permission_internet">互联网</string>
+    <string name="permission_vibrate">振动</string>
+    <string name="permission_read_phone_numbers">读取电话号码</string>
+    <string name="permission_bluetooth">蓝牙</string>
+    <string name="permission_bluetooth_admin">蓝牙管理</string>
+    <string name="permission_bluetooth_connect">蓝牙连接</string>
+    <string name="permission_bluetooth_scan">蓝牙扫描</string>
+    <string name="permission_nfc">NFC</string>
+    <string name="permission_access_media_location">访问媒体位置</string>
+    <string name="permission_post_notifications">推送通知</string>
+    <string name="permission_read_media_images">读取媒体图片</string>
+    <string name="permission_read_media_video">读取媒体视频</string>
+    <string name="permission_read_media_audio">读取媒体音频</string>
+    <string name="permission_access_notification_policy">访问通知策略</string>
+    <string name="permission_foreground_service">前台服务</string>
+    <string name="permission_request_install_packages">请求安装应用</string>
+    <string name="permission_write_settings">写入系统设置</string>
+    <string name="permission_get_accounts">获取账户</string>
+    <string name="permission_use_credentials">使用凭据</string>
+    <string name="permission_manage_accounts">管理账户</string>
+    <string name="permission_read_sync_settings">读取同步设置</string>
+    <string name="permission_write_sync_settings">写入同步设置</string>
+    <string name="permission_read_call_log">读取通话记录</string>
+    <string name="permission_write_call_log">写入通话记录</string>
+    <string name="permission_answer_phone_calls">接听电话</string>
+    <string name="permission_schedule_exact_alarm">计划精确闹钟</string>
+    <string name="permission_request_ignore_battery_optimizations">忽略电池优化</string>
+    <string name="permission_access_location_extra_commands">访问额外定位命令</string>
+    <string name="permission_access_mock_location">访问模拟定位</string>
+    <string name="permission_dhizuku">使用Dhizuku</string>
+    <string name="permission_unknown">未知权限</string>
+
     <string name="installer_running">InstallerX 运行中</string>
 
     <string name="installer_version_short">版本：%s (%s)</string>
@@ -179,7 +231,8 @@
     <string name="exception_install_failed_version_downgrade">应用降级失败，请先卸载后再安装</string>
 
     <string name="exception_install_failed_rejected_by_build_type">系统禁止跨区安装</string>
-    <string name="exception_install_failed_duplicate_permission">包正在尝试重新声明已拥有的权限</string>
+    <string name="exception_install_failed_duplicate_permission">包正在尝试重新声明其他安装包已声明的权限</string>
+    <string name="exception_install_failed_user_restricted">系统限制USB安装，请启用它。</string>
     <string name="exception_shizuku_not_work">请激活Sui或Shizuku，并授予权限</string>
     <string name="exception_dhizuku_not_work">请激活Dhizuku，并授予权限</string>
     <string name="exception_root_not_work">请授予ROOT权限</string>
@@ -191,4 +244,6 @@
     <string name="installer_error_reason">错误原因</string>
     <string name="exception_install_failed_hyperos_isolation_violation">HyperOS安装系统app需要声明有效安装者！</string>
     <string name="get_update">获取更新</string>
+
+    <string name="grant_permission_after_install">点击以在安装完成后授予权限</string>
 </resources>

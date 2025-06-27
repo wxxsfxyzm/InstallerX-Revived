@@ -86,6 +86,8 @@ class PackageManagerUtil {
 
         const val INSTALL_FAILED_VERSION_DOWNGRADE = -25
 
+        const val INSTALL_FAILED_USER_RESTRICTED = -111
+
         const val INSTALL_FAILED_DUPLICATE_PERMISSION = -112
 
         const val INSTALL_FAILED_NO_MATCHING_ABIS = -113
@@ -189,6 +191,7 @@ class PackageManagerUtil {
                     ecpMsg
                 )
 
+                INSTALL_FAILED_USER_RESTRICTED -> IllegalStateException(ecpMsg)
                 else -> IllegalStateException(ecpMsg)
             }
         }
