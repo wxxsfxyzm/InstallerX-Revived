@@ -8,7 +8,7 @@
 # https://mvnrepository.com/
 
 [versions]
-agp = "8.10.1"
+agp = "8.11.0"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
 composeBom = "2025.06.01"
