@@ -36,6 +36,10 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeShowDialogInstallExtendedMenu -> changeShowDialogInstallExtendedMenu(
                 action.showMenu
             )
+
+            is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(
+                action.countDown
+            )
         }
     }
 
@@ -51,20 +55,24 @@ class PreferredViewModel(
                 .map { InstallModeConverter.revert(it) }
             val showDialogInstallExtendedMenuFlow =
                 appDataStore.getBoolean("show_dialog_install_extended_menu")
+            val dhizukuAutoCloseCountDownFlow =
+                appDataStore.getInt("show_dhizuku_auto_close_count_down_menu", 3)
 
             combine(
                 authorizerFlow,
                 customizeAuthorizerFlow,
                 installModeFlow,
-                showDialogInstallExtendedMenuFlow
-            ) { authorizer, customize, installMode, showMenu ->
+                showDialogInstallExtendedMenuFlow,
+                dhizukuAutoCloseCountDownFlow
+            ) { authorizer, customize, installMode, showDialogInstallMenu, countDown ->
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
                     authorizer = authorizer,
                     customizeAuthorizer = customizeAuthorizer,
                     installMode = installMode,
-                    showDialogInstallExtendedMenu = showMenu
+                    showDialogInstallExtendedMenu = showDialogInstallMenu,
+                    dhizukuAutoCloseCountDown = countDown,
                 )
             }.collectLatest { state = it }
         }
@@ -95,6 +103,15 @@ class PreferredViewModel(
     private fun changeShowDialogInstallExtendedMenu(installExtendedMenu: Boolean) {
         viewModelScope.launch {
             appDataStore.putBoolean("show_dialog_install_extended_menu", installExtendedMenu)
+        }
+    }
+
+    fun changeDhizukuAutoCloseCountDown(countDown: Int) {
+        viewModelScope.launch {
+            // Ensure countDown is within the valid range
+            if (countDown in 1..10) {
+                appDataStore.putInt("show_dhizuku_auto_close_count_down_menu", countDown)
+            }
         }
     }
 }

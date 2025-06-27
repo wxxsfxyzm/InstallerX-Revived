@@ -249,6 +249,10 @@
     <string name="downgrade_version_prefix">Downgrade</string>
     <string name="install_choice">Select PKG</string>
 
+    <string name="show_dialog_install_extended_menu">Show extended menu</string>
+    <string name="show_dialog_install_extended_menu_desc">Show more options in the install dialog</string>
+    <string name="set_countdown">Set countdown</string>
+    <string name="dhizuku_auto_close_countdown_desc">Countdown to auto-close after Dhizuku installation succeeds</string>
     <string name="grant_permission_after_install">Click to grant permission after installation</string>
 
 </resources>
