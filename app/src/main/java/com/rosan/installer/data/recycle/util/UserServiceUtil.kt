@@ -21,11 +21,9 @@ fun useUserService(
     special: (() -> String?)? = null,
     action: (UserService) -> Unit
 ) {
-    // special为null时，遵循config
-    val recycler = if (special == null) when (config.authorizer) {
-        ConfigEntity.Authorizer.Root -> ProcessUserServiceRecyclers.get("su")
-            .make()
-
+    // special为null，或special.invoke()时，遵循config
+    val recycler = if (special?.invoke() == null) when (config.authorizer) {
+        ConfigEntity.Authorizer.Root -> ProcessUserServiceRecyclers.get("su").make()
         ConfigEntity.Authorizer.Shizuku -> ShizukuUserServiceRecycler.make()
         ConfigEntity.Authorizer.Dhizuku -> DhizukuUserServiceRecycler.make()
         ConfigEntity.Authorizer.Customize -> ProcessUserServiceRecyclers.get(config.customizeAuthorizer)
@@ -34,10 +32,10 @@ fun useUserService(
         else -> null
     } else {
         // special回调null时，不使用授权器
-        special.invoke()?.let { ProcessUserServiceRecyclers.get(it).make() }
+        ProcessUserServiceRecyclers.get(special.invoke()!!).make()
     }
     if (recycler != null) {
-        Timber.tag("useUserService").e("use Privileged Service: $recycler")
+        Timber.tag("useUserService").e("use ${config.authorizer} Privileged Service: $recycler")
         recycler.use { action.invoke(it.entity) }
     } else {
         Timber.tag("useUserService").e("Use Default User Service")
