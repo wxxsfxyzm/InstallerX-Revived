@@ -1,0 +1,258 @@
+<resources>
+    <string name="app_name" translatable="false">InstallerX</string>
+
+    <string name="agreement_title">Política</string>
+    <string name="agreement_text">Aquí está nuestra política de usuario. Por favor, léala y acepte. &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/terms&quot;&gt;Política de Usuario&lt;/a&gt;, &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/privacy&quot;&gt;Política de Privacidad&lt;/a&gt; Este mensaje no se mostrará nuevamente después de aceptar.</string>
+
+    <string name="user_terms">Política de usuario</string>
+    <string name="privacy_policy">Política de privacidad</string>
+
+    <string name="agree">Aceptar</string>
+
+    <string name="back">Atrás</string>
+    <string name="home">Inicio</string>
+    <string name="config">Perfiles</string>
+    <string name="app">App</string>
+    <string name="preferred">Preferencias</string>
+    <string name="search">Buscar</string>
+    <string name="menu">Menú</string>
+    <string name="about">Acerca de</string>
+    <string name="other">Otros</string>
+    <string name="about_detail">Acerca de InstallerX</string>
+    <string name="get_update">Obtener actualización</string>
+    <string name="get_update_detail">Busca actualizaciones de software y nuevas funciones.</string>
+
+    <string name="stable">Estable</string>
+    <string name="preview">Vista previa</string>
+    <string name="unstable">Inestable</string>
+
+    <string name="enable_notification_hint">¡Por favor, activa el permiso de notificaciones para instalar!</string>
+    <string name="enable_storage_permission_hint">¡Por favor, activa el permiso de almacenamiento para instalar!</string>
+
+    <string name="discuss">Chat &amp; Comentarios &amp; Actualizaciones</string>
+    <string name="qq_channel">Canal de QQ</string>
+    <string name="qq_group_official">Grupo de QQ (oficial)</string>
+    <string name="telegram_group">Grupo de Telegram</string>
+
+    <string name="basic">Básico</string>
+    <string name="lock_default_installer">Establecer como instalador predeterminado</string>
+    <string name="lock_default_installer_dsp">Establece InstallerX como la app predeterminada para instalar APKs</string>
+    <string name="lock_default_installer_success">Establecido como instalador predeterminado con éxito</string>
+    <string name="lock_default_installer_failed">No se pudo establecer como instalador predeterminado</string>
+    <string name="unlock_default_installer">Quitar como instalador predeterminado</string>
+    <string name="unlock_default_installer_dsp">Quita InstallerX como el instalador predeterminado para instalar APKs</string>
+    <string name="unlock_default_installer_success">Se quitó como instalador predeterminado con éxito</string>
+    <string name="unlock_default_installer_failed">No se pudo quitar como instalador predeterminado</string>
+    <string name="clear_cache">Limpiar caché</string>
+    <string name="success">Éxito</string>
+
+    <string name="details">Detalles</string>
+
+    <string name="add">Agregar</string>
+    <string name="update">Actualizar</string>
+    <string name="save">Guardar</string>
+    <string name="more">Más</string>
+    <string name="edit">Editar</string>
+    <string name="apply">Aplicar</string>
+    <string name="delete">Eliminar</string>
+    <string name="restore">Deshacer</string>
+
+    <string name="delete_success">Eliminado con éxito</string>
+
+    <string name="loading">Cargando…</string>
+    <string name="empty_configs">Sin perfiles, agrega uno abajo</string>
+    <string name="filter">Filtrar</string>
+    <string name="order">Ordenar</string>
+
+    <string name="config_name">Nombre del perfil</string>
+    <string name="config_description">Descripción del perfil</string>
+    <string name="config_authorizer">Autorizador</string>
+    <!--    <string name="config_authorizer_msg">Para ejecutar análisis y comandos, asegúrate de tener permisos suficientes.</string>-->
+    <string name="config_authorizer_global">Global</string>
+    <string name="config_authorizer_none">Ninguno</string>
+    <string name="config_authorizer_root">Root</string>
+    <string name="config_authorizer_shizuku">Shizuku</string>
+    <string name="config_authorizer_dhizuku">Dhizuku</string>
+    <string name="config_authorizer_customize">Personalizado</string>
+    <string name="config_customize_authorizer">Autorizador personalizado</string>
+    <string name="config_install_mode">Modo de instalación</string>
+    <string name="config_install_mode_global">Global</string>
+    <string name="config_install_mode_dialog">Diálogo</string>
+    <string name="config_install_mode_auto_dialog">Diálogo automático</string>
+    <string name="config_install_mode_notification">Notificación</string>
+    <string name="config_install_mode_auto_notification">Notificación automática</string>
+    <string name="config_install_mode_ignore">Ignorar</string>
+    <string name="config_declare_installer">Establecer fuente de instalación</string>
+    <string name="config_installer">instalado por (nombre del paquete)</string>
+    <string name="config_for_all_user">Instalar para todos los usuarios</string>
+    <string name="config_allow_test_only">Permitir depuración</string>
+    <string name="config_allow_test_only_dsp">Permitir aplicaciones marcadas para depuración</string>
+    <string name="config_allow_downgrade">Permitir downgrade</string>
+    <string name="config_allow_downgrade_dsp">Permitir que las aplicaciones se degraden (puede no funcionar en todas las ROMs)</string>
+    <string name="config_auto_delete">Eliminación automática</string>
+    <string name="config_auto_delete_dsp">Eliminar automáticamente el APK después de la instalación</string>
+    <string name="config_display_sdk_version">Mostrar información del SDK</string>
+    <string name="config_display_sdk_version_sdp">Mostrar información de destino y mínima en la interfaz de instalación</string>
+
+    <string name="config_error_name">El nombre no puede estar vacío</string>
+    <string name="config_error_customize_authorizer">El autorizador personalizado no puede estar vacío</string>
+    <string name="config_error_installer">La fuente de instalación no puede estar vacía</string>
+
+    <string name="cancel">Cancelar</string>
+    <string name="retry">Reintentar</string>
+    <string name="install">Instalar</string>
+    <string name="next">Siguiente</string>
+    <string name="previous">Anterior</string>
+    <string name="close">Cerrar</string>
+    <string name="finish">Finalizar</string>
+    <string name="open">Abrir</string>
+    <string name="select">Seleccionar</string>
+    <string name="clear">Limpiar</string>
+    <string name="global">Global</string>
+
+    <string name="options">Opciones</string>
+    <string name="sort">Ordenar</string>
+    <string name="sort_by_label">Etiqueta</string>
+    <string name="sort_by_package_name">Nombre del paquete</string>
+    <string name="sort_by_install_time">Fecha de instalación</string>
+    <string name="sort_by_reverse_order">Orden inverso</string>
+    <string name="sort_by_selected_first">Seleccionados primero</string>
+    <string name="sort_by_show_system_app">Mostrar apps del sistema</string>
+    <string name="sort_by_show_package_name">Mostrar nombre del paquete</string>
+
+    <string name="installer_ready">Listo</string>
+    <string name="installer_resolving">Verificando…</string>
+    <string name="installer_resolve_failed">Fallo en la verificación</string>
+    <string name="installer_resolve_success">Verificación exitosa</string>
+    <string name="installer_analysing">Analizando…</string>
+    <string name="installer_analyse_failed">Fallo en el análisis</string>
+    <string name="installer_select_install">Selecciona apps para instalar</string>
+    <string name="installer_prepare_install">Antes de instalar</string>
+    <string name="installer_prepare_install_empty">Selecciona al menos un paquete</string>
+    <string name="installer_prepare_install_too_many">Selecciona solo un base.apk</string>
+    <string name="installer_prepare_sdk_incompatible">El SDK del sistema es inferior al requerido por la app</string>
+    <string name="installer_prepare_type_new_install">Preparando para instalar nueva app</string>
+    <string name="installer_prepare_type_upgrade">Preparando para actualizar app</string>
+    <string name="installer_prepare_type_downgrade">Esto es un downgrade, puede causar pérdida de datos o inestabilidad</string>
+    <string name="installer_prepare_type_reinstall">Se reinstalará la versión actual de la app</string>
+    <string name="installer_prepare_type_sidegrade">Se cambiará la versión actual de la app</string>
+    <string name="installer_prepare_type_unknown_confirm">¿Estás seguro de que deseas instalar?</string>
+    <string name="installer_installing">Instalando…</string>
+    <string name="installer_install_failed">Fallo en la instalación</string>
+    <string name="installer_install_success">Instalación completada</string>
+    <string name="installer_error_reason">Motivo del error</string>
+    <string name="installer_unknown_error">Error desconocido</string>
+
+    <string name="installer_channel_name">Notificación de instalación</string>
+    <string name="installer_progress_channel_name">Notificación de progreso de instalación</string>
+    <string name="installer_background_channel_name">Notificación en segundo plano</string>
+
+    <string name="permission_read_external_storage">Leer almacenamiento externo</string>
+    <string name="permission_write_external_storage">Escribir en almacenamiento externo</string>
+    <string name="permission_access_fine_location">Acceder a ubicación precisa</string>
+    <string name="permission_access_coarse_location">Acceder a ubicación aproximada</string>
+    <string name="permission_camera">Cámara</string>
+    <string name="permission_record_audio">Grabar audio</string>
+    <string name="permission_read_contacts">Leer contactos</string>
+    <string name="permission_write_contacts">Escribir contactos</string>
+    <string name="permission_read_phone_state">Leer estado del teléfono</string>
+    <string name="permission_call_phone">Llamar por teléfono</string>
+    <string name="permission_send_sms">Enviar SMS</string>
+    <string name="permission_receive_sms">Recibir SMS</string>
+    <string name="permission_read_sms">Leer SMS</string>
+    <string name="permission_receive_mms">Recibir MMS</string>
+    <string name="permission_read_calendar">Leer calendario</string>
+    <string name="permission_write_calendar">Escribir en calendario</string>
+    <string name="permission_access_background_location">Acceder a ubicación en segundo plano</string>
+    <string name="permission_system_alert_window">Ventana de alerta del sistema</string>
+    <string name="permission_access_network_state">Acceder al estado de la red</string>
+    <string name="permission_access_wifi_state">Acceder al estado del Wi-Fi</string>
+    <string name="permission_internet">Internet</string>
+    <string name="permission_vibrate">Vibrar</string>
+    <string name="permission_read_phone_numbers">Leer números de teléfono</string>
+    <string name="permission_bluetooth">Bluetooth</string>
+    <string name="permission_bluetooth_admin">Administrador de Bluetooth</string>
+    <string name="permission_bluetooth_connect">Conectar Bluetooth</string>
+    <string name="permission_bluetooth_scan">Escanear Bluetooth</string>
+    <string name="permission_nfc">NFC</string>
+    <string name="permission_access_media_location">Acceder a ubicación de medios</string>
+    <string name="permission_post_notifications">Publicar notificaciones</string>
+    <string name="permission_read_media_images">Leer imágenes de medios</string>
+    <string name="permission_read_media_video">Leer videos de medios</string>
+    <string name="permission_read_media_audio">Leer audio de medios</string>
+    <string name="permission_access_notification_policy">Acceder a política de notificaciones</string>
+    <string name="permission_foreground_service">Servicio en primer plano</string>
+    <string name="permission_request_install_packages">Solicitar instalación de paquetes</string>
+    <string name="permission_write_settings">Escribir configuraciones</string>
+    <string name="permission_get_accounts">Obtener cuentas</string>
+    <string name="permission_use_credentials">Usar credenciales</string>
+    <string name="permission_manage_accounts">Administrar cuentas</string>
+    <string name="permission_read_sync_settings">Leer configuraciones de sincronización</string>
+    <string name="permission_write_sync_settings">Escribir configuraciones de sincronización</string>
+    <string name="permission_read_call_log">Leer registro de llamadas</string>
+    <string name="permission_write_call_log">Escribir en registro de llamadas</string>
+    <string name="permission_answer_phone_calls">Responder llamadas telefónicas</string>
+    <string name="permission_schedule_exact_alarm">Programar alarma exacta</string>
+    <string name="permission_request_ignore_battery_optimizations">Solicitar ignorar optimizaciones de batería</string>
+    <string name="permission_access_location_extra_commands">Acceder a comandos extra de ubicación</string>
+    <string name="permission_access_mock_location">Acceder a ubicación simulada</string>
+    <string name="permission_dhizuku">Usar Dhizuku</string>
+    <string name="permission_unknown">Permiso desconocido</string>
+
+    <string name="installer_running">InstallerX en ejecución</string>
+
+    <string name="installer_version_short">" Ver. %s (%s)"</string>
+    <string name="installer_version">Versión: %s (%s)</string>
+    <string name="installer_version2">%s (%s)</string>
+    <string name="installer_package_name">Paquete: %s</string>
+    <string name="installer_package_min_sdk" translatable="false">MinSDK: %s</string>
+    <string name="installer_package_target_sdk" translatable="false">TargetSDK: %s</string>
+    <string name="installer_file_path">Ruta: %s</string>
+
+    <string name="exception_install_failed_unknown">Error desconocido</string>
+    <string name="exception_install_failed_already_exists">Esta versión de la app ya está instalada, desinstala e inténtalo de nuevo</string>
+    <string name="exception_install_failed_invalid_apk">Esta versión de la app ya está instalada, desinstala e inténtalo de nuevo</string>
+    <string name="exception_install_failed_invalid_uri">URI inválido</string>
+    <string name="exception_install_failed_insufficient_storage">Almacenamiento lleno, libera espacio</string>
+    <string name="exception_install_failed_duplicate_package">La firma del paquete cambió, asegúrate de que sea seguro, desinstala la aplicación e inténtalo de nuevo</string>
+    <string name="exception_install_failed_no_shared_user">No se encontró el base.apk con un UID coincidente, descárgalo e inténtalo de nuevo</string>
+    <string name="exception_install_failed_update_incompatible">Actualización incompatible, desinstala e inténtalo de nuevo</string>
+    <string name="exception_install_failed_shared_user_incompatible">Las firmas del paquete no coinciden</string>
+    <string name="exception_install_failed_missing_shared_library">Falta una biblioteca compartida</string>
+    <string name="exception_install_failed_replace_couldnt_delete">Biblioteca compartida inválida</string>
+    <string name="exception_install_failed_dexopt">No se pudo optimizar el DEX</string>
+    <string name="exception_install_failed_older_sdk">La versión del sistema es muy antigua, actualízala</string>
+    <string name="exception_install_failed_conflicting_provider">Ya existe un ContentProvider con el mismo nombre</string>
+    <string name="exception_install_failed_newer_sdk">El paquete es muy antiguo para la versión del sistema</string>
+    <string name="exception_install_failed_test_only">La instalación de aplicaciones de depuración está desactivada, actívala e inténtalo de nuevo</string>
+    <string name="exception_install_failed_cpu_abi_incompatible">ABI de CPU incompatible, descarga el paquete compatible con tu CPU</string>
+    <string name="exception_install_failed_missing_feature">El paquete usa una característica inválida</string>
+    <string name="exception_install_failed_container_error">Error al acceder a la tarjeta SD</string>
+    <string name="exception_install_failed_invalid_install_location">Ubicación de instalación inválida</string>
+    <string name="exception_install_failed_media_unavailable">No se encontró la tarjeta SD</string>
+    <string name="exception_install_failed_verification_timeout">Tiempo de verificación del paquete agotado</string>
+    <string name="exception_install_failed_verification_failure">No se pudo verificar el paquete</string>
+    <string name="exception_install_failed_package_changed">El programa espera que cambie el envoltorio de la llamada</string>
+    <string name="exception_install_failed_uid_changed">El UID cambió, desinstala e inténtalo de nuevo</string>
+    <string name="exception_install_failed_version_downgrade">Fallo en el downgrade, desinstala la app e inténtalo de nuevo</string>
+    <string name="exception_install_failed_rejected_by_build_type">Rechazado por el tipo de compilación del sistema</string>
+    <string name="exception_install_failed_hyperos_isolation_violation">Agrega una fuente de instalación válida para instalar apps del sistema</string>
+    <string name="exception_install_failed_duplicate_permission">El paquete intenta redeclarar un permiso ya existente</string>
+    <string name="exception_install_failed_user_restricted">El sistema restringió la instalación por USB, por favor actívala.</string>
+
+    <string name="exception_shizuku_not_work">Activa Sui o Shizuku y otorga permisos</string>
+    <string name="exception_dhizuku_not_work">Activa Dhizuku y otorga permisos</string>
+    <string name="exception_root_not_work">No se pudo acceder a root</string>
+    <string name="exception_app_process_not_work">No se pudo conectar con el autorizador</string>
+    <string name="old_version_prefix">Actual</string>
+    <string name="upgrade_version_prefix">Actualizar</string>
+    <string name="downgrade_version_prefix">Downgrade</string>
+    <string name="install_choice">Seleccionar PKG</string>
+
+    <string name="show_dialog_install_extended_menu">Mostrar menú extendido</string>
+    <string name="show_dialog_install_extended_menu_desc">Mostrar más opciones en el diálogo de instalación</string>
+    <string name="set_countdown">Establecer cuenta regresiva</string>
+    <string name="dhizuku_auto_close_countdown_desc">Cuenta regresiva para cerrar automáticamente después de una instalación exitosa con Dhizuku</string>
+    <string name="grant_permission_after_install">Haz clic para otorgar permiso después de la instalación</string>
+    
+</resources>
