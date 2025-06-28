@@ -5,6 +5,11 @@ import android.content.Intent
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -76,9 +81,12 @@ import com.rosan.installer.data.app.model.impl.DSRepoImpl
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.AboutPageActivity
-import com.rosan.installer.ui.widget.icons.AppIcons
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.widget.setting.BaseWidget
+import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
+import com.rosan.installer.ui.widget.setting.SettingsAboutItemWidget
+import com.rosan.installer.ui.widget.setting.SwitchWidget
 import com.rosan.installer.util.help
 import com.rosan.installer.util.openUrl
 import kotlinx.coroutines.Dispatchers
@@ -102,6 +110,8 @@ fun PreferredPage(
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
     }
 
+    // Migrate to installSplashScreen
+    // move init logic to splash screen
     LaunchedEffect(true) {
         viewModel.dispatch(PreferredViewAction.Init)
     }
@@ -150,7 +160,28 @@ fun PreferredPage(
                     onClick = {}
                 )
             }
-            item { DataCustomizeAuthorizerWidget(viewModel) }
+            item {
+                AnimatedVisibility(
+                    visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                    enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
+                    exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                ) {
+                    IntNumberPickerWidget(
+                        context = context,
+                        icon = AppIcons.Working,
+                        title = stringResource(R.string.set_countdown),
+                        description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
+                        value = state.dhizukuAutoCloseCountDown,
+                        startInt = 1,
+                        endInt = 10
+                    ) {
+                        viewModel.dispatch(
+                            PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
+                        )
+                    }
+                }
+            }
+            // item { DataCustomizeAuthorizerWidget(viewModel) }
             // item { DataInstallModeWidget(viewModel) }
             item {
                 DataInstallModeWidget(
@@ -162,6 +193,24 @@ fun PreferredPage(
                     onClick = {}
                 )
             }
+            item {
+                AnimatedVisibility(
+                    visible = state.installMode == ConfigEntity.InstallMode.Dialog,
+                    enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
+                    exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                ) {
+                    SwitchWidget(
+                        icon = AppIcons.MenuOpen,
+                        title = stringResource(id = R.string.show_dialog_install_extended_menu),
+                        description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
+                        checked = viewModel.state.showDialogInstallExtendedMenu
+                    ) {
+                        viewModel.dispatch(
+                            PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
+                        )
+                    }
+                }
+            }
             item { LabelWidget(stringResource(R.string.basic)) }
             item { DefaultInstaller(snackBarHostState, true) }
             item { DefaultInstaller(snackBarHostState, false) }
@@ -171,7 +220,7 @@ fun PreferredPage(
             // item { PrivacyPolicy() }
             item { LabelWidget(stringResource(R.string.other)) }
             item {
-                SettingsAboutItem(
+                SettingsAboutItemWidget(
                     context = context,
                     imageVector = Icons.TwoTone.Info,
                     headlineContentText = stringResource(R.string.about_detail),
@@ -183,7 +232,7 @@ fun PreferredPage(
                 )
             }
             item {
-                SettingsAboutItem(
+                SettingsAboutItemWidget(
                     context = context,
                     imageVector = Icons.TwoTone.SystemUpdate,
                     headlineContentText = stringResource(R.string.get_update),
@@ -606,35 +655,7 @@ fun PrivacyPolicy() {
 }*/
 
 @Composable
-fun SettingsAboutItem(
-    context: Context,
-    modifier: Modifier = Modifier,
-    imageVector: ImageVector,
-    imageContentDescription: String? = null,
-    headlineContentText: String,
-    supportingContentText: String? = null,
-    onClick: () -> Unit
-) {
-    val vibrator = context.getSystemService(Vibrator::class.java)
-    ListItem(
-        leadingContent = {
-            Icon(
-                imageVector = imageVector,
-                contentDescription = imageContentDescription,
-                modifier = modifier
-            )
-        },
-        headlineContent = { Text(text = headlineContentText) },
-        supportingContent = { supportingContentText?.let { Text(text = it) } },
-        modifier = Modifier.clickable {
-            onClick()
-            vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-        }
-    )
-}
-
-@Composable
-fun BottomSheetContent(
+private fun BottomSheetContent(
     context: Context,
     title: String
 ) {

@@ -1,7 +1,8 @@
-package com.rosan.installer.ui.widget.icons
+package com.rosan.installer.ui.icons
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
+import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.NotInterested
@@ -12,6 +13,10 @@ import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.outlined.WebAsset
 import androidx.compose.material.icons.twotone.ArrowDropDown
+import androidx.compose.material.icons.twotone.HourglassDisabled
+import androidx.compose.material.icons.twotone.HourglassEmpty
+import androidx.compose.material.icons.twotone.KeyboardArrowDown
+import androidx.compose.material.icons.twotone.PermDeviceInformation
 
 /**
  * 将图标统一管理在一个对象中
@@ -43,8 +48,30 @@ object AppIcons {
     val Ignore = Icons.Outlined.NotInterested
 
     /**
-     * 安装对话框图标集合
+     * 箭头图标集合
      */
-    val ArrowDropDown = Icons.TwoTone.ArrowDropDown
+    // 实心三角小箭头
+    val ArrowDropDownFilled = Icons.TwoTone.ArrowDropDown
     val ArrowRight = Icons.AutoMirrored.TwoTone.ArrowRight
+
+    // DropDown用的箭头
+    val ArrowDropDown = Icons.TwoTone.KeyboardArrowDown
+    // Not needed since rotation animation is handled in the UI
+    // val ArrowDropUp = Icons.TwoTone.KeyboardArrowUp
+
+    /**
+     * 沙漏图标集合
+     */
+    val Pausing = Icons.TwoTone.HourglassDisabled
+    val Working = Icons.TwoTone.HourglassEmpty
+
+    /**
+     * 菜单图标
+     */
+    val MenuOpen = Icons.AutoMirrored.TwoTone.MenuOpen
+
+    /**
+     * 权限管理
+     */
+    val Permission = Icons.TwoTone.PermDeviceInformation
 }

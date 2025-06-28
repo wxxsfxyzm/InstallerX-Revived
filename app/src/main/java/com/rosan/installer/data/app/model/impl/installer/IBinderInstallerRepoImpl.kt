@@ -18,7 +18,7 @@ import android.os.ServiceManager
 import com.rosan.dhizuku.shared.DhizukuVariables
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.app.model.entity.InstallEntity
-import com.rosan.installer.data.app.model.entity.InstallExtraEntity
+import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.app.util.InstallFlag
 import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.installFlags
@@ -65,7 +65,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     private suspend fun getPackageInstaller(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraEntity
+        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
     ): PackageInstaller {
         val iPackageManager =
             IPackageManager.Stub.asInterface(iBinderWrapper(ServiceManager.getService("package")))
@@ -113,7 +113,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     override suspend fun doWork(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraEntity
+        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
     ) {
         val result = kotlin.runCatching {
             entities.groupBy { it.packageName }.forEach { (packageName, entities) ->
@@ -129,7 +129,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     private suspend fun doInnerWork(
         config: ConfigEntity,
         entities: List<InstallEntity>,
-        extra: InstallExtraEntity,
+        extra: InstallExtraInfoEntity,
         packageName: String
     ) {
         if (entities.isEmpty()) return
@@ -150,7 +150,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     private suspend fun createSession(
         config: ConfigEntity,
         entities: List<InstallEntity>,
-        extra: InstallExtraEntity,
+        extra: InstallExtraInfoEntity,
         packageInstaller: PackageInstaller,
         packageName: String
     ): Session {
@@ -183,14 +183,14 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     private suspend fun installIts(
         config: ConfigEntity,
         entities: List<InstallEntity>,
-        extra: InstallExtraEntity,
+        extra: InstallExtraInfoEntity,
         session: Session
     ) {
         for (entity in entities) installIt(config, entity, extra, session)
     }
 
     private suspend fun installIt(
-        config: ConfigEntity, entity: InstallEntity, extra: InstallExtraEntity, session: Session
+        config: ConfigEntity, entity: InstallEntity, extra: InstallExtraInfoEntity, session: Session
     ) {
         val inputStream = entity.data.getInputStreamWhileNotEmpty()
             ?: throw Exception("can't open input stream for this data: '${entity.data}'")
@@ -208,7 +208,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     private fun commit(
         config: ConfigEntity,
         entities: List<InstallEntity>,
-        extra: InstallExtraEntity,
+        extra: InstallExtraInfoEntity,
         session: Session
     ) {
         val receiver = LocalIntentReceiver()
@@ -219,23 +219,36 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     open suspend fun doFinishWork(
         config: ConfigEntity,
         entities: List<InstallEntity>,
-        extra: InstallExtraEntity,
+        extraInfo: InstallExtraInfoEntity,
         result: Result<Unit>
     ) {
 
+        if (result.isSuccess && config.isExtendedMenuEnabled) {
+            Timber.tag("doFinishWork").d("ExtendedMenu enabled, do extra work")
+            coroutineScope.launch {
+                runCatching { onExtraWork() }.exceptionOrNull()
+                    ?.printStackTrace()
+                onExtraWork()
+            }
+        }
         if (result.isSuccess && config.autoDelete) {
             Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
             coroutineScope.launch {
-                kotlin.runCatching { onDeleteWork(config, entities, extra) }.exceptionOrNull()
+                runCatching { onDeleteWork(config, entities, extraInfo) }.exceptionOrNull()
                     ?.printStackTrace()
             }
         }
     }
 
+    protected open suspend fun onExtraWork() {
+        // Override this method to perform any extra work after installation
+        Timber.tag("onExtraWork").d("No extra work defined.")
+    }
+
     protected open suspend fun onDeleteWork(
         config: ConfigEntity,
         entities: List<InstallEntity>,
-        extra: InstallExtraEntity
+        extra: InstallExtraInfoEntity
     ) {
         fun special() = null
         val authorizer = config.authorizer

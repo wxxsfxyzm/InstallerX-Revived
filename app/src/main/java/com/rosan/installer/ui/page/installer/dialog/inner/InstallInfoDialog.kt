@@ -51,11 +51,11 @@ import com.rosan.installer.data.app.util.AppIconCache
 import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.widget.icons.AppIcons
 import org.koin.compose.getKoin
 
 /**
@@ -216,7 +216,7 @@ fun InstallInfoDialog( // 大写开头
                                 modifier = Modifier.basicMarquee()
                             )
                             Icon(
-                                imageVector = AppIcons.ArrowDropDown,
+                                imageVector = AppIcons.ArrowDropDownFilled,
                                 contentDescription = "to",
                                 tint =
                                     if (oldInfo.versionCode > entityToInstall.versionCode)

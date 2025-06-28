@@ -8,7 +8,7 @@
 # https://mvnrepository.com/
 
 [versions]
-agp = "8.10.1"
+agp = "8.11.0"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
 composeBom = "2025.06.01"
@@ -47,9 +47,12 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
+compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "compose" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
 compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-compose-uiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
 compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.0" }
 compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
 

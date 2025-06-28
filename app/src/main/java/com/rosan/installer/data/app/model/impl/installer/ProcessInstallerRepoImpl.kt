@@ -3,7 +3,7 @@ package com.rosan.installer.data.app.model.impl.installer
 import android.os.IBinder
 import com.rosan.app_process.AppProcess
 import com.rosan.installer.data.app.model.entity.InstallEntity
-import com.rosan.installer.data.app.model.entity.InstallExtraEntity
+import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.recycle.model.impl.AppProcessRecyclers
 import com.rosan.installer.data.recycle.repo.Recyclable
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -12,7 +12,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     private lateinit var recycler: Recyclable<AppProcess>
 
     override suspend fun doWork(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraEntity
+        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
     ) {
         recycler = AppProcessRecyclers.get(
             when (config.authorizer) {
@@ -30,7 +30,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     override suspend fun doFinishWork(
         config: ConfigEntity,
         entities: List<InstallEntity>,
-        extra: InstallExtraEntity,
+        extra: InstallExtraInfoEntity,
         result: Result<Unit>
     ) {
         super.doFinishWork(config, entities, extra, result)

@@ -12,4 +12,10 @@ sealed class PreferredViewAction {
 
     data class ChangeGlobalInstallMode(val installMode: ConfigEntity.InstallMode) :
         PreferredViewAction()
+
+    data class ChangeShowDialogInstallExtendedMenu(val showMenu: Boolean) :
+        PreferredViewAction()
+
+    data class ChangeDhizukuAutoCloseCountDown(val countDown: Int) :
+        PreferredViewAction()
 }
