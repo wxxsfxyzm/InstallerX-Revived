@@ -10,9 +10,10 @@ import java.io.File
 @Suppress("LogNotTimber")
 fun deletePaths(paths: Array<out String>) {
     for (path in paths) {
-        Log.d("DELETE_PATH", "path: $path")
-        println("Deleting path: $path")
-        val file = File(path)
+        val target = pathUnify(path)
+        Log.d("DELETE_PATH", "path: $target")
+        println("Deleting path: $target")
+        val file = File(target)
         Log.d("DELETE_PATH", "file: $file")
         if (file.exists()) {
             Log.d("DELETE_PATH", "Deleting file: $file")
@@ -21,6 +22,13 @@ fun deletePaths(paths: Array<out String>) {
         }
     }
 }
+
+fun pathUnify(path: String): String =
+    // 处理路径前缀，确保路径统一
+    if (path.startsWith("/mnt/user/0")) {
+        path.replace("/mnt/user/0", "/storage")
+    } else path
+
 
 val InstallIntentFilter = IntentFilter().apply {
     addAction(Intent.ACTION_MAIN)

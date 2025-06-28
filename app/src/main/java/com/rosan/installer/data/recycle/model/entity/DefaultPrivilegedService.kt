@@ -15,6 +15,7 @@ import android.util.Log
 import androidx.core.net.toUri
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.deletePaths
+import com.rosan.installer.data.recycle.util.pathUnify
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.inject
 import java.io.IOException
@@ -28,18 +29,21 @@ class DefaultPrivilegedService : BasePrivilegedService() {
     @SuppressLint("LogNotTimber")
     override fun delete(paths: Array<out String>) {
         for (path in paths) {
-            Log.d("DELETE_PATH", "准备通过 rm -f 命令删除文件: $path")
+            // 部分系统路径可能以 "/mnt/user/0" 开头，shell无权访问，这里进行处理
+            val target = pathUnify(path)
+            Log.d("DELETE_PATH", "准备通过 rm -f 命令删除文件: $target")
             // println("通过 rm -f 命令删除文件: $path")
             try {
                 // 严格执行 "rm -f"，只删除文件，不进行递归操作
-                val result = execArr(arrayOf("rm", "-f", path))
+                val result = execArr(arrayOf("rm", "-f", target))
+                Log.d("DELETE_PATH", "执行结果: $result")
                 // 判断执行结果是否为空字符串
                 if (result.isEmpty()) {
                     // 为空，代表命令成功执行且无输出，这是预期的成功情况
-                    Log.d("DELETE_PATH", "成功删除 $path (命令无输出)")
+                    Log.d("DELETE_PATH", "成功删除 $target (命令无输出)")
                 } else {
                     // 如果有输出，可能是非致命的警告或某些特殊情况，记录下来以供排查
-                    Log.w("DELETE_PATH", "删除 $path 时命令有输出，请关注: $result")
+                    Log.w("DELETE_PATH", "删除 $target 时命令有输出，请关注: $result")
                 }
             } catch (e: IOException) {
                 // 如果执行过程中发生 IOException，记录错误信息，并尝试回退到 deletePaths 方法
