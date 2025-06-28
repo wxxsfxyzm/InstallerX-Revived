@@ -1,9 +1,11 @@
 package com.rosan.installer.data.recycle.model.impl
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.ServiceConnection
 import android.os.IBinder
+import android.util.Log
 import androidx.annotation.Keep
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.dhizuku.api.DhizukuUserServiceArgs
@@ -22,7 +24,6 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
-import timber.log.Timber
 
 object DhizukuUserServiceRecycler : Recycler<DhizukuUserServiceRecycler.UserServiceProxy>(),
     KoinComponent {
@@ -37,16 +38,22 @@ object DhizukuUserServiceRecycler : Recycler<DhizukuUserServiceRecycler.UserServ
         }
     }
 
+    @SuppressLint("LogNotTimber")
     class DhizukuUserService @Keep constructor(context: Context) : IDhizukuUserService.Stub() {
         init {
             // 在远程服务进程中，必须首先初始化 Dhizuku API。
             // 否则会导致AssertionError
-            if (!Dhizuku.init(context)) {
+            if (Dhizuku.init(context)) {
                 // 在此处记录日志，因为初始化失败将导致所有后续操作失败。
                 // 也可以选择抛出一个异常来提前终止。
-                Timber.tag("DhizukuUserService")
-                    .e("CRITICAL: Dhizuku.init() failed in remote process!")
+                Log.d("DhizukuUserService", "Dhizuku.init() succeeded in remote process!")
+            } else {
+                Log.e("DhizukuUserService", "CRITICAL: Dhizuku.init() failed in remote process!")
             }
+            Log.d(
+                "DhizukuUserService",
+                "Dhizuku.mOwnerComponent: ${Dhizuku.getOwnerComponent()}"
+            )
             startKoin {
                 modules(processModules)
                 androidContext(context)
@@ -68,9 +75,19 @@ object DhizukuUserServiceRecycler : Recycler<DhizukuUserServiceRecycler.UserServ
 
     private suspend fun onInnerMake(): UserServiceProxy = callbackFlow {
         val connection = object : ServiceConnection {
+            @SuppressLint("LogNotTimber")
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                if (service == null) {
+                    // 记录一个明确的错误，并通知调用者连接失败
+                    Log.e(
+                        "onServiceConnected",
+                        "Failed to connect to DhizukuUserService because the remote service failed to start."
+                    )
+                    close(IllegalStateException("Remote service connection failed."))
+                    return
+                }
                 trySend(UserServiceProxy(this, IDhizukuUserService.Stub.asInterface(service)))
-                service?.linkToDeath({
+                service.linkToDeath({
                     if (entity?.service == service) recycleForcibly()
                 }, 0)
             }

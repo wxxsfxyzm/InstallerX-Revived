@@ -252,9 +252,6 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     ) {
         fun special() = null
         val authorizer = config.authorizer
-        Timber.tag("useUserService").d(
-            "useUserService: authorizer=$authorizer, entities=${entities.sourcePath()}"
-        )
         useUserService(
             config, if (authorizer == ConfigEntity.Authorizer.None
                 || authorizer == ConfigEntity.Authorizer.Dhizuku
