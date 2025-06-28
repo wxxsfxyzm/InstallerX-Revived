@@ -1,21 +1,5 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
-// Remove unused imports related to building subtitle manually
-// import androidx.compose.foundation.basicMarquee
-// import androidx.compose.foundation.layout.Arrangement
-// import androidx.compose.foundation.layout.Column
-// import androidx.compose.foundation.layout.size
-// import androidx.compose.material.icons.Icons
-// import androidx.compose.material.icons.filled.ArrowDownward
-// import androidx.compose.material3.Icon
-// import androidx.compose.material3.MaterialTheme
-// import androidx.compose.material3.Text
-// import androidx.compose.ui.Alignment
-// import androidx.compose.ui.Modifier
-// import androidx.compose.ui.text.style.TextAlign
-// import androidx.compose.ui.unit.dp
-// import com.rosan.installer.data.app.model.entity.AppEntity // No longer needed here
-// import com.rosan.installer.data.app.util.sortedBest // No longer needed here
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -102,7 +86,7 @@ fun installSuccessDialog( // 小写开头
                                 .i("Force start succeeded for $packageName. Closing dialog.")
                             viewModel.dispatch(DialogViewAction.Close)
                         } else {
-                            // --- 第二步：主方法失败，回退到您完整的原始逻辑 (备用方案) ---
+                            // --- 第二步：主方法失败，回退到原始逻辑 (备用方案) ---
                             Timber.tag("HybridStart")
                                 .w("Force start failed. Falling back to original standard method.")
 
@@ -158,6 +142,7 @@ fun installSuccessDialog( // 小写开头
  *
  * @param targetPackageName 要检查的应用包名。
  * @param config 用于执行高权限Shell命令的配置实体。
+ * @param viewModel 用于处理自动关闭倒计时的ViewModel。
  * @return `true` 如果应用成功切换到前台, `false` 如果超时。
  */
 private suspend fun isAppInForeground(
@@ -168,10 +153,10 @@ private suspend fun isAppInForeground(
     if (config.authorizer == ConfigEntity.Authorizer.Dhizuku) {
         Timber.tag("isAppInForeground")
             .d("Dhizuku does not support shell commands, waiting for auto-close countdown.")
-        delay(viewModel.autoCloseCountDown * 1000L) // Wait for the auto-close countdown
+        delay(viewModel.autoCloseCountDown * 1000L)
         Timber.tag("isAppInForeground")
             .d("Auto-close countdown finished, returning false.")
-        return false // Dhizuku does not support shell commands
+        return false
     }
     // Use withTimeoutOrNull to limit the execution time to 10 seconds
     val result = withTimeoutOrNull(10000L) {
@@ -202,7 +187,8 @@ private suspend fun isAppInForeground(
  * @param config 用于执行高权限Shell命令的配置实体。
  * @return 当前前台应用的包名，如果无法获取则返回空字符串。
  */
-// TODO Dhizuku在SDK36上调用命令会直接内部错误，不能使用
+// Dhizuku在SDK36上调用命令会直接内部错误，不能使用
+// 直接在上级函数处理延时
 private fun getTopApp(
     config: ConfigEntity
 ): String {
