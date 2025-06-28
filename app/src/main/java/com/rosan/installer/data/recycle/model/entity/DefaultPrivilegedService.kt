@@ -1,5 +1,6 @@
 package com.rosan.installer.data.recycle.model.entity
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentFilter
@@ -10,9 +11,10 @@ import android.content.pm.ResolveInfo
 import android.os.Build
 import android.os.RemoteException
 import android.os.ServiceManager
+import android.util.Log
 import androidx.core.net.toUri
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
-import com.rosan.installer.data.recycle.util.delete
+import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.inject
 import java.io.IOException
@@ -22,7 +24,30 @@ import android.os.Process as AndroidProcess
 class DefaultPrivilegedService : BasePrivilegedService() {
     private val reflect by inject<ReflectRepo>()
 
-    override fun delete(paths: Array<out String>) = paths.delete()
+    // Privileged Process is not Main Process, so we use Log.d instead of Timber
+    @SuppressLint("LogNotTimber")
+    override fun delete(paths: Array<out String>) {
+        for (path in paths) {
+            Log.d("DELETE_PATH", "准备通过 rm -f 命令删除文件: $path")
+            // println("通过 rm -f 命令删除文件: $path")
+            try {
+                // 严格执行 "rm -f"，只删除文件，不进行递归操作
+                val result = execArr(arrayOf("rm", "-f", path))
+                // 判断执行结果是否为空字符串
+                if (result.isEmpty()) {
+                    // 为空，代表命令成功执行且无输出，这是预期的成功情况
+                    Log.d("DELETE_PATH", "成功删除 $path (命令无输出)")
+                } else {
+                    // 如果有输出，可能是非致命的警告或某些特殊情况，记录下来以供排查
+                    Log.w("DELETE_PATH", "删除 $path 时命令有输出，请关注: $result")
+                }
+            } catch (e: IOException) {
+                // 如果执行过程中发生 IOException，记录错误信息，并尝试回退到 deletePaths 方法
+                Log.e("DELETE_PATH", "删除 $path 失败: ${e.message}，回退方法")
+                deletePaths(paths)
+            }
+        }
+    }
 
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
         val uid = AndroidProcess.myUid()
@@ -224,11 +249,21 @@ class DefaultPrivilegedService : BasePrivilegedService() {
      */
     @Throws(IOException::class, InterruptedException::class)
     private fun readResult(process: Process): String {
-        // 使用 'use' 块可以自动关闭流，更安全、简洁
-        val output = process.inputStream.bufferedReader().use { reader ->
-            reader.readText()
+        // 分别读取标准输出和标准错误
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        val error = process.errorStream.bufferedReader().use { it.readText() }
+
+        // 等待命令执行完成，并获取退出码
+        val exitCode = process.waitFor()
+
+        // 检查退出码。0 通常代表成功，任何非零值都代表失败。
+        if (exitCode != 0) {
+            // 如果失败了，就构造一个详细的错误信息并抛出 IOException
+            // 这样 execArr 方法里的 catch 块就能捕捉到它，并转换成 RemoteException
+            throw IOException("命令执行失败，退出码: $exitCode, 错误信息: '$error'")
         }
-        process.waitFor()
+
+        // 如果成功，返回标准输出的内容
         return output
     }
 }

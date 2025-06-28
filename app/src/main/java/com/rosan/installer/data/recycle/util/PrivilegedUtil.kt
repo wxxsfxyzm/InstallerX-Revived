@@ -3,19 +3,22 @@ package com.rosan.installer.data.recycle.util
 import android.content.ContentResolver
 import android.content.Intent
 import android.content.IntentFilter
-import timber.log.Timber
+import android.util.Log
 import java.io.File
 
-fun Array<out String>.delete() {
-    for (path in this) {
-        Timber.tag("DELETE_PATH").d("path: $path")
-        val file = File(
-            if (path.startsWith("/mnt/user/0/emulated/0")) {
-                path.replace("/mnt/user/0/emulated/0", "/storage/emulated/0")
-            } else path
-        )
-        Timber.tag("DELETE_PATH").d("file: $file")
-        if (file.exists()) file.delete()
+// Privileged Process is not Main Process, so we use Log.d instead of Timber
+@Suppress("LogNotTimber")
+fun deletePaths(paths: Array<out String>) {
+    for (path in paths) {
+        Log.d("DELETE_PATH", "path: $path")
+        println("Deleting path: $path")
+        val file = File(path)
+        Log.d("DELETE_PATH", "file: $file")
+        if (file.exists()) {
+            Log.d("DELETE_PATH", "Deleting file: $file")
+            println("Deleting file: $file")
+            file.delete()
+        }
     }
 }
 

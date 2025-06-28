@@ -4,16 +4,15 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import com.rosan.dhizuku.api.Dhizuku
-import com.rosan.dhizuku.shared.DhizukuVariables
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
-import com.rosan.installer.data.recycle.util.delete
+import com.rosan.installer.data.recycle.util.deletePaths
 import timber.log.Timber
 
 class DhizukuPrivilegedService : BasePrivilegedService() {
     private val devicePolicyManager: DevicePolicyManager =
         context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
 
-    override fun delete(paths: Array<out String>) = paths.delete()
+    override fun delete(paths: Array<out String>) = deletePaths(paths)
 
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
         try {
