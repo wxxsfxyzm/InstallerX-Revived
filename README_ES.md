@@ -39,6 +39,9 @@ Además, comparado con sistemas nativos, **InstallerX** ofrece más opciones de 
 
 ## Preguntas frecuentes
 
+- **¿El bloqueador no funciona?**
+  - Debido a cambios en el nombre del paquete, debes usar la versión modificada del bloqueador en este repositorio: [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
+
 - **HyperOS muestra el error** `Instalar apps del sistema requiere declarar un instalador válido` **¿Qué hacer?**
   - Restricción de seguridad del sistema. Debes declarar un instalador de sistema en la configuración (recomendado: `com.android.fileexplorer` o `com.android.vending`).
   - En el futuro se podría añadir: *"Detección automática de HyperOS para agregar instalador en la configuración predeterminada"*.

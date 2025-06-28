@@ -39,6 +39,9 @@ Compared to stock systems, **InstallerX** offers more installation options:
 
 ## FAQ
 
+- **Lock tool not working?**
+  - Due to package name changes, you need to use the modified lock tool from this repository: [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
+
 - **HyperOS shows error** `System app installation requires valid installer declaration` **what to do?**
   - System security restriction. You need to declare a system app as installer in settings (recommended: `com.android.fileexplorer` or `com.android.vending`)
   - Planning to add: "Auto-detect HyperOS and add installer to default config"
