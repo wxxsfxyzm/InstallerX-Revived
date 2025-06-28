@@ -32,6 +32,9 @@ SDK 30-33有限支持，有问题发issue
 
 ## 常见问题
 
+- 锁定器无法锁定怎么办
+  - 由于包名改变，需要使用本仓库的修改版锁定器[InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
+
 - HyperOS更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
   - 系统安全限制，需要在配置中声明安装者为系统app，推荐 `com.android.fileexplorer` 或 `com.android.vending`
   - 考虑以后增加 `检测到系统为HyperOS自动为Default配置加上安装者` 的功能
