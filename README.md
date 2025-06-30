@@ -10,7 +10,8 @@
 
 ## 介绍
 
-> A modern and functional Android app installer. (You know some birds are not meant to be caged, their feathers are just too bright.) 
+> A modern and functional Android app installer. (You know some birds are not meant to be caged,
+> their feathers are just too bright.)
 
 一款应用安装程序，为什么不试试【InstallerX】？
 
@@ -20,33 +21,43 @@
 
 ## 支持版本
 
-SDK 34 以上
+支持 Android SDK 34 - 36
 
-SDK 30-33有限支持，有问题发issue
+对 Android SDK 30-33 提供有限支持，如有问题请提交 issue
 
 ## 变更内容
 
 - UI简化
 - 修复了原仓库项目无法正确删除安装包的问题
-- 文本调整，支持繁体中文。更多语言欢迎PR
-- 修改待安装应用版本号的显示效果
+- 文本调整，支持繁体中文，西班牙语。更多语言欢迎PR
+- 修改对话框安装的显示效果
 - 加入了安装时显示targetSDK与minSDK的功能
+- Shizuku/Root安装完成打开App时可以绕过定制UI的链式启动拦截
+    - 目前仅实现了对话框安装
+    - Dhizuku无法调用shell权限，因此加了一个倒计时自定义选项，给打开app的操作预留一定时间
+- 为对话框安装提供一个扩展菜单，可以在设置中启用
+    - 实验性功能，目前仅实现了应用权限的查看
 
 ## 常见问题
 
 - 锁定器无法锁定怎么办
-  - 由于包名改变，需要使用本仓库的修改版锁定器[InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
+    -
+    由于包名改变，需要使用本仓库的修改版锁定器[InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
 
 - HyperOS更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
-  - 系统安全限制，需要在配置中声明安装者为系统app，推荐 `com.android.fileexplorer` 或 `com.android.vending`
-  - 考虑以后增加 `检测到系统为HyperOS自动为Default配置加上安装者` 的功能
- 
+    - 系统安全限制，需要在配置中声明安装者为系统app，推荐 `com.android.fileexplorer` 或
+      `com.android.vending`
+    - 后续考虑增加 `检测到系统为 HyperOS 时自动为 Default 配置加上安装者` 的功能
+
 - Oppo/Vivo/联想的系统用不了了怎么办
-  - 手头没有这些品牌的手机，可以前往 [Disscussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions) 进行讨论
+    -
+    手头没有这些品牌的手机，可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)
+    进行讨论
 
 ## 开源协议
 
-Copyright (C)  [iamr0s](https://github.com/iamr0s) and contributors
+Copyright (C)  [iamr0s](https://github.com/iamr0s)
+and [Contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
 
 InstallerX目前基于 [**GNU General Public License v3 (GPL-3)**](http://www.gnu.org/copyleft/gpl.html)
 开源，但不保证未来依然继续遵循此协议或开源，有权更改开源协议或开源状态。
