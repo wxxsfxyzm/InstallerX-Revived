@@ -40,9 +40,12 @@
 
 ## 常见问题
 
+- Dhizuku无法使用怎么办
+    - 我不使用Dhizuku，对它了解也不多...但是已经尽力考虑过Dhizuku的使用需求，在SDK34以上AVD均有测试，SDK34以下无法保证
+    - Dhizuku的权限不够大，很多操作无法完成，例如绕过系统intent拦截，指定安装来源等，有条件建议使用Shizuku
+
 - 锁定器无法锁定怎么办
-    -
-    由于包名改变，需要使用本仓库的修改版锁定器[InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
+    - 由于包名改变，需要使用本仓库的修改版锁定器[InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
 
 - HyperOS更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
     - 系统安全限制，需要在配置中声明安装者为系统app，推荐 `com.android.fileexplorer` 或
@@ -50,14 +53,12 @@
     - 后续考虑增加 `检测到系统为 HyperOS 时自动为 Default 配置加上安装者` 的功能
 
 - Oppo/Vivo/联想的系统用不了了怎么办
-    -
-    手头没有这些品牌的手机，可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)
+    - 手头没有这些品牌的手机，可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)
     进行讨论
 
 ## 开源协议
 
-Copyright (C)  [iamr0s](https://github.com/iamr0s)
-and [Contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
+Copyright (C)  [iamr0s](https://github.com/iamr0s) and [Contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
 
 InstallerX目前基于 [**GNU General Public License v3 (GPL-3)**](http://www.gnu.org/copyleft/gpl.html)
 开源，但不保证未来依然继续遵循此协议或开源，有权更改开源协议或开源状态。
