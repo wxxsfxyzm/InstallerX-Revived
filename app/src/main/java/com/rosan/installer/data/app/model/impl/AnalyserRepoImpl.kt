@@ -14,6 +14,7 @@ import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import timber.log.Timber
 import java.io.BufferedReader
 import java.io.File
 import java.util.zip.ZipEntry
@@ -26,7 +27,9 @@ object AnalyserRepoImpl : AnalyserRepo {
         data: List<DataEntity>,
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
-        val apps = mutableListOf<AppEntity>()
+        // --- Logic to analyse data and return a list of AppEntity ---
+        // 1. 先收集所有原始分析结果
+        val rawApps = mutableListOf<AppEntity>()
 
         val analysers = mapOf(
             DataType.APK to ApkAnalyserRepoImpl,
@@ -38,6 +41,9 @@ object AnalyserRepoImpl : AnalyserRepo {
         data.forEach {
             val type = kotlin.runCatching { getDataType(config, it) ?: DataType.APK }
                 .getOrDefault(DataType.APK)
+            Timber.tag("AnalyserRepoImpl").d(
+                "getDataType: $type"
+            )
             val analyser =
                 analysers[type] ?: throw Exception("can't found analyser for this data: '$data'")
             val value = tasks[analyser] ?: mutableListOf()
@@ -45,9 +51,36 @@ object AnalyserRepoImpl : AnalyserRepo {
             tasks[analyser] = value
         }
         for ((key, value) in tasks) {
-            apps.addAll(key.doWork(config, value, extra))
+            rawApps.addAll(key.doWork(config, value, extra))
         }
-        return apps
+
+        // 2. 按packageName分组
+        val groupedByPackage = rawApps.groupBy { it.packageName }
+        val finalApps = mutableListOf<AppEntity>()
+
+        // 3. 遍历每个包，进行信息修正
+        groupedByPackage.forEach { (_, entitiesInPackage) ->
+            // 找到这个包里的BaseEntity，它是信息的来源
+            val baseEntity =
+                entitiesInPackage.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+
+            if (baseEntity != null) {
+                // 如果找到了BaseEntity，用它的targetSdk去修正所有其他实体
+                val authoritativeTargetSdk = baseEntity.targetSdk
+                entitiesInPackage.forEach { entity ->
+                    val correctedEntity = when (entity) {
+                        is AppEntity.SplitEntity -> entity.copy(targetSdk = authoritativeTargetSdk) // 修正SplitEntity
+                        is AppEntity.DexMetadataEntity -> entity.copy(targetSdk = authoritativeTargetSdk) // 修正DexMetadataEntity
+                        else -> entity // BaseEntity自身或其他类型保持不变
+                    }
+                    finalApps.add(correctedEntity)
+                }
+            } else {
+                // 如果在这个分组里没有找到BaseEntity（例如只安装一个split.apk），则直接添加，不做修正
+                finalApps.addAll(entitiesInPackage)
+            }
+        }
+        return finalApps
     }
 
     private fun getDataType(config: ConfigEntity, data: DataEntity): DataType? =
