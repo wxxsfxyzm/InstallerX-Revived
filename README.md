@@ -31,6 +31,7 @@
 - 修复了原仓库项目无法正确删除安装包的问题
 - 文本调整，支持繁体中文，西班牙语。更多语言欢迎PR
 - 修改对话框安装的显示效果
+- 支持显示系统图标包 方法来自[RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt)
 - 加入了安装时显示targetSDK与minSDK的功能
 - Shizuku/Root安装完成打开App时可以绕过定制UI的链式启动拦截
     - 目前仅实现了对话框安装
