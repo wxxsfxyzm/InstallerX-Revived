@@ -30,7 +30,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.KoinAndroidContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
@@ -229,13 +228,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 progress is ProgressEntity.Finish
             ) return@setContent
             InstallerTheme {
-                KoinAndroidContext {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        InstallerPage(installer)
-                    }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    InstallerPage(installer)
                 }
             }
         }

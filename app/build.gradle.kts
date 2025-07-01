@@ -184,6 +184,7 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.core.splashscreen)
     //implementation(libs.androidx.foundation)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.compose.ui)
@@ -217,8 +218,8 @@ dependencies {
 
     implementation(libs.lottie.compose)
 
-    implementation(libs.accompanist.navigationAnimation)
-    implementation(libs.accompanist.flowlayout)
+    //implementation(libs.accompanist.navigationAnimation)
+    //implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.drawablepainter)
 
     implementation(libs.rikka.shizuku.api)
