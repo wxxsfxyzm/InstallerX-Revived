@@ -41,6 +41,18 @@ data class ConfigEntity(
             allowDowngrade = false,
             autoDelete = false,
         )
+
+        val XiaomiDefault = ConfigEntity(
+            description = "",
+            authorizer = Authorizer.Global,
+            customizeAuthorizer = "",
+            installMode = InstallMode.Dialog,
+            installer = "com.android.fileexplorer",
+            forAllUser = false,
+            allowTestOnly = false,
+            allowDowngrade = false,
+            autoDelete = false,
+        )
     }
 
     @Ignore
