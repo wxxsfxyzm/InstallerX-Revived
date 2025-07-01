@@ -24,14 +24,51 @@ object RsConfig {
         else
             "%s (API %s)".format(Build.VERSION.RELEASE, Build.VERSION.SDK_INT)
 
-    val deviceName: String
+    val manufacturer: String
+        get() = Build.MANUFACTURER.uppercase()
+
+    /**
+     * 获取当前设备的制造商枚举。
+     * 这个属性会读取系统的制造商信息，并将其匹配到预定义的 Manufacturer 枚举上。
+     * @return 返回匹配到的 Manufacturer 枚举常量，如果不在列表中则返回 UNKNOWN。
+     */
+    val currentManufacturer: Manufacturer
         get() {
-            var manufacturer = Build.MANUFACTURER.uppercase()
-            val brand = Build.BRAND.uppercase()
-            if (!TextUtils.equals(brand, manufacturer)) manufacturer += " $brand"
-            manufacturer += " " + Build.MODEL
-            return manufacturer
+            // 获取制造商字符串并转换为大写，以便进行不区分大小写的比较
+            val manufacturerString = manufacturer
+            // 使用 when 表达式将字符串匹配到枚举
+            return when (manufacturerString) {
+                "GOOGLE" -> Manufacturer.GOOGLE
+                "HUAWEI" -> Manufacturer.HUAWEI
+                "HONOR" -> Manufacturer.HONOR
+                "OPPO" -> Manufacturer.OPPO
+                "VIVO" -> Manufacturer.VIVO
+                "XIAOMI" -> Manufacturer.XIAOMI
+                "ONEPLUS" -> Manufacturer.ONEPLUS
+                "REALME" -> Manufacturer.REALME
+                "SAMSUNG" -> Manufacturer.SAMSUNG
+                "SONY" -> Manufacturer.SONY
+                "ASUS" -> Manufacturer.ASUS
+                "MOTOROLA" -> Manufacturer.MOTOROLA
+                "NOKIA" -> Manufacturer.NOKIA
+                "LG" -> Manufacturer.LG
+                "ZTE" -> Manufacturer.ZTE
+                "LENOVO" -> Manufacturer.LENOVO
+                "MEIZU" -> Manufacturer.MEIZU
+                "SMARTISAN" -> Manufacturer.SMARTISAN
+                "BLACKSHARK" -> Manufacturer.BLACKSHARK
+                else -> Manufacturer.UNKNOWN // 如果没有匹配到任何已知厂商，返回 UNKNOWN
+            }
         }
+
+    val brand = Build.BRAND.uppercase()
+
+    val deviceName: String
+        get() = if (!TextUtils.equals(brand, manufacturer))
+            manufacturer + " " + brand + " " + Build.MODEL
+        else
+            manufacturer + " " + Build.MODEL
+
 
     val systemStruct: String
         get() {

@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.dao.AppDao
 import com.rosan.installer.data.settings.model.room.dao.ConfigDao
 import com.rosan.installer.data.settings.model.room.entity.AppEntity
@@ -50,8 +52,12 @@ abstract class InstallerRoom : RoomDatabase() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         // 延迟获取已初始化的 Database 实例
                         val database = get<InstallerRoom>()
+                        val defaultConfig = when (RsConfig.currentManufacturer) {
+                            Manufacturer.XIAOMI -> ConfigEntity.XiaomiDefault
+                            else -> ConfigEntity.default
+                        }
                         CoroutineScope(Dispatchers.IO).launch {
-                            database.configDao.insert(ConfigEntity.default)
+                            database.configDao.insert(defaultConfig)
                         }
                     }
                 })
