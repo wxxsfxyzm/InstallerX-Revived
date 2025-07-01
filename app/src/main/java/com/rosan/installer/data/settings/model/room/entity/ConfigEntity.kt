@@ -46,9 +46,6 @@ data class ConfigEntity(
     @Ignore
     var isExtendedMenuEnabled: Boolean = false
 
-    @Ignore
-    var isShowDialogWhenPressingNotificationEnabled: Boolean = true
-
     val isCustomizeAuthorizer: Boolean
         get() = authorizer == Authorizer.Customize
 
