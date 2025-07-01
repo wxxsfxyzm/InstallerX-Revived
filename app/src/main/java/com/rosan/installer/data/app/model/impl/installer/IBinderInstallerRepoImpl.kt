@@ -15,7 +15,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.IInterface
 import android.os.ServiceManager
-import com.rosan.dhizuku.shared.DhizukuVariables
+import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
@@ -24,6 +24,7 @@ import com.rosan.installer.data.app.util.InstallFlag
 import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.installFlags
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
+import com.rosan.installer.data.recycle.util.requireDhizukuPermissionGranted
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -73,7 +74,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             IPackageInstaller.Stub.asInterface(iBinderWrapper(iPackageManager.packageInstaller.asBinder()))
 
         val installerPackageName = when (config.authorizer) {
-            ConfigEntity.Authorizer.Dhizuku -> DhizukuVariables.OFFICIAL_PACKAGE_NAME
+            ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName()
             ConfigEntity.Authorizer.None -> BuildConfig.APPLICATION_ID
             else -> config.installer
         }
@@ -102,6 +103,11 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                 extra.userId
             )) as PackageInstaller
     }
+
+    private suspend fun getDhizukuComponentName(): String? =
+        requireDhizukuPermissionGranted {
+            Dhizuku.getOwnerPackageName()
+        }
 
     private suspend fun setSessionIBinder(session: Session) {
         val field = getFiled(session::class.java, "mSession", IPackageInstallerSession::class.java)
