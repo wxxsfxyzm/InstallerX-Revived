@@ -249,6 +249,8 @@
     <string name="downgrade_version_prefix">Downgrade</string>
     <string name="install_choice">Select PKG</string>
 
+    <string name="show_dialog_when_pressing_notification">Show Dialog when pressing Notification</string>
+    <string name="change_notification_touch_behavior">Change Notification touch behavior</string>
     <string name="show_dialog_install_extended_menu">Show extended menu</string>
     <string name="show_dialog_install_extended_menu_desc">Show more options in the install dialog</string>
     <string name="set_countdown">Set countdown</string>
