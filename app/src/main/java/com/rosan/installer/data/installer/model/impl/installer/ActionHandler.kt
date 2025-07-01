@@ -71,6 +71,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     private suspend fun resolve(activity: Activity) {
+        // resolve 函数的核心作用是解析文件/URI并填充 installer.data。
+        // 如果 data 字段已经有内容，说明解析已经成功完成过一次，
+        // 这是一个多余的调用，应当直接忽略，以防止后续流程出错。
+        if (installer.data.isNotEmpty()) {
+            return
+        }
+
         installer.progress.emit(ProgressEntity.Resolving)
 
         // 直接开始执行核心的解析逻辑

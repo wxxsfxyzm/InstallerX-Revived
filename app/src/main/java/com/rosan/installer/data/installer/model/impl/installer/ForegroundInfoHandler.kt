@@ -89,7 +89,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val icon = (if (isWorking) Icon.Working else Icon.Pausing).resId
 
         var builder = NotificationCompat.Builder(context, channel.id).setSmallIcon(icon)
-            .setContentIntent(openIntent)
+            .setContentIntent(
+                /* if (installer.config.installMode == ConfigEntity.InstallMode.Notification ||
+                     installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
+                 ) openIntent else null*/openIntent
+            )
             .setDeleteIntent(finishIntent)
 
         installProgresses[progress]?.let {
