@@ -110,7 +110,7 @@ fun PreferredPage(
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
     }
 
-    // Migrate to installSplashScreen
+    // TODO Migrate to installSplashScreen
     // move init logic to splash screen
     LaunchedEffect(true) {
         viewModel.dispatch(PreferredViewAction.Init)
@@ -142,11 +142,11 @@ fun PreferredPage(
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-    ) {
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
+                .padding(paddingValues)
         ) {
             item { LabelWidget(stringResource(R.string.global)) }
             // item { DataAuthorizerWidget(viewModel) }
@@ -207,6 +207,25 @@ fun PreferredPage(
                     ) {
                         viewModel.dispatch(
                             PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
+                        )
+                    }
+                }
+            }
+            item {
+                AnimatedVisibility(
+                    visible = state.installMode == ConfigEntity.InstallMode.Notification ||
+                            state.installMode == ConfigEntity.InstallMode.AutoNotification,
+                    enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
+                    exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                ) {
+                    SwitchWidget(
+                        icon = AppIcons.Dialog,
+                        title = stringResource(id = R.string.show_dialog_when_pressing_notification),
+                        description = stringResource(id = R.string.change_notification_touch_behavior),
+                        checked = viewModel.state.showDialogWhenPressingNotification
+                    ) {
+                        viewModel.dispatch(
+                            PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
                         )
                     }
                 }

@@ -11,9 +11,11 @@ import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerC
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import timber.log.Timber
 
 class PreferredViewModel(
     private val appDataStore: AppDataStore
@@ -37,6 +39,10 @@ class PreferredViewModel(
                 action.showMenu
             )
 
+            is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialogWhenPressingNotification(
+                action.showDialog
+            )
+
             is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(
                 action.countDown
             )
@@ -55,6 +61,8 @@ class PreferredViewModel(
                 .map { InstallModeConverter.revert(it) }
             val showDialogInstallExtendedMenuFlow =
                 appDataStore.getBoolean("show_dialog_install_extended_menu")
+            val showDialogWhenPressingNotificationFlow =
+                appDataStore.getBoolean("show_dialog_when_pressing_notification", true)
             val dhizukuAutoCloseCountDownFlow =
                 appDataStore.getInt("show_dhizuku_auto_close_count_down_menu", 3)
 
@@ -63,15 +71,23 @@ class PreferredViewModel(
                 customizeAuthorizerFlow,
                 installModeFlow,
                 showDialogInstallExtendedMenuFlow,
+                showDialogWhenPressingNotificationFlow,
                 dhizukuAutoCloseCountDownFlow
-            ) { authorizer, customize, installMode, showDialogInstallMenu, countDown ->
+            ) { values: Array<Any?> ->
+                val authorizer = values[0] as ConfigEntity.Authorizer
+                val customize = values[1] as String
+                val installMode = values[2] as ConfigEntity.InstallMode
+                val showMenu = values[3] as Boolean
+                val showDialog = values[4] as Boolean
+                val countDown = values[5] as Int
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
                     authorizer = authorizer,
                     customizeAuthorizer = customizeAuthorizer,
                     installMode = installMode,
-                    showDialogInstallExtendedMenu = showDialogInstallMenu,
+                    showDialogInstallExtendedMenu = showMenu,
+                    showDialogWhenPressingNotification = showDialog,
                     dhizukuAutoCloseCountDown = countDown,
                 )
             }.collectLatest { state = it }
@@ -106,7 +122,16 @@ class PreferredViewModel(
         }
     }
 
-    fun changeDhizukuAutoCloseCountDown(countDown: Int) {
+    private fun changeShowDialogWhenPressingNotification(showDialog: Boolean) {
+        viewModelScope.launch {
+            appDataStore.putBoolean("show_dialog_when_pressing_notification", showDialog)
+            val value =
+                appDataStore.getBoolean("show_dialog_when_pressing_notification", false).first()
+            Timber.tag("ForegroundInfoHandler").d("实际存储值: $value")
+        }
+    }
+
+    private fun changeDhizukuAutoCloseCountDown(countDown: Int) {
         viewModelScope.launch {
             // Ensure countDown is within the valid range
             if (countDown in 1..10) {

@@ -1,10 +1,12 @@
 package com.rosan.installer.data.installer.model.impl.installer
 
+import android.Manifest
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -14,17 +16,23 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.util.getInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.activity.InstallTriggerActivity
 import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import timber.log.Timber
 
 class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
+
     enum class Channel(val value: String) {
         InstallerChannel("installer_channel"), InstallerProgressChannel("installer_progress_channel")
     }
@@ -37,6 +45,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private val context by inject<Context>()
 
+    private val appDataStore by inject<AppDataStore>()
+    
     private val notificationManager = NotificationManagerCompat.from(context)
 
     private val notificationId = installer.id.hashCode() and Int.MAX_VALUE
@@ -88,11 +98,24 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         val icon = (if (isWorking) Icon.Working else Icon.Pausing).resId
 
+        val showDialog = runBlocking {
+            appDataStore.getBoolean("show_dialog_when_pressing_notification", false).first()
+        }
+
         var builder = NotificationCompat.Builder(context, channel.id).setSmallIcon(icon)
             .setContentIntent(
-                /* if (installer.config.installMode == ConfigEntity.InstallMode.Notification ||
-                     installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
-                 ) openIntent else null*/openIntent
+
+                when (installer.config.installMode) {
+                    ConfigEntity.InstallMode.Notification,
+                    ConfigEntity.InstallMode.AutoNotification -> {
+                        Timber.tag("ForegroundInfoHandler").d("Using openIntent for notification")
+                        Timber.tag("ForegroundInfoHandler")
+                            .d("isShowDialogWhenPressingNotificationEnabled: $showDialog")
+                        if (showDialog) openIntent else null
+                    }
+
+                    else -> openIntent
+                }
             )
             .setDeleteIntent(finishIntent)
 
@@ -127,6 +150,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         job = scope.launch {
             var progress: ProgressEntity = ProgressEntity.Ready
             var background = false
+
+            @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
             fun refresh() {
                 setNotification(newNotification(progress, background))
             }
@@ -145,6 +170,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
     }
 
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override suspend fun onFinish() {
         setNotification(null)
         job?.cancel()
@@ -185,6 +211,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }*/
 
     // 简化 setNotification 方法，移除其中的权限检查逻辑
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun setNotification(notification: Notification? = null) {
         if (notification == null) {
             notificationManager.cancel(notificationId)

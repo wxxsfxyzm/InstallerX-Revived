@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
+import timber.log.Timber
 
 /**
  * Utility class for managing configuration settings.
@@ -51,6 +52,10 @@ class ConfigUtil {
             return appDataStore.getBoolean("show_dialog_install_extended_menu", false).first()
         }
 
+        suspend fun getShowDialogWhenPressingNotification(): Boolean {
+            return appDataStore.getBoolean("show_dialog_when_pressing_notification", false).first()
+        }
+
         suspend fun getByPackageName(packageName: String? = null): ConfigEntity {
             var entity = getByPackageNameInner(packageName)
             if (entity.authorizer == ConfigEntity.Authorizer.Global)
@@ -64,6 +69,10 @@ class ConfigUtil {
             return entity.apply {
                 // --- 如果需要获取全局配置的其他字段，可以在这里添加 ---
                 this.isExtendedMenuEnabled = getShowDialogInstallExtendedMenu()
+                this.isShowDialogWhenPressingNotificationEnabled =
+                    getShowDialogWhenPressingNotification()
+                Timber.tag("ForegroundInfoHandler")
+                    .d("从datastore读取的值: ${this.isShowDialogWhenPressingNotificationEnabled}")
             }
         }
 

@@ -7,6 +7,7 @@ data class PreferredViewState(
     val customizeAuthorizer: String = "",
     val installMode: ConfigEntity.InstallMode = ConfigEntity.InstallMode.Dialog,
     val showDialogInstallExtendedMenu: Boolean = false,
+    val showDialogWhenPressingNotification: Boolean = true,
     val dhizukuAutoCloseCountDown: Int = 3
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
