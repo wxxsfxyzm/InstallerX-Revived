@@ -6,7 +6,6 @@ package com.rosan.installer.ui.page.installer.dialog.inner
 // import androidx.compose.runtime.remember // No longer needed here
 // import androidx.compose.runtime.setValue // No longer needed here
 // import com.rosan.installer.ui.page.installer.dialog.DialogViewState // No longer needed here
-import android.content.Context
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -39,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -56,7 +56,6 @@ import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
-import org.koin.compose.getKoin
 
 /**
  * Provides info display: Icon, Title, Subtitle (with version logic).
@@ -70,18 +69,16 @@ fun InstallInfoDialog( // 大写开头
     preInstallAppInfo: InstalledAppInfo?, // Crucial parameter: Info *before* install operation
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
-    val context: Context = getKoin().get()
+    val context = LocalContext.current
     val density = LocalDensity.current
 
-    val entityToInstall =
-        installer.entities.filter { it.selected }.map { it.app }.sortedBest().firstOrNull()
-            ?: return DialogParams()
+    val selectedApps = installer.entities.filter { it.selected }.map { it.app }
+    // If no apps are selected, return empty DialogParams
+    val entityToInstall = selectedApps.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+        ?: selectedApps.sortedBest().firstOrNull()
+        ?: return DialogParams()
 
     // No need for remembered state or LaunchedEffect here, logic depends directly on passed preInstallAppInfo
-
-    /*    val displayIcon: Drawable? =
-            (if (entityToInstall is AppEntity.BaseEntity) entityToInstall.icon else preInstallAppInfo?.icon)
-                ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)*/
 
     // --- ICON INTEGRATION LOGIC ---
 
@@ -131,6 +128,7 @@ fun InstallInfoDialog( // 大写开头
     val painterIcon =
         displayIcon ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
 
+    // --- Icon Logic End ---
 
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.InstallerInfo.id) {
@@ -189,14 +187,13 @@ fun InstallInfoDialog( // 大写开头
                 if (entityToInstall is AppEntity.BaseEntity) {
                     // 直接使用传入的 preInstallAppInfo 作为旧版本信息
                     val oldInfo = preInstallAppInfo
-
                     if (oldInfo == null) {
                         // 首次安装或无法获取旧信息: 只显示新版本，不带前缀
                         Text(
                             text = stringResource(
                                 R.string.installer_version, // Use base version string
                                 entityToInstall.versionName,
-                                entityToInstall.versionCode.toLong()
+                                entityToInstall.versionCode
                             ),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.basicMarquee()
@@ -248,7 +245,6 @@ fun InstallInfoDialog( // 大写开头
                 }
                 // --- SDK版本变动显示 ---
                 // 如果有SDK信息则显示SDK
-
                 val oldInfo = preInstallAppInfo
                 // Min SDK
                 entityToInstall.minSdk?.let { newMinSdk ->
@@ -332,7 +328,6 @@ fun InstallInfoDialog( // 大写开头
                 }
             }
         }
-        // --- 修改结束 ---
         // buttons parameter removed, to be set by caller via .copy()
     )
 }
