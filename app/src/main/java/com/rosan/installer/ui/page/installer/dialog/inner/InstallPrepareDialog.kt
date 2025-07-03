@@ -133,7 +133,7 @@ fun installPrepareDialog( // 小写开头
         installer, viewModel
     )
 
-    val entityToInstall = entities.first()
+    val entityToInstall = entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
     var showChips by remember { mutableStateOf(false) }
     val showDialogInstallExtendedMenu by produceState(initialValue = false) {
