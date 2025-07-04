@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.More
@@ -28,11 +29,12 @@ import androidx.compose.material.icons.twotone.PsychologyAlt
 import androidx.compose.material.icons.twotone.Save
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -41,6 +43,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -66,7 +69,8 @@ import org.koin.core.parameter.parametersOf
 import kotlin.math.absoluteValue
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class
+    ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
+    ExperimentalMaterial3ExpressiveApi::class
 )
 @Composable
 fun EditPage(
@@ -82,7 +86,21 @@ fun EditPage(
         mutableStateOf(true)
     }
     val showFloating by showFloatingState
-
+    val listState = rememberLazyListState()
+    // 新增: 判断是否滚动到底部的状态
+    val isScrolledToEnd by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            val visibleItemsInfo = layoutInfo.visibleItemsInfo
+            if (layoutInfo.totalItemsCount == 0) {
+                false
+            } else {
+                val lastVisibleItem = visibleItemsInfo.lastOrNull()
+                // 如果最后一个可见项的索引是列表总数减一，则认为到达了底部
+                lastVisibleItem?.index == layoutInfo.totalItemsCount - 1
+            }
+        }
+    }
     val snackBarHostState = remember {
         SnackbarHostState()
     }
@@ -123,17 +141,33 @@ fun EditPage(
                             )
                         )
                     }
+                },
+                // 新增: 当滚动到底部时，在 actions 中显示 FAB
+                actions = {
+                    AnimatedVisibility(
+                        visible = isScrolledToEnd, // 只有在滚动到底部时可见
+                        enter = scaleIn(),
+                        exit = scaleOut()
+                    ) {
+                        IconButton(onClick = { viewModel.dispatch(EditViewAction.SaveData) }) {
+                            Icon(
+                                imageVector = Icons.TwoTone.Save,
+                                contentDescription = stringResource(R.string.save)
+                            )
+                        }
+                    }
                 }
             )
         },
+        // 修改: 只有在未滚动到底部时，才在右下角显示 FAB
         floatingActionButton = {
             AnimatedVisibility(
-                visible = showFloating,
+                visible = !isScrolledToEnd && showFloating, // 在未滚动到底部且 showFloating 为 true 时可见
                 enter = scaleIn(),
                 exit = scaleOut()
             ) {
                 val text = stringResource(R.string.save)
-                ExtendedFloatingActionButton(
+                SmallExtendedFloatingActionButton(
                     icon = {
                         Icon(
                             imageVector = Icons.TwoTone.Save,
@@ -155,6 +189,7 @@ fun EditPage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),
+            state = listState, // 关键: 将 state 传入 LazyColumn
         ) {
             item { DataNameWidget(viewModel = viewModel) }
             item { DataDescriptionWidget(viewModel = viewModel) }

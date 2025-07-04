@@ -1,7 +1,8 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -9,8 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.*
+import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
+import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun installingDialog( // 小写开头
     installer: InstallerRepo, viewModel: DialogViewModel
@@ -30,7 +36,12 @@ fun installingDialog( // 小写开头
         text = DialogInnerParams(
             DialogParamsType.InstallerInstalling.id
         ) {
-            LinearProgressIndicator(Modifier.fillMaxWidth())
+            // --- M3E ---
+            // LinearProgressIndicator(Modifier.fillMaxWidth())
+            LinearWavyProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                amplitude = 0.5f
+            )
         },
         buttons = DialogButtons(DialogParamsType.ButtonsCancel.id) {
             listOf(

@@ -207,7 +207,7 @@ fun InstallInfoDialog( // 大写开头
                                 text = stringResource(R.string.old_version_prefix) + stringResource(
                                     R.string.installer_version_short,
                                     oldInfo.versionName,
-                                    oldInfo.versionCode.toLong()
+                                    oldInfo.versionCode
                                 ),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.basicMarquee()
@@ -231,7 +231,7 @@ fun InstallInfoDialog( // 大写开头
                                     ) else stringResource(R.string.downgrade_version_prefix) + stringResource(
                                     R.string.installer_version_short,
                                     entityToInstall.versionName,
-                                    entityToInstall.versionCode.toLong()
+                                    entityToInstall.versionCode
                                 ),
                                 color = if (oldInfo.versionCode > entityToInstall.versionCode)
                                     MaterialTheme.colorScheme.error

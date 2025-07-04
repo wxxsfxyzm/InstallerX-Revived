@@ -36,7 +36,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Sort
-import androidx.compose.material.icons.twotone.ArrowUpward
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Menu
@@ -96,6 +95,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.ui.common.ViewContent
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.installer.dialog.inner.Chip
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.widget.toggle.Toggle
@@ -217,7 +217,7 @@ fun ApplyPage(
                         lazyListState.animateScrollToItem(0)
                     }
                 }) {
-                    Icon(imageVector = Icons.TwoTone.ArrowUpward, contentDescription = null)
+                    Icon(imageVector = AppIcons.ArrowUp, contentDescription = null)
                 }
             }
         }) {

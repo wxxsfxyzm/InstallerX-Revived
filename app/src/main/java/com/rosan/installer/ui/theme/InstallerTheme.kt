@@ -5,7 +5,8 @@ import android.os.Build
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -18,6 +19,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.core.view.WindowCompat
 import com.rosan.installer.R
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InstallerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -25,10 +27,10 @@ fun InstallerTheme(
     dynamicColor: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
     val colorScheme = when {
         // 添加版本检查
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
@@ -59,7 +61,7 @@ fun InstallerTheme(
 
     DisableNavigationBarContrast(view)
 
-    MaterialTheme(
+    MaterialExpressiveTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
