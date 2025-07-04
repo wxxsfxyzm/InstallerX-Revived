@@ -246,7 +246,7 @@
 
     <string name="show_dialog_when_pressing_notification">點擊通知時顯示對話框</string>
     <string name="change_notification_touch_behavior">更改通知觸控行為</string>
-    <string name="show_dialog_install_extended_menu">顯示擴展選單</string>
+    <string name="show_dialog_install_extended_menu">顯示擴展選單「實驗性」</string>
     <string name="show_dialog_install_extended_menu_desc">在安裝對話框中顯示更多操作選項</string>
     <string name="set_countdown">設定倒數計時</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku安裝成功後自動關閉的倒數計時</string>
