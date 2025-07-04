@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.outlined.WebAsset
 import androidx.compose.material.icons.twotone.ArrowDropDown
+import androidx.compose.material.icons.twotone.ArrowUpward
 import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
@@ -58,6 +59,8 @@ object AppIcons {
     val ArrowDropDown = Icons.TwoTone.KeyboardArrowDown
     // Not needed since rotation animation is handled in the UI
     // val ArrowDropUp = Icons.TwoTone.KeyboardArrowUp
+
+    val ArrowUp = Icons.TwoTone.ArrowUpward
 
     /**
      * 沙漏图标集合
