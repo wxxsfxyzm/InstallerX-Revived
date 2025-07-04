@@ -24,9 +24,9 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FlexibleBottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalWideNavigationRail
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.WideNavigationRail
 import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.rememberWideNavigationRailState
@@ -205,7 +205,7 @@ fun ColumnNavigation(
     val state = rememberWideNavigationRailState()
     val scope = rememberCoroutineScope()
 
-    ModalWideNavigationRail(
+    WideNavigationRail(
         state = state,
         windowInsets = windowInsets,
         //expandedHeaderTopPadding = 64.dp,
