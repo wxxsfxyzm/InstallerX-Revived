@@ -39,6 +39,22 @@ class DialogViewModel(
     var autoCloseCountDown by mutableIntStateOf(3)
         private set
 
+    var disableNotificationOnDismiss by mutableStateOf(false)
+        private set
+
+    /**
+     * Determines if the dialog can be dismissed by tapping the scrim.
+     * Dismissal is disallowed during ongoing operations like installing.
+     */
+    val isDismissible
+        get() = when (state) {
+            is DialogViewState.Analysing,
+            is DialogViewState.Installing,
+            is DialogViewState.Resolving -> false
+
+            else -> true
+        }
+
     private val _preInstallAppInfo = MutableStateFlow<InstalledAppInfo?>(null)
     val preInstallAppInfo: StateFlow<InstalledAppInfo?> = _preInstallAppInfo.asStateFlow()
 
@@ -51,7 +67,6 @@ class DialogViewModel(
     // 新增一个标志位，来判断是否已经初始化过
     private var isInitialPermissionsSet = false
 
-
     private var fetchPreInstallInfoJob: Job? = null
     private var autoInstallJob: Job? = null
     private var collectRepoJob: Job? = null
@@ -61,6 +76,9 @@ class DialogViewModel(
             // 读取设置，假设 settingsRepo.getInt 支持默认值
             autoCloseCountDown =
                 appDataStore.getInt("show_dhizuku_auto_close_count_down_menu", 3).first()
+            disableNotificationOnDismiss =
+                appDataStore.getBoolean("show_disable_notification_for_dialog_install", false)
+                    .first()
         }
     }
 
