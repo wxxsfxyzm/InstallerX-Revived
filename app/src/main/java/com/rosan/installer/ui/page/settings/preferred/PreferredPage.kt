@@ -211,9 +211,9 @@ fun PreferredPage(
                             )
                         }
                         SwitchWidget(
-                            icon = AppIcons.Notification,
-                            title = "Disable Notification",
-                            description = "Close Immediately on Dismiss",
+                            icon = AppIcons.NotificationDisabled,
+                            title = stringResource(id = R.string.disable_notification),
+                            description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
                             checked = viewModel.state.disableNotificationForDialogInstall
                         ) {
                             viewModel.dispatch(

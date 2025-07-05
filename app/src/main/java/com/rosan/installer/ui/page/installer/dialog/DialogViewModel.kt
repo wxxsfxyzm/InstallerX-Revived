@@ -73,7 +73,6 @@ class DialogViewModel(
 
     init {
         viewModelScope.launch {
-            // 读取设置，假设 settingsRepo.getInt 支持默认值
             autoCloseCountDown =
                 appDataStore.getInt("show_dhizuku_auto_close_count_down_menu", 3).first()
             disableNotificationOnDismiss =
@@ -91,10 +90,7 @@ class DialogViewModel(
             is DialogViewAction.InstallPrepare -> installPrepare()
             is DialogViewAction.InstallExtendedMenu -> installExtendedMenu()
             is DialogViewAction.InstallExtendedSubMenu -> installExtendedSubMenu()
-            is DialogViewAction.Install -> {
-                install()
-            }
-
+            is DialogViewAction.Install -> install()
             is DialogViewAction.Background -> background()
         }
     }

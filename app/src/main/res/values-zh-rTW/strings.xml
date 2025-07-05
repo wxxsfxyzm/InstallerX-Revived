@@ -248,6 +248,8 @@
     <string name="change_notification_touch_behavior">更改通知觸控行為</string>
     <string name="show_dialog_install_extended_menu">顯示擴展選單「實驗性」</string>
     <string name="show_dialog_install_extended_menu_desc">在安裝對話框中顯示更多操作選項</string>
+    <string name="disable_notification">停用通知</string>
+    <string name="close_immediately_on_dialog_dismiss">對話框關閉時立即關閉</string>
     <string name="set_countdown">設定倒數計時</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku安裝成功後自動關閉的倒數計時</string>
     <string name="grant_permission_after_install">点击以在安装完成后授予权限</string>
