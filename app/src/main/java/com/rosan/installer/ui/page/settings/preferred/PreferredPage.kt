@@ -199,15 +199,27 @@ fun PreferredPage(
                     enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
                     exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
                 ) {
-                    SwitchWidget(
-                        icon = AppIcons.MenuOpen,
-                        title = stringResource(id = R.string.show_dialog_install_extended_menu),
-                        description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
-                        checked = viewModel.state.showDialogInstallExtendedMenu
-                    ) {
-                        viewModel.dispatch(
-                            PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
-                        )
+                    Column {
+                        SwitchWidget(
+                            icon = AppIcons.MenuOpen,
+                            title = stringResource(id = R.string.show_dialog_install_extended_menu),
+                            description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
+                            checked = viewModel.state.showDialogInstallExtendedMenu
+                        ) {
+                            viewModel.dispatch(
+                                PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
+                            )
+                        }
+                        SwitchWidget(
+                            icon = AppIcons.NotificationDisabled,
+                            title = stringResource(id = R.string.disable_notification),
+                            description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
+                            checked = viewModel.state.disableNotificationForDialogInstall
+                        ) {
+                            viewModel.dispatch(
+                                PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(it)
+                            )
+                        }
                     }
                 }
             }

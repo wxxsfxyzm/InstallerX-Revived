@@ -253,6 +253,8 @@
     <string name="change_notification_touch_behavior">Change Notification touch behavior</string>
     <string name="show_dialog_install_extended_menu">Show extended menu (Experimental)</string>
     <string name="show_dialog_install_extended_menu_desc">Show more options in the install dialog</string>
+    <string name="disable_notification">Disable Notification</string>
+    <string name="close_immediately_on_dialog_dismiss">Close Immediately on Dialog Dismiss</string>
     <string name="set_countdown">Set countdown</string>
     <string name="dhizuku_auto_close_countdown_desc">Countdown to auto-close after Dhizuku installation succeeds</string>
     <string name="grant_permission_after_install">Click to grant permission after installation</string>

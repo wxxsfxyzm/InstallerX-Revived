@@ -8,6 +8,7 @@ import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.NotInterested
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.Tag
@@ -45,6 +46,7 @@ object AppIcons {
     val Dialog = Icons.Outlined.WebAsset
     val AutoDialog = Icons.Outlined.SmartDisplay
     val Notification = Icons.Outlined.Notifications
+    val NotificationDisabled = Icons.Outlined.NotificationsOff
     val AutoNotification = Icons.Outlined.NotificationsActive
     val Ignore = Icons.Outlined.NotInterested
 
