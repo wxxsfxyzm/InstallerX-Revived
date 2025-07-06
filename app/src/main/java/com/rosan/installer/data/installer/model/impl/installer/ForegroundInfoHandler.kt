@@ -1,6 +1,7 @@
 package com.rosan.installer.data.installer.model.impl.installer
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
@@ -37,7 +38,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         InstallerChannel("installer_channel"), InstallerProgressChannel("installer_progress_channel")
     }
 
-    enum class Icon(@DrawableRes val resId: Int) {
+    enum class Icon(@param:DrawableRes val resId: Int) {
         Working(R.drawable.round_hourglass_empty_black_24), Pausing(R.drawable.round_hourglass_disabled_black_24)
     }
 
@@ -46,7 +47,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val context by inject<Context>()
 
     private val appDataStore by inject<AppDataStore>()
-    
+
     private val notificationManager = NotificationManagerCompat.from(context)
 
     private val notificationId = installer.id.hashCode() and Int.MAX_VALUE
@@ -151,6 +152,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             var progress: ProgressEntity = ProgressEntity.Ready
             var background = false
 
+            @SuppressLint("MissingPermission")
             @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
             fun refresh() {
                 setNotification(newNotification(progress, background))

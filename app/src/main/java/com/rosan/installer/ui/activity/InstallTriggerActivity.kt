@@ -2,6 +2,7 @@ package com.rosan.installer.ui.activity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import com.rosan.installer.data.installer.model.impl.installer.BroadcastHandler
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -18,23 +19,41 @@ class InstallTriggerActivity : ComponentActivity(), KoinComponent {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. 从启动它的 Intent 中获取 installerId
-        val installerId = intent?.getStringExtra(InstallerActivity.KEY_ID)
+        // 核心区别：检查 Intent 中是否包含“动作名称”
+        val keyName = intent?.getStringExtra(BroadcastHandler.KEY_NAME) // 建议将 KEY_NAME 设为 public
+        val installerId = intent?.getStringExtra(BroadcastHandler.KEY_ID) // 两个逻辑都需要 ID
 
         if (installerId == null) {
-            Timber.tag("InstallTriggerActivity").e("Installer ID is null, cannot trigger install.")
-            finish() // 如果没有ID，直接销毁
+            Timber.tag("InstallTriggerActivity").e("Installer ID is null, aborting.")
+            finish()
             return
         }
 
-        // 2. 使用 Koin 获取对应的 InstallerRepo 实例
-        val installer: InstallerRepo = get { parametersOf(installerId) }
+        if (keyName != null) {
+            // --- 新增的“蹦床/代理”逻辑 ---
+            // 如果 keyName 存在，说明这是来自通知的动作代理请求
 
-        // 3. 触发安装指令
-        Timber.tag("InstallTriggerActivity").d("Triggering install for ID: $installerId")
-        installer.install()
+            Timber.tag("InstallTriggerActivity")
+                .d("Proxying action '$keyName' for ID: $installerId")
 
-        // 4. 立即销毁自己，用户不会看到任何界面
+            val installer: InstallerRepo = get { parametersOf(installerId) }
+            installer.close()
+
+        } else {
+            // --- 保留的“触发安装”原始逻辑 ---
+            // 如果 keyName 不存在，说明这是原始的触发安装请求
+
+            Timber.tag("InstallTriggerActivity").d("Triggering install for ID: $installerId")
+
+            // 1. 使用 Koin 获取对应的 InstallerRepo 实例
+            // 注意：如果你的 Koin 定义不需要参数，请使用 val installer: InstallerRepo = get()
+            val installer: InstallerRepo = get { parametersOf(installerId) }
+
+            // 2. 触发安装指令
+            installer.install()
+        }
+
+        // 无论执行哪个逻辑，最后都立即销毁自己
         finish()
     }
 }

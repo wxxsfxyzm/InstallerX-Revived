@@ -1,5 +1,6 @@
 package com.rosan.installer.data.installer.model.impl.installer
 
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -7,7 +8,7 @@ import android.content.IntentFilter
 import androidx.core.content.ContextCompat
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.installer.util.pendingActivity
-import com.rosan.installer.data.installer.util.pendingBroadcast
+import com.rosan.installer.ui.activity.InstallTriggerActivity
 import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
@@ -20,7 +21,7 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         const val KEY_ID = "installer_id"
 
-        private const val KEY_NAME = "name"
+        const val KEY_NAME = "name"
 
         private fun getRequestCode(installer: InstallerRepo, name: Name) =
             "${installer.id}/$name".hashCode()
@@ -35,11 +36,21 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .pendingActivity(context, getRequestCode(installer, Name.Launch))
 
-        fun namedIntent(context: Context, installer: InstallerRepo, name: Name) =
-            Intent(ACTION).setPackage(context.packageName)
-                .putExtra(KEY_ID, installer.id)
-                .putExtra(KEY_NAME, name.value)
-                .pendingBroadcast(context, getRequestCode(installer, name))
+        fun namedIntent(context: Context, installer: InstallerRepo, name: Name): PendingIntent =
+            // TODO 改回BroadcastReceiver传递
+            Intent(context, InstallTriggerActivity::class.java).apply {
+                // 正常放入所有数据
+                putExtra(KEY_ID, installer.id)
+                putExtra(KEY_NAME, name.value)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+            }.let {
+                PendingIntent.getActivity(
+                    context,
+                    getRequestCode(installer, name),
+                    it,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
     }
 
     private val context by inject<Context>()
