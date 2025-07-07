@@ -30,10 +30,10 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     override suspend fun doFinishWork(
         config: ConfigEntity,
         entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity,
+        extraInfo: InstallExtraInfoEntity,
         result: Result<Unit>
     ) {
-        super.doFinishWork(config, entities, extra, result)
+        super.doFinishWork(config, entities, extraInfo, result)
         recycler.recycle()
     }
 }

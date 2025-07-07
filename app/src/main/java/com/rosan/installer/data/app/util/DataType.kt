@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class DataType {
-    AUTO,
     APK,
     APKS,
     APKM,
-    XAPK
+    XAPK,
+    MULTI_APK_ZIP
 }

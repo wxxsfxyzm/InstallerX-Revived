@@ -283,10 +283,12 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }.sortedWith(compareBy({
             it.packageName
         }, {
+
             when (it) {
                 is AppEntity.BaseEntity -> it.name
                 is AppEntity.SplitEntity -> it.name
                 is AppEntity.DexMetadataEntity -> it.name
+                is AppEntity.CollectionEntity -> it.name
             }
         })).map {
             SelectInstallEntity(
@@ -310,6 +312,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                         is AppEntity.BaseEntity -> app.data
                         is AppEntity.SplitEntity -> app.data
                         is AppEntity.DexMetadataEntity -> app.data
+                        is AppEntity.CollectionEntity -> app.data
                     }
                 )
             }, InstallExtraInfoEntity(Os.getuid() / 100000, cacheDirectory))

@@ -8,6 +8,7 @@ import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
+import com.rosan.installer.data.app.model.impl.analyser.MultiApkZipAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.XApkAnalyserRepoImpl
 import com.rosan.installer.data.app.repo.AnalyserRepo
 import com.rosan.installer.data.app.util.DataType
@@ -35,7 +36,8 @@ object AnalyserRepoImpl : AnalyserRepo {
             DataType.APK to ApkAnalyserRepoImpl,
             DataType.APKS to ApksAnalyserRepoImpl,
             DataType.APKM to ApkMAnalyserRepoImpl,
-            DataType.XAPK to XApkAnalyserRepoImpl
+            DataType.XAPK to XApkAnalyserRepoImpl,
+            DataType.MULTI_APK_ZIP to MultiApkZipAnalyserRepoImpl
         )
         val tasks = mutableMapOf<AnalyserRepo, MutableList<DataEntity>>()
         data.forEach {
@@ -106,7 +108,7 @@ object AnalyserRepoImpl : AnalyserRepo {
                             containsApk = true
                             break
                         }
-                        if (containsApk) DataType.APKS else null
+                        if (containsApk) DataType.MULTI_APK_ZIP else null
                     }
                 }
             }
@@ -136,7 +138,7 @@ object AnalyserRepoImpl : AnalyserRepo {
                     zip.closeEntry()
                     if (type != null) break
                 }
-                if (type == null && containsApk) type = DataType.APKS
+                if (type == null && containsApk) type = DataType.MULTI_APK_ZIP
                 return@use type
             }
         }

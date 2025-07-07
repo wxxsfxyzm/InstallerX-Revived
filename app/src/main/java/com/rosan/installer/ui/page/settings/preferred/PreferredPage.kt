@@ -308,7 +308,7 @@ fun DataAuthorizerWidget(viewModel: PreferredViewModel) {
 }*/
 
 data class AuthorizerInfo(
-    @StringRes val labelResId: Int,
+    @param:StringRes val labelResId: Int,
     val icon: ImageVector
 )
 
@@ -448,7 +448,7 @@ fun DataInstallModeWidget(viewModel: PreferredViewModel) {
 }*/
 
 data class InstallModeInfo(
-    @StringRes val labelResId: Int,
+    @param:StringRes val labelResId: Int,
     val icon: ImageVector
 )
 
