@@ -8,6 +8,7 @@ import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
+import com.rosan.installer.data.app.model.impl.analyser.MultiApkZipAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.XApkAnalyserRepoImpl
 import com.rosan.installer.data.app.repo.AnalyserRepo
 import com.rosan.installer.data.app.util.DataType
@@ -35,7 +36,8 @@ object AnalyserRepoImpl : AnalyserRepo {
             DataType.APK to ApkAnalyserRepoImpl,
             DataType.APKS to ApksAnalyserRepoImpl,
             DataType.APKM to ApkMAnalyserRepoImpl,
-            DataType.XAPK to XApkAnalyserRepoImpl
+            DataType.XAPK to XApkAnalyserRepoImpl,
+            DataType.MULTI_APK_ZIP to MultiApkZipAnalyserRepoImpl
         )
         val tasks = mutableMapOf<AnalyserRepo, MutableList<DataEntity>>()
         data.forEach {
@@ -86,32 +88,52 @@ object AnalyserRepoImpl : AnalyserRepo {
     private fun getDataType(config: ConfigEntity, data: DataEntity): DataType? =
         when (data) {
             is DataEntity.FileEntity -> ZipFile(data.path).use { zipFile ->
+                // 优先判断标准的清单文件
                 when {
-                    zipFile.getEntry("AndroidManifest.xml") != null -> DataType.APK
-                    zipFile.getEntry("info.json") != null -> if (isGenuineApkmInfo(
-                            zipFile,
-                            zipFile.getEntry("info.json")
-                        )
-                    )
-                        DataType.APKM
-                    else
-                        DataType.APKS
-
-                    zipFile.getEntry("manifest.json") != null -> DataType.XAPK
-                    else -> {
-                        val entries = zipFile.entries().toList()
-                        var containsApk = false
-                        for (entry in entries) {
-                            if (File(entry.name).extension.toLowerCase(Locale.current) != "apk") continue
-                            containsApk = true
-                            break
-                        }
-                        if (containsApk) DataType.APKS else null
+                    zipFile.getEntry("AndroidManifest.xml") != null -> return@use DataType.APK
+                    zipFile.getEntry("info.json") != null -> {
+                        val isApkm = isGenuineApkmInfo(zipFile, zipFile.getEntry("info.json")!!)
+                        return@use if (isApkm) DataType.APKM else DataType.APKS
                     }
+
+                    zipFile.getEntry("manifest.json") != null -> return@use DataType.XAPK
                 }
+
+                // 如果没有清单文件，则进行更严格的APKS格式检查
+                var hasBaseApk = false
+                var hasSplitApk = false
+                val entries = zipFile.entries().toList()
+                for (entry in entries) {
+                    if (entry.isDirectory) continue
+                    val entryName = File(entry.name).name
+                    if (entryName == "base.apk") {
+                        hasBaseApk = true
+                    } else if (entryName.startsWith("split_") && entryName.endsWith(".apk")) {
+                        hasSplitApk = true
+                    }
+                    // 优化：如果两个条件都满足，可以提前退出循环
+                    if (hasBaseApk && hasSplitApk) break
+                }
+
+                if (hasBaseApk && hasSplitApk) {
+                    return@use DataType.APKS
+                }
+
+                // 如果以上都不是，最后检查是否为包含任意APK的通用ZIP包
+                if (entries.any {
+                        !it.isDirectory && it.name.endsWith(
+                            ".apk",
+                            ignoreCase = true
+                        )
+                    }) {
+                    return@use DataType.MULTI_APK_ZIP
+                }
+
+                return@use null
             }
 
             else -> ZipInputStream(data.getInputStream()).use { zip ->
+                Timber.tag("AnalyserRepoImpl").d("data is ZipInputStream")
                 var type: DataType? = null
                 var containsApk = false
                 while (true) {
@@ -136,7 +158,7 @@ object AnalyserRepoImpl : AnalyserRepo {
                     zip.closeEntry()
                     if (type != null) break
                 }
-                if (type == null && containsApk) type = DataType.APKS
+                if (type == null && containsApk) type = DataType.MULTI_APK_ZIP
                 return@use type
             }
         }

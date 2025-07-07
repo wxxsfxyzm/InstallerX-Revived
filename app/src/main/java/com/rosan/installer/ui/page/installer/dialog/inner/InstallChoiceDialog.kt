@@ -3,7 +3,11 @@ package com.rosan.installer.ui.page.installer.dialog.inner
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Checkbox
@@ -18,7 +22,11 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.*
+import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParams
+import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
+import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -26,7 +34,8 @@ fun installChoiceDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     val entities = installer.entities.toMutableStateList()
-    return DialogParams(icon = DialogInnerParams(
+    return DialogParams(
+        icon = DialogInnerParams(
         DialogParamsType.IconWorking.id, workingIcon
     ), title = DialogInnerParams(
         DialogParamsType.InstallChoice.id,
@@ -35,14 +44,16 @@ fun installChoiceDialog(
     }, content = DialogInnerParams(DialogParamsType.InstallChoice.id) {
         LazyColumn {
             itemsIndexed(entities) { index, item ->
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        entities[index] = item.copy(selected = !item.selected)
-                    }
-                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            entities[index] = item.copy(selected = !item.selected)
+                        }
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Checkbox(modifier = Modifier.align(Alignment.CenterVertically),
+                    Checkbox(
+                        modifier = Modifier.align(Alignment.CenterVertically),
                         checked = item.selected,
                         onCheckedChange = {
                             entities[index] = item.copy(selected = it)
@@ -84,6 +95,7 @@ fun installChoiceDialog(
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
+
                             is AppEntity.SplitEntity -> {
                                 Text(
                                     app.splitName,
@@ -107,6 +119,7 @@ fun installChoiceDialog(
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
+
                             is AppEntity.DexMetadataEntity -> {
                                 Text(
                                     app.dmName,
@@ -128,6 +141,14 @@ fun installChoiceDialog(
                                     ),
                                     modifier = Modifier.basicMarquee(),
                                     style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                            is AppEntity.CollectionEntity -> {
+                                Text(
+                                    app.label,
+                                    modifier = Modifier.basicMarquee(),
+                                    style = MaterialTheme.typography.titleMedium
                                 )
                             }
                         }

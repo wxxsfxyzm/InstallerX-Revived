@@ -47,4 +47,25 @@ sealed class AppEntity {
     ) : AppEntity() {
         override val name = "base.dm"
     }
+
+    data class CollectionEntity(
+        val data: DataEntity
+    ) : AppEntity() {
+        // --- 修正部分开始 ---
+
+        // 覆盖 AppEntity 的抽象属性
+        override val packageName: String = "com.rosan.installer.collection.${System.nanoTime()}"
+        override val name: String = "collection.zip" // 使用一个通用的名称
+        override val targetSdk: String? = null
+        override val minSdk: String? = null
+
+        // 为UI提供类似于BaseEntity的属性，但使用硬编码/默认值
+        // 这些是 CollectionEntity 自己的属性，不与父类冲突
+        val label: String = "安装包集合"
+        val versionCode: Long = -1
+        val versionName: String = ""
+        val icon: Drawable? = null
+
+        // --- 修正部分结束 ---
+    }
 }

@@ -1,0 +1,80 @@
+name: Dev Branch Build & Artifact
+
+# 仅在向 dev 分支推送提交时触发
+on:
+  push:
+    branches: [ "dev" ]
+
+jobs:
+  build_and_upload_artifact:
+    runs-on: ubuntu-latest
+    # 对于此工作流，我们只需要读取仓库内容的权限
+    permissions:
+      contents: read
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+        # fetch-depth: 0 是为了确保能获取到所有历史记录，以便后续版本操作
+        with:
+          fetch-depth: 0
+
+      # 2. 获取提交短哈希值，用于命名和版本标识
+      - name: Get commit short SHA
+        id: commit_sha
+        run: echo "SHORT_SHA=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
+
+      # 3. 设置 JDK 环境
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+          cache: gradle
+
+      # 4. 修改 versionName 格式为 A.B.C.hash
+      - name: Update versionName format
+        id: version
+        run: |
+          # 提取 A.B.C
+          VERSION=$(grep -oP 'versionName = "\K([0-9]+\.[0-9]+\.[0-9]+)' app/build.gradle.kts)
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          A=$(echo $VERSION | cut -d. -f1)
+          B=$(echo $VERSION | cut -d. -f2)
+          C=$(echo $VERSION | cut -d. -f3)
+          C_NEW=$((C + 1))
+          NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
+          sed -i "s/versionName = \".*\"/versionName = \"${NEW_VERSION}\"/" app/build.gradle.kts
+          echo "VNEW_VERSION=v${A}.${B}.${C_NEW}" >> $GITHUB_OUTPUT
+
+      # 5. 赋予 gradlew 执行权限
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # 6. 签名准备
+      #    从 Secrets 中解码签名密钥并写入配置文件
+      - name: Decode and set up signing key
+        run: |
+          mkdir -p keystore
+          echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > keystore/carlyu.jks
+          echo "storeFile=keystore/carlyu.jks" > keystore.properties
+          echo "keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}" >> keystore.properties
+          echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> keystore.properties
+          echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> keystore.properties
+
+      # 7. 构建 APK
+      - name: Build Dev Release APK
+        run: ./gradlew assembleUnstableRelease
+
+      # 8. 上传 APK 作为 Artifact
+      #    将所有构建产物打包到一个ZIP文件中
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Artifact 的名称，包含提交哈希以便于识别
+          name: dev-apk-${{ steps.commit_sha.outputs.SHORT_SHA }}
+          # 需要上传的文件的路径 (使用通配符匹配所有APK)
+          path: app/build/outputs/apk/Unstable/release/*.apk
+          # 设置产物的保留天数
+          retention-days: 15
