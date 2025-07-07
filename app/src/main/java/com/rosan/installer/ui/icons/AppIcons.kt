@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.NotInterested
 import androidx.compose.material.icons.outlined.Notifications
@@ -19,6 +20,8 @@ import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
 import androidx.compose.material.icons.twotone.PermDeviceInformation
+import androidx.compose.material.icons.twotone.RoomPreferences
+import androidx.compose.material.icons.twotone.SettingsSuggest
 
 /**
  * 将图标统一管理在一个对象中
@@ -28,6 +31,12 @@ object AppIcons {
     // 你需要添加 'androidx.compose.material:material-icons-extended' 依赖来使用所有图标
     // 或者替换成你自己的图标资源
     val Android = Icons.Default.Android
+
+    /**
+     * 导航栏图标
+     */
+    val RoomPreferences = Icons.TwoTone.RoomPreferences
+    val SettingsSuggest = Icons.TwoTone.SettingsSuggest
 
     /**
      * 授权器图标集合
@@ -73,6 +82,7 @@ object AppIcons {
     /**
      * 菜单图标
      */
+    val Menu = Icons.Filled.Menu
     val MenuOpen = Icons.AutoMirrored.TwoTone.MenuOpen
 
     /**

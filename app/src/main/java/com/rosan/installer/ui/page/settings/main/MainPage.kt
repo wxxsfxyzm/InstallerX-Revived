@@ -13,11 +13,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuOpen
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.twotone.RoomPreferences
-import androidx.compose.material.icons.twotone.SettingsSuggest
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -39,6 +34,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.config.all.AllPage
 import com.rosan.installer.ui.page.settings.preferred.PreferredPage
 import com.rosan.installer.ui.theme.exclude
@@ -56,13 +52,13 @@ fun MainPage(navController: NavController) {
                     HomePage(it)
                 },*/
         NavigationData(
-            icon = Icons.TwoTone.RoomPreferences,
+            icon = AppIcons.RoomPreferences,
             label = stringResource(R.string.config)
         ) { insets ->
             AllPage(navController, insets)
         },
         NavigationData(
-            icon = Icons.TwoTone.SettingsSuggest,
+            icon = AppIcons.SettingsSuggest,
             label = stringResource(R.string.preferred)
         ) { insets ->
             PreferredPage(insets)
@@ -233,9 +229,9 @@ fun ColumnNavigation(
                 },
             ) {
                 if (state.targetValue == WideNavigationRailValue.Expanded) {
-                    Icon(Icons.AutoMirrored.Filled.MenuOpen, "Collapse rail")
+                    Icon(AppIcons.MenuOpen, "Collapse rail")
                 } else {
-                    Icon(Icons.Filled.Menu, "Expand rail")
+                    Icon(AppIcons.Menu, "Expand rail")
                 }
             }
         }
