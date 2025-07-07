@@ -34,14 +34,19 @@ jobs:
           cache: gradle
 
       # 4. 修改 versionName 格式为 A.B.C.hash
-      #    这有助于在测试时清晰地识别 APK 对应的具体提交
       - name: Update versionName format
         id: version
         run: |
+          # 提取 A.B.C
           VERSION=$(grep -oP 'versionName = "\K([0-9]+\.[0-9]+\.[0-9]+)' app/build.gradle.kts)
-          NEW_VERSION="${VERSION}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          A=$(echo $VERSION | cut -d. -f1)
+          B=$(echo $VERSION | cut -d. -f2)
+          C=$(echo $VERSION | cut -d. -f3)
+          C_NEW=$((C + 1))
+          NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
           sed -i "s/versionName = \".*\"/versionName = \"${NEW_VERSION}\"/" app/build.gradle.kts
-          echo "Updated versionName to ${NEW_VERSION}"
+          echo "VNEW_VERSION=v${A}.${B}.${C_NEW}" >> $GITHUB_OUTPUT
 
       # 5. 赋予 gradlew 执行权限
       - name: Grant execute permission for gradlew
