@@ -1,5 +1,8 @@
 package com.rosan.installer.ui.page.settings
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
@@ -22,18 +25,20 @@ fun SettingsPage() {
     ) {
         composable(
             route = SettingsScreen.Main.route,
-            enterTransition = {
-                null
-            },
             exitTransition = {
-                null
+                // 从 MainPage 到 EditPage 时，MainPage 的退出动画
+                slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth / 4 }) +
+                        fadeOut()
             },
+            // --- MainPage 的 popEnterTransition ---
             popEnterTransition = {
-                null
+                // 当从 EditPage 返回 MainPage 时，MainPage 的进入动画
+                slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth / 4 }) +
+                        fadeIn()
             },
-            popExitTransition = {
-                null
-            }
+            // 其他参数设为 null 或保持不变
+            popExitTransition = { null },
+            enterTransition = { null }
         ) {
             MainPage(navController = navController)
         }
@@ -53,8 +58,11 @@ fun SettingsPage() {
             popEnterTransition = {
                 slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth })
             },
+            // --- EditPage 的 popExitTransition ---
             popExitTransition = {
-                slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth })
+                // 当从 EditPage 返回时，EditPage 的退出动画
+                // 它会随着手势逐渐缩小和淡出
+                scaleOut(targetScale = 0.9f) + fadeOut()
             }
         ) {
             val id = it.arguments?.getLong("id")
@@ -82,7 +90,7 @@ fun SettingsPage() {
                 slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth })
             },
             popExitTransition = {
-                slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth })
+                scaleOut(targetScale = 0.9f) + fadeOut()
             }
         ) {
             val id = it.arguments?.getLong("id")!!
