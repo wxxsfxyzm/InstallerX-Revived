@@ -39,6 +39,9 @@ class DialogViewModel(
     var autoCloseCountDown by mutableIntStateOf(3)
         private set
 
+    var showExtendedMenu by mutableStateOf(false)
+        private set
+
     var disableNotificationOnDismiss by mutableStateOf(false)
         private set
 
@@ -75,6 +78,8 @@ class DialogViewModel(
         viewModelScope.launch {
             autoCloseCountDown =
                 appDataStore.getInt("show_dhizuku_auto_close_count_down_menu", 3).first()
+            showExtendedMenu =
+                appDataStore.getBoolean("show_dialog_install_extended_menu", false).first()
             disableNotificationOnDismiss =
                 appDataStore.getBoolean("show_disable_notification_for_dialog_install", false)
                     .first()
