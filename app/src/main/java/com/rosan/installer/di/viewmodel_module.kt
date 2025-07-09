@@ -24,7 +24,7 @@ val viewModelModule = module {
     }
 
     viewModel { (id: Long?) ->
-        EditViewModel(get(), id)
+        EditViewModel(get(), get(), id)
     }
 
     viewModel { (id: Long) ->

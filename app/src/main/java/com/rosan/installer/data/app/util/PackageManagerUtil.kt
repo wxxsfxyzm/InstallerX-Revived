@@ -29,6 +29,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedSharedUserIncom
 import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
 import com.rosan.installer.data.app.model.exception.InstallFailedUidChangedException
 import com.rosan.installer.data.app.model.exception.InstallFailedUpdateIncompatibleException
+import com.rosan.installer.data.app.model.exception.InstallFailedUserRestrictedException
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationFailureException
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationTimeoutException
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
@@ -191,7 +192,7 @@ class PackageManagerUtil {
                     ecpMsg
                 )
 
-                INSTALL_FAILED_USER_RESTRICTED -> IllegalStateException(ecpMsg)
+                INSTALL_FAILED_USER_RESTRICTED -> InstallFailedUserRestrictedException(ecpMsg)
                 else -> IllegalStateException(ecpMsg)
             }
         }

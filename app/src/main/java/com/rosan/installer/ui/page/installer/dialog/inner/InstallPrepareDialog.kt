@@ -29,7 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,7 +43,6 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
@@ -136,9 +134,6 @@ fun installPrepareDialog( // 小写开头
     val entityToInstall = entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
     var showChips by remember { mutableStateOf(false) }
-    val showDialogInstallExtendedMenu by produceState(initialValue = false) {
-        value = ConfigUtil.getShowDialogInstallExtendedMenu()
-    }
 
     var forAllUser by remember { mutableStateOf(installer.config.forAllUser) }
     var allowTestOnly by remember { mutableStateOf(installer.config.allowTestOnly) }
@@ -168,7 +163,7 @@ fun installPrepareDialog( // 小写开头
     // --- NEW LOGIC: Determine message, color, and error state ---
     val context = LocalContext.current
     val (summaryText, summaryColorKey) = remember(entityToInstall, preInstallAppInfo) {
-        val newEntity = entityToInstall as? AppEntity.BaseEntity
+        val newEntity = entityToInstall
         val oldInfo = preInstallAppInfo
 
         // Highest priority: SDK check
@@ -321,7 +316,7 @@ fun installPrepareDialog( // 小写开头
                 // TODO make a new dialog only for installing apk file
                 // Add Permission review and comparison button if needed
                 // Add more buttons as needed
-                else if (showDialogInstallExtendedMenu) {
+                else if (viewModel.showExtendedMenu) {
                     add(DialogButton("菜单", 2f) {
                         viewModel.dispatch(DialogViewAction.InstallExtendedMenu)
                     })

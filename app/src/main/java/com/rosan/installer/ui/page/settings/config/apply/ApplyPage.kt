@@ -32,7 +32,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Sort
@@ -42,14 +41,15 @@ import androidx.compose.material.icons.twotone.Menu
 import androidx.compose.material.icons.twotone.Search
 import androidx.compose.material.icons.twotone.Shield
 import androidx.compose.material.icons.twotone.Visibility
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +60,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -87,11 +90,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.ui.common.ViewContent
@@ -107,7 +105,7 @@ import org.koin.core.parameter.parametersOf
 import kotlin.math.absoluteValue
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ApplyPage(
     navController: NavController, id: Long, viewModel: ApplyViewModel = koinViewModel {
@@ -183,10 +181,24 @@ fun ApplyPage(
                     }
                 }
             }, navigationIcon = {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(
+                    onClick = { navController.navigateUp() },
+                    shapes = IconButtonShapes(
+                        shape = IconButtonDefaults.standardShape,
+                        pressedShape = IconButtonDefaults.standardShape
+                    ),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        // 指定“启用”状态下的内容（图标）颜色
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+
+                        // （可选）指定“启用”状态下的容器（背景）颜色
+                        containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
+
+                    )
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.TwoTone.ArrowBack,
-                        contentDescription = stringResource(R.string.back)
+                        contentDescription = stringResource(id = R.string.back)
                     )
                 }
             }, actions = {
@@ -224,33 +236,58 @@ fun ApplyPage(
         Box(modifier = Modifier.padding(it)) {
             when {
                 viewModel.state.apps.progress is ViewContent.Progress.Loading && viewModel.state.apps.data.isEmpty() -> {
-                    LottieWidget(
-                        contentPadding = it,
-                        spec = LottieCompositionSpec.RawRes(R.raw.loading),
-                        text = stringResource(id = R.string.loading)
-                    )
+                    // 使用 Box 将加载指示器和文本居中
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // 使用 Column 将指示器和文本垂直排列
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            //  M3E 风格的加载指示器
+                            ContainedLoadingIndicator()
+                            Text(
+                                text = stringResource(id = R.string.loading),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                    }
                 }
 
                 else -> {
                     val refreshing = viewModel.state.apps.progress is ViewContent.Progress.Loading
-                    val pullRefreshState = rememberPullRefreshState(
-                        refreshing = refreshing,
-                        onRefresh = { viewModel.dispatch(ApplyViewAction.LoadApps) })
-                    Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                    val pullToRefreshState = rememberPullToRefreshState()
+                    // 使用 PullToRefreshBox 作为根容器
+                    PullToRefreshBox(
+                        state = pullToRefreshState,
+                        isRefreshing = refreshing,
+                        onRefresh = { viewModel.dispatch(ApplyViewAction.LoadApps) },
+                        modifier = Modifier.fillMaxSize(), // 将修饰符应用在这里
+                        indicator = {
+                            //  将 Indicator 替换为 LoadingIndicator
+                            PullToRefreshDefaults.LoadingIndicator(
+                                modifier = Modifier.align(Alignment.TopCenter),
+                                state = pullToRefreshState,
+                                isRefreshing = refreshing,
+                                color = MaterialTheme.colorScheme.primary,
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer
+                            )
+                        }
+                    ) {
                         ItemsWidget(
                             modifier = Modifier.fillMaxSize(),
                             viewModel = viewModel,
                             lazyListState = lazyListState
                         )
-                        PullRefreshIndicator(
-                            modifier = Modifier.align(Alignment.TopCenter),
-                            refreshing = refreshing,
-                            state = pullRefreshState
-                        )
-
+                        // PullToRefreshBox 默认已经包含了一个居中对齐的指示器 (Indicator)。
+                        // 不需要再手动添加 PullRefreshIndicator。
+                        // 如果需要自定义指示器，可以使用 indicator 参数。
                     }
 
                 }
+
             }
         }
     }
@@ -270,38 +307,6 @@ private class ShowFloatingActionButtonNestedScrollConnection(
             else available.y > 1 && lazyListState.firstVisibleItemIndex > 1
 
         return super.onPreScroll(available, source)
-    }
-}
-
-@Composable
-fun LottieWidget(
-    contentPadding: PaddingValues, spec: LottieCompositionSpec, text: String
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(contentPadding)
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val composition by rememberLottieComposition(spec)
-            val progress by animateLottieCompositionAsState(
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-            )
-            LottieAnimation(
-                modifier = Modifier.size(200.dp),
-                composition = composition,
-                progress = { progress })
-            Text(
-                text = text, style = MaterialTheme.typography.titleLarge
-            )
-        }
     }
 }
 

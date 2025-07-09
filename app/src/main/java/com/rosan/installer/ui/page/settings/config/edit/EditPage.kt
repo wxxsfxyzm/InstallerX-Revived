@@ -2,8 +2,12 @@ package com.rosan.installer.ui.page.settings.config.edit
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +36,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconButtonShapes
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallExtendedFloatingActionButton
@@ -46,7 +53,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -58,7 +64,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
@@ -133,12 +138,24 @@ fun EditPage(
                     Text(text = stringResource(id = if (id == null) R.string.add else R.string.update))
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(
+                        onClick = { navController.navigateUp() },
+                        shapes = IconButtonShapes(
+                            shape = IconButtonDefaults.standardShape,
+                            pressedShape = IconButtonDefaults.standardShape
+                        ),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            // 指定“启用”状态下的内容（图标）颜色
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+
+                            // （可选）指定“启用”状态下的容器（背景）颜色
+                            containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
+
+                        )
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.TwoTone.ArrowBack,
-                            contentDescription = stringResource(
-                                id = R.string.back
-                            )
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
@@ -261,7 +278,8 @@ fun DataDescriptionWidget(viewModel: EditViewModel) {
 
 @Composable
 fun DataAuthorizerWidget(viewModel: EditViewModel) {
-    val authorizer = viewModel.state.data.authorizer
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
     val data = mapOf(
         ConfigEntity.Authorizer.Global to stringResource(R.string.config_authorizer_global),
         ConfigEntity.Authorizer.None to stringResource(R.string.config_authorizer_none),
@@ -273,8 +291,8 @@ fun DataAuthorizerWidget(viewModel: EditViewModel) {
     DropDownMenuWidget(
         icon = Icons.TwoTone.Memory,
         title = stringResource(R.string.config_authorizer),
-        description = if (data.containsKey(authorizer)) data[authorizer] else null,
-        choice = data.keys.toList().indexOf(authorizer),
+        description = if (data.containsKey(stateAuthorizer)) data[stateAuthorizer] else null,
+        choice = data.keys.toList().indexOf(stateAuthorizer),
         data = data.values.toList(),
     ) {
         data.keys.toList().getOrNull(it)?.let {
@@ -331,53 +349,64 @@ fun DataInstallModeWidget(viewModel: EditViewModel) {
 
 @Composable
 fun DataDeclareInstallerWidget(viewModel: EditViewModel) {
-    var authorizer = viewModel.state.data.authorizer
-    if (authorizer == ConfigEntity.Authorizer.Global)
-    // authorizer = ConfigUtil.globalAuthorizer
-    {
-        val globalAuthorizer by produceState<ConfigEntity.Authorizer?>(null) {
-            value = ConfigUtil.getGlobalAuthorizer()
-        }
-        if (globalAuthorizer == null) return // 等待异步结果
-        authorizer = globalAuthorizer!!
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+
+    val isDhizuku = when (stateAuthorizer) {
+        // 如果当前授权方式是 Dhizuku，结果直接为 true
+        ConfigEntity.Authorizer.Dhizuku -> true
+        // 如果当前授权方式是 Global，则取决于全局授权方式是否为 Dhizuku
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
+        // 其他任何情况，结果都为 false
+        else -> false
     }
-    val declareInstaller = viewModel.state.data.declareInstaller
-    if (authorizer == ConfigEntity.Authorizer.Dhizuku) {
-        viewModel.dispatch(EditViewAction.ChangeDataDeclareInstaller(false))
-        return
-    }
+
+    val description =
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_installer_desc) // 假设你有一个这样的字符串资源
+        else null // 其他模式下没有特殊描述
+
     SwitchWidget(
         icon = Icons.TwoTone.Face,
         title = stringResource(id = R.string.config_declare_installer),
-        checked = declareInstaller
-    ) {
-        viewModel.dispatch(EditViewAction.ChangeDataDeclareInstaller(it))
-    }
+        checked = viewModel.state.data.declareInstaller,
+        onCheckedChange = {
+            // 这是该组件唯一允许的 dispatch，即响应用户的直接交互
+            viewModel.dispatch(EditViewAction.ChangeDataDeclareInstaller(it))
+        },
+        // 将从 ViewModel 获取的状态直接传递给下一层
+        description = description,
+        enabled = !isDhizuku,
+        isError = isDhizuku
+    )
 }
 
 @Composable
 fun DataInstallerWidget(viewModel: EditViewModel) {
-    val declareInstaller = viewModel.state.data.declareInstaller
     val installer = viewModel.state.data.installer
-    if (!declareInstaller) return
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp)
-            .focusable(),
-        leadingIcon = {
-            Icon(imageVector = Icons.TwoTone.PsychologyAlt, contentDescription = null)
-        },
-        label = {
-            Text(text = stringResource(id = R.string.config_installer))
-        },
-        value = installer,
-        onValueChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataInstaller(it))
-        },
-        singleLine = true,
-        isError = viewModel.state.data.errorInstaller
-    )
+    AnimatedVisibility(
+        visible = viewModel.state.data.declareInstaller,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 16.dp)
+                .focusable(),
+            leadingIcon = {
+                Icon(imageVector = Icons.TwoTone.PsychologyAlt, contentDescription = null)
+            },
+            label = {
+                Text(text = stringResource(id = R.string.config_installer))
+            },
+            value = installer,
+            onValueChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataInstaller(it))
+            },
+            singleLine = true,
+            isError = viewModel.state.data.errorInstaller
+        )
+    }
 }
 
 @Composable
@@ -385,10 +414,9 @@ fun DataForAllUserWidget(viewModel: EditViewModel) {
     SwitchWidget(
         icon = Icons.TwoTone.People,
         title = stringResource(id = R.string.config_for_all_user),
-        checked = viewModel.state.data.forAllUser
-    ) {
-        viewModel.dispatch(EditViewAction.ChangeDataForAllUser(it))
-    }
+        checked = viewModel.state.data.forAllUser,
+        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataForAllUser(it)) }
+    )
 }
 
 @Composable

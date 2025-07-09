@@ -7,23 +7,30 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.repo.ConfigRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class EditViewModel(
     private val repo: ConfigRepo,
+    private val appDataStore: AppDataStore,
     private val id: Long? = null
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
     var state by mutableStateOf(EditViewState())
+        private set
+
+    var globalAuthorizer by mutableStateOf(ConfigEntity.Authorizer.Global)
         private set
 
     private val _eventFlow = MutableSharedFlow<EditViewEvent>()
@@ -40,10 +47,12 @@ class EditViewModel(
                     is EditViewAction.ChangeDataCustomizeAuthorizer -> changeDataCustomizeAuthorizer(
                         action.customizeAuthorizer
                     )
+
                     is EditViewAction.ChangeDataInstallMode -> changeDataInstallMode(action.installMode)
                     is EditViewAction.ChangeDataDeclareInstaller -> changeDataDeclareInstaller(
                         action.declareInstaller
                     )
+
                     is EditViewAction.ChangeDataInstaller -> changeDataInstaller(action.installer)
                     is EditViewAction.ChangeDataForAllUser -> changeDataForAllUser(action.forAllUser)
                     is EditViewAction.ChangeDataAllowTestOnly -> changeDataAllowTestOnly(action.allowTestOnly)
@@ -91,11 +100,24 @@ class EditViewModel(
     }
 
     private fun changeDataAuthorizer(authorizer: ConfigEntity.Authorizer) {
-        state = state.copy(
-            data = state.data.copy(
-                authorizer = authorizer
-            )
+        // 更新 authorizer 的值
+        val newAuthorizer = authorizer
+        var newState = state.copy(
+            data = state.data.copy(authorizer = newAuthorizer)
         )
+
+        // 检查新 authorizer 并更新依赖它的状态
+        if (newAuthorizer == ConfigEntity.Authorizer.Dhizuku) {
+            newState = newState.copy(
+                data = newState.data.copy(
+                    // 当切换到 Dhizuku 时，强制将 declareInstaller 的真实状态也设为 false
+                    declareInstaller = false
+                )
+            )
+        }
+
+        // 3. 使用包含了所有正确状态的 newState 来更新 state
+        state = newState
     }
 
     private fun changeDataCustomizeAuthorizer(customizeAuthorizer: String) {
@@ -113,6 +135,9 @@ class EditViewModel(
             )
         )
     }
+
+    private suspend fun getGlobalAuthorizer() =
+        AuthorizerConverter.revert(appDataStore.getString("authorizer").first())
 
     private fun changeDataDeclareInstaller(declareInstaller: Boolean) {
         state = state.copy(
@@ -178,6 +203,7 @@ class EditViewModel(
             state = state.copy(
                 data = EditViewState.Data.build(id?.let { repo.find(id) } ?: ConfigEntity.default)
             )
+            globalAuthorizer = getGlobalAuthorizer()
         }
     }
 

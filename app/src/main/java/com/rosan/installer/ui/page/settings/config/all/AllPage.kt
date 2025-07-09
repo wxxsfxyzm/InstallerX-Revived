@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.twotone.Rule
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -152,10 +153,24 @@ fun AllPage(
             when {
                 viewModel.state.data.progress is AllViewState.Data.Progress.Loading
                         && viewModel.state.data.configs.isEmpty() -> {
-                    LottieWidget(
-                        spec = LottieCompositionSpec.RawRes(R.raw.loading),
-                        text = stringResource(id = R.string.loading)
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            ContainedLoadingIndicator(
+                                indicatorColor = MaterialTheme.colorScheme.primary,
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer
+                            )
+                            Text(
+                                text = stringResource(id = R.string.loading),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                    }
                 }
 
                 viewModel.state.data.progress is AllViewState.Data.Progress.Loaded
