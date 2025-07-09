@@ -253,4 +253,5 @@
     <string name="set_countdown">設定倒數計時</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku安裝成功後自動關閉的倒數計時</string>
     <string name="grant_permission_after_install">点击以在安装完成后授予权限</string>
+    <string name="permission_list">查看應用的權限列表”</string>
 </resources>
