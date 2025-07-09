@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.settings
 
-import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -44,20 +45,16 @@ fun SettingsPage() {
                 }
             ),
             enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Up,
-                )
+                slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth })
             },
             exitTransition = {
-                null
+                slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth })
             },
             popEnterTransition = {
-                null
+                slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth })
             },
             popExitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Down,
-                )
+                slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth })
             }
         ) {
             val id = it.arguments?.getLong("id")
@@ -75,10 +72,18 @@ fun SettingsPage() {
                     type = NavType.LongType
                 }
             ),
-            enterTransition = { null },
-            exitTransition = { null },
-            popEnterTransition = { null },
-            popExitTransition = { null }
+            enterTransition = {
+                slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth })
+            },
+            exitTransition = {
+                slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth })
+            },
+            popEnterTransition = {
+                slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth })
+            },
+            popExitTransition = {
+                slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth })
+            }
         ) {
             val id = it.arguments?.getLong("id")!!
             ApplyPage(
