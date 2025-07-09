@@ -204,22 +204,25 @@ fun PreferredPage(
                             icon = AppIcons.MenuOpen,
                             title = stringResource(id = R.string.show_dialog_install_extended_menu),
                             description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
-                            checked = viewModel.state.showDialogInstallExtendedMenu
-                        ) {
-                            viewModel.dispatch(
-                                PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
-                            )
-                        }
+                            checked = viewModel.state.showDialogInstallExtendedMenu,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
+                                )
+                            })
                         SwitchWidget(
                             icon = AppIcons.NotificationDisabled,
                             title = stringResource(id = R.string.disable_notification),
                             description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
-                            checked = viewModel.state.disableNotificationForDialogInstall
-                        ) {
-                            viewModel.dispatch(
-                                PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(it)
-                            )
-                        }
+                            checked = viewModel.state.disableNotificationForDialogInstall,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(
+                                        it
+                                    )
+                                )
+                            }
+                        )
                     }
                 }
             }
@@ -234,12 +237,13 @@ fun PreferredPage(
                         icon = AppIcons.Dialog,
                         title = stringResource(id = R.string.show_dialog_when_pressing_notification),
                         description = stringResource(id = R.string.change_notification_touch_behavior),
-                        checked = viewModel.state.showDialogWhenPressingNotification
-                    ) {
-                        viewModel.dispatch(
-                            PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
-                        )
-                    }
+                        checked = viewModel.state.showDialogWhenPressingNotification,
+                        onCheckedChange = {
+                            viewModel.dispatch(
+                                PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
+                            )
+                        }
+                    )
                 }
             }
             item { LabelWidget(stringResource(R.string.basic)) }

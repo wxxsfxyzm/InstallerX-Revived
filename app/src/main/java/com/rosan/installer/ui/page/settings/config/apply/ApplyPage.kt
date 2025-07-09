@@ -48,6 +48,8 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -179,10 +181,24 @@ fun ApplyPage(
                     }
                 }
             }, navigationIcon = {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(
+                    onClick = { navController.navigateUp() },
+                    shapes = IconButtonShapes(
+                        shape = IconButtonDefaults.standardShape,
+                        pressedShape = IconButtonDefaults.standardShape
+                    ),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        // 指定“启用”状态下的内容（图标）颜色
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+
+                        // （可选）指定“启用”状态下的容器（背景）颜色
+                        containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
+
+                    )
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.TwoTone.ArrowBack,
-                        contentDescription = stringResource(R.string.back)
+                        contentDescription = stringResource(id = R.string.back)
                     )
                 }
             }, actions = {
