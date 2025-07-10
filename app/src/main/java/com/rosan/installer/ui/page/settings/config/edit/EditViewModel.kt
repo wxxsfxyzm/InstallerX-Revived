@@ -10,6 +10,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
+import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
 import com.rosan.installer.data.settings.repo.ConfigRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,6 +32,9 @@ class EditViewModel(
         private set
 
     var globalAuthorizer by mutableStateOf(ConfigEntity.Authorizer.Global)
+        private set
+
+    var globalInstallMode by mutableStateOf(ConfigEntity.InstallMode.Global)
         private set
 
     private val _eventFlow = MutableSharedFlow<EditViewEvent>()
@@ -139,6 +143,9 @@ class EditViewModel(
     private suspend fun getGlobalAuthorizer() =
         AuthorizerConverter.revert(appDataStore.getString("authorizer").first())
 
+    private suspend fun getGlobalInstallMode() =
+        InstallModeConverter.revert(appDataStore.getString("install_mode").first())
+
     private fun changeDataDeclareInstaller(declareInstaller: Boolean) {
         state = state.copy(
             data = state.data.copy(
@@ -204,6 +211,7 @@ class EditViewModel(
                 data = EditViewState.Data.build(id?.let { repo.find(id) } ?: ConfigEntity.default)
             )
             globalAuthorizer = getGlobalAuthorizer()
+            globalInstallMode = getGlobalInstallMode()
         }
     }
 

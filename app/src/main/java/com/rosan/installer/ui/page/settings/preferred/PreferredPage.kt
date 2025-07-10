@@ -1,7 +1,6 @@
 package com.rosan.installer.ui.page.settings.preferred
 
 import android.content.Context
-import android.content.Intent
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.StringRes
@@ -74,14 +73,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.impl.DSRepoImpl
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
-import com.rosan.installer.ui.activity.AboutPageActivity
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.settings.SettingsScreen
 import com.rosan.installer.ui.widget.setting.BaseWidget
 import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
@@ -97,6 +97,7 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferredPage(
+    navController: NavController,
     windowInsets: WindowInsets,
     viewModel: PreferredViewModel = koinViewModel()
 ) {
@@ -260,10 +261,7 @@ fun PreferredPage(
                     imageVector = Icons.TwoTone.Info,
                     headlineContentText = stringResource(R.string.about_detail),
                     supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
-                    onClick = {
-                        val intent = Intent(context, AboutPageActivity::class.java)
-                        context.startActivity(intent)
-                    }
+                    onClick = { navController.navigate(SettingsScreen.About.route) }
                 )
             }
             item {

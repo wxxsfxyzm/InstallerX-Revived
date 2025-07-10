@@ -90,8 +90,8 @@ jobs:
           fi
 
           # 获取不包含 Merge pull request 的提交
-          CHANGELOG_LIST=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge pull request' | head -n 5)
-          CHANGELOG_COUNT=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge pull request' | wc -l)
+          CHANGELOG_LIST=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | head -n 5)
+          CHANGELOG_COUNT=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | wc -l)
 
           if [ -z "$CHANGELOG_LIST" ]; then
             CHANGELOG_BODY="No changes since the last stable release."

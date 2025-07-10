@@ -141,8 +141,8 @@ fun EditPage(
                     IconButton(
                         onClick = { navController.navigateUp() },
                         shapes = IconButtonShapes(
-                            shape = IconButtonDefaults.standardShape,
-                            pressedShape = IconButtonDefaults.standardShape
+                            shape = IconButtonDefaults.smallRoundShape,
+                            pressedShape = IconButtonDefaults.smallPressedShape
                         ),
                         colors = IconButtonDefaults.iconButtonColors(
                             // 指定“启用”状态下的内容（图标）颜色
@@ -166,7 +166,17 @@ fun EditPage(
                         enter = scaleIn(),
                         exit = scaleOut()
                     ) {
-                        IconButton(onClick = { viewModel.dispatch(EditViewAction.SaveData) }) {
+                        IconButton(
+                            onClick = { viewModel.dispatch(EditViewAction.SaveData) },
+                            shapes = IconButtonShapes(
+                                shape = IconButtonDefaults.smallRoundShape,
+                                pressedShape = IconButtonDefaults.smallPressedShape
+                            ),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
+                            )
+                        ) {
                             Icon(
                                 imageVector = Icons.TwoTone.Save,
                                 contentDescription = stringResource(R.string.save)
@@ -281,7 +291,17 @@ fun DataAuthorizerWidget(viewModel: EditViewModel) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
     val data = mapOf(
-        ConfigEntity.Authorizer.Global to stringResource(R.string.config_authorizer_global),
+        ConfigEntity.Authorizer.Global to stringResource(
+            R.string.config_authorizer_global_desc,
+            when (globalAuthorizer) {
+                ConfigEntity.Authorizer.None -> stringResource(R.string.config_authorizer_none)
+                ConfigEntity.Authorizer.Root -> stringResource(R.string.config_authorizer_root)
+                ConfigEntity.Authorizer.Shizuku -> stringResource(R.string.config_authorizer_shizuku)
+                ConfigEntity.Authorizer.Dhizuku -> stringResource(R.string.config_authorizer_dhizuku)
+                ConfigEntity.Authorizer.Customize -> stringResource(R.string.config_authorizer_customize)
+                else -> stringResource(R.string.config_authorizer_global)
+            }
+        ),
         ConfigEntity.Authorizer.None to stringResource(R.string.config_authorizer_none),
         ConfigEntity.Authorizer.Root to stringResource(R.string.config_authorizer_root),
         ConfigEntity.Authorizer.Shizuku to stringResource(R.string.config_authorizer_shizuku),
@@ -325,9 +345,20 @@ fun DataCustomizeAuthorizerWidget(viewModel: EditViewModel) {
 
 @Composable
 fun DataInstallModeWidget(viewModel: EditViewModel) {
-    val installMode = viewModel.state.data.installMode
+    val stateInstallMode = viewModel.state.data.installMode
+    val globalInstallMode = viewModel.globalInstallMode
     val data = mapOf(
-        ConfigEntity.InstallMode.Global to stringResource(R.string.config_install_mode_global),
+        ConfigEntity.InstallMode.Global to stringResource(
+            R.string.config_install_mode_global_desc,
+            when (globalInstallMode) {
+                ConfigEntity.InstallMode.Dialog -> stringResource(R.string.config_install_mode_dialog)
+                ConfigEntity.InstallMode.AutoDialog -> stringResource(R.string.config_install_mode_auto_dialog)
+                ConfigEntity.InstallMode.Notification -> stringResource(R.string.config_install_mode_notification)
+                ConfigEntity.InstallMode.AutoNotification -> stringResource(R.string.config_install_mode_auto_notification)
+                ConfigEntity.InstallMode.Ignore -> stringResource(R.string.config_install_mode_ignore)
+                else -> stringResource(R.string.config_install_mode_global)
+            }
+        ),
         ConfigEntity.InstallMode.Dialog to stringResource(R.string.config_install_mode_dialog),
         ConfigEntity.InstallMode.AutoDialog to stringResource(R.string.config_install_mode_auto_dialog),
         ConfigEntity.InstallMode.Notification to stringResource(R.string.config_install_mode_notification),
@@ -337,8 +368,8 @@ fun DataInstallModeWidget(viewModel: EditViewModel) {
     DropDownMenuWidget(
         icon = Icons.TwoTone.Downloading,
         title = stringResource(R.string.config_install_mode),
-        description = if (data.containsKey(installMode)) data[installMode] else null,
-        choice = data.keys.toList().indexOf(installMode),
+        description = if (data.containsKey(stateInstallMode)) data[stateInstallMode] else null,
+        choice = data.keys.toList().indexOf(stateInstallMode),
         data = data.values.toList(),
     ) {
         data.keys.toList().getOrNull(it)?.let {

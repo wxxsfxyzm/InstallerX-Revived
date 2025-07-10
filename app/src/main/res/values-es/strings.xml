@@ -69,6 +69,7 @@
     <string name="config_authorizer">Autorizador</string>
     <!--    <string name="config_authorizer_msg">Para ejecutar análisis y comandos, asegúrate de tener permisos suficientes.</string>-->
     <string name="config_authorizer_global">Global</string>
+    <string name="config_authorizer_global_desc">Global (%1$s) </string>
     <string name="config_authorizer_none">Ninguno</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
@@ -77,6 +78,7 @@
     <string name="config_customize_authorizer">Autorizador personalizado</string>
     <string name="config_install_mode">Modo de instalación</string>
     <string name="config_install_mode_global">Global</string>
+    <string name="config_install_mode_global_desc">Global (%1$s)</string>
     <string name="config_install_mode_dialog">Diálogo</string>
     <string name="config_install_mode_auto_dialog">Diálogo automático</string>
     <string name="config_install_mode_notification">Notificación</string>
@@ -254,5 +256,5 @@
     <string name="set_countdown">Establecer cuenta regresiva</string>
     <string name="dhizuku_auto_close_countdown_desc">Cuenta regresiva para cerrar automáticamente después de una instalación exitosa con Dhizuku</string>
     <string name="grant_permission_after_install">Haz clic para otorgar permiso después de la instalación</string>
-    
+
 </resources>

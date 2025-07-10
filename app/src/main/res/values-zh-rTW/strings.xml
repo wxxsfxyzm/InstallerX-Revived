@@ -65,6 +65,7 @@
     <string name="config_authorizer">授權器</string>
     <!--    <string name="config_authorizer_msg">用於執行解析與執行命令，請確保擁有足夠的權限。</string>-->
     <string name="config_authorizer_global">跟隨全局</string>
+    <string name="config_authorizer_global_desc">跟隨全局 （%1$s）</string>
     <string name="config_authorizer_none">無</string>
     <string name="config_authorizer_root">ROOT超级使用者</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
@@ -73,6 +74,7 @@
     <string name="config_customize_authorizer">自定授權器</string>
     <string name="config_install_mode">安装方式</string>
     <string name="config_install_mode_global">跟隨全局</string>
+    <string name="config_install_mode_global_desc">跟隨全局 （%1$s）</string>
     <string name="config_install_mode_dialog">對話框</string>
     <string name="config_install_mode_auto_dialog">對話框自動</string>
     <string name="config_install_mode_notification">通知欄</string>
