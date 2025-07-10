@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rosan.installer.ui.page.settings.config.apply.ApplyPage
 import com.rosan.installer.ui.page.settings.config.edit.EditPage
+import com.rosan.installer.ui.page.settings.home.HomePage
 import com.rosan.installer.ui.page.settings.main.MainPage
 
 @Composable
@@ -98,6 +99,24 @@ fun SettingsPage() {
                 navController = navController,
                 id = id
             )
+        }
+        composable(
+            route = SettingsScreen.About.route, // 使用新路由
+            enterTransition = { // 使用统一的进入动画
+                slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth })
+            },
+            exitTransition = { // 占位，当从 About 再导航到别的页面时使用
+                slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth })
+            },
+            popEnterTransition = { // 占位，当从其他页面返回 About 时使用
+                slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth })
+            },
+            popExitTransition = { // 当从 About 返回时，使用的退出动画
+                scaleOut(targetScale = 0.9f) + fadeOut()
+            }
+        ) {
+            // 这里直接使用 HomePage，它之前是 AboutPageActivity 的内容
+            HomePage()
         }
     }
 }

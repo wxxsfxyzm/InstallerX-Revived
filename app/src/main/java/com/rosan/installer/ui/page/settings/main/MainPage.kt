@@ -61,7 +61,7 @@ fun MainPage(navController: NavController) {
             icon = AppIcons.SettingsSuggest,
             label = stringResource(R.string.preferred)
         ) { insets ->
-            PreferredPage(insets)
+            PreferredPage(navController, insets)
         }
     )
     val scope = rememberCoroutineScope()
@@ -70,7 +70,7 @@ fun MainPage(navController: NavController) {
     fun onPageChanged(page: Int) {
         //GlobalScope.launch(Dispatchers.Main) {
         scope.launch { // 使用 rememberCoroutineScope更安全
-            pagerState.scrollToPage(page = page)
+            pagerState.animateScrollToPage(page = page)
         }
     }
 

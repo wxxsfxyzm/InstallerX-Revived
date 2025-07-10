@@ -69,6 +69,7 @@
     <string name="config_authorizer">Authorizer</string>
     <!--    <string name="config_authorizer_msg">用于执行解析与执行命令，请确保拥有足够的权限。</string>-->
     <string name="config_authorizer_global">Global</string>
+    <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">None</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
@@ -77,6 +78,7 @@
     <string name="config_customize_authorizer">Custom authorizer</string>
     <string name="config_install_mode">Install mode</string>
     <string name="config_install_mode_global">Global</string>
+    <string name="config_install_mode_global_desc">Global (%1$s)</string>
     <string name="config_install_mode_dialog">Dialog</string>
     <string name="config_install_mode_auto_dialog">Auto dialog</string>
     <string name="config_install_mode_notification">Notification</string>
