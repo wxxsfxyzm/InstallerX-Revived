@@ -56,7 +56,7 @@ data class ConfigEntity(
     }
 
     @Ignore
-    var isExtendedMenuEnabled: Boolean = false
+    var installFlags: Int = 0
 
     val isCustomizeAuthorizer: Boolean
         get() = authorizer == Authorizer.Customize

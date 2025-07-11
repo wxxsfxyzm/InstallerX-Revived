@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
@@ -67,6 +68,11 @@ class DialogViewModel(
     private val _permissionsToGrant = MutableStateFlow<Set<String>>(emptySet())
     val permissionsToGrant: StateFlow<Set<String>> = _permissionsToGrant.asStateFlow()
 
+    // 新增一个 StateFlow 来管理安装标志位 (install flags)
+    // 它的值是一个整数，通过位运算来组合所有选项
+    private val _installFlags = MutableStateFlow(0) // 默认值为0，表示没有开启任何选项
+    val installFlags: StateFlow<Int> = _installFlags.asStateFlow()
+
     // 新增一个标志位，来判断是否已经初始化过
     private var isInitialPermissionsSet = false
 
@@ -83,6 +89,14 @@ class DialogViewModel(
             disableNotificationOnDismiss =
                 appDataStore.getBoolean("show_disable_notification_for_dialog_install", false)
                     .first()
+            _installFlags.value = listOfNotNull(
+                repo.config.allowTestOnly.takeIf { it }
+                    ?.let { InstallOption.AllowTest.value },
+                repo.config.allowDowngrade.takeIf { it }
+                    ?.let { InstallOption.AllowDowngrade.value },
+                repo.config.forAllUser.takeIf { it }
+                    ?.let { InstallOption.AllUsers.value }
+            ).fold(0) { acc, flag -> acc or flag }
         }
     }
 
@@ -232,6 +246,23 @@ class DialogViewModel(
 
         // 将标志位置为 true，确保这个逻辑块不会再次执行
         isInitialPermissionsSet = true
+    }
+
+    /**
+     * 切换（启用/禁用）一个安装标志位
+     * @param flag 要操作的标志位 (来自 InstallOption.value)
+     * @param enable true 表示添加该标志位, false 表示移除该标志位
+     */
+    fun toggleInstallFlag(flag: Int, enable: Boolean) {
+        val currentFlags = _installFlags.value
+        if (enable) {
+            // 使用位或运算 (or) 来添加一个 flag
+            _installFlags.value = currentFlags or flag
+        } else {
+            // 使用位与 (and) 和 按位取反 (inv) 来移除一个 flag
+            _installFlags.value = currentFlags and flag.inv()
+        }
+        repo.config.installFlags = _installFlags.value // 同步到 repo.config
     }
 
     private fun fetchPreInstallAppInfo(packageName: String) {

@@ -8,6 +8,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedAlreadyExistsEx
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedContainerErrorException
 import com.rosan.installer.data.app.model.exception.InstallFailedCpuAbiIncompatibleException
+import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
 import com.rosan.installer.data.app.model.exception.InstallFailedDexOptException
 import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePermissionException
@@ -86,6 +87,8 @@ class PackageManagerUtil {
         const val INSTALL_FAILED_UID_CHANGED = -24
 
         const val INSTALL_FAILED_VERSION_DOWNGRADE = -25
+
+        const val INSTALL_FAILED_DEPRECATED_SDK_VERSION = -29
 
         const val INSTALL_FAILED_USER_RESTRICTED = -111
 
@@ -183,7 +186,7 @@ class PackageManagerUtil {
                 INSTALL_FAILED_PACKAGE_CHANGED -> InstallFailedPackageChangedException(ecpMsg)
                 INSTALL_FAILED_UID_CHANGED -> InstallFailedUidChangedException(ecpMsg)
                 INSTALL_FAILED_VERSION_DOWNGRADE -> InstallFailedVersionDowngradeException(ecpMsg)
-
+                INSTALL_FAILED_DEPRECATED_SDK_VERSION -> InstallFailedDeprecatedSdkVersion(ecpMsg)
                 INSTALL_FAILED_REJECTED_BY_BUILDTYPE -> InstallFailedRejectedByBuildTypeException(
                     ecpMsg
                 )

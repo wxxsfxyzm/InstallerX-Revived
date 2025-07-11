@@ -17,6 +17,7 @@ import androidx.compose.material.icons.twotone.PermDeviceInformation
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,10 +36,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.util.rememberInstallOptions
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.model.entity.ExtendedMenuEntity
 import com.rosan.installer.data.installer.model.entity.ExtendedMenuItemEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
@@ -49,42 +52,48 @@ import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.util.getBestPermissionLabel
 import timber.log.Timber
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun installExtendedMenuDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
-    val menuEntities = remember {
-        mutableStateListOf(
+    val installOptions = rememberInstallOptions()
+    val installFlags by viewModel.installFlags.collectAsState()
+    val menuEntities = remember(installOptions) {
+        // 保留原来的静态“权限列表”子菜单
+        val staticMenus = listOf(
             ExtendedMenuEntity(
                 action = InstallExtendedMenuAction.SubMenu,
                 subMenuId = InstallExtendedSubMenuId.PermissionList,
                 menuItem = ExtendedMenuItemEntity(
-                    name = "权限列表",
-                    description = "查看应用的权限列表",
+                    nameResourceId = R.string.permission_list,
+                    descriptionResourceId = R.string.permission_list_desc,
                     icon = AppIcons.Permission,
                     action = null
                 )
-            ),
-            ExtendedMenuEntity(
-                action = InstallExtendedMenuAction.Checkbox,
-                menuItem = ExtendedMenuItemEntity(
-                    name = "进行一项操作",
-                    description = "勾选在安装完成后实现一项操作",
-                    icon = null,
-                    action = null
-                )
-            ),
-            ExtendedMenuEntity(
-                action = InstallExtendedMenuAction.Checkbox,
-                menuItem = ExtendedMenuItemEntity(
-                    name = "进行一项操作",
-                    description = "勾选在安装完成后实现一项操作",
-                    icon = null,
-                    action = null
-                )
             )
-            // 其他 item
         )
+        // 动态地将每个 InstallOption 转换为一个 ExtendedMenuEntity
+        val dynamicOptions =
+            if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
+                installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+            )
+                installOptions.map { option ->
+                    ExtendedMenuEntity(
+                        action = InstallExtendedMenuAction.InstallOption,
+                        menuItem = ExtendedMenuItemEntity(
+                            // 使用 stringResource 从资源ID解析文本
+                            nameResourceId = option.labelResource,
+                            descriptionResourceId = option.descResource,
+                            icon = null, // 这里没有图标
+                            // 将原始的 option 对象存起来，以便后续使用
+                            action = option
+                        )
+                    )
+                }
+            else emptyList()
+        // 合并列表并创建可观察的状态列表
+        (staticMenus + dynamicOptions).toMutableStateList()
     }
 
     return DialogParams(
@@ -92,10 +101,13 @@ fun installExtendedMenuDialog(
         title = DialogInnerParams(
             DialogParamsType.InstallExtendedMenu.id,
         ) {
-            Text("扩展菜单")
+            Text(
+                text = stringResource(R.string.extended_menu),
+                style = MaterialTheme.typography.headlineMediumEmphasized
+            )
         },
         content = DialogInnerParams(DialogParamsType.InstallExtendedMenu.id) {
-            MenuItemWidget(menuEntities, viewModel)
+            MenuItemWidget(menuEntities, installFlags, viewModel)
         },
         buttons = DialogButtons(
             DialogParamsType.InstallExtendedMenu.id
@@ -109,41 +121,47 @@ fun installExtendedMenuDialog(
 }
 
 @Composable
-fun MenuItemWidget(entities: SnapshotStateList<ExtendedMenuEntity>, viewmodel: DialogViewModel) {
+fun MenuItemWidget(
+    entities: SnapshotStateList<ExtendedMenuEntity>,
+    installFlags: Int, // 接收从 ViewModel 观察到的 flags
+    viewmodel: DialogViewModel
+) {
     LazyColumn {
         itemsIndexed(entities) { index, item ->
+            // 为了在 Checkbox 分支中复用，我们先在这里获取 option 对象
+            val option = when (item.action) {
+                is InstallExtendedMenuAction.InstallOption -> item.menuItem.action
+                else -> null
+            }
             Row(
-                modifier = when (item.action) {
-                    is InstallExtendedMenuAction.SubMenu ->
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable {
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
+                    .clickable {
+                        when (item.action) {
+                            is InstallExtendedMenuAction.SubMenu ->
                                 when (item.subMenuId) {
                                     InstallExtendedSubMenuId.PermissionList -> {
                                         // 打开权限列表子菜单
                                         viewmodel.dispatch(DialogViewAction.InstallExtendedSubMenu)
                                     }
 
-                                    else -> {
-                                        // 处理其他子菜单逻辑
-                                    }
+                                    else -> null // 其他子菜单可以在这里处理
                                 }
-                            }
-                            .padding(horizontal = 24.dp, vertical = 12.dp)
 
-                    is InstallExtendedMenuAction.Checkbox ->
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                entities[index] = item.copy(selected = !item.selected)
-                            }
-                            .padding(horizontal = 24.dp, vertical = 12.dp)
+                            is InstallExtendedMenuAction.InstallOption ->
 
-                    is InstallExtendedMenuAction.TextField ->
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable {}
-                },
+                                // 点击事件的逻辑
+                                // 不再修改本地的 item.selected
+                                // 而是调用 ViewModel 的方法来更新全局的 installFlags
+                                option?.let { opt ->
+                                    val isSelected = (installFlags and opt.value) != 0
+                                    viewmodel.toggleInstallFlag(opt.value, !isSelected)
+                                }
+
+                            is InstallExtendedMenuAction.TextField -> null
+                        }
+                    },
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -158,14 +176,17 @@ fun MenuItemWidget(entities: SnapshotStateList<ExtendedMenuEntity>, viewmodel: D
                                 modifier = Modifier.size(24.dp),
                                 imageVector = item.menuItem.icon
                                     ?: Icons.TwoTone.PermDeviceInformation,
-                                contentDescription = item.menuItem.name,
+                                contentDescription = stringResource(item.menuItem.nameResourceId),
                             )
 
-                        is InstallExtendedMenuAction.Checkbox ->
+                        is InstallExtendedMenuAction.InstallOption ->
                             Checkbox(
-                                checked = item.selected,
-                                onCheckedChange = {
-                                    entities[index] = item.copy(selected = it)
+                                checked = option?.let { (installFlags and it.value) != 0 } ?: false,
+                                onCheckedChange = { isChecked ->
+                                    // onCheckedChange 的回调同样调用 ViewModel 的方法
+                                    option?.let { opt ->
+                                        viewmodel.toggleInstallFlag(opt.value, isChecked)
+                                    }
                                 }
                             )
 
@@ -179,12 +200,12 @@ fun MenuItemWidget(entities: SnapshotStateList<ExtendedMenuEntity>, viewmodel: D
                         .weight(1f) // (可选，但推荐) 让文本列占据剩余空间，防止长文本溢出
                 ) {
                     Text(
-                        text = item.menuItem.name,
+                        text = stringResource(item.menuItem.nameResourceId),
                         style = MaterialTheme.typography.titleMedium
                     )
-                    item.menuItem.description?.let {
+                    item.menuItem.descriptionResourceId?.let { descriptionId ->
                         Text(
-                            text = it,
+                            text = stringResource(descriptionId),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -216,7 +237,7 @@ fun installExtendedMenuSubMenuDialog(
         title = DialogInnerParams(
             DialogParamsType.InstallExtendedSubMenu.id,
         ) {
-            Text("权限菜单")
+            Text(stringResource(R.string.permission_list))
         },
         content = DialogInnerParams(
             DialogParamsType.InstallExtendedSubMenu.id

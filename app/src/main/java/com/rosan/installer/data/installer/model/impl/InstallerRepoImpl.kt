@@ -8,14 +8,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.installer.model.entity.InstallerEvent
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.UUID
@@ -100,17 +98,6 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
 
     override val background: MutableSharedFlow<Boolean> =
         MutableStateFlow(false)
-
-    // 私有的、可变的 SharedFlow，用于在内部发送一次性事件。
-    private val _events = MutableSharedFlow<InstallerEvent>()
-
-    // 实现接口中定义的只读 events 属性。
-    override val events = _events.asSharedFlow()
-
-    // 实现接口中定义的 postEvent 挂起函数。
-    override suspend fun postEvent(event: InstallerEvent) {
-        _events.emit(event)
-    }
 
     override fun resolve(activity: Activity) {
         action.tryEmit(Action.Resolve(activity))

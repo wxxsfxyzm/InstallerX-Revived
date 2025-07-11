@@ -20,7 +20,7 @@ import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.repo.InstallerRepo
-import com.rosan.installer.data.app.util.InstallFlag
+import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.installFlags
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
@@ -168,18 +168,8 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             }
         )
         params.setAppPackageName(packageName)
-        params.installFlags = params.installFlags or InstallFlag.INSTALL_REPLACE_EXISTING.value
+        params.installFlags = config.installFlags or InstallOption.ReplaceExisting.value
 
-        if (config.allowTestOnly) params.installFlags =
-            params.installFlags or InstallFlag.INSTALL_ALLOW_TEST.value
-
-        if (config.allowDowngrade) {
-            params.installFlags = params.installFlags or InstallFlag.INSTALL_REQUEST_DOWNGRADE.value
-            params.installFlags = params.installFlags or InstallFlag.INSTALL_ALLOW_DOWNGRADE.value
-        }
-
-        if (config.forAllUser) params.installFlags =
-            params.installFlags or InstallFlag.INSTALL_ALL_USERS.value
         val sessionId = packageInstaller.createSession(params)
         val session = packageInstaller.openSession(sessionId)
         setSessionIBinder(session)
@@ -229,12 +219,10 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         result: Result<Unit>
     ) {
 
-        if (result.isSuccess && config.isExtendedMenuEnabled) {
-            Timber.tag("doFinishWork").d("ExtendedMenu enabled, do extra work")
+        if (result.isSuccess) {
             coroutineScope.launch {
                 runCatching { onExtraWork() }.exceptionOrNull()
                     ?.printStackTrace()
-                onExtraWork()
             }
         }
         if (result.isSuccess && config.autoDelete) {
@@ -247,7 +235,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     protected open suspend fun onExtraWork() {
-        // Override this method to perform any extra work after installation
+        // TODO Override this method to perform any extra work after installation
         Timber.tag("onExtraWork").d("No extra work defined.")
     }
 

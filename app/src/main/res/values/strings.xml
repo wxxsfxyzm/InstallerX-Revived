@@ -237,6 +237,7 @@
     <string name="exception_install_failed_package_changed">The calling program expects the wrapper of the call to change</string>
     <string name="exception_install_failed_uid_changed">The UID has changed, please uninstall and try again</string>
     <string name="exception_install_failed_version_downgrade">Downgrade failed, please uninstall the app and try again</string>
+    <string name="exception_install_failed_deprecated_sdk_version">targetSDK too low, to proceed, enable corresponding flag</string>
     <string name="exception_install_failed_rejected_by_build_type">Rejected by system build type</string>
     <string name="exception_install_failed_hyperos_isolation_violation">Please Add a valid install source for installing system app</string>
     <string name="exception_install_failed_duplicate_permission">The package is trying to redeclare permission already declared by another app!</string>
@@ -310,6 +311,7 @@
     <string name="bypass_low_target_sdk_block_desc">Allows apps targeting old SDK versions to be installed.</string>
     <string name="dry_run">Dry Run</string>
     <string name="dry_run_desc">Verify the package, but don\'t install it.</string>
+
     <string name="replace_existing">Replace Existing</string>
     <string name="replace_existing_desc">If the package being installed already exists, replace/upgrade it.</string>
     <!--  InstallOptions End  -->

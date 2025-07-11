@@ -8,7 +8,7 @@
 # https://mvnrepository.com/
 
 [versions]
-agp = "8.11.0"
+agp = "8.11.1"
 kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
 composeBom = "2025.06.01"
@@ -49,7 +49,6 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.1" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
-# androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "compose" }
 
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
@@ -57,9 +56,8 @@ compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref 
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
-compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.0" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.1" }
 compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -72,7 +70,8 @@ work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version
 # https://github.com/Kotlin/kotlinx.serialization/blob/master/README.md#setup
 # https://github.com/Kotlin/kotlinx.serialization/blob/master/formats/README.md
 ktx-serializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "ktx-serialization" }
-
+# kotlin reflect
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
 # AndroidHiddenApiBypass
 # https://github.com/LSPosed/AndroidHiddenApiBypass
 lsposed-hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version = "6.1" }
@@ -91,8 +90,6 @@ lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", versio
 
 # Pager layouts
 # https://google.github.io/accompanist/pager/
-accompanist-navigationAnimation = { group = "com.google.accompanist", name = "accompanist-navigation-animation", version.ref = "accompanist" }
-accompanist-flowlayout = { group = "com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 
 # Rikka Shizuku
@@ -106,10 +103,6 @@ compose-coil = { group = "io.coil-kt.coil3", name = "coil-compose", version = "3
 
 # AppIconLoader
 appiconloader = { module = "me.zhanghai.android.appiconloader:appiconloader", version.ref = "appiconloader" }
-
-# XXPermissions
-# https://github.com/getActivity/XXPermissions
-# xxpermissions = { group = "com.github.getActivity", name = "XXPermissions", version = "20.0" }
 
 # Dhizuku-API
 # https://github.com/iamr0s/Dhizuku-API

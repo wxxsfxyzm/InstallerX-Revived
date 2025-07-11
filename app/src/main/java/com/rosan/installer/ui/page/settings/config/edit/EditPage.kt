@@ -220,17 +220,19 @@ fun EditPage(
         ) {
             item { DataNameWidget(viewModel = viewModel) }
             item { DataDescriptionWidget(viewModel = viewModel) }
-            item { LabelWidget(label = stringResource(id = R.string.more)) }
             item { DataAuthorizerWidget(viewModel = viewModel) }
             item { DataCustomizeAuthorizerWidget(viewModel = viewModel) }
             item { DataInstallModeWidget(viewModel = viewModel) }
+            item { LabelWidget(label = "Install Settings") }
             item { DataDeclareInstallerWidget(viewModel = viewModel) }
             item { DataInstallerWidget(viewModel = viewModel) }
+            item { DataAutoDeleteWidget(viewModel = viewModel) }
+            item { DisplaySdkWidget(viewModel = viewModel) }
+            item { LabelWidget(label = "Install Flags") }
             item { DataForAllUserWidget(viewModel = viewModel) }
             item { DataAllowTestOnlyWidget(viewModel = viewModel) }
             item { DataAllowDowngradeWidget(viewModel = viewModel) }
-            item { DataAutoDeleteWidget(viewModel = viewModel) }
-            item { DisplaySdkWidget(viewModel = viewModel) }
+
         }
     }
 }

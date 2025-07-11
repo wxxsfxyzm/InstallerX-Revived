@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">InstallerX</string>
 
     <string name="agreement_title">Política</string>
     <string name="agreement_text">Aquí está nuestra política de usuario. Por favor, léala y acepte. &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/terms&quot;&gt;Política de Usuario&lt;/a&gt;, &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/privacy&quot;&gt;Política de Privacidad&lt;/a&gt; Este mensaje no se mostrará nuevamente después de aceptar.</string>
@@ -207,8 +206,6 @@
     <string name="installer_version">Versión: %s (%s)</string>
     <string name="installer_version2">%s (%s)</string>
     <string name="installer_package_name">Paquete: %s</string>
-    <string name="installer_package_min_sdk" translatable="false">MinSDK: %s</string>
-    <string name="installer_package_target_sdk" translatable="false">TargetSDK: %s</string>
     <string name="installer_file_path">Ruta: %s</string>
 
     <string name="exception_install_failed_unknown">Error desconocido</string>

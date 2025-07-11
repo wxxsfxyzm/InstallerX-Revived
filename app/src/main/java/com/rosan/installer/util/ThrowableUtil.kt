@@ -8,6 +8,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedAlreadyExistsEx
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedContainerErrorException
 import com.rosan.installer.data.app.model.exception.InstallFailedCpuAbiIncompatibleException
+import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
 import com.rosan.installer.data.app.model.exception.InstallFailedDexOptException
 import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePermissionException
@@ -75,6 +76,7 @@ private fun Throwable.getStringResourceId(): Int {
         is InstallFailedPackageChangedException -> R.string.exception_install_failed_package_changed
         is InstallFailedUidChangedException -> R.string.exception_install_failed_uid_changed
         is InstallFailedVersionDowngradeException -> R.string.exception_install_failed_version_downgrade
+        is InstallFailedDeprecatedSdkVersion -> R.string.exception_install_failed_deprecated_sdk_version
         is InstallFailedRejectedByBuildTypeException -> R.string.exception_install_failed_rejected_by_build_type
         is InstallFailedHyperOSIsolationViolationException -> R.string.exception_install_failed_hyperos_isolation_violation
         is InstallFailedUserRestrictedException -> R.string.exception_install_failed_user_restricted
