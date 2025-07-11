@@ -22,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -49,7 +48,6 @@ import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 import com.rosan.installer.util.getBestPermissionLabel
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -224,13 +222,6 @@ fun installExtendedMenuSubMenuDialog(
         (entity as? AppEntity.BaseEntity)?.permissions?.sorted()?.toMutableStateList()
             ?: mutableStateListOf()
     }
-    // 从 ViewModel 中收集状态。当 ViewModel 中的值变化时，这里会自动更新。
-    val permissionToGrant by viewModel.permissionsToGrant.collectAsState()
-    // 在 entity 变化时，用 ViewModel 的方法初始化一次状态
-    LaunchedEffect(Unit) {
-        viewModel.initializePermissionsIfNeeded(entity)
-    }
-    Timber.tag("permissionList").d("Permissions: $permissionToGrant")
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.IconMenu.id, permissionIcon),
         title = DialogInnerParams(
@@ -249,12 +240,7 @@ fun installExtendedMenuSubMenuDialog(
                     PermissionCard(
                         permission = permission,
                         // 从 ViewModel 的 state 中读取是否选中
-                        isSelected = permissionToGrant.contains(permission),
-                        onPermissionClick = {
-                            // 将点击事件通知给 ViewModel 去处理
-                            viewModel.togglePermissionGrant(permission)
-
-                        }
+                        isHighlight = false
                     )
                 }
                 item { Spacer(modifier = Modifier.size(1.dp)) }
@@ -272,8 +258,7 @@ fun installExtendedMenuSubMenuDialog(
 @Composable
 fun PermissionCard(
     permission: String,         // 当前权限字符串
-    isSelected: Boolean,        // 是否被选中
-    onPermissionClick: () -> Unit // 点击事件回调
+    isHighlight: Boolean,        // 是否被选中
 ) {
     val context = LocalContext.current
     // 使用 remember(key) 记住计算结果。
@@ -285,15 +270,14 @@ fun PermissionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isSelected) 1.dp else 4.dp
+            defaultElevation = if (isHighlight) 1.dp else 4.dp
         ),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected)
+            containerColor = if (isHighlight)
                 MaterialTheme.colorScheme.primaryContainer
             else
                 MaterialTheme.colorScheme.surface
-        ),
-        onClick = onPermissionClick // 使用传入的回调
+        )
     ) {
         Column(
             modifier = Modifier

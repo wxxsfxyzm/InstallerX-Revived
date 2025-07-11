@@ -17,12 +17,11 @@
     <string name="about">关于</string>
     <string name="other">其它</string>
     <string name="about_detail">关于 InstallerX</string>
-
     <string name="get_update_detail">检查软件更新和新功能</string>
+
     <string name="stable">正式版</string>
     <string name="preview">预览版</string>
     <string name="unstable">测试版</string>
-
 
     <string name="enable_notification_hint">请启用通知以进行安装！</string>
     <string name="enable_storage_permission_hint">请启用存储权限！</string>
@@ -92,6 +91,8 @@
     <string name="config_auto_delete_dsp">安装成功后自动删除安装包</string>
     <string name="config_display_sdk_version">显示SDK信息</string>
     <string name="config_display_sdk_version_sdp">在安装界面显示target与min信息</string>
+    <string name="config_label_installer_settings">安装器设置</string>
+    <string name="config_label_install_options">安装选项</string>
 
     <string name="config_error_name">名称不得为空</string>
     <string name="config_error_customize_authorizer">自定义授权器不得为空</string>

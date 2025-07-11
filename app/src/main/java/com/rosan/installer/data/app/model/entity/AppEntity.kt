@@ -22,8 +22,6 @@ sealed class AppEntity {
         override val minSdk: String?,
         // Get from AndroidManifest.xml
         val permissions: List<String>? = null,
-        // Set by ExtendedMenu
-        val permissionsToGrant: MutableList<String>? = null
     ) : AppEntity() {
         override val name = "base.apk"
     }

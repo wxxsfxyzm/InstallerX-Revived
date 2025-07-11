@@ -60,6 +60,7 @@ sealed class InstallOption(
 ) {
     @Keep
     data object ReplaceExisting : InstallOption(
+        minSdk = Int.MAX_VALUE, // Don't show on List because handled elsewhere
         value = 0x00000002,
         labelResource = R.string.replace_existing,
         descResource = R.string.replace_existing_desc,

@@ -223,12 +223,12 @@ fun EditPage(
             item { DataAuthorizerWidget(viewModel = viewModel) }
             item { DataCustomizeAuthorizerWidget(viewModel = viewModel) }
             item { DataInstallModeWidget(viewModel = viewModel) }
-            item { LabelWidget(label = "Install Settings") }
+            item { LabelWidget(label = stringResource(R.string.config_label_installer_settings)) }
             item { DataDeclareInstallerWidget(viewModel = viewModel) }
             item { DataInstallerWidget(viewModel = viewModel) }
             item { DataAutoDeleteWidget(viewModel = viewModel) }
             item { DisplaySdkWidget(viewModel = viewModel) }
-            item { LabelWidget(label = "Install Flags") }
+            item { LabelWidget(label = stringResource(R.string.config_label_install_options)) }
             item { DataForAllUserWidget(viewModel = viewModel) }
             item { DataAllowTestOnlyWidget(viewModel = viewModel) }
             item { DataAllowDowngradeWidget(viewModel = viewModel) }
@@ -395,7 +395,7 @@ fun DataDeclareInstallerWidget(viewModel: EditViewModel) {
     }
 
     val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_installer_desc) // 假设你有一个这样的字符串资源
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_installer_desc)
         else null // 其他模式下没有特殊描述
 
     SwitchWidget(

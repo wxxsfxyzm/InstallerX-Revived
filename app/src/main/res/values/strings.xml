@@ -95,6 +95,8 @@
     <string name="config_auto_delete_dsp">Automatically delete the apk after it\'s been installed</string>
     <string name="config_display_sdk_version">Display SDK information</string>
     <string name="config_display_sdk_version_sdp">Show target and min information on the installation interface</string>
+    <string name="config_label_installer_settings">Installer Settings</string>
+    <string name="config_label_install_options">Install Options</string>
 
     <string name="config_error_name">Name can\'t be empty</string>
     <string name="config_error_customize_authorizer">Custom authorizer can\'t be empty</string>
@@ -242,7 +244,6 @@
     <string name="exception_install_failed_hyperos_isolation_violation">Please Add a valid install source for installing system app</string>
     <string name="exception_install_failed_duplicate_permission">The package is trying to redeclare permission already declared by another app!</string>
     <string name="exception_install_failed_user_restricted">System restricted install through USB, please enable it.</string>
-
     <string name="exception_shizuku_not_work">Please activate Sui or Shizuku and grant permission</string>
     <string name="exception_dhizuku_not_work">Please activate Dhizuku and grant permission</string>
     <string name="exception_root_not_work">Couldn\'t access root</string>
