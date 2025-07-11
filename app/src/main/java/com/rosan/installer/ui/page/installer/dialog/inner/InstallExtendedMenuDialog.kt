@@ -48,7 +48,6 @@ import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.util.getBestPermissionLabel
 import timber.log.Timber
 
@@ -246,7 +245,6 @@ fun installExtendedMenuSubMenuDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
             ) {
-                item { LabelWidget(stringResource(R.string.grant_permission_after_install))/*Spacer(modifier = Modifier.size(1.dp))*/ }
                 itemsIndexed(permissionList) { index, permission ->
                     PermissionCard(
                         permission = permission,

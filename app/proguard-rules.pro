@@ -66,6 +66,14 @@
 -keep public interface ** extends android.os.IInterface {*;}
 -keep public class com.rosan.installer.App {*;}
 -keep public class com.rosan.installer.ui.activity.** extends android.app.Activity
+# 保留 sealed class 的 metadata（sealedSubclasses 用到）
+-keepattributes KotlinMetadata
+
+# 保留 InstallOption 本体
+-keep class com.rosan.installer.data.app.util.InstallOption { *; }
+
+# 保留所有 InstallOption 的 object 子类（完整保留，不只是 INSTANCE）
+-keep class com.rosan.installer.data.app.util.InstallOption$* { *; }
 
 #-keep public class com.rosan.installer.data.process.model.impl.** extends com.rosan.installer.data.process.repo.ProcessRepo {
 #public static void main(java.lang.String[]);
