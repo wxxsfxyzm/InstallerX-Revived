@@ -33,12 +33,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Sort
-import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.LibraryAddCheck
-import androidx.compose.material.icons.twotone.Menu
-import androidx.compose.material.icons.twotone.Search
 import androidx.compose.material.icons.twotone.Shield
 import androidx.compose.material.icons.twotone.Visibility
 import androidx.compose.material3.AlertDialogDefaults
@@ -158,17 +154,22 @@ fun ApplyPage(
                             singleLine = true,
                             leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.TwoTone.Search,
+                                    imageVector = AppIcons.Search,
                                     contentDescription = stringResource(R.string.search)
                                 )
                             },
                             trailingIcon = {
-                                IconButton(onClick = {
-                                    searchBarActivated = false
-                                    viewModel.dispatch(ApplyViewAction.Search(""))
-                                }) {
+                                IconButton(
+                                    shapes = IconButtonShapes(
+                                        shape = IconButtonDefaults.smallRoundShape,
+                                        pressedShape = IconButtonDefaults.smallPressedShape
+                                    ),
+                                    onClick = {
+                                        searchBarActivated = false
+                                        viewModel.dispatch(ApplyViewAction.Search(""))
+                                    }) {
                                     Icon(
-                                        imageVector = Icons.TwoTone.Close,
+                                        imageVector = AppIcons.Close,
                                         contentDescription = stringResource(R.string.close)
                                     )
                                 }
@@ -184,35 +185,34 @@ fun ApplyPage(
                 IconButton(
                     onClick = { navController.navigateUp() },
                     shapes = IconButtonShapes(
-                        shape = IconButtonDefaults.standardShape,
-                        pressedShape = IconButtonDefaults.standardShape
+                        shape = IconButtonDefaults.smallRoundShape,
+                        pressedShape = IconButtonDefaults.smallPressedShape
                     ),
                     colors = IconButtonDefaults.iconButtonColors(
                         // 指定“启用”状态下的内容（图标）颜色
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-
                         // （可选）指定“启用”状态下的容器（背景）颜色
                         containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
-
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.TwoTone.ArrowBack,
+                        imageVector = AppIcons.ArrowBack,
                         contentDescription = stringResource(id = R.string.back)
                     )
                 }
             }, actions = {
                 AnimatedVisibility(visible = !searchBarActivated) {
-                    IconButton(onClick = { searchBarActivated = !searchBarActivated }) {
+                    IconButton(
+                        onClick = { searchBarActivated = !searchBarActivated }) {
                         Icon(
-                            imageVector = Icons.TwoTone.Search,
+                            imageVector = AppIcons.Search,
                             contentDescription = stringResource(R.string.search)
                         )
                     }
                 }
                 IconButton(onClick = { showBottomSheet = true }) {
                     Icon(
-                        imageVector = Icons.TwoTone.Menu,
+                        imageVector = AppIcons.Menu,
                         contentDescription = stringResource(R.string.menu)
                     )
                 }

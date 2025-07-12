@@ -21,11 +21,14 @@ data class ConfigEntity(
     @ColumnInfo(name = "customize_authorizer") var customizeAuthorizer: String,
     @ColumnInfo(name = "install_mode") var installMode: InstallMode,
     @ColumnInfo(name = "installer") var installer: String?,
+    @ColumnInfo(name = "auto_delete") var autoDelete: Boolean,
+    @ColumnInfo(name = "display_sdk", defaultValue = "0") var displaySdk: Boolean = false,
     @ColumnInfo(name = "for_all_user") var forAllUser: Boolean,
     @ColumnInfo(name = "allow_test_only") var allowTestOnly: Boolean,
     @ColumnInfo(name = "allow_downgrade") var allowDowngrade: Boolean,
-    @ColumnInfo(name = "auto_delete") var autoDelete: Boolean,
-    @ColumnInfo(name = "display_sdk", defaultValue = "0") var displaySdk: Boolean = false,
+    @ColumnInfo(name = "allow_restricted_permissions", defaultValue = "0") var allowRestrictedPermissions: Boolean,
+    @ColumnInfo(name = "bypass_low_target_sdk", defaultValue = "0") var bypassLowTargetSdk: Boolean,
+    @ColumnInfo(name = "allow_all_requested_permissions", defaultValue = "0") var allowAllRequestedPermissions: Boolean,
     @ColumnInfo(name = "created_at") var createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "modified_at") var modifiedAt: Long = System.currentTimeMillis(),
 ) {
@@ -36,10 +39,13 @@ data class ConfigEntity(
             customizeAuthorizer = "",
             installMode = InstallMode.Global,
             installer = null,
+            autoDelete = false,
             forAllUser = false,
             allowTestOnly = false,
             allowDowngrade = false,
-            autoDelete = false,
+            allowRestrictedPermissions = false,
+            bypassLowTargetSdk = false,
+            allowAllRequestedPermissions = false,
         )
 
         val XiaomiDefault = ConfigEntity(
@@ -48,10 +54,13 @@ data class ConfigEntity(
             customizeAuthorizer = "",
             installMode = InstallMode.Dialog,
             installer = "com.android.fileexplorer",
+            autoDelete = false,
             forAllUser = false,
             allowTestOnly = false,
             allowDowngrade = false,
-            autoDelete = false,
+            allowRestrictedPermissions = false,
+            bypassLowTargetSdk = false,
+            allowAllRequestedPermissions = false,
         )
     }
 

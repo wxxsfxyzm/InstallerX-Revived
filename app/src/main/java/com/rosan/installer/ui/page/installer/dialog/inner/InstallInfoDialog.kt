@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.AutoFixHigh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -161,7 +159,7 @@ fun InstallInfoDialog( // 大写开头
                     onClick = onTitleExtraClick
                 ) {
                     Icon(
-                        imageVector = Icons.TwoTone.AutoFixHigh,
+                        imageVector = AppIcons.AutoFixHigh,
                         contentDescription = null,
                         modifier = Modifier.padding(4.dp)
                     )

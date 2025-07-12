@@ -18,19 +18,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.More
-import androidx.compose.material.icons.automirrored.twotone.TrendingDown
-import androidx.compose.material.icons.twotone.BugReport
-import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
-import androidx.compose.material.icons.twotone.Face
-import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.Memory
-import androidx.compose.material.icons.twotone.People
-import androidx.compose.material.icons.twotone.PsychologyAlt
-import androidx.compose.material.icons.twotone.Save
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -50,7 +41,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
@@ -87,28 +78,11 @@ fun EditPage(
         viewModel.dispatch(EditViewAction.Init)
     }
 
-    val showFloatingState = remember {
-        mutableStateOf(true)
-    }
+    val showFloatingState = remember { mutableStateOf(true) }
     val showFloating by showFloatingState
     val listState = rememberLazyListState()
-    // 新增: 判断是否滚动到底部的状态
-    val isScrolledToEnd by remember {
-        derivedStateOf {
-            val layoutInfo = listState.layoutInfo
-            val visibleItemsInfo = layoutInfo.visibleItemsInfo
-            if (layoutInfo.totalItemsCount == 0) {
-                false
-            } else {
-                val lastVisibleItem = visibleItemsInfo.lastOrNull()
-                // 如果最后一个可见项的索引是列表总数减一，则认为到达了底部
-                lastVisibleItem?.index == layoutInfo.totalItemsCount - 1
-            }
-        }
-    }
-    val snackBarHostState = remember {
-        SnackbarHostState()
-    }
+    val snackBarHostState = remember { SnackbarHostState() }
+
     LaunchedEffect(true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -147,14 +121,12 @@ fun EditPage(
                         colors = IconButtonDefaults.iconButtonColors(
                             // 指定“启用”状态下的内容（图标）颜色
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-
                             // （可选）指定“启用”状态下的容器（背景）颜色
                             containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
-
                         )
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.TwoTone.ArrowBack,
+                            imageVector = AppIcons.ArrowBack,
                             contentDescription = stringResource(id = R.string.back)
                         )
                     }
@@ -162,7 +134,7 @@ fun EditPage(
                 // 新增: 当滚动到底部时，在 actions 中显示 FAB
                 actions = {
                     AnimatedVisibility(
-                        visible = isScrolledToEnd, // 只有在滚动到底部时可见
+                        visible = !showFloating, // 只有在滚动到底部时可见
                         enter = scaleIn(),
                         exit = scaleOut()
                     ) {
@@ -178,7 +150,7 @@ fun EditPage(
                             )
                         ) {
                             Icon(
-                                imageVector = Icons.TwoTone.Save,
+                                imageVector = AppIcons.Save,
                                 contentDescription = stringResource(R.string.save)
                             )
                         }
@@ -189,7 +161,7 @@ fun EditPage(
         // 修改: 只有在未滚动到底部时，才在右下角显示 FAB
         floatingActionButton = {
             AnimatedVisibility(
-                visible = !isScrolledToEnd && showFloating, // 在未滚动到底部且 showFloating 为 true 时可见
+                visible = showFloating, // 在未滚动到底部且 showFloating 为 true 时可见
                 enter = scaleIn(),
                 exit = scaleOut()
             ) {
@@ -197,7 +169,7 @@ fun EditPage(
                 SmallExtendedFloatingActionButton(
                     icon = {
                         Icon(
-                            imageVector = Icons.TwoTone.Save,
+                            imageVector = AppIcons.Save,
                             contentDescription = text
                         )
                     },
@@ -232,7 +204,9 @@ fun EditPage(
             item { DataForAllUserWidget(viewModel = viewModel) }
             item { DataAllowTestOnlyWidget(viewModel = viewModel) }
             item { DataAllowDowngradeWidget(viewModel = viewModel) }
-
+            item { DataBypassLowTargetSdkWidget(viewModel = viewModel) }
+            item { DataAllowRestrictedPermissionsWidget(viewModel = viewModel) }
+            item { DataAllowAllRequestedPermissionsWidget(viewModel = viewModel) }
         }
     }
 }
@@ -399,7 +373,7 @@ fun DataDeclareInstallerWidget(viewModel: EditViewModel) {
         else null // 其他模式下没有特殊描述
 
     SwitchWidget(
-        icon = Icons.TwoTone.Face,
+        icon = AppIcons.InstallSource,
         title = stringResource(id = R.string.config_declare_installer),
         checked = viewModel.state.data.declareInstaller,
         onCheckedChange = {
@@ -427,7 +401,7 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
                 .padding(vertical = 8.dp, horizontal = 16.dp)
                 .focusable(),
             leadingIcon = {
-                Icon(imageVector = Icons.TwoTone.PsychologyAlt, contentDescription = null)
+                Icon(imageVector = AppIcons.InstallSourceInput, contentDescription = null)
             },
             label = {
                 Text(text = stringResource(id = R.string.config_installer))
@@ -443,45 +417,9 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun DataForAllUserWidget(viewModel: EditViewModel) {
-    SwitchWidget(
-        icon = Icons.TwoTone.People,
-        title = stringResource(id = R.string.config_for_all_user),
-        checked = viewModel.state.data.forAllUser,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataForAllUser(it)) }
-    )
-}
-
-@Composable
-fun DataAllowTestOnlyWidget(viewModel: EditViewModel) {
-    SwitchWidget(
-        icon = Icons.TwoTone.BugReport,
-        title = stringResource(id = R.string.config_allow_test_only),
-        description = stringResource(id = R.string.config_allow_test_only_dsp),
-        checked = viewModel.state.data.allowTestOnly,
-        onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataAllowTestOnly(it))
-        }
-    )
-}
-
-@Composable
-fun DataAllowDowngradeWidget(viewModel: EditViewModel) {
-    SwitchWidget(
-        icon = Icons.AutoMirrored.TwoTone.TrendingDown,
-        title = stringResource(id = R.string.config_allow_downgrade),
-        description = stringResource(id = R.string.config_allow_downgrade_dsp),
-        checked = viewModel.state.data.allowDowngrade,
-        onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataAllowDowngrade(it))
-        }
-    )
-}
-
-@Composable
 fun DataAutoDeleteWidget(viewModel: EditViewModel) {
     SwitchWidget(
-        icon = Icons.TwoTone.Delete,
+        icon = AppIcons.Delete,
         title = stringResource(id = R.string.config_auto_delete),
         description = stringResource(id = R.string.config_auto_delete_dsp),
         checked = viewModel.state.data.autoDelete,
@@ -494,12 +432,82 @@ fun DataAutoDeleteWidget(viewModel: EditViewModel) {
 @Composable
 fun DisplaySdkWidget(viewModel: EditViewModel) {
     SwitchWidget(
-        icon = Icons.TwoTone.Info,
+        icon = AppIcons.Info,
         title = stringResource(id = R.string.config_display_sdk_version),
         description = stringResource(id = R.string.config_display_sdk_version_sdp),
         checked = viewModel.state.data.displaySdk,
         onCheckedChange = {
             viewModel.dispatch(EditViewAction.ChangeDisplaySdk(it))
         }
+    )
+}
+
+@Composable
+fun DataForAllUserWidget(viewModel: EditViewModel) {
+    SwitchWidget(
+        icon = AppIcons.InstallForAllUsers,
+        title = stringResource(id = R.string.config_all_users),
+        description = stringResource(id = R.string.config_all_users_desc),
+        checked = viewModel.state.data.forAllUser,
+        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataForAllUser(it)) }
+    )
+}
+
+@Composable
+fun DataAllowTestOnlyWidget(viewModel: EditViewModel) {
+    SwitchWidget(
+        icon = AppIcons.BugReport,
+        title = stringResource(id = R.string.config_allow_test),
+        description = stringResource(id = R.string.config_allow_test_desc),
+        checked = viewModel.state.data.allowTestOnly,
+        onCheckedChange = {
+            viewModel.dispatch(EditViewAction.ChangeDataAllowTestOnly(it))
+        }
+    )
+}
+
+@Composable
+fun DataAllowDowngradeWidget(viewModel: EditViewModel) {
+    SwitchWidget(
+        icon = AppIcons.InstallAllowDowngrade,
+        title = stringResource(id = R.string.config_allow_downgrade),
+        description = stringResource(id = R.string.config_allow_downgrade_desc),
+        checked = viewModel.state.data.allowDowngrade,
+        onCheckedChange = {
+            viewModel.dispatch(EditViewAction.ChangeDataAllowDowngrade(it))
+        }
+    )
+}
+
+@Composable
+fun DataBypassLowTargetSdkWidget(viewModel: EditViewModel) {
+    SwitchWidget(
+        icon = AppIcons.InstallBypassLowTargetSdk,
+        title = stringResource(id = R.string.config_bypass_low_target_sdk),
+        description = stringResource(id = R.string.config_bypass_low_target_sdk_desc),
+        checked = viewModel.state.data.bypassLowTargetSdk,
+        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataBypassLowTargetSdk(it)) }
+    )
+}
+
+@Composable
+fun DataAllowRestrictedPermissionsWidget(viewModel: EditViewModel) {
+    SwitchWidget(
+        icon = AppIcons.InstallAllowRestrictedPermissions,
+        title = stringResource(id = R.string.config_all_whitelist_restricted_permissions),
+        description = stringResource(id = R.string.config_all_whitelist_restricted_permissions_desc),
+        checked = viewModel.state.data.allowRestrictedPermissions,
+        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowRestrictedPermissions(it)) }
+    )
+}
+
+@Composable
+fun DataAllowAllRequestedPermissionsWidget(viewModel: EditViewModel) {
+    SwitchWidget(
+        icon = AppIcons.InstallAllowAllRequestedPermissions,
+        title = stringResource(id = R.string.config_grant_all_permissions),
+        description = stringResource(id = R.string.config_grant_all_permissions_desc),
+        checked = viewModel.state.data.allowAllRequestedPermissions,
+        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowAllRequestedPermissions(it)) }
     )
 }

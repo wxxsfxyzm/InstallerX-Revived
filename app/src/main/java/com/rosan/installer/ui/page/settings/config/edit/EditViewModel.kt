@@ -48,21 +48,24 @@ class EditViewModel(
                     is EditViewAction.ChangeDataName -> changeDataName(action.name)
                     is EditViewAction.ChangeDataDescription -> changeDataDescription(action.description)
                     is EditViewAction.ChangeDataAuthorizer -> changeDataAuthorizer(action.authorizer)
-                    is EditViewAction.ChangeDataCustomizeAuthorizer -> changeDataCustomizeAuthorizer(
-                        action.customizeAuthorizer
-                    )
-
+                    is EditViewAction.ChangeDataCustomizeAuthorizer -> changeDataCustomizeAuthorizer(action.customizeAuthorizer)
                     is EditViewAction.ChangeDataInstallMode -> changeDataInstallMode(action.installMode)
-                    is EditViewAction.ChangeDataDeclareInstaller -> changeDataDeclareInstaller(
-                        action.declareInstaller
-                    )
-
+                    is EditViewAction.ChangeDataDeclareInstaller -> changeDataDeclareInstaller(action.declareInstaller)
                     is EditViewAction.ChangeDataInstaller -> changeDataInstaller(action.installer)
+                    is EditViewAction.ChangeDataAutoDelete -> changeDataAutoDelete(action.autoDelete)
+                    is EditViewAction.ChangeDisplaySdk -> changeDisplaySdk(action.displaySdk)
                     is EditViewAction.ChangeDataForAllUser -> changeDataForAllUser(action.forAllUser)
                     is EditViewAction.ChangeDataAllowTestOnly -> changeDataAllowTestOnly(action.allowTestOnly)
                     is EditViewAction.ChangeDataAllowDowngrade -> changeDataAllowDowngrade(action.allowDowngrade)
-                    is EditViewAction.ChangeDataAutoDelete -> changeDataAutoDelete(action.autoDelete)
-                    is EditViewAction.ChangeDisplaySdk -> changeDisplaySdk(action.displaySdk)
+                    is EditViewAction.ChangeDataBypassLowTargetSdk -> changeDataBypassLowTargetSdk(action.bypassLowTargetSdk)
+                    is EditViewAction.ChangeDataAllowRestrictedPermissions -> changeDataAllowRestrictedPermissions(
+                        action.allowRestrictedPermissions
+                    )
+
+                    is EditViewAction.ChangeDataAllowAllRequestedPermissions -> changeDataAllowAllRequestedPermissions(
+                        action.allowAllRequestedPermissions
+                    )
+
                     is EditViewAction.LoadData -> loadData()
                     is EditViewAction.SaveData -> saveData()
                 }
@@ -162,6 +165,22 @@ class EditViewModel(
         )
     }
 
+    private fun changeDataAutoDelete(autoDelete: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                autoDelete = autoDelete
+            )
+        )
+    }
+
+    private fun changeDisplaySdk(displaySdk: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                displaySdk = displaySdk
+            )
+        )
+    }
+
     private fun changeDataForAllUser(forAllUser: Boolean) {
         state = state.copy(
             data = state.data.copy(
@@ -186,18 +205,26 @@ class EditViewModel(
         )
     }
 
-    private fun changeDataAutoDelete(autoDelete: Boolean) {
+    private fun changeDataAllowRestrictedPermissions(allowRestrictedPermissions: Boolean) {
         state = state.copy(
             data = state.data.copy(
-                autoDelete = autoDelete
+                allowRestrictedPermissions = allowRestrictedPermissions
             )
         )
     }
 
-    private fun changeDisplaySdk(displaySdk: Boolean) {
+    private fun changeDataBypassLowTargetSdk(bypassLowTargetSdk: Boolean) {
         state = state.copy(
             data = state.data.copy(
-                displaySdk = displaySdk
+                bypassLowTargetSdk = bypassLowTargetSdk
+            )
+        )
+    }
+
+    private fun changeDataAllowAllRequestedPermissions(allowAllRequestedPermissions: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                allowAllRequestedPermissions = allowAllRequestedPermissions
             )
         )
     }

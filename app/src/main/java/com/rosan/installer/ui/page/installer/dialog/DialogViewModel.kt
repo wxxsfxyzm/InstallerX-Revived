@@ -83,14 +83,23 @@ class DialogViewModel(
             disableNotificationOnDismiss =
                 appDataStore.getBoolean("show_disable_notification_for_dialog_install", false)
                     .first()
+            // initialize install flags based on repo.config
             _installFlags.value = listOfNotNull(
                 repo.config.allowTestOnly.takeIf { it }
                     ?.let { InstallOption.AllowTest.value },
                 repo.config.allowDowngrade.takeIf { it }
                     ?.let { InstallOption.AllowDowngrade.value },
                 repo.config.forAllUser.takeIf { it }
-                    ?.let { InstallOption.AllUsers.value }
+                    ?.let { InstallOption.AllUsers.value },
+                repo.config.allowRestrictedPermissions.takeIf { it }
+                    ?.let { InstallOption.AllWhitelistRestrictedPermissions.value },
+                repo.config.bypassLowTargetSdk.takeIf { it }
+                    ?.let { InstallOption.BypassLowTargetSdkBlock.value },
+                repo.config.allowAllRequestedPermissions.takeIf { it }
+                    ?.let { InstallOption.GrantAllRequestedPermissions.value }
             ).fold(0) { acc, flag -> acc or flag }
+            // sync to repo.config
+            repo.config.installFlags = _installFlags.value
         }
     }
 

@@ -1,8 +1,11 @@
 package com.rosan.installer.ui.icons
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
+import androidx.compose.material.icons.automirrored.twotone.Rule
+import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
@@ -14,14 +17,36 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.outlined.WebAsset
+import androidx.compose.material.icons.twotone.Add
+import androidx.compose.material.icons.twotone.AdminPanelSettings
 import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.ArrowUpward
+import androidx.compose.material.icons.twotone.AutoFixHigh
+import androidx.compose.material.icons.twotone.Badge
+import androidx.compose.material.icons.twotone.BugReport
+import androidx.compose.material.icons.twotone.ClearAll
+import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material.icons.twotone.Delete
+import androidx.compose.material.icons.twotone.Downloading
+import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.icons.twotone.Face
+import androidx.compose.material.icons.twotone.Favorite
+import androidx.compose.material.icons.twotone.FavoriteBorder
 import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
+import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
+import androidx.compose.material.icons.twotone.LibraryAddCheck
+import androidx.compose.material.icons.twotone.Memory
+import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.PermDeviceInformation
 import androidx.compose.material.icons.twotone.RoomPreferences
+import androidx.compose.material.icons.twotone.Save
+import androidx.compose.material.icons.twotone.Search
+import androidx.compose.material.icons.twotone.SecurityUpdateWarning
 import androidx.compose.material.icons.twotone.SettingsSuggest
+import androidx.compose.material.icons.twotone.SystemUpdate
+import androidx.compose.material.icons.twotone.Terminal
 
 /**
  * 将图标统一管理在一个对象中
@@ -31,12 +56,25 @@ object AppIcons {
     // 你需要添加 'androidx.compose.material:material-icons-extended' 依赖来使用所有图标
     // 或者替换成你自己的图标资源
     val Android = Icons.Default.Android
+    val Info = Icons.TwoTone.Info
+    val Add = Icons.TwoTone.Add
+    val Edit = Icons.TwoTone.Edit
+    val Delete = Icons.TwoTone.Delete
+    val Save = Icons.TwoTone.Save
+    val BugReport = Icons.TwoTone.BugReport
+    val Terminal = Icons.TwoTone.Terminal
+    val Update = Icons.TwoTone.SystemUpdate
+    val Rule = Icons.AutoMirrored.TwoTone.Rule
+    val Search = Icons.TwoTone.Search
+    val Close = Icons.TwoTone.Close
+    val AutoFixHigh = Icons.TwoTone.AutoFixHigh
 
     /**
-     * 导航栏图标
+     * 导航图标
      */
     val RoomPreferences = Icons.TwoTone.RoomPreferences
     val SettingsSuggest = Icons.TwoTone.SettingsSuggest
+    val ArrowBack = Icons.AutoMirrored.TwoTone.ArrowBack
 
     /**
      * 授权器图标集合
@@ -58,6 +96,26 @@ object AppIcons {
     val NotificationDisabled = Icons.Outlined.NotificationsOff
     val AutoNotification = Icons.Outlined.NotificationsActive
     val Ignore = Icons.Outlined.NotInterested
+
+    /**
+     * Preferred item 图标集合
+     */
+    val Authorizer = Icons.TwoTone.Memory
+    val InstallMode = Icons.TwoTone.Downloading
+    val LockDefault = Icons.TwoTone.Favorite
+    val UnlockDefault = Icons.TwoTone.FavoriteBorder
+    val ClearAll = Icons.TwoTone.ClearAll
+
+    /**
+     * Profile item 图标集合
+     */
+    val InstallSource = Icons.TwoTone.Face
+    val InstallSourceInput = Icons.TwoTone.Badge
+    val InstallForAllUsers = Icons.TwoTone.People
+    val InstallAllowDowngrade = Icons.AutoMirrored.TwoTone.TrendingDown
+    val InstallBypassLowTargetSdk = Icons.TwoTone.SecurityUpdateWarning
+    val InstallAllowRestrictedPermissions = Icons.TwoTone.AdminPanelSettings
+    val InstallAllowAllRequestedPermissions = Icons.TwoTone.LibraryAddCheck
 
     /**
      * 箭头图标集合
