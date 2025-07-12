@@ -88,6 +88,7 @@ object AnalyserRepoImpl : AnalyserRepo {
     private fun getDataType(config: ConfigEntity, data: DataEntity): DataType? =
         when (data) {
             is DataEntity.FileEntity -> ZipFile(data.path).use { zipFile ->
+                Timber.tag("AnalyserRepoImpl").d("data is zipFile")
                 // 优先判断标准的清单文件
                 when {
                     zipFile.getEntry("AndroidManifest.xml") != null -> return@use DataType.APK
@@ -136,9 +137,22 @@ object AnalyserRepoImpl : AnalyserRepo {
                 Timber.tag("AnalyserRepoImpl").d("data is ZipInputStream")
                 var type: DataType? = null
                 var containsApk = false
+                // --- 新增的标志位 ---
+                var hasBaseApk = false
+                var hasSplitApk = false
+
                 while (true) {
                     val entry = zip.nextEntry ?: break
-                    type = when (entry.name) {
+                    if (entry.isDirectory) {
+                        zip.closeEntry()
+                        continue
+                    }
+
+                    val entryName = File(entry.name).name
+                    val entryExtension = File(entry.name).extension.toLowerCase(Locale.current)
+
+                    // 优先通过清单文件判断类型
+                    type = when (entryName) {
                         "AndroidManifest.xml" -> DataType.APK
                         "info.json" -> {
                             val content = zip.bufferedReader().use(BufferedReader::readText)
@@ -147,18 +161,41 @@ object AnalyserRepoImpl : AnalyserRepo {
                                 DataType.APKM
                             else
                                 DataType.APKS
-
                         }
 
                         "manifest.json" -> DataType.XAPK
                         else -> null
                     }
-                    if (File(entry.name).extension.toLowerCase(Locale.current) == "apk") containsApk =
-                        true
+
+                    // 如果尚未通过清单文件确定类型，则检查文件结构
+                    if (type == null) {
+                        if (entryName == "base.apk") {
+                            hasBaseApk = true
+                        } else if (entryName.startsWith("split_") && entryExtension == "apk") {
+                            hasSplitApk = true
+                        }
+                    }
+
+                    if (entryExtension == "apk") {
+                        containsApk = true
+                    }
+
                     zip.closeEntry()
+                    // 如果通过清单文件快速确定了类型，则可以提前退出
                     if (type != null) break
                 }
-                if (type == null && containsApk) type = DataType.MULTI_APK_ZIP
+
+                // --- 循环结束后，根据收集到的信息进行最终判断 ---
+                if (type == null) { // 如果遍历完所有条目，类型依然未定
+                    if (hasBaseApk && hasSplitApk) {
+                        // 如果同时满足 base.apk 和 split_*.apk 的结构，则判定为 APKS
+                        type = DataType.APKS
+                    } else if (containsApk) {
+                        // 否则，如果包含任何apk，则降级为通用ZIP
+                        type = DataType.MULTI_APK_ZIP
+                    }
+                }
+
                 return@use type
             }
         }
