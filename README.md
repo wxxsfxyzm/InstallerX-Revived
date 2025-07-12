@@ -29,15 +29,17 @@
 
 - UI简化
 - 修复了原仓库项目无法正确删除安装包的问题
-- 文本调整，支持繁体中文，西班牙语。更多语言欢迎PR
+- 文本调整，支持英文，繁体中文，西班牙语。更多语言欢迎提交PR
 - 修改对话框安装的显示效果
-- 支持显示系统图标包 方法来自[RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt)
+- 支持显示系统图标包，方法来自[RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt)
 - 加入了安装时显示targetSDK与minSDK的功能
 - Shizuku/Root安装完成打开App时可以绕过定制UI的链式启动拦截
     - 目前仅实现了对话框安装
     - Dhizuku无法调用shell权限，因此加了一个倒计时自定义选项，给打开app的操作预留一定时间
 - 为对话框安装提供一个扩展菜单，可以在设置中启用
-    - 实验性功能，目前仅实现了应用权限的查看
+    - 支持查看应用申明的权限
+    - 支持设定InstallFlags（可以继承全局Profile设置）
+       - **注意**：设定InstallFlags并不能保证一定生效，部分选项有可能带来安全风险，具体取决于系统
 
 ## 常见问题
 
