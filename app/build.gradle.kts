@@ -78,6 +78,7 @@ android {
 
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
+            isShrinkResources = true
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -111,7 +112,7 @@ android {
         abi {
             isEnable = isReleaseBuild
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            include("arm64-v8a", "x86_64")
             isUniversalApk = false
         }
     }
@@ -185,28 +186,25 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.core.splashscreen)
-    //implementation(libs.androidx.foundation)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.compose.ui)
-    // implementation(libs.compose.ui.tooling)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
-    implementation(libs.compose.material)
     implementation(libs.compose.material3)
     implementation(libs.compose.navigation)
     implementation(libs.compose.materialIcons)
     implementation(libs.material)
-    // 预览支持
+    // Preview support only for debug builds
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
-
     implementation(libs.work.runtime.ktx)
 
     implementation(libs.ktx.serializationJson)
+    implementation(libs.kotlin.reflect)
 
     implementation(libs.lsposed.hiddenapibypass)
 
@@ -218,8 +216,6 @@ dependencies {
 
     implementation(libs.lottie.compose)
 
-    //implementation(libs.accompanist.navigationAnimation)
-    //implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.drawablepainter)
 
     implementation(libs.rikka.shizuku.api)

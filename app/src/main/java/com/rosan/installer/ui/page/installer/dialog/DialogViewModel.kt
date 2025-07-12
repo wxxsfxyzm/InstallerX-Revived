@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
@@ -64,11 +65,10 @@ class DialogViewModel(
     private val _currentPackageName = MutableStateFlow<String?>(null)
     val currentPackageName: StateFlow<String?> = _currentPackageName.asStateFlow()
 
-    private val _permissionsToGrant = MutableStateFlow<Set<String>>(emptySet())
-    val permissionsToGrant: StateFlow<Set<String>> = _permissionsToGrant.asStateFlow()
-
-    // 新增一个标志位，来判断是否已经初始化过
-    private var isInitialPermissionsSet = false
+    // 新增一个 StateFlow 来管理安装标志位 (install flags)
+    // 它的值是一个整数，通过位运算来组合所有选项
+    private val _installFlags = MutableStateFlow(0) // 默认值为0，表示没有开启任何选项
+    val installFlags: StateFlow<Int> = _installFlags.asStateFlow()
 
     private var fetchPreInstallInfoJob: Job? = null
     private var autoInstallJob: Job? = null
@@ -83,6 +83,14 @@ class DialogViewModel(
             disableNotificationOnDismiss =
                 appDataStore.getBoolean("show_disable_notification_for_dialog_install", false)
                     .first()
+            _installFlags.value = listOfNotNull(
+                repo.config.allowTestOnly.takeIf { it }
+                    ?.let { InstallOption.AllowTest.value },
+                repo.config.allowDowngrade.takeIf { it }
+                    ?.let { InstallOption.AllowDowngrade.value },
+                repo.config.forAllUser.takeIf { it }
+                    ?.let { InstallOption.AllUsers.value }
+            ).fold(0) { acc, flag -> acc or flag }
         }
     }
 
@@ -207,31 +215,21 @@ class DialogViewModel(
         }
     }
 
-    fun togglePermissionGrant(permission: String) {
-        val currentSet = _permissionsToGrant.value.toMutableSet()
-        if (currentSet.contains(permission)) {
-            currentSet.remove(permission)
-        } else {
-            currentSet.add(permission)
-        }
-        _permissionsToGrant.value = currentSet
-    }
-
     /**
-     * 初始化权限列表，但仅在第一次调用时有效。
-     * @param entity 从中获取初始权限的应用实体。
+     * 切换（启用/禁用）一个安装标志位
+     * @param flag 要操作的标志位 (来自 InstallOption.value)
+     * @param enable true 表示添加该标志位, false 表示移除该标志位
      */
-    fun initializePermissionsIfNeeded(entity: AppEntity?) {
-        // 如果已经初始化过了，就直接返回，防止覆盖用户修改过的状态
-        if (isInitialPermissionsSet) {
-            return
+    fun toggleInstallFlag(flag: Int, enable: Boolean) {
+        val currentFlags = _installFlags.value
+        if (enable) {
+            // 使用位或运算 (or) 来添加一个 flag
+            _installFlags.value = currentFlags or flag
+        } else {
+            // 使用位与 (and) 和 按位取反 (inv) 来移除一个 flag
+            _installFlags.value = currentFlags and flag.inv()
         }
-
-        val initialPermissions = (entity as? AppEntity.BaseEntity)?.permissionsToGrant
-        _permissionsToGrant.value = initialPermissions?.toSet() ?: emptySet()
-
-        // 将标志位置为 true，确保这个逻辑块不会再次执行
-        isInitialPermissionsSet = true
+        repo.config.installFlags = _installFlags.value // 同步到 repo.config
     }
 
     private fun fetchPreInstallAppInfo(packageName: String) {

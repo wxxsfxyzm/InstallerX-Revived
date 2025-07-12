@@ -13,11 +13,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.TrendingDown
-import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.Info
-import androidx.compose.material.icons.twotone.People
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -135,19 +132,11 @@ fun installPrepareDialog( // 小写开头
     val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
     var showChips by remember { mutableStateOf(false) }
 
-    var forAllUser by remember { mutableStateOf(installer.config.forAllUser) }
-    var allowTestOnly by remember { mutableStateOf(installer.config.allowTestOnly) }
-    var allowDowngrade by remember { mutableStateOf(installer.config.allowDowngrade) }
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
 
-    LaunchedEffect(forAllUser, allowTestOnly, allowDowngrade, autoDelete, displaySdk) {
+    LaunchedEffect(autoDelete, displaySdk) {
         val currentConfig = installer.config
-        if (currentConfig.forAllUser != forAllUser) installer.config.forAllUser = forAllUser
-        if (currentConfig.allowTestOnly != allowTestOnly) installer.config.allowTestOnly =
-            allowTestOnly
-        if (currentConfig.allowDowngrade != allowDowngrade) installer.config.allowDowngrade =
-            allowDowngrade
         if (currentConfig.autoDelete != autoDelete) installer.config.autoDelete = autoDelete
         if (currentConfig.displaySdk != displaySdk) installer.config.displaySdk = displaySdk
     }
@@ -238,36 +227,6 @@ fun installPrepareDialog( // 小写开头
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Chip(
-                                selected = forAllUser,
-                                onClick = {
-                                    val newValue = !forAllUser
-                                    forAllUser = newValue
-                                    installer.config.forAllUser = newValue
-                                },
-                                label = stringResource(id = R.string.config_for_all_user),
-                                icon = Icons.TwoTone.People
-                            )
-                            Chip(
-                                selected = allowTestOnly,
-                                onClick = {
-                                    val newValue = !allowTestOnly
-                                    allowTestOnly = newValue
-                                    installer.config.allowTestOnly = newValue
-                                },
-                                label = stringResource(id = R.string.config_allow_test_only),
-                                icon = Icons.TwoTone.BugReport
-                            )
-                            Chip(
-                                selected = allowDowngrade,
-                                onClick = {
-                                    val newValue = !allowDowngrade
-                                    allowDowngrade = newValue
-                                    installer.config.allowDowngrade = newValue
-                                },
-                                label = stringResource(id = R.string.config_allow_downgrade),
-                                icon = Icons.AutoMirrored.TwoTone.TrendingDown
-                            )
                             Chip(
                                 selected = autoDelete,
                                 onClick = {

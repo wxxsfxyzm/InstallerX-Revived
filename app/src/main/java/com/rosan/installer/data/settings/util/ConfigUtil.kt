@@ -47,10 +47,6 @@ class ConfigUtil {
             return InstallModeConverter.revert(str)
         }
 
-        suspend fun getShowDialogInstallExtendedMenu(): Boolean {
-            return appDataStore.getBoolean("show_dialog_install_extended_menu", false).first()
-        }
-
         suspend fun getByPackageName(packageName: String? = null): ConfigEntity {
             var entity = getByPackageNameInner(packageName)
             if (entity.authorizer == ConfigEntity.Authorizer.Global)
@@ -63,7 +59,6 @@ class ConfigUtil {
             // 使用 apply 来设置非构造函数属性，代码更紧凑
             return entity.apply {
                 // --- 如果需要获取全局配置的其他字段，可以在这里添加 ---
-                this.isExtendedMenuEnabled = getShowDialogInstallExtendedMenu()
             }
         }
 

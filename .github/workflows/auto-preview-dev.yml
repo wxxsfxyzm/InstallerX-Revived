@@ -3,7 +3,8 @@ name: Dev Branch Build & Artifact
 # 仅在向 dev 分支推送提交时触发
 on:
   push:
-    branches: [ "dev" ]
+    branches-ignore:
+      - 'main'
 
 jobs:
   build_and_upload_artifact:
