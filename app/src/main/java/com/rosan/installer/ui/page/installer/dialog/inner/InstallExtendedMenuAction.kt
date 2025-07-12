@@ -1,7 +1,7 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
 sealed class InstallExtendedMenuAction {
-    object SubMenu : InstallExtendedMenuAction()
+    object PermissionList : InstallExtendedMenuAction()
     object InstallOption : InstallExtendedMenuAction()
     object TextField : InstallExtendedMenuAction()
 }
