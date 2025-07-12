@@ -20,11 +20,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.Rule
-import androidx.compose.material.icons.twotone.Add
-import androidx.compose.material.icons.twotone.Delete
-import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -62,6 +57,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.SettingsScreen
 import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
@@ -134,7 +130,7 @@ fun AllPage(
                 SmallExtendedFloatingActionButton(
                     icon = {
                         Icon(
-                            imageVector = Icons.TwoTone.Add,
+                            imageVector = AppIcons.Add,
                             contentDescription = stringResource(id = R.string.add)
                         )
                     },
@@ -289,7 +285,7 @@ fun DataItemWidget(
             ) {
                 IconButton(onClick = { viewModel.dispatch(AllViewAction.EditDataConfig(entity)) }) {
                     Icon(
-                        imageVector = Icons.TwoTone.Edit,
+                        imageVector = AppIcons.Edit,
                         contentDescription = stringResource(id = R.string.edit)
                     )
                 }
@@ -297,7 +293,7 @@ fun DataItemWidget(
                 //if (entity.name != "Default") {
                 IconButton(onClick = { viewModel.dispatch(AllViewAction.DeleteDataConfig(entity)) }) {
                     Icon(
-                        imageVector = Icons.TwoTone.Delete,
+                        imageVector = AppIcons.Delete,
                         contentDescription = stringResource(id = R.string.delete)
                     )
                 }
@@ -306,7 +302,7 @@ fun DataItemWidget(
                     viewModel.dispatch(AllViewAction.ApplyConfig(entity))
                 }) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.TwoTone.Rule,
+                        imageVector = AppIcons.Rule,
                         contentDescription = stringResource(id = R.string.apply)
                     )
                 }

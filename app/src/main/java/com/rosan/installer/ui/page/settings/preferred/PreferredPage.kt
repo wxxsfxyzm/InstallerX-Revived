@@ -26,15 +26,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.ClearAll
-import androidx.compose.material.icons.twotone.Downloading
-import androidx.compose.material.icons.twotone.Favorite
-import androidx.compose.material.icons.twotone.FavoriteBorder
-import androidx.compose.material.icons.twotone.Info
-import androidx.compose.material.icons.twotone.Memory
-import androidx.compose.material.icons.twotone.SystemUpdate
-import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -111,8 +102,6 @@ fun PreferredPage(
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
     }
 
-    // TODO Migrate to installSplashScreen
-    // move init logic to splash screen
     LaunchedEffect(true) {
         viewModel.dispatch(PreferredViewAction.Init)
     }
@@ -258,7 +247,7 @@ fun PreferredPage(
             item {
                 SettingsAboutItemWidget(
                     context = context,
-                    imageVector = Icons.TwoTone.Info,
+                    imageVector = AppIcons.Info,
                     headlineContentText = stringResource(R.string.about_detail),
                     supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
                     onClick = { navController.navigate(SettingsScreen.About.route) }
@@ -267,7 +256,7 @@ fun PreferredPage(
             item {
                 SettingsAboutItemWidget(
                     context = context,
-                    imageVector = Icons.TwoTone.SystemUpdate,
+                    imageVector = AppIcons.Update,
                     headlineContentText = stringResource(R.string.get_update),
                     supportingContentText = stringResource(R.string.get_update_detail),
                     onClick = { showBottomSheet = true }
@@ -358,7 +347,7 @@ fun DataAuthorizerWidget(
         // 左侧图标，使用原代码的图标
         leadingContent = {
             Icon(
-                imageVector = Icons.TwoTone.Memory,
+                imageVector = AppIcons.Authorizer,
                 contentDescription = null
             )
         },
@@ -412,7 +401,7 @@ fun DataCustomizeAuthorizerWidget(viewModel: PreferredViewModel) {
             .padding(vertical = 8.dp, horizontal = 16.dp)
             .focusable(),
         leadingIcon = {
-            Icon(imageVector = Icons.TwoTone.Terminal, contentDescription = null)
+            Icon(imageVector = AppIcons.Terminal, contentDescription = null)
         },
         label = {
             Text(stringResource(R.string.config_customize_authorizer))
@@ -495,7 +484,7 @@ fun DataInstallModeWidget(
     ListItem(
         leadingContent = {
             Icon(
-                imageVector = Icons.TwoTone.Downloading, // 来自原代码的图标
+                imageVector = AppIcons.InstallMode, // 来自原代码的图标
                 contentDescription = null
             )
         },
@@ -578,7 +567,7 @@ fun DefaultInstaller(snackBarHostState: SnackbarHostState, lock: Boolean) {
     }
 
     BaseWidget(
-        icon = if (lock) Icons.TwoTone.Favorite else Icons.TwoTone.FavoriteBorder,
+        icon = if (lock) AppIcons.LockDefault else AppIcons.UnlockDefault,
         title =
             stringResource(if (lock) R.string.lock_default_installer else R.string.unlock_default_installer),
         description =
@@ -635,7 +624,7 @@ fun ClearCache() {
         mutableStateOf(false)
     }
     BaseWidget(
-        icon = Icons.TwoTone.ClearAll,
+        icon = AppIcons.ClearAll,
         title = stringResource(id = R.string.clear_cache),
         onClick = {
             if (inProgress) return@BaseWidget

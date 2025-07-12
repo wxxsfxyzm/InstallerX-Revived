@@ -69,8 +69,8 @@ sealed class InstallOption(
     @Keep
     data object AllowTest : InstallOption(
         value = 0x00000004,
-        labelResource = R.string.allow_test,
-        descResource = R.string.allow_test_desc,
+        labelResource = R.string.config_allow_test,
+        descResource = R.string.config_allow_test_desc,
     )
 
     @Keep
@@ -98,24 +98,24 @@ sealed class InstallOption(
     @Keep
     data object AllUsers : InstallOption(
         value = 0x00000040,
-        labelResource = R.string.all_users,
-        descResource = R.string.all_users_desc,
+        labelResource = R.string.config_all_users,
+        descResource = R.string.config_all_users_desc,
     )
 
     @Keep
     data object AllowDowngrade : InstallOption(
         value = 0x00000080 or
                 0x00100000,
-        labelResource = R.string.allow_downgrade,
-        descResource = R.string.allow_downgrade_desc,
+        labelResource = R.string.config_allow_downgrade,
+        descResource = R.string.config_allow_downgrade_desc,
     )
 
     @Keep
     data object GrantAllRequestedPermissions : InstallOption(
         value = 0x00000100,
         minSdk = Build.VERSION_CODES.M,
-        labelResource = R.string.grant_all_permissions,
-        descResource = R.string.grant_all_permissions_desc,
+        labelResource = R.string.config_grant_all_permissions,
+        descResource = R.string.config_grant_all_permissions_desc,
     )
 
 //    @Keep
@@ -219,8 +219,8 @@ sealed class InstallOption(
     data object AllWhitelistRestrictedPermissions : InstallOption(
         value = 0x00400000,
         minSdk = Build.VERSION_CODES.S,
-        labelResource = R.string.all_whitelist_restricted_permissions,
-        descResource = R.string.all_whitelist_restricted_permissions_desc,
+        labelResource = R.string.config_all_whitelist_restricted_permissions,
+        descResource = R.string.config_all_whitelist_restricted_permissions_desc,
     )
 
     @Keep
@@ -236,7 +236,7 @@ sealed class InstallOption(
     data object BypassLowTargetSdkBlock : InstallOption(
         value = 0x01000000,
         minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
-        labelResource = R.string.bypass_low_target_sdk_block,
-        descResource = R.string.bypass_low_target_sdk_block_desc,
+        labelResource = R.string.config_bypass_low_target_sdk,
+        descResource = R.string.config_bypass_low_target_sdk_desc,
     )
 }

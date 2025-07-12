@@ -85,11 +85,6 @@
     <string name="config_install_mode_ignore">Ignorar</string>
     <string name="config_declare_installer">Establecer fuente de instalación</string>
     <string name="config_installer">instalado por (nombre del paquete)</string>
-    <string name="config_for_all_user">Instalar para todos los usuarios</string>
-    <string name="config_allow_test_only">Permitir depuración</string>
-    <string name="config_allow_test_only_dsp">Permitir aplicaciones marcadas para depuración</string>
-    <string name="config_allow_downgrade">Permitir downgrade</string>
-    <string name="config_allow_downgrade_dsp">Permitir que las aplicaciones se degraden (puede no funcionar en todas las ROMs)</string>
     <string name="config_auto_delete">Eliminación automática</string>
     <string name="config_auto_delete_dsp">Eliminar automáticamente el APK después de la instalación</string>
     <string name="config_display_sdk_version">Mostrar información del SDK</string>
@@ -253,5 +248,10 @@
     <string name="set_countdown">Establecer cuenta regresiva</string>
     <string name="dhizuku_auto_close_countdown_desc">Cuenta regresiva para cerrar automáticamente después de una instalación exitosa con Dhizuku</string>
     <string name="grant_permission_after_install">Haz clic para otorgar permiso después de la instalación</string>
+    <string name="config_allow_test">Permitir depuración</string>
+    <string name="config_allow_test_desc">Permitir aplicaciones marcadas para depuración</string>
+    <string name="config_all_users">Instalar para todos los usuarios</string>
+    <string name="config_allow_downgrade">Permitir downgrade</string>
+    <string name="config_allow_downgrade_desc">Permitir que las aplicaciones se degraden (puede no funcionar en todas las ROMs)</string>
 
 </resources>

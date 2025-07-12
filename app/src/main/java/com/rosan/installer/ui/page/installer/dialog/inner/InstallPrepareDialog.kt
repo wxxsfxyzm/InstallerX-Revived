@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Delete
-import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -40,6 +37,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
@@ -235,7 +233,7 @@ fun installPrepareDialog( // 小写开头
                                     installer.config.autoDelete = newValue
                                 },
                                 label = stringResource(id = R.string.config_auto_delete),
-                                icon = Icons.TwoTone.Delete
+                                icon = AppIcons.Delete
                             )
                             Chip(
                                 selected = displaySdk,
@@ -245,7 +243,7 @@ fun installPrepareDialog( // 小写开头
                                     installer.config.displaySdk = newValue
                                 },
                                 label = stringResource(id = R.string.config_display_sdk_version),
-                                icon = Icons.TwoTone.Info
+                                icon = AppIcons.Info
                             )
                         }
                     }

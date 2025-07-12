@@ -218,6 +218,7 @@ fun MenuItemWidget(
                 }
             }
         }
+        item { Spacer(modifier = Modifier.size(1.dp)) }
     }
 }
 

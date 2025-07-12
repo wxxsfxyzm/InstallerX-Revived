@@ -13,11 +13,14 @@ data class EditViewState(
         val installMode: ConfigEntity.InstallMode,
         val declareInstaller: Boolean,
         val installer: String,
+        val autoDelete: Boolean,
+        val displaySdk: Boolean,
         val forAllUser: Boolean,
         val allowTestOnly: Boolean,
         val allowDowngrade: Boolean,
-        val autoDelete: Boolean,
-        val displaySdk: Boolean,
+        val allowRestrictedPermissions: Boolean,
+        val bypassLowTargetSdk: Boolean,
+        val allowAllRequestedPermissions: Boolean
     ) {
         val errorName = name.isEmpty()// || name == "Default"
 
@@ -31,20 +34,17 @@ data class EditViewState(
             name = this.name,
             description = this.description,
             authorizer = this.authorizer,
-            customizeAuthorizer = if (this.authorizerCustomize)
-                this.customizeAuthorizer
-            else
-                "",
+            customizeAuthorizer = if (this.authorizerCustomize) this.customizeAuthorizer else "",
             installMode = this.installMode,
-            installer = if (this.declareInstaller)
-                this.installer
-            else
-                null,
+            installer = if (this.declareInstaller) this.installer else null,
+            autoDelete = this.autoDelete,
+            displaySdk = this.displaySdk,
             forAllUser = this.forAllUser,
             allowTestOnly = this.allowTestOnly,
             allowDowngrade = this.allowDowngrade,
-            autoDelete = this.autoDelete,
-            displaySdk = this.displaySdk
+            allowRestrictedPermissions = this.allowRestrictedPermissions,
+            bypassLowTargetSdk = this.bypassLowTargetSdk,
+            allowAllRequestedPermissions = this.allowAllRequestedPermissions,
         )
 
         companion object {
@@ -56,11 +56,14 @@ data class EditViewState(
                 installMode = config.installMode,
                 declareInstaller = config.installer != null,
                 installer = config.installer ?: "",
+                autoDelete = config.autoDelete,
+                displaySdk = config.displaySdk,
                 forAllUser = config.forAllUser,
                 allowTestOnly = config.allowTestOnly,
                 allowDowngrade = config.allowDowngrade,
-                autoDelete = config.autoDelete,
-                displaySdk = config.displaySdk
+                allowRestrictedPermissions = config.allowRestrictedPermissions,
+                bypassLowTargetSdk = config.bypassLowTargetSdk,
+                allowAllRequestedPermissions = config.allowAllRequestedPermissions
             )
         }
     }
