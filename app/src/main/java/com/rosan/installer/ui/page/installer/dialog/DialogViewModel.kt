@@ -77,11 +77,11 @@ class DialogViewModel(
     init {
         viewModelScope.launch {
             autoCloseCountDown =
-                appDataStore.getInt("show_dhizuku_auto_close_count_down_menu", 3).first()
+                appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first()
             showExtendedMenu =
-                appDataStore.getBoolean("show_dialog_install_extended_menu", false).first()
+                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false).first()
             disableNotificationOnDismiss =
-                appDataStore.getBoolean("show_disable_notification_for_dialog_install", false)
+                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false)
                     .first()
             // initialize install flags based on repo.config
             _installFlags.value = listOfNotNull(

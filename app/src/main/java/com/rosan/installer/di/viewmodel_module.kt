@@ -28,6 +28,6 @@ val viewModelModule = module {
     }
 
     viewModel { (id: Long) ->
-        ApplyViewModel(get(), get(), id)
+        ApplyViewModel(get(), get(), id, get())
     }
 }

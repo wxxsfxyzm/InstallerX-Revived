@@ -30,7 +30,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
@@ -124,6 +126,8 @@ fun MenuItemWidget(
     installFlags: Int, // 接收从 ViewModel 观察到的 flags
     viewmodel: DialogViewModel
 ) {
+    val haptic = LocalHapticFeedback.current
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp), // 卡片之间的间距
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -151,11 +155,13 @@ fun MenuItemWidget(
                                 else -> {}
                             }
 
-                        is InstallExtendedMenuAction.InstallOption ->
+                        is InstallExtendedMenuAction.InstallOption -> {
+                            haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
                             option?.let { opt ->
                                 viewmodel.toggleInstallFlag(opt.value, !isSelected)
                             }
-
+                        }
+                        
                         is InstallExtendedMenuAction.TextField -> {}
                     }
                 },

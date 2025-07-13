@@ -34,16 +34,16 @@ class ConfigUtil {
         private val appDataStore by inject<AppDataStore>()
 
         suspend fun getGlobalAuthorizer(): ConfigEntity.Authorizer {
-            val str = appDataStore.getString("authorizer", "").first()
+            val str = appDataStore.getString(AppDataStore.AUTHORIZER, "").first()
             return AuthorizerConverter.revert(str)
         }
 
         suspend fun getGlobalCustomizeAuthorizer(): String {
-            return appDataStore.getString("customize_authorizer", "").first()
+            return appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER, "").first()
         }
 
         suspend fun getGlobalInstallMode(): ConfigEntity.InstallMode {
-            val str = appDataStore.getString("install_mode", "").first()
+            val str = appDataStore.getString(AppDataStore.INSTALL_MODE, "").first()
             return InstallModeConverter.revert(str)
         }
 

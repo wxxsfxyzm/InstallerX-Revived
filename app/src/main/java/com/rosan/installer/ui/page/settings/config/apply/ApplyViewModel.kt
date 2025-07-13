@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.rosan.installer.data.common.util.compatVersionCode
 import com.rosan.installer.data.common.util.getCompatInstalledPackages
 import com.rosan.installer.data.common.util.hasFlag
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.AppEntity
 import com.rosan.installer.data.settings.repo.AppRepo
 import com.rosan.installer.data.settings.repo.ConfigRepo
@@ -17,13 +18,17 @@ import com.rosan.installer.ui.common.ViewContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.seconds
 
 class ApplyViewModel(
-    private val configRepo: ConfigRepo, private val appRepo: AppRepo, private val id: Long
+    private val configRepo: ConfigRepo,
+    private val appRepo: AppRepo,
+    private val id: Long,
+    private val appDataStore: AppDataStore
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
@@ -58,6 +63,7 @@ class ApplyViewModel(
     private fun init() {
         if (inited) return
         inited = true
+        loadAndObserveSettings()
         loadApps()
         collectAppEntities()
     }
@@ -133,24 +139,69 @@ class ApplyViewModel(
         }
     }
 
+    private fun loadAndObserveSettings() {
+        viewModelScope.launch {
+            // 加载初始值
+            val initialState = ApplyViewState(
+                // DataStore 是异步的，我们用 .first() 来获取一次当前的存储值
+                orderType = appDataStore.getString(AppDataStore.APPLY_ORDER_TYPE)
+                    .first()
+                    .let { name ->
+                        // 安全地将存储的字符串转换为 Enum
+                        runCatching { ApplyViewState.OrderType.valueOf(name) }
+                            .getOrDefault(ApplyViewState.OrderType.Label)
+                    },
+                orderInReverse = appDataStore.getBoolean(AppDataStore.APPLY_ORDER_IN_REVERSE).first(),
+                selectedFirst = appDataStore.getBoolean(AppDataStore.APPLY_SELECTED_FIRST, default = true)
+                    .first(), // 默认值为true
+                showSystemApp = appDataStore.getBoolean(AppDataStore.APPLY_SHOW_SYSTEM_APP).first(),
+                showPackageName = appDataStore.getBoolean(AppDataStore.APPLY_SHOW_PACKAGE_NAME, default = true)
+                    .first() // 默认值为true
+            )
+            // 用加载到的值更新 state
+            state = state.copy(
+                orderType = initialState.orderType,
+                orderInReverse = initialState.orderInReverse,
+                selectedFirst = initialState.selectedFirst,
+                showSystemApp = initialState.showSystemApp,
+                showPackageName = initialState.showPackageName
+            )
+        }
+    }
+
     private fun order(type: ApplyViewState.OrderType) {
         state = state.copy(orderType = type)
+        viewModelScope.launch {
+            appDataStore.putString(AppDataStore.APPLY_ORDER_TYPE, type.name)
+        }
     }
 
     private fun orderInReverse(enabled: Boolean) {
         state = state.copy(orderInReverse = enabled)
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.APPLY_ORDER_IN_REVERSE, enabled)
+        }
     }
 
     private fun selectedFirst(enabled: Boolean) {
         state = state.copy(selectedFirst = enabled)
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.APPLY_SELECTED_FIRST, enabled)
+        }
     }
 
     private fun showSystemApp(enabled: Boolean) {
         state = state.copy(showSystemApp = enabled)
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.APPLY_SHOW_SYSTEM_APP, enabled)
+        }
     }
 
     private fun showPackageName(enabled: Boolean) {
         state = state.copy(showPackageName = enabled)
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.APPLY_SHOW_PACKAGE_NAME, enabled)
+        }
     }
 
     private fun search(text: String) {

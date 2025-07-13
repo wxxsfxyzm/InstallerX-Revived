@@ -56,19 +56,19 @@ class PreferredViewModel(
         if (initialized) return
         initialized = true
         viewModelScope.launch {
-            val authorizerFlow = appDataStore.getString("authorizer")
+            val authorizerFlow = appDataStore.getString(AppDataStore.AUTHORIZER)
                 .map { AuthorizerConverter.revert(it) }
-            val customizeAuthorizerFlow = appDataStore.getString("customize_authorizer")
-            val installModeFlow = appDataStore.getString("install_mode")
+            val customizeAuthorizerFlow = appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER)
+            val installModeFlow = appDataStore.getString(AppDataStore.INSTALL_MODE)
                 .map { InstallModeConverter.revert(it) }
             val showDialogInstallExtendedMenuFlow =
-                appDataStore.getBoolean("show_dialog_install_extended_menu")
+                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU)
             val showNotificationForDialogInstall =
-                appDataStore.getBoolean("show_disable_notification_for_dialog_install", false)
+                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false)
             val showDialogWhenPressingNotificationFlow =
-                appDataStore.getBoolean("show_dialog_when_pressing_notification", true)
+                appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true)
             val dhizukuAutoCloseCountDownFlow =
-                appDataStore.getInt("show_dhizuku_auto_close_count_down_menu", 3)
+                appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
 
             combine(
                 authorizerFlow,
@@ -103,44 +103,41 @@ class PreferredViewModel(
 
     private fun changeGlobalAuthorizer(authorizer: ConfigEntity.Authorizer) {
         viewModelScope.launch {
-            appDataStore.putString("authorizer", AuthorizerConverter.convert(authorizer))
+            appDataStore.putString(AppDataStore.AUTHORIZER, AuthorizerConverter.convert(authorizer))
         }
     }
 
     private fun changeGlobalCustomizeAuthorizer(customizeAuthorizer: String) {
         viewModelScope.launch {
             if (state.authorizerCustomize) {
-                appDataStore.putString("customize_authorizer", customizeAuthorizer)
+                appDataStore.putString(AppDataStore.CUSTOMIZE_AUTHORIZER, customizeAuthorizer)
             } else {
-                appDataStore.putString("customize_authorizer", "")
+                appDataStore.putString(AppDataStore.CUSTOMIZE_AUTHORIZER, "")
             }
         }
     }
 
     private fun changeGlobalInstallMode(installMode: ConfigEntity.InstallMode) {
         viewModelScope.launch {
-            appDataStore.putString("install_mode", InstallModeConverter.convert(installMode))
+            appDataStore.putString(AppDataStore.INSTALL_MODE, InstallModeConverter.convert(installMode))
         }
     }
 
     private fun changeShowDialogInstallExtendedMenu(installExtendedMenu: Boolean) {
         viewModelScope.launch {
-            appDataStore.putBoolean("show_dialog_install_extended_menu", installExtendedMenu)
+            appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, installExtendedMenu)
         }
     }
 
     private fun changeShowDisableNotificationForDialogInstall(showDisableNotification: Boolean) {
         viewModelScope.launch {
-            appDataStore.putBoolean(
-                "show_disable_notification_for_dialog_install",
-                showDisableNotification
-            )
+            appDataStore.putBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, showDisableNotification)
         }
     }
 
     private fun changeShowDialogWhenPressingNotification(showDialog: Boolean) {
         viewModelScope.launch {
-            appDataStore.putBoolean("show_dialog_when_pressing_notification", showDialog)
+            appDataStore.putBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, showDialog)
         }
     }
 
@@ -148,7 +145,7 @@ class PreferredViewModel(
         viewModelScope.launch {
             // Ensure countDown is within the valid range
             if (countDown in 1..10) {
-                appDataStore.putInt("show_dhizuku_auto_close_count_down_menu", countDown)
+                appDataStore.putInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, countDown)
             }
         }
     }
