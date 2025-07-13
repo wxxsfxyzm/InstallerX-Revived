@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.widget.setting
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,11 +25,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun IntNumberPickerWidget(
-    context: Context,
     icon: ImageVector? = null,
     title: String,
     description: String? = null,
@@ -40,7 +40,7 @@ fun IntNumberPickerWidget(
     endInt: Int,
     onValueChange: (Int) -> Unit
 ) {
-    val vibrator = context.getSystemService(android.os.Vibrator::class.java)
+    val haptic = LocalHapticFeedback.current
     var lastIntValue by remember { mutableIntStateOf(value) }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -88,11 +88,7 @@ fun IntNumberPickerWidget(
                 onValueChange = {
                     val intValue = it.toInt()
                     if (intValue != lastIntValue) {
-                        vibrator?.vibrate(
-                            android.os.VibrationEffect.createPredefined(
-                                android.os.VibrationEffect.EFFECT_HEAVY_CLICK
-                            )
-                        )
+                        haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
                         lastIntValue = intValue
                         onValueChange(intValue)
                     }
