@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,6 +39,7 @@ import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Shield
 import androidx.compose.material.icons.twotone.Visibility
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -47,7 +49,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -55,6 +56,8 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -78,11 +81,16 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -90,10 +98,9 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.installer.dialog.inner.Chip
 import com.rosan.installer.ui.theme.none
-import com.rosan.installer.ui.widget.toggle.Toggle
-import com.rosan.installer.ui.widget.toggle.ToggleRow
+import com.rosan.installer.ui.widget.setting.LabelWidget
+import com.rosan.installer.ui.widget.toggle.Chip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -457,14 +464,14 @@ private fun BottomSheetContent(viewModel: ApplyViewModel) {
     }
 }
 
-@Composable
+/*@Composable
 private fun LabelWidget(text: String) {
     CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.titleMedium) {
         Text(text)
     }
-}
+}*/
 
-@Composable
+/*@Composable
 private fun OrderWidget(viewModel: ApplyViewModel) {
     LabelWidget(stringResource(R.string.sort))
 
@@ -487,12 +494,73 @@ private fun OrderWidget(viewModel: ApplyViewModel) {
             }
         }
     }
+}*/
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun OrderWidget(viewModel: ApplyViewModel) {
+    val haptic = LocalHapticFeedback.current
+
+    LabelWidget(stringResource(R.string.sort), 0)
+
+    data class OrderData(val labelResId: Int, val type: ApplyViewState.OrderType)
+
+    val map = listOf(
+        OrderData(R.string.sort_by_label, ApplyViewState.OrderType.Label),
+        OrderData(R.string.sort_by_package_name, ApplyViewState.OrderType.PackageName),
+        OrderData(R.string.sort_by_install_time, ApplyViewState.OrderType.FirstInstallTime)
+    )
+
+    val selectedIndex = map.map { it.type }.indexOf(viewModel.state.orderType)
+
+    // 使用 Row 来替代 ToggleRow，并添加 selectableGroup 以提高无障碍性
+    Row(
+        modifier = Modifier
+            .selectableGroup()
+            // 使用 clip 和 border 在 Row 外部创建统一的圆角和边框
+            .clip(RoundedCornerShape(8.dp)),
+        // 使用 ButtonGroupDefaults.ConnectedSpaceBetween (即 0.dp) 来使按钮紧密相连
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+    ) {
+        map.forEachIndexed { index, value ->
+            // 使用 Material 3 Expressive 的 ToggleButton
+            ToggleButton(
+                checked = selectedIndex == index,
+                onCheckedChange = {
+                    // 触发震动反馈
+                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    // onCheckedChange 会在按钮被点击时触发
+                    // 我们直接分发 Action 来更新状态
+                    viewModel.dispatch(ApplyViewAction.Order(value.type))
+                },
+                // 根据按钮位置应用不同的形状，实现 "连接" 的视觉效果
+                shapes = when (index) {
+                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    map.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                },
+                // 自定义颜色
+                colors = ToggleButtonDefaults.toggleButtonColors(
+                    // 选中时，背景为主题色
+                    checkedContainerColor = MaterialTheme.colorScheme.primary,
+                    // 选中时，内容（文字）为高对比度颜色
+                    checkedContentColor = MaterialTheme.colorScheme.onPrimary,
+                    // 未选中时，背景为透明或表面色
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    // 未选中时，内容（文字）颜色
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                modifier = Modifier.semantics { role = Role.RadioButton }
+            ) {
+                Text(stringResource(value.labelResId))
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ChipsWidget(viewModel: ApplyViewModel) {
-    LabelWidget(stringResource(R.string.more))
+    LabelWidget(stringResource(R.string.more), 0)
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {

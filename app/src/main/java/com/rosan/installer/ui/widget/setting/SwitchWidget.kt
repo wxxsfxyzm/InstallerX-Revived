@@ -1,11 +1,10 @@
 package com.rosan.installer.ui.widget.setting
 
-import android.os.VibrationEffect
-import android.os.Vibrator
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 
 @Composable
 fun SwitchWidget(
@@ -18,13 +17,11 @@ fun SwitchWidget(
     // --- 新增参数，用于实现更精美的UI ---
     isError: Boolean = false
 ) {
-    val context = LocalContext.current
-    val vibrator = context.getSystemService(Vibrator::class.java)
-
+    val haptic = LocalHapticFeedback.current
     // 1. 将所有操作逻辑统一到一个地方
     val toggleAction = {
         if (enabled) {
-            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+            haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
             onCheckedChange(!checked)
         }
     }

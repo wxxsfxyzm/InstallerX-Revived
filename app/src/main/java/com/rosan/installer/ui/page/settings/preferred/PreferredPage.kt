@@ -1,8 +1,6 @@
 package com.rosan.installer.ui.page.settings.preferred
 
 import android.content.Context
-import android.os.VibrationEffect
-import android.os.Vibrator
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -58,8 +56,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -142,7 +142,6 @@ fun PreferredPage(
             // item { DataAuthorizerWidget(viewModel) }
             item {
                 DataAuthorizerWidget(
-                    context = context,
                     currentAuthorizer = state.authorizer,
                     changeAuthorizer = { newAuthorizer ->
                         viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(newAuthorizer))
@@ -157,7 +156,6 @@ fun PreferredPage(
                     exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
                 ) {
                     IntNumberPickerWidget(
-                        context = context,
                         icon = AppIcons.Working,
                         title = stringResource(R.string.set_countdown),
                         description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
@@ -175,7 +173,6 @@ fun PreferredPage(
             // item { DataInstallModeWidget(viewModel) }
             item {
                 DataInstallModeWidget(
-                    context = context,
                     currentInstallMode = state.installMode,
                     changeInstallMode = { newMode ->
                         viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(newMode))
@@ -246,7 +243,6 @@ fun PreferredPage(
             item { LabelWidget(stringResource(R.string.other)) }
             item {
                 SettingsAboutItemWidget(
-                    context = context,
                     imageVector = AppIcons.Info,
                     headlineContentText = stringResource(R.string.about_detail),
                     supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
@@ -255,7 +251,6 @@ fun PreferredPage(
             }
             item {
                 SettingsAboutItemWidget(
-                    context = context,
                     imageVector = AppIcons.Update,
                     headlineContentText = stringResource(R.string.get_update),
                     supportingContentText = stringResource(R.string.get_update_detail),
@@ -309,7 +304,6 @@ data class AuthorizerInfo(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DataAuthorizerWidget(
-    context: Context,
     modifier: Modifier = Modifier,
     // 直接传入当前选中的授权者，而不是整个 ViewModel
     currentAuthorizer: ConfigEntity.Authorizer,
@@ -317,7 +311,7 @@ fun DataAuthorizerWidget(
     changeAuthorizer: (ConfigEntity.Authorizer) -> Unit,
     onClick: () -> Unit
 ) {
-    val vibrator = context.getSystemService(Vibrator::class.java)
+    val haptic = LocalHapticFeedback.current
 
     // 数据源和原代码保持一致
     val authorizerOptions = mapOf(
@@ -365,7 +359,7 @@ fun DataAuthorizerWidget(
                     InputChip(
                         selected = currentAuthorizer == authorizerType,
                         onClick = {
-                            vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                             if (currentAuthorizer != authorizerType) {
                                 changeAuthorizer(authorizerType)
                             }
@@ -385,8 +379,8 @@ fun DataAuthorizerWidget(
         },
         // 整个 ListItem 的点击事件
         modifier = Modifier.clickable {
+            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
             onClick()
-            vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
         }
     )
 }
@@ -449,13 +443,12 @@ data class InstallModeInfo(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DataInstallModeWidget(
-    context: Context,
     modifier: Modifier = Modifier,
     currentInstallMode: ConfigEntity.InstallMode,
     changeInstallMode: (ConfigEntity.InstallMode) -> Unit,
     onClick: () -> Unit = {} // 提供一个默认的空实现
 ) {
-    val vibrator = context.getSystemService(Vibrator::class.java)
+    val haptic = LocalHapticFeedback.current
 
     // 使用新的数据类来定义选项
     val installModeOptions = mapOf(
@@ -498,7 +491,7 @@ fun DataInstallModeWidget(
                     InputChip(
                         selected = currentInstallMode == modeType,
                         onClick = {
-                            vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                             if (currentInstallMode != modeType) {
                                 changeInstallMode(modeType)
                             }
@@ -516,8 +509,8 @@ fun DataInstallModeWidget(
             }
         },
         modifier = Modifier.clickable {
+            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
             onClick()
-            vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
         }
     )
 }
@@ -681,7 +674,7 @@ private fun BottomSheetContent(
     context: Context,
     title: String
 ) {
-    val vibrator = context.getSystemService(Vibrator::class.java)
+    val haptic = LocalHapticFeedback.current
     Column(
         modifier = Modifier
             .fillMaxWidth() // 填充横向宽度
@@ -698,7 +691,7 @@ private fun BottomSheetContent(
         // GitHub 按钮
         Button(
             onClick = {
-                vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                 // 点击按钮时调用 openUrl 工具函数
                 openUrl(context, "https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
             },
