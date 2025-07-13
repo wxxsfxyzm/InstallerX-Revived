@@ -10,12 +10,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,9 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -43,6 +36,7 @@ import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.widget.toggle.Chip
 
 // Assume pausingIcon is accessible
 
@@ -96,22 +90,6 @@ private fun InstallPrepareTooManyDialog(
                 viewModel.dispatch(DialogViewAction.Close)
             })
         })
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Chip(
-    selected: Boolean, onClick: () -> Unit, label: String, icon: ImageVector
-) {
-    FilterChip(selected = selected, onClick = onClick, leadingIcon = {
-        Icon(
-            modifier = Modifier.size(FilterChipDefaults.IconSize),
-            imageVector = icon,
-            contentDescription = null
-        )
-    }, label = {
-        Text(label)
-    })
 }
 
 @SuppressLint("UnrememberedMutableState")
@@ -274,7 +252,7 @@ fun installPrepareDialog( // 小写开头
                 // Add Permission review and comparison button if needed
                 // Add more buttons as needed
                 else if (viewModel.showExtendedMenu) {
-                    add(DialogButton("菜单", 2f) {
+                    add(DialogButton(stringResource(R.string.menu), 2f) {
                         viewModel.dispatch(DialogViewAction.InstallExtendedMenu)
                     })
                 }

@@ -144,10 +144,10 @@ class EditViewModel(
     }
 
     private suspend fun getGlobalAuthorizer() =
-        AuthorizerConverter.revert(appDataStore.getString("authorizer").first())
+        AuthorizerConverter.revert(appDataStore.getString(AppDataStore.AUTHORIZER).first())
 
     private suspend fun getGlobalInstallMode() =
-        InstallModeConverter.revert(appDataStore.getString("install_mode").first())
+        InstallModeConverter.revert(appDataStore.getString(AppDataStore.INSTALL_MODE).first())
 
     private fun changeDataDeclareInstaller(declareInstaller: Boolean) {
         state = state.copy(
