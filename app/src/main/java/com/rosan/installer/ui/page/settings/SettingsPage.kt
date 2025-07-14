@@ -116,7 +116,7 @@ fun SettingsPage() {
             }
         ) {
             // 这里直接使用 HomePage，它之前是 AboutPageActivity 的内容
-            HomePage()
+            HomePage(navController)
         }
     }
 }
