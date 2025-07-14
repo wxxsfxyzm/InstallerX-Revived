@@ -147,83 +147,85 @@ fun ApplyPage(
             var searchBarActivated by remember {
                 mutableStateOf(false)
             }
-            TopAppBar(title = {
-                @Suppress("AnimatedContentLabel") AnimatedContent(targetState = searchBarActivated) {
-                    if (!it) Text(stringResource(R.string.app))
-                    else {
-                        val focusRequester = remember {
-                            FocusRequester()
-                        }
-                        OutlinedTextField(
-                            modifier = Modifier.focusRequester(focusRequester),
-                            value = viewModel.state.search,
-                            onValueChange = { viewModel.dispatch(ApplyViewAction.Search(it)) },
-                            singleLine = true,
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = AppIcons.Search,
-                                    contentDescription = stringResource(R.string.search)
-                                )
-                            },
-                            trailingIcon = {
-                                IconButton(
-                                    shapes = IconButtonShapes(
-                                        shape = IconButtonDefaults.smallRoundShape,
-                                        pressedShape = IconButtonDefaults.smallPressedShape
-                                    ),
-                                    onClick = {
-                                        searchBarActivated = false
-                                        viewModel.dispatch(ApplyViewAction.Search(""))
-                                    }) {
+            TopAppBar(
+                title = {
+                    @Suppress("AnimatedContentLabel") AnimatedContent(targetState = searchBarActivated) {
+                        if (!it) Text(stringResource(R.string.app))
+                        else {
+                            val focusRequester = remember {
+                                FocusRequester()
+                            }
+                            OutlinedTextField(
+                                modifier = Modifier.focusRequester(focusRequester),
+                                value = viewModel.state.search,
+                                onValueChange = { viewModel.dispatch(ApplyViewAction.Search(it)) },
+                                singleLine = true,
+                                leadingIcon = {
                                     Icon(
-                                        imageVector = AppIcons.Close,
-                                        contentDescription = stringResource(R.string.close)
+                                        imageVector = AppIcons.Search,
+                                        contentDescription = stringResource(R.string.search)
                                     )
-                                }
-                            },
-                            textStyle = MaterialTheme.typography.titleMedium
-                        )
-                        SideEffect {
-                            focusRequester.requestFocus()
+                                },
+                                trailingIcon = {
+                                    IconButton(
+                                        shapes = IconButtonShapes(
+                                            shape = IconButtonDefaults.smallRoundShape,
+                                            pressedShape = IconButtonDefaults.smallPressedShape
+                                        ),
+                                        onClick = {
+                                            searchBarActivated = false
+                                            viewModel.dispatch(ApplyViewAction.Search(""))
+                                        }) {
+                                        Icon(
+                                            imageVector = AppIcons.Close,
+                                            contentDescription = stringResource(R.string.close)
+                                        )
+                                    }
+                                },
+                                textStyle = MaterialTheme.typography.titleMedium
+                            )
+                            SideEffect {
+                                focusRequester.requestFocus()
+                            }
                         }
                     }
-                }
-            }, navigationIcon = {
-                IconButton(
-                    onClick = { navController.navigateUp() },
-                    shapes = IconButtonShapes(
-                        shape = IconButtonDefaults.smallRoundShape,
-                        pressedShape = IconButtonDefaults.smallPressedShape
-                    ),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        // 指定“启用”状态下的内容（图标）颜色
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        // （可选）指定“启用”状态下的容器（背景）颜色
-                        containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
-                    )
-                ) {
-                    Icon(
-                        imageVector = AppIcons.ArrowBack,
-                        contentDescription = stringResource(id = R.string.back)
-                    )
-                }
-            }, actions = {
-                AnimatedVisibility(visible = !searchBarActivated) {
+                },
+                navigationIcon = {
                     IconButton(
-                        onClick = { searchBarActivated = !searchBarActivated }) {
+                        onClick = { navController.navigateUp() },
+                        shapes = IconButtonShapes(
+                            shape = IconButtonDefaults.smallRoundShape,
+                            pressedShape = IconButtonDefaults.smallPressedShape
+                        ),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            // 指定“启用”状态下的内容（图标）颜色
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            // （可选）指定“启用”状态下的容器（背景）颜色
+                            containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
+                        )
+                    ) {
                         Icon(
-                            imageVector = AppIcons.Search,
-                            contentDescription = stringResource(R.string.search)
+                            imageVector = AppIcons.ArrowBack1,
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
-                }
-                IconButton(onClick = { showBottomSheet = true }) {
-                    Icon(
-                        imageVector = AppIcons.Menu,
-                        contentDescription = stringResource(R.string.menu)
-                    )
-                }
-            })
+                }, actions = {
+                    AnimatedVisibility(visible = !searchBarActivated) {
+                        IconButton(
+                            onClick = { searchBarActivated = !searchBarActivated }) {
+                            Icon(
+                                imageVector = AppIcons.Search,
+                                contentDescription = stringResource(R.string.search)
+                            )
+                        }
+                    }
+                    IconButton(onClick = { showBottomSheet = true }) {
+                        Icon(
+                            imageVector = AppIcons.Menu,
+                            contentDescription = stringResource(R.string.menu)
+                        )
+                    }
+                })
         }, floatingActionButton = {
             AnimatedVisibility(
                 visible = showFloating,

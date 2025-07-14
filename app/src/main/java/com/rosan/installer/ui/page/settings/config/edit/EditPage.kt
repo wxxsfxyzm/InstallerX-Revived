@@ -126,7 +126,7 @@ fun EditPage(
                         )
                     ) {
                         Icon(
-                            imageVector = AppIcons.ArrowBack,
+                            imageVector = AppIcons.ArrowBack1,
                             contentDescription = stringResource(id = R.string.back)
                         )
                     }
