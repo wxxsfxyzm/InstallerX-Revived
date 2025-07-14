@@ -90,7 +90,10 @@ object MultiApkZipAnalyserRepoImpl : AnalyserRepo {
 
     /**
      * 从输入流中分析单个APK文件。
-     * 它将流内容写入临时文件，然后使用 ApkAnalyserRepoImpl 进行分析。
+     * 根据最终分析器 ApkAnalyserRepoImpl 的要求，此函数必须执行以下操作：
+     * 1. 将 InputStream 写入一个临时的、可访问的文件中。
+     * 2. 调用下游分析器处理该文件。
+     * 3. 使用健壮的错误处理机制，并在失败时清理临时文件。
      */
     private suspend fun analyseApkStream(
         config: ConfigEntity,
@@ -98,43 +101,50 @@ object MultiApkZipAnalyserRepoImpl : AnalyserRepo {
         inputStream: InputStream,
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
-        // 在缓存目录中创建一个唯一的临时文件
         val tempFile =
             File.createTempFile(UUID.randomUUID().toString(), ".apk", File(extra.cacheDirectory))
-        var analysisResult: List<AppEntity> = emptyList()
-        try {
-            // 将APK流写入临时文件
+
+        val result = runCatching {
+            // 核心逻辑: 将流写入文件，然后进行分析
             tempFile.outputStream().use { output ->
                 inputStream.copyTo(output)
             }
-            // 为临时文件创建一个新的数据实体
+
             val tempData = DataEntity.FileEntity(tempFile.absolutePath).apply {
                 source = data
             }
-            // 使用标准的APK分析器来解析这个临时文件
+
+            // 调用必须使用文件路径的下游分析器
             val originalEntities = ApkAnalyserRepoImpl.doWork(config, listOf(tempData), extra)
 
-            // --- 关键修改 ---
-            // 遍历分析结果，并为每个实体创建一个唯一的包名
-            analysisResult = originalEntities.mapNotNull { entity ->
+            // 根据你的建议，优化UI显示名称
+            val displayNameFromZip = when (data) {
+                is DataEntity.ZipFileEntity -> File(data.name).nameWithoutExtension
+                is DataEntity.ZipInputStreamEntity -> File(data.name).nameWithoutExtension
+                else -> tempFile.nameWithoutExtension
+            }
+
+            originalEntities.map { entity ->
                 when (entity) {
-                    is AppEntity.BaseEntity -> {
-                        // 通过将原始包名和文件名结合，来创建一个唯一的包名
-                        val uniquePackageName = "${entity.packageName}:${File(tempFile.name).name}"
-                        // 返回一个带有唯一包名的新实体副本
-                        entity.copy(packageName = uniquePackageName)
-                    }
-                    // 如果有其他类型的实体（如SplitEntity），我们在此场景下将其忽略，
-                    // 因为我们只关心独立的APK。
-                    else -> null
+                    is AppEntity.BaseEntity -> entity.copy(label = displayNameFromZip)
+                    else -> entity
                 }
             }
-        } finally {
-            // 确保临时文件在使用后被删除
-            if (tempFile.exists()) {
-                tempFile.delete()
-            }
         }
-        return analysisResult
+
+        // 根据分析结果进行资源管理
+        result.onSuccess { entities ->
+            // 成功：返回结果，保留临时文件用于安装
+            return entities
+        }
+
+        result.onFailure { error ->
+            // 失败：删除临时文件，防止垃圾残留。可以添加日志记录。
+            tempFile.delete()
+            // Log.e("MultiApkZipAnalyser", "Failed to analyse APK stream from ${data.name}", error)
+        }
+
+        // 默认返回空列表
+        return emptyList()
     }
 }
