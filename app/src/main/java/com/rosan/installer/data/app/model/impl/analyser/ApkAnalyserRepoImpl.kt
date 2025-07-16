@@ -26,14 +26,15 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         val apps = mutableListOf<AppEntity>()
-        data.forEach { apps.addAll(doWork(config, it)) }
+        data.forEach { apps.addAll(doWork(config, it, extra)) }
         return apps
     }
 
-    private fun doWork(config: ConfigEntity, data: DataEntity): List<AppEntity> {
+    private fun doWork(config: ConfigEntity, data: DataEntity, extra: AnalyseExtraEntity): List<AppEntity> {
         return when (data) {
-            is DataEntity.FileEntity -> doFileWork(config, data)
-            is DataEntity.FileDescriptorEntity -> doFileDescriptorWork(config, data)
+            // pass extra to sub-analyser
+            is DataEntity.FileEntity -> doFileWork(config, data, extra)
+            is DataEntity.FileDescriptorEntity -> doFileDescriptorWork(config, data, extra)
             else -> throw Exception("can't analyse this entity: $data")
         }
     }
@@ -54,22 +55,26 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         return Resources(assetManager, resources.displayMetrics, resources.configuration)
     }
 
-    private fun doFileWork(config: ConfigEntity, data: DataEntity.FileEntity): List<AppEntity> {
+    private fun doFileWork(
+        config: ConfigEntity,
+        data: DataEntity.FileEntity,
+        extra: AnalyseExtraEntity
+    ): List<AppEntity> {
         val path = data.path
         return useResources { resources ->
             setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
-            listOf(loadAppEntity(resources, resources.newTheme(), data))
+            listOf(loadAppEntity(resources, resources.newTheme(), data, extra))
         }
     }
 
     private fun doFileDescriptorWork(
-        config: ConfigEntity, data: DataEntity.FileDescriptorEntity
+        config: ConfigEntity, data: DataEntity.FileDescriptorEntity, extra: AnalyseExtraEntity
     ): List<AppEntity> {
         val fileDescriptor =
             data.getFileDescriptor() ?: throw Exception("can't get fd from '$data'")
         return useResources { resources ->
             setAssetPath(resources.assets, arrayOf(loadFromFd(fileDescriptor)))
-            listOf(loadAppEntity(resources, resources.newTheme(), data))
+            listOf(loadAppEntity(resources, resources.newTheme(), data, extra))
         }
     }
 
@@ -101,7 +106,7 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
     }
 
     private fun loadAppEntity(
-        resources: Resources, theme: Resources.Theme?, data: DataEntity
+        resources: Resources, theme: Resources.Theme?, data: DataEntity, extra: AnalyseExtraEntity
     ): AppEntity {
         var packageName: String? = null
         var splitName: String? = null
@@ -169,13 +174,15 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             icon = roundIcon ?: icon,
             targetSdk = targetSdk,
             minSdk = minSdk,
-            permissions = permissions
+            permissions = permissions,
+            containerType = extra.dataType
         ) else AppEntity.SplitEntity(
             packageName = packageName,
             data = data,
             splitName = splitName,
             targetSdk = targetSdk,
-            minSdk = minSdk
+            minSdk = minSdk,
+            containerType = extra.dataType
         )
     }
 }

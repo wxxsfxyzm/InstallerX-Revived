@@ -39,21 +39,23 @@ object AnalyserRepoImpl : AnalyserRepo {
             DataType.XAPK to XApkAnalyserRepoImpl,
             DataType.MULTI_APK_ZIP to MultiApkZipAnalyserRepoImpl
         )
-        val tasks = mutableMapOf<AnalyserRepo, MutableList<DataEntity>>()
-        data.forEach {
-            val type = kotlin.runCatching { getDataType(config, it) ?: DataType.APK }
+        // 将输入的 DataEntity 按其类型进行分组
+        val tasksByType = data.groupBy { dataEntity ->
+            kotlin.runCatching { getDataType(config, dataEntity) ?: DataType.APK }
                 .getOrDefault(DataType.APK)
-            Timber.tag("AnalyserRepoImpl").d(
-                "getDataType: $type"
-            )
-            val analyser =
-                analysers[type] ?: throw Exception("can't found analyser for this data: '$data'")
-            val value = tasks[analyser] ?: mutableListOf()
-            value.add(it)
-            tasks[analyser] = value
         }
-        for ((key, value) in tasks) {
-            rawApps.addAll(key.doWork(config, value, extra))
+        // 遍历每种类型及其对应的文件列表
+        for ((type, dataList) in tasksByType) {
+            val analyser = analysers[type]
+                ?: throw Exception("can't found analyser for this data type: '$type'")
+
+            // 调用子分析器时，通过 extra.copy() 将确定的类型传递下去
+            val analysedEntities = analyser.doWork(
+                config,
+                dataList,
+                extra.copy(dataType = type) // 将类型信息下发
+            )
+            rawApps.addAll(analysedEntities)
         }
 
         // 2. 按packageName分组
