@@ -47,11 +47,7 @@ fun dialogGenerateParams(
         is DialogViewState.InstallChoice -> installChoiceDialog(installer, viewModel)
         is DialogViewState.InstallPrepare -> installPrepareDialog(installer, viewModel)
         is DialogViewState.InstallExtendedMenu -> installExtendedMenuDialog(installer, viewModel)
-        is DialogViewState.InstallExtendedSubMenu -> installExtendedMenuSubMenuDialog(
-            installer,
-            viewModel
-        )
-
+        is DialogViewState.InstallExtendedSubMenu -> installExtendedMenuSubMenuDialog(installer, viewModel)
         is DialogViewState.Installing -> installingDialog(installer, viewModel)
         is DialogViewState.InstallSuccess -> installSuccessDialog(installer, viewModel)
         is DialogViewState.InstallFailed -> installFailedDialog(installer, viewModel)

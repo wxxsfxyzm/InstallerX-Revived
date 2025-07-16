@@ -89,11 +89,14 @@ object MultiApkZipAnalyserRepoImpl : AnalyserRepo {
     }
 
     /**
-     * 从输入流中分析单个APK文件。
-     * 根据最终分析器 ApkAnalyserRepoImpl 的要求，此函数必须执行以下操作：
-     * 1. 将 InputStream 写入一个临时的、可访问的文件中。
-     * 2. 调用下游分析器处理该文件。
-     * 3. 使用健壮的错误处理机制，并在失败时清理临时文件。
+     * 分析单个APK流，返回包含APK信息的AppEntity列表。
+     * 该方法会将输入流写入临时文件，然后调用下游分析器进行分析。
+     *
+     * @param config 分析配置
+     * @param data 数据实体，包含APK的来源信息
+     * @param inputStream 输入流，包含APK文件内容
+     * @param extra 附加分析信息，如缓存目录等
+     * @return 返回一个包含AppEntity的列表，表示分析结果。
      */
     private suspend fun analyseApkStream(
         config: ConfigEntity,
@@ -117,7 +120,7 @@ object MultiApkZipAnalyserRepoImpl : AnalyserRepo {
             // 调用必须使用文件路径的下游分析器
             val originalEntities = ApkAnalyserRepoImpl.doWork(config, listOf(tempData), extra)
 
-            // 根据你的建议，优化UI显示名称
+            // 优化UI显示名称
             val displayNameFromZip = when (data) {
                 is DataEntity.ZipFileEntity -> File(data.name).nameWithoutExtension
                 is DataEntity.ZipInputStreamEntity -> File(data.name).nameWithoutExtension

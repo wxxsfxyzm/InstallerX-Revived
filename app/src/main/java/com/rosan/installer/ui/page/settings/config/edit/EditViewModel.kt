@@ -123,7 +123,7 @@ class EditViewModel(
             )
         }
 
-        // 3. 使用包含了所有正确状态的 newState 来更新 state
+        // 使用包含了所有正确状态的 newState 来更新 state
         state = newState
     }
 
