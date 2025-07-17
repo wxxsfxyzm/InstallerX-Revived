@@ -103,7 +103,8 @@ object MultiApkZipAnalyserRepoImpl : AnalyserRepo {
             originalEntities.map { entity ->
                 if (entity is AppEntity.BaseEntity) {
                     entity.copy(
-                        label = displayNameFromZip,         // 使用ZIP包内的文件名作为应用名
+                        name = data.name,
+                        label = entity.label ?: displayNameFromZip,         // 使用ZIP包内的文件名作为应用名
                         containerType = extra.dataType    // 附加容器类型 (MULTI_APK_ZIP)
                     )
                 } else {
