@@ -311,4 +311,8 @@
     <string name="replace_existing">Replace Existing</string>
     <string name="replace_existing_desc">If the package being installed already exists, replace/upgrade it.</string>
     <!--  InstallOptions End  -->
+
+    <string name="installer_file_name">文件: %1$s</string>
+    <string name="installer_select_from_zip">从压缩包中选择</string>
+    <string name="installer_multi_apk_zip_description">该文件包含多个独立的应用程序，请选择您想要处理的应用。</string>
 </resources>

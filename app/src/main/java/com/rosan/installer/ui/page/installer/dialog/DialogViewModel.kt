@@ -10,9 +10,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
+import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -144,16 +146,52 @@ class DialogViewModel(
                     is ProgressEntity.AnalysedSuccess -> {
                         val selectedEntities = repo.entities.filter { it.selected }
                         val mappedApps = selectedEntities.map { it.app }
-                        val uniquePackages =
-                            mappedApps.groupBy { appEntity: AppEntity -> appEntity.packageName }
+                        // Get datatype from entity
+                        val containerType = mappedApps.firstOrNull()?.containerType
+                        // --- Mixed Choice Logic ---
+                        // Judge if we need to show install choice dialog
+                        if (containerType == DataType.MULTI_APK_ZIP) {
+                            // 将智能选择逻辑放在 ViewModel 中
+                            // 1. 对实体进行分组
+                            val grouped = repo.entities.groupBy { it.app.packageName }
+                            val smartSelectedEntities = mutableListOf<SelectInstallEntity>()
 
-                        if (uniquePackages.size != 1) {
+                            // 2. 遍历分组，应用智能选择逻辑
+                            grouped.forEach { (_, itemsInGroup) ->
+                                if (itemsInGroup.size > 1) {
+                                    // 多版本组：只选中版本号最高的
+                                    val sorted = itemsInGroup.sortedByDescending {
+                                        (it.app as? AppEntity.BaseEntity)?.versionCode ?: 0
+                                    }
+                                    smartSelectedEntities.add(sorted.first().copy(selected = true))
+                                    smartSelectedEntities.addAll(sorted.drop(1).map { it.copy(selected = false) })
+                                } else {
+                                    // 单版本组：保持选中
+                                    smartSelectedEntities.add(itemsInGroup.first().copy(selected = true))
+                                }
+                            }
+
+                            // 3. 用处理过的新列表，完全替换掉 repo 中的旧列表
+                            repo.entities = smartSelectedEntities
+
+                            // 4. 进入选择界面
                             newState = DialogViewState.InstallChoice
                             newPackageNameFromProgress = null
                         } else {
-                            newState = DialogViewState.InstallPrepare
-                            newPackageNameFromProgress = selectedEntities.first().app.packageName
+                            // For other types (APK, APKS, XAPK, APKM), they can be handled normally.
+                            val uniquePackages = mappedApps.groupBy { it.packageName }
+
+                            if (uniquePackages.size != 1) {
+                                // If there are multiple unique packages, show install choice dialog
+                                newState = DialogViewState.InstallChoice
+                                newPackageNameFromProgress = null
+                            } else {
+                                // If there is only one unique package, prepare for installation
+                                newState = DialogViewState.InstallPrepare
+                                newPackageNameFromProgress = selectedEntities.first().app.packageName
+                            }
                         }
+                        // --- Mixed Choice Logic End ---
                     }
 
                     is ProgressEntity.Installing -> {

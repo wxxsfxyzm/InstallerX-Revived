@@ -6,7 +6,6 @@ import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.automirrored.twotone.Rule
 import androidx.compose.material.icons.automirrored.twotone.TrendingDown
-import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.NotInterested
@@ -19,6 +18,7 @@ import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.outlined.WebAsset
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.AdminPanelSettings
+import androidx.compose.material.icons.twotone.Android
 import androidx.compose.material.icons.twotone.ArrowBackIosNew
 import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.ArrowUpward
@@ -56,7 +56,7 @@ object AppIcons {
     // 这里使用 Material Icons 作为示例
     // 你需要添加 'androidx.compose.material:material-icons-extended' 依赖来使用所有图标
     // 或者替换成你自己的图标资源
-    val Android = Icons.Default.Android
+    val Android = Icons.TwoTone.Android
     val Info = Icons.TwoTone.Info
     val Add = Icons.TwoTone.Add
     val Edit = Icons.TwoTone.Edit

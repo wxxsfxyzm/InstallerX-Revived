@@ -182,6 +182,7 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             splitName = splitName,
             targetSdk = targetSdk,
             minSdk = minSdk,
+            arch = null,
             containerType = extra.dataType
         )
     }

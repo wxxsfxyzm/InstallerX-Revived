@@ -1,6 +1,7 @@
 package com.rosan.installer.data.app.model.entity
 
 import android.graphics.drawable.Drawable
+import com.rosan.installer.build.Architecture
 import com.rosan.installer.data.app.util.DataType
 
 sealed class AppEntity {
@@ -12,6 +13,8 @@ sealed class AppEntity {
 
     abstract val minSdk: String?
 
+    abstract val arch: Architecture?
+
     // each app entity may have a container type, such as a split APK or a collection
     abstract val containerType: DataType?
 
@@ -22,14 +25,14 @@ sealed class AppEntity {
         val versionName: String,
         val label: String?,
         val icon: Drawable?,
+        override val name: String = "base.apk",
         override val targetSdk: String?,
         override val minSdk: String?,
+        override val arch: Architecture? = null,
         override val containerType: DataType? = null,
         // Get from AndroidManifest.xml
         val permissions: List<String>? = null,
-    ) : AppEntity() {
-        override val name = "base.apk"
-    }
+    ) : AppEntity()
 
     data class SplitEntity(
         override val packageName: String,
@@ -37,6 +40,7 @@ sealed class AppEntity {
         val splitName: String,
         override val targetSdk: String?,
         override val minSdk: String?,
+        override val arch: Architecture?,
         override val containerType: DataType? = null,
     ) : AppEntity() {
         override val name = "$splitName.apk"
@@ -48,6 +52,7 @@ sealed class AppEntity {
         val dmName: String,
         override val targetSdk: String?,
         override val minSdk: String?,
+        override val arch: Architecture? = null,
         override val containerType: DataType? = null,
     ) : AppEntity() {
         override val name = "base.dm"
@@ -58,11 +63,11 @@ sealed class AppEntity {
         val data: DataEntity,
         override val targetSdk: String? = null,
         override val minSdk: String? = null,
+        override val arch: Architecture? = null,
         override val containerType: DataType? = null,
         val label: String = "安装包集合",
         val versionCode: Long = -1,
         val versionName: String = "",
-        val icon: Drawable? = null
     ) : AppEntity() {
         override val name: String = "collection.zip" // 使用一个通用的名称
     }

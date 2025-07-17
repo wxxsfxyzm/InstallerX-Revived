@@ -146,6 +146,7 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             splitName = splitName,
             targetSdk = manifest.targetSdk,
             minSdk = manifest.minSdk,
+            arch = null,
             containerType = extra.dataType
         ) else if (dmName?.isNotEmpty() == true) AppEntity.DexMetadataEntity(
             packageName = manifest.packageName,

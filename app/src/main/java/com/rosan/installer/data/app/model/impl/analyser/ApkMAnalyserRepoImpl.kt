@@ -167,6 +167,7 @@ object ApkMAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             splitName = splitName,
             targetSdk = targetSdk,
             minSdk = minSdk,
+            arch = null,
             containerType = extra.dataType
         ) else if (dmName?.isNotEmpty() == true) AppEntity.DexMetadataEntity(
             packageName = manifest.packageName,

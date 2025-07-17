@@ -79,6 +79,7 @@ object ApksAnalyserRepoImpl : AnalyserRepo {
                     splitName = getSplitNameFromEntry(entry), // 从文件名解析 split 名称
                     targetSdk = baseEntity.targetSdk, // 复用 base 的信息
                     minSdk = baseEntity.minSdk, // 复用 base 的信息
+                    arch = null,
                     containerType = extra.dataType // 直接从 extra 中获取并赋值
                 )
                 apps.add(splitEntity)
