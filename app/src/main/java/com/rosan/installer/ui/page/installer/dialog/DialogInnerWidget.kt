@@ -7,6 +7,7 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.inner.analyseFailedDialog
 import com.rosan.installer.ui.page.installer.dialog.inner.analysingDialog
 import com.rosan.installer.ui.page.installer.dialog.inner.installChoiceDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.installCompletedDialog
 import com.rosan.installer.ui.page.installer.dialog.inner.installExtendedMenuDialog
 import com.rosan.installer.ui.page.installer.dialog.inner.installExtendedMenuSubMenuDialog
 import com.rosan.installer.ui.page.installer.dialog.inner.installFailedDialog
@@ -51,6 +52,11 @@ fun dialogGenerateParams(
         is DialogViewState.Installing -> installingDialog(installer, viewModel)
         is DialogViewState.InstallSuccess -> installSuccessDialog(installer, viewModel)
         is DialogViewState.InstallFailed -> installFailedDialog(installer, viewModel)
+        is DialogViewState.InstallCompleted -> installCompletedDialog(
+            installer,
+            viewModel,
+            (viewModel.state as DialogViewState.InstallCompleted).results
+        )
         // when is exhaustive, so no need to handle the else case
         // else -> readyDialog(installer, viewModel)
     }

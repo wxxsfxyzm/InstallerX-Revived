@@ -6,6 +6,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
@@ -23,6 +24,7 @@ import com.rosan.installer.ui.activity.InstallTriggerActivity
 import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -35,11 +37,13 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
 
     enum class Channel(val value: String) {
-        InstallerChannel("installer_channel"), InstallerProgressChannel("installer_progress_channel")
+        InstallerChannel("installer_channel"),
+        InstallerProgressChannel("installer_progress_channel")
     }
 
     enum class Icon(@param:DrawableRes val resId: Int) {
-        Working(R.drawable.round_hourglass_empty_black_24), Pausing(R.drawable.round_hourglass_disabled_black_24)
+        Working(R.drawable.round_hourglass_empty_black_24),
+        Pausing(R.drawable.round_hourglass_disabled_black_24)
     }
 
     private var job: Job? = null
@@ -130,6 +134,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private fun newNotification(
         progress: ProgressEntity, background: Boolean
     ): Notification? {
+        if (progress is ProgressEntity.AnalysedUnsupported) return null
         val builder = newNotificationBuilder(progress, background)
         return when (progress) {
             is ProgressEntity.Ready -> onReady(builder)
@@ -143,7 +148,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallFailed -> onInstallFailed(builder)
             is ProgressEntity.InstallSuccess -> onInstallSuccess(builder)
             is ProgressEntity.Finish -> null
-            else -> null
+            is ProgressEntity.Error -> null
+            is ProgressEntity.AnalysedUnsupported -> null
         }
     }
 
@@ -155,11 +161,35 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             @SuppressLint("MissingPermission")
             @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
             fun refresh() {
-                setNotification(newNotification(progress, background))
+                // 如果已经确定是对话框安装流程，则取消所有通知并停止后续操作
+                if (!background) {
+                    setNotification(null) // 这会取消掉任何已经显示的通知
+                    return
+                }
+                setNotification(newNotification(progress, true))
             }
             launch {
-                installer.progress.collect {
-                    progress = it
+                installer.progress.collect { collectedProgress ->
+                    // --- START OF MAJOR CHANGE ---
+                    // 为我们不支持的状态设置一个特殊的处理分支
+                    if (collectedProgress is ProgressEntity.AnalysedUnsupported) {
+                        // 1. 在主线程上显示 Toast。这是最优先的UI反馈。
+                        scope.launch(Dispatchers.Main) {
+                            Toast.makeText(context, collectedProgress.reason, Toast.LENGTH_LONG).show()
+                        }
+
+                        // 2. 立即主动发起关闭流程。
+                        //    这会触发 ProgressEntity.Finish 状态，
+                        //    让所有其他组件（包括本Handler和服务）执行标准的清理和退出逻辑。
+                        installer.close()
+
+                        // 3. 阻止这个状态下的任何标准通知刷新，因为我们正在关闭。
+                        return@collect
+                    }
+                    // --- END OF MAJOR CHANGE ---
+
+                    // 对于所有其他正常状态，照常更新进度并刷新通知
+                    progress = collectedProgress
                     refresh()
                 }
             }
@@ -180,38 +210,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private fun getString(@StringRes resId: Int): String = context.getString(resId)
 
-    /*private fun setNotification(notification: Notification? = null) {
-        *//*        // ======================= 在这里加上日志 =======================
-                val title = notification?.extras?.getCharSequence(Notification.EXTRA_TITLE)
-                Log.d("NotificationIdDebug", "setNotification called. ID: $notificationId, Title: $title")
-                // ==============================================================*//*
-        if (notification == null) {
-            notificationManager.cancel(notificationId)
-            return
-        }
-        // 检查版本是否为 Android 13 (Tiramisu) 或更高
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // 检查 POST_NOTIFICATIONS 权限是否已被授予
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // 如果权限未被授予
-                // 在这里不应该调用 notify()
-                // TODO 应该在这里引导用户去开启权限
-                // 权限未被授予，不再直接显示 Toast
-                // 而是通过 Repo 发送一个事件
-                scope.launch {
-                    installer.postEvent(InstallerEvent.NOTIFICATION_PERMISSION_MISSING)
-                }
-                return
-            }
-        }
-        // 如果权限已被授予，或者系统版本低于 Android 13，则正常显示通知
-        notificationManager.notify(notificationId, notification)
-    }*/
-
     // 简化 setNotification 方法，移除其中的权限检查逻辑
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun setNotification(notification: Notification? = null) {
@@ -219,22 +217,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             notificationManager.cancel(notificationId)
             return
         }
-
-        // 此处的权限检查逻辑已被 ActionHandler 取代，可以直接移除
-        /*
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                scope.launch {
-                    installer.postEvent(InstallerEvent.NOTIFICATION_PERMISSION_MISSING)
-                }
-                return
-            }
-        }
-        */
 
         // 直接显示通知
         notificationManager.notify(notificationId, notification)
@@ -248,7 +230,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     // 将 installIntent 的目标从 InstallerActivity 改为 InstallTriggerActivity
     private val installIntent by lazy {
         // 创建一个指向我们新的透明Activity的 Intent
-        val intent = Intent(context, InstallTriggerActivity::class.java).apply { // <--- 修改这里
+        val intent = Intent(context, InstallTriggerActivity::class.java).apply {
             putExtra(InstallerActivity.KEY_ID, installer.id)
             // 这里不再需要 action，因为TriggerActivity只有一个功能
         }

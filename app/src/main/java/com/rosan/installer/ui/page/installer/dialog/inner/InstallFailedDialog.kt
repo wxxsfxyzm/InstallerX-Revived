@@ -30,7 +30,7 @@ fun installFailedDialog( // 小写开头
         .firstOrNull()?.packageName ?: ""
 
     // Call InstallInfoDialog for base structure
-    val baseParams = InstallInfoDialog(
+    val baseParams = installInfoDialog(
         installer = installer,
         viewModel = viewModel,
         preInstallAppInfo = preInstallAppInfo,
@@ -49,7 +49,7 @@ fun installFailedDialog( // 小写开头
     return baseParams.copy(
         text = DialogInnerParams(
             DialogParamsType.InstallerInstallFailed.id,
-            errorTextBlock(installer, viewModel) // Assume errorText is accessible
+            errorTextBlock(installer.error) // Assume errorText is accessible
         ),
         buttons = DialogButtons(
             DialogParamsType.InstallerInstallFailed.id

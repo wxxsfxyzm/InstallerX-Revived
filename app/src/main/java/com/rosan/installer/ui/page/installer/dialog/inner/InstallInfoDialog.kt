@@ -61,7 +61,7 @@ import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun InstallInfoDialog( // 大写开头
+fun installInfoDialog(
     installer: InstallerRepo,
     viewModel: DialogViewModel, // Keep for consistency or future use
     preInstallAppInfo: InstalledAppInfo?, // Crucial parameter: Info *before* install operation
@@ -76,7 +76,9 @@ fun InstallInfoDialog( // 大写开头
         ?: selectedApps.sortedBest().firstOrNull()
         ?: return DialogParams()
 
-    // No need for remembered state or LaunchedEffect here, logic depends directly on passed preInstallAppInfo
+    // 为当前应用的所有 UI 部件创建一个唯一的 ID
+    // 确保 AnimatedContent 能够检测到内容变化
+    val uniqueContentKey = "${DialogParamsType.InstallerInfo.id}_${entityToInstall.packageName}"
 
     // --- ICON INTEGRATION LOGIC ---
 
@@ -89,10 +91,11 @@ fun InstallInfoDialog( // 大写开头
     }
 
     // 2. Create a state for the icon, initialized with our best first guess.
-    var displayIcon by remember { mutableStateOf(initialIcon) }
+    // This ensures when entityToInstall changes (switching to the next app), the displayIcon's state will be reinitialized.
+    var displayIcon by remember(entityToInstall.packageName) { mutableStateOf(initialIcon) }
 
     // 3. Use LaunchedEffect to load the high-quality icon asynchronously.
-    LaunchedEffect(preInstallAppInfo) {
+    LaunchedEffect(entityToInstall.packageName, preInstallAppInfo) {
         val iconSizePx = with(density) { 64.dp.toPx().toInt() }
 
         val finalIcon =
@@ -129,7 +132,7 @@ fun InstallInfoDialog( // 大写开头
     // --- Icon Logic End ---
 
     return DialogParams(
-        icon = DialogInnerParams(DialogParamsType.InstallerInfo.id) {
+        icon = DialogInnerParams(uniqueContentKey) {
             Image(
                 modifier = Modifier
                     .size(64.dp)
@@ -138,7 +141,7 @@ fun InstallInfoDialog( // 大写开头
                 contentDescription = null
             )
         },
-        title = DialogInnerParams(DialogParamsType.InstallerInfo.id) {
+        title = DialogInnerParams(uniqueContentKey) {
             Box {
                 Text(
                     text = displayLabel,
@@ -167,7 +170,7 @@ fun InstallInfoDialog( // 大写开头
             }
         },
         // --- 修改：恢复版本显示逻辑，依赖传入的 preInstallAppInfo ---
-        subtitle = DialogInnerParams(DialogParamsType.InstallerInfo.id) {
+        subtitle = DialogInnerParams(uniqueContentKey) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -326,6 +329,5 @@ fun InstallInfoDialog( // 大写开头
                 }
             }
         }
-        // buttons parameter removed, to be set by caller via .copy()
     )
 }

@@ -18,14 +18,10 @@ sealed class DialogParamsType(val id: String) {
     object InstallerPrepare : DialogParamsType("installer_prepare")
     object InstallerPrepareEmpty : DialogParamsType("installer_prepare_empty")
     object InstallerPrepareTooMany : DialogParamsType("installer_prepare_too_many")
-    object InstallerInfo :
-        DialogParamsType("installer_info")
-
-    object InstallerPrepareInstall :
-        DialogParamsType("installer_prepare")
-
+    object InstallerInfo : DialogParamsType("installer_info")
+    object InstallerPrepareInstall : DialogParamsType("installer_prepare")
     object InstallerInstalling : DialogParamsType("installer_installing")
-
     object InstallerInstallSuccess : DialogParamsType("install_success")
     object InstallerInstallFailed : DialogParamsType("install_failed")
+    object InstallerInstallCompleted : DialogParamsType("install_completed")
 }

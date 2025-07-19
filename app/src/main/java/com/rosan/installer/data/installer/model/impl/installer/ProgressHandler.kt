@@ -27,11 +27,11 @@ class ProgressHandler(scope: CoroutineScope, installer: InstallerRepo) : Handler
         job?.cancel()
     }
 
-    private suspend fun onResolvedFailed() {
+    private fun onResolvedFailed() {
         onResolved(false)
     }
 
-    private suspend fun onResolveSuccess() {
+    private fun onResolveSuccess() {
         onResolved(true)
     }
 

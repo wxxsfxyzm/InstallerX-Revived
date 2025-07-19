@@ -159,7 +159,7 @@ fun installPrepareDialog( // 小写开头
     }
 
     // Call InstallInfoDialog for base structure
-    val baseParams = InstallInfoDialog(
+    val baseParams = installInfoDialog(
         installer = installer,
         viewModel = viewModel,
         preInstallAppInfo = preInstallAppInfo,

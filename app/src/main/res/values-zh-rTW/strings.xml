@@ -254,18 +254,63 @@
     <string name="grant_permission_after_install">点击以在安装完成后授予权限</string>
     <string name="permission_list">查看應用的權限列表</string>
     <string name="permission_list_desc">正在安裝的軟體包請求的權限列表</string>
-    <string name="config_allow_test">允許測試包</string>
-    <string name="config_allow_test_desc">允許安裝帶TestOnly標籤的安裝包</string>
-    <string name="from_adb_desc">告知系統安裝請求是由 ADB 發出</string>
-    <string name="config_all_users">為所有使用者安裝</string>
-    <string name="config_all_users_desc">在系統上的所有使用者安裝套件，而不僅僅是指定或預設的使用者</string>
-    <string name="config_allow_downgrade">允許降級安裝</string>
-    <string name="config_allow_downgrade_desc">允許降级安裝低版本的安装包（部分系统禁止此方法，請参考核心破解）</string>
-    <string name="apex_desc">正在安裝的套件是一個 APEX 套件</string>
-    <string name="config_grant_all_permissions">授予所有請求權限</string>
-    <string name="config_grant_all_permissions_desc">自動授予套件請求的所有權限。請注意此僅適用於執行時權限，特殊權限例如所有檔案存取或無障礙功能不會自動授予</string>
 
     <!--  InstallOptions Start  -->
+    <string name="config_allow_test">允許測試</string>
+    <string name="config_allow_test_desc">如果要安裝的套件是僅供測試的應用程式，則允許其安裝。</string>
+    <string name="internal">內部儲存空間</string>
+    <string name="internal_desc">強制套件安裝到內部儲存空間。</string>
+    <string name="external">外部儲存空間</string>
+    <string name="external_desc">強制套件安裝到外部儲存空間。</string>
+    <string name="from_adb">來自ADB的安裝請求</string>
+    <string name="from_adb_desc">通知系統安裝請求是由ADB發出的</string>
+    <string name="config_all_users">為所有使用者安裝</string>
+    <string name="config_all_users_desc">為系統上的所有使用者安裝套件，而不僅僅是指定或預設使用者</string>
+    <string name="config_allow_downgrade">允許降級</string>
+    <string name="config_allow_downgrade_desc">嘗試將目前安裝的套件版本降級到正在安裝的版本（可能並非適用於所有ROM）</string>
+    <string name="config_grant_all_permissions">授予所有請求的權限</string>
+    <string name="config_grant_all_permissions_desc">自動授予套件請求的所有權限。請注意，這僅適用於執行時權限。像「所有檔案存取」或「輔助功能」這樣的特殊權限不會自動授予。</string>
+    <string name="force_volume_uuid">強制磁碟區UUID</string>
+    <string name="force_volume_uuid_desc">允許指定磁碟區UUID以將套件安裝到該磁碟區。</string>
+    <string name="force_permission_prompt">強制權限提示</string>
+    <string name="force_permission_prompt_desc">即使是系統安裝程式也強制顯示安裝確認提示。</string>
+    <string name="instant_app">即時應用程式</string>
+    <string name="instant_app_desc">將套件安裝為即時應用程式。</string>
+    <string name="dont_kill_app">不要殺死應用程式</string>
+    <string name="dont_kill_app_desc">用於為分割應用程式安裝功能時，以防止主應用程式在安裝過程中被殺死。</string>
+    <string name="full_app">完整應用程式</string>
+    <string name="full_app_desc">表示正在安裝的套件是完整應用程式。可用於將即時應用程式升級為完整應用程式。</string>
+    <string name="allocate_aggressive">積極分配</string>
+    <string name="allocate_aggressive_desc">表示套件「對系統健康或安全至關重要」，如果需要，將更積極地刪除可清除檔案以騰出空間。</string>
+    <string name="virtual_preload">虛擬預載入</string>
+    <string name="virtual_preload_desc">表示套件是虛擬預載入。</string>
+    <string name="apex" translatable="false">APEX</string>
+    <string name="apex_desc">表示正在安裝的套件是APEX套件</string>
+    <string name="enable_rollback">啟用回溯</string>
+    <string name="enable_rollback_desc">允許此套件未來回溯。</string>
+    <string name="disable_verification">停用驗證</string>
+    <string name="disable_verification_desc">在安裝期間停用套件驗證。這不是簽名驗證。</string>
+    <string name="staged">階段性安裝</string>
+    <string name="staged_desc">表示此套件作為階段性安裝的一部分正在安裝。</string>
+    <string name="config_all_whitelist_restricted_permissions">允許受限權限</string>
+    <string name="config_all_whitelist_restricted_permissions_desc">允許為正在安裝的套件授予受限權限。</string>
+    <string name="disable_allowed_apex_update_check">停用允許的APEX更新檢查</string>
+    <string name="disable_allowed_apex_update_check_desc">不檢查已安裝的APEX是否可以更新。</string>
+    <string name="config_bypass_low_target_sdk">繞過低目標SDK阻止</string>
+    <string name="config_bypass_low_target_sdk_desc">允許安裝目標SDK版本較低的應用程式。</string>
+    <string name="dry_run">空執行</string>
+    <string name="dry_run_desc">驗證套件，但不安裝它。</string>
 
+    <string name="replace_existing">取代現有</string>
+    <string name="replace_existing_desc">如果要安裝的套件已存在，則取代/升級它。</string>
     <!--  InstallOptions End  -->
+
+    <!-- MultiApkZip Installer -->
+    <string name="installer_file_name">檔案: %1$s</string>
+    <string name="installer_select_from_zip">從壓縮檔中選擇</string>
+    <string name="installer_multi_apk_zip_description">此檔案包含多個獨立應用程式，請選擇您想要處理的應用程式。</string>
+    <string name="installing_progress_text">正在安裝 %1$s (%2$d/%3$d)</string>
+    <string name="installer_completed_subtitle">成功 %1$s 個，失敗 %2$s 個</string>
+    <string name="installer_current_install_mode_not_supported">目前模式不支援安裝此類型檔案</string>
+    <!-- MultiApkZip End -->
 </resources>

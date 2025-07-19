@@ -1,21 +1,5 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
-// Remove unused imports related to building subtitle manually
-// import androidx.compose.foundation.basicMarquee
-// import androidx.compose.foundation.layout.Arrangement
-// import androidx.compose.foundation.layout.Column
-// import androidx.compose.foundation.layout.size
-// import androidx.compose.material.icons.Icons
-// import androidx.compose.material.icons.filled.ArrowDownward
-// import androidx.compose.material3.Icon
-// import androidx.compose.material3.MaterialTheme
-// import androidx.compose.material3.Text
-// import androidx.compose.ui.Alignment
-// import androidx.compose.ui.Modifier
-// import androidx.compose.ui.text.style.TextAlign
-// import androidx.compose.ui.unit.dp
-// import com.rosan.installer.data.app.model.entity.AppEntity // No longer needed here
-// import com.rosan.installer.data.app.util.sortedBest // No longer needed here
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -57,7 +41,7 @@ fun installSuccessDialog( // 小写开头
 
     // Call InstallInfoDialog, passing the collected preInstallAppInfo.
     // InstallInfoDialog will now handle the logic of displaying one or two versions.
-    val baseParams = InstallInfoDialog(
+    val baseParams = installInfoDialog(
         installer = installer,
         viewModel = viewModel,
         preInstallAppInfo = currentPreInstallInfo, // Pass the potentially null old info

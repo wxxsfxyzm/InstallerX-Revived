@@ -9,15 +9,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.InstalledAppInfo
+import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.page.installer.dialog.inner.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -39,6 +42,9 @@ class DialogViewModel(
     var state by mutableStateOf<DialogViewState>(DialogViewState.Ready)
         private set
 
+    // 持有原始的、完整的实体列表，用于批量安装
+    private var originalEntities: List<SelectInstallEntity> = emptyList()
+
     var autoCloseCountDown by mutableIntStateOf(3)
         private set
 
@@ -47,6 +53,19 @@ class DialogViewModel(
 
     var disableNotificationOnDismiss by mutableStateOf(false)
         private set
+
+    // 用于显示批量安装的进度文本
+    private val _installProgressText = MutableStateFlow<UiText?>(null)
+    val installProgressText: StateFlow<UiText?> = _installProgressText.asStateFlow()
+
+    // 用于驱动进度条的数值进度 (0.0f to 1.0f)
+    private val _installProgress = MutableStateFlow<Float?>(null)
+    val installProgress: StateFlow<Float?> = _installProgress.asStateFlow()
+
+    // 批量安装队列和结果
+    private var multiInstallQueue: List<SelectInstallEntity> = emptyList()
+    private val multiInstallResults = mutableListOf<InstallResult>()
+    private var currentMultiInstallIndex = 0
 
     /**
      * Determines if the dialog can be dismissed by tapping the scrim.
@@ -116,11 +135,16 @@ class DialogViewModel(
             is DialogViewAction.InstallExtendedSubMenu -> installExtendedSubMenu()
             is DialogViewAction.Install -> install()
             is DialogViewAction.Background -> background()
+            is DialogViewAction.InstallMultiple -> installMultiple()
         }
     }
 
     private fun collectRepo(repo: InstallerRepo) {
         this.repo = repo
+        // 第一次收集时，保存原始列表
+        if (originalEntities.isEmpty()) {
+            originalEntities = repo.entities
+        }
         _preInstallAppInfo.value = null
         _currentPackageName.value = null
         collectRepoJob?.cancel()
@@ -129,8 +153,14 @@ class DialogViewModel(
 
         collectRepoJob = viewModelScope.launch {
             repo.progress.collect { progress ->
+                // 如果正在进行批量安装，则由专门的逻辑处理
+                if (multiInstallQueue.isNotEmpty()) {
+                    handleMultiInstallProgress(progress)
+                    return@collect
+                }
+
                 val previousState = state
-                var newState = state
+                var newState: DialogViewState
                 var newPackageNameFromProgress: String? = _currentPackageName.value
 
                 when (progress) {
@@ -302,7 +332,6 @@ class DialogViewModel(
                 null
             }
 
-            // --- 关键修改：增加状态检查 ---
             // 只在状态不是最终状态（成功/失败）时更新 preInstallAppInfo
             // 并且包名仍然匹配
             if (state !is DialogViewState.InstallSuccess &&
@@ -311,7 +340,6 @@ class DialogViewModel(
             ) {
                 _preInstallAppInfo.value = info
             }
-            // --- 修改结束 ---
         }
     }
 
@@ -404,5 +432,80 @@ class DialogViewModel(
 
     private fun background() {
         repo.background(true)
+    }
+
+    /**
+     * 处理批量安装过程中的进度更新
+     *
+     * @param progress 当前进度
+     */
+    private fun handleMultiInstallProgress(progress: ProgressEntity) {
+        when (progress) {
+            is ProgressEntity.InstallSuccess -> {
+                val currentEntity = multiInstallQueue[currentMultiInstallIndex]
+                multiInstallResults.add(InstallResult(entity = currentEntity, success = true))
+                currentMultiInstallIndex++
+                triggerNextMultiInstall()
+            }
+
+            is ProgressEntity.InstallFailed -> {
+                val currentEntity = multiInstallQueue[currentMultiInstallIndex]
+                // 捕获 repo 中当前的错误信息
+                multiInstallResults.add(InstallResult(entity = currentEntity, success = false, error = repo.error))
+                currentMultiInstallIndex++
+                triggerNextMultiInstall()
+            }
+            // 在批量安装过程中，我们只关心最终的成功或失败状态，其他状态可以忽略
+            else -> {}
+        }
+    }
+
+    /**
+     * 启动批量安装
+     */
+    private fun installMultiple() {
+        multiInstallQueue = repo.entities.filter { it.selected }
+        multiInstallResults.clear()
+        currentMultiInstallIndex = 0
+        _installProgress.value = 0f // [新增] 批量安装开始时，进度初始化为0
+        triggerNextMultiInstall()
+    }
+
+    /**
+     * 触发队列中的下一个安装任务
+     */
+    private fun triggerNextMultiInstall() {
+        if (currentMultiInstallIndex < multiInstallQueue.size) {
+            val entityToInstall = multiInstallQueue[currentMultiInstallIndex]
+            // 修改 repo.entities，使其只包含当前要安装的这一个应用，并确保它是 selected
+            repo.entities = listOf(entityToInstall.copy(selected = true))
+            val appLabel = (entityToInstall.app as? AppEntity.BaseEntity)?.label ?: entityToInstall.app.packageName
+
+            // 更新进度文本
+            _installProgressText.value = UiText(
+                id = R.string.installing_progress_text,
+                formatArgs = listOf(appLabel, currentMultiInstallIndex + 1, multiInstallQueue.size)
+            )
+            _currentPackageName.value = entityToInstall.app.packageName // 更新当前包名，让UI可以显示信息
+            // 更新数值进度
+            // 在任务开始前更新，所以是 (当前索引 / 总数)
+            _installProgress.value = currentMultiInstallIndex.toFloat() / multiInstallQueue.size.toFloat()
+
+            // 切换到安装中状态
+            state = DialogViewState.Installing
+
+            // 调用 repo 的 install，但只传递当前要安装的这一个实体
+            repo.install()
+        } else {
+            // 所有任务完成
+            state = DialogViewState.InstallCompleted(multiInstallResults.toList())
+            // 清理并恢复状态
+            multiInstallQueue = emptyList()
+            _installProgressText.value = null
+            _currentPackageName.value = null
+            // 恢复 repo 的原始状态，以便用户可以返回或查看
+            repo.entities = originalEntities
+            originalEntities = emptyList()
+        }
     }
 }

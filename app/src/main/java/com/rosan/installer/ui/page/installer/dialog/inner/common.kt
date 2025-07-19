@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
@@ -10,11 +11,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
@@ -33,10 +34,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 import com.rosan.installer.util.help
+
+/**
+ * 一个封装了字符串资源及其格式化参数的数据类。
+ * @param id 字符串资源的 ID
+ * @param formatArgs 填充字符串中占位符 (如 %1$s, %2$d) 所需的参数列表.
+ */
+data class UiText(
+    @param:StringRes val id: Int,
+    val formatArgs: List<Any> = emptyList()
+)
 
 val pausingIcon: @Composable () -> Unit = {
     Icon(
@@ -64,62 +73,58 @@ val permissionIcon: @Composable () -> Unit = {
     )
 }
 
-val errorTextBlock: ((installer: InstallerRepo, viewModel: DialogViewModel) -> (@Composable () -> Unit)) =
-    { installer, viewModel ->
-        {
-            var expanded by remember { mutableStateOf(false) }
-            val rotation by animateFloatAsState(targetValue = if (expanded) -180f else 0f)
+val errorTextBlock: ((error: Throwable) -> (@Composable () -> Unit)) = { error ->
+    {
+        var expanded by remember { mutableStateOf(false) }
+        val rotation by animateFloatAsState(targetValue = if (expanded) -180f else 0f, label = "errorRotation")
 
-            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
-                LazyColumn(
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.errorContainer)
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.errorContainer)
                         .fillMaxWidth()
-                        .padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            expanded = !expanded
+                        },
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() }
-                                ) {
-                                    expanded = !expanded
-                                },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = AppIcons.ArrowDropDown,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .padding(end = 8.dp)
-                                    .rotate(rotation)
-                            )
-                            Text(
-                                text = installer.error.help(),
-                                fontWeight = FontWeight.Bold,
-                                maxLines = Int.MAX_VALUE
-                            )
-                        }
-
-                    }
-                    item {
-                        AnimatedVisibility(
-                            visible = expanded,
-                            enter = fadeIn() + expandVertically(expandFrom = Alignment.Top), // 进入动画：淡入 + 垂直展开
-                            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)  // 退出动画：淡出 + 垂直收起
-                        ) {
-                            BasicTextField(
-                                value = installer.error.stackTraceToString().trim(),
-                                onValueChange = {},
-                                readOnly = true
-                            )
-                        }
-                    }
+                    Icon(
+                        imageVector = AppIcons.ArrowDropDown,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .rotate(rotation)
+                    )
+                    Text(
+                        // 直接使用传入的 error 对象
+                        text = error.help(),
+                        fontWeight = FontWeight.Bold,
+                        maxLines = Int.MAX_VALUE
+                    )
+                }
+                AnimatedVisibility(
+                    visible = expanded,
+                    enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
+                    exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
+                ) {
+                    BasicTextField(
+                        // 直接使用传入的 error 对象
+                        value = error.stackTraceToString().trim(),
+                        onValueChange = {},
+                        readOnly = true
+                    )
                 }
             }
         }
     }
+}

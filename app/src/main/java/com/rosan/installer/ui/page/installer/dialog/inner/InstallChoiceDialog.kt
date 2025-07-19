@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -62,17 +63,40 @@ fun installChoiceDialog(
     val containerType = entities.firstOrNull()?.app?.containerType
     // Set title based on containerType
     val titleRes = if (containerType == DataType.MULTI_APK_ZIP)
-        R.string.installer_select_install/*R.string.installer_select_from_zip*/ // TODO 准备一个新文案，例如 "从压缩包中选择"
+        R.string.installer_select_from_zip
     else
         R.string.installer_select_install
+
+    // 根据类型决定按钮文本和行为
+    val isMultiApkZip = containerType == DataType.MULTI_APK_ZIP
+    val primaryButtonText = if (isMultiApkZip) R.string.install else R.string.next
+    val primaryButtonAction = if (isMultiApkZip) {
+        {
+            installer.entities = entities
+            viewModel.dispatch(DialogViewAction.InstallMultiple)
+        }
+    } else {
+        {
+            installer.entities = entities
+            viewModel.dispatch(DialogViewAction.InstallPrepare)
+        }
+    }
 
     return DialogParams(
         icon = DialogInnerParams(
             DialogParamsType.IconWorking.id, workingIcon
-        ), title = DialogInnerParams(
+        ),
+        title = DialogInnerParams(
             DialogParamsType.InstallChoice.id,
         ) {
             Text(stringResource(titleRes))
+        },
+        subtitle = DialogInnerParams(
+            DialogParamsType.InstallChoice.id
+        ) {
+            if (containerType == DataType.MULTI_APK_ZIP)
+                Text(stringResource(R.string.installer_multi_apk_zip_description))
+            else null
         },
         content = DialogInnerParams(DialogParamsType.InstallChoice.id) {
             if (containerType == DataType.MULTI_APK_ZIP) {
@@ -84,12 +108,12 @@ fun installChoiceDialog(
         buttons = DialogButtons(
             DialogParamsType.InstallChoice.id
         ) {
-            listOf(DialogButton(stringResource(R.string.next)) {
-                installer.entities = entities
-                viewModel.dispatch(DialogViewAction.InstallPrepare)
-            }, DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(DialogViewAction.Close)
-            })
+            listOf(
+                DialogButton(stringResource(primaryButtonText), onClick = primaryButtonAction),
+                DialogButton(stringResource(R.string.cancel)) {
+                    viewModel.dispatch(DialogViewAction.Close)
+                }
+            )
         }
     )
 }
@@ -101,6 +125,7 @@ private fun MultiApkZipChoiceContent(entities: MutableList<SelectInstallEntity>)
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
+        item { Spacer(modifier = Modifier.size(1.dp)) }
         items(groupedEntities.entries.toList(), key = { it.key }) { (packageName, itemsInGroup) ->
             MultiApkGroupCard(
                 packageName = packageName,
@@ -129,6 +154,7 @@ private fun MultiApkZipChoiceContent(entities: MutableList<SelectInstallEntity>)
                 }
             )
         }
+        item { Spacer(modifier = Modifier.size(1.dp)) }
     }
 }
 
@@ -279,12 +305,14 @@ private fun DefaultChoiceContent(entities: MutableList<SelectInstallEntity>) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
+        item { Spacer(modifier = Modifier.size(1.dp)) }
         itemsIndexed(entities, key = { _, item -> item.app.name + item.app.packageName }) { index, item ->
             SingleItemCard(
                 item = item,
                 onClick = { entities[index] = item.copy(selected = !item.selected) }
             )
         }
+        item { Spacer(modifier = Modifier.size(1.dp)) }
     }
 }
 

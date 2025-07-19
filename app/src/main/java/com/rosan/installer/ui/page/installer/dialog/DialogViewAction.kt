@@ -12,4 +12,7 @@ sealed class DialogViewAction {
     object InstallPrepare : DialogViewAction()
     object Install : DialogViewAction()
     object Background : DialogViewAction()
+
+    // 用于启动批量安装流程
+    object InstallMultiple : DialogViewAction()
 }
