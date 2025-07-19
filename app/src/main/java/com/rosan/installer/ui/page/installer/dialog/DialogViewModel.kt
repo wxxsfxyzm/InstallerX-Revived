@@ -51,9 +51,6 @@ class DialogViewModel(
     var showExtendedMenu by mutableStateOf(false)
         private set
 
-    var disableNotificationOnDismiss by mutableStateOf(false)
-        private set
-
     // 用于显示批量安装的进度文本
     private val _installProgressText = MutableStateFlow<UiText?>(null)
     val installProgressText: StateFlow<UiText?> = _installProgressText.asStateFlow()
@@ -101,9 +98,6 @@ class DialogViewModel(
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first()
             showExtendedMenu =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false).first()
-            disableNotificationOnDismiss =
-                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false)
-                    .first()
             // initialize install flags based on repo.config
             _installFlags.value = listOfNotNull(
                 repo.config.allowTestOnly.takeIf { it }

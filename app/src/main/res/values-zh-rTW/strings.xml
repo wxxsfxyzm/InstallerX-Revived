@@ -310,6 +310,7 @@
     <string name="installer_select_from_zip">從壓縮檔中選擇</string>
     <string name="installer_multi_apk_zip_description">此檔案包含多個獨立應用程式，請選擇您想要處理的應用程式。</string>
     <string name="installing_progress_text">正在安裝 %1$s (%2$d/%3$d)</string>
+    <string name="installer_completed">安裝完成</string>
     <string name="installer_completed_subtitle">成功 %1$s 個，失敗 %2$s 個</string>
     <string name="installer_current_install_mode_not_supported">目前模式不支援安裝此類型檔案</string>
     <!-- MultiApkZip End -->
