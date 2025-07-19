@@ -72,12 +72,8 @@ jobs:
           for APK_PATH in "$APK_DIR"*.apk; do
             if [[ "$APK_PATH" == *"arm64-v8a"* ]]; then
               ABI="arm64-v8a"
-            elif [[ "$APK_PATH" == *"armeabi-v7a"* ]]; then
-              ABI="armeabi-v7a"
             elif [[ "$APK_PATH" == *"x86_64"* ]]; then
               ABI="x86_64"
-            elif [[ "$APK_PATH" == *"x86"* ]]; then
-              ABI="x86"
             else
               ABI="unknown"
             fi

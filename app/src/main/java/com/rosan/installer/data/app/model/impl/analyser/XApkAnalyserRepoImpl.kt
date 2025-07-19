@@ -26,21 +26,25 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         val apps = mutableListOf<AppEntity>()
-        data.forEach { apps.addAll(doWork(config, it)) }
+        data.forEach { apps.addAll(doWork(config, it, extra)) }
         return apps
     }
 
-    private fun doWork(config: ConfigEntity, data: DataEntity): List<AppEntity> {
+    private fun doWork(config: ConfigEntity, data: DataEntity, extra: AnalyseExtraEntity): List<AppEntity> {
         return when (data) {
-            is DataEntity.FileEntity -> doFileWork(config, data)
-            is DataEntity.FileDescriptorEntity -> doFileDescriptorWork(config, data)
-            is DataEntity.ZipFileEntity -> doZipFileWork(config, data)
-            is DataEntity.ZipInputStreamEntity -> doZipInputStreamWork(config, data)
+            is DataEntity.FileEntity -> doFileWork(config, data, extra)
+            is DataEntity.FileDescriptorEntity -> doFileDescriptorWork(config, data, extra)
+            is DataEntity.ZipFileEntity -> doZipFileWork(config, data, extra)
+            is DataEntity.ZipInputStreamEntity -> doZipInputStreamWork(config, data, extra)
         }
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    private fun doFileWork(config: ConfigEntity, data: DataEntity.FileEntity): List<AppEntity> {
+    private fun doFileWork(
+        config: ConfigEntity,
+        data: DataEntity.FileEntity,
+        extra: AnalyseExtraEntity
+    ): List<AppEntity> {
         val apps = mutableListOf<AppEntity>()
         ZipFile(data.path).use { zip ->
             val manifest =
@@ -55,7 +59,8 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
                         manifest,
                         icon,
                         it,
-                        DataEntity.ZipFileEntity(it.name, data)
+                        DataEntity.ZipFileEntity(it.name, data),
+                        extra
                     )
                 )
             }
@@ -64,22 +69,23 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
     }
 
     private fun doFileDescriptorWork(
-        config: ConfigEntity, data: DataEntity.FileDescriptorEntity
-    ): List<AppEntity> = doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()))
+        config: ConfigEntity, data: DataEntity.FileDescriptorEntity, extra: AnalyseExtraEntity
+    ): List<AppEntity> = doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()), extra)
 
     private fun doZipFileWork(
-        config: ConfigEntity, data: DataEntity.ZipFileEntity
-    ): List<AppEntity> = doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()))
+        config: ConfigEntity, data: DataEntity.ZipFileEntity, extra: AnalyseExtraEntity
+    ): List<AppEntity> = doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()), extra)
 
     private fun doZipInputStreamWork(
-        config: ConfigEntity, data: DataEntity.ZipInputStreamEntity
-    ): List<AppEntity> = doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()))
+        config: ConfigEntity, data: DataEntity.ZipInputStreamEntity, extra: AnalyseExtraEntity
+    ): List<AppEntity> = doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()), extra)
 
     @OptIn(ExperimentalSerializationApi::class)
     private fun doZipInputStreamWork(
         config: ConfigEntity,
         data: DataEntity,
-        zip: ZipInputStream
+        zip: ZipInputStream,
+        extra: AnalyseExtraEntity
     ): List<AppEntity> {
         val apps = mutableListOf<AppEntity>()
         var manifestOrNull: Manifest? = null
@@ -99,7 +105,7 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             }
         }
         if (manifestOrNull == null) return apps
-        val manifest = manifestOrNull!!
+        val manifest = manifestOrNull
         manifest.splits.forEach {
             apps.addAll(
                 doSingleWork(
@@ -107,7 +113,8 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
                     manifest,
                     icon,
                     it,
-                    DataEntity.ZipInputStreamEntity(it.name, data)
+                    DataEntity.ZipInputStreamEntity(it.name, data),
+                    extra
                 )
             )
         }
@@ -119,7 +126,8 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         manifest: Manifest,
         icon: Drawable?,
         split: Manifest.Split,
-        data: DataEntity
+        data: DataEntity,
+        extra: AnalyseExtraEntity
     ): List<AppEntity> {
         var dmName: String? = null
         var splitName: String? = null
@@ -137,13 +145,16 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             data = data,
             splitName = splitName,
             targetSdk = manifest.targetSdk,
-            minSdk = manifest.minSdk
+            minSdk = manifest.minSdk,
+            arch = null,
+            containerType = extra.dataType
         ) else if (dmName?.isNotEmpty() == true) AppEntity.DexMetadataEntity(
             packageName = manifest.packageName,
             data = data,
             dmName = dmName,
             targetSdk = manifest.targetSdk,
-            minSdk = manifest.minSdk
+            minSdk = manifest.minSdk,
+            containerType = extra.dataType
         ) else AppEntity.BaseEntity(
             packageName = manifest.packageName,
             data = data,
@@ -152,7 +163,8 @@ object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             label = manifest.label,
             icon = icon,
             targetSdk = manifest.targetSdk,
-            minSdk = manifest.minSdk
+            minSdk = manifest.minSdk,
+            containerType = extra.dataType
         )
         return listOf(app)
     }

@@ -37,10 +37,6 @@ class PreferredViewModel(
                 action.showMenu
             )
 
-            is PreferredViewAction.ChangeShowDisableNotificationForDialogInstall -> changeShowDisableNotificationForDialogInstall(
-                action.showDisableNotification
-            )
-
             is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialogWhenPressingNotification(
                 action.showDialog
             )
@@ -63,8 +59,6 @@ class PreferredViewModel(
                 .map { InstallModeConverter.revert(it) }
             val showDialogInstallExtendedMenuFlow =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU)
-            val showNotificationForDialogInstall =
-                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false)
             val showDialogWhenPressingNotificationFlow =
                 appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true)
             val dhizukuAutoCloseCountDownFlow =
@@ -75,7 +69,6 @@ class PreferredViewModel(
                 customizeAuthorizerFlow,
                 installModeFlow,
                 showDialogInstallExtendedMenuFlow,
-                showNotificationForDialogInstall,
                 showDialogWhenPressingNotificationFlow,
                 dhizukuAutoCloseCountDownFlow
             ) { values: Array<Any?> ->
@@ -83,9 +76,8 @@ class PreferredViewModel(
                 val customize = values[1] as String
                 val installMode = values[2] as ConfigEntity.InstallMode
                 val showMenu = values[3] as Boolean
-                val showNotification = values[4] as Boolean
-                val showDialog = values[5] as Boolean
-                val countDown = values[6] as Int
+                val showDialog = values[4] as Boolean
+                val countDown = values[5] as Int
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -93,7 +85,6 @@ class PreferredViewModel(
                     customizeAuthorizer = customizeAuthorizer,
                     installMode = installMode,
                     showDialogInstallExtendedMenu = showMenu,
-                    disableNotificationForDialogInstall = showNotification,
                     showDialogWhenPressingNotification = showDialog,
                     dhizukuAutoCloseCountDown = countDown,
                 )
@@ -126,12 +117,6 @@ class PreferredViewModel(
     private fun changeShowDialogInstallExtendedMenu(installExtendedMenu: Boolean) {
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, installExtendedMenu)
-        }
-    }
-
-    private fun changeShowDisableNotificationForDialogInstall(showDisableNotification: Boolean) {
-        viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, showDisableNotification)
         }
     }
 

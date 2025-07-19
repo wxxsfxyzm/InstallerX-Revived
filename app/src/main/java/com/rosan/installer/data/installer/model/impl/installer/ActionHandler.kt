@@ -9,12 +9,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.Os
+import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
+import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.exception.ResolveException
@@ -28,6 +30,7 @@ import kotlinx.coroutines.launch
 import okhttp3.internal.closeQuietly
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import timber.log.Timber
 import java.io.File
 import java.util.UUID
 
@@ -113,38 +116,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return config
     }
 
-    /*    private suspend fun requestNotificationPermission(activity: Activity) {
-            // Determine the required permissions based on the Android version
-            val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                listOf(Manifest.permission.POST_NOTIFICATIONS)
-            } else {
-                emptyList() // No runtime permission needed for Android versions below 13
-            }
-
-            // If the permission list is empty, no runtime request is needed.
-            // This is the case for Android versions below 13.
-            if (permissions.isEmpty()) {
-                return // Successfully return as no permission is required
-            }
-            // If permissions are required (Android 13+), proceed with the request.
-            callbackFlow {
-                if (XXPermissions.isGranted(activity, permissions)) {
-                    trySend(true) // Permission already granted
-                    close()
-                } else {
-                    XXPermissions.with(activity)
-                        .permission(permissions)
-                        .request { _, allGranted ->
-                            trySend(allGranted) // Send the result of the request
-                            close()
-                        }
-                }
-                awaitClose { }
-            }.first()
-        }*/
-
-    private suspend fun resolveData(activity: Activity): List<DataEntity> {
-        // requestStoragePermissions(activity)
+    private fun resolveData(activity: Activity): List<DataEntity> {
         val uris = resolveDataUris(activity)
         val data = mutableListOf<DataEntity>()
         uris.forEach {
@@ -152,21 +124,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
         return data
     }
-
-    /*    private suspend fun requestStoragePermissions(activity: Activity) {
-            callbackFlow<Any?> {
-                val permissions = listOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
-                if (XXPermissions.isGranted(activity, permissions)) {
-                    send(null)
-                } else {
-                    XXPermissions.with(activity).permission(permissions).request { _, all ->
-                        if (all) trySend(null)
-                        else close()
-                    }
-                }
-                awaitClose { }
-            }.first()
-        }*/
 
     private fun resolveDataUris(activity: Activity): List<Uri> {
         val intent = activity.intent ?: throw ResolveException(
@@ -252,7 +209,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             if (source.startsWith('/')) {
                 cacheParcelFileDescriptors.add(parcelFileDescriptor)
                 val file = File(path)
-                val data = if (file.exists() && file.canRead() && kotlin.runCatching {
+                val data = if (file.exists() && file.canRead() && runCatching {
                         file.inputStream().use { }
                         return@runCatching true
                     }.getOrDefault(false)) DataEntity.FileEntity(path)
@@ -274,7 +231,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun analyse() {
         installer.progress.emit(ProgressEntity.Analysing)
-        installer.entities = kotlin.runCatching {
+        installer.entities = runCatching {
             analyseEntities(installer.data)
         }.getOrElse {
             installer.error = it
@@ -295,7 +252,25 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 app = it, selected = true
             )
         }
-        installer.progress.emit(ProgressEntity.AnalysedSuccess)
+
+        val isNotificationInstall =
+            installer.config.installMode == ConfigEntity.InstallMode.Notification ||
+                    installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
+
+        val isMultiApkZip = installer.entities.first().app.containerType == DataType.MULTI_APK_ZIP
+
+        Timber.tag("ActionHandler").d(
+            "Analyse completed: isNotificationInstall=$isNotificationInstall, isMultiApkZip=$isMultiApkZip"
+        )
+        if (isNotificationInstall && isMultiApkZip) {
+            // 条件满足：发射“不支持”状态
+            installer.progress.emit(
+                ProgressEntity.AnalysedUnsupported(context.getString(R.string.installer_current_install_mode_not_supported))
+            )
+        } else {
+            // 条件不满足：发射“分析成功”状态
+            installer.progress.emit(ProgressEntity.AnalysedSuccess)
+        }
     }
 
     private suspend fun analyseEntities(data: List<DataEntity>): List<AppEntity> =
@@ -303,7 +278,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun install() {
         installer.progress.emit(ProgressEntity.Installing)
-        kotlin.runCatching {
+        runCatching {
             installEntities(installer.config, installer.entities.filter { it.selected }.map {
                 InstallEntity(
                     name = it.app.name,
@@ -313,7 +288,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                         is AppEntity.SplitEntity -> app.data
                         is AppEntity.DexMetadataEntity -> app.data
                         is AppEntity.CollectionEntity -> app.data
-                    }
+                    },
+                    containerType = it.app.containerType!!
                 )
             }, InstallExtraInfoEntity(Os.getuid() / 100000, cacheDirectory))
         }.getOrElse {

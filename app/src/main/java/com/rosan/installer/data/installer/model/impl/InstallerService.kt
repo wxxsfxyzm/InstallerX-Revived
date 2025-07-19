@@ -121,16 +121,6 @@ class InstallerService : Service() {
             BroadcastHandler(scope, installer)
         )
 
-        /*        scope.launch {
-                    handlers.forEach { it.onStart() }
-                    installer.progress.collect {
-                        if (it is ProgressEntity.Finish) {
-                            handlers.forEach { it.onFinish() }
-                            scopes.remove(id)
-                            finish(installer)
-                        }
-                    }
-                }*/
         scope.launch {
             handlers.forEach { it.onStart() }
             installer.progress.collect { progress ->
@@ -146,21 +136,6 @@ class InstallerService : Service() {
     }
 
     private fun finish(installer: InstallerRepo) {
-        /*        val id = installer.id
-
-                if (scopes[id] != null) {
-                    installer.closeQuietly()
-                    return
-                }
-
-                InstallerRepoImpl.remove(id)
-
-                timeoutJob?.cancel()
-                timeoutJob = lifecycleScope.launch {
-                    autoForeground()
-                    delay(15.seconds)
-                    if (scopes.isEmpty()) destroy()
-                }*/
         // --- Logic to finish the installer process ---
         val id = installer.id
 

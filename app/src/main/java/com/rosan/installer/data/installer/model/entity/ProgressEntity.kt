@@ -17,6 +17,8 @@ sealed class ProgressEntity {
 
     data object AnalysedFailed : ProgressEntity()
 
+    data class AnalysedUnsupported(val reason: String) : ProgressEntity()
+
     data object AnalysedSuccess : ProgressEntity()
 
     data object Installing : ProgressEntity()

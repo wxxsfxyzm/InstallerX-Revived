@@ -20,6 +20,7 @@ import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.repo.InstallerRepo
+import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.installFlags
 import com.rosan.installer.data.app.util.PackageManagerUtil
@@ -160,13 +161,20 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         packageInstaller: PackageInstaller,
         packageName: String
     ): Session {
-        val params = PackageInstaller.SessionParams(
-            when (entities.count { it.name == "base.apk" }) {
-                1 -> PackageInstaller.SessionParams.MODE_FULL_INSTALL
-                0 -> PackageInstaller.SessionParams.MODE_INHERIT_EXISTING
-                else -> throw Exception("can't install multiple package name in single session")
-            }
-        )
+        val containerType = entities.first().containerType
+        val params = if (containerType == DataType.MULTI_APK_ZIP)
+            PackageInstaller.SessionParams(
+                // Always use full mode when apk is definite
+                PackageInstaller.SessionParams.MODE_FULL_INSTALL
+            )
+        else
+            PackageInstaller.SessionParams(
+                when (entities.count { it.name == "base.apk" }) {
+                    1 -> PackageInstaller.SessionParams.MODE_FULL_INSTALL
+                    0 -> PackageInstaller.SessionParams.MODE_INHERIT_EXISTING
+                    else -> throw Exception("can't install multiple package name in single session")
+                }
+            )
         params.setAppPackageName(packageName)
         params.installFlags = config.installFlags or InstallOption.ReplaceExisting.value
 
@@ -218,14 +226,16 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         extraInfo: InstallExtraInfoEntity,
         result: Result<Unit>
     ) {
-
+        Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
         if (result.isSuccess) {
             coroutineScope.launch {
                 runCatching { onExtraWork() }.exceptionOrNull()
                     ?.printStackTrace()
             }
         }
-        if (result.isSuccess && config.autoDelete) {
+        // Never Delete Multi-APK-ZIP files automatically
+        // Enable autoDelete only when the containerType is not MULTI_APK_ZIP_ZIP
+        if (result.isSuccess && config.autoDelete && entities.first().containerType != DataType.MULTI_APK_ZIP) {
             Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
             coroutineScope.launch {
                 runCatching { onDeleteWork(config, entities, extraInfo) }.exceptionOrNull()
@@ -291,34 +301,6 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                     code, intent, resolvedType, null, finishedReceiver, requiredPermission, options
                 )
             }
-
-            /* override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
-                return super.onTransact(
-                    code, data, reply, flags
-                )
-                                val descriptor = "android.content.IIntentSender"
-                                return when (code) {
-                                    1 -> {
-                                        data.enforceInterface(descriptor)
-                                        send(
-                                            data.readInt(),
-                                            if (data.readInt() != 0) Intent.CREATOR.createFromParcel(data) else null,
-                                            data.readString(),
-                                            IIntentReceiver.Stub.asInterface(data.readStrongBinder()),
-                                            data.readString(),
-                                            if (data.readInt() != 0) Bundle.CREATOR.createFromParcel(data) else null
-                                        )
-                                        true
-                                    }
-
-                                    0x5F4E5446 -> {
-                                        reply?.writeString(descriptor)
-                                        true
-                                    }
-
-                                    else -> return super.onTransact(code, data, reply, flags)
-                                }
-            }*/
         }
 
         fun getIntentSender(): IntentSender {

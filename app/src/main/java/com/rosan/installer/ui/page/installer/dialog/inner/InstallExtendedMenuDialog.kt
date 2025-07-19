@@ -161,7 +161,7 @@ fun MenuItemWidget(
                                 viewmodel.toggleInstallFlag(opt.value, !isSelected)
                             }
                         }
-                        
+
                         is InstallExtendedMenuAction.TextField -> {}
                     }
                 },
@@ -198,11 +198,7 @@ fun MenuItemWidget(
                             is InstallExtendedMenuAction.InstallOption ->
                                 Checkbox(
                                     checked = isSelected,
-                                    onCheckedChange = { isChecked ->
-                                        option?.let { opt ->
-                                            viewmodel.toggleInstallFlag(opt.value, isChecked)
-                                        }
-                                    }
+                                    onCheckedChange = null, // 交互处理在 Card 的 onClick 中
                                 )
 
                             is InstallExtendedMenuAction.TextField -> {}

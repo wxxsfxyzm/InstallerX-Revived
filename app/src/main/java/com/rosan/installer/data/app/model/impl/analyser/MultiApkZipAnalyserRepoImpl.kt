@@ -5,10 +5,10 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.repo.AnalyserRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import timber.log.Timber
 import java.io.File
 import java.io.InputStream
 import java.util.UUID
-import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
 /**
@@ -16,125 +16,118 @@ import java.util.zip.ZipInputStream
  * 它会遍历压缩包，对内部的每个 .apk 文件进行独立的分析以获取版本号等信息。
  */
 object MultiApkZipAnalyserRepoImpl : AnalyserRepo {
+
     override suspend fun doWork(
         config: ConfigEntity,
         data: List<DataEntity>,
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
-        val apps = mutableListOf<AppEntity>()
-        data.forEach { dataEntity ->
-            apps.addAll(analyseSingleZip(config, dataEntity, extra))
-        }
-        return apps
-    }
-
-    private suspend fun analyseSingleZip(
-        config: ConfigEntity,
-        dataEntity: DataEntity,
-        extra: AnalyseExtraEntity
-    ): List<AppEntity> {
-        return when (dataEntity) {
-            is DataEntity.FileEntity -> analyseFile(config, dataEntity, extra)
-            else -> analyseStream(config, dataEntity, extra)
-        }
-    }
-
-    private suspend fun analyseFile(
-        config: ConfigEntity,
-        data: DataEntity.FileEntity,
-        extra: AnalyseExtraEntity
-    ): List<AppEntity> {
-        val apps = mutableListOf<AppEntity>()
-        ZipFile(data.path).use { zipFile ->
-            val entries = zipFile.entries().toList()
-            for (entry in entries) {
-                if (entry.isDirectory || !entry.name.endsWith(".apk", ignoreCase = true)) continue
-                zipFile.getInputStream(entry).use { inputStream ->
-                    apps.addAll(
-                        analyseApkStream(
-                            config,
-                            DataEntity.ZipFileEntity(entry.name, data),
-                            inputStream,
-                            extra
-                        )
-                    )
-                }
-            }
-        }
-        return apps
-    }
-
-    private suspend fun analyseStream(
-        config: ConfigEntity,
-        data: DataEntity,
-        extra: AnalyseExtraEntity
-    ): List<AppEntity> {
-        val apps = mutableListOf<AppEntity>()
-        ZipInputStream(data.getInputStream()).use { zipInputStream ->
-            while (true) {
-                val entry = zipInputStream.nextEntry ?: break
-                if (entry.isDirectory || !entry.name.endsWith(".apk", ignoreCase = true)) continue
-                apps.addAll(
-                    analyseApkStream(
-                        config,
-                        DataEntity.ZipInputStreamEntity(entry.name, data),
-                        zipInputStream,
-                        extra
-                    )
-                )
-                zipInputStream.closeEntry()
-            }
-        }
-        return apps
+        // 使用 flatMap 可以优雅地将多个ZIP包的分析结果合并到一个列表中
+        return data.flatMap { analyseSingleZip(config, it, extra) }
     }
 
     /**
-     * 从输入流中分析单个APK文件。
-     * 它将流内容写入临时文件，然后使用 ApkAnalyserRepoImpl 进行分析。
+     * 分析单个 ZIP 文件实体。
+     */
+    private suspend fun analyseSingleZip(
+        config: ConfigEntity,
+        zipDataEntity: DataEntity,
+        extra: AnalyseExtraEntity
+    ): List<AppEntity> {
+        val results = mutableListOf<AppEntity>()
+        val inputStream = zipDataEntity.getInputStreamWhileNotEmpty() ?: return emptyList()
+
+        // 使用 ZipInputStream 流式读取，避免将整个ZIP解压到内存
+        ZipInputStream(inputStream).use { zip ->
+            while (true) {
+                val entry = zip.nextEntry ?: break
+                if (entry.isDirectory) {
+                    zip.closeEntry()
+                    continue
+                }
+
+                // 核心判断：只处理以 .apk 结尾的文件（不区分大小写）
+                if (entry.name.endsWith(".apk", ignoreCase = true)) {
+                    Timber.tag("MultiApkZipAnalyser")
+                        .d("Found APK entry: ${entry.name} in ${zipDataEntity}")
+
+                    // 为ZIP内的这个APK条目创建一个临时的DataEntity
+                    val entryDataEntity = DataEntity.ZipInputStreamEntity(entry.name, zipDataEntity)
+
+                    // 对这个APK流进行分析
+                    val analysedApks = analyseApkStream(config, entryDataEntity, zip, extra)
+                    results.addAll(analysedApks)
+                }
+                // 非APK文件会被自动忽略
+
+                zip.closeEntry()
+            }
+        }
+        return results
+    }
+
+    /**
+     * 将单个APK流提取到临时文件并调用 ApkAnalyserRepoImpl 进行分析。
      */
     private suspend fun analyseApkStream(
         config: ConfigEntity,
-        data: DataEntity,
-        inputStream: InputStream,
+        data: DataEntity.ZipInputStreamEntity, // 明确传入源，用于追溯和命名
+        inputStream: InputStream, // 这是未关闭的 ZipInputStream
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
-        // 在缓存目录中创建一个唯一的临时文件
+        // 1. 创建一个临时文件来存放提取出来的APK
         val tempFile =
             File.createTempFile(UUID.randomUUID().toString(), ".apk", File(extra.cacheDirectory))
-        var analysisResult: List<AppEntity> = emptyList()
-        try {
-            // 将APK流写入临时文件
+
+        // 2. 将APK内容从ZIP流复制到临时文件
+        // runCatching 保证即使某个APK分析失败，也不会中断整个流程
+        val result = runCatching {
             tempFile.outputStream().use { output ->
+                // 注意：这里不能关闭 inputStream (zip)，因为它由外层循环控制
                 inputStream.copyTo(output)
             }
-            // 为临时文件创建一个新的数据实体
+
+            // 3. 创建指向这个临时文件的 DataEntity
             val tempData = DataEntity.FileEntity(tempFile.absolutePath).apply {
-                source = data
+                source = data // 保持数据来源的链条
             }
-            // 使用标准的APK分析器来解析这个临时文件
+
+            // 4. 【核心复用】调用现有的 `ApkAnalyserRepoImpl` 来分析这个独立的APK文件
             val originalEntities = ApkAnalyserRepoImpl.doWork(config, listOf(tempData), extra)
 
-            // --- 关键修改 ---
-            // 遍历分析结果，并为每个实体创建一个唯一的包名
-            analysisResult = originalEntities.mapNotNull { entity ->
-                when (entity) {
-                    is AppEntity.BaseEntity -> {
-                        // 通过将原始包名和文件名结合，来创建一个唯一的包名
-                        val uniquePackageName = "${entity.packageName}:${File(tempFile.name).name}"
-                        // 返回一个带有唯一包名的新实体副本
-                        entity.copy(packageName = uniquePackageName)
-                    }
-                    // 如果有其他类型的实体（如SplitEntity），我们在此场景下将其忽略，
-                    // 因为我们只关心独立的APK。
-                    else -> null
+            // 5. 【数据增强】
+            //    - 附加 containerType
+            //    - 使用ZIP内的文件名作为更友好的显示标签(label)
+            val displayNameFromZip = File(data.name).nameWithoutExtension
+
+            originalEntities.map { entity ->
+                if (entity is AppEntity.BaseEntity) {
+                    entity.copy(
+                        name = data.name,
+                        label = entity.label ?: displayNameFromZip,         // 使用ZIP包内的文件名作为应用名
+                        containerType = extra.dataType    // 附加容器类型 (MULTI_APK_ZIP)
+                    )
+                } else {
+                    entity // 对于非BaseEntity，暂时不处理 (如果有SplitEntity等，也需要copy)
                 }
             }
-        } finally {
-            // 确保临时文件在使用后被删除
-            if (tempFile.exists()) {
-                tempFile.delete()
-            }
         }
-        return analysisResult
+
+        // 6. 处理结果
+        result.onSuccess { entities ->
+            Timber.tag("MultiApkZipAnalyser").d("Successfully analysed ${data.name}")
+            // 【重要】！！！
+            // 分析成功后，**不要删除** tempFile。
+            // 因为返回的 AppEntity.BaseEntity.data 指向了这个临时文件，
+            // 后续的安装过程需要它。临时文件应该在整个安装会话结束后统一清理。
+            return entities
+        }
+
+        result.onFailure { error ->
+            Timber.tag("MultiApkZipAnalyser").e(error, "Failed to analyse ${data.name}")
+            tempFile.delete() // 如果分析过程中出错，则删除这个无效的临时文件
+        }
+
+        return emptyList()
     }
 }

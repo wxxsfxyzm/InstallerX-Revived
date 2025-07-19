@@ -23,15 +23,10 @@ fun DialogPage(
     PositionDialog(
         onDismissRequest = {
             // Only allow dismiss if the current state is dismissible
-            if (viewModel.isDismissible) {
-                // If the setting is enabled, close the dialog directly.
-                // Otherwise, send it to the background (which shows a notification).
-                if (viewModel.disableNotificationOnDismiss) {
-                    viewModel.dispatch(DialogViewAction.Close)
-                } else {
-                    viewModel.dispatch(DialogViewAction.Background)
-                }
-            }
+            if (viewModel.isDismissible)
+            // If the setting is enabled, close the dialog directly.
+            // Otherwise, send it to the background (which shows a notification).
+                viewModel.dispatch(DialogViewAction.Close)
         },
         modifier = Modifier.animateContentSize(),
         centerIcon = dialogInnerWidget(installer, params.icon),

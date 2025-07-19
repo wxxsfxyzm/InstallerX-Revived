@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.icons.AppIcons
@@ -37,11 +38,12 @@ import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 import com.rosan.installer.ui.widget.toggle.Chip
+import timber.log.Timber
 
 // Assume pausingIcon is accessible
 
 @Composable
-private fun InstallPrepareEmptyDialog(
+private fun installPrepareEmptyDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     return DialogParams(
@@ -67,7 +69,7 @@ private fun InstallPrepareEmptyDialog(
 }
 
 @Composable
-private fun InstallPrepareTooManyDialog(
+private fun installPrepareTooManyDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     return DialogParams(
@@ -92,6 +94,7 @@ private fun InstallPrepareTooManyDialog(
         })
 }
 
+
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -99,15 +102,53 @@ fun installPrepareDialog( // 小写开头
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     val entities = installer.entities.filter { it.selected }.map { it.app }.sortedBest()
-    if (entities.isEmpty()) return InstallPrepareEmptyDialog(installer, viewModel)
-    if (entities.groupBy { it.packageName }.size > 1) return InstallPrepareTooManyDialog(
-        installer, viewModel
-    )
+    entities.forEach { entity ->
+        when (entity.containerType) {
+            DataType.APK -> {
+                // Log the type of the entity
+                Timber.tag("AppEntity").d("Entity: ${entity.packageName}, DataType: APK, Type: ${entity.containerType}")
+            }
 
+            DataType.APKS -> {
+                Timber.tag("AppEntity")
+                    .d("Entity: ${entity.packageName}, Type: APKS, DataType: ${entity.containerType}")
+            }
+
+            DataType.APKM -> {
+                Timber.tag("AppEntity")
+                    .d("Entity: ${entity.packageName}, Type: APKM, DataType: ${entity.containerType}")
+            }
+
+            DataType.XAPK -> {
+                Timber.tag("AppEntity")
+                    .d("Entity: ${entity.packageName}, Type: XAPK, DataType: ${entity.containerType}")
+            }
+
+            DataType.MULTI_APK_ZIP -> {
+                Timber.tag("AppEntity")
+                    .d("Entity: ${entity.packageName}, Type: MULTI_APK_ZIP, DataType: ${entity.containerType}")
+            }
+
+            else -> {
+                Timber.tag("AppEntity")
+                    .d("Entity: ${entity.packageName}, Type: Else, DataType: ${entity.containerType}")
+            }
+        }
+    }
+
+    if (entities.isEmpty()) return installPrepareEmptyDialog(installer, viewModel)
+    if (entities.groupBy { it.packageName }.size > 1) return installPrepareTooManyDialog(installer, viewModel)
+
+    val primaryEntity = entities.first()
     val entityToInstall = entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-    val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
-    var showChips by remember { mutableStateOf(false) }
+    val containerType = primaryEntity.containerType
 
+    Timber.tag("AppEntity")
+        .d("Package: ${primaryEntity.packageName}, Container: $containerType, Total files: ${entities.size}")
+
+    val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
+
+    var showChips by remember { mutableStateOf(false) }
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
 
@@ -118,7 +159,7 @@ fun installPrepareDialog( // 小写开头
     }
 
     // Call InstallInfoDialog for base structure
-    val baseParams = InstallInfoDialog(
+    val baseParams = installInfoDialog(
         installer = installer,
         viewModel = viewModel,
         preInstallAppInfo = preInstallAppInfo,
@@ -236,22 +277,20 @@ fun installPrepareDialog( // 小写开头
             // Use buildList to create a list of buttons
             buildList {
                 // Install button is shown if the entity's minSdk is compatible
-                entities.first().minSdk?.let {
-                    if (it.toInt() <= Build.VERSION.SDK_INT)
-                        add(DialogButton(stringResource(R.string.install)) {
-                            viewModel.dispatch(DialogViewAction.Install)
-                        })
+                val canInstall = entityToInstall?.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true
+                if (canInstall) {
+                    add(DialogButton(stringResource(R.string.install)) {
+                        viewModel.dispatch(DialogViewAction.Install)
+                    })
                 }
-                // if there are multiple entities, show the install choice button
-                if (entities.size > 1) {
+                // only when the entity is a split APK, XAPK, or APKM
+                if (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM) {
                     add(DialogButton(stringResource(R.string.install_choice), 2f) {
                         viewModel.dispatch(DialogViewAction.InstallChoice)
                     })
                 }
-                // TODO make a new dialog only for installing apk file
-                // Add Permission review and comparison button if needed
-                // Add more buttons as needed
-                else if (viewModel.showExtendedMenu) {
+                // else if app can be installed and extended menu is shown
+                else if (canInstall && viewModel.showExtendedMenu) {
                     add(DialogButton(stringResource(R.string.menu), 2f) {
                         viewModel.dispatch(DialogViewAction.InstallExtendedMenu)
                     })
