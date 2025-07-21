@@ -52,14 +52,14 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         job = scope.launch {
             installer.action.collect {
                 // 异步处理请求
-                launch {
-                    when (it) {
-                        is InstallerRepoImpl.Action.Resolve -> resolve(it.activity)
-                        is InstallerRepoImpl.Action.Analyse -> analyse()
-                        is InstallerRepoImpl.Action.Install -> install()
-                        is InstallerRepoImpl.Action.Finish -> finish()
-                    }
+                //launch {
+                when (it) {
+                    is InstallerRepoImpl.Action.Resolve -> resolve(it.activity)
+                    is InstallerRepoImpl.Action.Analyse -> analyse()
+                    is InstallerRepoImpl.Action.Install -> install()
+                    is InstallerRepoImpl.Action.Finish -> finish()
                 }
+                //}
             }
         }
     }

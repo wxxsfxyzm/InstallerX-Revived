@@ -20,12 +20,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.internal.closeQuietly
+import timber.log.Timber
 
 class InstallerService : Service() {
     companion object {
         const val EXTRA_ID = "id"
+
+        // 当服务空闲时，在自我销毁前的等待时间（毫秒）
+        private const val IDLE_TIMEOUT_MS = 5000L
     }
 
     enum class Action(val value: String) {
@@ -109,53 +114,58 @@ class InstallerService : Service() {
     }
 
     private fun ready(installer: InstallerRepo) {
-        val id = installer.id
-        if (scopes[id] != null) return
-        val scope = CoroutineScope(Dispatchers.IO)
-        scopes[id] = scope
+        // --- 关键修改 1: 新任务到达，取消任何待销毁的计划 ---
+        synchronized(this) {
+            timeoutJob?.cancel()
+            Timber.tag("InstallerService").d("New task arrived, shutdown canceled.")
 
-        val handlers = listOf(
-            ActionHandler(scope, installer),
-            ProgressHandler(scope, installer),
-            ForegroundInfoHandler(scope, installer),
-            BroadcastHandler(scope, installer)
-        )
+            val id = installer.id
+            if (scopes[id] != null) return
+            val scope = CoroutineScope(Dispatchers.IO)
+            scopes[id] = scope
 
-        scope.launch {
-            handlers.forEach { it.onStart() }
-            installer.progress.collect { progress ->
-                if (progress is ProgressEntity.Finish) {
-                    handlers.forEach { it.onFinish() }
-                    // 任务完成，直接调用 finish 方法处理后续清理和服务生命周期检查
-                    // 不需要在这里再做 scopes.remove(id) 等操作，统一在 finish 方法中处理
-                    finish(installer)
+            val handlers = listOf(
+                ActionHandler(scope, installer),
+                ProgressHandler(scope, installer),
+                ForegroundInfoHandler(scope, installer),
+                BroadcastHandler(scope, installer)
+            )
+
+            scope.launch {
+                handlers.forEach { it.onStart() }
+                installer.progress.collect { progress ->
+                    if (progress is ProgressEntity.Finish) {
+                        handlers.forEach { it.onFinish() }
+                        finish(installer)
+                    }
                 }
             }
+            autoForeground()
         }
-        autoForeground()
     }
 
     private fun finish(installer: InstallerRepo) {
-        // --- Logic to finish the installer process ---
         val id = installer.id
+        Timber.tag("InstallerService").d("Finishing task with id $id.")
 
-        // 如果任务仍在 scopes 中，取消其协程并移除
-        scopes.remove(id)?.cancel() // 好习惯：取消协程以释放资源
-
-        // 清理与该 installer 相关的资源
-        InstallerRepoImpl.remove(id)
-        installer.closeQuietly()
-
-        // 取消任何可能存在的旧的 timeoutJob
-        timeoutJob?.cancel()
-
-        // 立即检查服务是否应该停止，不再延迟
         synchronized(this) {
+            scopes.remove(id)?.cancel()
+            InstallerRepoImpl.remove(id)
+            installer.closeQuietly()
+
+            // --- 关键修改 2: 任务结束后，不再立即销毁服务 ---
+            timeoutJob?.cancel() // 取消上一个可能存在的销毁计划
+
             if (scopes.isEmpty()) {
-                // 没有正在运行的任务了，立即销毁服务
-                destroy() // destroy() 会调用 stopSelf()
+                // 服务已空闲，启动一个带延迟的销毁任务
+                Timber.tag("InstallerService").d("Service is idle. Scheduling shutdown in $IDLE_TIMEOUT_MS ms.")
+                timeoutJob = lifecycleScope.launch {
+                    delay(IDLE_TIMEOUT_MS)
+                    Timber.tag("InstallerService").d("Idle timeout reached. Destroying service.")
+                    destroy()
+                }
             } else {
-                // 如果还有其他任务，仅更新前台状态
+                // 仍有其他任务，只需更新前台服务状态
                 autoForeground()
             }
         }

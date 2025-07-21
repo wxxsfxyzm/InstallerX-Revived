@@ -2,6 +2,7 @@ package com.rosan.installer.util
 
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.annotation.StringRes
 import com.rosan.installer.R
 import timber.log.Timber
 
@@ -12,6 +13,7 @@ import timber.log.Timber
  * @param permission 权限字符串
  * @return 权限标签的资源ID
  */
+@StringRes
 private fun getPermissionLabelRes(permission: String): Int = when (permission) {
     "android.permission.ACCESS_BACKGROUND_LOCATION" -> R.string.permission_access_background_location
     "android.permission.ACCESS_COARSE_LOCATION" -> R.string.permission_access_coarse_location

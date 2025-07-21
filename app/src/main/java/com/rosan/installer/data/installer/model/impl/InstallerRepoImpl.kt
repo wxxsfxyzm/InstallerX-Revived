@@ -37,22 +37,30 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
                 }
             }
 
-            // 如果是匿名调用 (id == null)，则走新的、经过加固的逻辑
+            // ==================== 核心修改逻辑 ====================
+            // 对于匿名调用 (id == null)，执行“后来者优先”策略
             synchronized(this) {
-                // 先检查是否已存在一个正在运行的匿名实例
+                // 步骤 1: 检查并主动终止任何已存在的匿名实例
                 anonymousInstanceId?.let { existingId ->
-                    impls[existingId]?.let {
-                        return it // 如果有，直接返回它
+                    // 从管理器中移除旧实例的引用
+                    impls.remove(existingId)?.let { oldInstance ->
+                        // 触发旧实例的关闭和清理流程
+                        // 这会发射 ProgressEntity.Finish, 进而由 InstallerService 清理其协程等资源
+                        oldInstance.close()
                     }
                 }
+                // 此时，旧的匿名实例（如果存在）已被移除并开始关闭，我们可以安全地清理ID
+                anonymousInstanceId = null
 
-                // 如果不存在匿名实例，则创建一个新的
+                // 步骤 2: 创建一个全新的实例来处理新的请求
                 val newId = UUID.randomUUID().toString()
                 val newInstance = create(newId)
-                anonymousInstanceId = newId // 记录下这个新创建的匿名实例的ID
+                anonymousInstanceId = newId // 记录这个新创建的匿名实例的ID
                 return newInstance
             }
+            // =======================================================
         }
+
 
         fun get(id: String): InstallerRepo? {
             return impls[id]

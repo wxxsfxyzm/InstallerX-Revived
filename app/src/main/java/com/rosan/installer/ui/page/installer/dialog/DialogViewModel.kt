@@ -74,9 +74,9 @@ class DialogViewModel(
     val isDismissible
         get() = when (state) {
             is DialogViewState.Analysing,
-            is DialogViewState.Installing,
             is DialogViewState.Resolving -> false
 
+            is DialogViewState.Installing -> !disableNotificationOnDismiss
             else -> true
         }
 

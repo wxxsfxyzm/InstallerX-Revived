@@ -26,6 +26,8 @@ import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -153,52 +155,31 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
     }
 
+    @SuppressLint("MissingPermission")
     override suspend fun onStart() {
         job = scope.launch {
-            var progress: ProgressEntity = ProgressEntity.Ready
-            var background = false
-
-            @SuppressLint("MissingPermission")
-            @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-            fun refresh() {
-                // 如果已经确定是对话框安装流程，则取消所有通知并停止后续操作
-                if (!background) {
-                    setNotification(null) // 这会取消掉任何已经显示的通知
-                    return
-                }
-                setNotification(newNotification(progress, true))
-            }
-            launch {
-                installer.progress.collect { collectedProgress ->
-                    // --- START OF MAJOR CHANGE ---
-                    // 为我们不支持的状态设置一个特殊的处理分支
-                    if (collectedProgress is ProgressEntity.AnalysedUnsupported) {
-                        // 1. 在主线程上显示 Toast。这是最优先的UI反馈。
-                        scope.launch(Dispatchers.Main) {
-                            Toast.makeText(context, collectedProgress.reason, Toast.LENGTH_LONG).show()
-                        }
-
-                        // 2. 立即主动发起关闭流程。
-                        //    这会触发 ProgressEntity.Finish 状态，
-                        //    让所有其他组件（包括本Handler和服务）执行标准的清理和退出逻辑。
-                        installer.close()
-
-                        // 3. 阻止这个状态下的任何标准通知刷新，因为我们正在关闭。
-                        return@collect
+            // --- 核心修改：使用 combine 将 progress 和 background 流合并 ---
+            // 只要 progress 或 background 中任何一个有新值，这个代码块就会以最新的组合执行
+            installer.progress.combine(installer.background) { progress, background ->
+                // 特殊逻辑优先处理
+                if (progress is ProgressEntity.AnalysedUnsupported) {
+                    scope.launch(Dispatchers.Main) {
+                        Toast.makeText(context, progress.reason, Toast.LENGTH_LONG).show()
                     }
-                    // --- END OF MAJOR CHANGE ---
+                    installer.close()
+                    return@combine // 提前返回，不再执行后续通知逻辑
+                }
 
-                    // 对于所有其他正常状态，照常更新进度并刷新通知
-                    progress = collectedProgress
-                    refresh()
+                // 根据是否在后台决定通知行为
+                if (background) {
+                    // 在后台模式，创建并显示通知
+                    setNotification(newNotification(progress, true)) // 始终传递 true
+                } else {
+                    // 在前台模式（Activity可见），取消任何可能存在的通知
+                    setNotification(null)
                 }
-            }
-            launch {
-                installer.background.collect {
-                    background = it
-                    refresh()
-                }
-            }
+
+            }.collect() // 启动流的收集
         }
     }
 
