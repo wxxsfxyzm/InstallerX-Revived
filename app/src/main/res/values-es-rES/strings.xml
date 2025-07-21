@@ -243,15 +243,93 @@
     <string name="downgrade_version_prefix">Downgrade</string>
     <string name="install_choice">Seleccionar PKG</string>
 
-    <string name="show_dialog_install_extended_menu">Mostrar menú extendido</string>
+    <string name="show_dialog_when_pressing_notification">Mostrar diálogo al presionar la notificación</string>
+    <string name="change_notification_touch_behavior">Cambiar comportamiento táctil de la notificación</string>
+    <string name="show_dialog_install_extended_menu">Mostrar menú extendido (Experimental)</string>
     <string name="show_dialog_install_extended_menu_desc">Mostrar más opciones en el diálogo de instalación</string>
+    <string name="extended_menu">Menú Extendido</string>
+    <string name="disable_notification">Deshabilitar Notificación</string>
+    <string name="close_immediately_on_dialog_dismiss">Cerrar Inmediatamente al Descartar Diálogo</string>
     <string name="set_countdown">Establecer cuenta regresiva</string>
-    <string name="dhizuku_auto_close_countdown_desc">Cuenta regresiva para cerrar automáticamente después de una instalación exitosa con Dhizuku</string>
-    <string name="grant_permission_after_install">Haz clic para otorgar permiso después de la instalación</string>
-    <string name="config_allow_test">Permitir depuración</string>
-    <string name="config_allow_test_desc">Permitir aplicaciones marcadas para depuración</string>
-    <string name="config_all_users">Instalar para todos los usuarios</string>
-    <string name="config_allow_downgrade">Permitir downgrade</string>
-    <string name="config_allow_downgrade_desc">Permitir que las aplicaciones se degraden (puede no funcionar en todas las ROMs)</string>
+    <string name="dhizuku_auto_close_countdown_desc">Cuenta regresiva para el cierre automático después de que la instalación de Dhizuku se complete</string>
+    <string name="dhizuku_cannot_set_installer_desc">¡El modo Dhizuku no admite la configuración del instalador!</string>
+    <string name="grant_permission_after_install">Tocar para otorgar permiso después de la instalación</string>
+    <string name="permission_list">Lista de Permisos</string>
+    <string name="permission_list_desc">Lista de permisos solicitados por el paquete que se está instalando</string>
+
+    <!--  InstallOptions Start  -->
+    <string name="config_allow_test">Permitir Pruebas</string>
+    <string name="config_allow_test_desc">Si el paquete que se está instalando es una aplicación solo de prueba, permitir su instalación.</string>
+    <string name="internal">Almacenamiento Interno</string>
+    <string name="internal_desc">Forzar la instalación del paquete en el almacenamiento interno.</string>
+    <string name="external">Almacenamiento Externo</string>
+    <string name="external_desc">Forzar la instalación del paquete en el almacenamiento externo.</string>
+    <string name="from_adb">Solicitud de instalación desde ADB</string>
+    <string name="from_adb_desc">Indica al sistema que la solicitud de instalación fue realizada por ADB</string>
+    <string name="config_all_users">Instalar para Todos los Usuarios</string>
+    <string name="config_all_users_desc">Instala el paquete para todos los usuarios del sistema, en lugar de solo el usuario especificado o predeterminado</string>
+    <string name="config_allow_downgrade">Permitir Reversión</string>
+    <string name="config_allow_downgrade_desc">Intenta revertir la versión actualmente instalada del paquete a la que se está instalando (puede que no funcione en todas las ROMs)</string>
+    <string name="config_grant_all_permissions">Otorgar Todos los Permisos Solicitados</string>
+    <string name="config_grant_all_permissions_desc">Otorga automáticamente todos los permisos que solicita el paquete. Tenga en cuenta que esto solo se aplica a los permisos de tiempo de ejecución. Permisos especiales como Acceso a Todos los Archivos o Accesibilidad no se otorgarán automáticamente.</string>
+    <string name="force_volume_uuid">Forzar UUID de Volumen</string>
+    <string name="force_volume_uuid_desc">Permite especificar un UUID de volumen para instalar el paquete.</string>
+    <string name="force_permission_prompt">Forzar Solicitud de Permiso</string>
+    <string name="force_permission_prompt_desc">Fuerza a que incluso los instaladores del sistema muestren el mensaje de confirmación de instalación.</string>
+    <string name="instant_app">Aplicación Instantánea</string>
+    <string name="instant_app_desc">Instala el paquete como una aplicación instantánea.</string>
+    <string name="dont_kill_app">No Matar Aplicación</string>
+    <string name="dont_kill_app_desc">Se usa al instalar una función para una aplicación dividida para evitar que la aplicación principal se cierre durante la instalación.</string>
+    <string name="full_app">Aplicación Completa</string>
+    <string name="full_app_desc">Indica que el paquete que se está instalando es una aplicación completa. Se puede usar para actualizar aplicaciones instantáneas a aplicaciones completas.</string>
+    <string name="allocate_aggressive">Asignar Agresivamente</string>
+    <string name="allocate_aggressive_desc">Indica que el paquete es "crítico para la salud o seguridad del sistema" y eliminará más agresivamente los archivos borrables para hacer espacio si es necesario.</string>
+    <string name="virtual_preload">Precarga Virtual</string>
+    <string name="virtual_preload_desc">Indica que el paquete es una precarga virtual.</string>
+    <string name="apex" translatable="false">APEX</string>
+    <string name="apex_desc">Indica que el paquete que se está instalando es un paquete APEX</string>
+    <string name="enable_rollback">Habilitar Reversión</string>
+    <string name="enable_rollback_desc">Permitir futuras reversiones de este paquete.</string>
+    <string name="disable_verification">Deshabilitar Verificación</string>
+    <string name="disable_verification_desc">Deshabilita la verificación del paquete durante la instalación. Esto no es verificación de firma.</string>
+    <string name="staged">Escenificado</string>
+    <string name="staged_desc">Indica que este paquete se está instalando como parte de una instalación escenificada.</string>
+    <string name="config_all_whitelist_restricted_permissions">Permitir Permisos Restringidos</string>
+    <string name="config_all_whitelist_restricted_permissions_desc">Permitir que se otorguen permisos restringidos para el paquete que se está instalando.</string>
+    <string name="disable_allowed_apex_update_check">Deshabilitar Verificación de Actualización de APEX Permitida</string>
+    <string name="disable_allowed_apex_update_check_desc">No verificar si el APEX instalado se puede actualizar.</string>
+    <string name="config_bypass_low_target_sdk">Omitir Bloqueo de SDK de Destino Bajo</string>
+    <string name="config_bypass_low_target_sdk_desc">Permite instalar aplicaciones dirigidas a versiones de SDK antiguas.</string>
+    <string name="dry_run">Prueba en Seco</string>
+    <string name="dry_run_desc">Verificar el paquete, pero no instalarlo.</string>
+
+    <string name="replace_existing">Reemplazar Existente</string>
+    <string name="replace_existing_desc">Si el paquete que se va a instalar ya existe, reemplazarlo/actualizarlo.</string>
+    <!--  InstallOptions End  -->
+
+    <!-- MultiApkZip Installer -->
+    <string name="installer_file_name">Archivo: %1$s</string>
+    <string name="installer_select_from_zip">Seleccionar de archivo zip</string>
+    <string name="installer_multi_apk_zip_description">Este archivo contiene varias aplicaciones separadas, seleccione las aplicaciones que desea procesar.</string>
+    <string name="installing_progress_text">Instalando %1$s (%2$d/%3$d)</string>
+    <string name="installer_completed">Instalación completa</string>
+    <string name="installer_completed_subtitle">Exitoso: %1$s, fallido: %2$s</string>
+    <string name="installer_current_install_mode_not_supported">El modo actual no admite la instalación de este tipo de archivo</string>
+    <!-- MultiApkZip End -->
+
+    <!-- SplitNameUtil Start -->
+    <string name="split_name_language">División de idioma: %1$s</string>
+    <string name="split_name_architecture">División de arquitectura: %1$s</string>
+    <string name="split_name_density">Densidad de pantalla: %1$s</string>
+    <string name="split_dpi_ldpi">Baja (~120dpi)</string>
+    <string name="split_dpi_mdpi">Media (~160dpi)</string>
+    <string name="split_dpi_hdpi">Alta (~240dpi)</string>
+    <string name="split_dpi_xhdpi">Extra Alta (~320dpi)</string>
+    <string name="split_dpi_xxhdpi">Extra Extra Alta (~480dpi)</string>
+    <string name="split_dpi_xxxhdpi">Extra Extra Extra Alta (~640dpi)</string>
+    <string name="split_dpi_tvdpi">TV (~213dpi)</string>
+    <string name="split_dpi_nodpi">Sin escalado</string>
+    <string name="split_dpi_anydpi">Cualquier densidad</string>
+    <!-- SplitNameUtil End -->
 
 </resources>

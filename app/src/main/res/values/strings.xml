@@ -321,4 +321,19 @@
     <string name="installer_completed_subtitle">Successful %1$s, failed %2$s</string>
     <string name="installer_current_install_mode_not_supported">Current mode does not support installing this type of file</string>
     <!-- MultiApkZip End -->
+
+    <!-- SplitNameUtil Start -->
+    <string name="split_name_language">Language split: %1$s</string>
+    <string name="split_name_architecture">Architecture split: %1$s</string>
+    <string name="split_name_density">Screen density: %1$s</string>
+    <string name="split_dpi_ldpi">Low (~120dpi)</string>
+    <string name="split_dpi_mdpi">Medium (~160dpi)</string>
+    <string name="split_dpi_hdpi">High (~240dpi)</string>
+    <string name="split_dpi_xhdpi">Extra High (~320dpi)</string>
+    <string name="split_dpi_xxhdpi">Extra Extra High (~480dpi)</string>
+    <string name="split_dpi_xxxhdpi">Extra Extra Extra High (~640dpi)</string>
+    <string name="split_dpi_tvdpi">TV (~213dpi)</string>
+    <string name="split_dpi_nodpi">No scaling</string>
+    <string name="split_dpi_anydpi">Any density</string>
+    <!-- SplitNameUtil End -->
 </resources>

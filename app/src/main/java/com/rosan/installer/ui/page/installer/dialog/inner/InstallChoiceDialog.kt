@@ -51,6 +51,7 @@ import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
+import com.rosan.installer.util.asUserReadableSplitName
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -382,7 +383,11 @@ private fun SingleItemCard(
                     }
 
                     is AppEntity.SplitEntity -> {
-                        Text(app.splitName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(
+                            app.splitName.asUserReadableSplitName(),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                         Text(
                             text = stringResource(R.string.installer_file_name, app.name),
                             style = MaterialTheme.typography.bodyMedium,
