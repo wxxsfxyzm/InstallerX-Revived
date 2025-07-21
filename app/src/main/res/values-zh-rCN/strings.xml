@@ -315,4 +315,19 @@
     <string name="installer_completed_subtitle">成功 %1$s 个，失败 %2$s 个</string>
     <string name="installer_current_install_mode_not_supported">当前模式不支持安装该类型的文件</string>
     <!-- MultiApkZip End -->
+
+    <!-- SplitNameUtil Start -->
+    <string name="split_name_language">语言分包: %1$s</string>
+    <string name="split_name_architecture">架构分包: %1$s</string>
+    <string name="split_name_density">屏幕密度: %1$s</string>
+    <string name="split_dpi_ldpi">低 (~120dpi)</string>
+    <string name="split_dpi_mdpi">中 (~160dpi)</string>
+    <string name="split_dpi_hdpi">高 (~240dpi)</string>
+    <string name="split_dpi_xhdpi">超高 (~320dpi)</string>
+    <string name="split_dpi_xxhdpi">超超高 (~480dpi)</string>
+    <string name="split_dpi_xxxhdpi">超超超高 (~640dpi)</string>
+    <string name="split_dpi_tvdpi">电视 (~213dpi)</string>
+    <string name="split_dpi_nodpi">不缩放</string>
+    <string name="split_dpi_anydpi">任意密度</string>
+    <!-- SplitNameUtil End -->
 </resources>
