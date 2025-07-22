@@ -38,7 +38,7 @@
     - Dhizuku无法调用shell权限，因此加了一个倒计时自定义选项，给打开app的操作预留一定时间
 - 为对话框安装提供一个扩展菜单，可以在设置中启用
     - 支持查看应用申明的权限
-    - 支持设定InstallFlags（可以继承全局Profile设置）部分实现来自
+    - 支持设定InstallFlags（可以继承全局Profile设置）部分实现来自[zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions/blob/main/app/src/main/java/dev/zwander/installwithoptions/data/InstallOption.kt)
        - **注意**：设定InstallFlags并不能保证一定生效，部分选项有可能带来安全风险，具体取决于系统
 - 支持安装zip压缩包内的apk文件，用 InstallerX 打开zip压缩包即可 
     - 仅支持对话框安装
