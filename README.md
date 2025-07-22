@@ -71,6 +71,7 @@
 > 当切换构建频道的时候，可能会需要清除数据/卸载重新安装。
 
 - 开发中的功能将提交到`dev`分支，如有测试意愿可以前往[Pull Request](https://github.com/wxxsfxyzm/InstallerX-Revived/pulls)寻找相关的CI构建
+  - 每次commit的变更内容会在PR中提供，可能使用AI生成
 - 开发完成的功能会合并到`main`分支，CI/CD会自动构建并发布为最新alpha版本
 - 稳定版会在一个阶段的开发结束，需要提高`versionCode`时手动触发构建并由CI/CD自动发布为release
 
