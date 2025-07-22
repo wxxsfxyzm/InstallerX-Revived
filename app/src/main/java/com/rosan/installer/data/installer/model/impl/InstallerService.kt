@@ -22,14 +22,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.internal.closeQuietly
 import timber.log.Timber
 
 class InstallerService : Service() {
     companion object {
         const val EXTRA_ID = "id"
-
-        // 当服务空闲时，在自我销毁前的等待时间（毫秒）
         private const val IDLE_TIMEOUT_MS = 5000L
     }
 
@@ -41,42 +38,33 @@ class InstallerService : Service() {
         }
     }
 
-    private val lifecycleScope = CoroutineScope(Dispatchers.IO)
-
+    private val lifecycleScope = CoroutineScope(Dispatchers.IO + Job())
     private val scopes = mutableMapOf<String, CoroutineScope>()
-
     private var timeoutJob: Job? = null
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     private fun setForeground(enable: Boolean) {
+        Timber.d("setForeground called with enable: $enable")
         if (!enable) {
             stopForeground(STOP_FOREGROUND_REMOVE)
             return
         }
-
         val id = this.hashCode()
-
         val channelId = "installer_background_channel"
-        val channel =
-            NotificationChannelCompat.Builder(
-                channelId,
-                NotificationManagerCompat.IMPORTANCE_MIN
-            )
-                .setName(getString(R.string.installer_background_channel_name)).build()
+        val channel = NotificationChannelCompat.Builder(
+            channelId,
+            NotificationManagerCompat.IMPORTANCE_MIN
+        ).setName(getString(R.string.installer_background_channel_name)).build()
         val manager = NotificationManagerCompat.from(this)
         manager.createNotificationChannel(channel)
-
         val flags =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             else PendingIntent.FLAG_UPDATE_CURRENT
-
-        val cancelIntent = Intent(Action.Destroy.value)
-        cancelIntent.component = ComponentName(this, InstallerService::class.java)
+        val cancelIntent = Intent(Action.Destroy.value).apply {
+            component = ComponentName(this@InstallerService, InstallerService::class.java)
+        }
         val cancelPendingIntent = PendingIntent.getService(this, 0, cancelIntent, flags)
-
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.round_hourglass_empty_black_24)
             .setContentTitle(getString(R.string.installer_running))
@@ -87,18 +75,38 @@ class InstallerService : Service() {
 
     private fun autoForeground() {
         synchronized(this) {
-            setForeground(scopes.isNotEmpty())
+            val shouldBeForeground = scopes.isNotEmpty()
+            Timber.d("autoForeground: scopes.size=${scopes.size}, shouldBeForeground=$shouldBeForeground")
+            setForeground(shouldBeForeground)
         }
     }
 
     override fun onDestroy() {
-        scopes.keys.forEach {
-            (InstallerRepoImpl.get(it) ?: return@forEach).closeQuietly()
+        Timber.w("onDestroy: Service is being destroyed.")
+        scopes.keys.forEach { id ->
+            Timber.w("onDestroy: Closing forgotten installer instance: $id")
+
+            // 安全地获取 installer 实例
+            InstallerRepoImpl.get(id)?.let { installer ->
+                // 移除closeQuietly()调用
+                // 使用 runCatching 来安全地调用 close()
+                // 它会捕获任何可能抛出的异常，从而实现 "quietly" 的效果
+                runCatching {
+                    installer.close()
+                }.onFailure { throwable ->
+                    // （可选）在这里记录下被忽略的异常，以便调试
+                    Timber.w(throwable, "Ignoring exception while closing installer $id during onDestroy.")
+                }
+            }
         }
+        lifecycleScope.cancel()
         super.onDestroy()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val action = intent?.action
+        val id = intent?.getStringExtra(EXTRA_ID)
+        Timber.d("onStartCommand received. Action: $action, ID: $id")
         intent?.let { onStartCommand(it) }
         return super.onStartCommand(intent, flags, startId)
     }
@@ -106,7 +114,9 @@ class InstallerService : Service() {
     private fun onStartCommand(intent: Intent) {
         val id = intent.getStringExtra(EXTRA_ID)
         val installer = id?.let { InstallerRepoImpl.get(it) }
-        when (Action.revert(intent.action ?: return)) {
+        val action = intent.action ?: return
+        Timber.d("Processing action: $action for ID: $id. Installer found: ${installer != null}")
+        when (Action.revert(action)) {
             Action.Ready -> ready(installer ?: return)
             Action.Finish -> finish(installer ?: return)
             Action.Destroy -> destroy()
@@ -114,16 +124,21 @@ class InstallerService : Service() {
     }
 
     private fun ready(installer: InstallerRepo) {
-        // --- 关键修改 1: 新任务到达，取消任何待销毁的计划 ---
         synchronized(this) {
-            timeoutJob?.cancel()
-            Timber.tag("InstallerService").d("New task arrived, shutdown canceled.")
-
             val id = installer.id
-            if (scopes[id] != null) return
-            val scope = CoroutineScope(Dispatchers.IO)
-            scopes[id] = scope
+            Timber.d("[id=$id] ready() called.")
+            timeoutJob?.cancel().also {
+                Timber.d("[id=$id] Previous shutdown timeout cancelled.")
+            }
 
+            if (scopes[id] != null) {
+                Timber.w("[id=$id] Scope already exists. Ignoring ready() call.")
+                return
+            }
+
+            Timber.d("[id=$id] Creating new scope and handlers.")
+            val scope = CoroutineScope(Dispatchers.IO + Job())
+            scopes[id] = scope
             val handlers = listOf(
                 ActionHandler(scope, installer),
                 ProgressHandler(scope, installer),
@@ -132,9 +147,13 @@ class InstallerService : Service() {
             )
 
             scope.launch {
+                Timber.d("[id=$id] Starting all handlers.")
                 handlers.forEach { it.onStart() }
+                Timber.d("[id=$id] Starting to collect progress flow.")
                 installer.progress.collect { progress ->
                     if (progress is ProgressEntity.Finish) {
+                        Timber
+                            .d("[id=$id] Detected ProgressEntity.Finish. Cleaning up handlers and calling finish(installer).")
                         handlers.forEach { it.onFinish() }
                         finish(installer)
                     }
@@ -144,34 +163,37 @@ class InstallerService : Service() {
         }
     }
 
+    // --- 核心修改：移除对 InstallerRepoImpl.remove 的调用 ---
     private fun finish(installer: InstallerRepo) {
         val id = installer.id
-        Timber.tag("InstallerService").d("Finishing task with id $id.")
+        Timber.d("[id=$id] finish() called.")
 
         synchronized(this) {
-            scopes.remove(id)?.cancel()
-            InstallerRepoImpl.remove(id)
-            installer.closeQuietly()
+            scopes.remove(id)?.cancel().also {
+                Timber.d("[id=$id] Scope removed and cancelled. Existed: ${it != null}")
+            }
+            // `InstallerRepoImpl.remove(id)` 已被移除。
+            // `getOrCreate` 是唯一负责从全局 map 中移除实例的地方。
 
-            // --- 关键修改 2: 任务结束后，不再立即销毁服务 ---
-            timeoutJob?.cancel() // 取消上一个可能存在的销毁计划
+            timeoutJob?.cancel()
 
             if (scopes.isEmpty()) {
-                // 服务已空闲，启动一个带延迟的销毁任务
-                Timber.tag("InstallerService").d("Service is idle. Scheduling shutdown in $IDLE_TIMEOUT_MS ms.")
+                Timber
+                    .d("All tasks finished. Service is now idle. Scheduling shutdown in $IDLE_TIMEOUT_MS ms.")
                 timeoutJob = lifecycleScope.launch {
                     delay(IDLE_TIMEOUT_MS)
-                    Timber.tag("InstallerService").d("Idle timeout reached. Destroying service.")
+                    Timber.w("Idle timeout reached. Destroying service now.")
                     destroy()
                 }
             } else {
-                // 仍有其他任务，只需更新前台服务状态
+                Timber.d("Tasks still running: ${scopes.keys}. Updating foreground state.")
                 autoForeground()
             }
         }
     }
 
     private fun destroy() {
+        Timber.w("destroy() called. Calling stopSelf().")
         stopSelf()
     }
 }

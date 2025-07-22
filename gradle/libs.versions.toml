@@ -112,8 +112,6 @@ iamr0s-dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version
 # https://github.com/iamr0s/AndroidAppProcess
 iamr0s-androidAppProcess = { group = "io.github.iamr0s", name = "AndroidAppProcess", version = "1.3.2" }
 
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-
 # Core module (required for accessing library data)
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
 # Compose UI modules (choose one or both)

@@ -27,7 +27,6 @@ import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import okhttp3.internal.closeQuietly
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -37,73 +36,143 @@ import java.util.UUID
 class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
     override val installer: InstallerRepoImpl = super.installer as InstallerRepoImpl
-
     private var job: Job? = null
-
     private val context by inject<Context>()
-
     private val cacheParcelFileDescriptors = mutableListOf<ParcelFileDescriptor>()
-
     private val cacheDirectory = "${context.externalCacheDir?.absolutePath}/${installer.id}".apply {
         File(this).mkdirs()
     }
 
     override suspend fun onStart() {
+        Timber.d("[id=${installer.id}] onStart: Starting to collect actions.")
         job = scope.launch {
-            installer.action.collect {
-                // 异步处理请求
-                //launch {
-                when (it) {
-                    is InstallerRepoImpl.Action.Resolve -> resolve(it.activity)
+            installer.action.collect { action ->
+                Timber.d("[id=${installer.id}] Received action: ${action::class.simpleName}")
+                when (action) {
+                    is InstallerRepoImpl.Action.Resolve -> resolve(action.activity)
                     is InstallerRepoImpl.Action.Analyse -> analyse()
                     is InstallerRepoImpl.Action.Install -> install()
                     is InstallerRepoImpl.Action.Finish -> finish()
                 }
-                //}
             }
         }
     }
 
     override suspend fun onFinish() {
-        cacheParcelFileDescriptors.forEach {
-            it.closeQuietly()
-        }
+        Timber.d("[id=${installer.id}] onFinish: Cleaning up resources and cancelling job.")
+        cacheParcelFileDescriptors.forEach { it.runCatching { close() } }
         cacheParcelFileDescriptors.clear()
         File(cacheDirectory).deleteRecursively()
         job?.cancel()
     }
 
     private suspend fun resolve(activity: Activity) {
-        // resolve 函数的核心作用是解析文件/URI并填充 installer.data。
-        // 如果 data 字段已经有内容，说明解析已经成功完成过一次，
-        // 这是一个多余的调用，应当直接忽略，以防止后续流程出错。
+        Timber.d("[id=${installer.id}] resolve: Starting.")
         if (installer.data.isNotEmpty()) {
+            Timber.w("[id=${installer.id}] resolve: installer.data is not empty. Skipping redundant resolve.")
             return
         }
 
+        Timber.d("[id=${installer.id}] resolve: Emitting ProgressEntity.Resolving")
         installer.progress.emit(ProgressEntity.Resolving)
 
-        // 直接开始执行核心的解析逻辑
         installer.config = try {
             resolveConfig(activity)
         } catch (e: Exception) {
+            Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve config.")
             installer.error = e
             installer.progress.emit(ProgressEntity.ResolvedFailed)
             return
         }
+        Timber.d("[id=${installer.id}] resolve: Config resolved. installMode=${installer.config.installMode}")
 
         if (installer.config.installMode == ConfigEntity.InstallMode.Ignore) {
+            Timber.d("[id=${installer.id}] resolve: InstallMode is Ignore. Finishing task.")
             installer.progress.emit(ProgressEntity.Finish)
             return
         }
+
         installer.data = try {
             resolveData(activity)
         } catch (e: Exception) {
+            Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve data.")
             installer.error = e
             installer.progress.emit(ProgressEntity.ResolvedFailed)
             return
         }
+        Timber
+            .d("[id=${installer.id}] resolve: Data resolved successfully (${installer.data.size} items). Emitting ProgressEntity.ResolveSuccess.")
         installer.progress.emit(ProgressEntity.ResolveSuccess)
+    }
+
+    private suspend fun analyse() {
+        Timber.d("[id=${installer.id}] analyse: Starting. Emitting ProgressEntity.Analysing.")
+        installer.progress.emit(ProgressEntity.Analysing)
+        installer.entities = runCatching {
+            analyseEntities(installer.data)
+        }.getOrElse {
+            Timber.e(it, "[id=${installer.id}] analyse: Failed.")
+            installer.error = it
+            installer.progress.emit(ProgressEntity.AnalysedFailed)
+            return
+        }.sortedWith(compareBy({ it.packageName }, {
+            when (it) {
+                is AppEntity.BaseEntity -> it.name
+                is AppEntity.SplitEntity -> it.name
+                is AppEntity.DexMetadataEntity -> it.name
+                is AppEntity.CollectionEntity -> it.name
+            }
+        })).map { SelectInstallEntity(app = it, selected = true) }
+
+        val isNotificationInstall = installer.config.installMode == ConfigEntity.InstallMode.Notification ||
+                installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
+
+        val isMultiApkZip = installer.entities.firstOrNull()?.app?.containerType == DataType.MULTI_APK_ZIP
+
+        Timber
+            .d("[id=${installer.id}] analyse: Analyse completed. isNotificationInstall=$isNotificationInstall, isMultiApkZip=$isMultiApkZip")
+        if (isNotificationInstall && isMultiApkZip) {
+            Timber
+                .w("[id=${installer.id}] analyse: Multi-APK ZIP not supported in notification mode. Emitting AnalysedUnsupported.")
+            installer.progress.emit(
+                ProgressEntity.AnalysedUnsupported(context.getString(R.string.installer_current_install_mode_not_supported))
+            )
+        } else {
+            Timber.d("[id=${installer.id}] analyse: Emitting ProgressEntity.AnalysedSuccess.")
+            installer.progress.emit(ProgressEntity.AnalysedSuccess)
+        }
+    }
+
+    private suspend fun install() {
+        Timber.d("[id=${installer.id}] install: Starting. Emitting ProgressEntity.Installing.")
+        installer.progress.emit(ProgressEntity.Installing)
+        runCatching {
+            installEntities(installer.config, installer.entities.filter { it.selected }.map {
+                InstallEntity(
+                    name = it.app.name,
+                    packageName = it.app.packageName,
+                    data = when (val app = it.app) {
+                        is AppEntity.BaseEntity -> app.data
+                        is AppEntity.SplitEntity -> app.data
+                        is AppEntity.DexMetadataEntity -> app.data
+                        is AppEntity.CollectionEntity -> app.data
+                    },
+                    containerType = it.app.containerType!!
+                )
+            }, InstallExtraInfoEntity(Os.getuid() / 100000, cacheDirectory))
+        }.getOrElse {
+            Timber.e(it, "[id=${installer.id}] install: Failed.")
+            installer.error = it
+            installer.progress.emit(ProgressEntity.InstallFailed)
+            return
+        }
+        Timber.d("[id=${installer.id}] install: Succeeded. Emitting ProgressEntity.InstallSuccess.")
+        installer.progress.emit(ProgressEntity.InstallSuccess)
+    }
+
+    private suspend fun finish() {
+        Timber.d("[id=${installer.id}] finish: Emitting ProgressEntity.Finish.")
+        installer.progress.emit(ProgressEntity.Finish)
     }
 
     private suspend fun resolveConfig(activity: Activity): ConfigEntity {
@@ -229,80 +298,10 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return listOf(DataEntity.FileEntity(tempFile.absolutePath))
     }
 
-    private suspend fun analyse() {
-        installer.progress.emit(ProgressEntity.Analysing)
-        installer.entities = runCatching {
-            analyseEntities(installer.data)
-        }.getOrElse {
-            installer.error = it
-            installer.progress.emit(ProgressEntity.AnalysedFailed)
-            return
-        }.sortedWith(compareBy({
-            it.packageName
-        }, {
-
-            when (it) {
-                is AppEntity.BaseEntity -> it.name
-                is AppEntity.SplitEntity -> it.name
-                is AppEntity.DexMetadataEntity -> it.name
-                is AppEntity.CollectionEntity -> it.name
-            }
-        })).map {
-            SelectInstallEntity(
-                app = it, selected = true
-            )
-        }
-
-        val isNotificationInstall =
-            installer.config.installMode == ConfigEntity.InstallMode.Notification ||
-                    installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
-
-        val isMultiApkZip = installer.entities.first().app.containerType == DataType.MULTI_APK_ZIP
-
-        Timber.tag("ActionHandler").d(
-            "Analyse completed: isNotificationInstall=$isNotificationInstall, isMultiApkZip=$isMultiApkZip"
-        )
-        if (isNotificationInstall && isMultiApkZip) {
-            // 条件满足：发射“不支持”状态
-            installer.progress.emit(
-                ProgressEntity.AnalysedUnsupported(context.getString(R.string.installer_current_install_mode_not_supported))
-            )
-        } else {
-            // 条件不满足：发射“分析成功”状态
-            installer.progress.emit(ProgressEntity.AnalysedSuccess)
-        }
-    }
-
     private suspend fun analyseEntities(data: List<DataEntity>): List<AppEntity> =
         AnalyserRepoImpl.doWork(installer.config, data, AnalyseExtraEntity(cacheDirectory))
-
-    private suspend fun install() {
-        installer.progress.emit(ProgressEntity.Installing)
-        runCatching {
-            installEntities(installer.config, installer.entities.filter { it.selected }.map {
-                InstallEntity(
-                    name = it.app.name,
-                    packageName = it.app.packageName,
-                    data = when (val app = it.app) {
-                        is AppEntity.BaseEntity -> app.data
-                        is AppEntity.SplitEntity -> app.data
-                        is AppEntity.DexMetadataEntity -> app.data
-                        is AppEntity.CollectionEntity -> app.data
-                    },
-                    containerType = it.app.containerType!!
-                )
-            }, InstallExtraInfoEntity(Os.getuid() / 100000, cacheDirectory))
-        }.getOrElse {
-            installer.error = it
-            installer.progress.emit(ProgressEntity.InstallFailed)
-            return
-        }
-        installer.progress.emit(ProgressEntity.InstallSuccess)
-    }
 
     private suspend fun installEntities(
         config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
     ) = com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doWork(config, entities, extra)
-
-    private suspend fun finish() = installer.progress.emit(ProgressEntity.Finish)
 }

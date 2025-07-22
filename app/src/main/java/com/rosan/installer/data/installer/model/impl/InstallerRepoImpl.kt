@@ -16,61 +16,64 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import timber.log.Timber
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 
 class InstallerRepoImpl private constructor(override val id: String) : InstallerRepo,
     KoinComponent {
     companion object : KoinComponent {
-        @Volatile // 增加 Volatile 保证多线程可见性
+        @Volatile
         private var impls = mutableMapOf<String, InstallerRepoImpl>()
 
-        @Volatile // 用于追踪“匿名”安装实例的ID
+        @Volatile
         private var anonymousInstanceId: String? = null
 
         private val context by inject<Context>()
 
         fun getOrCreate(id: String? = null): InstallerRepo {
-            // 如果传入了具体的ID，走标准逻辑
+            Timber.d("getOrCreate called with id: ${id ?: "null (anonymous)"}")
+
             if (id != null) {
                 return impls[id] ?: synchronized(this) {
-                    impls[id] ?: create(id)
+                    impls[id] ?: create(id).also {
+                        Timber.d("Created and cached new instance for specific id: $id")
+                    }
                 }
             }
 
-            // ==================== 核心修改逻辑 ====================
-            // 对于匿名调用 (id == null)，执行“后来者优先”策略
             synchronized(this) {
-                // 步骤 1: 检查并主动终止任何已存在的匿名实例
+                Timber.d("Entering synchronized block for anonymous instance.")
                 anonymousInstanceId?.let { existingId ->
-                    // 从管理器中移除旧实例的引用
+                    Timber.d("Found existing anonymous instance with id: $existingId. Terminating it.")
                     impls.remove(existingId)?.let { oldInstance ->
-                        // 触发旧实例的关闭和清理流程
-                        // 这会发射 ProgressEntity.Finish, 进而由 InstallerService 清理其协程等资源
+                        Timber.d("Calling close() on old instance: $existingId")
+                        // 正确的终止入口点
                         oldInstance.close()
                     }
                 }
-                // 此时，旧的匿名实例（如果存在）已被移除并开始关闭，我们可以安全地清理ID
                 anonymousInstanceId = null
 
-                // 步骤 2: 创建一个全新的实例来处理新的请求
                 val newId = UUID.randomUUID().toString()
+                Timber.d("Creating new anonymous instance with new id: $newId")
                 val newInstance = create(newId)
-                anonymousInstanceId = newId // 记录这个新创建的匿名实例的ID
+                anonymousInstanceId = newId
+                Timber.d("New anonymous instance created and tracked. Returning it.")
                 return newInstance
             }
-            // =======================================================
         }
-
 
         fun get(id: String): InstallerRepo? {
-            return impls[id]
+            val instance = impls[id]
+            Timber.d("get() called for id: $id. Found: ${instance != null}")
+            return instance
         }
 
-        // 让 create 方法接收 ID
         private fun create(id: String): InstallerRepo {
-            // 使用传入的 id 创建实例，并用该 id 作为 key 存入缓存
+            Timber.d("create() called for id: $id")
             val impl = InstallerRepoImpl(id)
             impls[id] = impl
+            Timber.d("Instance for id: $id created and stored. Starting InstallerService.")
             val intent = Intent(InstallerService.Action.Ready.value)
             intent.component = ComponentName(context, InstallerService::class.java)
             intent.putExtra(InstallerService.EXTRA_ID, impl.id)
@@ -80,60 +83,62 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
 
         fun remove(id: String) {
             synchronized(this) {
-                // 当一个实例被移除时，检查它是否是那个匿名实例
+                Timber.d("remove() called for id: $id")
                 if (id == anonymousInstanceId) {
-                    anonymousInstanceId = null // 如果是，则清空记录，以便下次可以创建新的匿名实例
+                    Timber.d("The removed id matches the anonymous instance. Clearing anonymousInstanceId.")
+                    anonymousInstanceId = null
                 }
-                impls.remove(id)
+                val removed = impls.remove(id)
+                Timber.d("Instance for id: $id removed from map. Existed: ${removed != null}")
             }
         }
     }
 
+    // 添加原子关闭标志
+    private val isClosed = AtomicBoolean(false)
 
     override var error: Throwable = Throwable()
-
     override var config: ConfigEntity = ConfigEntity.default
-
     override var data: List<DataEntity> by mutableStateOf(emptyList())
-
     override var entities: List<SelectInstallEntity> by mutableStateOf(emptyList())
-
-    override val progress: MutableSharedFlow<ProgressEntity> =
-        MutableStateFlow(ProgressEntity.Ready)
-
-    val action: MutableSharedFlow<Action> =
-        MutableSharedFlow(replay = 1, extraBufferCapacity = 1)
-
-    override val background: MutableSharedFlow<Boolean> =
-        MutableStateFlow(false)
+    override val progress: MutableSharedFlow<ProgressEntity> = MutableStateFlow(ProgressEntity.Ready)
+    val action: MutableSharedFlow<Action> = MutableSharedFlow(replay = 1, extraBufferCapacity = 1)
+    override val background: MutableSharedFlow<Boolean> = MutableStateFlow(false)
 
     override fun resolve(activity: Activity) {
+        Timber.d("[id=$id] resolve() called. Emitting Action.Resolve.")
         action.tryEmit(Action.Resolve(activity))
     }
 
     override fun analyse() {
+        Timber.d("[id=$id] analyse() called. Emitting Action.Analyse.")
         action.tryEmit(Action.Analyse)
     }
 
     override fun install() {
+        Timber.d("[id=$id] install() called. Emitting Action.Install.")
         action.tryEmit(Action.Install)
     }
 
     override fun background(value: Boolean) {
+        Timber.d("[id=$id] background() called with value: $value.")
         background.tryEmit(value)
     }
 
     override fun close() {
-        action.tryEmit(Action.Finish)
+        // 确保 close 只执行一次
+        if (isClosed.compareAndSet(false, true)) {
+            Timber.d("[id=$id] close() called for the first time. Emitting Action.Finish.")
+            action.tryEmit(Action.Finish)
+        } else {
+            Timber.w("[id=$id] close() called on an already closing instance. Ignoring.")
+        }
     }
 
     sealed class Action {
         data class Resolve(val activity: Activity) : Action()
-
         data object Analyse : Action()
-
         data object Install : Action()
-
         data object Finish : Action()
     }
 }

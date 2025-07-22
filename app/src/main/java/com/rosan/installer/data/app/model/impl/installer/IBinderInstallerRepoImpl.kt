@@ -33,7 +33,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.closeQuietly
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -146,11 +145,15 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             session = createSession(config, entities, extra, packageInstaller, packageName)
             installIts(config, entities, extra, session)
             commit(config, entities, extra, session)
+        } catch (e: Exception) {
+            // 如果在提交之前或期间发生任何错误，应该放弃会话
+            session?.abandon()
+            // 将原始异常重新抛出，以便上层调用者可以处理（存疑）
+            throw e
         } finally {
-            session?.run {
-                abandon()
-                closeQuietly()
-            }
+            // 无论成功与否，都应关闭会话以释放本地资源（存疑）
+            // runCatching 是 "quietly" close 的标准 Kotlin 写法
+            session?.runCatching { close() }
         }
     }
 
