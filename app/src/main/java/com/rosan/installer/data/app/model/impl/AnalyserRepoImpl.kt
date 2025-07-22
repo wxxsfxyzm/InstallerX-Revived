@@ -1,7 +1,5 @@
 package com.rosan.installer.data.app.model.impl
 
-import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.toLowerCase
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
@@ -93,6 +91,7 @@ object AnalyserRepoImpl : AnalyserRepo {
                 Timber.tag("AnalyserRepoImpl").d("data is zipFile")
                 // 优先判断标准的清单文件
                 when {
+                    // *** 关键修正：检查根目录下的文件 ***
                     zipFile.getEntry("AndroidManifest.xml") != null -> return@use DataType.APK
                     zipFile.getEntry("info.json") != null -> {
                         val isApkm = isGenuineApkmInfo(zipFile, zipFile.getEntry("info.json")!!)
@@ -108,6 +107,7 @@ object AnalyserRepoImpl : AnalyserRepo {
                 val entries = zipFile.entries().toList()
                 for (entry in entries) {
                     if (entry.isDirectory) continue
+                    // *** 关键修正：只检查文件名，不关心路径 ***
                     val entryName = File(entry.name).name
                     if (entryName == "base.apk") {
                         hasBaseApk = true
@@ -123,12 +123,8 @@ object AnalyserRepoImpl : AnalyserRepo {
                 }
 
                 // 如果以上都不是，最后检查是否为包含任意APK的通用ZIP包
-                if (entries.any {
-                        !it.isDirectory && it.name.endsWith(
-                            ".apk",
-                            ignoreCase = true
-                        )
-                    }) {
+                // *** 关键修正：检查任意路径下的apk文件 ***
+                if (entries.any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }) {
                     return@use DataType.MULTI_APK_ZIP
                 }
 
@@ -137,68 +133,89 @@ object AnalyserRepoImpl : AnalyserRepo {
 
             else -> ZipInputStream(data.getInputStream()).use { zip ->
                 Timber.tag("AnalyserRepoImpl").d("data is ZipInputStream")
-                var type: DataType? = null
-                var containsApk = false
-                // --- 新增的标志位 ---
+
+                // --- 重构后的逻辑 ---
                 var hasBaseApk = false
                 var hasSplitApk = false
+                var containsAnyApk = false
+                var manifestType: DataType? = null
 
                 while (true) {
                     val entry = zip.nextEntry ?: break
+                    Timber.tag("AnalyserRepoImpl").d("Processing zip entry: ${entry.name}")
                     if (entry.isDirectory) {
                         zip.closeEntry()
                         continue
                     }
 
-                    val entryName = File(entry.name).name
-                    val entryExtension = File(entry.name).extension.toLowerCase(Locale.current)
-
-                    // 优先通过清单文件判断类型
-                    type = when (entryName) {
-                        "AndroidManifest.xml" -> DataType.APK
-                        "info.json" -> {
-                            val content = zip.bufferedReader().use(BufferedReader::readText)
-                            val jsonElement = Json.parseToJsonElement(content)
-                            if (jsonElement is JsonObject && jsonElement.containsKey("apkm_version"))
-                                DataType.APKM
-                            else
-                                DataType.APKS
+                    // *** 关键修正 1: 严格检查根目录的清单文件 ***
+                    // entry.name 是包含完整路径的
+                    when (entry.name) {
+                        "AndroidManifest.xml" -> {
+                            Timber.tag("AnalyserRepoImpl").d("Found AndroidManifest.xml at root, it's an APK.")
+                            return@use DataType.APK // 最高优先级，直接返回
                         }
 
-                        "manifest.json" -> DataType.XAPK
-                        else -> null
+                        "info.json" -> {
+                            // 发现 info.json，需要读取内容来判断是APKM还是APKS
+                            val content = zip.bufferedReader().use(BufferedReader::readText)
+                            val jsonElement = Json.parseToJsonElement(content)
+                            manifestType = if (jsonElement is JsonObject && jsonElement.containsKey("apkm_version")) {
+                                DataType.APKM
+                            } else {
+                                DataType.APKS
+                            }
+                            Timber.tag("AnalyserRepoImpl")
+                                .d("Found info.json at root, determined type: $manifestType. Exiting early.")
+                            return@use manifestType // 第二优先级，直接返回
+                        }
+
+                        "manifest.json" -> {
+                            // 发现 manifest.json，暂定为XAPK，但优先级低于info.json
+                            if (manifestType == null) {
+                                manifestType = DataType.XAPK
+                            }
+                        }
                     }
 
-                    // 如果尚未通过清单文件确定类型，则检查文件结构
-                    if (type == null) {
+                    // *** 关键修正 2: 仅在需要时收集APK文件信息，用于回退判断 ***
+                    if (entry.name.endsWith(".apk", ignoreCase = true)) {
+                        containsAnyApk = true
+                        val entryName = File(entry.name).name
                         if (entryName == "base.apk") {
                             hasBaseApk = true
-                        } else if (entryName.startsWith("split_") && entryExtension == "apk") {
+                        } else if (entryName.startsWith("split_")) {
                             hasSplitApk = true
                         }
                     }
 
-                    if (entryExtension == "apk") {
-                        containsApk = true
-                    }
-
                     zip.closeEntry()
-                    // 如果通过清单文件快速确定了类型，则可以提前退出
-                    if (type != null) break
+
+                    // 如果已经通过低优先级的 manifest.json 确定了类型，并且继续扫描也没有发现更高优先级的，
+                    // 那么在循环结束后来判断。这里不提前break，以防后面有更高优先级的清单文件。
                 }
 
                 // --- 循环结束后，根据收集到的信息进行最终判断 ---
-                if (type == null) { // 如果遍历完所有条目，类型依然未定
-                    if (hasBaseApk && hasSplitApk) {
-                        // 如果同时满足 base.apk 和 split_*.apk 的结构，则判定为 APKS
-                        type = DataType.APKS
-                    } else if (containsApk) {
-                        // 否则，如果包含任何apk，则降级为通用ZIP
-                        type = DataType.MULTI_APK_ZIP
-                    }
+                // 如果在循环中已经通过 manifest.json 推断出类型
+                if (manifestType != null) {
+                    Timber.tag("AnalyserRepoImpl").d("Finished scan. Returning type from manifest: $manifestType")
+                    return@use manifestType
                 }
 
-                return@use type
+                // 如果没有清单文件，则根据文件结构判断
+                if (hasBaseApk && hasSplitApk) {
+                    Timber.tag("AnalyserRepoImpl").d("Finished scan. Detected APKS structure.")
+                    return@use DataType.APKS
+                }
+
+                // 最后，如果只包含普通的apk文件
+                if (containsAnyApk) {
+                    Timber.tag("AnalyserRepoImpl").d("Finished scan. Detected as a generic ZIP with APKs.")
+                    return@use DataType.MULTI_APK_ZIP
+                }
+
+                Timber.tag("AnalyserRepoImpl").d("Finished scan. Could not determine file type.")
+                return@use null
             }
         }
 
