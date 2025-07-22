@@ -172,8 +172,8 @@ class InstallerService : Service() {
             scopes.remove(id)?.cancel().also {
                 Timber.d("[id=$id] Scope removed and cancelled. Existed: ${it != null}")
             }
-            // `InstallerRepoImpl.remove(id)` 已被移除。
-            // `getOrCreate` 是唯一负责从全局 map 中移除实例的地方。
+
+            InstallerRepoImpl.remove(id)
 
             timeoutJob?.cancel()
 

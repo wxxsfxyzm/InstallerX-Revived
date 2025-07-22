@@ -263,7 +263,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             Thread.sleep(50)
             return resolveDataContentFile(activity, uri, retry - 1)
         }
-        val assetFileDescriptor = activity.contentResolver?.openAssetFileDescriptor(uri, "r")
+        val assetFileDescriptor = context.contentResolver?.openAssetFileDescriptor(uri, "r")
             ?: throw Exception("can't open file descriptor: $uri")
         val parcelFileDescriptor = assetFileDescriptor.parcelFileDescriptor
         val pid = Os.getpid()
