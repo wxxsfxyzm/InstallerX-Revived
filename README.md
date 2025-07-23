@@ -60,6 +60,9 @@
     - Shizuku/Root有效，Dhizuku不支持
     - 为全新安装添加了 `检测到系统为 HyperOS 时自动为 Default 配置加上安装者` 的功能
 
+- HyperOS安装器锁定失效变回系统默认安装器怎么办
+    - HyperOS会以对话框形式拦截USB安装请求(adb/shizuku)，若用户在全新安装一款应用时点击拒绝安装，系统会撤销其安装器设定并强行改回默认安装器，若出现这种情况请重新锁定
+    
 - Oppo/Vivo/联想的系统用不了了怎么办
     - 手头没有这些品牌的手机，可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)
     进行讨论
