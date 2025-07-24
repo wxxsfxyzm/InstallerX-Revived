@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -69,9 +70,11 @@ fun installCompletedDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
+                item { Spacer(modifier = Modifier.size(1.dp)) }
                 items(results, key = { it.entity.app.name }) { result ->
                     ResultItemCard(result)
                 }
+                item { Spacer(modifier = Modifier.size(1.dp)) }
             }
         },
         buttons = DialogButtons(DialogParamsType.InstallerInstallCompleted.id) {
