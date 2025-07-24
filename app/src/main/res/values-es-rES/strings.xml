@@ -245,11 +245,11 @@
 
     <string name="show_dialog_when_pressing_notification">Mostrar diálogo al presionar la notificación</string>
     <string name="change_notification_touch_behavior">Cambiar comportamiento táctil de la notificación</string>
-    <string name="show_dialog_install_extended_menu">Mostrar menú extendido (Experimental)</string>
+    <string name="show_dialog_install_extended_menu">Mostrar menú extendido</string>
     <string name="show_dialog_install_extended_menu_desc">Mostrar más opciones en el diálogo de instalación</string>
     <string name="extended_menu">Menú Extendido</string>
     <string name="disable_notification">Deshabilitar Notificación</string>
-    <string name="close_immediately_on_dialog_dismiss">Cerrar Inmediatamente al Descartar Diálogo</string>
+    <string name="close_immediately_on_dialog_dismiss">Durante a instalação, a caixa de diálogo permanecerá em primeiro plano, outros estados encerrarão a sessão de instalação diretamente, sem exibir notificações de instalação</string>
     <string name="set_countdown">Establecer cuenta regresiva</string>
     <string name="dhizuku_auto_close_countdown_desc">Cuenta regresiva para el cierre automático después de que la instalación de Dhizuku se complete</string>
     <string name="dhizuku_cannot_set_installer_desc">¡El modo Dhizuku no admite la configuración del instalador!</string>
