@@ -14,4 +14,17 @@
                 <item name="android:windowTranslucentNavigation">true</item>-->
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
+
+    <style name="Theme.App.Transparent" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- 关键：将窗口背景设为完全透明 -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!-- 关键：声明窗口是半透明的 -->
+        <item name="android:windowIsTranslucent">true</item>
+        <!-- 可选：确保没有窗口内容覆盖 -->
+        <item name="android:windowContentOverlay">@null</item>
+        <!-- 可选：确保没有标题栏 -->
+        <item name="android:windowNoTitle">true</item>
+        <!-- 可选：如果希望状态栏也不变色 -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
 </resources>

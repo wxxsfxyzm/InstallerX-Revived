@@ -79,8 +79,9 @@
 
         <activity
             android:name=".ui.activity.InstallTriggerActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:theme="@style/Theme.App.Transparent"
             android:exported="false"
+            android:launchMode="singleTask"
             android:taskAffinity=""
             android:excludeFromRecents="true" />
 

@@ -196,7 +196,21 @@ fun PreferredPage(
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
                                 )
-                            })
+                            }
+                        )
+                        SwitchWidget(
+                            icon = AppIcons.NotificationDisabled,
+                            title = stringResource(id = R.string.disable_notification),
+                            description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
+                            checked = viewModel.state.disableNotificationForDialogInstall,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(
+                                        it
+                                    )
+                                )
+                            }
+                        )
                     }
                 }
             }

@@ -3,9 +3,7 @@ package com.rosan.installer.data.installer.model.impl.installer
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresPermission
@@ -20,30 +18,22 @@ import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.ui.activity.InstallTriggerActivity
-import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 
 class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
-
-    enum class Channel(val value: String) {
-        InstallerChannel("installer_channel"),
-        InstallerProgressChannel("installer_progress_channel")
-    }
-
-    enum class Icon(@param:DrawableRes val resId: Int) {
-        Working(R.drawable.round_hourglass_empty_black_24),
-        Pausing(R.drawable.round_hourglass_disabled_black_24)
+    companion object {
+        private const val MINIMUM_VISIBILITY_DURATION_MS = 400L
     }
 
     private var job: Job? = null
@@ -55,6 +45,78 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val notificationManager = NotificationManagerCompat.from(context)
 
     private val notificationId = installer.id.hashCode() and Int.MAX_VALUE
+
+    @SuppressLint("MissingPermission")
+    override suspend fun onStart() {
+        Timber.d("[id=${installer.id}] onStart: Starting to combine and collect flows.")
+        job = scope.launch {
+            combine(
+                installer.progress,
+                installer.background,
+                appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, false)
+            ) { progress, background, showDialog ->
+
+                Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=$showDialog")
+
+                if (progress is ProgressEntity.AnalysedUnsupported) {
+                    Timber.w("[id=${installer.id}] AnalysedUnsupported: ${progress.reason}")
+                    scope.launch(Dispatchers.Main) {
+                        Toast.makeText(context, progress.reason, Toast.LENGTH_LONG).show()
+                    }
+                    installer.close()
+                    return@combine
+                }
+
+                if (background) {
+                    val startTime = System.currentTimeMillis()
+
+                    // [FIXED] Call the new suspend function to build the notification
+                    val notification = newNotification(progress, true, showDialog)
+                    setNotification(notification)
+
+                    val elapsedTime = System.currentTimeMillis() - startTime
+                    if (elapsedTime < MINIMUM_VISIBILITY_DURATION_MS) {
+                        if (progress !is ProgressEntity.Finish && progress !is ProgressEntity.InstallSuccess) {
+                            delay(MINIMUM_VISIBILITY_DURATION_MS - elapsedTime)
+                        }
+                    }
+                } else {
+                    Timber.d("[id=${installer.id}] Foreground mode. Cancelling notification.")
+                    setNotification(null)
+                }
+
+            }.collect()
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    override suspend fun onFinish() {
+        Timber.d("[id=${installer.id}] onFinish: Cancelling notification and job.")
+        setNotification(null)
+        job?.cancel()
+    }
+
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    private fun setNotification(notification: Notification? = null) {
+        if (notification == null) {
+            Timber.d("[id=${installer.id}] setNotification: Cancelling notification with id: $notificationId")
+            notificationManager.cancel(notificationId)
+            return
+        }
+        Timber
+            .d("[id=${installer.id}] setNotification: Posting/Updating notification with id: $notificationId")
+        notificationManager.notify(notificationId, notification)
+    }
+
+    enum class Channel(val value: String) {
+        InstallerChannel("installer_channel"),
+        InstallerProgressChannel("installer_progress_channel")
+    }
+
+    enum class Icon(@param:DrawableRes val resId: Int) {
+        Working(R.drawable.round_hourglass_empty_black_24),
+        Pausing(R.drawable.round_hourglass_disabled_black_24)
+    }
 
     private val notificationChannels = mapOf(
         Channel.InstallerChannel to NotificationChannelCompat.Builder(
@@ -90,8 +152,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         ProgressEntity.Installing to 80
     )
 
-    private fun newNotificationBuilder(
-        progress: ProgressEntity, background: Boolean
+    private suspend fun newNotificationBuilder(
+        progress: ProgressEntity,
+        background: Boolean,
+        showDialog: Boolean
     ): NotificationCompat.Builder {
         val isWorking = workingProgresses.contains(progress)
         val isImportance = importanceProgresses.contains(progress)
@@ -103,25 +167,17 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         val icon = (if (isWorking) Icon.Working else Icon.Pausing).resId
 
-        val showDialog = runBlocking {
-            appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, false).first()
+        // Set content intent based on user setting
+        val contentIntent = when (installer.config.installMode) {
+            ConfigEntity.InstallMode.Notification, ConfigEntity.InstallMode.AutoNotification -> {
+                if (showDialog) openIntent else null
+            }
+
+            else -> openIntent
         }
 
         var builder = NotificationCompat.Builder(context, channel.id).setSmallIcon(icon)
-            .setContentIntent(
-
-                when (installer.config.installMode) {
-                    ConfigEntity.InstallMode.Notification,
-                    ConfigEntity.InstallMode.AutoNotification -> {
-                        Timber.tag("ForegroundInfoHandler").d("Using openIntent for notification")
-                        Timber.tag("ForegroundInfoHandler")
-                            .d("isShowDialogWhenPressingNotificationEnabled: $showDialog")
-                        if (showDialog) openIntent else null
-                    }
-
-                    else -> openIntent
-                }
-            )
+            .setContentIntent(contentIntent)
             .setDeleteIntent(finishIntent)
 
         installProgresses[progress]?.let {
@@ -131,11 +187,14 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return builder
     }
 
-    private fun newNotification(
-        progress: ProgressEntity, background: Boolean
+    private suspend fun newNotification(
+        progress: ProgressEntity,
+        background: Boolean,
+        showDialog: Boolean
     ): Notification? {
-        if (progress is ProgressEntity.AnalysedUnsupported) return null
-        val builder = newNotificationBuilder(progress, background)
+        // No need to show notification for unsupported analysis since handled in collector
+        // if (progress is ProgressEntity.AnalysedUnsupported) return null
+        val builder = newNotificationBuilder(progress, background, showDialog)
         return when (progress) {
             is ProgressEntity.Ready -> onReady(builder)
             is ProgressEntity.Resolving -> onResolving(builder)
@@ -153,98 +212,14 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
     }
 
-    override suspend fun onStart() {
-        job = scope.launch {
-            var progress: ProgressEntity = ProgressEntity.Ready
-            var background = false
-
-            @SuppressLint("MissingPermission")
-            @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-            fun refresh() {
-                // 如果已经确定是对话框安装流程，则取消所有通知并停止后续操作
-                if (!background) {
-                    setNotification(null) // 这会取消掉任何已经显示的通知
-                    return
-                }
-                setNotification(newNotification(progress, true))
-            }
-            launch {
-                installer.progress.collect { collectedProgress ->
-                    // --- START OF MAJOR CHANGE ---
-                    // 为我们不支持的状态设置一个特殊的处理分支
-                    if (collectedProgress is ProgressEntity.AnalysedUnsupported) {
-                        // 1. 在主线程上显示 Toast。这是最优先的UI反馈。
-                        scope.launch(Dispatchers.Main) {
-                            Toast.makeText(context, collectedProgress.reason, Toast.LENGTH_LONG).show()
-                        }
-
-                        // 2. 立即主动发起关闭流程。
-                        //    这会触发 ProgressEntity.Finish 状态，
-                        //    让所有其他组件（包括本Handler和服务）执行标准的清理和退出逻辑。
-                        installer.close()
-
-                        // 3. 阻止这个状态下的任何标准通知刷新，因为我们正在关闭。
-                        return@collect
-                    }
-                    // --- END OF MAJOR CHANGE ---
-
-                    // 对于所有其他正常状态，照常更新进度并刷新通知
-                    progress = collectedProgress
-                    refresh()
-                }
-            }
-            launch {
-                installer.background.collect {
-                    background = it
-                    refresh()
-                }
-            }
-        }
-    }
-
-    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-    override suspend fun onFinish() {
-        setNotification(null)
-        job?.cancel()
-    }
-
     private fun getString(@StringRes resId: Int): String = context.getString(resId)
-
-    // 简化 setNotification 方法，移除其中的权限检查逻辑
-    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-    private fun setNotification(notification: Notification? = null) {
-        if (notification == null) {
-            notificationManager.cancel(notificationId)
-            return
-        }
-
-        // 直接显示通知
-        notificationManager.notify(notificationId, notification)
-    }
-
     private val openIntent = BroadcastHandler.openIntent(context, installer)
 
     private val analyseIntent =
         BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Analyse)
 
-    // 将 installIntent 的目标从 InstallerActivity 改为 InstallTriggerActivity
-    private val installIntent by lazy {
-        // 创建一个指向我们新的透明Activity的 Intent
-        val intent = Intent(context, InstallTriggerActivity::class.java).apply {
-            putExtra(InstallerActivity.KEY_ID, installer.id)
-            // 这里不再需要 action，因为TriggerActivity只有一个功能
-        }
-
-        PendingIntent.getActivity(
-            context,
-            installer.id.hashCode(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-    }
-
-//    private val installIntent =
-//        BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Install)
+    private val installIntent =
+        BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Install)
 
     private val finishIntent =
         BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Finish)

@@ -9,5 +9,6 @@ enum class DataType {
     APKS,
     APKM,
     XAPK,
-    MULTI_APK_ZIP
+    MULTI_APK_ZIP,
+    MODULE_ZIP
 }

@@ -228,8 +228,6 @@ dependencies {
 
     implementation(libs.iamr0s.androidAppProcess)
 
-    implementation(libs.okhttp)
-
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)
 

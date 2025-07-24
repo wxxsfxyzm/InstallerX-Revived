@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.internal.closeQuietly
 import java.io.Closeable
 
 abstract class Recycler<T : Closeable> {
@@ -48,7 +47,7 @@ abstract class Recycler<T : Closeable> {
     fun recycleForcibly() {
         synchronized(this) {
             referenceCount = 0
-            entity?.closeQuietly()
+            entity?.runCatching { close() }
             entity = null
         }
     }
