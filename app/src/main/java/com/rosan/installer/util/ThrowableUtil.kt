@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
+import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.exception.InstallFailedAlreadyExistsException
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedContainerErrorException
@@ -50,6 +51,7 @@ import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
  */
 private fun Throwable.getStringResourceId(): Int {
     return when (this) {
+        is AnalyseFailedAllFilesUnsupportedException -> R.string.exception_analyse_failed_all_files_unsupported
         is InstallFailedAlreadyExistsException -> R.string.exception_install_failed_already_exists
         is InstallFailedInvalidAPKException -> R.string.exception_install_failed_invalid_apk
         is InstallFailedInvalidURIException -> R.string.exception_install_failed_invalid_uri

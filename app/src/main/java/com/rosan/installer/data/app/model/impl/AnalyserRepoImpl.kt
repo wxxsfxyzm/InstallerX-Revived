@@ -3,6 +3,7 @@ package com.rosan.installer.data.app.model.impl
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
+import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
@@ -27,7 +28,7 @@ object AnalyserRepoImpl : AnalyserRepo {
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         // --- Logic to analyse data and return a list of AppEntity ---
-        // 1. 先收集所有原始分析结果
+        // 先收集所有原始分析结果
         val rawApps = mutableListOf<AppEntity>()
 
         val analysers = mapOf(
@@ -37,11 +38,27 @@ object AnalyserRepoImpl : AnalyserRepo {
             DataType.XAPK to XApkAnalyserRepoImpl,
             DataType.MULTI_APK_ZIP to MultiApkZipAnalyserRepoImpl
         )
-        // 将输入的 DataEntity 按其类型进行分组
-        val tasksByType = data.groupBy { dataEntity ->
-            kotlin.runCatching { getDataType(config, dataEntity) ?: DataType.APK }
-                .getOrDefault(DataType.APK)
+        // 尝试为每个文件确定类型，无法识别的暂时记为 null
+        val typedTasks = data.map { dataEntity ->
+            val type = runCatching { getDataType(config, dataEntity) }.getOrNull()
+            type to dataEntity // 创建一个 (DataType?, DataEntity) 的配对
         }
+        // 筛选出所有可以被分析的文件
+        val validTasks = typedTasks.mapNotNull { (type, dataEntity) ->
+            if (type != null) type to dataEntity else null
+        }
+        // 如果没有任何一个文件是有效的，则抛出异常
+        if (validTasks.isEmpty() && data.isNotEmpty()) {
+            Timber.e("All ${data.size} files were unrecognized. Failing analysis.")
+            throw AnalyseFailedAllFilesUnsupportedException(
+                "All ${data.size} file(s) were unrecognized. Please check the file formats."
+            )
+        }
+        // 按类型分组有效的文件
+        val tasksByType = validTasks.groupBy(
+            keySelector = { it.first },
+            valueTransform = { it.second }
+        )
         // 遍历每种类型及其对应的文件列表
         for ((type, dataList) in tasksByType) {
             val analyser = analysers[type]
@@ -56,11 +73,11 @@ object AnalyserRepoImpl : AnalyserRepo {
             rawApps.addAll(analysedEntities)
         }
 
-        // 2. 按packageName分组
+        // 按packageName分组
         val groupedByPackage = rawApps.groupBy { it.packageName }
         val finalApps = mutableListOf<AppEntity>()
 
-        // 3. 遍历每个包，进行信息修正
+        // 遍历每个包，进行信息修正
         groupedByPackage.forEach { (_, entitiesInPackage) ->
             // 找到这个包里的BaseEntity，它是信息的来源
             val baseEntity =
@@ -88,17 +105,25 @@ object AnalyserRepoImpl : AnalyserRepo {
     private fun getDataType(config: ConfigEntity, data: DataEntity): DataType? =
         when (data) {
             is DataEntity.FileEntity -> ZipFile(data.path).use { zipFile ->
-                Timber.tag("AnalyserRepoImpl").d("data is zipFile")
+                Timber.d("data is zipFile")
                 // 优先判断标准的清单文件
                 when {
                     // *** 关键修正：检查根目录下的文件 ***
-                    zipFile.getEntry("AndroidManifest.xml") != null -> return@use DataType.APK
+                    zipFile.getEntry("AndroidManifest.xml") != null -> {
+                        Timber.d("Found AndroidManifest.xml at root, it's an APK.")
+                        return@use DataType.APK
+                    }
+
                     zipFile.getEntry("info.json") != null -> {
                         val isApkm = isGenuineApkmInfo(zipFile, zipFile.getEntry("info.json")!!)
+                        Timber.d("Found info.json at root, it's ${if (isApkm) "APKM" else "APKS"}.")
                         return@use if (isApkm) DataType.APKM else DataType.APKS
                     }
 
-                    zipFile.getEntry("manifest.json") != null -> return@use DataType.XAPK
+                    zipFile.getEntry("manifest.json") != null -> {
+                        Timber.d("Found manifest.json at root, it's an XAPK.")
+                        return@use DataType.XAPK
+                    }
                 }
 
                 // 如果没有清单文件，则进行更严格的APKS格式检查
@@ -119,20 +144,23 @@ object AnalyserRepoImpl : AnalyserRepo {
                 }
 
                 if (hasBaseApk && hasSplitApk) {
+                    Timber.d("Detected APKS structure.")
                     return@use DataType.APKS
                 }
 
                 // 如果以上都不是，最后检查是否为包含任意APK的通用ZIP包
                 // *** 关键修正：检查任意路径下的apk文件 ***
                 if (entries.any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }) {
+                    Timber.d("Detected as a generic ZIP with APKs.")
                     return@use DataType.MULTI_APK_ZIP
                 }
 
+                Timber.d("Could not determine file type, returning null.")
                 return@use null
             }
 
             else -> ZipInputStream(data.getInputStream()).use { zip ->
-                Timber.tag("AnalyserRepoImpl").d("data is ZipInputStream")
+                Timber.d("data is ZipInputStream")
 
                 // --- 重构后的逻辑 ---
                 var hasBaseApk = false
@@ -142,7 +170,7 @@ object AnalyserRepoImpl : AnalyserRepo {
 
                 while (true) {
                     val entry = zip.nextEntry ?: break
-                    Timber.tag("AnalyserRepoImpl").d("Processing zip entry: ${entry.name}")
+                    Timber.d("Processing zip entry: ${entry.name}")
                     if (entry.isDirectory) {
                         zip.closeEntry()
                         continue
@@ -152,7 +180,7 @@ object AnalyserRepoImpl : AnalyserRepo {
                     // entry.name 是包含完整路径的
                     when (entry.name) {
                         "AndroidManifest.xml" -> {
-                            Timber.tag("AnalyserRepoImpl").d("Found AndroidManifest.xml at root, it's an APK.")
+                            Timber.d("Found AndroidManifest.xml at root, it's an APK.")
                             return@use DataType.APK // 最高优先级，直接返回
                         }
 
@@ -165,7 +193,7 @@ object AnalyserRepoImpl : AnalyserRepo {
                             } else {
                                 DataType.APKS
                             }
-                            Timber.tag("AnalyserRepoImpl")
+                            Timber
                                 .d("Found info.json at root, determined type: $manifestType. Exiting early.")
                             return@use manifestType // 第二优先级，直接返回
                         }
@@ -198,23 +226,23 @@ object AnalyserRepoImpl : AnalyserRepo {
                 // --- 循环结束后，根据收集到的信息进行最终判断 ---
                 // 如果在循环中已经通过 manifest.json 推断出类型
                 if (manifestType != null) {
-                    Timber.tag("AnalyserRepoImpl").d("Finished scan. Returning type from manifest: $manifestType")
+                    Timber.d("Finished scan. Returning type from manifest: $manifestType")
                     return@use manifestType
                 }
 
                 // 如果没有清单文件，则根据文件结构判断
                 if (hasBaseApk && hasSplitApk) {
-                    Timber.tag("AnalyserRepoImpl").d("Finished scan. Detected APKS structure.")
+                    Timber.d("Finished scan. Detected APKS structure.")
                     return@use DataType.APKS
                 }
 
                 // 最后，如果只包含普通的apk文件
                 if (containsAnyApk) {
-                    Timber.tag("AnalyserRepoImpl").d("Finished scan. Detected as a generic ZIP with APKs.")
+                    Timber.d("Finished scan. Detected as a generic ZIP with APKs.")
                     return@use DataType.MULTI_APK_ZIP
                 }
 
-                Timber.tag("AnalyserRepoImpl").d("Finished scan. Could not determine file type.")
+                Timber.d("Finished scan. Could not determine file type.")
                 return@use null
             }
         }
