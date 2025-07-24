@@ -15,6 +15,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.util.getInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
@@ -222,16 +224,32 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val analyseIntent =
         BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Analyse)
 
-    private val installIntent by lazy {
-        val intent = Intent(context, InstallTriggerActivity::class.java).apply {
-            putExtra(InstallerActivity.KEY_ID, installer.id)
+    private val installIntent: PendingIntent by lazy {
+        // use when to handle different manufacturers
+        when {
+            RsConfig.currentManufacturer == Manufacturer.XIAOMI &&
+                    installer.config.authorizer == ConfigEntity.Authorizer.Shizuku &&
+                    installer.config.installMode == ConfigEntity.InstallMode.Notification -> {
+                // Special logic for Xiaomi devices
+                // Xiaomi will intercept usb installation requests, which caused ForegroundService not working.
+                // So we use a transparent Activity to trigger the installation.
+                val intent = Intent(context, InstallTriggerActivity::class.java).apply {
+                    putExtra(InstallerActivity.KEY_ID, installer.id)
+                }
+                PendingIntent.getActivity(
+                    context,
+                    installer.id.hashCode(),
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
+
+            else -> {
+                // Default logic for other manufacturers
+                // Use a PendingIntent to trigger the installation directly
+                BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Install)
+            }
         }
-        PendingIntent.getActivity(
-            context,
-            installer.id.hashCode(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
     }
 
     private val finishIntent =

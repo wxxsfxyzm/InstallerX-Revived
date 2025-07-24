@@ -163,7 +163,6 @@ class InstallerService : Service() {
         }
     }
 
-    // --- 核心修改：移除对 InstallerRepoImpl.remove 的调用 ---
     private fun finish(installer: InstallerRepo) {
         val id = installer.id
         Timber.d("[id=$id] finish() called.")
