@@ -54,7 +54,7 @@ class InstallerService : Service() {
         val channelId = "installer_background_channel"
         val channel = NotificationChannelCompat.Builder(
             channelId,
-            NotificationManagerCompat.IMPORTANCE_MIN
+            NotificationManagerCompat.IMPORTANCE_DEFAULT
         ).setName(getString(R.string.installer_background_channel_name)).build()
         val manager = NotificationManagerCompat.from(this)
         manager.createNotificationChannel(channel)

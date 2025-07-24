@@ -3,9 +3,7 @@ package com.rosan.installer.data.installer.model.impl.installer
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresPermission
@@ -15,15 +13,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
-import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.util.getInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.ui.activity.InstallTriggerActivity
-import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,9 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -58,13 +50,16 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     override suspend fun onStart() {
         Timber.d("[id=${installer.id}] onStart: Starting to combine and collect flows.")
         job = scope.launch {
-            installer.progress.combine(installer.background) { progress, background ->
-                Timber.i(
-                    "[id=${installer.id}] Combined Flow Update: progress=${progress::class.simpleName}, background=$background"
-                )
+            combine(
+                installer.progress,
+                installer.background,
+                appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, false)
+            ) { progress, background, showDialog ->
+
+                Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=$showDialog")
 
                 if (progress is ProgressEntity.AnalysedUnsupported) {
-                    Timber.w("[id=${installer.id}] AnalysedUnsupported detected: ${progress.reason}")
+                    Timber.w("[id=${installer.id}] AnalysedUnsupported: ${progress.reason}")
                     scope.launch(Dispatchers.Main) {
                         Toast.makeText(context, progress.reason, Toast.LENGTH_LONG).show()
                     }
@@ -74,24 +69,23 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
                 if (background) {
                     val startTime = System.currentTimeMillis()
-                    Timber.d("[id=${installer.id}] Background mode. Generating and setting notification.")
-                    setNotification(newNotification(progress, true))
-                    // 计算已经花费的时间
+
+                    // [FIXED] Call the new suspend function to build the notification
+                    val notification = newNotification(progress, true, showDialog)
+                    setNotification(notification)
+
                     val elapsedTime = System.currentTimeMillis() - startTime
-                    // 如果花费的时间小于最小可见时间，则延迟剩余的时间
                     if (elapsedTime < MINIMUM_VISIBILITY_DURATION_MS) {
-                        // 只对非终止状态的通知进行延迟，确保取消通知的即时性
                         if (progress !is ProgressEntity.Finish && progress !is ProgressEntity.InstallSuccess) {
                             delay(MINIMUM_VISIBILITY_DURATION_MS - elapsedTime)
                         }
                     }
                 } else {
-                    Timber
-                        .d("[id=${installer.id}] Foreground mode (Activity visible). Cancelling notification.")
+                    Timber.d("[id=${installer.id}] Foreground mode. Cancelling notification.")
                     setNotification(null)
                 }
 
-            }.collect() // 启动流的收集
+            }.collect()
         }
     }
 
@@ -158,8 +152,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         ProgressEntity.Installing to 80
     )
 
-    private fun newNotificationBuilder(
-        progress: ProgressEntity, background: Boolean
+    private suspend fun newNotificationBuilder(
+        progress: ProgressEntity,
+        background: Boolean,
+        showDialog: Boolean
     ): NotificationCompat.Builder {
         val isWorking = workingProgresses.contains(progress)
         val isImportance = importanceProgresses.contains(progress)
@@ -171,22 +167,17 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         val icon = (if (isWorking) Icon.Working else Icon.Pausing).resId
 
-        val showDialog = runBlocking {
-            appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, false).first()
+        // Set content intent based on user setting
+        val contentIntent = when (installer.config.installMode) {
+            ConfigEntity.InstallMode.Notification, ConfigEntity.InstallMode.AutoNotification -> {
+                if (showDialog) openIntent else null
+            }
+
+            else -> openIntent
         }
 
         var builder = NotificationCompat.Builder(context, channel.id).setSmallIcon(icon)
-            .setContentIntent(
-
-                when (installer.config.installMode) {
-                    ConfigEntity.InstallMode.Notification,
-                    ConfigEntity.InstallMode.AutoNotification -> {
-                        if (showDialog) openIntent else null
-                    }
-
-                    else -> openIntent
-                }
-            )
+            .setContentIntent(contentIntent)
             .setDeleteIntent(finishIntent)
 
         installProgresses[progress]?.let {
@@ -196,11 +187,14 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return builder
     }
 
-    private fun newNotification(
-        progress: ProgressEntity, background: Boolean
+    private suspend fun newNotification(
+        progress: ProgressEntity,
+        background: Boolean,
+        showDialog: Boolean
     ): Notification? {
-        if (progress is ProgressEntity.AnalysedUnsupported) return null
-        val builder = newNotificationBuilder(progress, background)
+        // No need to show notification for unsupported analysis since handled in collector
+        // if (progress is ProgressEntity.AnalysedUnsupported) return null
+        val builder = newNotificationBuilder(progress, background, showDialog)
         return when (progress) {
             is ProgressEntity.Ready -> onReady(builder)
             is ProgressEntity.Resolving -> onResolving(builder)
@@ -224,33 +218,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val analyseIntent =
         BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Analyse)
 
-    private val installIntent: PendingIntent by lazy {
-        // use when to handle different manufacturers
-        when {
-            RsConfig.currentManufacturer == Manufacturer.XIAOMI &&
-                    installer.config.authorizer == ConfigEntity.Authorizer.Shizuku &&
-                    installer.config.installMode == ConfigEntity.InstallMode.Notification -> {
-                // Special logic for Xiaomi devices
-                // Xiaomi will intercept usb installation requests, which caused ForegroundService not working.
-                // So we use a transparent Activity to trigger the installation.
-                val intent = Intent(context, InstallTriggerActivity::class.java).apply {
-                    putExtra(InstallerActivity.KEY_ID, installer.id)
-                }
-                PendingIntent.getActivity(
-                    context,
-                    installer.id.hashCode(),
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            }
-
-            else -> {
-                // Default logic for other manufacturers
-                // Use a PendingIntent to trigger the installation directly
-                BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Install)
-            }
-        }
-    }
+    private val installIntent =
+        BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Install)
 
     private val finishIntent =
         BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Finish)
