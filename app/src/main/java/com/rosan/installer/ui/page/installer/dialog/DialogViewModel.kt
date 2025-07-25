@@ -517,6 +517,8 @@ class DialogViewModel(
         when (progress) {
             is ProgressEntity.InstallSuccess -> {
                 val currentEntity = multiInstallQueue[currentMultiInstallIndex]
+                // Clear the icon cache for the installed package
+                appIconRepo.clearCacheForPackage(currentEntity.app.packageName)
                 multiInstallResults.add(InstallResult(entity = currentEntity, success = true))
                 currentMultiInstallIndex++
                 triggerNextMultiInstall()
