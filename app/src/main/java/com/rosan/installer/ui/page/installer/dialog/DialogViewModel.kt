@@ -1,16 +1,19 @@
 package com.rosan.installer.ui.page.installer.dialog
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.InstalledAppInfo
@@ -28,14 +31,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import timber.log.Timber
 
 class DialogViewModel(
     private var repo: InstallerRepo,
-    private val appDataStore: AppDataStore
+    private val appDataStore: AppDataStore,
+    private val appIconRepo: AppIconRepo
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
@@ -86,12 +92,16 @@ class DialogViewModel(
     private val _currentPackageName = MutableStateFlow<String?>(null)
     val currentPackageName: StateFlow<String?> = _currentPackageName.asStateFlow()
 
+    private val _displayIcons = MutableStateFlow<Map<String, Drawable?>>(emptyMap())
+    val displayIcons: StateFlow<Map<String, Drawable?>> = _displayIcons.asStateFlow()
+
     // 新增一个 StateFlow 来管理安装标志位 (install flags)
     // 它的值是一个整数，通过位运算来组合所有选项
     private val _installFlags = MutableStateFlow(0) // 默认值为0，表示没有开启任何选项
     val installFlags: StateFlow<Int> = _installFlags.asStateFlow()
 
     private var fetchPreInstallInfoJob: Job? = null
+    private val iconJobs = mutableMapOf<String, Job>()
     private var autoInstallJob: Job? = null
     private var collectRepoJob: Job? = null
 
@@ -147,6 +157,8 @@ class DialogViewModel(
         }
         _preInstallAppInfo.value = null
         _currentPackageName.value = null
+        val newPackageNames = repo.entities.map { it.app.packageName }.toSet()
+        _displayIcons.update { old -> old.filterKeys { it in newPackageNames } }
         collectRepoJob?.cancel()
         autoInstallJob?.cancel()
         fetchPreInstallInfoJob?.cancel()
@@ -203,6 +215,9 @@ class DialogViewModel(
 
                             // 3. 用处理过的新列表，完全替换掉 repo 中的旧列表
                             repo.entities = smartSelectedEntities
+                            repo.entities.forEach { entity ->
+                                loadDisplayIcon(entity.app.packageName)
+                            }
 
                             // 4. 进入选择界面
                             newState = DialogViewState.InstallChoice
@@ -257,6 +272,7 @@ class DialogViewModel(
                         _currentPackageName.value = newPackageNameFromProgress
                         _preInstallAppInfo.value = null
                         fetchPreInstallAppInfo(newPackageNameFromProgress)
+                        loadDisplayIcon(newPackageNameFromProgress)
                     } else if (_preInstallAppInfo.value == null) {
                         fetchPreInstallAppInfo(newPackageNameFromProgress)
                     }
@@ -309,6 +325,62 @@ class DialogViewModel(
         repo.config.installFlags = _installFlags.value // 同步到 repo.config
     }
 
+    /**
+     * Loads the display icon for the given package name and updates the StateFlow.
+     * @param packageName The package name of the app to load the icon for.
+     */
+    private fun loadDisplayIcon(packageName: String) {
+        if (packageName.isBlank() || _displayIcons.value.containsKey(packageName))
+        // Do not reload if blank or already loading/loaded.
+            return
+
+        // Add a placeholder to prevent re-triggering while loading
+        // This safely adds the placeholder without risking a lost update.
+        _displayIcons.update { currentMap ->
+            if (currentMap.containsKey(packageName)) {
+                currentMap // Already contains a placeholder or icon, do nothing.
+            } else {
+                currentMap + (packageName to null)
+            }
+        }
+
+        iconJobs[packageName]?.cancel() // Cancel any existing job for this package name
+        iconJobs[packageName] = viewModelScope.launch {
+            // Find the entity from the repo to pass to the repository method
+            val entityToInstall = repo.entities
+                .filter { it.selected && it.app.packageName == packageName }
+                .map { it.app }
+                .filterIsInstance<AppEntity.BaseEntity>()
+                .firstOrNull()
+
+            // Define a generic icon size, could also be passed as a parameter if needed
+            val iconSizePx = 256 // A reasonably high resolution
+
+            val loadedIcon = try {
+                appIconRepo.getIcon(
+                    packageName = packageName,
+                    entityToInstall = entityToInstall,
+                    iconSizePx = iconSizePx
+                )
+            } catch (e: Exception) {
+                // Log the error and return null if icon loading fails
+                Timber.d("Failed to load icon for package $packageName: ${e.message}")
+                null
+            }
+            // Update the map with the loaded icon, or the fallback icon if it failed.
+            val finalIcon = loadedIcon ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+
+            // Create a new map with the updated value
+            // This guarantees that setting the final icon won't overwrite other concurrent updates.
+            _displayIcons.update { currentMap ->
+                if (currentMap[packageName] == null) {
+                    currentMap + (packageName to finalIcon)
+                } else currentMap
+            }
+
+        }
+    }
+
     private fun fetchPreInstallAppInfo(packageName: String) {
         if (packageName.isBlank()) {
             _preInstallAppInfo.value = null
@@ -357,6 +429,8 @@ class DialogViewModel(
         collectRepoJob?.cancel()
         _preInstallAppInfo.value = null
         _currentPackageName.value = null
+        iconJobs.values.forEach { it.cancel() }
+        iconJobs.clear()
         repo.close()
         state = DialogViewState.Ready
     }

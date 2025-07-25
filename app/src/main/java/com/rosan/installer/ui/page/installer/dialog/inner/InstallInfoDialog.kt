@@ -28,24 +28,18 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.util.AppIconCache
 import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
@@ -55,6 +49,7 @@ import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 
+
 /**
  * Provides info display: Icon, Title, Subtitle (with version logic).
  * Shows comparison if preInstallAppInfo is provided, otherwise shows only new version.
@@ -63,13 +58,12 @@ import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 @Composable
 fun installInfoDialog(
     installer: InstallerRepo,
-    viewModel: DialogViewModel, // Keep for consistency or future use
+    viewModel: DialogViewModel,
     preInstallAppInfo: InstalledAppInfo?, // Crucial parameter: Info *before* install operation
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
-    val context = LocalContext.current
     val density = LocalDensity.current
-
+    val iconMap by viewModel.displayIcons.collectAsState()
     val selectedApps = installer.entities.filter { it.selected }.map { it.app }
     // If no apps are selected, return empty DialogParams
     val entityToInstall = selectedApps.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
@@ -80,43 +74,6 @@ fun installInfoDialog(
     // 确保 AnimatedContent 能够检测到内容变化
     val uniqueContentKey = "${DialogParamsType.InstallerInfo.id}_${entityToInstall.packageName}"
 
-    // --- ICON INTEGRATION LOGIC ---
-
-    // 1. Set an initial icon to prevent flickering. For upgrades, use the already-loaded
-    //    low-res icon. For new installs, use the icon from the APK.
-    val initialIcon = if (preInstallAppInfo != null) {
-        preInstallAppInfo.icon
-    } else {
-        (entityToInstall as? AppEntity.BaseEntity)?.icon
-    }
-
-    // 2. Create a state for the icon, initialized with our best first guess.
-    // This ensures when entityToInstall changes (switching to the next app), the displayIcon's state will be reinitialized.
-    var displayIcon by remember(entityToInstall.packageName) { mutableStateOf(initialIcon) }
-
-    // 3. Use LaunchedEffect to load the high-quality icon asynchronously.
-    LaunchedEffect(entityToInstall.packageName, preInstallAppInfo) {
-        val iconSizePx = with(density) { 64.dp.toPx().toInt() }
-
-        val finalIcon =
-            if (preInstallAppInfo != null && preInstallAppInfo.applicationInfo != null) {
-                // UPGRADE: Use the new AppIconLoaderUtil for the installed app's icon.
-                AppIconCache.loadIconDrawable(
-                    context,
-                    preInstallAppInfo.applicationInfo,
-                    iconSizePx
-                )
-            } else {
-                // NEW INSTALL: Use the icon from the new package entity.
-                (entityToInstall as? AppEntity.BaseEntity)?.icon
-            }
-
-        // Update state if the loaded icon is not null.
-        if (finalIcon != null) {
-            displayIcon = finalIcon
-        }
-    }
-
     val displayLabel: String =
         (if (entityToInstall is AppEntity.BaseEntity) entityToInstall.label else preInstallAppInfo?.label)
             ?: when (entityToInstall) {
@@ -125,11 +82,10 @@ fun installInfoDialog(
                 else -> entityToInstall.packageName
             }
 
-    // Fallback to a default system icon if displayIcon is ever null.
-    val painterIcon =
-        displayIcon ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
-
-    // --- Icon Logic End ---
+    // --- New Icon Loading Logic ---
+    // Collect the icon state directly from the ViewModel.
+    val displayIcon = iconMap[entityToInstall.packageName]
+    // --- New Icon Loading Logic End ---
 
     return DialogParams(
         icon = DialogInnerParams(uniqueContentKey) {
@@ -137,7 +93,7 @@ fun installInfoDialog(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(RoundedCornerShape(12.dp)),
-                painter = rememberDrawablePainter(painterIcon),
+                painter = rememberDrawablePainter(displayIcon),
                 contentDescription = null
             )
         },

@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.Context
+import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresPermission
@@ -13,7 +14,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
 import com.rosan.installer.R
+import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.getInfo
+import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
@@ -39,11 +43,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private var job: Job? = null
 
     private val context by inject<Context>()
-
     private val appDataStore by inject<AppDataStore>()
+    private val appIconRepo by inject<AppIconRepo>()
 
     private val notificationManager = NotificationManagerCompat.from(context)
-
     private val notificationId = installer.id.hashCode() and Int.MAX_VALUE
 
     @SuppressLint("MissingPermission")
@@ -92,6 +95,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override suspend fun onFinish() {
         Timber.d("[id=${installer.id}] onFinish: Cancelling notification and job.")
+        // Clear cache for all involved packages to ensure freshness on next install
+        installer.entities.filter { it.selected }.map { it.app.packageName }.distinct().forEach {
+            appIconRepo.clearCacheForPackage(it)
+        }
         setNotification(null)
         job?.cancel()
     }
@@ -152,7 +159,30 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         ProgressEntity.Installing to 80
     )
 
-    private suspend fun newNotificationBuilder(
+    /**
+     * Gets the large icon for notifications as a Bitmap by fetching it from the AppIconRepository.
+     */
+    private suspend fun getLargeIconBitmap(): Bitmap? {
+        val entities = installer.entities.filter { it.selected }.map { it.app }
+        val entityToInstall = entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+            ?: entities.sortedBest().firstOrNull()
+            ?: return null // Return null if no suitable entity is found
+
+        // Use standard notification large icon dimensions
+        val iconSizePx = context.resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_width)
+
+        // Get the drawable from the central repository
+        val drawable = appIconRepo.getIcon(
+            packageName = entityToInstall.packageName,
+            entityToInstall = entityToInstall,
+            iconSizePx = iconSizePx
+        )
+
+        // Convert the drawable to a bitmap of the correct size
+        return drawable?.toBitmapOrNull(width = iconSizePx, height = iconSizePx)
+    }
+
+    private fun newNotificationBuilder(
         progress: ProgressEntity,
         background: Boolean,
         showDialog: Boolean
@@ -249,7 +279,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .addAction(0, getString(R.string.retry), analyseIntent)
             .addAction(0, getString(R.string.cancel), finishIntent).build()
 
-    private fun onAnalysedSuccess(builder: NotificationCompat.Builder): Notification {
+    private suspend fun onAnalysedSuccess(builder: NotificationCompat.Builder): Notification {
         val selected = installer.entities.filter { it.selected }
         return (if (selected.groupBy { it.app.packageName }.size != 1) builder.setContentTitle(
             getString(R.string.installer_prepare_install)
@@ -258,21 +288,21 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             val info = selected.map { it.app }.getInfo(context)
             builder.setContentTitle(info.title)
                 .setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
-                .setLargeIcon(info.icon?.toBitmapOrNull())
+                .setLargeIcon(getLargeIconBitmap())
                 .addAction(0, getString(R.string.install), installIntent)
                 .addAction(0, getString(R.string.cancel), finishIntent)
         }).build()
     }
 
-    private fun onInstalling(builder: NotificationCompat.Builder): Notification {
+    private suspend fun onInstalling(builder: NotificationCompat.Builder): Notification {
         val info = installer.entities.filter { it.selected }.map { it.app }.getInfo(context)
         return builder.setContentTitle(info.title)
             .setContentText(getString(R.string.installer_installing))
-            .setLargeIcon(info.icon?.toBitmapOrNull())
+            .setLargeIcon(getLargeIconBitmap())
             .addAction(0, getString(R.string.cancel), finishIntent).build()
     }
 
-    private fun onInstallFailed(
+    private suspend fun onInstallFailed(
         builder: NotificationCompat.Builder
     ): Notification {
         val info = installer.entities.filter { it.selected }.map { it.app }.getInfo(context)
@@ -288,12 +318,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return builder.setContentTitle(info.title)
             .setContentText(contentText)
             .setStyle(bigTextStyle)
-            .setLargeIcon(info.icon?.toBitmapOrNull())
+            .setLargeIcon(getLargeIconBitmap())
             .addAction(0, getString(R.string.retry), installIntent)
             .addAction(0, getString(R.string.cancel), finishIntent).build()
     }
 
-    private fun onInstallSuccess(builder: NotificationCompat.Builder): Notification {
+    private suspend fun onInstallSuccess(builder: NotificationCompat.Builder): Notification {
         val entities = installer.entities.filter { it.selected }.map { it.app }
         val info = entities.getInfo(context)
         val launchIntent =
@@ -304,7 +334,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         var newBuilder = builder.setContentTitle(info.title)
             .setContentText(getString(R.string.installer_install_success))
-            .setLargeIcon(info.icon?.toBitmapOrNull())
+            .setLargeIcon(getLargeIconBitmap())
         if (launchIntent != null) newBuilder =
             newBuilder.addAction(0, getString(R.string.open), launchPendingIntent)
         return newBuilder

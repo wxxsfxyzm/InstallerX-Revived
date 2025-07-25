@@ -12,7 +12,7 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
     viewModel { (installer: InstallerRepo) ->
-        DialogViewModel(installer, get())
+        DialogViewModel(installer, get(), get())
     }
 
     viewModel {
