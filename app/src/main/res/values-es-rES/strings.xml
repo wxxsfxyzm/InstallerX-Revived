@@ -8,6 +8,7 @@
 
     <string name="agree">Aceptar</string>
 
+    <string name="open_source_license">Licencia de código abierto</string>
     <string name="back">Atrás</string>
     <string name="home">Inicio</string>
     <string name="config">Perfiles</string>
@@ -241,7 +242,7 @@
     <string name="old_version_prefix">Actual</string>
     <string name="upgrade_version_prefix">Actualizar</string>
     <string name="downgrade_version_prefix">Downgrade</string>
-    <string name="install_choice">Seleccionar PKG</string>
+    <string name="install_choice">Seleccionar Package</string>
 
     <string name="show_dialog_when_pressing_notification">Mostrar diálogo al presionar la notificación</string>
     <string name="change_notification_touch_behavior">Cambiar comportamiento táctil de la notificación</string>
@@ -286,7 +287,6 @@
     <string name="allocate_aggressive_desc">Indica que el paquete es "crítico para la salud o seguridad del sistema" y eliminará más agresivamente los archivos borrables para hacer espacio si es necesario.</string>
     <string name="virtual_preload">Precarga Virtual</string>
     <string name="virtual_preload_desc">Indica que el paquete es una precarga virtual.</string>
-    <string name="apex" translatable="false">APEX</string>
     <string name="apex_desc">Indica que el paquete que se está instalando es un paquete APEX</string>
     <string name="enable_rollback">Habilitar Reversión</string>
     <string name="enable_rollback_desc">Permitir futuras reversiones de este paquete.</string>

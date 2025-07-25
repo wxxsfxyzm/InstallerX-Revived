@@ -227,6 +227,7 @@
     <string name="exception_install_failed_uid_changed">UID發生改變，請先解除安裝後再安裝</string>
     <string name="exception_install_failed_version_downgrade">應用降級失敗，請先解除安裝後再安装</string>
 
+    <string name="exception_install_failed_deprecated_sdk_version">目標targetSDK過低，若要安裝，請啟用對應標誌位</string>
     <string name="exception_install_failed_rejected_by_build_type">系統禁止跨區安裝</string>
     <string name="exception_install_failed_duplicate_permission">程式套件正嘗試重新宣告其它應用程式已宣告的權限</string>
     <string name="exception_install_failed_user_restricted">USB 安裝功能受到限制，請將其啟用。</string>
@@ -248,7 +249,7 @@
     <string name="show_dialog_install_extended_menu_desc">在安裝對話框中顯示更多操作選項</string>
     <string name="extended_menu">擴展菜單</string>
     <string name="disable_notification">停用通知</string>
-    <string name="close_immediately_on_dialog_dismiss">安裝過程中對話框將保持前景顯示，其他狀態直接結束安裝會話，不彈出安裝通知</string>
+    <string name="close_immediately_on_dialog_dismiss">在安装过程中，对话框将保持在前台显示，点击空白处将直接结束安装会话，而不会弹出安装通知</string>
     <string name="set_countdown">設定倒數計時</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku安裝成功後自動關閉的倒數計時</string>
     <string name="dhizuku_cannot_set_installer_desc">Dhizuku 模式下不支援設定安裝器</string>
@@ -285,7 +286,6 @@
     <string name="allocate_aggressive_desc">表示套件「對系統健康或安全至關重要」，如果需要，將更積極地刪除可清除檔案以騰出空間。</string>
     <string name="virtual_preload">虛擬預載入</string>
     <string name="virtual_preload_desc">表示套件是虛擬預載入。</string>
-    <string name="apex" translatable="false">APEX</string>
     <string name="apex_desc">表示正在安裝的套件是APEX套件</string>
     <string name="enable_rollback">啟用回溯</string>
     <string name="enable_rollback_desc">允許此套件未來回溯。</string>
