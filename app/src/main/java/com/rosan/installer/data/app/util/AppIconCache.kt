@@ -22,6 +22,9 @@ import kotlin.coroutines.CoroutineContext
  * 该工具类包含一个内存 LRU 缓存，以避免重复的磁盘读取，并使用一个专用的后台线程池进行图标加载，以保持主线程的流畅。
  *
  * 核心的缓存与加载逻辑改编自 RikkaApps 的 Shizuku 项目中的 `AppIconCache.kt` 文件。
+ *
+ * 代码受 Apache License 2.0 许可协议保护。
+ * @see <a href="https://github.com/RikkaApps/Shizuku/blob/master/LICENSE">Apache License 2.0</a>
  * @see <a href="https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt">RikkaApps/Shizuku - AppIconCache.kt</a>
  */
 object AppIconCache : CoroutineScope {
