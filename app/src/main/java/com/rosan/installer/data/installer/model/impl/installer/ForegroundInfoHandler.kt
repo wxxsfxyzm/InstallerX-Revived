@@ -56,7 +56,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             combine(
                 installer.progress,
                 installer.background,
-                appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, false)
+                appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true)
             ) { progress, background, showDialog ->
 
                 Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=$showDialog")
