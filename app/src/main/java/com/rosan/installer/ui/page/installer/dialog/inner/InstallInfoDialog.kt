@@ -1,11 +1,5 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
-// import androidx.compose.runtime.LaunchedEffect // No longer needed here
-// import androidx.compose.runtime.getValue // No longer needed here
-// import androidx.compose.runtime.mutableStateOf // No longer needed here
-// import androidx.compose.runtime.remember // No longer needed here
-// import androidx.compose.runtime.setValue // No longer needed here
-// import com.rosan.installer.ui.page.installer.dialog.DialogViewState // No longer needed here
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -33,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -62,7 +55,6 @@ fun installInfoDialog(
     preInstallAppInfo: InstalledAppInfo?, // Crucial parameter: Info *before* install operation
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
-    val density = LocalDensity.current
     val iconMap by viewModel.displayIcons.collectAsState()
     val selectedApps = installer.entities.filter { it.selected }.map { it.app }
     // If no apps are selected, return empty DialogParams
@@ -129,7 +121,7 @@ fun installInfoDialog(
         subtitle = DialogInnerParams(uniqueContentKey) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                // verticalArrangement = Arrangement.spacedBy(4.dp) // Removed to avoid spacing issues during animation
             ) {
                 // --- 显示包名 ---
                 Text(
@@ -142,9 +134,7 @@ fun installInfoDialog(
 
                 // --- 显示版本信息 ---
                 if (entityToInstall is AppEntity.BaseEntity) {
-                    // 直接使用传入的 preInstallAppInfo 作为旧版本信息
-                    val oldInfo = preInstallAppInfo
-                    if (oldInfo == null) {
+                    if (preInstallAppInfo == null) {
                         // 首次安装或无法获取旧信息: 只显示新版本，不带前缀
                         Text(
                             text = stringResource(
@@ -163,8 +153,8 @@ fun installInfoDialog(
                             Text( // 旧版本带前缀
                                 text = stringResource(R.string.old_version_prefix) + stringResource(
                                     R.string.installer_version_short,
-                                    oldInfo.versionName,
-                                    oldInfo.versionCode
+                                    preInstallAppInfo.versionName,
+                                    preInstallAppInfo.versionCode
                                 ),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.basicMarquee()
@@ -173,14 +163,14 @@ fun installInfoDialog(
                                 imageVector = AppIcons.ArrowDropDownFilled,
                                 contentDescription = "to",
                                 tint =
-                                    if (oldInfo.versionCode > entityToInstall.versionCode)
+                                    if (preInstallAppInfo.versionCode > entityToInstall.versionCode)
                                         MaterialTheme.colorScheme.error
                                     else
                                         MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp)
                             )
                             Text( // 新版本带前缀
-                                text = if (entityToInstall.versionCode >= oldInfo.versionCode)
+                                text = if (entityToInstall.versionCode >= preInstallAppInfo.versionCode)
                                     stringResource(R.string.upgrade_version_prefix) + stringResource(
                                         R.string.installer_version_short,
                                         entityToInstall.versionName,
@@ -190,7 +180,7 @@ fun installInfoDialog(
                                     entityToInstall.versionName,
                                     entityToInstall.versionCode
                                 ),
-                                color = if (oldInfo.versionCode > entityToInstall.versionCode)
+                                color = if (preInstallAppInfo.versionCode > entityToInstall.versionCode)
                                     MaterialTheme.colorScheme.error
                                 else
                                     MaterialTheme.colorScheme.primary,
@@ -200,86 +190,91 @@ fun installInfoDialog(
                         }
                     }
                 }
-                // --- SDK版本变动显示 ---
-                // 如果有SDK信息则显示SDK
-                val oldInfo = preInstallAppInfo
-                // Min SDK
-                entityToInstall.minSdk?.let { newMinSdk ->
-                    AnimatedVisibility(visible = installer.config.displaySdk) {
+                // --- SDK Information Showcase ---
+                // Use a single AnimatedVisibility to control the entire SDK block
+                AnimatedVisibility(visible = installer.config.displaySdk) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        // Spacing between Min and Target SDK is now handled cleanly here.
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        // This Spacer creates a gap between the version info above and this SDK block.
+                        // It's animated along with the content, ensuring a smooth transition.
+                        Spacer(modifier = Modifier.size(4.dp))
+                        // Min SDK
+                        entityToInstall.minSdk?.let { newMinSdk ->
+                            val oldMinSdk = preInstallAppInfo?.minSdk
+                            if (oldMinSdk != null && oldMinSdk.toString() != newMinSdk) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = stringResource(
+                                            R.string.installer_package_min_sdk,
+                                            oldMinSdk.toString()
+                                        )
+                                    )
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        imageVector = AppIcons.ArrowRight,
+                                        tint =
+                                            if (newMinSdk.toInt() > Build.VERSION.SDK_INT)
+                                                MaterialTheme.colorScheme.error
+                                            else
+                                                MaterialTheme.colorScheme.primary,
+                                        contentDescription = null
+                                    )
+                                    Text(
+                                        text = newMinSdk,
+                                        color =
+                                            if (newMinSdk.toInt() > Build.VERSION.SDK_INT)
+                                                MaterialTheme.colorScheme.error
+                                            else
+                                                MaterialTheme.colorScheme.primary,
+                                    )
 
-                        val oldMinSdk = oldInfo?.minSdk
-                        if (oldMinSdk != null && oldMinSdk.toString() != newMinSdk) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                }
+                            } else {
                                 Text(
                                     text = stringResource(
                                         R.string.installer_package_min_sdk,
-                                        oldMinSdk.toString()
-                                    )
+                                        newMinSdk
+                                    ),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.basicMarquee()
                                 )
-                                Icon(
-                                    modifier = Modifier.size(24.dp),
-                                    imageVector = AppIcons.ArrowRight,
-                                    tint =
-                                        if (newMinSdk.toInt() > Build.VERSION.SDK_INT)
-                                            MaterialTheme.colorScheme.error
-                                        else
-                                            MaterialTheme.colorScheme.primary,
-                                    contentDescription = null
-                                )
-                                Text(
-                                    text = newMinSdk,
-                                    color =
-                                        if (newMinSdk.toInt() > Build.VERSION.SDK_INT)
-                                            MaterialTheme.colorScheme.error
-                                        else
-                                            MaterialTheme.colorScheme.primary,
-                                )
-
                             }
-                        } else {
-                            Text(
-                                text = stringResource(
-                                    R.string.installer_package_min_sdk,
-                                    newMinSdk
-                                ),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.basicMarquee()
-                            )
                         }
-                    }
-                }
-                // Target SDK
-                entityToInstall.targetSdk?.let { newTargetSdk ->
-                    AnimatedVisibility(visible = installer.config.displaySdk) {
-                        val oldTargetSdk = oldInfo?.targetSdk
-                        if (oldTargetSdk != null && oldTargetSdk.toString() != newTargetSdk) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Target SDK
+                        entityToInstall.targetSdk?.let { newTargetSdk ->
+                            val oldTargetSdk = preInstallAppInfo?.targetSdk
+                            if (oldTargetSdk != null && oldTargetSdk.toString() != newTargetSdk) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = stringResource(
+                                            R.string.installer_package_target_sdk,
+                                            oldTargetSdk.toString()
+                                        )
+                                    )
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        imageVector = AppIcons.ArrowRight,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        contentDescription = null
+                                    )
+                                    Text(
+                                        text = newTargetSdk,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+                            } else {
                                 Text(
                                     text = stringResource(
                                         R.string.installer_package_target_sdk,
-                                        oldTargetSdk.toString()
-                                    )
-                                )
-                                Icon(
-                                    modifier = Modifier.size(24.dp),
-                                    imageVector = AppIcons.ArrowRight,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    contentDescription = null
-                                )
-                                Text(
-                                    text = newTargetSdk,
-                                    color = MaterialTheme.colorScheme.primary,
+                                        newTargetSdk
+                                    ),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.basicMarquee()
                                 )
                             }
-                        } else {
-                            Text(
-                                text = stringResource(
-                                    R.string.installer_package_target_sdk,
-                                    newTargetSdk
-                                ),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.basicMarquee()
-                            )
                         }
                     }
                 }
