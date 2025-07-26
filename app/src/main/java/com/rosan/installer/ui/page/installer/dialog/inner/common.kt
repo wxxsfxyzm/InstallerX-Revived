@@ -10,10 +10,11 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -85,7 +86,7 @@ val errorTextBlock: ((error: Throwable) -> (@Composable () -> Unit)) = { error -
                     .background(MaterialTheme.colorScheme.errorContainer)
                     .fillMaxWidth()
                     .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                // verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -117,12 +118,16 @@ val errorTextBlock: ((error: Throwable) -> (@Composable () -> Unit)) = { error -
                     enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
                     exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
                 ) {
-                    BasicTextField(
-                        // 直接使用传入的 error 对象
-                        value = error.stackTraceToString().trim(),
-                        onValueChange = {},
-                        readOnly = true
-                    )
+                    Column {
+                        // The spacer that replaces Arrangement.spacedBy
+                        Spacer(modifier = Modifier.height(8.dp))
+                        BasicTextField(
+                            // 直接使用传入的 error 对象
+                            value = error.stackTraceToString().trim(),
+                            onValueChange = {},
+                            readOnly = true
+                        )
+                    }
                 }
             }
         }
