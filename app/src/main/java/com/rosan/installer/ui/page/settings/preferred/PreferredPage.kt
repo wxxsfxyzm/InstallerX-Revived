@@ -3,6 +3,7 @@ package com.rosan.installer.ui.page.settings.preferred
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -181,20 +182,45 @@ fun PreferredPage(
                 )
             }
             item {
+                // Outer AnimatedVisibility: Controls the visibility of the entire section.
+                // It handles the main expansion/shrinking and fading for the whole group.
                 AnimatedVisibility(
-                    visible = state.installMode == ConfigEntity.InstallMode.Dialog,
-                    enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
-                    exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                    visible = state.installMode == ConfigEntity.InstallMode.Dialog || state.installMode == ConfigEntity.InstallMode.AutoDialog,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
                 ) {
-                    Column {
+                    Column(modifier = Modifier.animateContentSize()) {
+                        // Inner AnimatedVisibility: Specifically controls the first SwitchWidget.
+                        // Its animation should be simple and not conflict with the parent's size animation.
+                        // Using only fadeIn/fadeOut is perfect for this.
+                        AnimatedVisibility(
+                            visible = state.installMode == ConfigEntity.InstallMode.Dialog,
+                            enter = fadeIn(), // Only fade in, let the parent handle the expansion.
+                            exit = fadeOut()  // Only fade out, let the parent handle the shrinking.
+                        ) {
+                            // This SwitchWidget will now smoothly fade in/out when toggling
+                            // between Dialog and AutoDialog modes.
+                            SwitchWidget(
+                                icon = AppIcons.MenuOpen,
+                                title = stringResource(id = R.string.show_dialog_install_extended_menu),
+                                description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
+                                checked = viewModel.state.showDialogInstallExtendedMenu,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
+                                    )
+                                }
+                            )
+                        }
+                        // These SwitchWidgets are always present when the container is visible.
                         SwitchWidget(
-                            icon = AppIcons.MenuOpen,
-                            title = stringResource(id = R.string.show_dialog_install_extended_menu),
-                            description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
-                            checked = viewModel.state.showDialogInstallExtendedMenu,
+                            icon = AppIcons.Suggestion,
+                            title = stringResource(id = R.string.show_intelligent_suggestion),
+                            description = stringResource(id = R.string.show_intelligent_suggestion_desc),
+                            checked = viewModel.state.showIntelligentSuggestion,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
+                                    PreferredViewAction.ChangeShowIntelligentSuggestion(it)
                                 )
                             }
                         )
@@ -221,17 +247,36 @@ fun PreferredPage(
                     enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
                     exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
                 ) {
-                    SwitchWidget(
-                        icon = AppIcons.Dialog,
-                        title = stringResource(id = R.string.show_dialog_when_pressing_notification),
-                        description = stringResource(id = R.string.change_notification_touch_behavior),
-                        checked = viewModel.state.showDialogWhenPressingNotification,
-                        onCheckedChange = {
-                            viewModel.dispatch(
-                                PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
+                    Column(modifier = Modifier.animateContentSize()) {
+                        SwitchWidget(
+                            icon = AppIcons.Dialog,
+                            title = stringResource(id = R.string.show_dialog_when_pressing_notification),
+                            description = stringResource(id = R.string.change_notification_touch_behavior),
+                            checked = viewModel.state.showDialogWhenPressingNotification,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
+                                )
+                            }
+                        )
+                        AnimatedVisibility(
+                            visible = viewModel.state.showDialogWhenPressingNotification,
+                            enter = fadeIn(), // Only fade in, let the parent handle the expansion.
+                            exit = fadeOut()  // Only fade out, let the parent handle the shrinking.
+                        ) {
+                            SwitchWidget(
+                                icon = AppIcons.NotificationDisabled,
+                                title = stringResource(id = R.string.disable_notification_on_dismiss),
+                                description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
+                                checked = viewModel.state.disableNotificationForDialogInstall,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(it)
+                                    )
+                                }
                             )
                         }
-                    )
+                    }
                 }
             }
             item { LabelWidget(stringResource(R.string.basic)) }

@@ -256,10 +256,14 @@
     <string name="extended_menu">Extended Menu</string>
     <string name="disable_notification">Disable Notification</string>
     <string name="close_immediately_on_dialog_dismiss">Dialog remains foreground while installing, clicking blank area will silently exit</string>
+    <string name="disable_notification_on_dismiss">Close On Dialog Dismiss</string>
+    <string name="close_notification_immediately_on_dialog_dismiss">Dismiss Dialog will silently exit</string>
     <string name="set_countdown">Set countdown</string>
     <string name="dhizuku_auto_close_countdown_desc">Countdown to auto-close after Dhizuku installation succeeds</string>
     <string name="dhizuku_cannot_set_installer_desc">Dhizuku mode does not support setting installer!</string>
     <string name="grant_permission_after_install">Click to grant permission after installation</string>
+    <string name="show_intelligent_suggestion">Show Intelligent Suggestions (Experimental)</string>
+    <string name="show_intelligent_suggestion_desc">Show intelligent suggestions when installation fails</string>
     <string name="permission_list">Permission List</string>
     <string name="permission_list_desc">List of permissions requested by the package being installed</string>
 
@@ -337,4 +341,10 @@
     <string name="split_dpi_nodpi">No scaling</string>
     <string name="split_dpi_anydpi">Any density</string>
     <!-- SplitNameUtil End -->
+
+    <string name="suggestion_uninstall_and_retry">卸载后重新安装</string>
+    <string name="suggestion_allow_test_app">临时启用允许测试包并重试</string>
+    <string name="suggestion_mi_isolation">临时添加有效安装者并重试</string>
+    <string name="suggestion_user_restricted">前往开发者选项启用USB安装</string>
+    <string name="suggestion_bypass_low_target_sdk">临时允许绕过限制并重试</string>
 </resources>

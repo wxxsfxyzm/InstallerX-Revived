@@ -16,9 +16,12 @@ sealed class PreferredViewAction {
     data class ChangeShowDialogInstallExtendedMenu(val showMenu: Boolean) :
         PreferredViewAction()
 
+    data class ChangeShowIntelligentSuggestion(val showIntelligentSuggestion: Boolean) :
+        PreferredViewAction()
+
     data class ChangeShowDisableNotificationForDialogInstall(val showDisableNotification: Boolean) :
         PreferredViewAction()
-    
+
     data class ChangeShowDialogWhenPressingNotification(val showDialog: Boolean) :
         PreferredViewAction()
 

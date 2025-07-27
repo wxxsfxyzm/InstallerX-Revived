@@ -57,6 +57,9 @@ class DialogViewModel(
     var showExtendedMenu by mutableStateOf(false)
         private set
 
+    var showIntelligentSuggestion by mutableStateOf(false)
+        private set
+
     var disableNotificationOnDismiss by mutableStateOf(false)
         private set
 
@@ -111,9 +114,10 @@ class DialogViewModel(
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first()
             showExtendedMenu =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false).first()
+            showIntelligentSuggestion =
+                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, false).first()
             disableNotificationOnDismiss =
-                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false)
-                    .first()
+                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first()
             // initialize install flags based on repo.config
             _installFlags.value = listOfNotNull(
                 repo.config.allowTestOnly.takeIf { it }
@@ -257,11 +261,27 @@ class DialogViewModel(
                     is ProgressEntity.InstallFailed -> {
                         newState = DialogViewState.InstallFailed
                         autoInstallJob?.cancel()
+                        // [FIX] Add logic to ensure the package name is identified
+                        // when the dialog opens directly into this state.
+                        if (newPackageNameFromProgress == null && repo.entities.isNotEmpty()) {
+                            val selectedEntities = repo.entities.filter { it.selected }
+                            if (selectedEntities.isNotEmpty()) {
+                                newPackageNameFromProgress = selectedEntities.first().app.packageName
+                            }
+                        }
                     }
 
                     is ProgressEntity.InstallSuccess -> {
                         newState = DialogViewState.InstallSuccess
                         autoInstallJob?.cancel()
+                        // [FIX] Add logic to ensure the package name is identified
+                        // when the dialog opens directly into this state.
+                        if (newPackageNameFromProgress == null && repo.entities.isNotEmpty()) {
+                            val selectedEntities = repo.entities.filter { it.selected }
+                            if (selectedEntities.isNotEmpty()) {
+                                newPackageNameFromProgress = selectedEntities.first().app.packageName
+                            }
+                        }
                     }
 
                     else -> newState = DialogViewState.Ready
@@ -415,7 +435,7 @@ class DialogViewModel(
         }
     }
 
-    private fun toast(message: String) {
+    fun toast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 
@@ -476,13 +496,10 @@ class DialogViewModel(
 
     private fun installExtendedMenu() {
         when (state) {
-            is DialogViewState.InstallPrepare -> {
+            is DialogViewState.InstallPrepare,
+            DialogViewState.InstallExtendedSubMenu,
+            DialogViewState.InstallFailed -> {
                 state = DialogViewState.InstallExtendedMenu
-            }
-
-            is DialogViewState.InstallExtendedSubMenu -> {
-                state = DialogViewState.InstallExtendedMenu
-
             }
 
             else -> {
@@ -518,7 +535,7 @@ class DialogViewModel(
             is ProgressEntity.InstallSuccess -> {
                 val currentEntity = multiInstallQueue[currentMultiInstallIndex]
                 // Clear the icon cache for the installed package
-                appIconRepo.clearCacheForPackage(currentEntity.app.packageName)
+                // appIconRepo.clearCacheForPackage(currentEntity.app.packageName)
                 multiInstallResults.add(InstallResult(entity = currentEntity, success = true))
                 currentMultiInstallIndex++
                 triggerNextMultiInstall()
