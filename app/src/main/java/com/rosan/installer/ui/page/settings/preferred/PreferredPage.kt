@@ -215,7 +215,7 @@ fun PreferredPage(
                         // These SwitchWidgets are always present when the container is visible.
                         SwitchWidget(
                             icon = AppIcons.Suggestion,
-                            title = "",
+                            title = stringResource(id = R.string.show_intelligent_suggestion),
                             description = stringResource(id = R.string.show_intelligent_suggestion_desc),
                             checked = viewModel.state.showIntelligentSuggestion,
                             onCheckedChange = {
