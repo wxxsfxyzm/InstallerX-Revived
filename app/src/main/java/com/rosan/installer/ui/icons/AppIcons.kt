@@ -28,11 +28,13 @@ import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.ClearAll
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Delete
+import androidx.compose.material.icons.twotone.DeveloperMode
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Face
 import androidx.compose.material.icons.twotone.Favorite
 import androidx.compose.material.icons.twotone.FavoriteBorder
+import androidx.compose.material.icons.twotone.History
 import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
 import androidx.compose.material.icons.twotone.Info
@@ -48,6 +50,7 @@ import androidx.compose.material.icons.twotone.SecurityUpdateWarning
 import androidx.compose.material.icons.twotone.SettingsSuggest
 import androidx.compose.material.icons.twotone.SystemUpdate
 import androidx.compose.material.icons.twotone.Terminal
+import androidx.compose.material.icons.twotone.TipsAndUpdates
 
 /**
  * 将图标统一管理在一个对象中
@@ -64,11 +67,14 @@ object AppIcons {
     val Save = Icons.TwoTone.Save
     val BugReport = Icons.TwoTone.BugReport
     val Terminal = Icons.TwoTone.Terminal
+    val History = Icons.TwoTone.History
+    val Suggestion = Icons.TwoTone.TipsAndUpdates
     val Update = Icons.TwoTone.SystemUpdate
     val Rule = Icons.AutoMirrored.TwoTone.Rule
     val Search = Icons.TwoTone.Search
     val Close = Icons.TwoTone.Close
     val AutoFixHigh = Icons.TwoTone.AutoFixHigh
+    val Developer = Icons.TwoTone.DeveloperMode
 
     // --- 导航图标集合 ---
     val RoomPreferences = Icons.TwoTone.RoomPreferences

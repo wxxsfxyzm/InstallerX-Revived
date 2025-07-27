@@ -250,10 +250,14 @@
     <string name="extended_menu">擴展菜單</string>
     <string name="disable_notification">停用通知</string>
     <string name="close_immediately_on_dialog_dismiss">在安装过程中，对话框将保持在前台显示，点击空白处将直接结束安装会话，而不会弹出安装通知</string>
+    <string name="disable_notification_on_dismiss">在對話框關閉時退出</string>
+    <string name="close_notification_immediately_on_dialog_dismiss">關閉對話框將靜默退出</string>
     <string name="set_countdown">設定倒數計時</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku安裝成功後自動關閉的倒數計時</string>
     <string name="dhizuku_cannot_set_installer_desc">Dhizuku 模式下不支援設定安裝器</string>
-    <string name="grant_permission_after_install">点击以在安装完成后授予权限</string>
+    <string name="grant_permission_after_install">點擊以在安裝完成後授予權限</string>
+    <string name="show_intelligent_suggestion">顯示智能建議（實驗性）</string>
+    <string name="show_intelligent_suggestion_desc">當安裝失敗時顯示智能建議</string>
     <string name="permission_list">查看應用的權限列表</string>
     <string name="permission_list_desc">正在安裝的軟體包請求的權限列表</string>
 
