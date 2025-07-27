@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.widget.toggle
+package com.rosan.installer.ui.widget.chip
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 @Composable
 fun Chip(
     selected: Boolean,
+    useHaptic: Boolean = true,
     onClick: () -> Unit,
     label: String,
     icon: ImageVector
@@ -25,7 +26,8 @@ fun Chip(
     FilterChip(
         selected = selected,
         onClick = {
-            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+            if (useHaptic)
+                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
             onClick()
         },
         label = {

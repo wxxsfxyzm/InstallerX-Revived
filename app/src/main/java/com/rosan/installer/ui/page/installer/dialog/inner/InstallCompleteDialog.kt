@@ -146,5 +146,5 @@ private fun SuccessCard() {
 @Composable
 private fun FailureCard(error: Throwable) {
     // 这里直接调用通用的 errorTextBlock
-    errorTextBlock(error).invoke()
+    ErrorTextBlock(error)
 }

@@ -37,7 +37,7 @@ import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.widget.toggle.Chip
+import com.rosan.installer.ui.widget.chip.Chip
 import timber.log.Timber
 
 // Assume pausingIcon is accessible
