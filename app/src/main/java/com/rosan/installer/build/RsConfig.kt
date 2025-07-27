@@ -69,7 +69,22 @@ object RsConfig {
         else
             manufacturer + " " + Build.MODEL
 
+    /**
+     * The primary architecture of the device.
+     * This property determines the most preferred ABI supported by the device
+     * and maps it to a safe enum type.
+     * @return The corresponding Architecture enum constant.
+     */
+    val currentArchitecture: Architecture
+        get() {
+            // Build.SUPPORTED_ABIS lists supported ABIs in order of preference.
+            // The first element is the most preferred one for the running system.
+            val primaryAbi = Build.SUPPORTED_ABIS.firstOrNull()
+            // Use the helper function in the enum to safely convert the string to an enum type.
+            return Architecture.fromArchString(primaryAbi)
+        }
 
+    // Used for displaying the system architecture in a user-friendly format.
     val systemStruct: String
         get() {
             var struct = System.getProperty("os.arch") ?: "unknown"

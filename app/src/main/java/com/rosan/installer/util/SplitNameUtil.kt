@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
+import com.rosan.installer.build.Architecture
 import java.util.Locale
 
 private const val SPLIT_CONFIG_PREFIX = "split_config."
@@ -31,9 +32,12 @@ fun String.asUserReadableSplitName(): String {
     }
 
     // --- 尝试解析为CPU架构 (ABI) ---
-    val abiDisplayName = getAbiDisplayName(coreName)
-    if (abiDisplayName != null) {
-        return stringResource(R.string.split_name_architecture, abiDisplayName)
+    // Call the static-like helper function from the enum's companion object.
+    val architecture = Architecture.fromArchString(coreName)
+    // Check if the returned enum is not the default 'UNKNOWN' value.
+    if (architecture != Architecture.UNKNOWN) {
+        // If the string was recognized, use the 'displayName' property from the enum constant.
+        return stringResource(R.string.split_name_architecture, architecture.displayName)
     }
 
     // --- 尝试解析为屏幕密度 (DPI) ---
