@@ -141,20 +141,40 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
                     getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "label", -1)) {
                     -1 -> getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "label") ?: label
                     0 -> null
-                    else -> resources.getString(resId)
+                    else -> {
+                        try {
+                            resources.getString(resId)
+                        } catch (e: Resources.NotFoundException) {
+                            null
+                        }
+                    }
                 }
+
                 icon = when (val resId =
                     getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "icon", -1)) {
                     -1 -> null
                     0 -> null
-                    else -> ResourcesCompat.getDrawable(resources, resId, theme)
+                    else -> {
+                        try {
+                            ResourcesCompat.getDrawable(resources, resId, theme)
+                        } catch (e: Resources.NotFoundException) {
+                            null
+                        }
+                    }
                 }
+
                 roundIcon = when (val resId = getAttributeResourceValue(
                     AxmlTreeRepo.ANDROID_NAMESPACE, "roundIcon", -1
                 )) {
                     -1 -> null
                     0 -> null
-                    else -> ResourcesCompat.getDrawable(resources, resId, theme)
+                    else -> {
+                        try {
+                            ResourcesCompat.getDrawable(resources, resId, theme)
+                        } catch (e: Resources.NotFoundException) {
+                            null
+                        }
+                    }
                 }
             }
             .register("/manifest/uses-permission") {
