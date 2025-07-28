@@ -14,7 +14,7 @@ Looking for a better app installer? Try **InstallerX**!
 
 Many customized Chinese ROMs come with subpar default installers. You can replace them with **InstallerX**.
 
-Compared to stock systems, **InstallerX** offers more installation options:
+Compared to stock installers, **InstallerX** offers more installation options:
 - Dialog-based installation
 - Notification-based installation
 - Automatic installation
@@ -26,33 +26,70 @@ Compared to stock systems, **InstallerX** offers more installation options:
 
 ## Supported Versions
 
-- SDK 34+ (full support)
-- SDK 30-33 (limited support, please report issues)
+- **Full support:** Android SDK 34 - 36
+- **Limited support:** Android SDK 30 - 33 (please report issues)
 
-## Changelog
+## Key Changes
 
-- Simplified UI
-- Fixed APK deletion issues from original repository
-- Text adjustments, added Traditional Chinese support. PRs for more languages welcome!
-- Improved version number display for apps to be installed
-- Added targetSDK and minSDK display during installation
+- **Redesigned UI:** Material 3 Expressive design
+- **Bug fixes:** Resolved APK deletion issues on certain systems
+- **Multilingual support:** English, Traditional Chinese, and Spanish. Contributions for more languages welcome!
+- **Dialog optimization:** Improved installation dialog display
+- **New features:**
+  - Shows targetSDK and minSDK during installation
+  - Displays system icons (method from [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku))
+  - Shizuku/Root can bypass launch restrictions on customized systems (dialog installation only)
+  - Extended installation dialog menu (enable in settings):
+    - Displays requested permissions
+    - InstallFlags configuration (based on [InstallWithOptions](https://github.com/zacharee/InstallWithOptions))
+      - **Note:** Some options may not work or pose security risks
+  - Supports installing APKs from ZIP files (dialog installation only):
+    - Semi-intelligent selection of best package to install
 
 ## FAQ
 
-- **Lock tool not working?**
-  - Due to package name changes, you need to use the modified lock tool from this repository: [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
+- **Dhizuku not working properly**
+  - Developers don't personally use Dhizuku and have limited knowledge about it
+  - Dhizuku has permission limitations (can't bypass intent blocks or specify installation source)
+  - Tested on SDK ≥34 AVDs
+  - Recommended to use Shizuku when possible
 
-- **HyperOS shows error** `System app installation requires valid installer declaration` **what to do?**
-  - System security restriction. You need to declare a system app as installer in settings (recommended: `com.android.fileexplorer` or `com.android.vending`)
-  - Planning to add: "Auto-detect HyperOS and add installer to default config"
+- **Lock tool not working**
+  - Due to package name changes, use the modified [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
 
-- **Not working on Oppo/Vivo/Lenovo devices?**
-  - We don't have these devices for testing. Please discuss in [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)
+- **HyperOS shows "System app installation requires valid installer declaration" error**
+  - System security restriction
+  - Declare a system installer (recommended: `com.android.fileexplorer` or `com.android.vending`)
+  - Works with Shizuku/Root (Dhizuku not supported)
+  - New feature: Auto-detects HyperOS to add installer in default config
+
+- **HyperOS reverts to default installer**
+  - HyperOS revokes permissions if user rejects ADB/Shizuku installation
+  - Solution: Manually relock the installer
+
+- **Installation notification freezes on HyperOS**
+  - HyperOS has strict background app controls
+  - Enable "No background restrictions"
+  - App automatically closes 5 seconds after completing installation
+
+- **Issues on Oppo/Vivo/Lenovo devices**
+  - We don't have these devices for testing. Discuss solutions in [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)
+
+## About Releases
+
+> [!WARNING]
+> Development versions may be unstable and features may change/be removed without notice.
+> Switching build channels may require data wipe/reinstallation.
+
+- **`dev` branch:** Features in testing (find builds in [Pull Requests](https://github.com/wxxsfxyzm/InstallerX-Revived/pulls))
+  - Changes documented in PRs (may be AI-generated)
+- **Alpha versions:** Automatic when merged to `main`
+- **Stable releases:** Manually published when incrementing `versionCode`
 
 ## License
 
-Copyright © [iamr0s](https://github.com/iamr0s) and contributors
+Copyright © [iamr0s](https://github.com/iamr0s) and [contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
 
-InstallerX is currently released under [**GNU GPL v3**](http://www.gnu.org/copyleft/gpl.html), though this licensing approach may change in the future. Maintainers reserve the right to modify license terms or transition to closed-source.
+InstallerX is currently released under [**GNU GPL v3**](http://www.gnu.org/copyleft/gpl.html), though this commitment may change in the future. Maintainers reserve the right to modify license terms or close the source.
 
-If you create derivative works based on InstallerX, you must comply with the GPL-3.0 terms of the specific version you use as base, regardless of future licensing changes in the main project.
+If you create derivative works based on InstallerX, you must comply with the GPL-3.0 terms of the specific version you use as base, regardless of future changes to the main project.
