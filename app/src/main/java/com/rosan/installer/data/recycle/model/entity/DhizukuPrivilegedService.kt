@@ -3,6 +3,7 @@ package com.rosan.installer.data.recycle.model.entity
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.deletePaths
@@ -48,5 +49,10 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
     override fun execArr(command: Array<String>): String {
         // Device Owner Privileged Service does not support shell access
         throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
+    }
+
+    // Dhizuku does not support privileged activity
+    override fun startActivityPrivileged(intent: Intent): Boolean {
+        return false
     }
 }

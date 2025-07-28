@@ -7,6 +7,8 @@ interface IPrivilegedService {
 
     void setDefaultInstaller(in ComponentName component, boolean enable);
 
+    boolean startActivityPrivileged(in Intent intent);
+
     /**
      * 执行命令
      */
