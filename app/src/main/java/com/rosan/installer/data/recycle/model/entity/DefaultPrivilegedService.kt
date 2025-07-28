@@ -134,11 +134,10 @@ class DefaultPrivilegedService : BasePrivilegedService() {
     // Cache the reflected method for performance.
     // A privileged process might live for a long time, so caching is beneficial.
     private var startActivityAsUserMethod: Method? = null
-    private var requiresIApplicationThread: Boolean = false
 
     @SuppressLint("LogNotTimber")
     override fun startActivityPrivileged(intent: Intent): Boolean {
-        // We are executing inside the privileged process (Root).
+        // We are executing inside the privileged process (Root/Shizuku).
         // All API calls here inherit that privilege.
         try {
             // 1. Find the correct method reflectively, but only once.
@@ -164,38 +163,20 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             val resolvedType = intent.resolveType(context.contentResolver)
 
             // 4. Invoke the method with the correct parameters based on our cached info.
-            val result: Int = if (requiresIApplicationThread) {
-                // Modern signature (Android O and newer)
-                methodToCall.invoke(
-                    am,
-                    null as IApplicationThread?, // The first argument is IApplicationThread
-                    callerPackage,
-                    intent,
-                    resolvedType,
-                    null as IBinder?,
-                    null as String?,
-                    0,
-                    0,
-                    null as Bundle?, // ProfilerInfo is usually null, we use Bundle for wider compatibility
-                    null as Bundle?,
-                    userId
-                ) as Int
-            } else {
-                // Older signature (pre-Android O)
-                methodToCall.invoke(
-                    am,
-                    callerPackage,
-                    intent,
-                    resolvedType,
-                    null as IBinder?,
-                    null as String?,
-                    0,
-                    0,
-                    null as Bundle?,
-                    null as Bundle?,
-                    userId
-                ) as Int
-            }
+            val result: Int = methodToCall.invoke(
+                am,
+                null as IApplicationThread?, // The first argument is IApplicationThread
+                callerPackage,
+                intent,
+                resolvedType,
+                null as IBinder?,
+                null as String?,
+                0,
+                0,
+                null as Bundle?, // ProfilerInfo is usually null, we use Bundle for wider compatibility
+                null as Bundle?,
+                userId
+            ) as Int
 
             Log.d("PrivilegedService", "IActivityManager.startActivityAsUser returned a result code: $result")
             return result >= 0
@@ -217,11 +198,10 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         // So we use Bundle.class for better forward compatibility.
         val bundleClass = Bundle::class.java
 
-        // Strategy: Try the newest (Android O+) signature first.
-        var method = reflect.getDeclaredMethod(
+        val method = reflect.getDeclaredMethod(
             IActivityManager::class.java,
             "startActivityAsUser",
-            IApplicationThread::class.java,
+            IApplicationThread::class.java, // This signature is guaranteed to be present.
             String::class.java,
             Intent::class.java,
             String::class.java,
@@ -229,35 +209,19 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             String::class.java,
             Int::class.java,
             Int::class.java,
-            bundleClass, // Represents ProfilerInfo
+            bundleClass,      // Represents ProfilerInfo
             Bundle::class.java, // Represents options
             Int::class.java     // userId
         )
 
-        if (method != null) {
-            Log.d("PrivilegedService", "Found modern (11-arg) startActivityAsUser method.")
-            requiresIApplicationThread = true
-        } else {
-            // If the modern one fails, fall back to the older signature (without IApplicationThread).
-            Log.d("PrivilegedService", "Modern method not found, trying older (10-arg) version.")
-            method = reflect.getDeclaredMethod(
-                IActivityManager::class.java,
-                "startActivityAsUser",
-                String::class.java,
-                Intent::class.java,
-                String::class.java,
-                IBinder::class.java,
-                String::class.java,
-                Int::class.java,
-                Int::class.java,
-                bundleClass, // Represents ProfilerInfo
-                Bundle::class.java, // Represents options
-                Int::class.java     // userId
+        if (method == null) {
+            // This is a critical error for your target SDK range. It should never happen.
+            Log.e(
+                "PrivilegedService",
+                "FATAL: Could not find the modern startActivityAsUser method on an SDK 30+ device."
             )
-            if (method != null) {
-                Log.d("PrivilegedService", "Found older (10-arg) startActivityAsUser method.")
-                requiresIApplicationThread = false
-            }
+        } else {
+            Log.d("PrivilegedService", "Successfully found the modern 11-argument method.")
         }
 
         method?.isAccessible = true
