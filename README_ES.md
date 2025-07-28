@@ -77,7 +77,7 @@ Además, comparado con instaladores del sistema, **InstallerX** ofrece más opci
 
 ## Sobre las versiones
 
-> [!ADVERTENCIA]
+> [!WARNING]
 > Las versiones en desarrollo no garantizan estabilidad y pueden cambiar/eliminar funciones sin previo aviso.
 > Al cambiar canales de compilación, puede ser necesario limpiar datos/reinstalar.
 
