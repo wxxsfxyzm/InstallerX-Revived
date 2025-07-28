@@ -1,14 +1,13 @@
 <resources>
-
+ 
     <string name="agreement_title">Política</string>
-    <string name="agreement_text">Aquí está nuestra política de usuario. Por favor, léala y acepte. &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/terms&quot;&gt;Política de Usuario&lt;/a&gt;, &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/privacy&quot;&gt;Política de Privacidad&lt;/a&gt; Este mensaje no se mostrará nuevamente después de aceptar.</string>
+    <string name="agreement_text">Esta es nuestra política de usuario. Por favor, léela y acéptala. &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/terms&quot;&gt;Política de Usuario&lt;/a&gt;, &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/privacy&quot;&gt;Política de Privacidad&lt;/a&gt; Este mensaje no se mostrará nuevamente después de aceptar.</string>
 
     <string name="user_terms">Política de usuario</string>
     <string name="privacy_policy">Política de privacidad</string>
-
     <string name="agree">Aceptar</string>
-
     <string name="open_source_license">Licencia de código abierto</string>
+
     <string name="back">Atrás</string>
     <string name="home">Inicio</string>
     <string name="config">Perfiles</string>
@@ -17,19 +16,19 @@
     <string name="search">Buscar</string>
     <string name="menu">Menú</string>
     <string name="about">Acerca de</string>
-    <string name="other">Otros</string>
+    <string name="other">Otro</string>
     <string name="about_detail">Acerca de InstallerX</string>
     <string name="get_update">Obtener actualización</string>
-    <string name="get_update_detail">Busca actualizaciones de software y nuevas funciones.</string>
+    <string name="get_update_detail">Buscar actualizaciones de software y nuevas funciones.</string>
 
     <string name="stable">Estable</string>
     <string name="preview">Vista previa</string>
     <string name="unstable">Inestable</string>
 
-    <string name="enable_notification_hint">¡Por favor, activa el permiso de notificaciones para instalar!</string>
-    <string name="enable_storage_permission_hint">¡Por favor, activa el permiso de almacenamiento para instalar!</string>
+    <string name="enable_notification_hint">¡Activa el permiso de notificaciones para instalar!</string>
+    <string name="enable_storage_permission_hint">¡Activa el permiso de almacenamiento para instalar!</string>
 
-    <string name="discuss">Chat &amp; Comentarios &amp; Actualizaciones</string>
+    <string name="discuss">Chat, comentarios y actualizaciones</string>
     <string name="qq_channel">Canal de QQ</string>
     <string name="qq_group_official">Grupo de QQ (oficial)</string>
     <string name="telegram_group">Grupo de Telegram</string>
@@ -37,11 +36,11 @@
     <string name="basic">Básico</string>
     <string name="lock_default_installer">Establecer como instalador predeterminado</string>
     <string name="lock_default_installer_dsp">Establece InstallerX como la app predeterminada para instalar APKs</string>
-    <string name="lock_default_installer_success">Establecido como instalador predeterminado con éxito</string>
+    <string name="lock_default_installer_success">Instalador predeterminado establecido</string>
     <string name="lock_default_installer_failed">No se pudo establecer como instalador predeterminado</string>
     <string name="unlock_default_installer">Quitar como instalador predeterminado</string>
-    <string name="unlock_default_installer_dsp">Quita InstallerX como el instalador predeterminado para instalar APKs</string>
-    <string name="unlock_default_installer_success">Se quitó como instalador predeterminado con éxito</string>
+    <string name="unlock_default_installer_dsp">Quita InstallerX como el instalador predeterminado para APKs</string>
+    <string name="unlock_default_installer_success">Instalador predeterminado quitado</string>
     <string name="unlock_default_installer_failed">No se pudo quitar como instalador predeterminado</string>
     <string name="clear_cache">Limpiar caché</string>
     <string name="success">Éxito</string>
@@ -57,7 +56,7 @@
     <string name="delete">Eliminar</string>
     <string name="restore">Deshacer</string>
 
-    <string name="delete_success">Eliminado con éxito</string>
+    <string name="delete_success">Eliminado correctamente</string>
 
     <string name="loading">Cargando…</string>
     <string name="empty_configs">Sin perfiles, agrega uno abajo</string>
@@ -67,9 +66,9 @@
     <string name="config_name">Nombre del perfil</string>
     <string name="config_description">Descripción del perfil</string>
     <string name="config_authorizer">Autorizador</string>
-    <!--    <string name="config_authorizer_msg">Para ejecutar análisis y comandos, asegúrate de tener permisos suficientes.</string>-->
+    <!--    <string name="config_authorizer_msg">用于执行解析与执行命令，请确保拥有足够的权限。</string>-->
     <string name="config_authorizer_global">Global</string>
-    <string name="config_authorizer_global_desc">Global (%1$s) </string>
+    <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">Ninguno</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
@@ -87,9 +86,11 @@
     <string name="config_declare_installer">Establecer fuente de instalación</string>
     <string name="config_installer">instalado por (nombre del paquete)</string>
     <string name="config_auto_delete">Eliminación automática</string>
-    <string name="config_auto_delete_dsp">Eliminar automáticamente el APK después de la instalación</string>
+    <string name="config_auto_delete_dsp">Elimina automáticamente el APK después de instalarlo</string>
     <string name="config_display_sdk_version">Mostrar información del SDK</string>
     <string name="config_display_sdk_version_sdp">Mostrar información de destino y mínima en la interfaz de instalación</string>
+    <string name="config_label_installer_settings">Configuración del instalador</string>
+    <string name="config_label_install_options">Opciones de instalación</string>
 
     <string name="config_error_name">El nombre no puede estar vacío</string>
     <string name="config_error_customize_authorizer">El autorizador personalizado no puede estar vacío</string>
@@ -101,7 +102,7 @@
     <string name="next">Siguiente</string>
     <string name="previous">Anterior</string>
     <string name="close">Cerrar</string>
-    <string name="finish">Finalizar</string>
+    <string name="finish">Listo</string>
     <string name="open">Abrir</string>
     <string name="select">Seleccionar</string>
     <string name="clear">Limpiar</string>
@@ -119,51 +120,51 @@
 
     <string name="installer_ready">Listo</string>
     <string name="installer_resolving">Verificando…</string>
-    <string name="installer_resolve_failed">Fallo en la verificación</string>
+    <string name="installer_resolve_failed">Error al verificar</string>
     <string name="installer_resolve_success">Verificación exitosa</string>
     <string name="installer_analysing">Analizando…</string>
-    <string name="installer_analyse_failed">Fallo en el análisis</string>
+    <string name="installer_analyse_failed">Error al analizar</string>
     <string name="installer_select_install">Selecciona apps para instalar</string>
     <string name="installer_prepare_install">Antes de instalar</string>
     <string name="installer_prepare_install_empty">Selecciona al menos un paquete</string>
     <string name="installer_prepare_install_too_many">Selecciona solo un base.apk</string>
-    <string name="installer_prepare_sdk_incompatible">El SDK del sistema es inferior al requerido por la app</string>
+    <string name="installer_prepare_sdk_incompatible">El SDK del sistema es inferior al requerido</string>
     <string name="installer_prepare_type_new_install">Preparando para instalar nueva app</string>
     <string name="installer_prepare_type_upgrade">Preparando para actualizar app</string>
     <string name="installer_prepare_type_downgrade">Esto es un downgrade, puede causar pérdida de datos o inestabilidad</string>
     <string name="installer_prepare_type_reinstall">Se reinstalará la versión actual de la app</string>
     <string name="installer_prepare_type_sidegrade">Se cambiará la versión actual de la app</string>
-    <string name="installer_prepare_type_unknown_confirm">¿Estás seguro de que deseas instalar?</string>
+    <string name="installer_prepare_type_unknown_confirm">¿Estás seguro de que quieres instalar?</string>
     <string name="installer_installing">Instalando…</string>
-    <string name="installer_install_failed">Fallo en la instalación</string>
-    <string name="installer_install_success">Instalación completada</string>
+    <string name="installer_install_failed">Error al instalar</string>
+    <string name="installer_install_success">Instalación exitosa</string>
     <string name="installer_error_reason">Motivo del error</string>
     <string name="installer_unknown_error">Error desconocido</string>
 
     <string name="installer_channel_name">Notificación de instalación</string>
-    <string name="installer_progress_channel_name">Notificación de progreso de instalación</string>
+    <string name="installer_progress_channel_name">Notificación de progreso</string>
     <string name="installer_background_channel_name">Notificación en segundo plano</string>
 
     <string name="permission_read_external_storage">Leer almacenamiento externo</string>
     <string name="permission_write_external_storage">Escribir en almacenamiento externo</string>
-    <string name="permission_access_fine_location">Acceder a ubicación precisa</string>
-    <string name="permission_access_coarse_location">Acceder a ubicación aproximada</string>
+    <string name="permission_access_fine_location">Acceso preciso a ubicación</string>
+    <string name="permission_access_coarse_location">Acceso aproximado a ubicación</string>
     <string name="permission_camera">Cámara</string>
     <string name="permission_record_audio">Grabar audio</string>
     <string name="permission_read_contacts">Leer contactos</string>
     <string name="permission_write_contacts">Escribir contactos</string>
     <string name="permission_read_phone_state">Leer estado del teléfono</string>
-    <string name="permission_call_phone">Llamar por teléfono</string>
+    <string name="permission_call_phone">Llamar</string>
     <string name="permission_send_sms">Enviar SMS</string>
     <string name="permission_receive_sms">Recibir SMS</string>
     <string name="permission_read_sms">Leer SMS</string>
     <string name="permission_receive_mms">Recibir MMS</string>
     <string name="permission_read_calendar">Leer calendario</string>
     <string name="permission_write_calendar">Escribir en calendario</string>
-    <string name="permission_access_background_location">Acceder a ubicación en segundo plano</string>
+    <string name="permission_access_background_location">Acceso a ubicación en segundo plano</string>
     <string name="permission_system_alert_window">Ventana de alerta del sistema</string>
-    <string name="permission_access_network_state">Acceder al estado de la red</string>
-    <string name="permission_access_wifi_state">Acceder al estado del Wi-Fi</string>
+    <string name="permission_access_network_state">Acceso al estado de red</string>
+    <string name="permission_access_wifi_state">Acceso al estado de Wi-Fi</string>
     <string name="permission_internet">Internet</string>
     <string name="permission_vibrate">Vibrar</string>
     <string name="permission_read_phone_numbers">Leer números de teléfono</string>
@@ -172,12 +173,12 @@
     <string name="permission_bluetooth_connect">Conectar Bluetooth</string>
     <string name="permission_bluetooth_scan">Escanear Bluetooth</string>
     <string name="permission_nfc">NFC</string>
-    <string name="permission_access_media_location">Acceder a ubicación de medios</string>
+    <string name="permission_access_media_location">Acceso a ubicación de medios</string>
     <string name="permission_post_notifications">Publicar notificaciones</string>
-    <string name="permission_read_media_images">Leer imágenes de medios</string>
-    <string name="permission_read_media_video">Leer videos de medios</string>
-    <string name="permission_read_media_audio">Leer audio de medios</string>
-    <string name="permission_access_notification_policy">Acceder a política de notificaciones</string>
+    <string name="permission_read_media_images">Leer imágenes</string>
+    <string name="permission_read_media_video">Leer videos</string>
+    <string name="permission_read_media_audio">Leer audio</string>
+    <string name="permission_access_notification_policy">Acceso a política de notificaciones</string>
     <string name="permission_foreground_service">Servicio en primer plano</string>
     <string name="permission_request_install_packages">Solicitar instalación de paquetes</string>
     <string name="permission_write_settings">Escribir configuraciones</string>
@@ -187,149 +188,156 @@
     <string name="permission_read_sync_settings">Leer configuraciones de sincronización</string>
     <string name="permission_write_sync_settings">Escribir configuraciones de sincronización</string>
     <string name="permission_read_call_log">Leer registro de llamadas</string>
-    <string name="permission_write_call_log">Escribir en registro de llamadas</string>
-    <string name="permission_answer_phone_calls">Responder llamadas telefónicas</string>
+    <string name="permission_write_call_log">Escribir registro de llamadas</string>
+    <string name="permission_answer_phone_calls">Responder llamadas</string>
     <string name="permission_schedule_exact_alarm">Programar alarma exacta</string>
-    <string name="permission_request_ignore_battery_optimizations">Solicitar ignorar optimizaciones de batería</string>
-    <string name="permission_access_location_extra_commands">Acceder a comandos extra de ubicación</string>
-    <string name="permission_access_mock_location">Acceder a ubicación simulada</string>
+    <string name="permission_request_ignore_battery_optimizations">Ignorar optimización de batería</string>
+    <string name="permission_access_location_extra_commands">Comandos extras de ubicación</string>
+    <string name="permission_access_mock_location">Ubicación simulada</string>
     <string name="permission_dhizuku">Usar Dhizuku</string>
     <string name="permission_unknown">Permiso desconocido</string>
 
     <string name="installer_running">InstallerX en ejecución</string>
 
     <string name="installer_version_short">" Ver. %1$s (%2$s)"</string>
-    <string name="installer_version">Versión: %1$s (%2$s))</string>
+    <string name="installer_version">Versión: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">Paquete: %1$s</string>
+    <string name="installer_package_min_sdk" translatable="false">SDK mínimo: %1$s</string>
+    <string name="installer_package_target_sdk" translatable="false">SDK objetivo: %1$s</string>
     <string name="installer_file_path">Ruta: %1$s</string>
 
     <string name="exception_install_failed_unknown">Error desconocido</string>
-    <string name="exception_install_failed_already_exists">Esta versión de la app ya está instalada, desinstala e inténtalo de nuevo</string>
-    <string name="exception_install_failed_invalid_apk">Esta versión de la app ya está instalada, desinstala e inténtalo de nuevo</string>
+    <string name="exception_analyse_failed_all_files_unsupported">Archivo no compatible</string>
+    <string name="exception_install_failed_already_exists">Esta versión ya está instalada, desinstala e intenta nuevamente</string>
+    <string name="exception_install_failed_invalid_apk">APK inválido</string>
     <string name="exception_install_failed_invalid_uri">URI inválido</string>
     <string name="exception_install_failed_insufficient_storage">Almacenamiento lleno, libera espacio</string>
-    <string name="exception_install_failed_duplicate_package">La firma del paquete cambió, asegúrate de que sea seguro, desinstala la aplicación e inténtalo de nuevo</string>
-    <string name="exception_install_failed_no_shared_user">No se encontró el base.apk con un UID coincidente, descárgalo e inténtalo de nuevo</string>
-    <string name="exception_install_failed_update_incompatible">Actualización incompatible, desinstala e inténtalo de nuevo</string>
-    <string name="exception_install_failed_shared_user_incompatible">Las firmas del paquete no coinciden</string>
-    <string name="exception_install_failed_missing_shared_library">Falta una biblioteca compartida</string>
+    <string name="exception_install_failed_duplicate_package">La firma del paquete cambió, desinstala la app e intenta nuevamente</string>
+    <string name="exception_install_failed_no_shared_user">No se encontró el base.apk con UID coincidente</string>
+    <string name="exception_install_failed_update_incompatible">Actualización incompatible</string>
+    <string name="exception_install_failed_shared_user_incompatible">Las firmas no coinciden</string>
+    <string name="exception_install_failed_missing_shared_library">Falta biblioteca compartida</string>
     <string name="exception_install_failed_replace_couldnt_delete">Biblioteca compartida inválida</string>
-    <string name="exception_install_failed_dexopt">No se pudo optimizar el DEX</string>
-    <string name="exception_install_failed_older_sdk">La versión del sistema es muy antigua, actualízala</string>
-    <string name="exception_install_failed_conflicting_provider">Ya existe un ContentProvider con el mismo nombre</string>
-    <string name="exception_install_failed_newer_sdk">El paquete es muy antiguo para la versión del sistema</string>
-    <string name="exception_install_failed_test_only">La instalación de aplicaciones de depuración está desactivada, actívala e inténtalo de nuevo</string>
-    <string name="exception_install_failed_cpu_abi_incompatible">ABI de CPU incompatible, descarga el paquete compatible con tu CPU</string>
-    <string name="exception_install_failed_missing_feature">El paquete usa una característica inválida</string>
+    <string name="exception_install_failed_dexopt">Error al optimizar DEX</string>
+    <string name="exception_install_failed_older_sdk">Versión del sistema muy antigua</string>
+    <string name="exception_install_failed_conflicting_provider">Ya existe un ContentProvider con este nombre</string>
+    <string name="exception_install_failed_newer_sdk">El paquete es muy antiguo para esta versión del sistema</string>
+    <string name="exception_install_failed_test_only">Instalación de apps de prueba desactivada</string>
+    <string name="exception_install_failed_cpu_abi_incompatible">ABI de CPU incompatible</string>
+    <string name="exception_install_failed_missing_feature">El paquete usa una función inválida</string>
     <string name="exception_install_failed_container_error">Error al acceder a la tarjeta SD</string>
     <string name="exception_install_failed_invalid_install_location">Ubicación de instalación inválida</string>
     <string name="exception_install_failed_media_unavailable">No se encontró la tarjeta SD</string>
-    <string name="exception_install_failed_verification_timeout">Tiempo de verificación del paquete agotado</string>
-    <string name="exception_install_failed_verification_failure">No se pudo verificar el paquete</string>
-    <string name="exception_install_failed_package_changed">El programa espera que cambie el envoltorio de la llamada</string>
-    <string name="exception_install_failed_uid_changed">El UID cambió, desinstala e inténtalo de nuevo</string>
-    <string name="exception_install_failed_version_downgrade">Fallo en el downgrade, desinstala la app e inténtalo de nuevo</string>
-    <string name="exception_install_failed_rejected_by_build_type">Rechazado por el tipo de compilación del sistema</string>
-    <string name="exception_install_failed_hyperos_isolation_violation">Agrega una fuente de instalación válida para instalar apps del sistema</string>
-    <string name="exception_install_failed_duplicate_permission">El paquete intenta redeclarar un permiso ya existente</string>
-    <string name="exception_install_failed_user_restricted">El sistema restringió la instalación por USB, por favor actívala.</string>
-
+    <string name="exception_install_failed_verification_timeout">Tiempo de verificación agotado</string>
+    <string name="exception_install_failed_verification_failure">Error al verificar el paquete</string>
+    <string name="exception_install_failed_package_changed">El paquete cambió durante la instalación</string>
+    <string name="exception_install_failed_uid_changed">El UID cambió, desinstala e intenta nuevamente</string>
+    <string name="exception_install_failed_version_downgrade">Downgrade fallido</string>
+    <string name="exception_install_failed_deprecated_sdk_version">targetSDK demasiado bajo</string>
+    <string name="exception_install_failed_rejected_by_build_type">Rechazado por tipo de compilación</string>
+    <string name="exception_install_failed_hyperos_isolation_violation">Agrega una fuente de instalación válida para apps del sistema</string>
+    <string name="exception_install_failed_duplicate_permission">¡El paquete intenta redeclarar un permiso ya existente!</string>
+    <string name="exception_install_failed_user_restricted">Instalación restringida por USB, actívala</string>
     <string name="exception_shizuku_not_work">Activa Sui o Shizuku y otorga permisos</string>
     <string name="exception_dhizuku_not_work">Activa Dhizuku y otorga permisos</string>
     <string name="exception_root_not_work">No se pudo acceder a root</string>
-    <string name="exception_app_process_not_work">No se pudo conectar con el autorizador</string>
+    <string name="exception_app_process_not_work">No se pudo conectar al autorizador</string>
     <string name="old_version_prefix">Actual</string>
     <string name="upgrade_version_prefix">Actualizar</string>
     <string name="downgrade_version_prefix">Downgrade</string>
-    <string name="install_choice">Seleccionar Package</string>
+    <string name="install_choice">Seleccionar paquete</string>
 
-    <string name="show_dialog_when_pressing_notification">Mostrar diálogo al presionar la notificación</string>
-    <string name="change_notification_touch_behavior">Cambiar comportamiento táctil de la notificación</string>
+    <string name="show_dialog_when_pressing_notification">Mostrar diálogo al tocar notificación</string>
+    <string name="change_notification_touch_behavior">Cambiar comportamiento al tocar notificación</string>
     <string name="show_dialog_install_extended_menu">Mostrar menú extendido</string>
     <string name="show_dialog_install_extended_menu_desc">Mostrar más opciones en el diálogo de instalación</string>
-    <string name="extended_menu">Menú Extendido</string>
-    <string name="disable_notification">Deshabilitar Notificación</string>
-    <string name="close_immediately_on_dialog_dismiss">Durante a instalação, a caixa de diálogo permanecerá em primeiro plano, outros estados encerrarão a sessão de instalação diretamente, sem exibir notificações de instalação</string>
+    <string name="extended_menu">Menú extendido</string>
+    <string name="disable_notification">Desactivar notificación</string>
+    <string name="close_immediately_on_dialog_dismiss">El diálogo permanece en primer plano durante la instalación</string>
+    <string name="disable_notification_on_dismiss">Cerrar al descartar diálogo</string>
+    <string name="close_notification_immediately_on_dialog_dismiss">Descartar diálogo cerrará la app</string>
     <string name="set_countdown">Establecer cuenta regresiva</string>
-    <string name="dhizuku_auto_close_countdown_desc">Cuenta regresiva para el cierre automático después de que la instalación de Dhizuku se complete</string>
-    <string name="dhizuku_cannot_set_installer_desc">¡El modo Dhizuku no admite la configuración del instalador!</string>
-    <string name="grant_permission_after_install">Tocar para otorgar permiso después de la instalación</string>
-    <string name="permission_list">Lista de Permisos</string>
-    <string name="permission_list_desc">Lista de permisos solicitados por el paquete que se está instalando</string>
+    <string name="dhizuku_auto_close_countdown_desc">Cuenta regresiva para cerrar después de instalación con Dhizuku</string>
+    <string name="dhizuku_cannot_set_installer_desc">¡El modo Dhizuku no soporta establecer instalador!</string>
+    <string name="grant_permission_after_install">Otorgar permisos después de instalar</string>
+    <string name="show_intelligent_suggestion">Mostrar sugerencias inteligentes (Experimental)</string>
+    <string name="show_intelligent_suggestion_desc">Mostrar sugerencias cuando falle la instalación</string>
+    <string name="permission_list">Lista de permisos</string>
+    <string name="permission_list_desc">Permisos solicitados por el paquete</string>
 
-    <!--  InstallOptions Start  -->
-    <string name="config_allow_test">Permitir Pruebas</string>
-    <string name="config_allow_test_desc">Si el paquete que se está instalando es una aplicación solo de prueba, permitir su instalación.</string>
-    <string name="internal">Almacenamiento Interno</string>
-    <string name="internal_desc">Forzar la instalación del paquete en el almacenamiento interno.</string>
-    <string name="external">Almacenamiento Externo</string>
-    <string name="external_desc">Forzar la instalación del paquete en el almacenamiento externo.</string>
+    <string name="config_allow_test">Permitir pruebas</string>
+    <string name="config_allow_test_desc">Permitir instalación de apps solo para pruebas</string>
+    <string name="internal">Almacenamiento interno</string>
+    <string name="internal_desc">Forzar instalación en almacenamiento interno</string>
+    <string name="external">Almacenamiento externo</string>
+    <string name="external_desc">Forzar instalación en almacenamiento externo</string>
     <string name="from_adb">Solicitud de instalación desde ADB</string>
-    <string name="from_adb_desc">Indica al sistema que la solicitud de instalación fue realizada por ADB</string>
-    <string name="config_all_users">Instalar para Todos los Usuarios</string>
-    <string name="config_all_users_desc">Instala el paquete para todos los usuarios del sistema, en lugar de solo el usuario especificado o predeterminado</string>
-    <string name="config_allow_downgrade">Permitir Reversión</string>
-    <string name="config_allow_downgrade_desc">Intenta revertir la versión actualmente instalada del paquete a la que se está instalando (puede que no funcione en todas las ROMs)</string>
-    <string name="config_grant_all_permissions">Otorgar Todos los Permisos Solicitados</string>
-    <string name="config_grant_all_permissions_desc">Otorga automáticamente todos los permisos que solicita el paquete. Tenga en cuenta que esto solo se aplica a los permisos de tiempo de ejecución. Permisos especiales como Acceso a Todos los Archivos o Accesibilidad no se otorgarán automáticamente.</string>
-    <string name="force_volume_uuid">Forzar UUID de Volumen</string>
-    <string name="force_volume_uuid_desc">Permite especificar un UUID de volumen para instalar el paquete.</string>
-    <string name="force_permission_prompt">Forzar Solicitud de Permiso</string>
-    <string name="force_permission_prompt_desc">Fuerza a que incluso los instaladores del sistema muestren el mensaje de confirmación de instalación.</string>
-    <string name="instant_app">Aplicación Instantánea</string>
-    <string name="instant_app_desc">Instala el paquete como una aplicación instantánea.</string>
-    <string name="dont_kill_app">No Matar Aplicación</string>
-    <string name="dont_kill_app_desc">Se usa al instalar una función para una aplicación dividida para evitar que la aplicación principal se cierre durante la instalación.</string>
-    <string name="full_app">Aplicación Completa</string>
-    <string name="full_app_desc">Indica que el paquete que se está instalando es una aplicación completa. Se puede usar para actualizar aplicaciones instantáneas a aplicaciones completas.</string>
-    <string name="allocate_aggressive">Asignar Agresivamente</string>
-    <string name="allocate_aggressive_desc">Indica que el paquete es "crítico para la salud o seguridad del sistema" y eliminará más agresivamente los archivos borrables para hacer espacio si es necesario.</string>
-    <string name="virtual_preload">Precarga Virtual</string>
-    <string name="virtual_preload_desc">Indica que el paquete es una precarga virtual.</string>
-    <string name="apex_desc">Indica que el paquete que se está instalando es un paquete APEX</string>
-    <string name="enable_rollback">Habilitar Reversión</string>
-    <string name="enable_rollback_desc">Permitir futuras reversiones de este paquete.</string>
-    <string name="disable_verification">Deshabilitar Verificación</string>
-    <string name="disable_verification_desc">Deshabilita la verificación del paquete durante la instalación. Esto no es verificación de firma.</string>
-    <string name="staged">Escenificado</string>
-    <string name="staged_desc">Indica que este paquete se está instalando como parte de una instalación escenificada.</string>
-    <string name="config_all_whitelist_restricted_permissions">Permitir Permisos Restringidos</string>
-    <string name="config_all_whitelist_restricted_permissions_desc">Permitir que se otorguen permisos restringidos para el paquete que se está instalando.</string>
-    <string name="disable_allowed_apex_update_check">Deshabilitar Verificación de Actualización de APEX Permitida</string>
-    <string name="disable_allowed_apex_update_check_desc">No verificar si el APEX instalado se puede actualizar.</string>
-    <string name="config_bypass_low_target_sdk">Omitir Bloqueo de SDK de Destino Bajo</string>
-    <string name="config_bypass_low_target_sdk_desc">Permite instalar aplicaciones dirigidas a versiones de SDK antiguas.</string>
-    <string name="dry_run">Prueba en Seco</string>
-    <string name="dry_run_desc">Verificar el paquete, pero no instalarlo.</string>
+    <string name="from_adb_desc">Indica que la instalación fue solicitada por ADB</string>
+    <string name="config_all_users">Instalar para todos los usuarios</string>
+    <string name="config_all_users_desc">Instalar el paquete para todos los usuarios del sistema</string>
+    <string name="config_allow_downgrade">Permitir downgrade</string>
+    <string name="config_allow_downgrade_desc">Intentar instalar una versión anterior (puede no funcionar en todos los sistemas)</string>
+    <string name="config_grant_all_permissions">Otorgar todos los permisos</string>
+    <string name="config_grant_all_permissions_desc">Otorga automáticamente todos los permisos solicitados</string>
+    <string name="force_volume_uuid">Forzar UUID de volumen</string>
+    <string name="force_volume_uuid_desc">Especificar un UUID de volumen para instalación</string>
+    <string name="force_permission_prompt">Forzar diálogo de permisos</string>
+    <string name="force_permission_prompt_desc">Mostrar diálogo de confirmación incluso para instaladores del sistema</string>
+    <string name="instant_app">App instantánea</string>
+    <string name="instant_app_desc">Instalar como app instantánea</string>
+    <string name="dont_kill_app">No cerrar app</string>
+    <string name="dont_kill_app_desc">Evita que se cierre la app durante la instalación</string>
+    <string name="full_app">App completa</string>
+    <string name="full_app_desc">Instalar como app completa</string>
+    <string name="allocate_aggressive">Asignación agresiva</string>
+    <string name="allocate_aggressive_desc">Elimina archivos para liberar espacio si es necesario</string>
+    <string name="virtual_preload">Precarga virtual</string>
+    <string name="virtual_preload_desc">Indica que el paquete es una precarga virtual</string>
+    <string name="apex" translatable="false">APEX</string>
+    <string name="apex_desc">Indica que el paquete es APEX</string>
+    <string name="enable_rollback">Habilitar reversión</string>
+    <string name="enable_rollback_desc">Permitir reversiones futuras</string>
+    <string name="disable_verification">Desactivar verificación</string>
+    <string name="disable_verification_desc">Desactiva la verificación durante la instalación</string>
+    <string name="staged">Escalonado</string>
+    <string name="staged_desc">Instalación escalonada</string>
+    <string name="config_all_whitelist_restricted_permissions">Permitir permisos restringidos</string>
+    <string name="config_all_whitelist_restricted_permissions_desc">Permitir otorgar permisos restringidos</string>
+    <string name="disable_allowed_apex_update_check">Desactivar verificación de actualización APEX</string>
+    <string name="disable_allowed_apex_update_check_desc">No verificar si el APEX puede actualizarse</string>
+    <string name="config_bypass_low_target_sdk">Ignorar bloqueo por SDK bajo</string>
+    <string name="config_bypass_low_target_sdk_desc">Permitir instalar apps con SDK antiguo</string>
+    <string name="dry_run">Prueba seca</string>
+    <string name="dry_run_desc">Verificar el paquete sin instalarlo</string>
 
-    <string name="replace_existing">Reemplazar Existente</string>
-    <string name="replace_existing_desc">Si el paquete que se va a instalar ya existe, reemplazarlo/actualizarlo.</string>
-    <!--  InstallOptions End  -->
+    <string name="replace_existing">Reemplazar existente</string>
+    <string name="replace_existing_desc">Reemplazar paquete si ya existe</string>
 
-    <!-- MultiApkZip Installer -->
     <string name="installer_file_name">Archivo: %1$s</string>
-    <string name="installer_select_from_zip">Seleccionar de archivo zip</string>
-    <string name="installer_multi_apk_zip_description">Este archivo contiene varias aplicaciones separadas, seleccione las aplicaciones que desea procesar.</string>
+    <string name="installer_select_from_zip">Seleccionar desde archivo ZIP</string>
+    <string name="installer_multi_apk_zip_description">Este archivo contiene múltiples aplicaciones, selecciona las que deseas procesar.</string>
     <string name="installing_progress_text">Instalando %1$s (%2$d/%3$d)</string>
-    <string name="installer_completed">Instalación completa</string>
-    <string name="installer_completed_subtitle">Exitoso: %1$s, fallido: %2$s</string>
-    <string name="installer_current_install_mode_not_supported">El modo actual no admite la instalación de este tipo de archivo</string>
-    <!-- MultiApkZip End -->
+    <string name="installer_completed">Instalación completada</string>
+    <string name="installer_completed_subtitle">%1$s exitosas, %2$s fallidas</string>
+    <string name="installer_current_install_mode_not_supported">El modo actual no soporta este tipo de archivo</string>
 
-    <!-- SplitNameUtil Start -->
-    <string name="split_name_language">División de idioma: %1$s</string>
-    <string name="split_name_architecture">División de arquitectura: %1$s</string>
+    <string name="split_name_language">Idioma: %1$s</string>
+    <string name="split_name_architecture">Arquitectura: %1$s</string>
     <string name="split_name_density">Densidad de pantalla: %1$s</string>
     <string name="split_dpi_ldpi">Baja (~120dpi)</string>
     <string name="split_dpi_mdpi">Media (~160dpi)</string>
     <string name="split_dpi_hdpi">Alta (~240dpi)</string>
-    <string name="split_dpi_xhdpi">Extra Alta (~320dpi)</string>
-    <string name="split_dpi_xxhdpi">Extra Extra Alta (~480dpi)</string>
-    <string name="split_dpi_xxxhdpi">Extra Extra Extra Alta (~640dpi)</string>
+    <string name="split_dpi_xhdpi">Extra alta (~320dpi)</string>
+    <string name="split_dpi_xxhdpi">Extra extra alta (~480dpi)</string>
+    <string name="split_dpi_xxxhdpi">Extra extra extra alta (~640dpi)</string>
     <string name="split_dpi_tvdpi">TV (~213dpi)</string>
     <string name="split_dpi_nodpi">Sin escalado</string>
     <string name="split_dpi_anydpi">Cualquier densidad</string>
-    <!-- SplitNameUtil End -->
 
+    <string name="suggestion_uninstall_and_retry">Desinstalar y volver a instalar</string>
+    <string name="suggestion_allow_test_app">Habilitar temporalmente el paquete de prueba y volver a intentarlo</string>
+    <string name="suggestion_mi_isolation">Añadir temporalmente un instalador válido y volver a intentarlo</string>
+    <string name="suggestion_user_restricted">Ve a las opciones de desarrollador y activa la instalación USB</string>
+    <string name="suggestion_bypass_low_target_sdk">Permite temporalmente omitir la restricción y vuelve a intentarlo</string>
 </resources>
