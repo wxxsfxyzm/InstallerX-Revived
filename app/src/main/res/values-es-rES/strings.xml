@@ -66,7 +66,7 @@
     <string name="config_name">Nombre del perfil</string>
     <string name="config_description">Descripción del perfil</string>
     <string name="config_authorizer">Autorizador</string>
-    <!--    <string name="config_authorizer_msg">用于执行解析与执行命令，请确保拥有足够的权限。</string>-->
+    <!--    <string name="config_authorizer_msg">Para ejecutar análisis y comandos, asegúrate de tener permisos suficientes.</string>-->
     <string name="config_authorizer_global">Global</string>
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">Ninguno</string>
