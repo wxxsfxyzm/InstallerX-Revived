@@ -67,14 +67,18 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     private suspend fun resolve(activity: Activity) {
-        Timber.d("[id=${installer.id}] resolve: Starting.")
-        if (installer.data.isNotEmpty()) {
-            Timber.w("[id=${installer.id}] resolve: installer.data is not empty. Skipping redundant resolve.")
-            return
-        }
+        Timber.d("[id=${installer.id}] resolve: Starting new task.")
 
-        Timber.d("[id=${installer.id}] resolve: Emitting ProgressEntity.Resolving")
+        // --- Reset all state fields here at the beginning ---
+        installer.error = Throwable()
+        installer.config = ConfigEntity.default
+        installer.data = emptyList()
+        installer.entities = emptyList()
+        installer.progress.emit(ProgressEntity.Ready) // Also reset progress
+
+        Timber.d("[id=${installer.id}] resolve: State has been reset. Emitting ProgressEntity.Resolving.")
         installer.progress.emit(ProgressEntity.Resolving)
+
 
         installer.config = try {
             resolveConfig(activity)
