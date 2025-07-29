@@ -20,8 +20,7 @@ body:
       label: |
         To Reproduce
       description: |
-        step example：
-        Steps to reproduce the behavior:
+        Example of problem reproduction steps:\
         1. Go to '...'
         2. Click on '....'
         3. Scroll down to '....'
@@ -45,9 +44,9 @@ body:
       label: |
         Smartphone Info
       description: |
-        example：
-        Device: Xiaomi
-        OS: HyperOS 2.0.200, Android 15
+        example:\
+        Device: Xiaomi\
+        OS: HyperOS 2.0.200, Android 15\
         InstallerX Version: latest alpha/latest stable
     validations:
       required: true
