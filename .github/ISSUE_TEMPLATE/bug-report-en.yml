@@ -20,7 +20,7 @@ body:
       label: |
         To Reproduce
       description: |
-        Example of problem reproduction steps:\
+        Example of problem reproduction steps:
         1. Go to '...'
         2. Click on '....'
         3. Scroll down to '....'
