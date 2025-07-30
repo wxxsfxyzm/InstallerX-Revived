@@ -49,7 +49,7 @@ data class EditViewState(
 
         companion object {
             fun build(config: ConfigEntity): Data = Data(
-                name = config.name,
+                name = "",
                 description = config.description,
                 authorizer = config.authorizer,
                 customizeAuthorizer = config.customizeAuthorizer,

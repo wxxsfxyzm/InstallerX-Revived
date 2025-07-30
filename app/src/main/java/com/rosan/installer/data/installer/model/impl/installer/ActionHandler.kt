@@ -241,11 +241,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     private fun resolveDataUri(activity: Activity, uri: Uri): List<DataEntity> {
+        Timber.d("Source URI: $uri")
         if (uri.scheme == ContentResolver.SCHEME_FILE) return resolveDataFileUri(activity, uri)
         return resolveDataContentFile(activity, uri)
     }
 
     private fun resolveDataFileUri(activity: Activity, uri: Uri): List<DataEntity> {
+        Timber.d("uri:$uri")
         val path = uri.path ?: throw Exception("can't get uri path: $uri")
         val data = DataEntity.FileEntity(path)
         data.source = DataEntity.FileEntity(path)

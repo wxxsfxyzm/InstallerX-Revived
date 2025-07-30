@@ -3,6 +3,7 @@ package com.rosan.installer.ui.page.installer.dialog.inner
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -21,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.util.help
 
@@ -74,29 +77,39 @@ val permissionIcon: @Composable () -> Unit = {
     )
 }
 
-val errorTextBlock: ((error: Throwable) -> (@Composable () -> Unit)) = { error ->
-    {
-        var expanded by remember { mutableStateOf(false) }
-        val rotation by animateFloatAsState(targetValue = if (expanded) -180f else 0f, label = "errorRotation")
+/**
+ * A composable that displays an error message in a collapsible block.
+ * It also provides a slot for suggestions to be shown when the block is not expanded.
+ *
+ * @param error The throwable error to display.
+ * @param modifier Modifier for the root Column.
+ * @param suggestions A composable lambda for displaying suggestion chips below the error block.
+ */
+@Composable
+fun ErrorTextBlock(
+    error: Throwable,
+    modifier: Modifier = Modifier,
+    suggestions: @Composable () -> Unit = {}
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val rotation by animateFloatAsState(targetValue = if (expanded) -180f else 0f, label = "errorRotation")
 
+    Column(modifier = modifier.fillMaxWidth()) {
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
             Column(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.errorContainer)
                     .fillMaxWidth()
-                    .padding(12.dp),
-                // verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        expanded = !expanded
+                    }
+                    .padding(12.dp)
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            expanded = !expanded
-                        },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -107,7 +120,6 @@ val errorTextBlock: ((error: Throwable) -> (@Composable () -> Unit)) = { error -
                             .rotate(rotation)
                     )
                     Text(
-                        // 直接使用传入的 error 对象
                         text = error.help(),
                         fontWeight = FontWeight.Bold,
                         maxLines = Int.MAX_VALUE
@@ -118,18 +130,30 @@ val errorTextBlock: ((error: Throwable) -> (@Composable () -> Unit)) = { error -
                     enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
                     exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
                 ) {
+                    val textToShow = if (RsConfig.isDebug) {
+                        error.stackTraceToString()
+                    } else {
+                        error.message ?: "An unknown error occurred." // Fallback message
+                    }.trim()
                     Column {
-                        // The spacer that replaces Arrangement.spacedBy
                         Spacer(modifier = Modifier.height(8.dp))
                         BasicTextField(
-                            // 直接使用传入的 error 对象
-                            value = error.stackTraceToString().trim(),
+                            value = textToShow,
                             onValueChange = {},
-                            readOnly = true
+                            readOnly = true,
+                            textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current)
                         )
                     }
                 }
             }
+        }
+        // Suggestions are only visible when the error text is NOT expanded.
+        AnimatedVisibility(
+            visible = !expanded,
+            enter = fadeIn(animationSpec = tween(delayMillis = 150)) + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            suggestions()
         }
     }
 }

@@ -53,7 +53,7 @@ data class ConfigEntity(
             authorizer = Authorizer.Global,
             customizeAuthorizer = "",
             installMode = InstallMode.Dialog,
-            installer = "com.android.fileexplorer",
+            installer = "com.miui.packageinstaller",
             autoDelete = false,
             forAllUser = false,
             allowTestOnly = false,

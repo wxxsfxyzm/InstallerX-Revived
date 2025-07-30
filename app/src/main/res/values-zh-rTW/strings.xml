@@ -334,4 +334,10 @@
     <string name="split_dpi_nodpi">不縮放</string>
     <string name="split_dpi_anydpi">任意密度</string>
     <!-- SplitNameUtil End -->
+
+    <string name="suggestion_uninstall_and_retry">卸載舊版並重試</string>
+    <string name="suggestion_allow_test_app">臨時允許測試包並重試</string>
+    <string name="suggestion_mi_isolation">臨時添加有效安裝者並重試</string>
+    <string name="suggestion_user_restricted">前往開發者選項啟用USB安裝</string>
+    <string name="suggestion_bypass_low_target_sdk">臨時允許繞過限制並重試</string>
 </resources>

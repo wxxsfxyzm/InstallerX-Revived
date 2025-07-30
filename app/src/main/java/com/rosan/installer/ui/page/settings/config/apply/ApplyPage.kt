@@ -99,8 +99,8 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.widget.chip.Chip
 import com.rosan.installer.ui.widget.setting.LabelWidget
-import com.rosan.installer.ui.widget.toggle.Chip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
