@@ -19,10 +19,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
@@ -120,7 +118,6 @@ private fun ErrorSuggestions(
     onUninstall: () -> Unit
 ) {
     val context = LocalContext.current
-    val miIcon = ImageVector.vectorResource(id = R.drawable.ic_mi)
     val possibleSuggestions = remember(installer, onUninstall) {
         listOf(
             SuggestionChipInfo(
@@ -150,7 +147,7 @@ private fun ErrorSuggestions(
                     viewModel.dispatch(DialogViewAction.Install)
                 },
                 labelRes = R.string.suggestion_mi_isolation,
-                icon = miIcon
+                icon = AppIcons.InstallSource
             ),
             SuggestionChipInfo(
                 InstallFailedUserRestrictedException::class,

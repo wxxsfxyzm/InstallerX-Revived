@@ -125,14 +125,6 @@ fun ErrorTextBlock(
                         maxLines = Int.MAX_VALUE
                     )
                 }
-                // Suggestions are only visible when the error text is NOT expanded.
-                AnimatedVisibility(
-                    visible = !expanded,
-                    enter = fadeIn(animationSpec = tween(delayMillis = 150)) + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
-                ) {
-                    suggestions()
-                }
                 AnimatedVisibility(
                     visible = expanded,
                     enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
@@ -155,6 +147,13 @@ fun ErrorTextBlock(
                 }
             }
         }
-
+        // Suggestions are only visible when the error text is NOT expanded.
+        AnimatedVisibility(
+            visible = !expanded,
+            enter = fadeIn(animationSpec = tween(delayMillis = 150)) + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            suggestions()
+        }
     }
 }
