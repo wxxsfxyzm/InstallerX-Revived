@@ -342,9 +342,9 @@
     <string name="split_dpi_anydpi">Any density</string>
     <!-- SplitNameUtil End -->
 
-    <string name="suggestion_uninstall_and_retry">卸载后重新安装</string>
-    <string name="suggestion_allow_test_app">临时启用允许测试包并重试</string>
-    <string name="suggestion_mi_isolation">临时添加有效安装者并重试</string>
-    <string name="suggestion_user_restricted">前往开发者选项启用USB安装</string>
-    <string name="suggestion_bypass_low_target_sdk">临时允许绕过限制并重试</string>
+    <string name="suggestion_uninstall_and_retry">Uninstall previous and retry</string>
+    <string name="suggestion_allow_test_app">Temporarily Allow Test and retry</string>
+    <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
+    <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
+    <string name="suggestion_bypass_low_target_sdk">Temporarily allow bypassing restrictions and retry</string>
 </resources>

@@ -103,7 +103,7 @@ fun installFailedDialog( // 小写开头
                 /*DialogButton(stringResource(R.string.previous)) {
                     viewModel.dispatch(DialogViewAction.InstallPrepare)
                 },*/
-                DialogButton(stringResource(R.string.cancel)) {
+                DialogButton(stringResource(R.string.close)) {
                     viewModel.dispatch(DialogViewAction.Close)
                 }
             )
@@ -130,14 +130,14 @@ private fun ErrorSuggestions(
                     viewModel.toggleInstallFlag(InstallOption.AllowTest.value, true)
                     viewModel.dispatch(DialogViewAction.Install)
                 },
-                labelRes = R.string.suggestion_allow_test_app, // Assumed to exist
+                labelRes = R.string.suggestion_allow_test_app,
                 icon = AppIcons.BugReport
             ),
             SuggestionChipInfo(
                 InstallFailedUpdateIncompatibleException::class,
                 InstallFailedVersionDowngradeException::class,
-                selected = { true }, // This is an action, not a state toggle.
-                onClick = onUninstall,
+                selected = { false }, // This is an action, not a state toggle.
+                onClick = { viewModel.toast("Not yet implemented!") },// onUninstall,
                 labelRes = R.string.suggestion_uninstall_and_retry,
                 icon = AppIcons.Delete
             ),
