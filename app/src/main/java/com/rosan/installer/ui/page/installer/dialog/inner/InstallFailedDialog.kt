@@ -12,7 +12,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -44,6 +42,7 @@ import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 import com.rosan.installer.ui.widget.chip.Chip
 import com.rosan.installer.ui.widget.chip.SuggestionChipInfo
 import kotlinx.coroutines.delay
+import timber.log.Timber
 
 // Assume errorText is accessible
 
@@ -101,9 +100,9 @@ fun installFailedDialog( // 小写开头
             DialogParamsType.InstallerInstallFailed.id
         ) {
             listOf(
-                DialogButton(stringResource(R.string.previous)) {
+                /*DialogButton(stringResource(R.string.previous)) {
                     viewModel.dispatch(DialogViewAction.InstallPrepare)
-                },
+                },*/
                 DialogButton(stringResource(R.string.cancel)) {
                     viewModel.dispatch(DialogViewAction.Close)
                 }
@@ -192,11 +191,12 @@ private fun ErrorSuggestions(
             }
         }
     }
-
+    Timber.tag("suggestion")
+        .d("Visible suggestions: ${visibleSuggestions.size} for error: ${error::class.java.simpleName}")
     // Requirement: If there is at least one chip to show, create the FlowRow.
     if (visibleSuggestions.isNotEmpty()) {
         FlowRow(
-            modifier = Modifier.padding(top = 10.dp),
+            //modifier = Modifier.padding(top = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {

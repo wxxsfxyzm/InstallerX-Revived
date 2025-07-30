@@ -6,6 +6,7 @@ import com.rosan.installer.BuildConfig
 
 object RsConfig {
     val LEVEL: Level = getLevel()
+    val isDebug: Boolean = BuildConfig.DEBUG
 
     private fun getLevel(): Level {
         return when (BuildConfig.BUILD_LEVEL) {

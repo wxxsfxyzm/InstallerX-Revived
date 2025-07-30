@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.util.help
 
@@ -124,15 +125,28 @@ fun ErrorTextBlock(
                         maxLines = Int.MAX_VALUE
                     )
                 }
+                // Suggestions are only visible when the error text is NOT expanded.
+                AnimatedVisibility(
+                    visible = !expanded,
+                    enter = fadeIn(animationSpec = tween(delayMillis = 150)) + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    suggestions()
+                }
                 AnimatedVisibility(
                     visible = expanded,
                     enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
                     exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
                 ) {
+                    val textToShow = if (RsConfig.isDebug) {
+                        error.stackTraceToString()
+                    } else {
+                        error.message ?: "An unknown error occurred." // Fallback message
+                    }.trim()
                     Column {
                         Spacer(modifier = Modifier.height(8.dp))
                         BasicTextField(
-                            value = error.stackTraceToString().trim(),
+                            value = textToShow,
                             onValueChange = {},
                             readOnly = true,
                             textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current)
@@ -142,13 +156,5 @@ fun ErrorTextBlock(
             }
         }
 
-        // Suggestions are only visible when the error text is NOT expanded.
-        AnimatedVisibility(
-            visible = !expanded,
-            enter = fadeIn(animationSpec = tween(delayMillis = 150)) + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
-        ) {
-            suggestions()
-        }
     }
 }
