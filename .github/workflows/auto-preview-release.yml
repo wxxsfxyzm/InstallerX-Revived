@@ -92,28 +92,39 @@ jobs:
           # 获取不包含 Merge pull request 的提交
           CHANGELOG_LIST=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | head -n 5)
           CHANGELOG_COUNT=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | wc -l)
-
+          
+          CHANGELOG_BODY_OUTPUT=""
           if [ -z "$CHANGELOG_LIST" ]; then
-            CHANGELOG_BODY="No changes since the last stable release."
+            CHANGELOG_BODY_OUTPUT="No changes since the last stable release."
           else
-            CHANGELOG_BODY="$CHANGELOG_LIST"
-            if [ "$CHANGELOG_COUNT" -gt 5 ]; then
-              if [ -z "$PREV_TAG" ]; then
-                COMPARE_URL="https://github.com/wxxsfxyzm/InstallerX-Revived/commits/main"
-              else
-                COMPARE_URL="https://github.com/wxxsfxyzm/InstallerX-Revived/compare/${PREV_TAG}...${CURR_TAG}"
-              fi
-              CHANGELOG_BODY="$CHANGELOG_BODY\n\n**Full Changelog:** [\`${PREV_TAG}...${CURR_TAG}\`]($COMPARE_URL)"
-            fi
+            CHANGELOG_BODY_OUTPUT="$CHANGELOG_LIST"
           fi
 
+          CHANGELOG_LINK_OUTPUT=""
+          if [ "$CHANGELOG_COUNT" -gt 5 ]; then
+            if [ -z "$PREV_TAG" ]; then
+              COMPARE_URL="https://github.com/${{ github.repository }}/commits/main"
+            else
+              COMPARE_URL="https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${CURR_TAG}"
+            fi
+            # Store the link in its own variable. Note the \n\n for markdown formatting.
+            CHANGELOG_LINK_OUTPUT="\n\n**Full Changelog:** [\`${PREV_TAG}...${CURR_TAG}\`]($COMPARE_URL)"
+          fi
+          
           {
-            echo "changelog<<EOF"
-            echo -e "$CHANGELOG_BODY"
+            echo "changelog_body<<EOF"
+            echo -e "$CHANGELOG_BODY_OUTPUT"
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
-          echo -e "$CHANGELOG_BODY"
+          {
+            echo "changelog_full_link<<EOF"
+            echo -e "$CHANGELOG_LINK_OUTPUT"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+          echo "--- Generated Changelog for Release Body ---"
+          echo -e "${CHANGELOG_BODY_OUTPUT}${CHANGELOG_LINK_OUTPUT}"
 
       # 10. 新建带哈希后缀的 Alpha Release
       - name: Create Latest Alpha Pre-Release
@@ -132,11 +143,9 @@ jobs:
             - **This is a pre-release version and is not intended for production use.** It is for testing and evaluation purposes only. Please do not use this version in a production environment.
             - We highly encourage you to share your thoughts! If you have any feedback, suggestions, or encounter any issues, please feel free to submit an Issue or Pull Request on GitHub.
             
-            **提交哈希:** ${{ steps.commit_sha.outputs.SHORT_SHA }}
-            
             **更新日志（Changelog）:**
             
-            ${{ steps.changelog.outputs.changelog }}
+            ${{ steps.changelog.outputs.changelog_body }}${{ steps.changelog.outputs.changelog_full_link }}
 
           prerelease: true
           files: app/build/outputs/apk/Preview/release/*.apk
@@ -146,7 +155,7 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
-          COMMIT_MESSAGE: ${{ steps.changelog.outputs.changelog }}
+          COMMIT_MESSAGE: ${{ steps.changelog.outputs.changelog_body }}
         run: |
           pip3 install telethon
           APK=$(find ./app/build/outputs/apk/Preview/release -name "*.apk")
