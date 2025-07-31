@@ -104,18 +104,18 @@ android {
         }
     }
 
-    val isReleaseBuild = gradle.startParameter.taskNames.any {
-        it.contains("Release", ignoreCase = true)
-    }
-
-    splits {
-        abi {
-            isEnable = isReleaseBuild
-            reset()
-            include("arm64-v8a", "x86_64")
-            isUniversalApk = false
+    /*    val isReleaseBuild = gradle.startParameter.taskNames.any {
+            it.contains("Release", ignoreCase = true)
         }
-    }
+
+        splits {
+            abi {
+                isEnable = isReleaseBuild
+                reset()
+                include("arm64-v8a", "x86_64")
+                isUniversalApk = false
+            }
+        }*/
 
     applicationVariants.all {
         val level = when (flavorName) {
@@ -233,4 +233,6 @@ dependencies {
 
     // log
     implementation(libs.timber)
+
+    implementation(libs.commons.compress)
 }

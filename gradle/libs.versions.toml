@@ -9,14 +9,15 @@
 
 [versions]
 agp = "8.11.1"
+commonsCompress = "1.27.1"
 kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
-composeBom = "2025.06.01"
+composeBom = "2025.07.00"
 compose = "1.8.3"
 coreSplashscreenVersion = "1.0.1"
 # Note: When 1.4.0 goes to stable, the Material Expressive APIs will move to the next alpha (1.5.0-alphaX),
 # and will no longer be available in 1.4.0. The APIs will go stable in the 1.5.0 release.
-material3 = "1.4.0-alpha17"
+material3 = "1.4.0-alpha18"
 room = "2.7.2"
 ktx-serialization = "1.9.0"
 accompanist = "0.37.3"
@@ -47,9 +48,10 @@ androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.16.0"
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreenVersion" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
-androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.1" }
+androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.2" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
 
+commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "compose" }
@@ -57,7 +59,7 @@ compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = 
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.1" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.2" }
 compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -99,7 +101,7 @@ rikka-shizuku-provider = { group = "dev.rikka.shizuku", name = "provider", versi
 
 # Coil: An image loader for Compose
 # https://coil-kt.github.io/coil/compose/
-compose-coil = { group = "io.coil-kt.coil3", name = "coil-compose", version = "3.2.0" }
+compose-coil = { group = "io.coil-kt.coil3", name = "coil-compose", version = "3.3.0" }
 
 # AppIconLoader
 appiconloader = { module = "me.zhanghai.android.appiconloader:appiconloader", version.ref = "appiconloader" }
