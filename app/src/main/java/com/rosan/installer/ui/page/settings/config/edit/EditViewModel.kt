@@ -234,8 +234,17 @@ class EditViewModel(
     private fun loadData() {
         loadDataJob?.cancel()
         loadDataJob = viewModelScope.launch(Dispatchers.IO) {
+            // Check if it is a new configuration or an existing one.
+            val configEntity = if (id == null) {
+                // If new, use default config but with an empty name.
+                ConfigEntity.default.copy(name = "")
+            } else {
+                // If editing, find the config by id. Fallback to a default empty one if not found.
+                repo.find(id) ?: ConfigEntity.default.copy(name = "")
+            }
+
             state = state.copy(
-                data = EditViewState.Data.build(id?.let { repo.find(id) } ?: ConfigEntity.default)
+                data = EditViewState.Data.build(configEntity)
             )
             globalAuthorizer = getGlobalAuthorizer()
             globalInstallMode = getGlobalInstallMode()
