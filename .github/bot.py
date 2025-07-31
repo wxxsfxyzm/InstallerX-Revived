@@ -8,7 +8,7 @@ API_ID = 611335
 API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
-CHAT_ID = os.environ.get("CHAT_ID")
+CHAT_ID = int(os.environ.get("CHAT_ID"))
 COMMIT_MESSAGE = os.environ.get("COMMIT_MESSAGE")
 BOT_CI_SESSION = os.environ.get("BOT_CI_SESSION")
 MSG_TEMPLATE = """
