@@ -3,6 +3,7 @@ package com.rosan.installer.data.app.model.impl
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
+import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
@@ -10,7 +11,6 @@ import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.MultiApkZipAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.XApkAnalyserRepoImpl
 import com.rosan.installer.data.app.repo.AnalyserRepo
-import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -28,7 +28,7 @@ object AnalyserRepoImpl : AnalyserRepo {
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         // --- Logic to analyse data and return a list of AppEntity ---
-        // 先收集所有原始分析结果
+        // A list to hold all raw analysis results before final processing.
         val rawApps = mutableListOf<AppEntity>()
 
         val analysers = mapOf(
@@ -54,6 +54,16 @@ object AnalyserRepoImpl : AnalyserRepo {
                 "All ${data.size} file(s) were unrecognized. Please check the file formats."
             )
         }
+        // --- NEW LOGIC: Determine if this is a Multi-APK installation session ---
+        // A "Multi-APK Session" is defined as the app received more than one file,
+        // and all of those files being identified as standard APKs.
+        val isMultiApkSession = data.size > 1 && typedTasks.all { it.first == DataType.APK }
+        val sessionType = if (isMultiApkSession) {
+            Timber.d("This is a Multi-APK session. All resulting entities will be marked as such.")
+            DataType.MULTI_APK
+        } else {
+            null // Not a special session, use the type of each file.
+        }
         // 按类型分组有效的文件
         val tasksByType = validTasks.groupBy(
             keySelector = { it.first },
@@ -63,12 +73,12 @@ object AnalyserRepoImpl : AnalyserRepo {
         for ((type, dataList) in tasksByType) {
             val analyser = analysers[type]
                 ?: throw Exception("can't found analyser for this data type: '$type'")
-
+            val containerTypeForAnalyser = sessionType ?: type
             // 调用子分析器时，通过 extra.copy() 将确定的类型传递下去
             val analysedEntities = analyser.doWork(
                 config,
                 dataList,
-                extra.copy(dataType = type) // 将类型信息下发
+                extra.copy(dataType = containerTypeForAnalyser) // 将类型信息下发
             )
             rawApps.addAll(analysedEntities)
         }
@@ -100,6 +110,8 @@ object AnalyserRepoImpl : AnalyserRepo {
             }
         }
         return finalApps
+        // TODO after supporting abi analyse, deduplicate the result
+        // .deduplicate()
     }
 
     private fun getDataType(config: ConfigEntity, data: DataEntity): DataType? =
@@ -212,7 +224,9 @@ object AnalyserRepoImpl : AnalyserRepo {
                         val entryName = File(entry.name).name
                         if (entryName == "base.apk") {
                             hasBaseApk = true
-                        } else if (entryName.startsWith("split_")) {
+                        } else if (entryName.startsWith("split_") ||
+                            entryName.startsWith("config")
+                        ) {
                             hasSplitApk = true
                         }
                     }
