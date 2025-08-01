@@ -51,6 +51,7 @@ import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 import com.rosan.installer.util.asUserReadableSplitName
+import timber.log.Timber
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -142,13 +143,15 @@ private fun MultiApkMethodChoiceContent(
             val onExpandToggle = remember(itemsInGroup, entities) {
                 {
                     val isExpanding = !isExpanded
+                    Timber.d("onExpandToggle: Group '$packageName', isExpanding=$isExpanding, hasSelection=${itemsInGroup.any { it.selected }}")
                     if (isExpanding && itemsInGroup.none { it.selected }) {
                         // Call our reusable function to get the correctly selected group.
                         val latestItemInGroup = SelectInstallEntity.getLatestInGroup(itemsInGroup)
-
+                        Timber.d("--> Found latest item for re-selection: ${latestItemInGroup?.app?.name}")
                         // Atomically update the master list: remove the old group, add the new one.
                         entities.replaceAll { currentItem ->
                             if (currentItem.app.packageName != packageName) {
+                                Timber.d("----> Setting ${currentItem.app.name} to selected=true")
                                 return@replaceAll currentItem
                             }
                             // Compare with the found item using direct object reference.
@@ -165,17 +168,15 @@ private fun MultiApkMethodChoiceContent(
                 isExpanded = isExpanded,
                 onExpandToggle = onExpandToggle,
                 onSelectionChanged = { selectedItem ->
-                    val clickedApp = selectedItem.app as? AppEntity.BaseEntity
-                        ?: return@MultiApkGroupCard // Should always be BaseEntity here
-
-                    // Create a unique composite key for the item that was clicked.
-                    val clickedKey =
-                        Triple(clickedApp.packageName, clickedApp.versionCode, clickedApp.versionName)
+                    Timber.d("===== onSelectionChanged: START for group '$packageName' =====")
 
                     val isSingleItemGroup = itemsInGroup.size == 1
                     val wasItemAlreadySelected = selectedItem.selected
-                    // If this action will result in no items being selected, schedule a collapse.
+
+                    Timber.d("--> Clicked Item: ${selectedItem.app.name}, Current Selected Status = $wasItemAlreadySelected")
+
                     if (!isSingleItemGroup && wasItemAlreadySelected) {
+                        Timber.d("--> Logic branch: Collapse card because a selected item was clicked again.")
                         isExpanded = false
                     }
 
@@ -185,30 +186,29 @@ private fun MultiApkMethodChoiceContent(
                             return@replaceAll currentItem
                         }
 
-                        val currentApp = currentItem.app as? AppEntity.BaseEntity
-                            ?: return@replaceAll currentItem // Safety check
-
-                        // Create a composite key for the item currently being iterated over.
-                        val currentKey =
-                            Triple(currentApp.packageName, currentApp.versionCode, currentApp.versionName)
-
                         if (isSingleItemGroup) {
-                            // If it's the clicked item, toggle its selection.
-                            if (currentKey == clickedKey) {
+                            // In single item group, just toggle the clicked one
+                            if (currentItem === selectedItem) { // Use reference equality for absolute certainty
                                 currentItem.copy(selected = !currentItem.selected)
                             } else {
                                 currentItem
                             }
-                        } else { // Multi-item group (radio button behavior)
+                        } else {
+                            // Multi-item group (radio button behavior)
                             if (wasItemAlreadySelected) {
                                 // If the clicked item was already selected, deselect everything in the group.
                                 currentItem.copy(selected = false)
                             } else {
-                                // Otherwise, select ONLY the item whose composite key matches the one we clicked.
-                                currentItem.copy(selected = (currentKey == clickedKey))
+                                // Otherwise, select ONLY the one that is the exact same object as the clicked one.
+                                val shouldBeSelected = (currentItem === selectedItem)
+                                currentItem.copy(selected = shouldBeSelected)
                             }
                         }
                     }
+                    val finalGroupState = entities
+                        .filter { it.app.packageName == packageName }
+                        .joinToString { "${it.app.name}:${it.selected}" }
+                    Timber.d("===== onSelectionChanged: END. Final state for group '$packageName': [$finalGroupState] =====")
                 }
             )
         }
