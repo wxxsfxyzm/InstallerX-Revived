@@ -25,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,7 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.util.DataType
+import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.icons.AppIcons
@@ -61,7 +60,7 @@ fun installChoiceDialog(
     // Remember entities as a mutable state list to avoid recomposition
     val entities = remember { installer.entities.toMutableStateList() }
     // obtain containerType from entity
-    val containerType = entities.firstOrNull()?.app?.containerType
+    val containerType = entities.firstOrNull()?.app?.containerType ?: DataType.NONE
     // Set title based on containerType
     val titleRes = if (containerType == DataType.MULTI_APK_ZIP)
         R.string.installer_select_from_zip
@@ -70,8 +69,10 @@ fun installChoiceDialog(
 
     // 根据类型决定按钮文本和行为
     val isMultiApkZip = containerType == DataType.MULTI_APK_ZIP
-    val primaryButtonText = if (isMultiApkZip) R.string.install else R.string.next
-    val primaryButtonAction = if (isMultiApkZip) {
+    val isMultiApk = containerType == DataType.MULTI_APK
+
+    val primaryButtonText = if (isMultiApkZip || isMultiApk) R.string.install else R.string.next
+    val primaryButtonAction = if (isMultiApkZip || isMultiApk) {
         {
             installer.entities = entities
             viewModel.dispatch(DialogViewAction.InstallMultiple)
@@ -95,15 +96,21 @@ fun installChoiceDialog(
         subtitle = DialogInnerParams(
             DialogParamsType.InstallChoice.id
         ) {
-            if (containerType == DataType.MULTI_APK_ZIP)
-                Text(stringResource(R.string.installer_multi_apk_zip_description))
-            else null
+            when (containerType) {
+                DataType.MULTI_APK_ZIP ->
+                    Text(stringResource(R.string.installer_multi_apk_zip_description))
+
+                DataType.MULTI_APK ->
+                    Text(stringResource(R.string.installer_multi_apk_description))
+
+                else -> null
+            }
         },
         content = DialogInnerParams(DialogParamsType.InstallChoice.id) {
-            if (containerType == DataType.MULTI_APK_ZIP) {
-                MultiApkZipChoiceContent(entities = entities)
+            if (containerType == DataType.MULTI_APK_ZIP || containerType == DataType.MULTI_APK) {
+                MultiApkMethodChoiceContent(entities = entities, containerType = containerType)
             } else {
-                DefaultChoiceContent(entities = entities)
+                DefaultChoiceContent(entities = entities, containerType = containerType)
             }
         },
         buttons = DialogButtons(
@@ -120,7 +127,10 @@ fun installChoiceDialog(
 }
 
 @Composable
-private fun MultiApkZipChoiceContent(entities: MutableList<SelectInstallEntity>) {
+private fun MultiApkMethodChoiceContent(
+    entities: MutableList<SelectInstallEntity>,
+    containerType: DataType
+) {
     val groupedEntities = remember(entities.toList()) { entities.groupBy { it.app.packageName } }
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -128,28 +138,75 @@ private fun MultiApkZipChoiceContent(entities: MutableList<SelectInstallEntity>)
     ) {
         item { Spacer(modifier = Modifier.size(1.dp)) }
         items(groupedEntities.entries.toList(), key = { it.key }) { (packageName, itemsInGroup) ->
+            var isExpanded by remember { mutableStateOf(itemsInGroup.any { it.selected }) }
+            val onExpandToggle = remember(itemsInGroup, entities) {
+                {
+                    val isExpanding = !isExpanded
+                    if (isExpanding && itemsInGroup.none { it.selected }) {
+                        // Call our reusable function to get the correctly selected group.
+                        val latestItemInGroup = SelectInstallEntity.getLatestInGroup(itemsInGroup)
+
+                        // Atomically update the master list: remove the old group, add the new one.
+                        entities.replaceAll { currentItem ->
+                            if (currentItem.app.packageName != packageName) {
+                                return@replaceAll currentItem
+                            }
+                            // Compare with the found item using direct object reference.
+                            currentItem.copy(selected = (currentItem == latestItemInGroup))
+                        }
+                    }
+                    isExpanded = !isExpanded
+                }
+            }
             MultiApkGroupCard(
                 packageName = packageName,
                 itemsInGroup = itemsInGroup,
+                containerType = containerType,
+                isExpanded = isExpanded,
+                onExpandToggle = onExpandToggle,
                 onSelectionChanged = { selectedItem ->
+                    val clickedApp = selectedItem.app as? AppEntity.BaseEntity
+                        ?: return@MultiApkGroupCard // Should always be BaseEntity here
+
+                    // Create a unique composite key for the item that was clicked.
+                    val clickedKey =
+                        Triple(clickedApp.packageName, clickedApp.versionCode, clickedApp.versionName)
+
                     val isSingleItemGroup = itemsInGroup.size == 1
-                    // 检查被点击的项是否原本就已选中
                     val wasItemAlreadySelected = selectedItem.selected
-                    for (i in entities.indices) {
-                        val currentItem = entities[i]
-                        // 单项安装包组，切换自己的选中状态
-                        if (isSingleItemGroup && currentItem.app.name == selectedItem.app.name) {
-                            entities[i] = currentItem.copy(selected = !currentItem.selected)
-                            break // 找到并处理后即可退出循环
+                    // If this action will result in no items being selected, schedule a collapse.
+                    if (!isSingleItemGroup && wasItemAlreadySelected) {
+                        isExpanded = false
+                    }
+
+                    entities.replaceAll { currentItem ->
+                        // Ignore items not in the current package group.
+                        if (currentItem.app.packageName != packageName) {
+                            return@replaceAll currentItem
                         }
-                        // 同包名多项组，实现单选版本逻辑
-                        if (!isSingleItemGroup && currentItem.app.packageName == packageName) {
-                            if (wasItemAlreadySelected)
-                            // 如果点击的是已选项，则将组内所有项都取消选择
-                                entities[i] = currentItem.copy(selected = false)
-                            else
-                            // 否则，执行标准单选逻辑
-                                entities[i] = currentItem.copy(selected = currentItem.app.name == selectedItem.app.name)
+
+                        val currentApp = currentItem.app as? AppEntity.BaseEntity
+                            ?: return@replaceAll currentItem // Safety check
+
+                        // Create a composite key for the item currently being iterated over.
+                        val currentKey =
+                            Triple(currentApp.packageName, currentApp.versionCode, currentApp.versionName)
+
+                        if (isSingleItemGroup) {
+                            // If it's the clicked item, toggle its selection.
+                            if (currentKey == clickedKey) {
+                                currentItem.copy(selected = !currentItem.selected)
+                            } else {
+                                currentItem
+                            }
+                        } else { // Multi-item group (radio button behavior)
+                            if (wasItemAlreadySelected) {
+                                // If the clicked item was already selected, deselect everything in the group.
+                                currentItem.copy(selected = false)
+                            } else {
+                                // Otherwise, select ONLY the item whose composite key matches the one we clicked.
+                                currentItem.copy(selected = (currentKey == clickedKey))
+                            }
                         }
                     }
                 }
@@ -164,6 +221,9 @@ private fun MultiApkZipChoiceContent(entities: MutableList<SelectInstallEntity>)
 private fun MultiApkGroupCard(
     packageName: String,
     itemsInGroup: List<SelectInstallEntity>,
+    containerType: DataType,
+    isExpanded: Boolean,
+    onExpandToggle: () -> Unit,
     onSelectionChanged: (SelectInstallEntity) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
@@ -178,26 +238,16 @@ private fun MultiApkGroupCard(
     if (isSingleItemInGroup) {
         // --- 组内只有一个安装包，渲染可点击切换的卡片 ---
         val item = itemsInGroup.first()
-        val app = item.app as AppEntity.BaseEntity
-        // 直接从 item 读取 selected 状态
-        val isSelected = item.selected
 
         SingleItemCard(
             item = item,
+            containerType = containerType,
             onClick = { onSelectionChanged(item) }
         )
     } else {
         // --- 组内有多个安装包，渲染可展开的选择卡片 ---
-        // 默认不展开
-        var isExpanded by remember { mutableStateOf(false) }
+        // The LaunchedEffect that was here is no longer needed, as state is managed by the parent.
         val rotation by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f, label = "arrowRotation")
-
-        // 如果组内有选中项，则默认展开
-        val hasSelectionInGroup = remember(itemsInGroup) { itemsInGroup.any { it.selected } }
-        LaunchedEffect(hasSelectionInGroup) {
-            if (hasSelectionInGroup)
-                isExpanded = true
-        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -206,7 +256,7 @@ private fun MultiApkGroupCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { isExpanded = !isExpanded }
+                    .clickable { onExpandToggle() }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -281,11 +331,12 @@ private fun MultiApkGroupCard(
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
-                                        Text(
-                                            text = stringResource(R.string.installer_file_name, app.name),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                                        )
+                                        if (containerType == DataType.MULTI_APK_ZIP)
+                                            Text(
+                                                text = stringResource(R.string.installer_file_name, app.name),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                            )
                                     }
                                 }
                             }
@@ -301,7 +352,10 @@ private fun MultiApkGroupCard(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun DefaultChoiceContent(entities: MutableList<SelectInstallEntity>) {
+private fun DefaultChoiceContent(
+    entities: MutableList<SelectInstallEntity>,
+    containerType: DataType
+) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -310,6 +364,7 @@ private fun DefaultChoiceContent(entities: MutableList<SelectInstallEntity>) {
         itemsIndexed(entities, key = { _, item -> item.app.name + item.app.packageName }) { index, item ->
             SingleItemCard(
                 item = item,
+                containerType = containerType,
                 onClick = { entities[index] = item.copy(selected = !item.selected) }
             )
         }
@@ -325,6 +380,7 @@ private fun DefaultChoiceContent(entities: MutableList<SelectInstallEntity>) {
 @Composable
 private fun SingleItemCard(
     item: SelectInstallEntity,
+    containerType: DataType,
     onClick: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
@@ -375,11 +431,12 @@ private fun SingleItemCard(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Text(
-                            text = stringResource(R.string.installer_file_name, app.name),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                        )
+                        if (containerType != DataType.MULTI_APK)
+                            Text(
+                                text = stringResource(R.string.installer_file_name, app.name),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            )
                     }
 
                     is AppEntity.SplitEntity -> {

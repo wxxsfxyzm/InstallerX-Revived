@@ -1,7 +1,5 @@
 package com.rosan.installer.data.app.model.entity
 
-import com.rosan.installer.data.app.util.DataType
-
 /**
  * 包含了分析过程中可能需要的附加信息。
  * @param cacheDirectory 用于存放临时文件的缓存目录路径。

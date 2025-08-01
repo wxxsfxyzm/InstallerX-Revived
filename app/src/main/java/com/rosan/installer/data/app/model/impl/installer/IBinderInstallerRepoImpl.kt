@@ -17,10 +17,10 @@ import android.os.IInterface
 import android.os.ServiceManager
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.BuildConfig
+import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.repo.InstallerRepo
-import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.installFlags
 import com.rosan.installer.data.app.util.PackageManagerUtil

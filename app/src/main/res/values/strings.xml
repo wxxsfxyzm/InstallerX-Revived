@@ -320,7 +320,8 @@
     <!-- MultiApkZip Installer -->
     <string name="installer_file_name">File: %1$s</string>
     <string name="installer_select_from_zip">Select from zip file</string>
-    <string name="installer_multi_apk_zip_description">This file contains multiple separate applications, please select the applications you want to process.</string>
+    <string name="installer_multi_apk_zip_description">This file contains multiple separate applications, please select the applications you want to install</string>
+    <string name="installer_multi_apk_description">Please select the applications you want to install</string>
     <string name="installing_progress_text">Installing %1$s (%2$d/%3$d)</string>
     <string name="installer_completed">Install complete</string>
     <string name="installer_completed_subtitle">Successful %1$s, failed %2$s</string>

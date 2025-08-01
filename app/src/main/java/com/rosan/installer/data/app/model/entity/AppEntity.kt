@@ -2,7 +2,6 @@ package com.rosan.installer.data.app.model.entity
 
 import android.graphics.drawable.Drawable
 import com.rosan.installer.build.Architecture
-import com.rosan.installer.data.app.util.DataType
 
 sealed class AppEntity {
     abstract val packageName: String

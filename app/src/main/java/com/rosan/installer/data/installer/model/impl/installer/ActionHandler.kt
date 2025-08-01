@@ -13,10 +13,10 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
+import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
-import com.rosan.installer.data.app.util.DataType
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.exception.ResolveException
@@ -132,12 +132,15 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
 
         val isMultiApkZip = installer.entities.firstOrNull()?.app?.containerType == DataType.MULTI_APK_ZIP
-
-        Timber
-            .d("[id=${installer.id}] analyse: Analyse completed. isNotificationInstall=$isNotificationInstall, isMultiApkZip=$isMultiApkZip")
+        val isMultiApk = installer.entities.firstOrNull()?.app?.containerType == DataType.MULTI_APK
+        Timber.d("[id=${installer.id}] analyse: Analyse completed. isNotificationInstall=$isNotificationInstall, isMultiApkZip=$isMultiApkZip")
         if (isNotificationInstall && isMultiApkZip) {
-            Timber
-                .w("[id=${installer.id}] analyse: Multi-APK ZIP not supported in notification mode. Emitting AnalysedUnsupported.")
+            Timber.w("[id=${installer.id}] analyse: Multi-APK ZIP not supported in notification mode. Emitting AnalysedUnsupported.")
+            installer.progress.emit(
+                ProgressEntity.AnalysedUnsupported(context.getString(R.string.installer_current_install_mode_not_supported))
+            )
+        } else if (isNotificationInstall && isMultiApk) {
+            Timber.w("[id=${installer.id}] analyse: Multi-APK not supported in notification mode. Emitting AnalysedUnsupported.")
             installer.progress.emit(
                 ProgressEntity.AnalysedUnsupported(context.getString(R.string.installer_current_install_mode_not_supported))
             )

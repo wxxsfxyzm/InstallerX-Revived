@@ -313,7 +313,8 @@
     <!-- MultiApkZip Installer -->
     <string name="installer_file_name">檔案: %1$s</string>
     <string name="installer_select_from_zip">從壓縮檔中選擇</string>
-    <string name="installer_multi_apk_zip_description">此檔案包含多個獨立應用程式，請選擇您想要處理的應用程式。</string>
+    <string name="installer_multi_apk_zip_description">此檔案包含多個獨立應用程式，請選擇想要處理的應用程式</string>
+    <string name="installer_multi_apk_description">請選擇要安裝的應用程式</string>
     <string name="installing_progress_text">正在安裝 %1$s (%2$d/%3$d)</string>
     <string name="installer_completed">安裝完成</string>
     <string name="installer_completed_subtitle">成功 %1$s 個，失敗 %2$s 個</string>

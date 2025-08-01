@@ -71,7 +71,10 @@ fun installCompletedDialog(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 item { Spacer(modifier = Modifier.size(1.dp)) }
-                items(results, key = { it.entity.app.name }) { result ->
+                items(results, key = { result ->
+                    val app = result.entity.app as AppEntity.BaseEntity
+                    app.packageName + app.name
+                }) { result ->
                     ResultItemCard(result)
                 }
                 item { Spacer(modifier = Modifier.size(1.dp)) }
