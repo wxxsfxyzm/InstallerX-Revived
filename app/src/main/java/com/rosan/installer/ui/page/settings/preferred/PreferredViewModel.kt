@@ -97,6 +97,7 @@ class PreferredViewModel(
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
+                    progress = PreferredViewState.Progress.Loaded,
                     authorizer = authorizer,
                     customizeAuthorizer = customizeAuthorizer,
                     installMode = installMode,
