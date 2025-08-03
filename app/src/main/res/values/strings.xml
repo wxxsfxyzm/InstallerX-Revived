@@ -33,6 +33,7 @@
     <string name="qq_channel">QQ channel</string>
     <string name="qq_group_official">QQ group (official)</string>
     <string name="telegram_group">Telegram group</string>
+    <string name="telegram_group_desc">Join the group!</string>
 
     <string name="basic">Basic</string>
     <string name="lock_default_installer">Set as default installer</string>

@@ -29,6 +29,7 @@
     <string name="qq_channel">QQ频道</string>
     <string name="qq_group_official">QQ群组（官方）</string>
     <string name="telegram_group">Telegram群组</string>
+    <string name="telegram_group_desc">来一起划水！</string>
 
     <string name="basic">常规</string>
     <string name="lock_default_installer">锁定为默认安装器</string>
