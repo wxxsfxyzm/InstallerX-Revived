@@ -151,11 +151,14 @@ fun installInfoDialog(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text( // 旧版本带前缀
-                                text = stringResource(R.string.old_version_prefix) + stringResource(
-                                    R.string.installer_version_short,
-                                    preInstallAppInfo.versionName,
-                                    preInstallAppInfo.versionCode
-                                ),
+                                text = stringResource(R.string.old_version_prefix) +
+                                        stringResource(
+                                            R.string.installer_version_short,
+                                            if (preInstallAppInfo.isArchived)
+                                                stringResource(R.string.old_version_archived)
+                                            else preInstallAppInfo.versionName,
+                                            preInstallAppInfo.versionCode
+                                        ),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.basicMarquee()
                             )
@@ -209,7 +212,9 @@ fun installInfoDialog(
                                     Text(
                                         text = stringResource(
                                             R.string.installer_package_min_sdk,
-                                            oldMinSdk.toString()
+                                            if (preInstallAppInfo.isArchived)
+                                                stringResource(R.string.old_version_archived)
+                                            else oldMinSdk.toString()
                                         )
                                     )
                                     Icon(

@@ -29,6 +29,7 @@
     <string name="qq_channel">QQ频道</string>
     <string name="qq_group_official">QQ群组（官方）</string>
     <string name="telegram_group">Telegram群组</string>
+    <string name="telegram_group_desc">来一起划水！</string>
 
     <string name="basic">常规</string>
     <string name="lock_default_installer">锁定为默认安装器</string>
@@ -131,6 +132,7 @@
     <string name="installer_prepare_type_downgrade">这是一个降级操作，可能会导致数据丢失或应用不稳定</string>
     <string name="installer_prepare_type_reinstall">将重新安装当前版本的应用</string>
     <string name="installer_prepare_type_sidegrade">将变更当前版本的应用</string>
+    <string name="installer_prepare_type_unarchive">将取消归档当前应用</string>
     <string name="installer_prepare_type_unknown_confirm">你确定要安装吗？</string>
     <string name="installer_installing">安装中…</string>
     <string name="installer_install_failed">安装失败</string>
@@ -237,6 +239,7 @@
     <string name="exception_root_not_work">请授予ROOT权限</string>
     <string name="exception_app_process_not_work">授权器启动失败</string>
     <string name="old_version_prefix">当前</string>
+    <string name="old_version_archived">已归档</string>
     <string name="upgrade_version_prefix">升级</string>
     <string name="downgrade_version_prefix">降级</string>
     <string name="install_choice">安装包选择</string>
@@ -307,6 +310,8 @@
     <string name="dry_run">试运行</string>
     <string name="dry_run_desc">验证包，但不要安装</string>
 
+    <string name="unarchive">取消归档</string>
+    <string name="unarchive_desc">取消一个现有安装的归档</string>
     <string name="replace_existing">替换已有</string>
     <string name="replace_existing_desc">如果该软件包已被安装，则替换或升级</string>
     <!--  InstallOptions End  -->

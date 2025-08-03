@@ -1,7 +1,6 @@
 package com.rosan.installer.ui.icons
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.automirrored.twotone.Rule
@@ -79,8 +78,7 @@ object AppIcons {
     // --- 导航图标集合 ---
     val RoomPreferences = Icons.TwoTone.RoomPreferences
     val SettingsSuggest = Icons.TwoTone.SettingsSuggest
-    val ArrowBack = Icons.AutoMirrored.TwoTone.ArrowBack
-    val ArrowBack1 = Icons.TwoTone.ArrowBackIosNew
+    val ArrowBack = Icons.TwoTone.ArrowBackIosNew
     // --- 导航图标结束 ---
 
     // --- 授权器图标集合 ---

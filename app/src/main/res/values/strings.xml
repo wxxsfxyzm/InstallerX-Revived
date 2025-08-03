@@ -33,6 +33,7 @@
     <string name="qq_channel">QQ channel</string>
     <string name="qq_group_official">QQ group (official)</string>
     <string name="telegram_group">Telegram group</string>
+    <string name="telegram_group_desc">Join the group!</string>
 
     <string name="basic">Basic</string>
     <string name="lock_default_installer">Set as default installer</string>
@@ -135,6 +136,7 @@
     <string name="installer_prepare_type_downgrade">This is a downgrade, which may cause data loss or app instability</string>
     <string name="installer_prepare_type_reinstall">Will reinstall the current version of the app</string>
     <string name="installer_prepare_type_sidegrade">Will change the current version of the app</string>
+    <string name="installer_prepare_type_unarchive">Will unarchive the current app</string>
     <string name="installer_prepare_type_unknown_confirm">Are you sure you want to install?</string>
     <string name="installer_installing">Installing…</string>
     <string name="installer_install_failed">Install failed</string>
@@ -245,6 +247,7 @@
     <string name="exception_root_not_work">Couldn\'t access root</string>
     <string name="exception_app_process_not_work">Couldn\'t connect the authorizer</string>
     <string name="old_version_prefix">Current</string>
+    <string name="old_version_archived">Archived</string>
     <string name="upgrade_version_prefix">Upgrade</string>
     <string name="downgrade_version_prefix">Downgrade</string>
     <string name="install_choice">Select Package</string>
@@ -313,6 +316,8 @@
     <string name="dry_run">Dry Run</string>
     <string name="dry_run_desc">Verify the package, but don\'t install it.</string>
 
+    <string name="unarchive">Unarchive existing package</string>
+    <string name="unarchive_desc">Unarchive an existing package.</string>
     <string name="replace_existing">Replace Existing</string>
     <string name="replace_existing_desc">If the package being installed already exists, replace/upgrade it.</string>
     <!--  InstallOptions End  -->

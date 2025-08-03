@@ -239,4 +239,12 @@ sealed class InstallOption(
         labelResource = R.string.config_bypass_low_target_sdk,
         descResource = R.string.config_bypass_low_target_sdk_desc,
     )
+
+    @Keep
+    data object UnArchive : InstallOption(
+        value = 1 shl 30,
+        minSdk = Build.VERSION_CODES.VANILLA_ICE_CREAM,
+        labelResource = R.string.unarchive,
+        descResource = R.string.unarchive_desc,
+    )
 }

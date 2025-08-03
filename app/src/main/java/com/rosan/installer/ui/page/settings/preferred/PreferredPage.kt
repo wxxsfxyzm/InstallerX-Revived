@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.settings.preferred
 
-import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -303,11 +302,22 @@ fun PreferredPage(
                     onClick = { showBottomSheet = true }
                 )
             }
+            item {
+                val haptic = LocalHapticFeedback.current
+                SettingsAboutItemWidget(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
+                    headlineContentText = stringResource(R.string.telegram_group),
+                    supportingContentText = stringResource(R.string.telegram_group_desc),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        openUrl(context, "https://t.me/installerx_revived_ci")
+                    }
+                )
+            }
         }
     }
     if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
         BottomSheetContent(
-            context = context,
             title = stringResource(R.string.get_update)
         )
     }
@@ -358,7 +368,7 @@ fun DataAuthorizerWidget(
     onClick: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
-
+    val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
     // 数据源和原代码保持一致
     val authorizerOptions = mapOf(
         ConfigEntity.Authorizer.None to AuthorizerInfo(
@@ -371,11 +381,11 @@ fun DataAuthorizerWidget(
         ),
         ConfigEntity.Authorizer.Shizuku to AuthorizerInfo(
             R.string.config_authorizer_shizuku,
-            AppIcons.Android
+            shizukuIcon
         ),
         ConfigEntity.Authorizer.Dhizuku to AuthorizerInfo(
             R.string.config_authorizer_dhizuku,
-            AppIcons.Android
+            AppIcons.InstallAllowRestrictedPermissions
         ),
         /*        ConfigEntity.Authorizer.Customize to AuthorizerInfo(
                     R.string.config_authorizer_customize,
@@ -717,9 +727,9 @@ fun PrivacyPolicy() {
 
 @Composable
 private fun BottomSheetContent(
-    context: Context,
     title: String
 ) {
+    val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     Column(
         modifier = Modifier
@@ -751,7 +761,21 @@ private fun BottomSheetContent(
             Spacer(modifier = Modifier.width(8.dp)) // 图标与文字之间的间隔
             Text(text = "GitHub") // 按钮文本
         }
-
+        Button(
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                openUrl(context, "https://t.me/installerx_revived_ci")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
+                contentDescription = "Telegram Icon",
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Telegram") // 按钮文本
+        }
         Spacer(modifier = Modifier.size(60.dp)) // 按钮下方留白
     }
 }

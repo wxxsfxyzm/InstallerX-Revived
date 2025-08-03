@@ -25,6 +25,7 @@ import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.installFlags
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
+import com.rosan.installer.data.common.util.isPackageArchivedCompat
 import com.rosan.installer.data.recycle.util.requireDhizukuPermissionGranted
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
@@ -165,7 +166,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         packageName: String
     ): Session {
         val containerType = entities.first().containerType
-        val params = if (containerType == DataType.MULTI_APK_ZIP)
+        val params = if (containerType == DataType.MULTI_APK_ZIP || containerType == DataType.MULTI_APK)
             PackageInstaller.SessionParams(
                 // Always use full mode when apk is definite
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL
@@ -179,7 +180,16 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                 }
             )
         params.setAppPackageName(packageName)
-        params.installFlags = config.installFlags or InstallOption.ReplaceExisting.value
+        params.installFlags = config.installFlags or
+                if (context.packageManager.isPackageArchivedCompat(packageName)) {
+                    Timber.d("Package $packageName is archived, using unarchive option.")
+                    // It's an unarchive operation. Set the specific flag.
+                    InstallOption.UnArchive.value or InstallOption.ReplaceExisting.value
+                } else {
+                    // It's a new install or a regular update. Use replace existing.
+                    Timber.d("Package $packageName is not archived, using replace existing option.")
+                    InstallOption.ReplaceExisting.value
+                }
 
         val sessionId = packageInstaller.createSession(params)
         val session = packageInstaller.openSession(sessionId)

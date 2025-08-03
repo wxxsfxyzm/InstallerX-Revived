@@ -205,7 +205,7 @@ fun ApplyPage(
                         )
                     ) {
                         Icon(
-                            imageVector = AppIcons.ArrowBack1,
+                            imageVector = AppIcons.ArrowBack,
                             contentDescription = stringResource(id = R.string.back)
                         )
                     }
