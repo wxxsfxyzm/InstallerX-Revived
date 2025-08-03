@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.settings.preferred
 
-import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -307,7 +306,6 @@ fun PreferredPage(
     }
     if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
         BottomSheetContent(
-            context = context,
             title = stringResource(R.string.get_update)
         )
     }
@@ -717,9 +715,9 @@ fun PrivacyPolicy() {
 
 @Composable
 private fun BottomSheetContent(
-    context: Context,
     title: String
 ) {
+    val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     Column(
         modifier = Modifier
@@ -751,7 +749,21 @@ private fun BottomSheetContent(
             Spacer(modifier = Modifier.width(8.dp)) // 图标与文字之间的间隔
             Text(text = "GitHub") // 按钮文本
         }
-
+        Button(
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                openUrl(context, "https://t.me/installerx_revived_ci")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
+                contentDescription = "Telegram Icon",
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Telegram") // 按钮文本
+        }
         Spacer(modifier = Modifier.size(60.dp)) // 按钮下方留白
     }
 }
