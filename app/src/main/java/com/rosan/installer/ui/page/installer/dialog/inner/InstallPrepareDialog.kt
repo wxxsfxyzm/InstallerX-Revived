@@ -198,6 +198,8 @@ fun installPrepareDialog( // 小写开头
                             context.getString(R.string.installer_prepare_type_reinstall),
                             "default"
                         )
+                    // UnArchive an application
+                    oldInfo.isArchived -> Pair(context.getString(R.string.installer_prepare_type_unarchive), "default")
                     // versionCode same, versionName different
                     else ->
                         Pair(
