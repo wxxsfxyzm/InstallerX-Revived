@@ -145,9 +145,6 @@ private fun MultiApkMethodChoiceContent(
                     val isExpanding = !isExpanded
                     Timber.d("onExpandToggle: Group '$packageName', isExpanding=$isExpanding, hasSelection=${itemsInGroup.any { it.selected }}")
                     if (isExpanding && itemsInGroup.none { it.selected }) {
-                        // Call our reusable function to get the correctly selected group.
-                        val latestItemInGroup = SelectInstallEntity.getLatestInGroup(itemsInGroup)
-                        Timber.d("--> Found latest item for re-selection: ${latestItemInGroup?.app?.name}")
                         // Atomically update the master list: remove the old group, add the new one.
                         entities.replaceAll { currentItem ->
                             if (currentItem.app.packageName != packageName) {
@@ -155,7 +152,7 @@ private fun MultiApkMethodChoiceContent(
                                 return@replaceAll currentItem
                             }
                             // Compare with the found item using direct object reference.
-                            currentItem.copy(selected = (currentItem == latestItemInGroup))
+                            currentItem.copy(selected = (currentItem == itemsInGroup))
                         }
                     }
                     isExpanded = !isExpanded

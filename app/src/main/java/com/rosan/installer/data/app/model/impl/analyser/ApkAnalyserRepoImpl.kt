@@ -5,6 +5,8 @@ import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import androidx.core.content.res.ResourcesCompat
+import com.rosan.installer.build.Architecture
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
@@ -16,6 +18,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import java.io.FileDescriptor
+import java.util.zip.ZipFile
 
 object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
     private val reflect = get<ReflectRepo>()
@@ -61,9 +64,10 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         val path = data.path
+        val bestArch = analyseAndSelectBestArchitecture(path, RsConfig.supportedArchitectures)
         return useResources { resources ->
             setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
-            listOf(loadAppEntity(resources, resources.newTheme(), data, extra))
+            listOf(loadAppEntity(resources, resources.newTheme(), data, extra, bestArch ?: Architecture.UNKNOWN))
         }
     }
 
@@ -74,7 +78,7 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             data.getFileDescriptor() ?: throw Exception("can't get fd from '$data'")
         return useResources { resources ->
             setAssetPath(resources.assets, arrayOf(loadFromFd(fileDescriptor)))
-            listOf(loadAppEntity(resources, resources.newTheme(), data, extra))
+            listOf(loadAppEntity(resources, resources.newTheme(), data, extra, Architecture.UNKNOWN))
         }
     }
 
@@ -106,7 +110,7 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
     }
 
     private fun loadAppEntity(
-        resources: Resources, theme: Resources.Theme?, data: DataEntity, extra: AnalyseExtraEntity
+        resources: Resources, theme: Resources.Theme?, data: DataEntity, extra: AnalyseExtraEntity, arch: Architecture
     ): AppEntity {
         var packageName: String? = null
         var splitName: String? = null
@@ -194,6 +198,7 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             icon = roundIcon ?: icon,
             targetSdk = targetSdk,
             minSdk = minSdk,
+            arch = arch,
             permissions = permissions,
             containerType = extra.dataType
         ) else AppEntity.SplitEntity(
@@ -205,5 +210,55 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
             arch = null,
             containerType = extra.dataType
         )
+    }
+
+    /**
+     * Analyzes the APK's supported architectures and selects the best one for the current device.
+     * It extracts all ABIs from the APK's 'lib' directory, compares them against the
+     * device's supported ABIs (from `ConfigEntity`), and returns the highest-priority match.
+     *
+     * @param path The file path to the APK.
+     * @param deviceSupportedArchs A prioritized list of architectures supported by the device.
+     * @return The best matching Architecture for the device, or null if no compatible architecture is found.
+     */
+    private fun analyseAndSelectBestArchitecture(
+        path: String,
+        deviceSupportedArchs: List<Architecture>
+    ): Architecture? {
+        // Step 1: Extract all supported architectures from the APK file.
+        val apkArchs = mutableSetOf<Architecture>()
+        runCatching {
+            ZipFile(path).use { zipFile ->
+                val entries = zipFile.entries()
+                while (entries.hasMoreElements()) {
+                    val entry = entries.nextElement()
+                    val entryName = entry.name
+                    // Check for native library directories.
+                    if (entryName.startsWith("lib/") && entryName.count { it == '/' } >= 2) {
+                        val archString = entryName.split('/')[1]
+                        val architecture = Architecture.fromArchString(archString)
+                        if (architecture != Architecture.UNKNOWN) {
+                            apkArchs.add(architecture)
+                        }
+                    }
+                }
+            }
+        }
+
+        if (apkArchs.isEmpty()) {
+            return null // The APK is architecture-independent or contains no native libs.
+        }
+
+        // Step 2: Find the best match.
+        // Iterate through the device's prioritized list of ABIs.
+        for (deviceArch in deviceSupportedArchs) {
+            // Return the first one that is also supported by the APK.
+            if (apkArchs.contains(deviceArch)) {
+                return deviceArch
+            }
+        }
+
+        // Return null if no match was found.
+        return null
     }
 }

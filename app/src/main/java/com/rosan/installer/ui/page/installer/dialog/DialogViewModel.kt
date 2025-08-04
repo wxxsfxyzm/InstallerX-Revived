@@ -190,59 +190,28 @@ class DialogViewModel(
                     is ProgressEntity.Analysing -> newState = DialogViewState.Analysing
                     is ProgressEntity.AnalysedFailed -> newState = DialogViewState.AnalyseFailed
                     is ProgressEntity.AnalysedSuccess -> {
-                        val selectedEntities = repo.entities.filter { it.selected }
-                        val mappedApps = selectedEntities.map { it.app }
-                        // Get datatype from entity
-                        val containerType = mappedApps.firstOrNull()?.containerType
-                        // --- Mixed Choice Logic ---
-                        // --- Logic to determine the next state based on containerType ---
-                        when (containerType) {
-                            DataType.MULTI_APK_ZIP, DataType.MULTI_APK -> {
-                                val grouped = repo.entities.groupBy { it.app.packageName }
-                                // For each group, apply the smart selection logic and flatten the results into a single list.
-                                val smartSelectedEntities = grouped.values.flatMap { group ->
-                                    // Apply "smart version selection" ONLY if a group has multiple items.
-                                    // This indicates a version conflict that needs resolving.
-                                    if (group.size > 1) {
-                                        SelectInstallEntity.selectLatestInGroup(group)
-                                    } else {
-                                        // If a group has only one item, it's an independent app (like in a ZIP).
-                                        // Just return it as is. Its default `selected = true` state is correct
-                                        // for an initial checklist.
-                                        group
-                                    }
-                                }
+                        val containerType = repo.entities.firstOrNull()?.app?.containerType
+                        val isMultiAppMode =
+                            containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
 
-                                // Replace the original list with the new, smartly-selected one.
-                                repo.entities = smartSelectedEntities.toMutableList()
+                        if (isMultiAppMode) {
+                            // If the backend (ActionHandler) determined it's a multi-app scenario,
+                            // ALWAYS go to the choice screen, regardless of package names.
+                            Timber.d("ViewModel: Multi-app mode detected (type: $containerType). Forcing InstallChoice state.")
+                            newState = DialogViewState.InstallChoice
+                            newPackageNameFromProgress = null // No single package is the focus.
 
-                                // 3. 用处理过的新列表，完全替换掉 repo 中的旧列表
-                                repo.entities = smartSelectedEntities
-                                repo.entities.forEach { entity ->
-                                    loadDisplayIcon(entity.app.packageName)
-                                }
-
-                                // 4. 进入选择界面
-                                newState = DialogViewState.InstallChoice
-                                newPackageNameFromProgress = null
+                            // Trigger icon loading for all apps in the list.
+                            repo.entities.forEach { entity ->
+                                loadDisplayIcon(entity.app.packageName)
                             }
-
-                            else -> {
-                                // For other types (APK, APKS, XAPK, APKM), they can be handled normally.
-                                val uniquePackages = mappedApps.groupBy { it.packageName }
-
-                                if (uniquePackages.size != 1) {
-                                    // If there are multiple unique packages, show install choice dialog
-                                    newState = DialogViewState.InstallChoice
-                                    newPackageNameFromProgress = null
-                                } else {
-                                    // If there is only one unique package, prepare for installation
-                                    newState = DialogViewState.InstallPrepare
-                                    newPackageNameFromProgress = selectedEntities.first().app.packageName
-                                }
-                            }
+                        } else {
+                            // If it's not a multi-app scenario (e.g., single APK with splits),
+                            // it's safe to proceed directly to the prepare screen for the single app.
+                            Timber.d("ViewModel: Single-app mode detected. Proceeding to InstallPrepare.")
+                            newState = DialogViewState.InstallPrepare
+                            newPackageNameFromProgress = repo.entities.firstOrNull()?.app?.packageName
                         }
-                        // --- Mixed Choice Logic End ---
                     }
 
                     is ProgressEntity.Installing -> {

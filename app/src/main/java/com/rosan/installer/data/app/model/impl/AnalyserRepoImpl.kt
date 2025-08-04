@@ -148,7 +148,10 @@ object AnalyserRepoImpl : AnalyserRepo {
                     val entryName = File(entry.name).name
                     if (entryName == "base.apk") {
                         hasBaseApk = true
-                    } else if (entryName.startsWith("split_") && entryName.endsWith(".apk")) {
+                    } else if ((entryName.startsWith("split_") ||
+                                entryName.startsWith("config")) &&
+                        entryName.endsWith(".apk")
+                    ) {
                         hasSplitApk = true
                     }
                     // 优化：如果两个条件都满足，可以提前退出循环

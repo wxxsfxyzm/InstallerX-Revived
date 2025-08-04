@@ -1,5 +1,6 @@
 package com.rosan.installer.build
 
+import android.content.res.Resources
 import android.os.Build
 import android.text.TextUtils
 import com.rosan.installer.BuildConfig
@@ -29,38 +30,12 @@ object RsConfig {
         get() = Build.MANUFACTURER.uppercase()
 
     /**
-     * 获取当前设备的制造商枚举。
-     * 这个属性会读取系统的制造商信息，并将其匹配到预定义的 Manufacturer 枚举上。
-     * @return 返回匹配到的 Manufacturer 枚举常量，如果不在列表中则返回 UNKNOWN。
+     * The current device manufacturer's enum representation.
+     * The lookup logic is centralized in the Manufacturer.from() companion object function.
+     * @return The matching Manufacturer enum, or UNKNOWN if not found.
      */
     val currentManufacturer: Manufacturer
-        get() {
-            // 获取制造商字符串并转换为大写，以便进行不区分大小写的比较
-            val manufacturerString = manufacturer
-            // 使用 when 表达式将字符串匹配到枚举
-            return when (manufacturerString) {
-                "GOOGLE" -> Manufacturer.GOOGLE
-                "HUAWEI" -> Manufacturer.HUAWEI
-                "HONOR" -> Manufacturer.HONOR
-                "OPPO" -> Manufacturer.OPPO
-                "VIVO" -> Manufacturer.VIVO
-                "XIAOMI" -> Manufacturer.XIAOMI
-                "ONEPLUS" -> Manufacturer.ONEPLUS
-                "REALME" -> Manufacturer.REALME
-                "SAMSUNG" -> Manufacturer.SAMSUNG
-                "SONY" -> Manufacturer.SONY
-                "ASUS" -> Manufacturer.ASUS
-                "MOTOROLA" -> Manufacturer.MOTOROLA
-                "NOKIA" -> Manufacturer.NOKIA
-                "LG" -> Manufacturer.LG
-                "ZTE" -> Manufacturer.ZTE
-                "LENOVO" -> Manufacturer.LENOVO
-                "MEIZU" -> Manufacturer.MEIZU
-                "SMARTISAN" -> Manufacturer.SMARTISAN
-                "BLACKSHARK" -> Manufacturer.BLACKSHARK
-                else -> Manufacturer.UNKNOWN // 如果没有匹配到任何已知厂商，返回 UNKNOWN
-            }
-        }
+        get() = Manufacturer.from(Build.MANUFACTURER)
 
     val brand = Build.BRAND.uppercase()
 
@@ -77,25 +52,85 @@ object RsConfig {
      * @return The corresponding Architecture enum constant.
      */
     val currentArchitecture: Architecture
+        get() = supportedArchitectures.first()
+
+    /**
+     * Gets a prioritized list of supported architectures for the device.
+     * The list is ordered from the most preferred to the least preferred.
+     *
+     * @return A List of Architecture enums, sorted by preference.
+     */
+    val supportedArchitectures: List<Architecture>
+        get() =
+        // Build.SUPPORTED_ABIS is already ordered by system preference.
+            // We just map the string values to our type-safe enum.
+            Build.SUPPORTED_ABIS.mapNotNull { abiString ->
+                Architecture.fromArchString(abiString)
+            }
+
+
+    /**
+     * Gets a prioritized list of screen densities for the device.
+     * The logic prefers densities that are equal to or higher than the device's native density,
+     * followed by lower densities, to ensure the best possible asset quality is chosen first.
+     *
+     * @return A List of Density enums, sorted by preference.
+     */
+    val supportedDensities: List<Density>
+        get() = Density.getPrioritizedList()
+
+    /**
+     * Gets a prioritized list of languages based on the user's system settings.
+     * This version strictly extracts language codes without any modification or conversion.
+     *
+     * Logic is from the PackageUtil.kt file in the PackageInstaller project.
+     * Under Apache License 2.0.
+     *
+     * @return A List of language code Strings, sorted by user preference, with "base" as a fallback.
+     * @see <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>
+     * @see <a href="https://github.com/vvb2060/PackageInstaller/blob/master/app/src/main/java/io/github/vvb2060/packageinstaller/model/PackageUtil.kt">PackageUtil</a>
+     */
+    val supportedLocales: List<String>
         get() {
-            // Build.SUPPORTED_ABIS lists supported ABIs in order of preference.
-            // The first element is the most preferred one for the running system.
-            val primaryAbi = Build.SUPPORTED_ABIS.firstOrNull()
-            // Use the helper function in the enum to safely convert the string to an enum type.
-            return Architecture.fromArchString(primaryAbi)
+            val res = Resources.getSystem()
+            // Use a LinkedHashSet to preserve insertion order while ensuring uniqueness.
+            val languageSet = LinkedHashSet<String>()
+            val locales = res.configuration.locales
+
+            if (!locales.isEmpty) {
+                for (i in 0 until locales.size()) {
+                    val locale = locales.get(i)
+                    // Get the base language code (e.g., "en" from "en-US") and add it directly.
+                    // No conversion logic is applied.
+                    val langCode = locale.toLanguageTag().substringBefore('-')
+                    languageSet.add(langCode.convertLanguageCode())
+                }
+            }
+
+            // Always add "base" as the ultimate fallback.
+            languageSet.add("base")
+            return languageSet.toList()
         }
 
-    // Used for displaying the system architecture in a user-friendly format.
-    val systemStruct: String
-        get() {
-            var struct = System.getProperty("os.arch") ?: "unknown"
-            val abis = Build.SUPPORTED_ABIS
-            struct += if (abis.isEmpty()) {
-                " (Not Supported Native ABI)"
-            } else {
-                val supportABIs = abis.joinToString(", ")
-                " ($supportABIs)"
-            }
-            return struct
+    /**
+     * Converts legacy ISO 639 language codes to their modern equivalents.
+     * This ensures compatibility with older and non-standard APK splits.
+     *
+     * Logic is from the PackageUtil.kt file in the PackageInstaller project.
+     * Under Apache License 2.0.
+     *
+     * @param code The language code to convert.
+     * @return The converted, modern language code.
+     *
+     * @see <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>
+     * @see <a href="https://github.com/vvb2060/PackageInstaller/blob/master/app/src/main/java/io/github/vvb2060/packageinstaller/model/PackageUtil.kt">PackageUtil</a>
+     */
+    private fun String.convertLanguageCode(): String =
+        when (this) {
+            "tl" -> "fil" // Tagalog -> Filipino
+            "iw" -> "he"  // Old Hebrew -> Hebrew
+            "ji" -> "yi"  // Old Yiddish -> Yiddish
+            "in" -> "id"  // Old Indonesian -> Indonesian
+            else -> this
         }
 }
