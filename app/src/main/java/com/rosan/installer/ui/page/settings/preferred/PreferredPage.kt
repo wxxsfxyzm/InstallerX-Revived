@@ -310,7 +310,7 @@ fun PreferredPage(
                     supportingContentText = stringResource(R.string.telegram_group_desc),
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        openUrl(context, "https://t.me/installerx_revived_ci")
+                        openUrl(context, "https://t.me/installerx_revived_chat")
                     }
                 )
             }
