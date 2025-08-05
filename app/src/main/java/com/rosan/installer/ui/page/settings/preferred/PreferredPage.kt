@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -27,7 +28,9 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.ListItem
@@ -85,7 +88,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PreferredPage(
     navController: NavController,
@@ -133,186 +136,213 @@ fun PreferredPage(
         },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            item { LabelWidget(stringResource(R.string.global)) }
-            // item { DataAuthorizerWidget(viewModel) }
-            item {
-                DataAuthorizerWidget(
-                    currentAuthorizer = state.authorizer,
-                    changeAuthorizer = { newAuthorizer ->
-                        viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(newAuthorizer))
-                    },
-                    onClick = {}
-                )
-            }
-            item {
-                AnimatedVisibility(
-                    visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                    enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
-                    exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+        when (state.progress) {
+            is PreferredViewState.Progress.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
                 ) {
-                    IntNumberPickerWidget(
-                        icon = AppIcons.Working,
-                        title = stringResource(R.string.set_countdown),
-                        description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                        value = state.dhizukuAutoCloseCountDown,
-                        startInt = 1,
-                        endInt = 10
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        viewModel.dispatch(
-                            PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
+                        ContainedLoadingIndicator(
+                            indicatorColor = MaterialTheme.colorScheme.primary,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        )
+                        Text(
+                            text = stringResource(id = R.string.loading),
+                            style = MaterialTheme.typography.titleLarge
                         )
                     }
                 }
             }
-            // item { DataCustomizeAuthorizerWidget(viewModel) }
-            // item { DataInstallModeWidget(viewModel) }
-            item {
-                DataInstallModeWidget(
-                    currentInstallMode = state.installMode,
-                    changeInstallMode = { newMode ->
-                        viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(newMode))
-                    },
-                    onClick = {}
-                )
-            }
-            item {
-                // Outer AnimatedVisibility: Controls the visibility of the entire section.
-                // It handles the main expansion/shrinking and fading for the whole group.
-                AnimatedVisibility(
-                    visible = state.installMode == ConfigEntity.InstallMode.Dialog || state.installMode == ConfigEntity.InstallMode.AutoDialog,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
+
+            is PreferredViewState.Progress.Loaded -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
                 ) {
-                    Column(modifier = Modifier.animateContentSize()) {
-                        // Inner AnimatedVisibility: Specifically controls the first SwitchWidget.
-                        // Its animation should be simple and not conflict with the parent's size animation.
-                        // Using only fadeIn/fadeOut is perfect for this.
-                        AnimatedVisibility(
-                            visible = state.installMode == ConfigEntity.InstallMode.Dialog,
-                            enter = fadeIn(), // Only fade in, let the parent handle the expansion.
-                            exit = fadeOut()  // Only fade out, let the parent handle the shrinking.
-                        ) {
-                            // This SwitchWidget will now smoothly fade in/out when toggling
-                            // between Dialog and AutoDialog modes.
-                            SwitchWidget(
-                                icon = AppIcons.MenuOpen,
-                                title = stringResource(id = R.string.show_dialog_install_extended_menu),
-                                description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
-                                checked = viewModel.state.showDialogInstallExtendedMenu,
-                                onCheckedChange = {
-                                    viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
-                                    )
-                                }
-                            )
-                        }
-                        // These SwitchWidgets are always present when the container is visible.
-                        SwitchWidget(
-                            icon = AppIcons.Suggestion,
-                            title = stringResource(id = R.string.show_intelligent_suggestion),
-                            description = stringResource(id = R.string.show_intelligent_suggestion_desc),
-                            checked = viewModel.state.showIntelligentSuggestion,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowIntelligentSuggestion(it)
-                                )
-                            }
-                        )
-                        SwitchWidget(
-                            icon = AppIcons.NotificationDisabled,
-                            title = stringResource(id = R.string.disable_notification),
-                            description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
-                            checked = viewModel.state.disableNotificationForDialogInstall,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(
-                                        it
-                                    )
-                                )
-                            }
+                    item { LabelWidget(stringResource(R.string.global)) }
+                    // item { DataAuthorizerWidget(viewModel) }
+                    item {
+                        DataAuthorizerWidget(
+                            currentAuthorizer = state.authorizer,
+                            changeAuthorizer = { newAuthorizer ->
+                                viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(newAuthorizer))
+                            },
+                            onClick = {}
                         )
                     }
-                }
-            }
-            item {
-                AnimatedVisibility(
-                    visible = state.installMode == ConfigEntity.InstallMode.Notification ||
-                            state.installMode == ConfigEntity.InstallMode.AutoNotification,
-                    enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
-                    exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
-                ) {
-                    Column(modifier = Modifier.animateContentSize()) {
-                        SwitchWidget(
-                            icon = AppIcons.Dialog,
-                            title = stringResource(id = R.string.show_dialog_when_pressing_notification),
-                            description = stringResource(id = R.string.change_notification_touch_behavior),
-                            checked = viewModel.state.showDialogWhenPressingNotification,
-                            onCheckedChange = {
+                    item {
+                        AnimatedVisibility(
+                            visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                            enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
+                            exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                        ) {
+                            IntNumberPickerWidget(
+                                icon = AppIcons.Working,
+                                title = stringResource(R.string.set_countdown),
+                                description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
+                                value = state.dhizukuAutoCloseCountDown,
+                                startInt = 1,
+                                endInt = 10
+                            ) {
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
+                                    PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
                                 )
                             }
-                        )
-                        AnimatedVisibility(
-                            visible = viewModel.state.showDialogWhenPressingNotification,
-                            enter = fadeIn(), // Only fade in, let the parent handle the expansion.
-                            exit = fadeOut()  // Only fade out, let the parent handle the shrinking.
-                        ) {
-                            SwitchWidget(
-                                icon = AppIcons.NotificationDisabled,
-                                title = stringResource(id = R.string.disable_notification_on_dismiss),
-                                description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
-                                checked = viewModel.state.disableNotificationForDialogInstall,
-                                onCheckedChange = {
-                                    viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(it)
-                                    )
-                                }
-                            )
                         }
                     }
-                }
-            }
-            item { LabelWidget(stringResource(R.string.basic)) }
-            item { DefaultInstaller(snackBarHostState, true) }
-            item { DefaultInstaller(snackBarHostState, false) }
-            item { ClearCache() }
-            // item { LabelWidget(label = stringResource(id = R.string.more)) }
-            // item { UserTerms() }
-            // item { PrivacyPolicy() }
-            item { LabelWidget(stringResource(R.string.other)) }
-            item {
-                SettingsAboutItemWidget(
-                    imageVector = AppIcons.Info,
-                    headlineContentText = stringResource(R.string.about_detail),
-                    supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
-                    onClick = { navController.navigate(SettingsScreen.About.route) }
-                )
-            }
-            item {
-                SettingsAboutItemWidget(
-                    imageVector = AppIcons.Update,
-                    headlineContentText = stringResource(R.string.get_update),
-                    supportingContentText = stringResource(R.string.get_update_detail),
-                    onClick = { showBottomSheet = true }
-                )
-            }
-            item {
-                val haptic = LocalHapticFeedback.current
-                SettingsAboutItemWidget(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
-                    headlineContentText = stringResource(R.string.telegram_group),
-                    supportingContentText = stringResource(R.string.telegram_group_desc),
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        openUrl(context, "https://t.me/installerx_revived_chat")
+                    // item { DataCustomizeAuthorizerWidget(viewModel) }
+                    // item { DataInstallModeWidget(viewModel) }
+                    item {
+                        DataInstallModeWidget(
+                            currentInstallMode = state.installMode,
+                            changeInstallMode = { newMode ->
+                                viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(newMode))
+                            },
+                            onClick = {}
+                        )
                     }
-                )
+                    item {
+                        // Outer AnimatedVisibility: Controls the visibility of the entire section.
+                        // It handles the main expansion/shrinking and fading for the whole group.
+                        AnimatedVisibility(
+                            visible = state.installMode == ConfigEntity.InstallMode.Dialog || state.installMode == ConfigEntity.InstallMode.AutoDialog,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            Column(modifier = Modifier.animateContentSize()) {
+                                // Inner AnimatedVisibility: Specifically controls the first SwitchWidget.
+                                // Its animation should be simple and not conflict with the parent's size animation.
+                                // Using only fadeIn/fadeOut is perfect for this.
+                                AnimatedVisibility(
+                                    visible = state.installMode == ConfigEntity.InstallMode.Dialog,
+                                    enter = fadeIn(), // Only fade in, let the parent handle the expansion.
+                                    exit = fadeOut()  // Only fade out, let the parent handle the shrinking.
+                                ) {
+                                    // This SwitchWidget will now smoothly fade in/out when toggling
+                                    // between Dialog and AutoDialog modes.
+                                    SwitchWidget(
+                                        icon = AppIcons.MenuOpen,
+                                        title = stringResource(id = R.string.show_dialog_install_extended_menu),
+                                        description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
+                                        checked = viewModel.state.showDialogInstallExtendedMenu,
+                                        onCheckedChange = {
+                                            viewModel.dispatch(
+                                                PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
+                                            )
+                                        }
+                                    )
+                                }
+                                // These SwitchWidgets are always present when the container is visible.
+                                SwitchWidget(
+                                    icon = AppIcons.Suggestion,
+                                    title = stringResource(id = R.string.show_intelligent_suggestion),
+                                    description = stringResource(id = R.string.show_intelligent_suggestion_desc),
+                                    checked = viewModel.state.showIntelligentSuggestion,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.ChangeShowIntelligentSuggestion(it)
+                                        )
+                                    }
+                                )
+                                SwitchWidget(
+                                    icon = AppIcons.NotificationDisabled,
+                                    title = stringResource(id = R.string.disable_notification),
+                                    description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
+                                    checked = viewModel.state.disableNotificationForDialogInstall,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(
+                                                it
+                                            )
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    item {
+                        AnimatedVisibility(
+                            visible = state.installMode == ConfigEntity.InstallMode.Notification ||
+                                    state.installMode == ConfigEntity.InstallMode.AutoNotification,
+                            enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
+                            exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                        ) {
+                            Column(modifier = Modifier.animateContentSize()) {
+                                SwitchWidget(
+                                    icon = AppIcons.Dialog,
+                                    title = stringResource(id = R.string.show_dialog_when_pressing_notification),
+                                    description = stringResource(id = R.string.change_notification_touch_behavior),
+                                    checked = viewModel.state.showDialogWhenPressingNotification,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
+                                        )
+                                    }
+                                )
+                                AnimatedVisibility(
+                                    visible = viewModel.state.showDialogWhenPressingNotification,
+                                    enter = fadeIn(), // Only fade in, let the parent handle the expansion.
+                                    exit = fadeOut()  // Only fade out, let the parent handle the shrinking.
+                                ) {
+                                    SwitchWidget(
+                                        icon = AppIcons.NotificationDisabled,
+                                        title = stringResource(id = R.string.disable_notification_on_dismiss),
+                                        description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
+                                        checked = viewModel.state.disableNotificationForDialogInstall,
+                                        onCheckedChange = {
+                                            viewModel.dispatch(
+                                                PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(it)
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    item { LabelWidget(stringResource(R.string.basic)) }
+                    item { DefaultInstaller(snackBarHostState, true) }
+                    item { DefaultInstaller(snackBarHostState, false) }
+                    item { ClearCache() }
+                    // item { LabelWidget(label = stringResource(id = R.string.more)) }
+                    // item { UserTerms() }
+                    // item { PrivacyPolicy() }
+                    item { LabelWidget(stringResource(R.string.other)) }
+                    item {
+                        SettingsAboutItemWidget(
+                            imageVector = AppIcons.Info,
+                            headlineContentText = stringResource(R.string.about_detail),
+                            supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
+                            onClick = { navController.navigate(SettingsScreen.About.route) }
+                        )
+                    }
+                    item {
+                        SettingsAboutItemWidget(
+                            imageVector = AppIcons.Update,
+                            headlineContentText = stringResource(R.string.get_update),
+                            supportingContentText = stringResource(R.string.get_update_detail),
+                            onClick = { showBottomSheet = true }
+                        )
+                    }
+                    item {
+                        val haptic = LocalHapticFeedback.current
+                        SettingsAboutItemWidget(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
+                            headlineContentText = stringResource(R.string.telegram_group),
+                            supportingContentText = stringResource(R.string.telegram_group_desc),
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                openUrl(context, "https://t.me/installerx_revived_ci")
+                            }
+                        )
+                    }
+                }
             }
         }
     }
