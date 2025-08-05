@@ -10,6 +10,7 @@ import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
+import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.repo.AnalyserRepo
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.res.model.impl.AxmlTreeRepoImpl
@@ -17,7 +18,9 @@ import com.rosan.installer.data.res.repo.AxmlTreeRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import timber.log.Timber
 import java.io.FileDescriptor
+import java.io.IOException
 import java.util.zip.ZipFile
 
 object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
@@ -66,7 +69,12 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         val path = data.path
         val bestArch = analyseAndSelectBestArchitecture(path, RsConfig.supportedArchitectures)
         return useResources { resources ->
-            setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
+            try {
+                setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
+            } catch (e: IOException) {
+                Timber.e(e, "Failed to load APK assets from path: $path")
+                throw AnalyseFailedAllFilesUnsupportedException("Failed to load APK assets. Maybe the file is corrupted or not supported?")
+            }
             listOf(loadAppEntity(resources, resources.newTheme(), data, extra, bestArch ?: Architecture.UNKNOWN))
         }
     }
