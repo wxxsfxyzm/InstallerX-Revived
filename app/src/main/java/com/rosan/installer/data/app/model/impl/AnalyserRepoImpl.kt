@@ -4,7 +4,6 @@ import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.DataType
-import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
@@ -44,15 +43,16 @@ object AnalyserRepoImpl : AnalyserRepo {
             type to dataEntity // 创建一个 (DataType?, DataEntity) 的配对
         }
         // 筛选出所有可以被分析的文件
-        val validTasks = typedTasks.mapNotNull { (type, dataEntity) ->
-            if (type != null) type to dataEntity else null
+        val validTasks = typedTasks.map { (type, dataEntity) ->
+            if (type != null) type to dataEntity else DataType.APK to dataEntity
         }
         // 如果没有任何一个文件是有效的，则抛出异常
         if (validTasks.isEmpty() && data.isNotEmpty()) {
-            Timber.e("All ${data.size} files were unrecognized. Failing analysis.")
-            throw AnalyseFailedAllFilesUnsupportedException(
+            Timber.e("All ${data.size} files were unrecognized. Assume as APK")
+
+            /*throw AnalyseFailedAllFilesUnsupportedException(
                 "All ${data.size} file(s) were unrecognized. Please check the file formats."
-            )
+            )*/
         }
         // --- NEW LOGIC: Determine if this is a Multi-APK installation session ---
         // A "Multi-APK Session" is defined as the app received more than one file,
