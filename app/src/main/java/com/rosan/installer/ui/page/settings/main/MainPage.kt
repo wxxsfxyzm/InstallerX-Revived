@@ -26,6 +26,7 @@ import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -37,13 +38,20 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.config.all.AllPage
 import com.rosan.installer.ui.page.settings.preferred.PreferredPage
+import com.rosan.installer.ui.page.settings.preferred.PreferredViewAction
+import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.theme.exclude
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainPage(navController: NavController) {
+    val preferredViewModel: PreferredViewModel = koinViewModel()
+    LaunchedEffect(Unit) {
+        preferredViewModel.dispatch(PreferredViewAction.Init)
+    }
     val data = arrayOf(
         /*        NavigationData(
                     icon = Icons.TwoTone.Home,
