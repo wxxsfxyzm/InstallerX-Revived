@@ -252,7 +252,7 @@
     <string name="show_dialog_install_extended_menu">显示扩展菜单</string>
     <string name="show_dialog_install_extended_menu_desc">在安装对话框中显示更多操作选项</string>
     <string name="extended_menu">扩展菜单</string>
-    <string name="disable_notification">禁用通知</string>
+    <string name="disable_notification">无通知前台安装</string>
     <string name="close_immediately_on_dialog_dismiss">安装过程中对话框将保持前台显示，点击空白处直接结束安装会话，不弹出安装通知</string>
     <string name="disable_notification_on_dismiss">对话框关闭时退出</string>
     <string name="close_notification_immediately_on_dialog_dismiss">关闭对话框将静默退出</string>

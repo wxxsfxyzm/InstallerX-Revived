@@ -34,17 +34,32 @@
 - 支持显示系统图标包，方法来自[RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt)
 - 加入了安装时显示targetSDK与minSDK的功能
 - Shizuku/Root安装完成打开App时可以绕过定制UI的链式启动拦截
+    - 使用原生api实现，不使用shell命令
     - 目前仅实现了对话框安装
-    - Dhizuku无法调用shell权限，因此加了一个倒计时自定义选项，给打开app的操作预留一定时间
+    - Dhizuku无法调用权限，因此加了一个倒计时自定义选项，给打开app的操作预留一定时间
 - 为对话框安装提供一个扩展菜单，可以在设置中启用
     - 支持查看应用申明的权限
     - 支持设定InstallFlags（可以继承全局Profile设置）部分实现来自[zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions/blob/main/app/src/main/java/dev/zwander/installwithoptions/data/InstallOption.kt)
        - **注意**：设定InstallFlags并不能保证一定生效，部分选项有可能带来安全风险，具体取决于系统
 - 支持安装zip压缩包内的apk文件，用 InstallerX 打开zip压缩包即可 
     - 仅支持对话框安装
+    - 不限制数量
     - 仅支持apk文件
     - 支持自动处理相同包名的多版本
-       - 支持~不那么~智能地选择最佳安装包
+       - 支持去重
+       - 支持智能地选择最佳安装包
+- 支持批量安装（多选然后共享到InstallerX）
+    - 仅支持对话框安装
+    - 不限制数量
+    - 仅支持apk文件
+    - 支持自动处理相同包名的多版本
+       - 支持去重
+       - 支持智能地选择最佳安装包
+- APKS/APKM/XAPK文件支持自动选择最佳分包 部分思路和代码来自[vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller/tree/master/app)
+    - 同时支持状态栏通知安装&对话框安装
+        - 通知栏点击安装即是最优选择
+        - 对话框默认选中最优选择，仍可以通过菜单自由选择分包
+    - 分包选择界面支持用户友好描述 
 
 ## 常见问题
 
