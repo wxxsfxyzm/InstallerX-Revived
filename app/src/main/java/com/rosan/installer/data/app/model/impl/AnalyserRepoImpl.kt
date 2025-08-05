@@ -4,6 +4,7 @@ import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
@@ -40,6 +41,10 @@ object AnalyserRepoImpl : AnalyserRepo {
         // 尝试为每个文件确定类型，无法识别的暂时记为 null
         val typedTasks = data.map { dataEntity ->
             val type = runCatching { getDataType(config, dataEntity) }.getOrNull()
+            if (type == DataType.NONE) {
+                Timber.w("Unrecognized file type for data: $dataEntity")
+                throw AnalyseFailedAllFilesUnsupportedException("Not a valid APK file: ${dataEntity.getSourceTop()}")
+            }
             type to dataEntity // 创建一个 (DataType?, DataEntity) 的配对
         }
         // 筛选出所有可以被分析的文件
@@ -170,8 +175,8 @@ object AnalyserRepoImpl : AnalyserRepo {
                     return@use DataType.MULTI_APK_ZIP
                 }
 
-                Timber.d("Could not determine file type, returning null.")
-                return@use null
+                Timber.d("Could not determine file type, returning NONE.")
+                return@use DataType.NONE
             }
 
             else -> ZipInputStream(data.getInputStream()).use { zip ->
@@ -260,7 +265,7 @@ object AnalyserRepoImpl : AnalyserRepo {
                 }
 
                 Timber.d("Finished scan. Could not determine file type.")
-                return@use null
+                return@use DataType.NONE
             }
         }
 
