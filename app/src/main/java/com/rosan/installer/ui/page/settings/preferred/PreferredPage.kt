@@ -49,7 +49,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -105,9 +104,14 @@ fun PreferredPage(
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
     }
 
-    LaunchedEffect(true) {
-        viewModel.dispatch(PreferredViewAction.Init)
-    }
+    /*
+     * REMOVED: This LaunchedEffect is no longer needed
+     * because pre-loading is handled in MainPage.kt.
+     *
+     * LaunchedEffect(true) {
+     *     viewModel.dispatch(PreferredViewAction.Init)
+     * }
+     */
 
     val snackBarHostState = remember {
         SnackbarHostState()
