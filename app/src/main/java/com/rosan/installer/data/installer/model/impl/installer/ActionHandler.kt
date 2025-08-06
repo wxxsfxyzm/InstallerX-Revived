@@ -25,6 +25,8 @@ import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.exception.ResolveException
 import com.rosan.installer.data.installer.model.impl.InstallerRepoImpl
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.installer.util.getRealPathFromUri
+import com.rosan.installer.data.installer.util.pathUnify
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
@@ -352,7 +354,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         if (assetFileDescriptor.declaredLength < 0) {
 
             // file descriptor can't be pipe or socket
-            val source = Os.readlink(path)
+            val source = Os.readlink(path).getRealPathFromUri(uri).pathUnify()
+            Timber.d("Source path: $source")
             if (source.startsWith('/')) {
                 cacheParcelFileDescriptors.add(parcelFileDescriptor)
                 val file = File(path)
