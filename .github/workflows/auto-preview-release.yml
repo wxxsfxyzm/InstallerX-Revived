@@ -30,11 +30,21 @@ jobs:
           java-version: '21'
           cache: gradle
 
+      # 新增：缓存 Gradle 依赖（加快构建速度）
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       # 4. 修改 versionName 格式为 A.B.C.hash
       - name: Update versionName format
         id: version
         run: |
-          # 提取 A.B.C
           VERSION=$(grep -oP 'versionName = "\K([0-9]+\.[0-9]+\.[0-9]+)' app/build.gradle.kts)
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           A=$(echo $VERSION | cut -d. -f1)
@@ -82,24 +92,19 @@ jobs:
         run: |
           PREV_TAG=$(git tag --list | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -Vr | head -n 1)
           CURR_TAG="${{ steps.version.outputs.VNEW_VERSION }}-alpha-latest"
-
           if [ -z "$PREV_TAG" ]; then
             LOG_RANGE=""
           else
             LOG_RANGE="$PREV_TAG..HEAD"
           fi
-
-          # 获取不包含 Merge pull request 的提交
           CHANGELOG_LIST=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | head -n 5)
           CHANGELOG_COUNT=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | wc -l)
-          
           CHANGELOG_BODY_OUTPUT=""
           if [ -z "$CHANGELOG_LIST" ]; then
             CHANGELOG_BODY_OUTPUT="No changes since the last stable release."
           else
             CHANGELOG_BODY_OUTPUT="$CHANGELOG_LIST"
           fi
-
           CHANGELOG_LINK_OUTPUT=""
           if [ "$CHANGELOG_COUNT" -gt 5 ]; then
             if [ -z "$PREV_TAG" ]; then
@@ -107,22 +112,18 @@ jobs:
             else
               COMPARE_URL="https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${CURR_TAG}"
             fi
-            # Store the link in its own variable. Note the \n\n for markdown formatting.
             CHANGELOG_LINK_OUTPUT="\n\n**Full Changelog:** [\`${PREV_TAG}...${CURR_TAG}\`]($COMPARE_URL)"
           fi
-          
           {
             echo "changelog_body<<EOF"
             echo -e "$CHANGELOG_BODY_OUTPUT"
             echo "EOF"
           } >> $GITHUB_OUTPUT
-
           {
             echo "changelog_full_link<<EOF"
             echo -e "$CHANGELOG_LINK_OUTPUT"
             echo "EOF"
           } >> $GITHUB_OUTPUT
-
           echo "--- Generated Changelog for Release Body ---"
           echo -e "${CHANGELOG_BODY_OUTPUT}${CHANGELOG_LINK_OUTPUT}"
 
@@ -135,7 +136,6 @@ jobs:
           target_commitish: ${{ github.sha }}
           body: |
             ## 这是自动构建的最新 Alpha 测试版。
-            
             - **这是一个预发布版本，并非为生产环境准备就绪。** 它仅用于测试和评估目的。请勿在实际生产环境中使用此版本。
             - 我们非常鼓励您分享您的看法！如果您有任何反馈、建议，或者遇到了任何问题，请随时在GitHub上提交Issue或Pull Request。
             
@@ -146,7 +146,6 @@ jobs:
             **更新日志（Changelog）:**
             
             ${{ steps.changelog.outputs.changelog_body }}${{ steps.changelog.outputs.changelog_full_link }}
-
           prerelease: true
           files: app/build/outputs/apk/Preview/release/*.apk
 
