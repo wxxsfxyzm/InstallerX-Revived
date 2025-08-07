@@ -4,8 +4,8 @@ from telethon.sessions import StringSession
 import os
 import sys
 
-API_ID = 611335
-API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
+API_ID = os.environ.get("API_ID")
+API_HASH = os.environ.get("API_HASH")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = int(os.environ.get("CHAT_ID"))
@@ -22,13 +22,11 @@ def get_caption():
     msg = MSG_TEMPLATE.format(
         commit_message=COMMIT_MESSAGE,
     )
-    if len(msg) > 1024:
-        return COMMIT_URL
     return msg
 
 async def send_telegram_message():
     files = sys.argv[1]
-    async with TelegramClient(StringSession(BOT_CI_SESSION), api_id=API_ID, api_hash=API_HASH) as client:
+    client = TelegramClient("bot", API_ID, API_HASH)
         await client.start(bot_token=BOT_TOKEN)
         print("[+] Caption: ")
         print("---")
