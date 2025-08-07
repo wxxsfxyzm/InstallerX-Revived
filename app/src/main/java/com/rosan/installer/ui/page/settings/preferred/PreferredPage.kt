@@ -334,18 +334,16 @@ fun PreferredPage(
                             onClick = { showBottomSheet = true }
                         )
                     }
-                    /*item {
-                        val haptic = LocalHapticFeedback.current
+                    item {
                         SettingsAboutItemWidget(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
                             headlineContentText = stringResource(R.string.telegram_group),
                             supportingContentText = stringResource(R.string.telegram_group_desc),
                             onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                openUrl(context, "https://t.me/")
+                                openUrl(context, "https://t.me/installerx_revived")
                             }
                         )
-                    }*/
+                    }
                 }
             }
         }
