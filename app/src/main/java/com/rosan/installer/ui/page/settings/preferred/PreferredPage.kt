@@ -334,6 +334,18 @@ fun PreferredPage(
                             onClick = { showBottomSheet = true }
                         )
                     }
+                    item {
+                        val haptic = LocalHapticFeedback.current
+                        SettingsAboutItemWidget(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
+                            headlineContentText = stringResource(R.string.telegram_group),
+                            supportingContentText = stringResource(R.string.telegram_group_desc),
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                openUrl(context, "https://t.me/installerx_revived_ci")
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -782,6 +794,21 @@ private fun BottomSheetContent(
             )
             Spacer(modifier = Modifier.width(8.dp)) // 图标与文字之间的间隔
             Text(text = "GitHub") // 按钮文本
+        }
+        Button(
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                openUrl(context, "https://t.me/installerx_revived_ci")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
+                contentDescription = "Telegram Icon",
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Telegram") // 按钮文本
         }
         Spacer(modifier = Modifier.size(60.dp)) // 按钮下方留白
     }
