@@ -26,7 +26,7 @@ def get_caption():
 
 async def send_telegram_message():
     files = sys.argv[1]
-    client = TelegramClient("bot", API_ID, API_HASH)
+    async with TelegramClient(StringSession(BOT_CI_SESSION), api_id=API_ID, api_hash=API_HASH) as client:
         await client.start(bot_token=BOT_TOKEN)
         print("[+] Caption: ")
         print("---")
