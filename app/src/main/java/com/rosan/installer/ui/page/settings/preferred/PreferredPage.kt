@@ -334,7 +334,7 @@ fun PreferredPage(
                             onClick = { showBottomSheet = true }
                         )
                     }
-                    item {
+                    /*item {
                         val haptic = LocalHapticFeedback.current
                         SettingsAboutItemWidget(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
@@ -342,10 +342,10 @@ fun PreferredPage(
                             supportingContentText = stringResource(R.string.telegram_group_desc),
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                openUrl(context, "https://t.me/installerx_revived_ci")
+                                openUrl(context, "https://t.me/")
                             }
                         )
-                    }
+                    }*/
                 }
             }
         }
@@ -798,7 +798,7 @@ private fun BottomSheetContent(
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                openUrl(context, "https://t.me/installerx_revived_ci")
+                openUrl(context, "https://t.me/+9pBFmROIOE80MTQ1")
             },
             modifier = Modifier.fillMaxWidth()
         ) {
