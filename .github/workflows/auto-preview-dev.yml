@@ -79,16 +79,3 @@ jobs:
           path: app/build/outputs/apk/Unstable/release/*.apk
           # 设置产物的保留天数
           retention-days: 15
-
-      - name: Upload to Telegram
-        env:
-          API_ID: ${{ secrets.API_ID }}
-          API_HASH: ${{ secrets.API_HASH }}
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
-          BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
-          COMMIT_MESSAGE: "Test build for dev branch"
-        run: |
-          pip3 install telethon
-          APK=$(find ./app/build/outputs/apk/Unstable/release -name "*.apk")
-          python3 .github/bot.py $APK
