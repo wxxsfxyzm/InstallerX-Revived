@@ -10,7 +10,8 @@ enum class Architecture(val arch: String, val displayName: String) {
     X86_64("x86_64", "x86 (64-bit)"),
     MIPS("mips", "MIPS (32-bit)"),
     MIPS64("mips64", "MIPS (64-bit)"),
-    UNKNOWN("unknown", "Unknown");
+    UNKNOWN("unknown", "Unknown"),
+    NONE("none", "None");
 
     companion object {
         /**
