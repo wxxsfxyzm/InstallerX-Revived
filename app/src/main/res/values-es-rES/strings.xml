@@ -1,5 +1,5 @@
 <resources>
- 
+
     <string name="agreement_title">Política</string>
     <string name="agreement_text">Esta es nuestra política de usuario. Por favor, léela y acéptala. &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/terms&quot;&gt;Política de Usuario&lt;/a&gt;, &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/privacy&quot;&gt;Política de Privacidad&lt;/a&gt; Este mensaje no se mostrará nuevamente después de aceptar.</string>
 
@@ -29,8 +29,6 @@
     <string name="enable_storage_permission_hint">¡Activa el permiso de almacenamiento para instalar!</string>
 
     <string name="discuss">Chat, comentarios y actualizaciones</string>
-    <string name="qq_channel">Canal de QQ</string>
-    <string name="qq_group_official">Grupo de QQ (oficial)</string>
     <string name="telegram_group">Grupo de Telegram</string>
 
     <string name="basic">Básico</string>
