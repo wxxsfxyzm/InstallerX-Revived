@@ -2,15 +2,11 @@
 
 [![README en español](https://img.shields.io/badge/README_ES-0077b5?style=flat-square)](./README_ES.md) [![README in English](https://img.shields.io/badge/README_EN-239120?style=flat-square)](./README_EN.md)
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![Latest Release](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=稳定版)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![Prerelease](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=测试版)](https://github.com/wxxsfxyzm/InstallerX/releases)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![Latest Release](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=稳定版)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![Prerelease](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=测试版)](https://github.com/wxxsfxyzm/InstallerX/releases)[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
 - 这是一个由社区维护的分支版本， [原项目](https://github.com/iamr0s/InstallerX)已被作者归档。
 - 提供有限的开源更新和支持
 - 此分支严格遵循 GNU GPLv3，所有修改均开放源代码。
-
-## 重要提示
-> [!NOTE]
-> TG测试已经结束，正式的构建频道&讨论群组会在下次更新时推出，在此期间开发者暂不受理群内反馈，如遇到问题请暂时通过issue提交
 
 ## 介绍
 
