@@ -14,6 +14,7 @@
     <string name="config">Profiles</string>
     <string name="app">App</string>
     <string name="preferred">Preferences</string>
+    <string name="personalization">Personalization</string>
     <string name="search">Search</string>
     <string name="menu">Menu</string>
     <string name="about">About</string>
@@ -30,10 +31,19 @@
     <string name="enable_storage_permission_hint">Please enable storage permission to install!</string>
 
     <string name="discuss">Chat &amp; Feedback &amp; Update</string>
-    <string name="qq_channel">QQ channel</string>
-    <string name="qq_group_official">QQ group (official)</string>
     <string name="telegram_group">Telegram group</string>
     <string name="telegram_group_desc">Join the group!</string>
+
+    <string name="theme_settings">Theme Settings</string>
+    <string name="theme_settings_ui_style">UI Style</string>
+    <string name="theme_settings_desc">Change the theme of the app</string>
+    <string name="theme_settings_use_refreshed_ui">Use Refreshed UI</string>
+    <string name="theme_settings_use_refreshed_ui_desc">Use the new Google UI for the App</string>
+    <string name="installer_settings">Installer Settings</string>
+    <string name="installer_settings_desc">Change the global settings of the installer</string>
+    <string name="installer_settings_global_installer">Global</string>
+    <string name="installer_settings_dialog_mode_options">Options for Dialog</string>
+    <string name="installer_settings_notification_mode_options">Options for Notification</string>
 
     <string name="basic">Basic</string>
     <string name="lock_default_installer">Set as default installer</string>
@@ -91,13 +101,18 @@
     <string name="config_auto_delete_dsp">Automatically delete the apk after it\'s been installed</string>
     <string name="config_display_sdk_version">Display SDK information</string>
     <string name="config_display_sdk_version_sdp">Show target and min information on the installation interface</string>
+    <string name="config_label_main_settings">Main Settings</string>
     <string name="config_label_installer_settings">Installer Settings</string>
     <string name="config_label_install_options">Install Options</string>
+    <string name="config_dialog_title_invalid">Invalid Input</string>
+    <string name="config_dialog_title_unsaved_changes">Unsaved changes</string>
+    <string name="config_dialog_message_unsaved_changes">Quit without saving?</string>
 
     <string name="config_error_name">Name can\'t be empty</string>
     <string name="config_error_customize_authorizer">Custom authorizer can\'t be empty</string>
     <string name="config_error_installer">Installer source can\'t be empty</string>
 
+    <string name="discard">Discard Changes</string>
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>
     <string name="install">Install</string>

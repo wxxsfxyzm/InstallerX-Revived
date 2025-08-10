@@ -14,10 +14,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ContainedLoadingIndicator
@@ -35,12 +36,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -59,7 +62,6 @@ import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.SettingsScreen
-import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -74,27 +76,47 @@ fun AllPage(
         parametersOf(navController)
     }
 ) {
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         viewModel.dispatch(AllViewAction.Init)
         viewModel.navController = navController
     }
 
-    val showFloatingState = remember {
-        mutableStateOf(true)
-    }
+    val showFloatingState = remember { mutableStateOf(true) }
     val showFloating by showFloatingState
+    val listState = rememberLazyStaggeredGridState()
+    val snackBarHostState = remember { SnackbarHostState() }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    val snackBarHostState = remember {
-        SnackbarHostState()
+    LaunchedEffect(listState) {
+        var previousIndex = listState.firstVisibleItemIndex
+        var previousOffset = listState.firstVisibleItemScrollOffset
+
+        snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+            .collectLatest { (index, offset) ->
+                val isScrollingDown = when {
+                    index > previousIndex -> true
+                    index < previousIndex -> false
+                    else -> offset > previousOffset
+                }
+
+                previousIndex = index
+                previousOffset = offset
+
+                val newShowFloating = !isScrollingDown
+                if (showFloatingState.value != newShowFloating) {
+                    showFloatingState.value = newShowFloating
+                }
+            }
     }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is AllViewEvent.DeletedConfig -> {
                     val result = snackBarHostState.showSnackbar(
                         message = viewModel.context.getString(R.string.delete_success),
                         actionLabel = viewModel.context.getString(R.string.restore),
+                        withDismissAction = true
                     )
                     if (result == SnackbarResult.ActionPerformed) {
                         viewModel.dispatch(
@@ -111,9 +133,8 @@ fun AllPage(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(windowInsets)
-            .nestedScroll(ShowFloatingActionButtonNestedScrollConnection(showFloatingState)),
-        contentWindowInsets = WindowInsets.none,
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets = windowInsets,
         topBar = {
             TopAppBar(
                 title = {
@@ -180,6 +201,7 @@ fun AllPage(
                 else -> {
                     ShowDataWidget(
                         viewModel = viewModel,
+                        listState = listState
                     )
                 }
             }
@@ -226,13 +248,15 @@ fun LottieWidget(
 @Composable
 fun ShowDataWidget(
     viewModel: AllViewModel,
+    listState: LazyStaggeredGridState = rememberLazyStaggeredGridState()
 ) {
     LazyVerticalStaggeredGrid(
         modifier = Modifier.fillMaxSize(),
         columns = StaggeredGridCells.Adaptive(350.dp),
         contentPadding = PaddingValues(16.dp),
         verticalItemSpacing = 16.dp,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        state = listState,
     ) {
         items(viewModel.state.data.configs) {
             DataItemWidget(viewModel, it)

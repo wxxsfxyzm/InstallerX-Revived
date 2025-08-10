@@ -229,6 +229,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 InstallEntity(
                     name = it.app.name,
                     packageName = it.app.packageName,
+                    arch = it.app.arch,
                     data = when (val app = it.app) {
                         is AppEntity.BaseEntity -> app.data
                         is AppEntity.SplitEntity -> app.data

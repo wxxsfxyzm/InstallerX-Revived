@@ -24,23 +24,14 @@ class PreferredViewModel(
 
     private var initialized = false
 
-    fun dispatch(action: PreferredViewAction) {
+    fun dispatch(action: PreferredViewAction) =
         when (action) {
             is PreferredViewAction.Init -> init()
             is PreferredViewAction.ChangeGlobalAuthorizer -> changeGlobalAuthorizer(action.authorizer)
-            is PreferredViewAction.ChangeGlobalCustomizeAuthorizer -> changeGlobalCustomizeAuthorizer(
-                action.customizeAuthorizer
-            )
-
+            is PreferredViewAction.ChangeGlobalCustomizeAuthorizer -> changeGlobalCustomizeAuthorizer(action.customizeAuthorizer)
             is PreferredViewAction.ChangeGlobalInstallMode -> changeGlobalInstallMode(action.installMode)
-            is PreferredViewAction.ChangeShowDialogInstallExtendedMenu -> changeShowDialogInstallExtendedMenu(
-                action.showMenu
-            )
-
-            is PreferredViewAction.ChangeShowIntelligentSuggestion -> changeShowIntelligentSuggestion(
-                action.showIntelligentSuggestion
-            )
-
+            is PreferredViewAction.ChangeShowDialogInstallExtendedMenu -> changeShowDialogInstallExtendedMenu(action.showMenu)
+            is PreferredViewAction.ChangeShowIntelligentSuggestion -> changeShowIntelligentSuggestion(action.showIntelligentSuggestion)
             is PreferredViewAction.ChangeShowDisableNotificationForDialogInstall -> changeShowDisableNotificationForDialogInstall(
                 action.showDisableNotification
             )
@@ -49,11 +40,10 @@ class PreferredViewModel(
                 action.showDialog
             )
 
-            is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(
-                action.countDown
-            )
+            is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(action.countDown)
+            is PreferredViewAction.ChangeShowRefreshedUI -> changeRefreshedUI(action.showRefreshedUI)
         }
-    }
+
 
     private fun init() {
         // DataStore async initialization
@@ -75,6 +65,7 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true)
             val dhizukuAutoCloseCountDownFlow =
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
+            val showRefreshedUIFlow = appDataStore.getBoolean(AppDataStore.UI_FRESH_SWITCH, true)
 
             combine(
                 authorizerFlow,
@@ -84,7 +75,8 @@ class PreferredViewModel(
                 showIntelligentSuggestionFlow,
                 showNotificationForDialogInstallFlow,
                 showDialogWhenPressingNotificationFlow,
-                dhizukuAutoCloseCountDownFlow
+                dhizukuAutoCloseCountDownFlow,
+                showRefreshedUIFlow
             ) { values: Array<Any?> ->
                 val authorizer = values[0] as ConfigEntity.Authorizer
                 val customize = values[1] as String
@@ -94,6 +86,7 @@ class PreferredViewModel(
                 val showNotification = values[5] as Boolean
                 val showDialog = values[6] as Boolean
                 val countDown = values[7] as Int
+                val showRefreshedUI = values[8] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -106,6 +99,7 @@ class PreferredViewModel(
                     disableNotificationForDialogInstall = showNotification,
                     showDialogWhenPressingNotification = showDialog,
                     dhizukuAutoCloseCountDown = countDown,
+                    showRefreshedUI = showRefreshedUI,
                 )
             }.collectLatest { state = it }
         }
@@ -163,6 +157,12 @@ class PreferredViewModel(
             if (countDown in 1..10) {
                 appDataStore.putInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, countDown)
             }
+        }
+    }
+
+    private fun changeRefreshedUI(showRefreshedUI: Boolean) {
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.UI_FRESH_SWITCH, showRefreshedUI)
         }
     }
 }

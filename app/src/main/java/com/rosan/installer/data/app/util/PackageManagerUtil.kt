@@ -126,75 +126,33 @@ class PackageManagerUtil {
                 INSTALL_FAILED_ALREADY_EXISTS -> InstallFailedAlreadyExistsException(ecpMsg)
                 INSTALL_FAILED_INVALID_APK -> InstallFailedInvalidAPKException(ecpMsg)
                 INSTALL_FAILED_INVALID_URI -> InstallFailedInvalidURIException(ecpMsg)
-                INSTALL_FAILED_INSUFFICIENT_STORAGE -> InstallFailedInsufficientStorageException(
-                    ecpMsg
-                )
-
+                INSTALL_FAILED_INSUFFICIENT_STORAGE -> InstallFailedInsufficientStorageException(ecpMsg)
                 INSTALL_FAILED_DUPLICATE_PACKAGE -> InstallFailedDuplicatePackageException(ecpMsg)
-                INSTALL_FAILED_DUPLICATE_PERMISSION -> InstallFailedDuplicatePermissionException(
-                    ecpMsg
-                )
-
+                INSTALL_FAILED_DUPLICATE_PERMISSION -> InstallFailedDuplicatePermissionException(ecpMsg)
                 INSTALL_FAILED_NO_SHARED_USER -> InstallFailedNoSharedUserException(ecpMsg)
-                INSTALL_FAILED_UPDATE_INCOMPATIBLE -> InstallFailedUpdateIncompatibleException(
-                    ecpMsg
-                )
-
-                INSTALL_FAILED_SHARED_USER_INCOMPATIBLE -> InstallFailedSharedUserIncompatibleException(
-                    ecpMsg
-                )
-
-                INSTALL_FAILED_MISSING_SHARED_LIBRARY -> InstallFailedMissingSharedLibraryException(
-                    ecpMsg
-                )
-
-                INSTALL_FAILED_REPLACE_COULDNT_DELETE -> InstallFailedReplaceCouldntDeleteException(
-                    ecpMsg
-                )
-
+                INSTALL_FAILED_UPDATE_INCOMPATIBLE -> InstallFailedUpdateIncompatibleException(ecpMsg)
+                INSTALL_FAILED_SHARED_USER_INCOMPATIBLE -> InstallFailedSharedUserIncompatibleException(ecpMsg)
+                INSTALL_FAILED_MISSING_SHARED_LIBRARY -> InstallFailedMissingSharedLibraryException(ecpMsg)
+                INSTALL_FAILED_REPLACE_COULDNT_DELETE -> InstallFailedReplaceCouldntDeleteException(ecpMsg)
                 INSTALL_FAILED_DEXOPT -> InstallFailedDexOptException(ecpMsg)
                 INSTALL_FAILED_OLDER_SDK -> InstallFailedOlderSdkException(ecpMsg)
-                INSTALL_FAILED_CONFLICTING_PROVIDER -> InstallFailedConflictingProviderException(
-                    ecpMsg
-                )
-
+                INSTALL_FAILED_CONFLICTING_PROVIDER -> InstallFailedConflictingProviderException(ecpMsg)
                 INSTALL_FAILED_NEWER_SDK -> InstallFailedNewerSDKException(ecpMsg)
                 INSTALL_FAILED_TEST_ONLY -> InstallFailedTestOnlyException(ecpMsg)
-                INSTALL_FAILED_CPU_ABI_INCOMPATIBLE -> InstallFailedCpuAbiIncompatibleException(
-                    ecpMsg
-                )
-
-                INSTALL_FAILED_NO_MATCHING_ABIS -> InstallFailedCpuAbiIncompatibleException(
-                    ecpMsg
-                )
-
+                INSTALL_FAILED_CPU_ABI_INCOMPATIBLE -> InstallFailedCpuAbiIncompatibleException(ecpMsg)
+                INSTALL_FAILED_NO_MATCHING_ABIS -> InstallFailedCpuAbiIncompatibleException(ecpMsg)
                 INSTALL_FAILED_MISSING_FEATURE -> InstallFailedMissingFeatureException(ecpMsg)
                 INSTALL_FAILED_CONTAINER_ERROR -> InstallFailedContainerErrorException(ecpMsg)
-                INSTALL_FAILED_INVALID_INSTALL_LOCATION -> InstallFailedInvalidInstallLocationException(
-                    ecpMsg
-                )
-
+                INSTALL_FAILED_INVALID_INSTALL_LOCATION -> InstallFailedInvalidInstallLocationException(ecpMsg)
                 INSTALL_FAILED_MEDIA_UNAVAILABLE -> InstallFailedMediaUnavailableException(ecpMsg)
-                INSTALL_FAILED_VERIFICATION_TIMEOUT -> InstallFailedVerificationTimeoutException(
-                    ecpMsg
-                )
-
-                INSTALL_FAILED_VERIFICATION_FAILURE -> InstallFailedVerificationFailureException(
-                    ecpMsg
-                )
-
+                INSTALL_FAILED_VERIFICATION_TIMEOUT -> InstallFailedVerificationTimeoutException(ecpMsg)
+                INSTALL_FAILED_VERIFICATION_FAILURE -> InstallFailedVerificationFailureException(ecpMsg)
                 INSTALL_FAILED_PACKAGE_CHANGED -> InstallFailedPackageChangedException(ecpMsg)
                 INSTALL_FAILED_UID_CHANGED -> InstallFailedUidChangedException(ecpMsg)
                 INSTALL_FAILED_VERSION_DOWNGRADE -> InstallFailedVersionDowngradeException(ecpMsg)
                 INSTALL_FAILED_DEPRECATED_SDK_VERSION -> InstallFailedDeprecatedSdkVersion(ecpMsg)
-                INSTALL_FAILED_REJECTED_BY_BUILDTYPE -> InstallFailedRejectedByBuildTypeException(
-                    ecpMsg
-                )
-
-                INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION -> InstallFailedHyperOSIsolationViolationException(
-                    ecpMsg
-                )
-
+                INSTALL_FAILED_REJECTED_BY_BUILDTYPE -> InstallFailedRejectedByBuildTypeException(ecpMsg)
+                INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION -> InstallFailedHyperOSIsolationViolationException(ecpMsg)
                 INSTALL_FAILED_USER_RESTRICTED -> InstallFailedUserRestrictedException(ecpMsg)
                 else -> IllegalStateException(ecpMsg)
             }

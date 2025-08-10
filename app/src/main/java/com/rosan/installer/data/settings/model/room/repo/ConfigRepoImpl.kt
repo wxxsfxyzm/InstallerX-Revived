@@ -22,6 +22,7 @@ class ConfigRepoImpl(
                     is ConfigOrder.ModifiedAt -> configs.sortedBy { it.modifiedAt }
                 }
             }
+
             OrderType.Descending -> {
                 when (order) {
                     is ConfigOrder.Id -> configs.sortedByDescending { it.id }
@@ -44,6 +45,7 @@ class ConfigRepoImpl(
                         is ConfigOrder.ModifiedAt -> configs.sortedBy { it.modifiedAt }
                     }
                 }
+
                 OrderType.Descending -> {
                     when (order) {
                         is ConfigOrder.Id -> configs.sortedByDescending { it.id }

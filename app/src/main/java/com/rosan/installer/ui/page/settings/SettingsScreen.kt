@@ -5,6 +5,8 @@ sealed class SettingsScreen(val route: String) {
     data object EditConfig : SettingsScreen("config/edit?id={id}")
     data object ApplyConfig : SettingsScreen("config/apply?id={id}")
     data object About : SettingsScreen("about")
+    data object Theme : SettingsScreen("theme")
+    data object InstallerGlobal : SettingsScreen("installerGlobal")
 
     sealed class Builder(val route: String) {
         data object Main : SettingsScreen("main")

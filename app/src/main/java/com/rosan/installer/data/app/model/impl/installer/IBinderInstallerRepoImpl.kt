@@ -17,6 +17,7 @@ import android.os.IInterface
 import android.os.ServiceManager
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.BuildConfig
+import com.rosan.installer.build.Architecture
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
@@ -51,7 +52,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
 
-    private fun getFiled(any: Class<*>, name: String, clazz: Class<*>): Field? {
+    private fun getField(any: Class<*>, name: String, clazz: Class<*>): Field? {
         var field = reflect.getDeclaredField(any, name)
         field?.isAccessible = true
         if (field?.type != clazz) {
@@ -111,12 +112,27 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         }
 
     private suspend fun setSessionIBinder(session: Session) {
-        val field = getFiled(session::class.java, "mSession", IPackageInstallerSession::class.java)
+        val field = getField(session::class.java, "mSession", IPackageInstallerSession::class.java)
             ?: return
         val iBinder = (field.get(session) as IInterface).asBinder()
         field.set(
             session, IPackageInstallerSession.Stub.asInterface(iBinderWrapper(iBinder))
         )
+    }
+
+    private fun setAbiOverride(params: PackageInstaller.SessionParams, abi: String) {
+        try {
+            // Get the Field object for "abiOverride" from the SessionParams class
+            val abiOverrideField = params::class.java.getField("abiOverride")
+
+            // Set the value of the field on your 'params' instance
+            abiOverrideField.set(params, abi)
+
+            Timber.d("Successfully set abiOverride field to: $abi")
+        } catch (e: Exception) {
+            // Catch potential exceptions like NoSuchFieldException if the API changes
+            Timber.w(e, "Failed to set abiOverride field. Installation might fail for ABI mismatch.")
+        }
     }
 
     override suspend fun doWork(
@@ -190,6 +206,17 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                     Timber.d("Package $packageName is not archived, using replace existing option.")
                     InstallOption.ReplaceExisting.value
                 }
+
+        Timber.d(
+            "Current Arch to install: ${entities.firstOrNull { it.name == "base.apk" }?.arch}, isUnknownArch: ${
+                entities.firstOrNull { it.name == "base.apk" }?.arch == Architecture.UNKNOWN
+            }"
+        )
+
+        if ((containerType == DataType.APK || containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP) &&
+            entities.firstOrNull { it.name == "base.apk" }?.arch == Architecture.UNKNOWN
+        )
+            setAbiOverride(params, "armeabi-v7a")
 
         val sessionId = packageInstaller.createSession(params)
         val session = packageInstaller.openSession(sessionId)

@@ -38,14 +38,14 @@ import com.rosan.installer.ui.page.settings.SettingsScreen
 import com.rosan.installer.ui.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.widget.setting.ClearCache
 import com.rosan.installer.ui.widget.setting.DefaultInstaller
-import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.ui.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.widget.setting.SettingsNavigationItemWidget
+import com.rosan.installer.ui.widget.setting.SplicedSettingsGroup
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PreferredPage(
+fun NewPreferredPage(
     navController: NavController,
     windowInsets: WindowInsets,
     viewModel: PreferredViewModel = koinViewModel()
@@ -112,65 +112,83 @@ fun PreferredPage(
                         .fillMaxSize()
                         .padding(paddingValues)
                 ) {
-                    item { LabelWidget(stringResource(R.string.global)) }
-                    // item { DataAuthorizerWidget(viewModel) }
+                    // --- Global Settings Group ---
                     item {
-                        SettingsNavigationItemWidget(
-                            icon = AppIcons.Theme,
-                            title = stringResource(R.string.theme_settings),
-                            description = stringResource(R.string.theme_settings_desc),
-                            onClick = {
-                                // Navigate using NavController instead of changing state
-                                navController.navigate(SettingsScreen.Theme.route)
-                            }
+                        SplicedSettingsGroup(
+                            title = stringResource(R.string.personalization),
+                            content = listOf(
+                                {
+                                    SettingsNavigationItemWidget(
+                                        icon = AppIcons.Theme,
+                                        title = stringResource(R.string.theme_settings),
+                                        description = stringResource(R.string.theme_settings_desc),
+                                        onClick = {
+                                            // Navigate using NavController instead of changing state
+                                            navController.navigate(SettingsScreen.Theme.route)
+                                        }
+                                    )
+                                },
+                                {
+                                    SettingsNavigationItemWidget(
+                                        icon = AppIcons.InstallMode,
+                                        title = stringResource(R.string.installer_settings),
+                                        description = stringResource(R.string.installer_settings_desc),
+                                        onClick = {
+                                            // Navigate using NavController
+                                            navController.navigate(SettingsScreen.InstallerGlobal.route)
+                                        }
+                                    )
+                                }
+                            )
                         )
                     }
+
+                    // --- Basic Settings Group ---
                     item {
-                        SettingsNavigationItemWidget(
-                            icon = AppIcons.InstallMode,
-                            title = stringResource(R.string.installer_settings),
-                            description = stringResource(R.string.installer_settings_desc),
-                            onClick = {
-                                // Navigate using NavController
-                                navController.navigate(SettingsScreen.InstallerGlobal.route)
-                            }
+                        SplicedSettingsGroup(
+                            title = stringResource(R.string.basic),
+                            content = listOf(
+                                { DefaultInstaller(snackBarHostState, true) },
+                                { DefaultInstaller(snackBarHostState, false) },
+                                { ClearCache() }
+                            )
                         )
                     }
-                    item { LabelWidget(stringResource(R.string.basic)) }
-                    item { DefaultInstaller(snackBarHostState, true) }
-                    item { DefaultInstaller(snackBarHostState, false) }
-                    item { ClearCache() }
-                    // item { LabelWidget(label = stringResource(id = R.string.more)) }
-                    // item { UserTerms() }
-                    // item { PrivacyPolicy() }
-                    item { LabelWidget(stringResource(R.string.other)) }
+
+                    // --- Other Settings Group ---
                     item {
-                        SettingsAboutItemWidget(
-                            imageVector = AppIcons.Info,
-                            headlineContentText = stringResource(R.string.about_detail),
-                            supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
-                            onClick = { navController.navigate(SettingsScreen.About.route) }
+                        SplicedSettingsGroup(
+                            title = stringResource(R.string.other),
+                            content = listOf(
+                                {
+                                    SettingsAboutItemWidget(
+                                        imageVector = AppIcons.Info,
+                                        headlineContentText = stringResource(R.string.about_detail),
+                                        supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
+                                        onClick = { navController.navigate(SettingsScreen.About.route) }
+                                    )
+                                },
+                                {
+                                    SettingsAboutItemWidget(
+                                        imageVector = AppIcons.Update,
+                                        headlineContentText = stringResource(R.string.get_update),
+                                        supportingContentText = stringResource(R.string.get_update_detail),
+                                        onClick = { showBottomSheet = true }
+                                    )
+                                }/*,
+                                {
+                                    SettingsAboutItemWidget(
+                                        imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
+                                        headlineContentText = stringResource(R.string.telegram_group),
+                                        supportingContentText = stringResource(R.string.telegram_group_desc),
+                                        onClick = {
+                                            openUrl(context, "https://t.me/installerx_revived")
+                                        }
+                                    )
+                                }*/
+                            )
                         )
                     }
-                    item {
-                        SettingsAboutItemWidget(
-                            imageVector = AppIcons.Update,
-                            headlineContentText = stringResource(R.string.get_update),
-                            supportingContentText = stringResource(R.string.get_update_detail),
-                            onClick = { showBottomSheet = true }
-                        )
-                    }
-                    // Temporarily Disable This
-                    /*                    item {
-                                            SettingsAboutItemWidget(
-                                                imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
-                                                headlineContentText = stringResource(R.string.telegram_group),
-                                                supportingContentText = stringResource(R.string.telegram_group_desc),
-                                                onClick = {
-                                                    openUrl(context, "https://t.me/installerx_revived")
-                                                }
-                                            )
-                                        }*/
                 }
             }
         }
@@ -181,28 +199,3 @@ fun PreferredPage(
         )
     }
 }
-
-/*@Composable
-fun UserTerms() {
-    val context = LocalContext.current
-    BaseWidget(
-        icon = Icons.TwoTone.Gavel,
-        title = stringResource(id = R.string.user_terms),
-        onClick = {
-            openUrl(context, "https://iamr0s.github.io/InstallerXDocs/terms")
-        }
-    ) {}
-}*/
-
-/*
-@Composable
-fun PrivacyPolicy() {
-    val context = LocalContext.current
-    BaseWidget(
-        icon = Icons.TwoTone.PrivacyTip,
-        title = stringResource(id = R.string.privacy_policy),
-        onClick = {
-            openUrl(context, "https://iamr0s.github.io/InstallerXDocs/privacy")
-        }
-    ) {}
-}*/

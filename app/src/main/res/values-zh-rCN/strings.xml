@@ -12,6 +12,7 @@
     <string name="config">配置</string>
     <string name="app">应用</string>
     <string name="preferred">设置</string>
+    <string name="personalization">个性化</string>
     <string name="search">搜索</string>
     <string name="menu">菜单</string>
     <string name="about">关于</string>
@@ -25,11 +26,21 @@
 
     <string name="enable_notification_hint">请启用通知以进行安装！</string>
     <string name="enable_storage_permission_hint">请启用存储权限！</string>
+
     <string name="discuss">讨论 &amp; 反馈 &amp; 更新</string>
-    <string name="qq_channel">QQ频道</string>
-    <string name="qq_group_official">QQ群组（官方）</string>
     <string name="telegram_group">Telegram群组</string>
     <string name="telegram_group_desc">来一起划水！</string>
+
+    <string name="theme_settings">主题设置</string>
+    <string name="theme_settings_ui_style">主题风格</string>
+    <string name="theme_settings_desc">更改应用主题</string>
+    <string name="theme_settings_use_refreshed_ui">使用全新的外观</string>
+    <string name="theme_settings_use_refreshed_ui_desc">使用来自谷歌的全新设计风格</string>
+    <string name="installer_settings">安装器设置</string>
+    <string name="installer_settings_desc">更改安装器的全局设置</string>
+    <string name="installer_settings_global_installer">全局</string>
+    <string name="installer_settings_dialog_mode_options">对话框安装自定义选项</string>
+    <string name="installer_settings_notification_mode_options">通知安装自定义选项</string>
 
     <string name="basic">常规</string>
     <string name="lock_default_installer">锁定为默认安装器</string>
@@ -87,13 +98,18 @@
     <string name="config_auto_delete_dsp">安装成功后自动删除安装包</string>
     <string name="config_display_sdk_version">显示SDK信息</string>
     <string name="config_display_sdk_version_sdp">在安装界面显示target与min信息</string>
+    <string name="config_label_main_settings">主要设置</string>
     <string name="config_label_installer_settings">安装器设置</string>
     <string name="config_label_install_options">安装选项</string>
+    <string name="config_dialog_title_invalid">有错误输入项</string>
+    <string name="config_dialog_title_unsaved_changes">有未保存的修改</string>
+    <string name="config_dialog_message_unsaved_changes">不保存就退出吗？</string>
 
     <string name="config_error_name">名称不得为空</string>
     <string name="config_error_customize_authorizer">自定义授权器不得为空</string>
     <string name="config_error_installer">安装者不得为空</string>
 
+    <string name="discard">放弃更改</string>
     <string name="cancel">取消</string>
     <string name="retry">重试</string>
     <string name="install">安装</string>

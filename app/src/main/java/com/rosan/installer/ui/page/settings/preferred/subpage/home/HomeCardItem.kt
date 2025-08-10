@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.settings.home
+package com.rosan.installer.ui.page.settings.preferred.subpage.home
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

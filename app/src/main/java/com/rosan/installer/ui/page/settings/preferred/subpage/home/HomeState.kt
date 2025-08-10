@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.settings.home
+package com.rosan.installer.ui.page.settings.preferred.subpage.home
 
 import android.os.Build
 import androidx.compose.ui.text.intl.Locale
@@ -25,7 +25,7 @@ data class HomeState(
         manufacturer += " ${Build.MODEL}"
         manufacturer
     },
-    val systemStruct: String = kotlin.run {
+    val systemStruct: String = run {
         var struct = System.getProperty("os.arch") ?: "unknown"
         val abis = Build.SUPPORTED_ABIS
         struct += if (abis.isEmpty()) {
