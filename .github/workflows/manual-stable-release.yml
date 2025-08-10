@@ -89,3 +89,13 @@ jobs:
           body: ${{ inputs.changelog }}
           prerelease: false
           files: app/build/outputs/apk/Stable/release/InstallerX-Revived-${{ inputs.version_tag }}.apk
+
+      - name: Upload to Telegram
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
+        run: |
+          pip3 install telethon
+          APK_PATH="app/build/outputs/apk/Stable/release/InstallerX-Revived-${{ inputs.version_tag }}.apk"
+          python3 .github/bot.py "$APK_PATH"

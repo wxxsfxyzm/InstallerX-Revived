@@ -149,3 +149,16 @@ jobs:
 
           prerelease: true
           files: app/build/outputs/apk/Preview/release/*.apk
+
+      - name: Upload to Telegram
+        env:
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
+          COMMIT_MESSAGE: ${{ steps.changelog.outputs.changelog_body }}
+        run: |
+          pip3 install telethon
+          APK=$(find ./app/build/outputs/apk/Preview/release -name "*.apk")
+          python3 .github/bot.py $APK
