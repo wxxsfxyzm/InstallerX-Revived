@@ -8,6 +8,10 @@
 - 提供有限的开源更新和支持
 - 此分支严格遵循 GNU GPLv3，所有修改均开放源代码。
 
+## 重要提示
+> [!NOTE]
+> TG测试已经结束，正式的构建频道&讨论群组会在下次更新时推出，在此期间开发者暂不受理群内反馈，如遇到问题请暂时通过issue提交
+
 ## 介绍
 
 > A modern and functional Android app installer. (You know some birds are not meant to be caged,
