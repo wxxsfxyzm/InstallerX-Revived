@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.settings.home
+package com.rosan.installer.ui.page.settings.preferred.subpage.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -18,9 +18,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
@@ -45,7 +42,7 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.rosan.installer.R
 import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
-import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.widget.setting.AppBackButton
 import com.rosan.installer.ui.widget.setting.LabelWidget
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -70,29 +67,7 @@ fun HomePage(
                     Text(text = stringResource(id = R.string.about))
                 },
                 scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    IconButton(
-                        onClick = { navController.navigateUp() },
-                        shapes = IconButtonShapes(
-                            shape = IconButtonDefaults.smallRoundShape,
-                            pressedShape = IconButtonDefaults.smallPressedShape
-                        ),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            // 指定“启用”状态下的内容（图标）颜色
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            // （可选）指定“启用”状态下的容器（背景）颜色
-                            containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
-                        )
-                    ) {
-                        Icon(
-                            imageVector = AppIcons.ArrowBack,
-                            contentDescription = stringResource(id = R.string.back)
-                        )
-                    }
-                }
-                /*colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,*/
+                navigationIcon = { AppBackButton(onClick = { navController.navigateUp() }) }
             )
         },
     ) { paddingValues ->

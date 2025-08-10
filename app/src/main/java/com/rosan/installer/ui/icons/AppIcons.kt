@@ -26,6 +26,7 @@ import androidx.compose.material.icons.twotone.Badge
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.ClearAll
 import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material.icons.twotone.ColorLens
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
 import androidx.compose.material.icons.twotone.Downloading
@@ -74,6 +75,7 @@ object AppIcons {
     val Close = Icons.TwoTone.Close
     val AutoFixHigh = Icons.TwoTone.AutoFixHigh
     val Developer = Icons.TwoTone.DeveloperMode
+    val Theme = Icons.TwoTone.ColorLens
 
     // --- 导航图标集合 ---
     val RoomPreferences = Icons.TwoTone.RoomPreferences

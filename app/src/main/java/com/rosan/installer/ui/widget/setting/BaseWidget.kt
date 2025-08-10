@@ -19,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -32,12 +34,17 @@ fun BaseWidget(
     foreContent: @Composable BoxScope.() -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
 ) {
+    val haptic = LocalHapticFeedback.current
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(
                 enabled = enabled,
-                onClick = onClick
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    onClick()
+                }
             )
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -48,6 +55,7 @@ fun BaseWidget(
                 .align(Alignment.CenterVertically),
             imageVector = icon ?: materialIcon("") { materialPath {} },
             contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Box(
             modifier = Modifier
@@ -65,7 +73,7 @@ fun BaseWidget(
                     Text(
                         text = it,
                         color = if (isError) MaterialTheme.colorScheme.error
-                        else MaterialTheme.colorScheme.onSurface, // 保持原有的正常颜色
+                        else MaterialTheme.colorScheme.onSurfaceVariant, // 保持原有的正常颜色
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

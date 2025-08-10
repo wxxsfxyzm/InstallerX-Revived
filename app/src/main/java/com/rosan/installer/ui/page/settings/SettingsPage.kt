@@ -6,6 +6,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,12 +14,25 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rosan.installer.ui.page.settings.config.apply.ApplyPage
 import com.rosan.installer.ui.page.settings.config.edit.EditPage
-import com.rosan.installer.ui.page.settings.home.HomePage
+import com.rosan.installer.ui.page.settings.config.edit.NewEditPage
 import com.rosan.installer.ui.page.settings.main.MainPage
+import com.rosan.installer.ui.page.settings.preferred.PreferredViewAction
+import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.settings.preferred.subpage.home.HomePage
+import com.rosan.installer.ui.page.settings.preferred.subpage.installer.LegacyInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.settings.preferred.subpage.installer.NewInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.settings.preferred.subpage.theme.LegacyThemeSettingsPage
+import com.rosan.installer.ui.page.settings.preferred.subpage.theme.NewThemeSettingsPage
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SettingsPage() {
+    val preferredViewModel: PreferredViewModel = koinViewModel()
     val navController = rememberNavController()
+
+    LaunchedEffect(Unit) {
+        preferredViewModel.dispatch(PreferredViewAction.Init)
+    }
 
     NavHost(
         navController = navController,
@@ -41,7 +55,7 @@ fun SettingsPage() {
             popExitTransition = { null },
             enterTransition = { null }
         ) {
-            MainPage(navController = navController)
+            MainPage(navController = navController, preferredViewModel)
         }
         composable(
             route = SettingsScreen.EditConfig.route,
@@ -67,11 +81,17 @@ fun SettingsPage() {
             }
         ) {
             val id = it.arguments?.getLong("id")
-            EditPage(
-                navController = navController,
-                id = if (id != -1L) id
-                else null
-            )
+            if (preferredViewModel.state.showRefreshedUI)
+                NewEditPage(
+                    navController = navController,
+                    id = if (id != -1L) id
+                    else null
+                ) else
+                EditPage(
+                    navController = navController,
+                    id = if (id != -1L) id
+                    else null
+                )
         }
 
         composable(
@@ -117,6 +137,28 @@ fun SettingsPage() {
         ) {
             // 这里直接使用 HomePage，它之前是 AboutPageActivity 的内容
             HomePage(navController)
+        }
+        composable(
+            route = SettingsScreen.Theme.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+            popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() } // Your predictive back animation
+        ) {
+            if (preferredViewModel.state.showRefreshedUI) {
+                NewThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
+            } else {
+                LegacyThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
+            }
+        }
+        composable(
+            route = SettingsScreen.InstallerGlobal.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+            popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() } // Your predictive back animation
+        ) {
+            if (preferredViewModel.state.showRefreshedUI) {
+                NewInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
+            } else {
+                LegacyInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
+            }
         }
     }
 }

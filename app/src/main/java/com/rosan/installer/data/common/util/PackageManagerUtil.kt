@@ -43,7 +43,7 @@ fun PackageManager.isPackageArchivedCompat(packageName: String): Boolean {
         // Perform the check directly inside this function.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             Timber.tag("IBinderInstallerRepoImpl")
-                .d("isPackageArchivedCompat: Checking if package $packageName archived: $appInfo.isArchived")
+                .d("isPackageArchivedCompat: Checking if package $packageName archived: ${appInfo.isArchived}")
             appInfo.isArchived
         } else {
             // For Android 14 (API 34), check the flag manually.

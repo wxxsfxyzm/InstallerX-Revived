@@ -26,7 +26,6 @@ import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -37,21 +36,16 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.config.all.AllPage
+import com.rosan.installer.ui.page.settings.preferred.NewPreferredPage
 import com.rosan.installer.ui.page.settings.preferred.PreferredPage
-import com.rosan.installer.ui.page.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.theme.exclude
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MainPage(navController: NavController) {
-    val preferredViewModel: PreferredViewModel = koinViewModel()
-    LaunchedEffect(Unit) {
-        preferredViewModel.dispatch(PreferredViewAction.Init)
-    }
+fun MainPage(navController: NavController, preferredViewModel: PreferredViewModel) {
     val data = arrayOf(
         /*        NavigationData(
                     icon = Icons.TwoTone.Home,
@@ -69,14 +63,16 @@ fun MainPage(navController: NavController) {
             icon = AppIcons.SettingsSuggest,
             label = stringResource(R.string.preferred)
         ) { insets ->
-            PreferredPage(navController, insets)
+            if (preferredViewModel.state.showRefreshedUI)
+                NewPreferredPage(navController, insets, preferredViewModel)
+            else
+                PreferredPage(navController, insets, preferredViewModel)
         }
     )
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { data.size })
     val currentPage = pagerState.currentPage
     fun onPageChanged(page: Int) {
-        //GlobalScope.launch(Dispatchers.Main) {
         scope.launch { // 使用 rememberCoroutineScope更安全
             pagerState.animateScrollToPage(page = page)
         }
@@ -147,12 +143,12 @@ fun RowNavigation(
     onPageChanged: (Int) -> Unit
 ) {
     FlexibleBottomAppBar(
-        horizontalArrangement = BottomAppBarDefaults.FlexibleFixedHorizontalArrangement,
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentSize(),
         windowInsets = windowInsets,
         expandedHeight = 72.dp,
+        horizontalArrangement = BottomAppBarDefaults.FlexibleFixedHorizontalArrangement,
         content = {
             data.forEachIndexed { index, navigationData ->
                 NavigationBarItem(

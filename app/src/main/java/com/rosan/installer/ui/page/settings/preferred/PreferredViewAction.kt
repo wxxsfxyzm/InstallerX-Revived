@@ -27,4 +27,7 @@ sealed class PreferredViewAction {
 
     data class ChangeDhizukuAutoCloseCountDown(val countDown: Int) :
         PreferredViewAction()
+
+    data class ChangeShowRefreshedUI(val showRefreshedUI: Boolean) :
+        PreferredViewAction()
 }

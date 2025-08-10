@@ -10,7 +10,7 @@ data class AllViewState(
     data class Data(
         val configs: List<ConfigEntity> = emptyList(),
         val configOrder: ConfigOrder = ConfigOrder.Id(OrderType.Ascending),
-        val progress: Progress = Progress.Loading,
+        val progress: Progress = Progress.Loading
     ) {
         sealed class Progress {
             object Loading : Progress()

@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import timber.log.Timber
 
 class EditViewModel(
     private val repo: ConfigRepo,
@@ -31,6 +32,35 @@ class EditViewModel(
     var state by mutableStateOf(EditViewState())
         private set
 
+    // A property to store the original, unmodified data.
+    private var originalData: EditViewState.Data? = null
+
+    // A computed property to check for unsaved changes.
+    // It's true if the original data has been loaded and the current data is different.
+    val hasUnsavedChanges: Boolean
+        get() = originalData != null && state.data != originalData
+
+    // A new property that returns a list of specific, human-readable error messages.
+    val activeErrorMessages: List<String>
+        get() {
+            val errors = mutableListOf<String>()
+            with(state.data) {
+                if (errorName) {
+                    errors.add(context.getString(R.string.config_error_name))
+                }
+                if (errorCustomizeAuthorizer) {
+                    errors.add(context.getString(R.string.config_error_customize_authorizer))
+                }
+                if (errorInstaller) {
+                    errors.add(context.getString(R.string.config_error_installer))
+                }
+            }
+            return errors
+        }
+    
+    val hasErrors: Boolean
+        get() = activeErrorMessages.isNotEmpty()
+
     var globalAuthorizer by mutableStateOf(ConfigEntity.Authorizer.Global)
         private set
 
@@ -41,6 +71,7 @@ class EditViewModel(
     val eventFlow = _eventFlow.asSharedFlow()
 
     fun dispatch(action: EditViewAction) {
+        Timber.i("[DISPATCH] Action received: ${action::class.simpleName}")
         viewModelScope.launch {
             val errorMessage = kotlin.runCatching {
                 when (action) {
@@ -89,6 +120,7 @@ class EditViewModel(
     private fun changeDataName(name: String) {
         if (name.length > 20) return
         if (name.lines().size > 1) return
+        Timber.d("[STATE_CHANGE] Name changing to: '$name'")
         state = state.copy(
             data = state.data.copy(
                 name = name
@@ -166,6 +198,7 @@ class EditViewModel(
     }
 
     private fun changeDataAutoDelete(autoDelete: Boolean) {
+        Timber.d("[STATE_CHANGE] AutoDelete changing to: $autoDelete")
         state = state.copy(
             data = state.data.copy(
                 autoDelete = autoDelete
@@ -242,10 +275,12 @@ class EditViewModel(
                 // If editing, find the config by id. Fallback to a default empty one if not found.
                 repo.find(id) ?: ConfigEntity.default.copy(name = "")
             }
-
-            state = state.copy(
-                data = EditViewState.Data.build(configEntity)
-            )
+            // UPDATE: Build the initial data state from the entity.
+            val initialData = EditViewState.Data.build(configEntity)
+            // UPDATE: Store this initial data as the "original" state.
+            originalData = initialData
+            state = state.copy(data = initialData)
+            Timber.i("[LOAD_DATA] Original data has been set: $initialData")
             globalAuthorizer = getGlobalAuthorizer()
             globalInstallMode = getGlobalInstallMode()
         }
@@ -270,6 +305,10 @@ class EditViewModel(
                 else repo.update(entity.also {
                     it.id = id
                 })
+                // UPDATE: After a successful save, update the "original" data
+                // to match the current state. This resets the hasUnsavedChanges flag.
+                originalData = state.data
+                Timber.i("[SAVE_DATA] Data saved. Original data updated to: $originalData")
                 _eventFlow.emit(EditViewEvent.Saved)
             }
         }

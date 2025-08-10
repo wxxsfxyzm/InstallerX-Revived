@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.map
 
 class AppDataStore(private val dataStore: DataStore<Preferences>) {
     companion object {
+        // UI Fresh Switch
+        val UI_FRESH_SWITCH = booleanPreferencesKey("ui_fresh_switch")
+
         // ForegroundInfoHandler
         val SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION = booleanPreferencesKey("show_dialog_when_pressing_notification")
 

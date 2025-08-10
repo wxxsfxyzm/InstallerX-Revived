@@ -11,7 +11,8 @@ data class PreferredViewState(
     val showIntelligentSuggestion: Boolean = false,
     val disableNotificationForDialogInstall: Boolean = false,
     val showDialogWhenPressingNotification: Boolean = true,
-    val dhizukuAutoCloseCountDown: Int = 3
+    val dhizukuAutoCloseCountDown: Int = 3,
+    val showRefreshedUI: Boolean = true,
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 
