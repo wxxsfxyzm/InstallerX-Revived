@@ -116,10 +116,10 @@ fun installSuccessDialog( // 小写开头
                 })
             }
             list.addAll(
-                DialogButton(stringResource(R.string.previous), 2f) {
+                /*DialogButton(stringResource(R.string.previous), 2f) {
                     viewModel.dispatch(DialogViewAction.InstallPrepare)
-                },
-                DialogButton(stringResource(R.string.finish), 1f) {
+                },*/
+                DialogButton(stringResource(R.string.finish)) {
                     viewModel.dispatch(DialogViewAction.Close)
                 }
             )
