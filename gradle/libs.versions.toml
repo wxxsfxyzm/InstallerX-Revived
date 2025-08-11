@@ -66,7 +66,7 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.10.2" }
+work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.10.3" }
 
 # Kotlin Serialization
 # https://github.com/Kotlin/kotlinx.serialization/blob/master/README.md#setup
