@@ -12,7 +12,7 @@ updates:
     directory: "/"
     # How often to check for updates.
     schedule:
-      interval: "daily" # Options: "daily", "weekly", "monthly"
+      interval: "weekly" # Options: "daily", "weekly", "monthly"
     # Add reviewers to the PRs created by Dependabot.
     reviewers:
       - "wxxsfxyzm"
