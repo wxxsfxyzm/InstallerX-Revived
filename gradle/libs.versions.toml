@@ -59,7 +59,7 @@ compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = 
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.2" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.3" }
 compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
