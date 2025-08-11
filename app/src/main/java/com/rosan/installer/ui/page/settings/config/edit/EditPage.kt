@@ -38,6 +38,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
@@ -152,6 +153,7 @@ fun EditPage(
         contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
+                scrollBehavior = scrollBehavior,
                 title = {
                     Text(text = stringResource(id = if (id == null) R.string.add else R.string.update))
                 },
@@ -188,7 +190,8 @@ fun EditPage(
             AnimatedVisibility(
                 visible = showFloating, // 在未滚动到底部且 showFloating 为 true 时可见
                 enter = scaleIn(),
-                exit = scaleOut()
+                exit = scaleOut(),
+                modifier = Modifier.padding(bottom = 16.dp)
             ) {
                 val text = stringResource(R.string.save)
                 SmallExtendedFloatingActionButton(
