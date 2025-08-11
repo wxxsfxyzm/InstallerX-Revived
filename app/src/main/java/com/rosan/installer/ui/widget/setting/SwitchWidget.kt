@@ -3,8 +3,6 @@ package com.rosan.installer.ui.widget.setting
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 
 @Composable
 fun SwitchWidget(
@@ -14,14 +12,10 @@ fun SwitchWidget(
     enabled: Boolean = true,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    // --- 新增参数，用于实现更精美的UI ---
     isError: Boolean = false
 ) {
-    val haptic = LocalHapticFeedback.current
-    // 1. 将所有操作逻辑统一到一个地方
     val toggleAction = {
         if (enabled) {
-            haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
             onCheckedChange(!checked)
         }
     }
@@ -31,14 +25,12 @@ fun SwitchWidget(
         title = title,
         enabled = enabled,
         isError = isError,
-        onClick = toggleAction, // 2. 整个条目点击时，执行统一的逻辑
+        onClick = toggleAction,
         description = description
     ) {
         Switch(
             enabled = enabled,
             checked = checked,
-            // 4. Switch 的回调现在只负责调用统一逻辑，不再有振动等副作用
-            //    为了防止重复触发，更好的做法是设为 null，因为父级已经处理了点击
             onCheckedChange = null
         )
     }

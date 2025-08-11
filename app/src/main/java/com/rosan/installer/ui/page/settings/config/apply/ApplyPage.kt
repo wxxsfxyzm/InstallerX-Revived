@@ -22,15 +22,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -59,6 +56,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -66,8 +64,8 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -79,11 +77,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -100,61 +95,49 @@ import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.widget.chip.Chip
+import com.rosan.installer.ui.widget.setting.AppBackButton
 import com.rosan.installer.ui.widget.setting.LabelWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import kotlin.math.absoluteValue
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ApplyPage(
-    navController: NavController, id: Long, viewModel: ApplyViewModel = koinViewModel {
+    navController: NavController,
+    id: Long,
+    viewModel: ApplyViewModel = koinViewModel {
         parametersOf(id)
     }
 ) {
-    LaunchedEffect(true) {
-        viewModel.dispatch(ApplyViewAction.Init)
-    }
+    LaunchedEffect(Unit) { viewModel.dispatch(ApplyViewAction.Init) }
 
-    val scope = rememberCoroutineScope()
-
-    val showFloatingState = remember {
-        mutableStateOf(false)
-    }
-    var showFloating by showFloatingState
-
-    var showBottomSheet by remember {
-        mutableStateOf(false)
-    }
-
+    val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val showFloating by remember {
+        derivedStateOf {
+            lazyListState.firstVisibleItemIndex > 0 || lazyListState.firstVisibleItemScrollOffset > 0
+        }
+    }
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.safeDrawing)
-            .nestedScroll(
-                ShowFloatingActionButtonNestedScrollConnection(
-                    showFloatingState,
-                    lazyListState
-                )
-            ),
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets.none,
         topBar = {
-            var searchBarActivated by remember {
-                mutableStateOf(false)
-            }
+            var searchBarActivated by remember { mutableStateOf(false) }
             TopAppBar(
+                scrollBehavior = scrollBehavior,
                 title = {
-                    @Suppress("AnimatedContentLabel") AnimatedContent(targetState = searchBarActivated) {
+                    AnimatedContent(targetState = searchBarActivated) {
                         if (!it) Text(stringResource(R.string.app))
                         else {
-                            val focusRequester = remember {
-                                FocusRequester()
-                            }
+                            val focusRequester = remember { FocusRequester() }
                             OutlinedTextField(
                                 modifier = Modifier.focusRequester(focusRequester),
                                 value = viewModel.state.search,
@@ -191,25 +174,9 @@ fun ApplyPage(
                     }
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = { navController.navigateUp() },
-                        shapes = IconButtonShapes(
-                            shape = IconButtonDefaults.smallRoundShape,
-                            pressedShape = IconButtonDefaults.smallPressedShape
-                        ),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            // 指定“启用”状态下的内容（图标）颜色
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            // （可选）指定“启用”状态下的容器（背景）颜色
-                            containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
-                        )
-                    ) {
-                        Icon(
-                            imageVector = AppIcons.ArrowBack,
-                            contentDescription = stringResource(id = R.string.back)
-                        )
-                    }
-                }, actions = {
+                    AppBackButton(onClick = { navController.navigateUp() })
+                },
+                actions = {
                     AnimatedVisibility(visible = !searchBarActivated) {
                         IconButton(
                             onClick = { searchBarActivated = !searchBarActivated }) {
@@ -225,16 +192,18 @@ fun ApplyPage(
                             contentDescription = stringResource(R.string.menu)
                         )
                     }
-                })
-        }, floatingActionButton = {
+                }
+            )
+        },
+        floatingActionButton = {
             AnimatedVisibility(
                 visible = showFloating,
                 enter = scaleIn(),
-                exit = scaleOut()
+                exit = scaleOut(),
+                modifier = Modifier.padding(bottom = 16.dp)
             ) {
                 FloatingActionButton({
-                    scope.launch {
-                        showFloating = false
+                    coroutineScope.launch {
                         lazyListState.animateScrollToItem(0)
                     }
                 }) {
@@ -306,19 +275,6 @@ fun ApplyPage(
     }
 }
 
-private class ShowFloatingActionButtonNestedScrollConnection(
-    private val showFloatingState: MutableState<Boolean>,
-    private val lazyListState: LazyListState
-) : NestedScrollConnection {
-    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        if (available.y.absoluteValue > 1)
-            showFloatingState.value = if (!lazyListState.isScrollInProgress) false
-            else available.y > 1 && lazyListState.firstVisibleItemIndex > 1
-
-        return super.onPreScroll(available, source)
-    }
-}
-
 @Composable
 fun ItemsWidget(
     modifier: Modifier,
@@ -331,12 +287,6 @@ fun ItemsWidget(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(8.dp)
     ) {
-//        item {
-//            ItemWidget(
-//                viewModel = viewModel,
-//                app = null
-//            )
-//        }
         items(viewModel.state.checkedApps, key = { it.packageName }) {
             var alpha by remember {
                 mutableFloatStateOf(0f)
@@ -514,44 +464,31 @@ private fun OrderWidget(viewModel: ApplyViewModel) {
 
     val selectedIndex = map.map { it.type }.indexOf(viewModel.state.orderType)
 
-    // 使用 Row 来替代 ToggleRow，并添加 selectableGroup 以提高无障碍性
     Row(
-        modifier = Modifier
-            .selectableGroup()
-            // 使用 clip 和 border 在 Row 外部创建统一的圆角和边框
-            .clip(RoundedCornerShape(8.dp)),
-        // 使用 ButtonGroupDefaults.ConnectedSpaceBetween (即 0.dp) 来使按钮紧密相连
-        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
     ) {
+        val modifiers = List(map.size) { Modifier.weight(1f) } // 根据需要调整权重
+
         map.forEachIndexed { index, value ->
-            // 使用 Material 3 Expressive 的 ToggleButton
             ToggleButton(
                 checked = selectedIndex == index,
                 onCheckedChange = {
-                    // 触发震动反馈
                     haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                    // onCheckedChange 会在按钮被点击时触发
-                    // 我们直接分发 Action 来更新状态
                     viewModel.dispatch(ApplyViewAction.Order(value.type))
                 },
-                // 根据按钮位置应用不同的形状，实现 "连接" 的视觉效果
                 shapes = when (index) {
                     0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
                     map.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
                     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                 },
-                // 自定义颜色
                 colors = ToggleButtonDefaults.toggleButtonColors(
-                    // 选中时，背景为主题色
                     checkedContainerColor = MaterialTheme.colorScheme.primary,
-                    // 选中时，内容（文字）为高对比度颜色
                     checkedContentColor = MaterialTheme.colorScheme.onPrimary,
-                    // 未选中时，背景为透明或表面色
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    // 未选中时，内容（文字）颜色
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ),
-                modifier = Modifier.semantics { role = Role.RadioButton }
+                modifier = modifiers[index]
+                    .semantics { role = Role.RadioButton }
             ) {
                 Text(stringResource(value.labelResId))
             }
