@@ -54,7 +54,7 @@ import com.rosan.installer.ui.widget.setting.DataForAllUserWidget
 import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.widget.setting.DataNameWidget
 import com.rosan.installer.ui.widget.setting.DisplaySdkWidget
-import com.rosan.installer.ui.widget.setting.SplicedSettingsGroup
+import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.widget.setting.UnsavedChangesDialog
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
@@ -232,7 +232,7 @@ fun NewEditPage(
                     add { DataInstallModeWidget(viewModel) }
                 }
 
-                SplicedSettingsGroup(
+                SplicedColumnGroup(
                     title = stringResource(R.string.config_label_main_settings),
                     content = mainSettingsContent
                 )
@@ -247,7 +247,7 @@ fun NewEditPage(
                     add { DisplaySdkWidget(viewModel) }
                 }
 
-                SplicedSettingsGroup(
+                SplicedColumnGroup(
                     title = stringResource(R.string.config_label_installer_settings),
                     content = installerSettingsContent
                 )
@@ -255,7 +255,7 @@ fun NewEditPage(
 
             // --- Group 3: Install Options ---
             item {
-                SplicedSettingsGroup(
+                SplicedColumnGroup(
                     title = stringResource(R.string.config_label_install_options),
                     content = listOf(
                         { DataForAllUserWidget(viewModel) },

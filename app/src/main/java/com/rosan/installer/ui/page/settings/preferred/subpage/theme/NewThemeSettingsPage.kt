@@ -18,7 +18,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.widget.setting.AppBackButton
-import com.rosan.installer.ui.widget.setting.SplicedSettingsGroup
+import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.widget.setting.SwitchWidget
 
 // This is now a top-level composable, likely in its own file.
@@ -49,7 +49,7 @@ fun NewThemeSettingsPage(
                 .padding(paddingValues)
         ) {
             item {
-                SplicedSettingsGroup(
+                SplicedColumnGroup(
                     title = stringResource(R.string.theme_settings_ui_style),
                     content = listOf {
                         SwitchWidget(
