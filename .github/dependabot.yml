@@ -1,0 +1,23 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # The primary package ecosystem for your Android project.
+  - package-ecosystem: "gradle"
+    # The directory where your build.gradle/build.gradle.kts files are located.
+    # "/" means the root of the repository.
+    directory: "/"
+    # How often to check for updates.
+    schedule:
+      interval: "weekly" # Options: "daily", "weekly", "monthly"
+    # Add reviewers to the PRs created by Dependabot.
+    reviewers:
+      - "wxxsfxyzm"
+    # Add labels to the PRs for better organization.
+    labels:
+      - "dependency"
+    # Limit the number of open PRs for version updates to avoid being overwhelmed.
+    open-pull-requests-limit: 10
