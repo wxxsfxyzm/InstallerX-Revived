@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -15,11 +14,9 @@ import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material.icons.twotone.Terminal
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -335,57 +332,3 @@ fun DataAllowAllRequestedPermissionsWidget(viewModel: EditViewModel) {
     )
 }
 
-/**
- * A dialog to confirm an action, dynamically showing specific errors or a generic message.
- *
- * @param show Controls the visibility of the dialog.
- * @param onDismiss Request to close the dialog.
- * @param onConfirm Request to perform the confirm action (e.g., discard and exit).
- * @param errorMessages A list of specific error messages to display. If empty, a generic message is shown.
- */
-@Composable
-fun UnsavedChangesDialog(
-    show: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-    errorMessages: List<String>
-) {
-    if (show) {
-        val hasSpecificErrors = errorMessages.isNotEmpty()
-
-        // Determine the title based on whether there are specific errors.
-        val dialogTitle = if (hasSpecificErrors) {
-            stringResource(R.string.config_dialog_title_invalid)
-        } else {
-            stringResource(R.string.config_dialog_title_unsaved_changes)
-        }
-
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(text = dialogTitle) },
-            text = {
-                if (hasSpecificErrors) {
-                    // If there are errors, display each one on a new line.
-                    Column {
-                        errorMessages.forEach { message ->
-                            Text(text = message)
-                        }
-                    }
-                } else {
-                    // Otherwise, show the generic unsaved changes message.
-                    Text(text = stringResource(R.string.config_dialog_message_unsaved_changes))
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = onConfirm) {
-                    Text(text = stringResource(R.string.discard))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(text = stringResource(R.string.back))
-                }
-            }
-        )
-    }
-}

@@ -110,6 +110,7 @@
     <string name="config_error_installer">安装者不得为空</string>
 
     <string name="discard">放弃更改</string>
+    <string name="confirm">确认</string>
     <string name="cancel">取消</string>
     <string name="retry">重试</string>
     <string name="install">安装</string>
@@ -360,6 +361,9 @@
 
     <string name="suggestion_uninstall_and_retry">卸载后重新安装</string>
     <string name="suggestion_uninstall_and_retry_keep_data">保留数据卸载后重试</string>
+    <string name="suggestion_uninstall_alert_dialog_confirm_action">确认操作</string>
+    <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">将保留数据卸载应用，然后尝试安装。请勿用于系统应用！</string>
+    <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">将会卸载你的应用然后安装新版，所有数据都会丢失。请勿用于系统应用！</string>
     <string name="suggestion_allow_test_app">临时允许测试包并重试</string>
     <string name="suggestion_mi_isolation">临时添加有效安装者并重试</string>
     <string name="suggestion_user_restricted">前往开发者选项启用USB安装</string>

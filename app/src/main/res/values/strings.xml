@@ -113,6 +113,7 @@
     <string name="config_error_installer">Installer source can\'t be empty</string>
 
     <string name="discard">Discard Changes</string>
+    <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>
     <string name="install">Install</string>
@@ -363,8 +364,11 @@
     <string name="split_dpi_anydpi">Any density</string>
     <!-- SplitNameUtil End -->
 
-    <string name="suggestion_uninstall_and_retry">Uninstall previous and retry</string>
-    <string name="suggestion_uninstall_and_retry_keep_data">Uninstall previous, keep data and retry</string>
+    <string name="suggestion_uninstall_and_retry">Uninstall old and retry</string>
+    <string name="suggestion_uninstall_and_retry_keep_data">Uninstall old, keep data and retry</string>
+    <string name="suggestion_uninstall_alert_dialog_confirm_action">Confirm Action</string>
+    <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">This will uninstall the current version of the app while keeping its data, then try to install the new one. DO NOT use on system app!</string>
+    <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">This will uninstall the current version of the app and try to install the new one. DO NOT use on system app!</string>
     <string name="suggestion_allow_test_app">Temporarily Allow Test and retry</string>
     <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
     <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>

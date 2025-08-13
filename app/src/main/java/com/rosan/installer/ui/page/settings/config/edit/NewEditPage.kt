@@ -39,6 +39,7 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.widget.dialog.UnsavedChangesDialog
 import com.rosan.installer.ui.widget.setting.AppBackButton
 import com.rosan.installer.ui.widget.setting.DataAllowAllRequestedPermissionsWidget
 import com.rosan.installer.ui.widget.setting.DataAllowDowngradeWidget
@@ -55,7 +56,6 @@ import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.widget.setting.DataNameWidget
 import com.rosan.installer.ui.widget.setting.DisplaySdkWidget
 import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
-import com.rosan.installer.ui.widget.setting.UnsavedChangesDialog
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
