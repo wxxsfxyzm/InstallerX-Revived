@@ -1,5 +1,6 @@
 package com.rosan.installer.data.app.model.impl.installer
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.IIntentReceiver
 import android.content.IIntentSender
@@ -10,6 +11,8 @@ import android.content.pm.IPackageInstallerSession
 import android.content.pm.IPackageManager
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.Session
+import android.content.pm.PackageManager
+import android.content.pm.VersionedPackage
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
@@ -23,6 +26,7 @@ import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.app.util.InstallOption
+import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.abiOverride
 import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.installFlags
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
@@ -120,22 +124,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         )
     }
 
-    private fun setAbiOverride(params: PackageInstaller.SessionParams, abi: String) {
-        try {
-            // Get the Field object for "abiOverride" from the SessionParams class
-            val abiOverrideField = params::class.java.getField("abiOverride")
-
-            // Set the value of the field on your 'params' instance
-            abiOverrideField.set(params, abi)
-
-            Timber.d("Successfully set abiOverride field to: $abi")
-        } catch (e: Exception) {
-            // Catch potential exceptions like NoSuchFieldException if the API changes
-            Timber.w(e, "Failed to set abiOverride field. Installation might fail for ABI mismatch.")
-        }
-    }
-
-    override suspend fun doWork(
+    override suspend fun doInstallWork(
         config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
     ) {
         val result = kotlin.runCatching {
@@ -147,6 +136,55 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         result.onFailure {
             throw it
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    override suspend fun doUninstallWork(
+        config: ConfigEntity,
+        packageName: String,
+        extra: InstallExtraInfoEntity,
+    ) {
+        val iPackageManager =
+            IPackageManager.Stub.asInterface(iBinderWrapper(ServiceManager.getService("package")))
+        val iPackageInstaller =
+            IPackageInstaller.Stub.asInterface(iBinderWrapper(iPackageManager.packageInstaller.asBinder()))
+
+        val installerPackageName = context.packageName
+        val packageInstaller = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            reflect.getDeclaredConstructor(
+                PackageInstaller::class.java,
+                IPackageInstaller::class.java,
+                String::class.java,
+                String::class.java,
+                Int::class.java,
+            )!!.also {
+                it.isAccessible = true
+            }.newInstance(iPackageInstaller, installerPackageName, null, extra.userId)
+        } else {
+            reflect.getDeclaredConstructor(
+                PackageInstaller::class.java,
+                IPackageInstaller::class.java,
+                String::class.java,
+                Int::class.java,
+            )!!.also {
+                it.isAccessible = true
+            }.newInstance(iPackageInstaller, installerPackageName, extra.userId)
+        }) as PackageInstaller
+
+        val receiver = LocalIntentReceiver()
+
+        val flags = config.uninstallFlags
+        val versionedPackage = VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST)
+        if (flags != 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // UPSIDE_DOWN_CAKE is API 34
+            Timber.d("Using modern uninstall method with flags on API ${Build.VERSION.SDK_INT}")
+            packageInstaller.uninstall(versionedPackage, flags, receiver.getIntentSender())
+        } else {
+            Timber.d("Using legacy uninstall method without flags on API ${Build.VERSION.SDK_INT} or no flags provided.")
+            packageInstaller.uninstall(versionedPackage, receiver.getIntentSender())
+        }
+
+        // Ensure your PackageManagerUtil has the uninstallResultVerify method
+        PackageManagerUtil.uninstallResultVerify(context, receiver)
     }
 
     private suspend fun doInnerWork(
@@ -216,7 +254,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         if ((containerType == DataType.APK || containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP) &&
             entities.firstOrNull { it.name == "base.apk" }?.arch == Architecture.UNKNOWN
         )
-            setAbiOverride(params, "armeabi-v7a")
+            params.abiOverride = "armeabi-v7a"
 
         val sessionId = packageInstaller.createSession(params)
         val session = packageInstaller.openSession(sessionId)

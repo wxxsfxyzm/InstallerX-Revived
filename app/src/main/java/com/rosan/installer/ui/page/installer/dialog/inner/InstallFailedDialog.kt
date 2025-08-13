@@ -133,9 +133,17 @@ private fun ErrorSuggestions(
             SuggestionChipInfo(
                 InstallFailedUpdateIncompatibleException::class,
                 InstallFailedVersionDowngradeException::class,
-                selected = { false }, // This is an action, not a state toggle.
-                onClick = { viewModel.toast("Not yet implemented!") },// onUninstall,
-                labelRes = R.string.suggestion_uninstall_and_retry,
+                selected = { true }, // This is an action, not a state toggle.
+                onClick = { viewModel.dispatch(DialogViewAction.UninstallAndRetryInstall(false)) },// onUninstall,
+                labelRes = R.string.suggestion_uninstall_and_retry,// Not keep data
+                icon = AppIcons.Delete
+            ),
+            SuggestionChipInfo(
+                InstallFailedUpdateIncompatibleException::class,
+                InstallFailedVersionDowngradeException::class,
+                selected = { true }, // This is an action, not a state toggle.
+                onClick = { viewModel.dispatch(DialogViewAction.UninstallAndRetryInstall(true)) },// onUninstall,
+                labelRes = R.string.suggestion_uninstall_and_retry_keep_data, // Keep data
                 icon = AppIcons.Delete
             ),
             SuggestionChipInfo(
@@ -193,9 +201,9 @@ private fun ErrorSuggestions(
     // Requirement: If there is at least one chip to show, create the FlowRow.
     if (visibleSuggestions.isNotEmpty()) {
         FlowRow(
-            //modifier = Modifier.padding(top = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            // modifier = Modifier.padding(top = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(0.dp),
+            verticalArrangement = Arrangement.spacedBy((-9).dp)
         ) {
             visibleSuggestions.forEachIndexed { index, suggestion ->
                 var animatedVisibility by remember { mutableStateOf(false) }

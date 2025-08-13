@@ -9,7 +9,7 @@ import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 object InstallerRepoImpl : InstallerRepo {
-    override suspend fun doWork(
+    override suspend fun doInstallWork(
         config: ConfigEntity,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity
@@ -19,6 +19,19 @@ object InstallerRepoImpl : InstallerRepo {
             ConfigEntity.Authorizer.Dhizuku -> DhizukuInstallerRepoImpl
             else -> ProcessInstallerRepoImpl
         }
-        repo.doWork(config, entities, extra)
+        repo.doInstallWork(config, entities, extra)
+    }
+
+    override suspend fun doUninstallWork(
+        config: ConfigEntity,
+        packageName: String,
+        extra: InstallExtraInfoEntity,
+    ) {
+        val repo = when (config.authorizer) {
+            ConfigEntity.Authorizer.Shizuku -> ShizukuInstallerRepoImpl
+            ConfigEntity.Authorizer.Dhizuku -> DhizukuInstallerRepoImpl
+            else -> ProcessInstallerRepoImpl
+        }
+        repo.doUninstallWork(config, packageName, extra)
     }
 }

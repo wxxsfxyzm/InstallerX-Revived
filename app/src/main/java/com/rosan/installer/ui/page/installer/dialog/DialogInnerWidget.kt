@@ -57,6 +57,8 @@ fun dialogGenerateParams(
             viewModel,
             (viewModel.state as DialogViewState.InstallCompleted).results
         )
+
+        is DialogViewState.Uninstalling -> installingDialog(installer, viewModel)
         // when is exhaustive, so no need to handle the else case
         // else -> readyDialog(installer, viewModel)
     }

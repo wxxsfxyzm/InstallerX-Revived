@@ -11,7 +11,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     private lateinit var recycler: Recyclable<AppProcess>
 
-    override suspend fun doWork(
+    override suspend fun doInstallWork(
         config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
     ) {
         recycler = AppProcessRecyclers.get(
@@ -21,7 +21,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
                 else -> "sh"
             }
         ).make()
-        super.doWork(config, entities, extra)
+        super.doInstallWork(config, entities, extra)
     }
 
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder =

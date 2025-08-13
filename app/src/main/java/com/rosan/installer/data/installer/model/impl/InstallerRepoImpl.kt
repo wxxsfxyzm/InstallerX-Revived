@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
+import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -101,6 +102,7 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     override val progress: MutableSharedFlow<ProgressEntity> = MutableStateFlow(ProgressEntity.Ready)
     val action: MutableSharedFlow<Action> = MutableSharedFlow(replay = 1, extraBufferCapacity = 1)
     override val background: MutableSharedFlow<Boolean> = MutableStateFlow(false)
+    override val uninstallInfo: MutableStateFlow<UninstallInfo?> = MutableStateFlow(null)
 
     override fun resolve(activity: Activity) {
         Timber.d("[id=$id] resolve() called. Emitting Action.Resolve.")
@@ -115,6 +117,14 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     override fun install() {
         Timber.d("[id=$id] install() called. Emitting Action.Install.")
         action.tryEmit(Action.Install)
+    }
+
+    override fun uninstall(packageName: String) {
+        // Store the info for handlers like ForegroundInfoHandler to access
+        this.uninstallInfo.value = UninstallInfo(packageName)
+        Timber.d("[id=$id] uninstall() called for $packageName. Emitting Action.Uninstall.")
+        // Emit the action for the ActionHandler to process
+        action.tryEmit(Action.Uninstall(packageName))
     }
 
     override fun background(value: Boolean) {
@@ -136,6 +146,7 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         data class Resolve(val activity: Activity) : Action()
         data object Analyse : Action()
         data object Install : Action()
+        data class Uninstall(val packageName: String) : Action()
         data object Finish : Action()
     }
 }

@@ -239,6 +239,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.Finish -> null
             is ProgressEntity.Error -> null
             is ProgressEntity.AnalysedUnsupported -> null
+            // TODO temporarily disable uninstall notification
+            else -> null
         }
     }
 

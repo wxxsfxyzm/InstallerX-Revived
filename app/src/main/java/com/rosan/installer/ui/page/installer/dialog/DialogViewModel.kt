@@ -17,6 +17,7 @@ import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.InstalledAppInfo
+import com.rosan.installer.data.app.util.PackageInstallerUtil
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
@@ -103,6 +104,12 @@ class DialogViewModel(
     private val _installFlags = MutableStateFlow(0) // 默认值为0，表示没有开启任何选项
     val installFlags: StateFlow<Int> = _installFlags.asStateFlow()
 
+    /**
+     * Flag to track if the current operation is an uninstall-and-retry flow.
+     * This helps the progress collector know when to trigger a reinstall.
+     */
+    private var isRetryingInstall = false
+
     private var fetchPreInstallInfoJob: Job? = null
     private val iconJobs = mutableMapOf<String, Job>()
     private var autoInstallJob: Job? = null
@@ -147,9 +154,10 @@ class DialogViewModel(
             is DialogViewAction.InstallPrepare -> installPrepare()
             is DialogViewAction.InstallExtendedMenu -> installExtendedMenu()
             is DialogViewAction.InstallExtendedSubMenu -> installExtendedSubMenu()
+            is DialogViewAction.InstallMultiple -> installMultiple()
             is DialogViewAction.Install -> install()
             is DialogViewAction.Background -> background()
-            is DialogViewAction.InstallMultiple -> installMultiple()
+            is DialogViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData)
         }
     }
 
@@ -252,6 +260,29 @@ class DialogViewModel(
                             if (selectedEntities.isNotEmpty()) {
                                 newPackageNameFromProgress = selectedEntities.first().app.packageName
                             }
+                        }
+                    }
+
+                    is ProgressEntity.Uninstalling -> {
+                        newState = DialogViewState.Uninstalling
+                    }
+
+                    is ProgressEntity.UninstallFailed -> {
+                        // If uninstall fails during retry, revert to install failed state
+                        isRetryingInstall = false
+                        newState = DialogViewState.InstallFailed
+                    }
+
+                    is ProgressEntity.UninstallSuccess -> {
+                        // If uninstall succeeded as part of a retry, trigger the install
+                        if (isRetryingInstall) {
+                            isRetryingInstall = false
+                            repo.install()
+                            // Stay in a transitional state until Install starts
+                            newState = DialogViewState.Uninstalling
+                        } else {
+                            // This case shouldn't be hit in normal flow, but as a fallback:
+                            newState = DialogViewState.Ready
                         }
                     }
 
@@ -494,6 +525,21 @@ class DialogViewModel(
 
     private fun background() {
         repo.background(true)
+    }
+
+    private fun uninstallAndRetryInstall(keepData: Boolean) {
+        val packageName = _currentPackageName.value
+        if (packageName == null) {
+            toast("R.string.error_no_package_to_uninstall")
+            return
+        }
+        repo.config.uninstallFlags = if (keepData)
+            PackageInstallerUtil.DELETE_KEEP_DATA
+        else 0 // Default flags (complete removal)
+
+        // Set the flag before starting the operation
+        isRetryingInstall = true
+        repo.uninstall(packageName)
     }
 
     /**

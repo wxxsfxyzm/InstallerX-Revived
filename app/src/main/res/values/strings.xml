@@ -364,6 +364,7 @@
     <!-- SplitNameUtil End -->
 
     <string name="suggestion_uninstall_and_retry">Uninstall previous and retry</string>
+    <string name="suggestion_uninstall_and_retry_keep_data">Uninstall previous, keep data and retry</string>
     <string name="suggestion_allow_test_app">Temporarily Allow Test and retry</string>
     <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
     <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
