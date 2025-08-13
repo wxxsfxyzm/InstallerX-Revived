@@ -67,6 +67,9 @@ data class ConfigEntity(
     @Ignore
     var installFlags: Int = 0
 
+    @Ignore
+    var uninstallFlags: Int = 0
+
     val isCustomizeAuthorizer: Boolean
         get() = authorizer == Authorizer.Customize
 

@@ -27,7 +27,7 @@ import com.rosan.installer.ui.widget.setting.AppBackButton
 import com.rosan.installer.ui.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
-import com.rosan.installer.ui.widget.setting.SplicedSettingsGroup
+import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.widget.setting.SwitchWidget
 
 
@@ -56,7 +56,7 @@ fun NewInstallerGlobalSettingsPage(
                 .padding(paddingValues)
         ) {
             item {
-                SplicedSettingsGroup(
+                SplicedColumnGroup(
                     title = stringResource(R.string.installer_settings_global_installer),
                     content = listOf(
                         {
@@ -108,7 +108,7 @@ fun NewInstallerGlobalSettingsPage(
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    SplicedSettingsGroup(
+                    SplicedColumnGroup(
                         title = stringResource(R.string.installer_settings_dialog_mode_options),
                         content = listOfNotNull(
                             if (state.installMode == ConfigEntity.InstallMode.Dialog) {
@@ -164,7 +164,7 @@ fun NewInstallerGlobalSettingsPage(
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    SplicedSettingsGroup(
+                    SplicedColumnGroup(
                         title = stringResource(R.string.installer_settings_notification_mode_options),
                         content = listOf(
                             {

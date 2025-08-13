@@ -39,6 +39,7 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.widget.dialog.UnsavedChangesDialog
 import com.rosan.installer.ui.widget.setting.AppBackButton
 import com.rosan.installer.ui.widget.setting.DataAllowAllRequestedPermissionsWidget
 import com.rosan.installer.ui.widget.setting.DataAllowDowngradeWidget
@@ -54,8 +55,7 @@ import com.rosan.installer.ui.widget.setting.DataForAllUserWidget
 import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.widget.setting.DataNameWidget
 import com.rosan.installer.ui.widget.setting.DisplaySdkWidget
-import com.rosan.installer.ui.widget.setting.SplicedSettingsGroup
-import com.rosan.installer.ui.widget.setting.UnsavedChangesDialog
+import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -232,7 +232,7 @@ fun NewEditPage(
                     add { DataInstallModeWidget(viewModel) }
                 }
 
-                SplicedSettingsGroup(
+                SplicedColumnGroup(
                     title = stringResource(R.string.config_label_main_settings),
                     content = mainSettingsContent
                 )
@@ -247,7 +247,7 @@ fun NewEditPage(
                     add { DisplaySdkWidget(viewModel) }
                 }
 
-                SplicedSettingsGroup(
+                SplicedColumnGroup(
                     title = stringResource(R.string.config_label_installer_settings),
                     content = installerSettingsContent
                 )
@@ -255,7 +255,7 @@ fun NewEditPage(
 
             // --- Group 3: Install Options ---
             item {
-                SplicedSettingsGroup(
+                SplicedColumnGroup(
                     title = stringResource(R.string.config_label_install_options),
                     content = listOf(
                         { DataForAllUserWidget(viewModel) },

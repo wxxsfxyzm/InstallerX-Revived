@@ -10,7 +10,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 
 /**
@@ -22,7 +21,7 @@ import androidx.compose.ui.unit.dp
  * @param modifier Modifier 会被应用到整个分组。
  */
 @Composable
-fun SplicedSettingsGroup(
+fun SplicedColumnGroup(
     title: String,
     content: List<@Composable () -> Unit>,
     modifier: Modifier = Modifier
@@ -30,11 +29,21 @@ fun SplicedSettingsGroup(
     if (content.isEmpty()) return
 
     val cornerRadius = 16.dp
-
+    val connectionRadius = 4.dp
     // Define shapes for different positions.
-    val topShape = RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius)
-    val middleShape = RectangleShape
-    val bottomShape = RoundedCornerShape(bottomStart = cornerRadius, bottomEnd = cornerRadius)
+    val topShape = RoundedCornerShape(
+        topStart = cornerRadius,
+        topEnd = cornerRadius,
+        bottomStart = connectionRadius,
+        bottomEnd = connectionRadius
+    )
+    val middleShape = RoundedCornerShape(connectionRadius)
+    val bottomShape = RoundedCornerShape(
+        topStart = connectionRadius,
+        topEnd = connectionRadius,
+        bottomStart = cornerRadius,
+        bottomEnd = cornerRadius
+    )
     val singleShape = RoundedCornerShape(cornerRadius)
 
     Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {

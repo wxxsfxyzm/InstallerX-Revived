@@ -166,13 +166,13 @@ fun MenuItemWidget(
                     }
                 },
                 elevation = CardDefaults.cardElevation(
-                    defaultElevation = if (option != null && isSelected) 1.dp else 2.dp
+                    defaultElevation = 0.dp, // if (option != null && isSelected) 1.dp else 2.dp
                 ),
                 colors = CardDefaults.cardColors(
                     containerColor = if (option != null && isSelected)
                         MaterialTheme.colorScheme.primaryContainer
                     else
-                        MaterialTheme.colorScheme.surfaceVariant
+                        MaterialTheme.colorScheme.surfaceContainer
                 )
             ) {
                 Row(
@@ -207,7 +207,8 @@ fun MenuItemWidget(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(item.menuItem.nameResourceId),
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         item.menuItem.descriptionResourceId?.let { descriptionId ->
                             Text(
@@ -282,13 +283,13 @@ fun PermissionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isHighlight) 1.dp else 4.dp
+            0.dp, // if (isHighlight) 1.dp else 4.dp
         ),
         colors = CardDefaults.cardColors(
             containerColor = if (isHighlight)
                 MaterialTheme.colorScheme.primaryContainer
             else
-                MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.surfaceContainer
         )
     ) {
         Column(
@@ -301,6 +302,7 @@ fun PermissionCard(
                 // 直接使用我们计算好的标签
                 text = permissionLabel,
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 // 副标题仍然显示原始权限字符串

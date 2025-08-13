@@ -57,6 +57,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     is InstallerRepoImpl.Action.Resolve -> resolve(action.activity)
                     is InstallerRepoImpl.Action.Analyse -> analyse()
                     is InstallerRepoImpl.Action.Install -> install()
+                    is InstallerRepoImpl.Action.Uninstall -> uninstall(action.packageName)
                     is InstallerRepoImpl.Action.Finish -> finish()
                 }
             }
@@ -249,6 +250,28 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.InstallSuccess)
     }
 
+    private suspend fun uninstall(packageName: String, flags: Int = 0) {
+        Timber.d("[id=${installer.id}] uninstall: Starting for $packageName. Emitting ProgressEntity.Uninstalling.")
+        installer.progress.emit(ProgressEntity.Uninstalling)
+
+        runCatching {
+            // Call the dispatcher from the worker layer
+            com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doUninstallWork(
+                installer.config,
+                packageName,
+                InstallExtraInfoEntity(Os.getuid() / 100000, cacheDirectory)
+            )
+        }.getOrElse {
+            Timber.e(it, "[id=${installer.id}] uninstall: Failed for $packageName.")
+            installer.error = it
+            installer.progress.emit(ProgressEntity.UninstallFailed)
+            return
+        }
+
+        Timber.d("[id=${installer.id}] uninstall: Succeeded for $packageName. Emitting ProgressEntity.UninstallSuccess.")
+        installer.progress.emit(ProgressEntity.UninstallSuccess)
+    }
+
     private suspend fun finish() {
         Timber.d("[id=${installer.id}] finish: Emitting ProgressEntity.Finish.")
         installer.progress.emit(ProgressEntity.Finish)
@@ -385,7 +408,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun installEntities(
         config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
-    ) = com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doWork(config, entities, extra)
+    ) = com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doInstallWork(config, entities, extra)
 
     private enum class SplitCategory { ABI, DENSITY, LANGUAGE, FEATURE }
 

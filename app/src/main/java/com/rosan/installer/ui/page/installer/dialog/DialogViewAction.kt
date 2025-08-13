@@ -4,15 +4,15 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 
 sealed class DialogViewAction {
     data class CollectRepo(val repo: InstallerRepo) : DialogViewAction()
-    object Close : DialogViewAction()
-    object Analyse : DialogViewAction()
-    object InstallChoice : DialogViewAction()
-    object InstallExtendedMenu : DialogViewAction()
-    object InstallExtendedSubMenu : DialogViewAction()
-    object InstallPrepare : DialogViewAction()
-    object Install : DialogViewAction()
-    object Background : DialogViewAction()
+    data object Close : DialogViewAction()
+    data object Analyse : DialogViewAction()
+    data object InstallChoice : DialogViewAction()
+    data object InstallExtendedMenu : DialogViewAction()
+    data object InstallExtendedSubMenu : DialogViewAction()
+    data object InstallMultiple : DialogViewAction()
+    data object InstallPrepare : DialogViewAction()
+    data object Install : DialogViewAction()
+    data object Background : DialogViewAction()
 
-    // 用于启动批量安装流程
-    object InstallMultiple : DialogViewAction()
+    data class UninstallAndRetryInstall(val keepData: Boolean) : DialogViewAction()
 }

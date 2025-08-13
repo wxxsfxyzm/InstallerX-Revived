@@ -40,7 +40,7 @@ import com.rosan.installer.ui.widget.setting.ClearCache
 import com.rosan.installer.ui.widget.setting.DefaultInstaller
 import com.rosan.installer.ui.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.widget.setting.SettingsNavigationItemWidget
-import com.rosan.installer.ui.widget.setting.SplicedSettingsGroup
+import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -114,7 +114,7 @@ fun NewPreferredPage(
                 ) {
                     // --- Global Settings Group ---
                     item {
-                        SplicedSettingsGroup(
+                        SplicedColumnGroup(
                             title = stringResource(R.string.personalization),
                             content = listOf(
                                 {
@@ -145,7 +145,7 @@ fun NewPreferredPage(
 
                     // --- Basic Settings Group ---
                     item {
-                        SplicedSettingsGroup(
+                        SplicedColumnGroup(
                             title = stringResource(R.string.basic),
                             content = listOf(
                                 { DefaultInstaller(snackBarHostState, true) },
@@ -157,7 +157,7 @@ fun NewPreferredPage(
 
                     // --- Other Settings Group ---
                     item {
-                        SplicedSettingsGroup(
+                        SplicedColumnGroup(
                             title = stringResource(R.string.other),
                             content = listOf(
                                 {

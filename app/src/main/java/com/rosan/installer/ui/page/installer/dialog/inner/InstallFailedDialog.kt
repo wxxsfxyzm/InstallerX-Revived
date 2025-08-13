@@ -3,6 +3,7 @@ package com.rosan.installer.ui.page.installer.dialog.inner
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -23,6 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
 import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolationException
 import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
@@ -39,6 +42,7 @@ import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 import com.rosan.installer.ui.widget.chip.Chip
 import com.rosan.installer.ui.widget.chip.SuggestionChipInfo
+import com.rosan.installer.ui.widget.dialog.UninstallConfirmationDialog
 import kotlinx.coroutines.delay
 import timber.log.Timber
 
@@ -84,11 +88,7 @@ fun installFailedDialog( // 小写开头
                             ErrorSuggestions(
                                 error = installer.error,
                                 viewModel = viewModel,
-                                installer = installer,
-                                onUninstall = {
-                                    // Define the action for uninstalling and retrying.
-                                    // This might involve calling a method on the viewModel.
-                                }
+                                installer = installer
                             )
                     }
                 )
@@ -114,71 +114,101 @@ fun installFailedDialog( // 小写开头
 private fun ErrorSuggestions(
     error: Throwable,
     viewModel: DialogViewModel,
-    installer: InstallerRepo,
-    onUninstall: () -> Unit
+    installer: InstallerRepo
 ) {
     val context = LocalContext.current
-    val possibleSuggestions = remember(installer, onUninstall) {
-        listOf(
-            SuggestionChipInfo(
-                InstallFailedTestOnlyException::class,
-                selected = { true },
-                onClick = {
-                    viewModel.toggleInstallFlag(InstallOption.AllowTest.value, true)
-                    viewModel.dispatch(DialogViewAction.Install)
-                },
-                labelRes = R.string.suggestion_allow_test_app,
-                icon = AppIcons.BugReport
-            ),
-            SuggestionChipInfo(
-                InstallFailedUpdateIncompatibleException::class,
-                InstallFailedVersionDowngradeException::class,
-                selected = { false }, // This is an action, not a state toggle.
-                onClick = { viewModel.toast("Not yet implemented!") },// onUninstall,
-                labelRes = R.string.suggestion_uninstall_and_retry,
-                icon = AppIcons.Delete
-            ),
-            SuggestionChipInfo(
-                InstallFailedHyperOSIsolationViolationException::class,
-                selected = { true }, // This is an action, not a state toggle.
-                onClick = {
-                    installer.config.installer = "com.miui.packageinstaller"
-                    viewModel.toast("可在设置中配置一个有效的安装来源")
-                    viewModel.dispatch(DialogViewAction.Install)
-                },
-                labelRes = R.string.suggestion_mi_isolation,
-                icon = AppIcons.InstallSource
-            ),
-            SuggestionChipInfo(
-                InstallFailedUserRestrictedException::class,
-                selected = { true }, // This is an action, not a state toggle.
-                onClick = {
-                    try {
-                        val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                        // Add this flag because we are starting an activity from a non-activity context.
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(intent)
-                        viewModel.dispatch(DialogViewAction.Close)
-                    } catch (e: ActivityNotFoundException) {
-                        // In case the activity is not found on some strange devices,
-                        // show a toast to the user.
-                        viewModel.toast("Developer options screen not found.")
-                    }
-                },
-                labelRes = R.string.suggestion_user_restricted,
-                icon = AppIcons.Developer
-            ),
-            SuggestionChipInfo(
-                InstallFailedDeprecatedSdkVersion::class,
-                selected = { true }, // This is an action, not a state toggle.
-                onClick = {
-                    viewModel.toggleInstallFlag(InstallOption.BypassLowTargetSdkBlock.value, true)
-                    viewModel.dispatch(DialogViewAction.Install)
-                },
-                labelRes = R.string.suggestion_bypass_low_target_sdk,
-                icon = AppIcons.InstallBypassLowTargetSdk
+    var showUninstallConfirmDialog by remember { mutableStateOf(false) }
+    var confirmKeepData by remember { mutableStateOf(false) }
+    val possibleSuggestions = remember(installer) {
+        buildList {
+            add(
+                SuggestionChipInfo(
+                    InstallFailedTestOnlyException::class,
+                    selected = { true },
+                    onClick = {
+                        viewModel.toggleInstallFlag(InstallOption.AllowTest.value, true)
+                        viewModel.dispatch(DialogViewAction.Install)
+                    },
+                    labelRes = R.string.suggestion_allow_test_app,
+                    icon = AppIcons.BugReport
+                )
             )
-        )
+            add(
+                SuggestionChipInfo(
+                    InstallFailedUpdateIncompatibleException::class,
+                    InstallFailedVersionDowngradeException::class,
+                    selected = { true }, // This is an action, not a state toggle.
+                    onClick = {
+                        confirmKeepData = false
+                        showUninstallConfirmDialog = true
+                    },// onUninstall,
+                    labelRes = R.string.suggestion_uninstall_and_retry,// Not keep data
+                    icon = AppIcons.Delete
+                )
+            )
+            if (RsConfig.currentManufacturer != Manufacturer.SAMSUNG &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+            ) {
+                add(
+                    SuggestionChipInfo(
+                        InstallFailedVersionDowngradeException::class,
+                        selected = { true }, // This is an action, not a state toggle.
+                        onClick = {
+                            confirmKeepData = true
+                            showUninstallConfirmDialog = true
+                        },// onUninstall,
+                        labelRes = R.string.suggestion_uninstall_and_retry_keep_data, // Keep data
+                        icon = AppIcons.Delete
+                    )
+                )
+            }
+            add(
+                SuggestionChipInfo(
+                    InstallFailedHyperOSIsolationViolationException::class,
+                    selected = { true }, // This is an action, not a state toggle.
+                    onClick = {
+                        installer.config.installer = "com.miui.packageinstaller"
+                        viewModel.toast("可在设置中配置一个有效的安装来源")
+                        viewModel.dispatch(DialogViewAction.Install)
+                    },
+                    labelRes = R.string.suggestion_mi_isolation,
+                    icon = AppIcons.InstallSource
+                )
+            )
+            add(
+                SuggestionChipInfo(
+                    InstallFailedUserRestrictedException::class,
+                    selected = { true }, // This is an action, not a state toggle.
+                    onClick = {
+                        try {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                            // Add this flag because we are starting an activity from a non-activity context.
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                            viewModel.dispatch(DialogViewAction.Close)
+                        } catch (e: ActivityNotFoundException) {
+                            // In case the activity is not found on some strange devices,
+                            // show a toast to the user.
+                            viewModel.toast("Developer options screen not found.")
+                        }
+                    },
+                    labelRes = R.string.suggestion_user_restricted,
+                    icon = AppIcons.Developer
+                )
+            )
+            add(
+                SuggestionChipInfo(
+                    InstallFailedDeprecatedSdkVersion::class,
+                    selected = { true }, // This is an action, not a state toggle.
+                    onClick = {
+                        viewModel.toggleInstallFlag(InstallOption.BypassLowTargetSdkBlock.value, true)
+                        viewModel.dispatch(DialogViewAction.Install)
+                    },
+                    labelRes = R.string.suggestion_bypass_low_target_sdk,
+                    icon = AppIcons.InstallBypassLowTargetSdk
+                )
+            )
+        }
     }
 
     val visibleSuggestions = remember(error) {
@@ -193,9 +223,9 @@ private fun ErrorSuggestions(
     // Requirement: If there is at least one chip to show, create the FlowRow.
     if (visibleSuggestions.isNotEmpty()) {
         FlowRow(
-            //modifier = Modifier.padding(top = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            // modifier = Modifier.padding(top = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(0.dp),
+            verticalArrangement = Arrangement.spacedBy((-9).dp)
         ) {
             visibleSuggestions.forEachIndexed { index, suggestion ->
                 var animatedVisibility by remember { mutableStateOf(false) }
@@ -221,5 +251,14 @@ private fun ErrorSuggestions(
                 }
             }
         }
+        UninstallConfirmationDialog(
+            showDialog = showUninstallConfirmDialog,
+            onDismiss = { showUninstallConfirmDialog = false },
+            onConfirm = {
+                // When the user confirms, we dispatch the action to the ViewModel.
+                viewModel.dispatch(DialogViewAction.UninstallAndRetryInstall(keepData = confirmKeepData))
+            },
+            keepData = confirmKeepData
+        )
     }
 }
