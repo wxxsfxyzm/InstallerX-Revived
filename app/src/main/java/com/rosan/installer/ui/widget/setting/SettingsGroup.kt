@@ -29,7 +29,7 @@ fun SplicedColumnGroup(
     if (content.isEmpty()) return
 
     val cornerRadius = 16.dp
-    val connectionRadius = 4.dp
+    val connectionRadius = 5.dp
     // Define shapes for different positions.
     val topShape = RoundedCornerShape(
         topStart = cornerRadius,
