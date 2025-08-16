@@ -35,9 +35,11 @@ import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.SettingsScreen
+import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.widget.setting.ClearCache
 import com.rosan.installer.ui.widget.setting.DefaultInstaller
+import com.rosan.installer.ui.widget.setting.DisableAdbVerify
 import com.rosan.installer.ui.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
@@ -67,7 +69,7 @@ fun NewPreferredPage(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
-        contentWindowInsets = windowInsets,
+        contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -148,6 +150,7 @@ fun NewPreferredPage(
                         SplicedColumnGroup(
                             title = stringResource(R.string.basic),
                             content = listOf(
+                                { DisableAdbVerify(viewModel) },
                                 { DefaultInstaller(snackBarHostState, true) },
                                 { DefaultInstaller(snackBarHostState, false) },
                                 { ClearCache() }

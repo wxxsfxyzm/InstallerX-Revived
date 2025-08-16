@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,10 +24,12 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.widget.setting.AppBackButton
 import com.rosan.installer.ui.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
+import com.rosan.installer.ui.widget.setting.ManagedPackagesWidget
 import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.widget.setting.SwitchWidget
 
@@ -41,7 +44,10 @@ fun NewInstallerGlobalSettingsPage(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .fillMaxSize(),
+        contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.installer_settings)) },
@@ -135,7 +141,7 @@ fun NewInstallerGlobalSettingsPage(
                                     description = stringResource(id = R.string.show_intelligent_suggestion_desc),
                                     checked = state.showIntelligentSuggestion,
                                     onCheckedChange = {
-                                        viewModel.dispatch(PreferredViewAction.ChangeShowIntelligentSuggestion(it))
+                                        viewModel.dispatch(PreferredViewAction.ChangeShowSuggestion(it))
                                     }
                                 )
                             },
@@ -147,7 +153,7 @@ fun NewInstallerGlobalSettingsPage(
                                     checked = state.disableNotificationForDialogInstall,
                                     onCheckedChange = {
                                         viewModel.dispatch(
-                                            PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(
+                                            PreferredViewAction.ChangeShowDisableNotification(
                                                 it
                                             )
                                         )
@@ -191,7 +197,7 @@ fun NewInstallerGlobalSettingsPage(
                                         checked = state.disableNotificationForDialogInstall,
                                         onCheckedChange = {
                                             viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(
+                                                PreferredViewAction.ChangeShowDisableNotification(
                                                     it
                                                 )
                                             )
@@ -202,6 +208,15 @@ fun NewInstallerGlobalSettingsPage(
                         )
                     )
                 }
+            }
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.managed_packages_title),
+                    content = listOf {
+                        ManagedPackagesWidget(viewModel = viewModel)
+                    }
+                )
+
             }
         }
     }

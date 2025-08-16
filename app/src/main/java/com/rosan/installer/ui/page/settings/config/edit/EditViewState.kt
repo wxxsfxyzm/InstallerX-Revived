@@ -1,9 +1,11 @@
 package com.rosan.installer.ui.page.settings.config.edit
 
+import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 data class EditViewState(
-    val data: Data = Data.build(ConfigEntity.default)
+    val data: Data = Data.build(ConfigEntity.default),
+    val managedPackages: List<NamedPackage> = emptyList()
 ) {
     data class Data(
         val name: String,

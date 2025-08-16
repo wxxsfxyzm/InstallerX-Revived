@@ -46,6 +46,7 @@ import androidx.compose.material.icons.twotone.PermDeviceInformation
 import androidx.compose.material.icons.twotone.RoomPreferences
 import androidx.compose.material.icons.twotone.Save
 import androidx.compose.material.icons.twotone.Search
+import androidx.compose.material.icons.twotone.Security
 import androidx.compose.material.icons.twotone.SecurityUpdateWarning
 import androidx.compose.material.icons.twotone.SettingsSuggest
 import androidx.compose.material.icons.twotone.SystemUpdate
@@ -102,6 +103,7 @@ object AppIcons {
 
     // --- 设置图标集合 ---
     val Authorizer = Icons.TwoTone.Memory
+    val DisableAdbVerify = Icons.TwoTone.Security
     val InstallMode = Icons.TwoTone.Downloading
     val LockDefault = Icons.TwoTone.Favorite
     val UnlockDefault = Icons.TwoTone.FavoriteBorder

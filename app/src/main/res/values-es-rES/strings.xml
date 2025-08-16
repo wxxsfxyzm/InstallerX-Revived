@@ -33,11 +33,11 @@
 
     <string name="basic">Básico</string>
     <string name="lock_default_installer">Establecer como instalador predeterminado</string>
-    <string name="lock_default_installer_dsp">Establece InstallerX como la app predeterminada para instalar APKs</string>
+    <string name="lock_default_installer_desc">Establece InstallerX como la app predeterminada para instalar APKs</string>
     <string name="lock_default_installer_success">Instalador predeterminado establecido</string>
     <string name="lock_default_installer_failed">No se pudo establecer como instalador predeterminado</string>
     <string name="unlock_default_installer">Quitar como instalador predeterminado</string>
-    <string name="unlock_default_installer_dsp">Quita InstallerX como el instalador predeterminado para APKs</string>
+    <string name="unlock_default_installer_desc">Quita InstallerX como el instalador predeterminado para APKs</string>
     <string name="unlock_default_installer_success">Instalador predeterminado quitado</string>
     <string name="unlock_default_installer_failed">No se pudo quitar como instalador predeterminado</string>
     <string name="clear_cache">Limpiar caché</string>
