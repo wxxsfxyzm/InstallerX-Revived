@@ -58,7 +58,7 @@ class DialogViewModel(
     var showExtendedMenu by mutableStateOf(false)
         private set
 
-    var showIntelligentSuggestion by mutableStateOf(false)
+    var showIntelligentSuggestion by mutableStateOf(true)
         private set
 
     var disableNotificationOnDismiss by mutableStateOf(false)

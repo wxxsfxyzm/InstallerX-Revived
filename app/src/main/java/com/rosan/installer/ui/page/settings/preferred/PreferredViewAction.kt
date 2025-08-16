@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.settings.preferred
 
+import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 sealed class PreferredViewAction {
@@ -13,13 +14,16 @@ sealed class PreferredViewAction {
     data class ChangeGlobalInstallMode(val installMode: ConfigEntity.InstallMode) :
         PreferredViewAction()
 
+    data class ChangeAdbVerifyEnabledState(val enabled: Boolean) :
+        PreferredViewAction()
+
     data class ChangeShowDialogInstallExtendedMenu(val showMenu: Boolean) :
         PreferredViewAction()
 
-    data class ChangeShowIntelligentSuggestion(val showIntelligentSuggestion: Boolean) :
+    data class ChangeShowSuggestion(val showIntelligentSuggestion: Boolean) :
         PreferredViewAction()
 
-    data class ChangeShowDisableNotificationForDialogInstall(val showDisableNotification: Boolean) :
+    data class ChangeShowDisableNotification(val showDisableNotification: Boolean) :
         PreferredViewAction()
 
     data class ChangeShowDialogWhenPressingNotification(val showDialog: Boolean) :
@@ -29,5 +33,11 @@ sealed class PreferredViewAction {
         PreferredViewAction()
 
     data class ChangeShowRefreshedUI(val showRefreshedUI: Boolean) :
+        PreferredViewAction()
+
+    data class AddManagedPackage(val item: NamedPackage) :
+        PreferredViewAction()
+
+    data class RemoveManagedPackage(val item: NamedPackage) :
         PreferredViewAction()
 }

@@ -17,6 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -57,7 +58,7 @@ class EditViewModel(
             }
             return errors
         }
-    
+
     val hasErrors: Boolean
         get() = activeErrorMessages.isNotEmpty()
 
@@ -279,7 +280,8 @@ class EditViewModel(
             val initialData = EditViewState.Data.build(configEntity)
             // UPDATE: Store this initial data as the "original" state.
             originalData = initialData
-            state = state.copy(data = initialData)
+            val managedPackages = appDataStore.getNamedPackageList().firstOrNull() ?: emptyList()
+            state = state.copy(data = initialData, managedPackages = managedPackages)
             Timber.i("[LOAD_DATA] Original data has been set: $initialData")
             globalAuthorizer = getGlobalAuthorizer()
             globalInstallMode = getGlobalInstallMode()

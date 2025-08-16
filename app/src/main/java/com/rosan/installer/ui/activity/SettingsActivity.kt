@@ -20,8 +20,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
             // A surface based on material design theme.
             InstallerTheme {
                 Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     // Disable AgreementDialog for now
                     // AgreementDialog()

@@ -3,6 +3,7 @@ package com.rosan.installer.data.recycle.model.entity
 import android.annotation.SuppressLint
 import android.app.IActivityManager
 import android.app.IApplicationThread
+import android.app.ProfilerInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -23,14 +24,12 @@ import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.inject
 import java.io.IOException
-import java.lang.reflect.Method
 import android.os.Process as AndroidProcess
 
-
+@SuppressLint("LogNotTimber")
 class DefaultPrivilegedService : BasePrivilegedService() {
     private val reflect by inject<ReflectRepo>()
 
-    @SuppressLint("LogNotTimber")
     override fun delete(paths: Array<out String>) = deletePaths(paths)
 
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
@@ -131,101 +130,102 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         }
     }
 
-    // Cache the reflected method for performance.
-    // A privileged process might live for a long time, so caching is beneficial.
-    private var startActivityAsUserMethod: Method? = null
-
-    @SuppressLint("LogNotTimber")
-    override fun startActivityPrivileged(intent: Intent): Boolean {
-        // We are executing inside the privileged process (Root/Shizuku).
-        // All API calls here inherit that privilege.
+    /**
+     * Implements the grantRuntimePermission from our IPrivilegedService.aidl.
+     * This method runs inside the privileged process.
+     */
+    override fun grantRuntimePermission(packageName: String, permission: String) {
         try {
-            // 1. Find the correct method reflectively, but only once.
-            if (startActivityAsUserMethod == null) {
-                findAndCacheStartActivityMethod()
-            }
+            val iPackageManager = IPackageManager.Stub.asInterface(
+                ServiceManager.getService("package")
+            ) ?: throw RemoteException("Failed to get 'package' service.")
 
-            // If after searching, the method is still null, we cannot proceed.
-            val methodToCall = startActivityAsUserMethod
-                ?: throw NoSuchMethodException("startActivityAsUser method could not be found via reflection.")
+            val userId = AndroidProcess.myUid() / 100000
 
-            // 2. Get the ActivityManagerService instance.
+            Log.d("PrivilegedService", "Granting $permission for $packageName (UID: $userId)")
+
+            iPackageManager.grantRuntimePermission(packageName, permission, userId)
+
+            Log.i("PrivilegedService", "Successfully granted $permission to $packageName")
+
+        } catch (e: Exception) {
+            // 捕获所有可能的异常 (包括 SecurityException)
+            Log.e("PrivilegedService", "ERROR granting permission", e)
+            // 将异常包装成 RemoteException 抛回给客户端
+            throw RemoteException("Failed to grant permission via system API: ${e.message}")
+        }
+    }
+
+    /**
+     * Checks if a package has a given permission.
+     * This method runs inside the privileged process, which is not subject to
+     * package visibility restrictions that a normal app would face.
+     *
+     * @param packageName The package to check.
+     * @param permission The permission to check for.
+     * @return True if the permission is granted, false otherwise.
+     * @throws RemoteException if any underlying error occurs.
+     */
+    override fun isPermissionGranted(packageName: String, permission: String): Boolean {
+        Log.d("PrivilegedService", "Checking permission '$permission' for package '$packageName'")
+        try {
+            // Because this code runs in a privileged context with access to a full Context,
+            // we can directly use the standard PackageManager API.
+            val result = context.packageManager.checkPermission(permission, packageName)
+            // The API returns PERMISSION_GRANTED (0) on success.
+            return result == PackageManager.PERMISSION_GRANTED
+        } catch (e: Exception) {
+            // Catch potential exceptions, e.g., if the package name is invalid,
+            // though checkPermission typically returns PERMISSION_DENIED for that.
+            Log.e("PrivilegedService", "Failed to check permission '$permission' for '$packageName'", e)
+            // It's safer to return false on any error.
+            return false
+        }
+    }
+
+    override fun startActivityPrivileged(intent: Intent): Boolean {
+        try {
             val amBinder = ServiceManager.getService(Context.ACTIVITY_SERVICE)
-                ?: run {
-                    Log.e("PrivilegedService", "Failed to get ActivityManagerService binder.")
-                    return false
-                }
             val am = IActivityManager.Stub.asInterface(amBinder)
 
-            // 3. Prepare common parameters.
             val userId = AndroidProcess.myUid() / 100000
+
+            // By setting the calling package to "com.android.shell",
+            // we leverage the permissions granted to the shell user,
+            // bypassing many standard security checks.
             val callerPackage = "com.android.shell"
             val resolvedType = intent.resolveType(context.contentResolver)
 
-            // 4. Invoke the method with the correct parameters based on our cached info.
-            val result: Int = methodToCall.invoke(
-                am,
-                null as IApplicationThread?, // The first argument is IApplicationThread
+            // Call the new, non-deprecated API 'startActivityAsUserWithFeature'.
+            // The 'callingFeatureId' is passed as null, which mimics the behavior
+            // of the old 'startActivityAsUser' method.
+            val result = am.startActivityAsUserWithFeature(
+                null as IApplicationThread?,
                 callerPackage,
+                null as String?, // This is the new 'callingFeatureId' parameter.
                 intent,
                 resolvedType,
                 null as IBinder?,
                 null as String?,
                 0,
                 0,
-                null as Bundle?, // ProfilerInfo is usually null, we use Bundle for wider compatibility
+                null as ProfilerInfo?,
                 null as Bundle?,
                 userId
-            ) as Int
+            )
 
-            Log.d("PrivilegedService", "IActivityManager.startActivityAsUser returned a result code: $result")
+            // A result code >= 0 indicates success.
+            // See ActivityManager.START_SUCCESS, START_DELIVERED_TO_TOP, etc.
             return result >= 0
-
+        } catch (e: SecurityException) {
+            // Log security exceptions specifically, as they indicate a permission issue.
+            Log.e("PrivilegedService", "startActivityPrivileged failed due to SecurityException", e)
+            return false
         } catch (e: Exception) {
-            Log.e("PrivilegedService", "startActivityPrivileged via API call failed", e)
+            // Catch other potential exceptions, such as RemoteException.
+            Log.e("PrivilegedService", "startActivityPrivileged failed with an exception", e)
             return false
         }
-    }
-
-    /**
-     * Finds the correct startActivityAsUser method using the ReflectRepo
-     * and caches it for future use. This avoids repeated reflection lookups.
-     */
-    @SuppressLint("LogNotTimber")
-    private fun findAndCacheStartActivityMethod() {
-        Log.d("PrivilegedService", "Searching for startActivityAsUser method for the first time...")
-        // In Android P and above, ProfilerInfo was deprecated and replaced by Bundle.
-        // So we use Bundle.class for better forward compatibility.
-        val bundleClass = Bundle::class.java
-
-        val method = reflect.getDeclaredMethod(
-            IActivityManager::class.java,
-            "startActivityAsUser",
-            IApplicationThread::class.java, // This signature is guaranteed to be present.
-            String::class.java,
-            Intent::class.java,
-            String::class.java,
-            IBinder::class.java,
-            String::class.java,
-            Int::class.java,
-            Int::class.java,
-            bundleClass,      // Represents ProfilerInfo
-            Bundle::class.java, // Represents options
-            Int::class.java     // userId
-        )
-
-        if (method == null) {
-            // This is a critical error for your target SDK range. It should never happen.
-            Log.e(
-                "PrivilegedService",
-                "FATAL: Could not find the modern startActivityAsUser method on an SDK 30+ device."
-            )
-        } else {
-            Log.d("PrivilegedService", "Successfully found the modern 11-argument method.")
-        }
-
-        method?.isAccessible = true
-        startActivityAsUserMethod = method
     }
 
     private fun addPreferredActivity(

@@ -30,11 +30,11 @@
 
     <string name="basic">常規</string>
     <string name="lock_default_installer">鎖定為預設安装器</string>
-    <string name="lock_default_installer_dsp">多個授權器配合效果更佳，少數系统需要配合Xposed模塊</string>
+    <string name="lock_default_installer_desc">多個授權器配合效果更佳，少數系统需要配合Xposed模塊</string>
     <string name="lock_default_installer_success">鎖定成功</string>
     <string name="lock_default_installer_failed">鎖定失敗</string>
     <string name="unlock_default_installer">清除鎖預設安裝器</string>
-    <string name="unlock_default_installer_dsp">清除鎖定時授權器應盡量與鎖定時一致，否則可能無效</string>
+    <string name="unlock_default_installer_desc">清除鎖定時授權器應盡量與鎖定時一致，否則可能無效</string>
     <string name="unlock_default_installer_success">清除成功</string>
     <string name="unlock_default_installer_failed">清除失敗</string>
     <string name="clear_cache">清理快取</string>

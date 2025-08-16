@@ -148,7 +148,7 @@ fun LegacyInstallerGlobalSettingsPage(
                             checked = viewModel.state.showIntelligentSuggestion,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowIntelligentSuggestion(it)
+                                    PreferredViewAction.ChangeShowSuggestion(it)
                                 )
                             }
                         )
@@ -159,7 +159,7 @@ fun LegacyInstallerGlobalSettingsPage(
                             checked = viewModel.state.disableNotificationForDialogInstall,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(it)
+                                    PreferredViewAction.ChangeShowDisableNotification(it)
                                 )
                             }
                         )
@@ -198,7 +198,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 checked = viewModel.state.disableNotificationForDialogInstall,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowDisableNotificationForDialogInstall(it)
+                                        PreferredViewAction.ChangeShowDisableNotification(it)
                                     )
                                 }
                             )

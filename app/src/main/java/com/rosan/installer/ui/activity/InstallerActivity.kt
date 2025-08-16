@@ -24,6 +24,7 @@ import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.InstallerPage
 import com.rosan.installer.ui.theme.InstallerTheme
+import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -63,7 +64,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 installer?.resolve(this)
             } else {
                 Timber.d("Storage permission DENIED after returning from settings.")
-                Toast.makeText(this, R.string.enable_storage_permission_hint, Toast.LENGTH_LONG).show()
+                this.toast(R.string.enable_storage_permission_hint, Toast.LENGTH_LONG)
                 finish()
             }
         }
@@ -172,7 +173,18 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
                 data = "package:$packageName".toUri()
             }
-            requestStoragePermissionLauncher.launch(intent)
+
+            // Check if there is an activity to handle this intent
+            if (intent.resolveActivity(packageManager) != null) {
+                try {
+                    requestStoragePermissionLauncher.launch(intent)
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to launch storage permission settings, even after resolving activity.")
+                }
+            } else {
+                // If no activity can handle the specific intent, open the generic app settings page.
+                Timber.w("No activity found to handle ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION.")
+            }
         }
     }
 

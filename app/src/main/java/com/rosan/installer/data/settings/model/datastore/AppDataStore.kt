@@ -6,10 +6,15 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
+import timber.log.Timber
 
 class AppDataStore(private val dataStore: DataStore<Preferences>) {
+    private val json = Json { ignoreUnknownKeys = true }
+
     companion object {
         // UI Fresh Switch
         val UI_FRESH_SWITCH = booleanPreferencesKey("ui_fresh_switch")
@@ -35,6 +40,9 @@ class AppDataStore(private val dataStore: DataStore<Preferences>) {
         val DIALOG_SHOW_INTELLIGENT_SUGGESTION = booleanPreferencesKey("show_dialog_install_intelligent_suggestion")
         val DIALOG_DISABLE_NOTIFICATION_ON_DISMISS =
             booleanPreferencesKey("show_disable_notification_for_dialog_install")
+
+        // Customize Installer
+        val MANAGED_PACKAGES_LIST = stringPreferencesKey("managed_packages_list")
     }
 
     suspend fun putString(key: Preferences.Key<String>, value: String) {
@@ -59,5 +67,33 @@ class AppDataStore(private val dataStore: DataStore<Preferences>) {
 
     fun getBoolean(key: Preferences.Key<Boolean>, default: Boolean = false): Flow<Boolean> {
         return dataStore.data.map { it[key] ?: default }
+    }
+
+    /**
+     * Saves a list of NamedPackage objects to DataStore after converting it to a JSON string.
+     * @param packages The list of packages to save.
+     */
+    suspend fun putNamedPackageList(packages: List<NamedPackage>) {
+        // Use json.encodeToString to serialize the list
+        val jsonString = json.encodeToString(packages)
+        putString(MANAGED_PACKAGES_LIST, jsonString)
+    }
+
+    /**
+     * Retrieves a Flow of a list of NamedPackage objects from DataStore.
+     * It reads the JSON string and deserializes it.
+     * @return A Flow emitting the list of packages. Returns an empty list if no data or on error.
+     */
+    fun getNamedPackageList(): Flow<List<NamedPackage>> {
+        return getString(MANAGED_PACKAGES_LIST, "[]").map { jsonString ->
+            try {
+                // Use json.decodeFromString to deserialize the string back into a list
+                json.decodeFromString<List<NamedPackage>>(jsonString)
+            } catch (e: Exception) {
+                // In case of a parsing error, return an empty list
+                Timber.e(e, "Failed to decode NamedPackage list from DataStore. Returning empty list.")
+                emptyList()
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.rosan.installer.ui.widget.setting
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @Composable
 fun SwitchWidget(
@@ -26,6 +27,7 @@ fun SwitchWidget(
         enabled = enabled,
         isError = isError,
         onClick = toggleAction,
+        hapticFeedbackType = HapticFeedbackType.ToggleOn,
         description = description
     ) {
         Switch(

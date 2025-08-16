@@ -25,7 +25,7 @@
     <string name="unstable">测试版</string>
 
     <string name="enable_notification_hint">请启用通知以进行安装！</string>
-    <string name="enable_storage_permission_hint">请启用存储权限！</string>
+    <string name="enable_storage_permission_hint">请启用“所有文件访问”权限！</string>
 
     <string name="discuss">讨论 &amp; 反馈 &amp; 更新</string>
     <string name="telegram_group">Telegram群组</string>
@@ -43,12 +43,15 @@
     <string name="installer_settings_notification_mode_options">通知安装自定义选项</string>
 
     <string name="basic">常规</string>
+    <string name="disable_adb_install_verify">停用系统安装验证</string>
+    <string name="disable_adb_install_verify_desc">在一些系统上可以禁止安装扫描（Play 保护机制等）</string>
+    <string name="disable_adb_install_verify_not_support_dhizuku_desc">Dhizuku不受支持</string>
     <string name="lock_default_installer">锁定为默认安装器</string>
-    <string name="lock_default_installer_dsp">多个授权器配合效果更佳，少数系统需要配合Xposed模块</string>
+    <string name="lock_default_installer_desc">多个授权器配合效果更佳，少数系统需要配合Xposed模块</string>
     <string name="lock_default_installer_success">锁定成功</string>
     <string name="lock_default_installer_failed">锁定失败</string>
     <string name="unlock_default_installer">清除锁定默认安装器</string>
-    <string name="unlock_default_installer_dsp">清除锁定时授权器应尽量与锁定时一致，否则可能无效</string>
+    <string name="unlock_default_installer_desc">清除锁定时授权器应尽量与锁定时一致，否则可能无效</string>
     <string name="unlock_default_installer_success">清除成功</string>
     <string name="unlock_default_installer_failed">清除失败</string>
     <string name="clear_cache">清理缓存</string>

@@ -22,14 +22,14 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun SplicedColumnGroup(
-    title: String,
+    modifier: Modifier = Modifier,
+    title: String = "",
     content: List<@Composable () -> Unit>,
-    modifier: Modifier = Modifier
 ) {
     if (content.isEmpty()) return
 
     val cornerRadius = 16.dp
-    val connectionRadius = 4.dp
+    val connectionRadius = 5.dp
     // Define shapes for different positions.
     val topShape = RoundedCornerShape(
         topStart = cornerRadius,
@@ -48,12 +48,13 @@ fun SplicedColumnGroup(
 
     Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         // Group title
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
-        )
+        if (title != "")
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+            )
 
         // The container for setting items.
         Column(

@@ -55,4 +55,12 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
     override fun startActivityPrivileged(intent: Intent): Boolean {
         return false
     }
+
+    override fun grantRuntimePermission(packageName: String?, permission: String?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun isPermissionGranted(packageName: String?, permission: String?): Boolean {
+        TODO("Not yet implemented")
+    }
 }

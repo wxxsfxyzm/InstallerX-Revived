@@ -31,6 +31,7 @@ fun BaseWidget(
     enabled: Boolean = true,
     isError: Boolean = false,
     onClick: () -> Unit = {},
+    hapticFeedbackType: HapticFeedbackType = HapticFeedbackType.ContextClick,
     foreContent: @Composable BoxScope.() -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
 ) {
@@ -42,7 +43,7 @@ fun BaseWidget(
             .clickable(
                 enabled = enabled,
                 onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    haptic.performHapticFeedback(hapticFeedbackType)
                     onClick()
                 }
             )
