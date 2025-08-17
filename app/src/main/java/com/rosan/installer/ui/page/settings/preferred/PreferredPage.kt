@@ -13,12 +13,15 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,10 +36,14 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.SettingsScreen
+import com.rosan.installer.ui.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.widget.setting.ClearCache
+import com.rosan.installer.ui.widget.setting.DefaultInstaller
+import com.rosan.installer.ui.widget.setting.DisableAdbVerify
 import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.ui.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.widget.setting.SettingsNavigationItemWidget
@@ -60,7 +67,30 @@ fun PreferredPage(
     }
 
     val snackBarHostState = remember { SnackbarHostState() }
+    var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowErrorDialog?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvents.collect { event ->
+            snackBarHostState.currentSnackbarData?.dismiss() // Dismiss any existing snackbar
+            when (event) {
+                is PreferredViewEvent.ShowSnackbar -> {
+                    snackBarHostState.showSnackbar(event.message)
+                }
+
+                is PreferredViewEvent.ShowErrorDialog -> {
+                    val snackbarResult = snackBarHostState.showSnackbar(
+                        message = event.title,
+                        actionLabel = context.getString(R.string.details),
+                        duration = SnackbarDuration.Short
+                    )
+                    if (snackbarResult == SnackbarResult.ActionPerformed) {
+                        errorDialogInfo = event
+                    }
+                }
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier
@@ -136,8 +166,20 @@ fun PreferredPage(
                         )
                     }
                     item { LabelWidget(stringResource(R.string.basic)) }
-                    /*item { DefaultInstaller(snackBarHostState, true) }
-                    item { DefaultInstaller(snackBarHostState, false) }*/
+                    item {
+                        DisableAdbVerify(
+                            checked = !state.adbVerifyEnabled,
+                            isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                            enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku,
+                            onCheckedChange = { isDisabled ->
+                                viewModel.dispatch(
+                                    PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
+                                )
+                            }
+                        )
+                    }
+                    item { DefaultInstaller(true) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) } }
+                    item { DefaultInstaller(false) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) } }
                     item { ClearCache() }
                     // item { LabelWidget(label = stringResource(id = R.string.more)) }
                     // item { UserTerms() }
@@ -173,6 +215,17 @@ fun PreferredPage(
                 }
             }
         }
+    }
+    errorDialogInfo?.let { dialogInfo ->
+        ErrorDisplayDialog(
+            exception = dialogInfo.exception,
+            onDismissRequest = { errorDialogInfo = null },
+            onRetry = {
+                errorDialogInfo = null // Dismiss dialog
+                viewModel.dispatch(dialogInfo.retryAction) // Dispatch the retry action
+            },
+            title = dialogInfo.title
+        )
     }
     if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
         BottomSheetContent(

@@ -84,7 +84,6 @@ fun NewPreferredPage(
                         actionLabel = context.getString(R.string.details),
                         duration = SnackbarDuration.Short
                     )
-                    // This is the fix for Bug #1: Only show the dialog if the user clicks the action button.
                     if (snackbarResult == SnackbarResult.ActionPerformed) {
                         errorDialogInfo = event
                     }
@@ -200,7 +199,9 @@ fun NewPreferredPage(
                                 {
                                     DefaultInstaller(false) {
                                         viewModel.dispatch(
-                                            PreferredViewAction.SetDefaultInstaller(false)
+                                            PreferredViewAction.SetDefaultInstaller(
+                                                false
+                                            )
                                         )
                                     }
                                 },
