@@ -80,9 +80,9 @@
     <string name="order">Sort</string>
 
     <string name="config_name">Profile name</string>
+    <string name="config_info">Info</string>
     <string name="config_description">Profile description</string>
     <string name="config_authorizer">Authorizer</string>
-    <!--    <string name="config_authorizer_msg">用于执行解析与执行命令，请确保拥有足够的权限。</string>-->
     <string name="config_authorizer_global">Global</string>
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">None</string>
@@ -111,6 +111,17 @@
     <string name="config_dialog_title_invalid">Invalid Input</string>
     <string name="config_dialog_title_unsaved_changes">Unsaved changes</string>
     <string name="config_dialog_message_unsaved_changes">Quit without saving?</string>
+    <string name="config_follow_settings">Follow Profile</string>
+    <string name="config_managed_packages_title">Install Source Presets</string>
+    <string name="config_managed_packages_description">Add or remove managed packages</string>
+    <string name="config_no_managed_packages">No managed packages</string>
+    <string name="config_add_one_to_get_started">Click \'Add\' below to start</string>
+    <string name="config_add_new_package">Add new package</string>
+    <string name="config_package_name">Package Name</string>
+    <string name="config_confirm_deletion">Confirm deletion</string>
+    <string name="config_confirm_deletion_desc">Do you want to delete \'%1$s\'? This cannot be undone.</string>
+    <string name="config_installer_matches">Match: %1$s</string>
+    <string name="config_no_managed_packages_to_suggest">Nothing to suggest</string>
 
     <string name="config_error_name">Name can\'t be empty</string>
     <string name="config_error_customize_authorizer">Custom authorizer can\'t be empty</string>
@@ -378,19 +389,4 @@
     <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
     <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
     <string name="suggestion_bypass_low_target_sdk">Temporarily allow bypassing restrictions and retry</string>
-
-    <string name="managed_packages_title">Install Source Presets</string>
-    <string name="managed_packages_description">添加或移除需要特殊处理的应用</string>
-    <string name="no_managed_packages">没有记录的应用</string>
-    <string name="add_one_to_get_started">点击下方的“添加”按钮开始</string>
-    <string name="add_new">添加</string>
-    <string name="add_new_package">添加新应用</string>
-    <string name="name">名称</string>
-    <string name="package_name">包名</string>
-    <string name="confirm_deletion">确认删除</string>
-    <string name="confirm_deletion_desc">您确定要删除“%1$s”吗？此操作无法撤销。</string>
-    <string name="info">信息</string>
-    <string name="config_installer_matches">匹配到: %1$s</string>
-    <string name="no_managed_packages_to_suggest">没有可建议的应用</string>
-
 </resources>

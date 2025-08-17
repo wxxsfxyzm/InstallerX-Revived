@@ -23,6 +23,7 @@ import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.page.installer.dialog.inner.UiText
 import kotlinx.coroutines.Dispatchers
@@ -104,6 +105,18 @@ class DialogViewModel(
     private val _installFlags = MutableStateFlow(0) // 默认值为0，表示没有开启任何选项
     val installFlags: StateFlow<Int> = _installFlags.asStateFlow()
 
+    // StateFlow to hold the default installer package name from global settings.
+    private val _defaultInstallerFromSettings = MutableStateFlow<String?>(repo.config.installer)
+    val defaultInstallerFromSettings: StateFlow<String?> = _defaultInstallerFromSettings.asStateFlow()
+
+    // StateFlow to hold the list of managed installer packages.
+    private val _managedPackages = MutableStateFlow<List<NamedPackage>>(emptyList())
+    val managedPackages: StateFlow<List<NamedPackage>> = _managedPackages.asStateFlow()
+
+    // StateFlow to hold the currently selected installer package name.
+    private val _selectedInstaller = MutableStateFlow(repo.config.installer)
+    val selectedInstaller: StateFlow<String?> = _selectedInstaller.asStateFlow()
+
     /**
      * Flag to track if the current operation is an uninstall-and-retry flow.
      * This helps the progress collector know when to trigger a reinstall.
@@ -125,6 +138,10 @@ class DialogViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, false).first()
             disableNotificationOnDismiss =
                 appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first()
+            // Load managed packages for installer selection.
+            appDataStore.getNamedPackageList().collect { packages ->
+                _managedPackages.value = packages
+            }
             // initialize install flags based on repo.config
             _installFlags.value = listOfNotNull(
                 repo.config.allowTestOnly.takeIf { it }
@@ -345,6 +362,11 @@ class DialogViewModel(
             _installFlags.value = currentFlags and flag.inv()
         }
         repo.config.installFlags = _installFlags.value // 同步到 repo.config
+    }
+
+    fun selectInstaller(packageName: String?) {
+        repo.config.installer = packageName // Update the repository
+        _selectedInstaller.value = packageName // Update the StateFlow
     }
 
     /**

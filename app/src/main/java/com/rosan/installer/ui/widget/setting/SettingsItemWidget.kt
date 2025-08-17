@@ -494,8 +494,8 @@ fun ManagedPackagesWidget(viewModel: PreferredViewModel) {
         // Display each package in the list
         if (state.managedPackages.isEmpty()) {
             ListItem(
-                headlineContent = { Text(stringResource(R.string.no_managed_packages)) },
-                supportingContent = { Text(stringResource(R.string.add_one_to_get_started)) },
+                headlineContent = { Text(stringResource(R.string.config_no_managed_packages)) },
+                supportingContent = { Text(stringResource(R.string.config_add_one_to_get_started)) },
                 leadingContent = {
                     Icon(
                         imageVector = AppIcons.Info,
@@ -545,7 +545,7 @@ fun ManagedPackagesWidget(viewModel: PreferredViewModel) {
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.size(8.dp))
-                Text(stringResource(R.string.add_new))
+                Text(stringResource(R.string.add))
             }
         }
     }
@@ -590,19 +590,19 @@ private fun AddPackageDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_new_package)) },
+        title = { Text(stringResource(R.string.config_add_new_package)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.name)) },
+                    label = { Text(stringResource(R.string.config_name)) },
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = packageName,
                     onValueChange = { packageName = it },
-                    label = { Text(stringResource(R.string.package_name)) },
+                    label = { Text(stringResource(R.string.config_package_name)) },
                     singleLine = true
                 )
             }
@@ -634,8 +634,8 @@ private fun DeleteConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.confirm_deletion)) },
-        text = { Text(stringResource(R.string.confirm_deletion_desc, item.name)) },
+        title = { Text(stringResource(R.string.config_confirm_deletion)) },
+        text = { Text(stringResource(R.string.config_confirm_deletion_desc, item.name)) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)

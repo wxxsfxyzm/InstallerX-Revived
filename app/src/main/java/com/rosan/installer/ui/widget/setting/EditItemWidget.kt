@@ -276,7 +276,7 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
             ) {
                 if (managedPackages.isEmpty()) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.no_managed_packages_to_suggest)) },
+                        text = { Text(stringResource(R.string.config_no_managed_packages_to_suggest)) },
                         onClick = { expanded = false },
                         enabled = false
                     )

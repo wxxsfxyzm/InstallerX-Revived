@@ -211,7 +211,7 @@ fun NewInstallerGlobalSettingsPage(
             }
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.managed_packages_title),
+                    title = stringResource(R.string.config_managed_packages_title),
                     content = listOf {
                         ManagedPackagesWidget(viewModel = viewModel)
                     }
