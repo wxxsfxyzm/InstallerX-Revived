@@ -1,39 +1,35 @@
 package com.rosan.installer.ui.widget.setting
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,7 +37,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -49,16 +44,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.impl.DSRepoImpl
+import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
-import com.rosan.installer.util.help
 import com.rosan.installer.util.openUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -308,106 +300,40 @@ fun DataInstallModeWidget(
         },
         colors = ListItemDefaults.colors(
             containerColor = Color.Transparent
-        ),
-        /*modifier = Modifier.clickable {
-            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-            onClick()
-        }*/
+        )
     )
 }
 
 @Composable
-fun DefaultInstaller(snackBarHostState: SnackbarHostState, lock: Boolean) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var exception: Throwable by remember {
-        mutableStateOf(Throwable())
-    }
-    var showException by remember {
-        mutableStateOf(false)
-    }
+fun DisableAdbVerify(
+    checked: Boolean,
+    isError: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    SwitchWidget(
+        icon = AppIcons.DisableAdbVerify,
+        title = stringResource(R.string.disable_adb_install_verify),
+        description = if (!isError)
+            stringResource(R.string.disable_adb_install_verify_desc)
+        else stringResource(R.string.disable_adb_install_verify_not_support_dhizuku_desc),
+        isError = isError,
+        checked = checked,
+        enabled = enabled,
+        onCheckedChange = onCheckedChange
+    )
+}
 
-    fun workIt() {
-        synchronized(scope) {
-            scope.launch(Dispatchers.IO) {
-                val exceptionOrNull = runCatching {
-                    DSRepoImpl.doWork(ConfigUtil.getByPackageName(null), lock)
-                }.exceptionOrNull()
-                exceptionOrNull?.printStackTrace()
-
-                snackBarHostState.currentSnackbarData?.dismiss()
-                if (exceptionOrNull == null) snackBarHostState.showSnackbar(
-                    context.getString(
-                        if (lock) R.string.lock_default_installer_success
-                        else R.string.unlock_default_installer_success
-                    )
-                )
-                else {
-                    val result = snackBarHostState.showSnackbar(
-                        context.getString(
-                            if (lock) R.string.lock_default_installer_failed
-                            else R.string.unlock_default_installer_failed
-                        ),
-                        context.getString(R.string.details),
-                        duration = SnackbarDuration.Short
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        exception = exceptionOrNull
-                        showException = true
-                    }
-                }
-            }
-        }
-    }
-
+@Composable
+fun DefaultInstaller(lock: Boolean, onClick: () -> Unit) {
     BaseWidget(
         icon = if (lock) AppIcons.LockDefault else AppIcons.UnlockDefault,
         title =
             stringResource(if (lock) R.string.lock_default_installer else R.string.unlock_default_installer),
         description =
-            stringResource(if (lock) R.string.lock_default_installer_dsp else R.string.unlock_default_installer_dsp),
-        onClick = {
-            workIt()
-        }
+            stringResource(if (lock) R.string.lock_default_installer_desc else R.string.unlock_default_installer_desc),
+        onClick = onClick
     ) {}
-    if (!showException) return
-    AlertDialog(onDismissRequest = {
-        showException = false
-    }, title = {
-        Text(stringResource(if (lock) R.string.lock_default_installer_failed else R.string.unlock_default_installer_failed))
-    }, text = {
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
-            LazyColumn(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.errorContainer)
-                    .fillMaxWidth()
-                    .padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    Text(exception.help(), fontWeight = FontWeight.Bold)
-                }
-                item {
-                    SelectionContainer {
-                        Text(exception.stackTraceToString().trim())
-                    }
-                }
-            }
-        }
-    }, confirmButton = {
-        TextButton(onClick = {
-            showException = false
-            workIt()
-        }) {
-            Text(stringResource(R.string.retry))
-        }
-    }, dismissButton = {
-        TextButton(onClick = {
-            showException = false
-        }) {
-            Text(stringResource(R.string.cancel))
-        }
-    })
 }
 
 @Composable
@@ -549,4 +475,176 @@ fun BottomSheetContent(
         }
         Spacer(modifier = Modifier.size(60.dp)) // 按钮下方留白
     }
+}
+
+/**
+ * A widget to display and manage a list of NamedPackage items.
+ * Allows adding new packages and deleting existing ones.
+ *
+ * @param viewModel The ViewModel that holds the state and handles actions.
+ */
+@Composable
+fun ManagedPackagesWidget(viewModel: PreferredViewModel) {
+    val state = viewModel.state
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf<NamedPackage?>(null) }
+
+    // Main container for the widget
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        // Display each package in the list
+        if (state.managedPackages.isEmpty()) {
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.config_no_managed_packages)) },
+                supportingContent = { Text(stringResource(R.string.config_add_one_to_get_started)) },
+                leadingContent = {
+                    Icon(
+                        imageVector = AppIcons.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+            )
+        } else {
+            state.managedPackages.forEach { item ->
+                ListItem(
+                    headlineContent = { Text(item.name) },
+                    supportingContent = { Text(item.packageName) },
+                    leadingContent = {
+                        Icon(
+                            imageVector = AppIcons.BugReport, // Or any other relevant icon
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    trailingContent = {
+                        IconButton(onClick = { showDeleteConfirmation = item }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.delete),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                )
+            }
+        }
+
+        // "Add New Package" button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(onClick = { showAddDialog = true }) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(stringResource(R.string.add))
+            }
+        }
+    }
+
+    // --- Dialogs ---
+
+    // Dialog for adding a new package
+    if (showAddDialog) {
+        AddPackageDialog(
+            onDismiss = { showAddDialog = false },
+            onConfirm = { newItem ->
+                viewModel.dispatch(PreferredViewAction.AddManagedPackage(newItem))
+                showAddDialog = false
+            }
+        )
+    }
+
+    // Dialog for confirming deletion
+    showDeleteConfirmation?.let { itemToDelete ->
+        DeleteConfirmationDialog(
+            item = itemToDelete,
+            onDismiss = { showDeleteConfirmation = null },
+            onConfirm = {
+                viewModel.dispatch(PreferredViewAction.RemoveManagedPackage(itemToDelete))
+                showDeleteConfirmation = null
+            }
+        )
+    }
+}
+
+/**
+ * An AlertDialog for adding a new NamedPackage.
+ */
+@Composable
+private fun AddPackageDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (NamedPackage) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var packageName by remember { mutableStateOf("") }
+    val isConfirmEnabled = name.isNotBlank() && packageName.isNotBlank()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.config_add_new_package)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(R.string.config_name)) },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = packageName,
+                    onValueChange = { packageName = it },
+                    label = { Text(stringResource(R.string.config_package_name)) },
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(NamedPackage(name, packageName)) },
+                enabled = isConfirmEnabled
+            ) {
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+/**
+ * An AlertDialog to confirm the deletion of an item.
+ */
+@Composable
+private fun DeleteConfirmationDialog(
+    item: NamedPackage,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.config_confirm_deletion)) },
+        text = { Text(stringResource(R.string.config_confirm_deletion_desc, item.name)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }

@@ -144,46 +144,30 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         packageName: String,
         extra: InstallExtraInfoEntity,
     ) {
+        // Get the underlying IPackageManager and IPackageInstaller interfaces.
         val iPackageManager =
             IPackageManager.Stub.asInterface(iBinderWrapper(ServiceManager.getService("package")))
         val iPackageInstaller =
             IPackageInstaller.Stub.asInterface(iBinderWrapper(iPackageManager.packageInstaller.asBinder()))
 
-        val installerPackageName = context.packageName
-        val packageInstaller = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            reflect.getDeclaredConstructor(
-                PackageInstaller::class.java,
-                IPackageInstaller::class.java,
-                String::class.java,
-                String::class.java,
-                Int::class.java,
-            )!!.also {
-                it.isAccessible = true
-            }.newInstance(iPackageInstaller, installerPackageName, null, extra.userId)
-        } else {
-            reflect.getDeclaredConstructor(
-                PackageInstaller::class.java,
-                IPackageInstaller::class.java,
-                String::class.java,
-                Int::class.java,
-            )!!.also {
-                it.isAccessible = true
-            }.newInstance(iPackageInstaller, installerPackageName, extra.userId)
-        }) as PackageInstaller
-
+        // Prepare parameters for the direct AIDL call.
         val receiver = LocalIntentReceiver()
-
         val flags = config.uninstallFlags
         val versionedPackage = VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST)
-        if (flags != 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // UPSIDE_DOWN_CAKE is API 34
-            Timber.d("Using modern uninstall method with flags on API ${Build.VERSION.SDK_INT}")
-            packageInstaller.uninstall(versionedPackage, flags, receiver.getIntentSender())
-        } else {
-            Timber.d("Using legacy uninstall method without flags on API ${Build.VERSION.SDK_INT} or no flags provided.")
-            packageInstaller.uninstall(versionedPackage, receiver.getIntentSender())
-        }
+        val callerPackageName = "com.android.shell"
 
-        // Ensure your PackageManagerUtil has the uninstallResultVerify method
+        Timber.d("Directly calling IPackageInstaller.uninstall with flags: $flags")
+
+        // Directly call the method from the stub interface.
+        iPackageInstaller.uninstall(
+            versionedPackage,
+            callerPackageName,
+            flags,
+            receiver.getIntentSender(),
+            extra.userId
+        )
+
+        // Step 4: The result verification logic remains the same.
         PackageManagerUtil.uninstallResultVerify(context, receiver)
     }
 

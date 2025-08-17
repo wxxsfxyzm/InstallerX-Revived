@@ -46,12 +46,16 @@
     <string name="installer_settings_notification_mode_options">Options for Notification</string>
 
     <string name="basic">Basic</string>
+    <string name="disable_adb_install_verify">Disable ADB Verify</string>
+    <string name="disable_adb_install_verify_desc">Disable ADB install verification, useful on some systems where a installation will trigger an scan (Play Protect)</string>
+    <string name="disable_adb_install_verify_not_support_dhizuku_desc">Not support Dhizuku</string>
+    <string name="disable_adb_install_verify_failed">Couldn\'t disable ADB install verification</string>
     <string name="lock_default_installer">Set as default installer</string>
-    <string name="lock_default_installer_dsp">Set InstallerX as the default app to install apks</string>
+    <string name="lock_default_installer_desc">Set InstallerX as the default app to install apks</string>
     <string name="lock_default_installer_success">Successfully set as default installer</string>
     <string name="lock_default_installer_failed">Couldn\'t set as default installer</string>
     <string name="unlock_default_installer">Unset as default installer</string>
-    <string name="unlock_default_installer_dsp">Unset InstallerX as the default installer to install apks</string>
+    <string name="unlock_default_installer_desc">Unset InstallerX as the default installer to install apks</string>
     <string name="unlock_default_installer_success">Successfully unset as default installer</string>
     <string name="unlock_default_installer_failed">Couldn\'t unset as default installer</string>
     <string name="clear_cache">Clear cache</string>
@@ -76,9 +80,9 @@
     <string name="order">Sort</string>
 
     <string name="config_name">Profile name</string>
+    <string name="config_info">Info</string>
     <string name="config_description">Profile description</string>
     <string name="config_authorizer">Authorizer</string>
-    <!--    <string name="config_authorizer_msg">用于执行解析与执行命令，请确保拥有足够的权限。</string>-->
     <string name="config_authorizer_global">Global</string>
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">None</string>
@@ -107,6 +111,17 @@
     <string name="config_dialog_title_invalid">Invalid Input</string>
     <string name="config_dialog_title_unsaved_changes">Unsaved changes</string>
     <string name="config_dialog_message_unsaved_changes">Quit without saving?</string>
+    <string name="config_follow_settings">Follow Profile</string>
+    <string name="config_managed_packages_title">Install Source Presets</string>
+    <string name="config_managed_packages_description">Add or remove managed packages</string>
+    <string name="config_no_managed_packages">No managed packages</string>
+    <string name="config_add_one_to_get_started">Click \'Add\' below to start</string>
+    <string name="config_add_new_package">Add new package</string>
+    <string name="config_package_name">Package Name</string>
+    <string name="config_confirm_deletion">Confirm deletion</string>
+    <string name="config_confirm_deletion_desc">Do you want to delete \'%1$s\'? This cannot be undone.</string>
+    <string name="config_installer_matches">Match: %1$s</string>
+    <string name="config_no_managed_packages_to_suggest">Nothing to suggest</string>
 
     <string name="config_error_name">Name can\'t be empty</string>
     <string name="config_error_customize_authorizer">Custom authorizer can\'t be empty</string>
@@ -157,6 +172,7 @@
     <string name="installer_installing">Installing…</string>
     <string name="installer_install_failed">Install failed</string>
     <string name="installer_install_success">Install success</string>
+    <string name="installer_silent_install">Silent Install</string>
     <string name="installer_error_reason">Error Reason</string>
     <string name="installer_unknown_error">Unknown Error</string>
 
@@ -369,6 +385,7 @@
     <string name="suggestion_uninstall_alert_dialog_confirm_action">Confirm Action</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">This will uninstall the current version of the app while keeping its data, then try to install the new one. DO NOT use on system app!</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">This will uninstall the current version of the app and try to install the new one. DO NOT use on system app!</string>
+    <string name="suggestion_allow_downgrade">Temporarily Allow Downgrade and retry</string>
     <string name="suggestion_allow_test_app">Temporarily Allow Test and retry</string>
     <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
     <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>

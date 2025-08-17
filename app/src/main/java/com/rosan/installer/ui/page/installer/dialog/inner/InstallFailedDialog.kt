@@ -34,6 +34,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedUserRestrictedE
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
@@ -119,6 +120,7 @@ private fun ErrorSuggestions(
     val context = LocalContext.current
     var showUninstallConfirmDialog by remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
+
     val possibleSuggestions = remember(installer) {
         buildList {
             add(
@@ -146,8 +148,15 @@ private fun ErrorSuggestions(
                     icon = AppIcons.Delete
                 )
             )
-            if (RsConfig.currentManufacturer != Manufacturer.SAMSUNG &&
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+            if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && // Must be Android 14 or higher
+
+                !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && // And is Android 15 or higher
+                        (RsConfig.currentManufacturer == Manufacturer.SAMSUNG ||         // and the manufacturer is Samsung
+                                RsConfig.currentManufacturer == Manufacturer.REALME)) &&        // or the manufacturer is realme -> This combination is excluded
+
+                (installer.config.authorizer == ConfigEntity.Authorizer.Root ||    // Authorization must be
+                        installer.config.authorizer == ConfigEntity.Authorizer.Shizuku)   // Root or Shizuku
             ) {
                 add(
                     SuggestionChipInfo(
@@ -158,6 +167,22 @@ private fun ErrorSuggestions(
                             showUninstallConfirmDialog = true
                         },// onUninstall,
                         labelRes = R.string.suggestion_uninstall_and_retry_keep_data, // Keep data
+                        icon = AppIcons.Delete
+                    )
+                )
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                (installer.config.authorizer == ConfigEntity.Authorizer.Root || installer.config.authorizer == ConfigEntity.Authorizer.Shizuku)
+            ) {
+                add(
+                    SuggestionChipInfo(
+                        InstallFailedVersionDowngradeException::class,
+                        selected = { true }, // This is an action, not a state toggle.
+                        onClick = {
+                            viewModel.toggleInstallFlag(InstallOption.AllowDowngrade.value, true)
+                            viewModel.dispatch(DialogViewAction.Install)
+                        },
+                        labelRes = R.string.suggestion_allow_downgrade,
                         icon = AppIcons.Delete
                     )
                 )

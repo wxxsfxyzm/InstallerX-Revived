@@ -14,11 +14,22 @@ import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material.icons.twotone.Terminal
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -207,32 +218,86 @@ fun DataDeclareInstallerWidget(viewModel: EditViewModel) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DataInstallerWidget(viewModel: EditViewModel) {
-    val installer = viewModel.state.data.installer
+    val stateData = viewModel.state.data
+    val managedPackages = viewModel.state.managedPackages
+    val currentInstaller = stateData.installer
+    var expanded by remember { mutableStateOf(false) }
+    // Find a matching package to display its friendly name
+    val matchingPackage = remember(currentInstaller, managedPackages) {
+        managedPackages.find { it.packageName == currentInstaller }
+    }
+
+    // Use ExposedDropdownMenuBox for the text field with a dropdown menu
     AnimatedVisibility(
-        visible = viewModel.state.data.declareInstaller,
+        visible = stateData.declareInstaller,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()
     ) {
-        OutlinedTextField(
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp, horizontal = 16.dp)
-                .focusable(),
-            leadingIcon = {
-                Icon(imageVector = AppIcons.InstallSourceInput, contentDescription = null)
-            },
-            label = {
-                Text(text = stringResource(id = R.string.config_installer))
-            },
-            value = installer,
-            onValueChange = {
-                viewModel.dispatch(EditViewAction.ChangeDataInstaller(it))
-            },
-            singleLine = true,
-            isError = viewModel.state.data.errorInstaller
-        )
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusable()
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
+                value = currentInstaller,
+                onValueChange = {
+                    viewModel.dispatch(EditViewAction.ChangeDataInstaller(it))
+                },
+                label = { Text(text = stringResource(id = R.string.config_installer)) },
+                leadingIcon = {
+                    Icon(imageVector = AppIcons.InstallSourceInput, contentDescription = null)
+                },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                supportingText = {
+                    // If a match is found, show the friendly name as supporting text
+                    matchingPackage?.let {
+                        Text(stringResource(R.string.config_installer_matches, it.name))
+                    }
+                },
+                singleLine = true,
+                isError = stateData.errorInstaller
+            )
+
+            // Define the content of the dropdown menu
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                if (managedPackages.isEmpty()) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.config_no_managed_packages_to_suggest)) },
+                        onClick = { expanded = false },
+                        enabled = false
+                    )
+                } else {
+                    managedPackages.forEach { item ->
+                        val isSelected = currentInstaller == item.packageName
+                        DropdownMenuItem(
+                            text = { Text("${item.name} (${item.packageName})") },
+                            onClick = {
+                                viewModel.dispatch(EditViewAction.ChangeDataInstaller(item.packageName))
+                                expanded = false
+                            },
+                            // Highlight the selected item
+                            colors = if (isSelected) MenuDefaults.itemColors(
+                                textColor = MaterialTheme.colorScheme.primary
+                            ) else MenuDefaults.itemColors()
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
