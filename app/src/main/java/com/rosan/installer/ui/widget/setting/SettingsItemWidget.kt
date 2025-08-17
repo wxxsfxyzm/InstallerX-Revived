@@ -1,7 +1,6 @@
 package com.rosan.installer.ui.widget.setting
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,9 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
@@ -28,17 +24,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +37,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -54,17 +44,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.impl.DSRepoImpl
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
-import com.rosan.installer.util.help
 import com.rosan.installer.util.openUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -319,114 +305,35 @@ fun DataInstallModeWidget(
 }
 
 @Composable
-fun DisableAdbVerify(viewModel: PreferredViewModel) {
+fun DisableAdbVerify(
+    checked: Boolean,
+    isError: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
     SwitchWidget(
         icon = AppIcons.DisableAdbVerify,
         title = stringResource(R.string.disable_adb_install_verify),
-        description = if (viewModel.state.authorizer != ConfigEntity.Authorizer.Dhizuku)
+        description = if (!isError)
             stringResource(R.string.disable_adb_install_verify_desc)
         else stringResource(R.string.disable_adb_install_verify_not_support_dhizuku_desc),
-        isError = viewModel.state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-        checked = !viewModel.state.adbVerifyEnabled,
-        enabled = viewModel.state.authorizer != ConfigEntity.Authorizer.Dhizuku,
-        onCheckedChange = { isDisabled ->
-            viewModel.dispatch(PreferredViewAction.ChangeAdbVerifyEnabledState(!isDisabled))
-        }
+        isError = isError,
+        checked = checked,
+        enabled = enabled,
+        onCheckedChange = onCheckedChange
     )
 }
 
 @Composable
-fun DefaultInstaller(snackBarHostState: SnackbarHostState, lock: Boolean) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var exception: Throwable by remember {
-        mutableStateOf(Throwable())
-    }
-    var showException by remember {
-        mutableStateOf(false)
-    }
-
-    fun workIt() {
-        synchronized(scope) {
-            scope.launch(Dispatchers.IO) {
-                val exceptionOrNull = runCatching {
-                    DSRepoImpl.doWork(ConfigUtil.getByPackageName(null), lock)
-                }.exceptionOrNull()
-                exceptionOrNull?.printStackTrace()
-
-                snackBarHostState.currentSnackbarData?.dismiss()
-                if (exceptionOrNull == null) snackBarHostState.showSnackbar(
-                    context.getString(
-                        if (lock) R.string.lock_default_installer_success
-                        else R.string.unlock_default_installer_success
-                    )
-                )
-                else {
-                    val result = snackBarHostState.showSnackbar(
-                        context.getString(
-                            if (lock) R.string.lock_default_installer_failed
-                            else R.string.unlock_default_installer_failed
-                        ),
-                        context.getString(R.string.details),
-                        duration = SnackbarDuration.Short
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        exception = exceptionOrNull
-                        showException = true
-                    }
-                }
-            }
-        }
-    }
-
+fun DefaultInstaller(lock: Boolean, onClick: () -> Unit) {
     BaseWidget(
         icon = if (lock) AppIcons.LockDefault else AppIcons.UnlockDefault,
         title =
             stringResource(if (lock) R.string.lock_default_installer else R.string.unlock_default_installer),
         description =
             stringResource(if (lock) R.string.lock_default_installer_desc else R.string.unlock_default_installer_desc),
-        onClick = {
-            workIt()
-        }
+        onClick = onClick
     ) {}
-    if (!showException) return
-    AlertDialog(onDismissRequest = {
-        showException = false
-    }, title = {
-        Text(stringResource(if (lock) R.string.lock_default_installer_failed else R.string.unlock_default_installer_failed))
-    }, text = {
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
-            LazyColumn(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.errorContainer)
-                    .fillMaxWidth()
-                    .padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    Text(exception.help(), fontWeight = FontWeight.Bold)
-                }
-                item {
-                    SelectionContainer {
-                        Text(exception.stackTraceToString().trim())
-                    }
-                }
-            }
-        }
-    }, confirmButton = {
-        TextButton(onClick = {
-            showException = false
-            workIt()
-        }) {
-            Text(stringResource(R.string.retry))
-        }
-    }, dismissButton = {
-        TextButton(onClick = {
-            showException = false
-        }) {
-            Text(stringResource(R.string.cancel))
-        }
-    })
 }
 
 @Composable

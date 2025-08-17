@@ -64,7 +64,7 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
             label = stringResource(R.string.preferred)
         ) { insets ->
             if (preferredViewModel.state.showRefreshedUI)
-                NewPreferredPage(navController, insets, preferredViewModel)
+                NewPreferredPage(navController, preferredViewModel)
             else
                 PreferredPage(navController, insets, preferredViewModel)
         }

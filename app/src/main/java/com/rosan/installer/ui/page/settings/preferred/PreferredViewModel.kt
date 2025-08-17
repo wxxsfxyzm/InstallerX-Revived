@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.settings.preferred
 
+import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
 import android.provider.Settings
@@ -8,32 +9,42 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rosan.installer.data.recycle.util.useUserService
+import com.rosan.installer.R
+import com.rosan.installer.data.app.repo.PrivilegedActionRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
+import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 
 class PreferredViewModel(
     private val appDataStore: AppDataStore,
+    private val paRepo: PrivilegedActionRepo
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
     var state by mutableStateOf(PreferredViewState())
         private set
+
+    private val _uiEvents = Channel<PreferredViewEvent>()
+    val uiEvents = _uiEvents.receiveAsFlow()
 
     private var initialized = false
 
@@ -43,7 +54,6 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeGlobalAuthorizer -> changeGlobalAuthorizer(action.authorizer)
             is PreferredViewAction.ChangeGlobalCustomizeAuthorizer -> changeGlobalCustomizeAuthorizer(action.customizeAuthorizer)
             is PreferredViewAction.ChangeGlobalInstallMode -> changeGlobalInstallMode(action.installMode)
-            is PreferredViewAction.ChangeAdbVerifyEnabledState -> changeAdbVerifyEnabled(action.enabled)
             is PreferredViewAction.ChangeShowDialogInstallExtendedMenu -> changeShowDialogInstallExtendedMenu(action.showMenu)
             is PreferredViewAction.ChangeShowSuggestion -> changeShowSuggestionState(action.showIntelligentSuggestion)
             is PreferredViewAction.ChangeShowDisableNotification -> changeDisableNotificationState(action.showDisableNotification)
@@ -56,6 +66,20 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeShowRefreshedUI -> changeRefreshedUI(action.showRefreshedUI)
             is PreferredViewAction.AddManagedPackage -> addManagedPackage(action.item)
             is PreferredViewAction.RemoveManagedPackage -> removeManagedPackage(action.item)
+
+            is PreferredViewAction.SetAdbVerifyEnabledState -> viewModelScope.launch {
+                setAdbVerifyEnabled(
+                    action.enabled,
+                    action
+                )
+            }
+
+            is PreferredViewAction.SetDefaultInstaller -> viewModelScope.launch {
+                setDefaultInstaller(
+                    action.lock,
+                    action
+                )
+            }
         }
 
 
@@ -225,25 +249,63 @@ class PreferredViewModel(
         emit(Settings.Global.getInt(cr, name, defaultValue))
     }.flowOn(Dispatchers.IO)
 
-    private fun changeAdbVerifyEnabled(enabled: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            Timber.d("Changing ADB Verify Enabled to: $enabled")
-            useUserService(state.authorizer) { userService ->
-                val isPermissionGranted = userService.privileged.isPermissionGranted(
+    private suspend fun setAdbVerifyEnabled(enabled: Boolean, action: PreferredViewAction) {
+        runPrivilegedAction(
+            action = action,
+            titleForError = context.getString(R.string.disable_adb_install_verify_failed),
+            successMessage = null, // No success snackbar message for this action type
+            block = {
+                Timber.d("Changing ADB Verify Enabled to: $enabled")
+                val isPermissionGranted = paRepo.isPermissionGranted(
+                    state.authorizer,
                     context.packageName, "android.permission.WRITE_SECURE_SETTINGS"
                 )
                 if (!isPermissionGranted) {
                     Timber.w("WRITE_SECURE_SETTINGS permission not granted, attempting to grant it...")
-                    userService.privileged.grantRuntimePermission(
+                    paRepo.grantRuntimePermission(
+                        state.authorizer,
                         context.packageName,
                         "android.permission.WRITE_SECURE_SETTINGS"
                     )
                 }
+
+                // This need android.permission.WRITE_SECURE_SETTINGS, thus cannot be called directly
+                Settings.Global.putInt(context.contentResolver, "verifier_verify_adb_installs", if (enabled) 1 else 0)
+                state = state.copy(adbVerifyEnabled = enabled)
             }
-            // This need android.permission.WRITE_SECURE_SETTINGS, thus cannot be called directly
-            Settings.Global.putInt(context.contentResolver, "verifier_verify_adb_installs", if (enabled) 1 else 0)
-            // Optimistically update the UI state
-            state = state.copy(adbVerifyEnabled = enabled)
+        )
+        // Optimistically update the UI state
+        // state = state.copy(adbVerifyEnabled = enabled)
+    }
+
+    private suspend fun setDefaultInstaller(lock: Boolean, action: PreferredViewAction) {
+        val config = ConfigUtil.getByPackageName(null)
+        val component = ComponentName(context, InstallerActivity::class.java)
+        runPrivilegedAction(
+            action = action,
+            titleForError = context.getString(if (lock) R.string.lock_default_installer_failed else R.string.unlock_default_installer_failed),
+            successMessage = context.getString(if (lock) R.string.lock_default_installer_success else R.string.unlock_default_installer_success),
+            block = { paRepo.setDefaultInstaller(config, component, lock) }
+        )
+    }
+
+    private suspend fun runPrivilegedAction(
+        action: PreferredViewAction,
+        titleForError: String,
+        successMessage: String?,
+        block: suspend () -> Unit
+    ) {
+        runCatching {
+            withContext(Dispatchers.IO) {
+                block() // 现在这个 block 内部的所有代码都在后台 IO 线程上运行
+            }
+        }.onSuccess {
+            Timber.d("Privileged action succeeded")
+            if (successMessage != null)
+                _uiEvents.send(PreferredViewEvent.ShowSnackbar(successMessage))
+        }.onFailure { exception ->
+            Timber.e(exception, "Privileged action failed")
+            _uiEvents.send(PreferredViewEvent.ShowErrorDialog(titleForError, exception, action))
         }
     }
 }

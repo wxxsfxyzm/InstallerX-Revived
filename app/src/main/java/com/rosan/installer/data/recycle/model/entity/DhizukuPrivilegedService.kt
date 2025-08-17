@@ -56,11 +56,74 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
         return false
     }
 
-    override fun grantRuntimePermission(packageName: String?, permission: String?) {
-        TODO("Not yet implemented")
+    /**
+     * Grants a runtime permission to a specific package.
+     * This requires Device Owner or Profile Owner privileges.
+     *
+     * @param packageName The package to grant the permission to.
+     * @param permission The name of the permission to grant (e.g., android.Manifest.permission.CAMERA).
+     */
+    override fun grantRuntimePermission(packageName: String, permission: String) {
+        // Check for null or empty arguments to avoid errors
+        if (packageName.isEmpty() || permission.isEmpty()) {
+            Timber.tag("DhizukuPrivilegedService")
+                .w("grantRuntimePermission called with invalid arguments: packageName=$packageName, permission=$permission")
+            throw IllegalArgumentException("packageName and permission must not be empty.")
+        }
+
+        try {
+            val ownerComponent = Dhizuku.getOwnerComponent()
+            Timber.tag("DhizukuPrivilegedService")
+                .d("Attempting to grant permission '$permission' to package '$packageName' using owner '$ownerComponent'")
+
+            // Use setPermissionGrantState to grant the permission
+            // The user will not be able to revoke this permission from the settings UI
+            devicePolicyManager.setPermissionGrantState(
+                ownerComponent,
+                packageName,
+                permission,
+                DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
+            )
+            Timber.tag("DhizukuPrivilegedService")
+                .i("Successfully granted permission '$permission' to package '$packageName'")
+        } catch (t: Throwable) {
+            Timber.tag("DhizukuPrivilegedService")
+                .e(t, "Failed to grant permission '$permission' to package '$packageName'")
+            throw t
+        }
     }
 
+    /**
+     * Checks if a runtime permission has been granted by the Device/Profile Owner's policy.
+     *
+     * @param packageName The package to check.
+     * @param permission The name of the permission to check.
+     * @return true if the permission is in the GRANTED state according to the policy, false otherwise.
+     */
     override fun isPermissionGranted(packageName: String?, permission: String?): Boolean {
-        TODO("Not yet implemented")
+        // Check for null or empty arguments
+        if (packageName.isNullOrEmpty() || permission.isNullOrEmpty()) {
+            Timber.tag("DhizukuPrivilegedService")
+                .w("isPermissionGranted called with invalid arguments: packageName=$packageName, permission=$permission")
+            return false
+        }
+
+        try {
+            val ownerComponent = Dhizuku.getOwnerComponent()
+            // Get the current grant state set by the policy
+            val grantState = devicePolicyManager.getPermissionGrantState(
+                ownerComponent,
+                packageName,
+                permission
+            )
+
+            // Return true only if the policy has explicitly granted the permission
+            return grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
+        } catch (t: Throwable) {
+            Timber.tag("DhizukuPrivilegedService")
+                .e(t, "Failed to check permission grant state for package '$packageName'")
+            // In case of an error, it's safer to assume the permission is not granted
+            return false
+        }
     }
 }

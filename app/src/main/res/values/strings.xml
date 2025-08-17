@@ -49,6 +49,7 @@
     <string name="disable_adb_install_verify">Disable ADB Verify</string>
     <string name="disable_adb_install_verify_desc">Disable ADB install verification, useful on some systems where a installation will trigger an scan (Play Protect)</string>
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">Not support Dhizuku</string>
+    <string name="disable_adb_install_verify_failed">Couldn\'t disable ADB install verification</string>
     <string name="lock_default_installer">Set as default installer</string>
     <string name="lock_default_installer_desc">Set InstallerX as the default app to install apks</string>
     <string name="lock_default_installer_success">Successfully set as default installer</string>

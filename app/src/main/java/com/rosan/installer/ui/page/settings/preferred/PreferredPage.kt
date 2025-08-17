@@ -37,7 +37,6 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.SettingsScreen
 import com.rosan.installer.ui.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.widget.setting.ClearCache
-import com.rosan.installer.ui.widget.setting.DefaultInstaller
 import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.ui.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.widget.setting.SettingsNavigationItemWidget
@@ -137,8 +136,8 @@ fun PreferredPage(
                         )
                     }
                     item { LabelWidget(stringResource(R.string.basic)) }
-                    item { DefaultInstaller(snackBarHostState, true) }
-                    item { DefaultInstaller(snackBarHostState, false) }
+                    /*item { DefaultInstaller(snackBarHostState, true) }
+                    item { DefaultInstaller(snackBarHostState, false) }*/
                     item { ClearCache() }
                     // item { LabelWidget(label = stringResource(id = R.string.more)) }
                     // item { UserTerms() }

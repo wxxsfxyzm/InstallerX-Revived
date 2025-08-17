@@ -1,14 +1,30 @@
 package com.rosan.installer.ui.widget.dialog
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.util.help
 
 /**
  * A dialog to confirm an action, dynamically showing specific errors or a generic message.
@@ -108,4 +124,64 @@ fun UninstallConfirmationDialog(
             }
         )
     }
+}
+
+/**
+ * A reusable AlertDialog to display detailed information about an exception.
+ *
+ * @param exception The exception to display.
+ * @param onDismissRequest Callback invoked when the user wants to dismiss the dialog.
+ * @param onRetry Callback invoked when the user clicks the "Retry" button. Can be null if retry is not applicable.
+ * @param title The title of the dialog.
+ */
+@Composable
+fun ErrorDisplayDialog(
+    exception: Throwable,
+    onDismissRequest: () -> Unit,
+    onRetry: (() -> Unit)?,
+    title: String
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(title) },
+        text = {
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
+                LazyColumn(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.errorContainer)
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        Text(exception.help(), fontWeight = FontWeight.Bold)
+                    }
+                    item {
+                        SelectionContainer {
+                            Text(
+                                if (RsConfig.isDebug) {
+                                    exception.stackTraceToString()
+                                } else {
+                                    exception.message ?: "An unknown error occurred."
+                                }.trim()
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (onRetry != null) {
+                TextButton(onClick = onRetry) {
+                    Text(stringResource(R.string.retry))
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(stringResource(/*if (onRetry != null)*/ R.string.cancel/* else R.string.ok)*/))
+            }
+        }
+    )
 }

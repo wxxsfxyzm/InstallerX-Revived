@@ -46,6 +46,7 @@
     <string name="disable_adb_install_verify">停用系统安装验证</string>
     <string name="disable_adb_install_verify_desc">在一些系统上可以禁止安装扫描（Play 保护机制等）</string>
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">Dhizuku不受支持</string>
+    <string name="disable_adb_install_verify_failed">无法停用安装验证</string>
     <string name="lock_default_installer">锁定为默认安装器</string>
     <string name="lock_default_installer_desc">多个授权器配合效果更佳，少数系统需要配合Xposed模块</string>
     <string name="lock_default_installer_success">锁定成功</string>
