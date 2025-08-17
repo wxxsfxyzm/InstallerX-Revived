@@ -16,10 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.rosan.installer.R
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -86,14 +88,12 @@ fun installingDialog(
             }
         },
         buttons = DialogButtons(DialogParamsType.ButtonsCancel.id) {
-            // For now canceling action has no effect and will cause unknown behavior
-            // So we leave it as empty list
-            emptyList()
-            /*            listOf(
-                            DialogButton(stringResource(R.string.cancel)) {
-                                viewModel.dispatch(DialogViewAction.Close)
-                            }
-                        )*/
+            // Provides a button to move to background
+            listOf(
+                DialogButton(stringResource(R.string.installer_silent_install)) {
+                    viewModel.dispatch(DialogViewAction.Background)
+                }
+            )
         }
     )
 }

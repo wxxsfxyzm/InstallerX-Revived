@@ -171,7 +171,7 @@
     <string name="installer_installing">安装中…</string>
     <string name="installer_install_failed">安装失败</string>
     <string name="installer_install_success">安装成功</string>
-
+    <string name="installer_silent_install">静默安装</string>
     <string name="installer_unknown_error">未知错误</string>
     <string name="installer_channel_name">安装通知</string>
     <string name="installer_progress_channel_name">安装过程通知</string>
