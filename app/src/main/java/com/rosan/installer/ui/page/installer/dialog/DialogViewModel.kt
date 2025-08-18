@@ -142,23 +142,6 @@ class DialogViewModel(
             appDataStore.getNamedPackageList().collect { packages ->
                 _managedPackages.value = packages
             }
-            // initialize install flags based on repo.config
-            _installFlags.value = listOfNotNull(
-                repo.config.allowTestOnly.takeIf { it }
-                    ?.let { InstallOption.AllowTest.value },
-                repo.config.allowDowngrade.takeIf { it }
-                    ?.let { InstallOption.AllowDowngrade.value },
-                repo.config.forAllUser.takeIf { it }
-                    ?.let { InstallOption.AllUsers.value },
-                repo.config.allowRestrictedPermissions.takeIf { it }
-                    ?.let { InstallOption.AllWhitelistRestrictedPermissions.value },
-                repo.config.bypassLowTargetSdk.takeIf { it }
-                    ?.let { InstallOption.BypassLowTargetSdkBlock.value },
-                repo.config.allowAllRequestedPermissions.takeIf { it }
-                    ?.let { InstallOption.GrantAllRequestedPermissions.value }
-            ).fold(0) { acc, flag -> acc or flag }
-            // sync to repo.config
-            repo.config.installFlags = _installFlags.value
         }
     }
 
@@ -180,6 +163,23 @@ class DialogViewModel(
 
     private fun collectRepo(repo: InstallerRepo) {
         this.repo = repo
+        // initialize install flags based on repo.config
+        _installFlags.value = listOfNotNull(
+            repo.config.allowTestOnly.takeIf { it }
+                ?.let { InstallOption.AllowTest.value },
+            repo.config.allowDowngrade.takeIf { it }
+                ?.let { InstallOption.AllowDowngrade.value },
+            repo.config.forAllUser.takeIf { it }
+                ?.let { InstallOption.AllUsers.value },
+            repo.config.allowRestrictedPermissions.takeIf { it }
+                ?.let { InstallOption.AllWhitelistRestrictedPermissions.value },
+            repo.config.bypassLowTargetSdk.takeIf { it }
+                ?.let { InstallOption.BypassLowTargetSdkBlock.value },
+            repo.config.allowAllRequestedPermissions.takeIf { it }
+                ?.let { InstallOption.GrantAllRequestedPermissions.value }
+        ).fold(0) { acc, flag -> acc or flag }
+        // sync to repo.config
+        repo.config.installFlags = _installFlags.value
         // 第一次收集时，保存原始列表
         if (originalEntities.isEmpty()) {
             originalEntities = repo.entities
