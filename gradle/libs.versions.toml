@@ -8,7 +8,7 @@
 # https://mvnrepository.com/
 
 [versions]
-agp = "8.12.0"
+agp = "8.12.1"
 commonsCompress = "1.28.0"
 kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
