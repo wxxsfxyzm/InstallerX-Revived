@@ -40,6 +40,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
+import java.util.zip.ZipFile
 
 class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
@@ -406,27 +407,39 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val assetFileDescriptor = context.contentResolver?.openAssetFileDescriptor(uri, "r")
             ?: throw IOException("can't open file descriptor: $uri")
 
-        // Attempt to get a direct file path first (zero-copy scenario).
-        val pid = Os.getpid()
-        val descriptor = assetFileDescriptor.parcelFileDescriptor.fd
-        val procPath = "/proc/$pid/fd/$descriptor"
+        // --- FIX: The key change is here. We add a try-catch to restore the fallback. ---
+        val procPath = "/proc/${Os.getpid()}/fd/${assetFileDescriptor.parcelFileDescriptor.fd}"
 
-        if (assetFileDescriptor.declaredLength < 0) { // Indicates it might be a direct file.
+        // We use runCatching to safely attempt the high-performance (zero-copy) path.
+        val zeroCopyResult = runCatching {
+            // The "test" is to try creating a ZipFile. If this fails, the path is unusable for us.
+            ZipFile(procPath).use { } // Immediately close it, we just want to check for exceptions.
+
+            // If the test passes, it means we have full access.
             val sourcePath = Os.readlink(procPath).getRealPathFromUri(uri).pathUnify()
             if (sourcePath.startsWith('/')) {
-                Timber.d("Got direct file access through procfs: $sourcePath")
+                Timber.d("Success! Got direct, usable file access through procfs: $sourcePath")
                 cacheParcelFileDescriptors.add(assetFileDescriptor.parcelFileDescriptor)
-                val file = File(procPath)
-                val data = if (file.exists() && file.canRead()) DataEntity.FileEntity(procPath)
-                else DataEntity.FileDescriptorEntity(pid, descriptor)
-                data.source = DataEntity.FileEntity(sourcePath)
-                return listOf(data)
+                return@runCatching listOf(DataEntity.FileEntity(procPath).apply {
+                    source = DataEntity.FileEntity(sourcePath)
+                })
             }
+            // If sourcePath isn't a real path, this attempt fails.
+            throw Exception("Resolved source path is not a valid file path.")
+        }
+
+        if (zeroCopyResult.isSuccess) {
+            // The zero-copy path worked, return the result.
+            return zeroCopyResult.getOrThrow()
+        } else {
+            // The zero-copy path failed (e.g., EACCES permission denied).
+            // Log the reason for the failure.
+            Timber.w(zeroCopyResult.exceptionOrNull(), "Direct file access via /proc failed. Falling back to caching.")
         }
 
         // --- Fallback to Caching with Progress ---
-        // If we reach here, we must copy the file.
-        Timber.d("Direct file access failed. Falling back to caching with progress.")
+        // This code now acts as the reliable fallback, just like the old InputStream path did.
+        Timber.d("Executing fallback: Caching stream content to a temporary file.")
         val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
         val totalSize = assetFileDescriptor.declaredLength
 
@@ -434,17 +447,12 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             afd.createInputStream().use { input ->
                 tempFile.outputStream().use { output ->
                     if (totalSize > 0) {
-                        // We can show determinate progress.
-                        Timber.d("Starting copy of $totalSize bytes.")
-                        installer.progress.emit(ProgressEntity.Preparing(0f)) // Show progress bar at 0%
+                        installer.progress.emit(ProgressEntity.Preparing(0f))
                         input.copyToWithProgress(output, totalSize) { progress ->
-                            // Update progress in a coroutine to avoid blocking.
                             scope.launch { installer.progress.emit(ProgressEntity.Preparing(progress)) }
                         }
                     } else {
-                        // Indeterminate progress.
-                        Timber.d("Starting copy of unknown size.")
-                        installer.progress.emit(ProgressEntity.Preparing(-1f)) // Use -1 for indeterminate
+                        installer.progress.emit(ProgressEntity.Preparing(-1f))
                         input.copyTo(output)
                     }
                 }
@@ -452,9 +460,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
 
         Timber.d("Caching complete. Temp file: ${tempFile.absolutePath}")
-        // Return a FileEntity pointing to the newly cached file.
         return listOf(DataEntity.FileEntity(tempFile.absolutePath).apply {
-            source = DataEntity.FileEntity(uri.toString()) // Set original URI as source
+            source = DataEntity.FileEntity(uri.toString())
         })
     }
 

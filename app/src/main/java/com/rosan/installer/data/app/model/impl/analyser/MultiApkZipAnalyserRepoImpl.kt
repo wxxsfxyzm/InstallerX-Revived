@@ -121,7 +121,7 @@ object MultiApkZipAnalyserRepoImpl : AnalyserRepo {
 
         // Handle the result.
         result.onSuccess { entities ->
-            Timber.tag("MultiApkZipAnalyser").d("Successfully analysed ${data}")
+            Timber.tag("MultiApkZipAnalyser").d("Successfully analysed $data")
             // IMPORTANT: Do NOT delete the tempFile on success.
             // The returned AppEntity points to it, and it's needed for the installation step.
             // ActionHandler's onFinish() will clean it up later.
@@ -129,7 +129,7 @@ object MultiApkZipAnalyserRepoImpl : AnalyserRepo {
         }
 
         result.onFailure { error ->
-            Timber.tag("MultiApkZipAnalyser").e(error, "Failed to analyse ${data}")
+            Timber.tag("MultiApkZipAnalyser").e(error, "Failed to analyse $data")
             tempFile.delete() // Delete the invalid temp file on failure.
         }
 

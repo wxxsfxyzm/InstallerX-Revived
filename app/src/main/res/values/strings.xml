@@ -390,4 +390,7 @@
     <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
     <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
     <string name="suggestion_bypass_low_target_sdk">Temporarily allow bypassing restrictions and retry</string>
+
+    <string name="installer_preparing">正在准备文件</string>
+    <string name="installer_preparing_desc">正在读取文件内容，请稍候…</string>
 </resources>

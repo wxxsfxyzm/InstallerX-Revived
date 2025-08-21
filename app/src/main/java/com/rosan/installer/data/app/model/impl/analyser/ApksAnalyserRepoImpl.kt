@@ -45,11 +45,11 @@ object ApksAnalyserRepoImpl : AnalyserRepo {
     ): List<AppEntity> {
         val apps = mutableListOf<AppEntity>()
         ZipFile(data.path).use { zipFile ->
-            // 1. Find and prioritize base.apk.
+            // Find and prioritize base.apk.
             val baseEntry = zipFile.getEntry("base.apk")
                 ?: throw IllegalStateException("APKS file does not contain a base.apk")
 
-            // 2. Extract and analyze ONLY base.apk.
+            // Extract and analyze ONLY base.apk.
             var baseEntity = zipFile.getInputStream(baseEntry).use { inputStream ->
                 // This helper still extracts the single base.apk to a temp file for ApkAnalyserRepoImpl.
                 analyseSingleApkStream(
@@ -64,7 +64,7 @@ object ApksAnalyserRepoImpl : AnalyserRepo {
             baseEntity = baseEntity.copy(containerType = extra.dataType)
             apps.add(baseEntity)
 
-            // 3. Iterate through all other entries and create lightweight entities for splits.
+            // Iterate through all other entries and create lightweight entities for splits.
             val entries = zipFile.entries().toList()
             for (entry in entries) {
                 val entryName = entry.name

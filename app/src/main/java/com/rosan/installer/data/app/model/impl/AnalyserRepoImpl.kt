@@ -18,6 +18,7 @@ import timber.log.Timber
 import java.io.BufferedReader
 import java.io.File
 import java.util.zip.ZipEntry
+import java.util.zip.ZipException
 import java.util.zip.ZipFile
 
 object AnalyserRepoImpl : AnalyserRepo {
@@ -130,84 +131,91 @@ object AnalyserRepoImpl : AnalyserRepo {
             ?: // This should not happen if the cache-first strategy is implemented correctly.
             throw IllegalArgumentException("AnalyserRepoImpl expected a FileEntity, but got ${data::class.simpleName}")
 
-        return ZipFile(fileEntity.path).use { zipFile ->
-            // First, check for standard manifest files at the root.
-            when {
-                zipFile.getEntry("AndroidManifest.xml") != null -> {
-                    Timber.d("Found AndroidManifest.xml at root, it's an APK.")
-                    return@use DataType.APK
+        return try {
+            ZipFile(fileEntity.path).use { zipFile ->
+                // First, check for standard manifest files at the root.
+                when {
+                    zipFile.getEntry("AndroidManifest.xml") != null -> {
+                        Timber.d("Found AndroidManifest.xml at root, it's an APK.")
+                        return@use DataType.APK
+                    }
+
+                    zipFile.getEntry("info.json") != null -> {
+                        val isApkm = isGenuineApkmInfo(zipFile, zipFile.getEntry("info.json")!!)
+                        Timber.d("Found info.json at root, it's ${if (isApkm) "APKM" else "APKS"}.")
+                        return@use if (isApkm) DataType.APKM else DataType.APKS
+                    }
+
+                    zipFile.getEntry("manifest.json") != null -> {
+                        Timber.d("Found manifest.json at root, it's an XAPK.")
+                        return@use DataType.XAPK
+                    }
                 }
 
-                zipFile.getEntry("info.json") != null -> {
-                    val isApkm = isGenuineApkmInfo(zipFile, zipFile.getEntry("info.json")!!)
-                    Timber.d("Found info.json at root, it's ${if (isApkm) "APKM" else "APKS"}.")
-                    return@use if (isApkm) DataType.APKM else DataType.APKS
+                // If no manifest file is found, check for APKS file structure.
+                var hasBaseApk = false
+                var hasSplitApk = false
+                val entries = zipFile.entries().toList()
+                for (entry in entries) {
+                    if (entry.isDirectory) continue
+                    // Check only the filename, ignoring the path.
+                    val entryName = File(entry.name).name
+                    if (entryName == "base.apk") {
+                        hasBaseApk = true
+                    } else if ((entryName.startsWith("split_") ||
+                                entryName.startsWith("config")) &&
+                        entryName.endsWith(".apk")
+                    ) {
+                        hasSplitApk = true
+                    }
+                    // Optimization: exit early if both conditions are met.
+                    if (hasBaseApk && hasSplitApk) break
                 }
 
-                zipFile.getEntry("manifest.json") != null -> {
-                    Timber.d("Found manifest.json at root, it's an XAPK.")
-                    return@use DataType.XAPK
+                if (hasBaseApk && hasSplitApk) {
+                    Timber.d("Detected APKS structure without a manifest.")
+                    return@use DataType.APKS
                 }
-            }
 
-            // If no manifest file is found, check for APKS file structure.
-            var hasBaseApk = false
-            var hasSplitApk = false
-            val entries = zipFile.entries().toList()
-            for (entry in entries) {
-                if (entry.isDirectory) continue
-                // Check only the filename, ignoring the path.
-                val entryName = File(entry.name).name
-                if (entryName == "base.apk") {
-                    hasBaseApk = true
-                } else if ((entryName.startsWith("split_") ||
-                            entryName.startsWith("config")) &&
-                    entryName.endsWith(".apk")
-                ) {
-                    hasSplitApk = true
+                // Finally, check if it's a generic ZIP containing any APK files.
+                if (entries.any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }) {
+                    Timber.d("Detected as a generic ZIP with APKs (MULTI_APK_ZIP).")
+                    return@use DataType.MULTI_APK_ZIP
                 }
-                // Optimization: exit early if both conditions are met.
-                if (hasBaseApk && hasSplitApk) break
-            }
 
-            if (hasBaseApk && hasSplitApk) {
-                Timber.d("Detected APKS structure without a manifest.")
-                return@use DataType.APKS
+                Timber.d("Could not determine file type for ${fileEntity.path}, returning NONE.")
+                return@use DataType.NONE
             }
-
-            // Finally, check if it's a generic ZIP containing any APK files.
-            if (entries.any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }) {
-                Timber.d("Detected as a generic ZIP with APKs (MULTI_APK_ZIP).")
-                return@use DataType.MULTI_APK_ZIP
-            }
-
-            Timber.d("Could not determine file type for ${fileEntity.path}, returning NONE.")
-            return@use DataType.NONE
+        } catch (e: ZipException) {
+            // If the file is not a valid ZIP archive (e.g., PDF, XLS), catch the exception.
+            Timber.w("File is not a valid zip archive: ${fileEntity.path}. It's an unsupported file type.")
+            DataType.NONE // Mark it as an unsupported type.
         }
     }
 
     /**
-     * 辅助函数：使用 kotlinx.serialization 检查 zip 条目是否为真正的 APKM 的 info.json。
+     * Uses the ZipFile API to check if the info.json in the APKM is genuine.
      *
      * @author wxxsfxyzm
-     * @param zipFile ZipFile 对象
-     * @param entry 要检查的 ZipEntry (info.json)
-     * @return 如果是真正的 APKM info.json，返回 true
+     * @param zipFile ZipFile Object
+     * @param entry ZipEntry (info.json) to check
+     * @return true if the info.json is a genuine APKM info file.
      */
     private fun isGenuineApkmInfo(zipFile: ZipFile, entry: ZipEntry): Boolean {
         return try {
             zipFile.getInputStream(entry).use { inputStream ->
                 val content = inputStream.bufferedReader().use(BufferedReader::readText)
 
-                // 1. 使用 kotlinx.serialization 将字符串解析为通用的 JsonElement
+                // Use kotlinx.serialization to parse the JSON content.
                 val jsonElement = Json.parseToJsonElement(content)
 
-                // 2. 检查它是否为一个 JsonObject，并且是否包含 "apkm_version" 键
+                // Check if the JSON element is an object and contains the "apkm_version" key.
                 jsonElement is JsonObject && jsonElement.containsKey("apkm_version")
             }
         } catch (e: Exception) {
-            // 捕获所有可能的异常，包括 IO 异常和序列化异常 (SerializationException)
-            // e.printStackTrace() // 在调试时可以打开此行
+            // Catch all exceptions to ensure we handle any issues gracefully.
+            // This includes IO exceptions, parsing errors, and serialization exceptions.
+            Timber.e(e, "Failed to parse info.json as genuine APKM info.")
             false
         }
     }

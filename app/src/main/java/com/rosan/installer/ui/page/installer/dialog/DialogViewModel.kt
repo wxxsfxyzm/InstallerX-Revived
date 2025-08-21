@@ -210,6 +210,7 @@ class DialogViewModel(
                         newPackageNameFromProgress = null
                     }
 
+                    is ProgressEntity.Preparing -> newState = DialogViewState.Preparing(progress.progress)
                     is ProgressEntity.Resolving -> newState = DialogViewState.Resolving
                     is ProgressEntity.ResolvedFailed -> newState = DialogViewState.ResolveFailed
                     is ProgressEntity.Analysing -> newState = DialogViewState.Analysing
