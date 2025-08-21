@@ -19,6 +19,7 @@ import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
+import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
@@ -140,6 +141,15 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             installer.progress.emit(ProgressEntity.AnalysedFailed)
             return
         }
+        // --- Add a check here for empty results. ---
+        if (rawAppEntities.isEmpty()) {
+            Timber.w("[id=${installer.id}] analyse: Analysis resulted in an empty list. No valid apps found.")
+            // You can either use a generic error or a more specific one.
+            installer.error = AnalyseFailedAllFilesUnsupportedException("No valid files were found in the selection.")
+            installer.progress.emit(ProgressEntity.AnalysedFailed)
+            return
+        }
+
         val containerType = rawAppEntities.firstOrNull()?.containerType
         val isMultiAppMode = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
         // Process each package group separately
@@ -257,6 +267,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }.getOrElse {
             Timber.e(it, "[id=${installer.id}] install: Failed.")
             installer.error = it
+            Timber.d("Caught exception, emitting InstallFailed state now.")
             installer.progress.emit(ProgressEntity.InstallFailed)
             return
         }

@@ -109,7 +109,9 @@ object MultiApkZipAnalyserRepoImpl : AnalyserRepo {
                 if (entity is AppEntity.BaseEntity) {
                     val entryName = (data as? DataEntity.ZipFileEntity)?.name ?: entity.name
                     entity.copy(
-                        name = entryName,
+                        // --- FIX: Use File(entryName).name to get just the filename. ---
+                        // PackageInstaller will throw IllegalArgumentException if the name contains '/'.
+                        name = File(entryName).name,
                         label = entity.label ?: displayNameFromZip, // Use the filename from the ZIP as a fallback label
                         containerType = extra.dataType // Add the container type (MULTI_APK_ZIP)
                     )
