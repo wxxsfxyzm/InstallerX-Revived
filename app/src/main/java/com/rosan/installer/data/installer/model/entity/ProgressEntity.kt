@@ -2,6 +2,7 @@ package com.rosan.installer.data.installer.model.entity
 
 sealed class ProgressEntity {
     data object Finish : ProgressEntity()
+    data object Preparing : ProgressEntity()
     data object Ready : ProgressEntity()
     data object Error : ProgressEntity()
 

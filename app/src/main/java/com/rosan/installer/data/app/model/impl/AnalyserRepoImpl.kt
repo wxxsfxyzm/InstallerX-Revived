@@ -30,7 +30,7 @@ object AnalyserRepoImpl : AnalyserRepo {
         // --- Logic to analyse data and return a list of AppEntity ---
         // A list to hold all raw analysis results before final processing.
         val rawApps = mutableListOf<AppEntity>()
-
+        // A map of all available analysers for different file types.
         val analysers = mapOf(
             DataType.APK to ApkAnalyserRepoImpl,
             DataType.APKS to ApksAnalyserRepoImpl,
@@ -38,85 +38,88 @@ object AnalyserRepoImpl : AnalyserRepo {
             DataType.XAPK to XApkAnalyserRepoImpl,
             DataType.MULTI_APK_ZIP to MultiApkZipAnalyserRepoImpl
         )
-        // 尝试为每个文件确定类型，无法识别的暂时记为 null
-        val typedTasks = data.map { dataEntity ->
-            val type = runCatching { getDataType(config, dataEntity) }.getOrNull()
-            if (type == DataType.NONE) {
-                Timber.w("Unrecognized file type for data: $dataEntity")
-                throw AnalyseFailedAllFilesUnsupportedException("Not a valid APK file: ${dataEntity.getSourceTop()}")
-            }
-            type to dataEntity // 创建一个 (DataType?, DataEntity) 的配对
-        }
-        // 筛选出所有可以被分析的文件
-        val validTasks = typedTasks.map { (type, dataEntity) ->
-            if (type != null) type to dataEntity else DataType.APK to dataEntity
-        }
-        // 如果没有任何一个文件是有效的，则抛出异常
-        if (validTasks.isEmpty() && data.isNotEmpty()) {
-            Timber.e("All ${data.size} files were unrecognized. Assume as APK")
+        // This loop processes every file/data source provided by the user.
+        for (dataEntity in data) {
+            // Determine the type of the current file (APK, APKS, etc.)
+            val fileType = getDataType(config, dataEntity)
+                ?: throw AnalyseFailedAllFilesUnsupportedException("Unrecognized file type for: ${dataEntity.getSourceTop()}")
 
-            /*throw AnalyseFailedAllFilesUnsupportedException(
-                "All ${data.size} file(s) were unrecognized. Please check the file formats."
-            )*/
-        }
-        // --- NEW LOGIC: Determine if this is a Multi-APK installation session ---
-        // A "Multi-APK Session" is defined as the app received more than one file,
-        // and all of those files being identified as standard APKs.
-        val isMultiApkSession = data.size > 1 && typedTasks.all { it.first == DataType.APK }
-        val sessionType = if (isMultiApkSession) {
-            Timber.d("This is a Multi-APK session. All resulting entities will be marked as such.")
-            DataType.MULTI_APK
-        } else {
-            null // Not a special session, use the type of each file.
-        }
-        // 按类型分组有效的文件
-        val tasksByType = validTasks.groupBy(
-            keySelector = { it.first },
-            valueTransform = { it.second }
-        )
-        // 遍历每种类型及其对应的文件列表
-        for ((type, dataList) in tasksByType) {
-            val analyser = analysers[type]
-                ?: throw Exception("can't found analyser for this data type: '$type'")
-            val containerTypeForAnalyser = sessionType ?: type
-            // 调用子分析器时，通过 extra.copy() 将确定的类型传递下去
+            if (fileType == DataType.NONE) {
+                throw AnalyseFailedAllFilesUnsupportedException("Not a valid installer file: ${dataEntity.getSourceTop()}")
+            }
+
+            // Get the appropriate analyser for this file type.
+            val analyser = analysers[fileType]
+                ?: throw Exception("No analyser found for data type: '$fileType'")
+
+            // Run the specific analyser for this file.
+            // We pass the file's own type for now. The final containerType will be decided later.
             val analysedEntities = analyser.doWork(
                 config,
-                dataList,
-                extra.copy(dataType = containerTypeForAnalyser) // 将类型信息下发
+                listOf(dataEntity), // Pass only the current entity to the sub-analyser
+                extra.copy(dataType = fileType)
             )
             rawApps.addAll(analysedEntities)
         }
 
-        // 按packageName分组
+        // If after analyzing all files, no app entities were produced, return empty.
+        if (rawApps.isEmpty()) {
+            return emptyList()
+        }
+
+        // --- Group the analysis results by package name ---
+        // This is the key step to differentiate single-app vs multi-app installs.
         val groupedByPackage = rawApps.groupBy { it.packageName }
+
+        // --- Determine the final installation type and correct entity properties ---
         val finalApps = mutableListOf<AppEntity>()
 
-        // 遍历每个包，进行信息修正
-        groupedByPackage.forEach { (_, entitiesInPackage) ->
-            // 找到这个包里的BaseEntity，它是信息的来源
-            val baseEntity =
-                entitiesInPackage.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+        // Check if all analyzed files belong to one single package name.
+        val isSinglePackageInstall = groupedByPackage.size == 1
 
-            if (baseEntity != null) {
-                // 如果找到了BaseEntity，用它的targetSdk去修正所有其他实体
-                val authoritativeTargetSdk = baseEntity.targetSdk
-                entitiesInPackage.forEach { entity ->
-                    val correctedEntity = when (entity) {
-                        is AppEntity.SplitEntity -> entity.copy(targetSdk = authoritativeTargetSdk) // 修正SplitEntity
-                        is AppEntity.DexMetadataEntity -> entity.copy(targetSdk = authoritativeTargetSdk) // 修正DexMetadataEntity
-                        else -> entity // BaseEntity自身或其他类型保持不变
-                    }
-                    finalApps.add(correctedEntity)
+        val sessionContainerType = if (isSinglePackageInstall) {
+            // All files are for the same app. This is a single-app install (with splits).
+            // The container type should be what the first entity was analyzed as (e.g., APK, APKS).
+            // This ensures downstream logic (like findOptimalSplits) is triggered correctly.
+            Timber.d("Determined install type: Single-App (all files for '${groupedByPackage.keys.first()}').")
+            rawApps.first().containerType ?: DataType.APK
+        } else {
+            // Files belong to multiple different apps. This is a multi-app install.
+            Timber.d("Determined install type: Multi-App (found ${groupedByPackage.size} unique packages).")
+            DataType.MULTI_APK
+        }
+
+        // --- Post-process all entities to apply corrections ---
+        groupedByPackage.forEach { (_, entitiesInPackage) ->
+            // Find the BaseEntity in the group to use its info as the source of truth.
+            val baseEntity = entitiesInPackage.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+            val authoritativeTargetSdk = baseEntity?.targetSdk
+
+            // Correct each entity within the package group.
+            entitiesInPackage.forEach { entity ->
+                var correctedEntity = entity
+
+                // Correct the containerType for all entities based on our final decision.
+                correctedEntity = when (correctedEntity) {
+                    is AppEntity.BaseEntity -> correctedEntity.copy(containerType = sessionContainerType)
+                    is AppEntity.SplitEntity -> correctedEntity.copy(containerType = sessionContainerType)
+                    is AppEntity.DexMetadataEntity -> correctedEntity.copy(containerType = sessionContainerType)
+                    is AppEntity.CollectionEntity -> correctedEntity.copy(containerType = sessionContainerType)
                 }
-            } else {
-                // 如果在这个分组里没有找到BaseEntity（例如只安装一个split.apk），则直接添加，不做修正
-                finalApps.addAll(entitiesInPackage)
+
+                // Correct the targetSdk for splits and metadata if a base entity exists.
+                if (authoritativeTargetSdk != null) {
+                    correctedEntity = when (correctedEntity) {
+                        is AppEntity.SplitEntity -> correctedEntity.copy(targetSdk = authoritativeTargetSdk)
+                        is AppEntity.DexMetadataEntity -> correctedEntity.copy(targetSdk = authoritativeTargetSdk)
+                        else -> correctedEntity // BaseEntity and others are already correct.
+                    }
+                }
+                finalApps.add(correctedEntity)
             }
         }
+
         return finalApps
-        // TODO after supporting abi analyse, deduplicate the result
-        // .deduplicate()
     }
 
     private fun getDataType(config: ConfigEntity, data: DataEntity): DataType? =
