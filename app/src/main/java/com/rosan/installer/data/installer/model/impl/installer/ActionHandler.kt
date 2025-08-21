@@ -39,8 +39,8 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.io.RandomAccessFile
 import java.util.UUID
-import java.util.zip.ZipFile
 
 class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
@@ -407,39 +407,39 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val assetFileDescriptor = context.contentResolver?.openAssetFileDescriptor(uri, "r")
             ?: throw IOException("can't open file descriptor: $uri")
 
-        // --- FIX: The key change is here. We add a try-catch to restore the fallback. ---
+        // Attempt to get a direct, readable file path first.
         val procPath = "/proc/${Os.getpid()}/fd/${assetFileDescriptor.parcelFileDescriptor.fd}"
+        val file = File(procPath)
 
-        // We use runCatching to safely attempt the high-performance (zero-copy) path.
-        val zeroCopyResult = runCatching {
-            // The "test" is to try creating a ZipFile. If this fails, the path is unusable for us.
-            ZipFile(procPath).use { } // Immediately close it, we just want to check for exceptions.
+        // Check if the proc path is a valid, readable file. This is the zero-copy happy path.
+        if (file.exists() && file.canRead()) {
+            try {
+                // We perform a more robust access test. RandomAccessFile will fail with an
+                // IOException (like FileNotFoundException caused by EACCES) if we don't have
+                // proper permissions, but it won't fail for a malformed zip content.
+                RandomAccessFile(file, "r").use { } // Test open and immediately close.
 
-            // If the test passes, it means we have full access.
-            val sourcePath = Os.readlink(procPath).getRealPathFromUri(uri).pathUnify()
-            if (sourcePath.startsWith('/')) {
-                Timber.d("Success! Got direct, usable file access through procfs: $sourcePath")
-                cacheParcelFileDescriptors.add(assetFileDescriptor.parcelFileDescriptor)
-                return@runCatching listOf(DataEntity.FileEntity(procPath).apply {
-                    source = DataEntity.FileEntity(sourcePath)
-                })
+                // If the test above passes, we have sufficient permission to use this path directly.
+                val sourcePath = Os.readlink(procPath).getRealPathFromUri(uri).pathUnify()
+                if (sourcePath.startsWith('/')) {
+                    Timber.d("Success! Got direct, usable file access through procfs: $sourcePath")
+                    cacheParcelFileDescriptors.add(assetFileDescriptor.parcelFileDescriptor)
+                    return listOf(DataEntity.FileEntity(procPath).apply {
+                        source = DataEntity.FileEntity(sourcePath)
+                    })
+                }
+            } catch (e: IOException) {
+                // This will catch EACCES or other low-level IO errors.
+                // THIS is the trigger for the stream fallback, as you requested.
+                Timber.w(e, "Direct access test to /proc path failed. This will trigger the caching fallback.")
             }
-            // If sourcePath isn't a real path, this attempt fails.
-            throw Exception("Resolved source path is not a valid file path.")
-        }
-
-        if (zeroCopyResult.isSuccess) {
-            // The zero-copy path worked, return the result.
-            return zeroCopyResult.getOrThrow()
-        } else {
-            // The zero-copy path failed (e.g., EACCES permission denied).
-            // Log the reason for the failure.
-            Timber.w(zeroCopyResult.exceptionOrNull(), "Direct file access via /proc failed. Falling back to caching.")
         }
 
         // --- Fallback to Caching with Progress ---
-        // This code now acts as the reliable fallback, just like the old InputStream path did.
-        Timber.d("Executing fallback: Caching stream content to a temporary file.")
+        // If we reach here, it means we could not get a directly readable file path.
+        // We MUST copy the file content to our cache. This handles all other cases,
+        // including the one that was previously creating a FileDescriptorEntity.
+        Timber.d("Direct file access failed. Falling back to caching with progress.")
         val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
         val totalSize = assetFileDescriptor.declaredLength
 
@@ -447,12 +447,17 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             afd.createInputStream().use { input ->
                 tempFile.outputStream().use { output ->
                     if (totalSize > 0) {
-                        installer.progress.emit(ProgressEntity.Preparing(0f))
+                        // We can show determinate progress.
+                        Timber.d("Starting copy of $totalSize bytes.")
+                        installer.progress.emit(ProgressEntity.Preparing(0f)) // Show progress bar at 0%
                         input.copyToWithProgress(output, totalSize) { progress ->
+                            // Update progress in a coroutine to avoid blocking.
                             scope.launch { installer.progress.emit(ProgressEntity.Preparing(progress)) }
                         }
                     } else {
-                        installer.progress.emit(ProgressEntity.Preparing(-1f))
+                        // Indeterminate progress.
+                        Timber.d("Starting copy of unknown size.")
+                        installer.progress.emit(ProgressEntity.Preparing(-1f)) // Use -1 for indeterminate
                         input.copyTo(output)
                     }
                 }
@@ -460,8 +465,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
 
         Timber.d("Caching complete. Temp file: ${tempFile.absolutePath}")
+        // Return a FileEntity pointing to the newly cached file.
         return listOf(DataEntity.FileEntity(tempFile.absolutePath).apply {
-            source = DataEntity.FileEntity(uri.toString())
+            source = DataEntity.FileEntity(uri.toString()) // Set original URI as source
         })
     }
 

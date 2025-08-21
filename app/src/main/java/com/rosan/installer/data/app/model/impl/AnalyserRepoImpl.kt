@@ -4,7 +4,6 @@ import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.DataType
-import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
@@ -17,6 +16,7 @@ import kotlinx.serialization.json.JsonObject
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.File
+import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
@@ -42,10 +42,12 @@ object AnalyserRepoImpl : AnalyserRepo {
         for (dataEntity in data) {
             // Determine the type of the current file (APK, APKS, etc.)
             val fileType = getDataType(config, dataEntity)
-                ?: throw AnalyseFailedAllFilesUnsupportedException("Unrecognized file type for: ${dataEntity.getSourceTop()}")
+                ?: continue // If type is null for any reason, just skip to the next file.
 
+            // --- FIX: Instead of throwing an exception, just skip the invalid file. ---
             if (fileType == DataType.NONE) {
-                throw AnalyseFailedAllFilesUnsupportedException("Not a valid installer file: ${dataEntity.getSourceTop()}")
+                Timber.w("Skipping unsupported file: ${dataEntity.getSourceTop()}")
+                continue // Continue to the next file in the loop.
             }
 
             // Get the appropriate analyser for this file type.
@@ -187,8 +189,14 @@ object AnalyserRepoImpl : AnalyserRepo {
                 return@use DataType.NONE
             }
         } catch (e: ZipException) {
-            // If the file is not a valid ZIP archive (e.g., PDF, XLS), catch the exception.
-            Timber.w("File is not a valid zip archive: ${fileEntity.path}. It's an unsupported file type.")
+            // CATCH: This is a malformed ZIP file.
+            // Assume it's a problematic APK and try to process it as such.
+            Timber.w(e, "File is a malformed zip, but assuming it is APK for compatibility: ${fileEntity.path}")
+            DataType.APK
+        } catch (e: IOException) {
+            // CATCH for other IO errors: Though ActionHandler should prevent EACCES from reaching here,
+            // this serves as a final safety net for other potential IO issues.
+            Timber.e(e, "Unexpected IO error while reading zip file, marking as unsupported: ${fileEntity.path}")
             DataType.NONE // Mark it as an unsupported type.
         }
     }

@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
@@ -60,7 +60,10 @@ fun preparingDialog(
 
                 if (progress < 0f) {
                     // Indeterminate progress
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    LinearWavyProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        amplitude = 0f // not wavy
+                    )
                 } else {
                     // Determinate progress with smooth animation
                     val animatedProgress by animateFloatAsState(
@@ -68,9 +71,10 @@ fun preparingDialog(
                         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
                         label = "PreparingProgressAnimation"
                     )
-                    LinearProgressIndicator(
+                    LinearWavyProgressIndicator(
                         progress = { animatedProgress },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        amplitude = { 0f }
                     )
                 }
             }
