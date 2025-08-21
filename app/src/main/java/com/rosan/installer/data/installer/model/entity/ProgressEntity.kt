@@ -2,7 +2,12 @@ package com.rosan.installer.data.installer.model.entity
 
 sealed class ProgressEntity {
     data object Finish : ProgressEntity()
-    data object Preparing : ProgressEntity()
+
+    /**
+     * The new state for caching files, now with progress.
+     * @param progress A value from 0.0f to 1.0f. A value of -1.0f can indicate an indeterminate progress.
+     */
+    data class Preparing(val progress: Float) : ProgressEntity()
     data object Ready : ProgressEntity()
     data object Error : ProgressEntity()
 

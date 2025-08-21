@@ -36,6 +36,9 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.UUID
 
 class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
@@ -102,14 +105,24 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             return
         }
 
+        /*        installer.data = try {
+                    resolveData(activity)
+                } catch (e: Exception) {
+                    Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve data.")
+                    installer.error = e
+                    installer.progress.emit(ProgressEntity.ResolvedFailed)
+                    return
+                }*/
+        // OPTIMIZATION: The caching logic is now integrated directly into the data resolution step.
         installer.data = try {
-            resolveData(activity)
+            resolveAndStabilizeData(activity)
         } catch (e: Exception) {
-            Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve data.")
+            Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve and stabilize data.")
             installer.error = e
             installer.progress.emit(ProgressEntity.ResolvedFailed)
             return
         }
+
         Timber
             .d("[id=${installer.id}] resolve: Data resolved successfully (${installer.data.size} items). Emitting ProgressEntity.ResolveSuccess.")
         installer.progress.emit(ProgressEntity.ResolveSuccess)
@@ -250,7 +263,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.InstallSuccess)
     }
 
-    private suspend fun uninstall(packageName: String, flags: Int = 0) {
+    private suspend fun uninstall(packageName: String) {
         Timber.d("[id=${installer.id}] uninstall: Starting for $packageName. Emitting ProgressEntity.Uninstalling.")
         installer.progress.emit(ProgressEntity.Uninstalling)
 
@@ -287,11 +300,17 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return config
     }
 
-    private fun resolveData(activity: Activity): List<DataEntity> {
+    /**
+     * New function that combines resolving and stabilizing (caching) data in one step.
+     *
+     * @param activity The activity context to use for resolving data URIs.
+     * @return A list of DataEntity objects representing the resolved and stabilized data.
+     */
+    private suspend fun resolveAndStabilizeData(activity: Activity): List<DataEntity> {
         val uris = resolveDataUris(activity)
         val data = mutableListOf<DataEntity>()
-        uris.forEach {
-            data.addAll(resolveDataUri(activity, it))
+        for (uri in uris) {
+            data.addAll(resolveDataUri(activity, uri))
         }
         return data
     }
@@ -338,13 +357,27 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return uris
     }
 
-    private fun resolveDataUri(activity: Activity, uri: Uri): List<DataEntity> {
+    /**
+     * Resolves a data URI, which can be either a file URI or a content URI.
+     *
+     * @param activity The activity context to use for resolving content URIs.
+     * @param uri The URI to resolve.
+     * @return A list of DataEntity objects representing the resolved data.
+     */
+    private suspend fun resolveDataUri(activity: Activity, uri: Uri): List<DataEntity> {
         Timber.d("Source URI: $uri")
-        if (uri.scheme == ContentResolver.SCHEME_FILE) return resolveDataFileUri(activity, uri)
+        if (uri.scheme == ContentResolver.SCHEME_FILE) return resolveDataFileUri(uri)
         return resolveDataContentFile(activity, uri)
     }
 
-    private fun resolveDataFileUri(activity: Activity, uri: Uri): List<DataEntity> {
+    /**
+     * Resolves a file URI directly, assuming it points to a local file.
+     * This is a simplified version that does not handle caching or progress.
+     *
+     * @param uri The file URI to resolve.
+     * @return A list containing a single FileEntity with the file path.
+     */
+    private fun resolveDataFileUri(uri: Uri): List<DataEntity> {
         Timber.d("uri:$uri")
         val path = uri.path ?: throw Exception("can't get uri path: $uri")
         val data = DataEntity.FileEntity(path)
@@ -352,13 +385,16 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return listOf(data)
     }
 
-    private fun resolveDataContentFile(
+    /**
+     * This function is now responsible for caching the file if direct access is not possible,
+     * and it will emit progress updates.
+     */
+    private suspend fun resolveDataContentFile(
         activity: Activity,
         uri: Uri,
         retry: Int = 3
     ): List<DataEntity> {
-        // wait for PermissionRecords ok.
-        // if not, maybe show Uri Read Permission Denied
+        // HACK: wait for PermissionRecords ok.
         if (activity.checkCallingOrSelfUriPermission(
                 uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
             ) != PackageManager.PERMISSION_GRANTED &&
@@ -368,40 +404,116 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             return resolveDataContentFile(activity, uri, retry - 1)
         }
         val assetFileDescriptor = context.contentResolver?.openAssetFileDescriptor(uri, "r")
-            ?: throw Exception("can't open file descriptor: $uri")
-        val parcelFileDescriptor = assetFileDescriptor.parcelFileDescriptor
+            ?: throw IOException("can't open file descriptor: $uri")
+
+        // Attempt to get a direct file path first (zero-copy scenario).
         val pid = Os.getpid()
-        val descriptor = parcelFileDescriptor.fd
-        val path = "/proc/$pid/fd/$descriptor"
+        val descriptor = assetFileDescriptor.parcelFileDescriptor.fd
+        val procPath = "/proc/$pid/fd/$descriptor"
 
-        // only full file, can't handle a sub-section of a file
-        if (assetFileDescriptor.declaredLength < 0) {
-
-            // file descriptor can't be pipe or socket
-            val source = Os.readlink(path).getRealPathFromUri(uri).pathUnify()
-            Timber.d("Source path: $source")
-            if (source.startsWith('/')) {
-                cacheParcelFileDescriptors.add(parcelFileDescriptor)
-                val file = File(path)
-                val data = if (file.exists() && file.canRead() && runCatching {
-                        file.inputStream().use { }
-                        return@runCatching true
-                    }.getOrDefault(false)) DataEntity.FileEntity(path)
+        if (assetFileDescriptor.declaredLength < 0) { // Indicates it might be a direct file.
+            val sourcePath = Os.readlink(procPath).getRealPathFromUri(uri).pathUnify()
+            if (sourcePath.startsWith('/')) {
+                Timber.d("Got direct file access through procfs: $sourcePath")
+                cacheParcelFileDescriptors.add(assetFileDescriptor.parcelFileDescriptor)
+                val file = File(procPath)
+                val data = if (file.exists() && file.canRead()) DataEntity.FileEntity(procPath)
                 else DataEntity.FileDescriptorEntity(pid, descriptor)
-                data.source = DataEntity.FileEntity(source)
+                data.source = DataEntity.FileEntity(sourcePath)
                 return listOf(data)
             }
         }
 
-        // cache it
-        val tempFile = File.createTempFile(UUID.randomUUID().toString(), null, File(cacheDirectory))
-        tempFile.outputStream().use { output ->
-            assetFileDescriptor.use {
-                it.createInputStream().copyTo(output)
+        // --- Fallback to Caching with Progress ---
+        // If we reach here, we must copy the file.
+        Timber.d("Direct file access failed. Falling back to caching with progress.")
+        val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
+        val totalSize = assetFileDescriptor.declaredLength
+
+        assetFileDescriptor.use { afd ->
+            afd.createInputStream().use { input ->
+                tempFile.outputStream().use { output ->
+                    if (totalSize > 0) {
+                        // We can show determinate progress.
+                        Timber.d("Starting copy of $totalSize bytes.")
+                        installer.progress.emit(ProgressEntity.Preparing(0f)) // Show progress bar at 0%
+                        input.copyToWithProgress(output, totalSize) { progress ->
+                            // Update progress in a coroutine to avoid blocking.
+                            scope.launch { installer.progress.emit(ProgressEntity.Preparing(progress)) }
+                        }
+                    } else {
+                        // Indeterminate progress.
+                        Timber.d("Starting copy of unknown size.")
+                        installer.progress.emit(ProgressEntity.Preparing(-1f)) // Use -1 for indeterminate
+                        input.copyTo(output)
+                    }
+                }
             }
         }
-        return listOf(DataEntity.FileEntity(tempFile.absolutePath))
+
+        Timber.d("Caching complete. Temp file: ${tempFile.absolutePath}")
+        // Return a FileEntity pointing to the newly cached file.
+        return listOf(DataEntity.FileEntity(tempFile.absolutePath).apply {
+            source = DataEntity.FileEntity(uri.toString()) // Set original URI as source
+        })
     }
+
+    /*    private fun resolveDataUri(activity: Activity, uri: Uri): List<DataEntity> {
+            Timber.d("Source URI: $uri")
+            if (uri.scheme == ContentResolver.SCHEME_FILE) return resolveDataFileUri(activity, uri)
+            return resolveDataContentFile(activity, uri)
+        }
+
+        private fun resolveDataContentFile(
+            activity: Activity,
+            uri: Uri,
+            retry: Int = 3
+        ): List<DataEntity> {
+            // wait for PermissionRecords ok.
+            // if not, maybe show Uri Read Permission Denied
+            if (activity.checkCallingOrSelfUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                ) != PackageManager.PERMISSION_GRANTED &&
+                retry > 0
+            ) {
+                Thread.sleep(50)
+                return resolveDataContentFile(activity, uri, retry - 1)
+            }
+            val assetFileDescriptor = context.contentResolver?.openAssetFileDescriptor(uri, "r")
+                ?: throw Exception("can't open file descriptor: $uri")
+            val parcelFileDescriptor = assetFileDescriptor.parcelFileDescriptor
+            val pid = Os.getpid()
+            val descriptor = parcelFileDescriptor.fd
+            val path = "/proc/$pid/fd/$descriptor"
+
+            // only full file, can't handle a sub-section of a file
+            if (assetFileDescriptor.declaredLength < 0) {
+
+                // file descriptor can't be pipe or socket
+                val source = Os.readlink(path).getRealPathFromUri(uri).pathUnify()
+                Timber.d("Source path: $source")
+                if (source.startsWith('/')) {
+                    cacheParcelFileDescriptors.add(parcelFileDescriptor)
+                    val file = File(path)
+                    val data = if (file.exists() && file.canRead() && runCatching {
+                            file.inputStream().use { }
+                            return@runCatching true
+                        }.getOrDefault(false)) DataEntity.FileEntity(path)
+                    else DataEntity.FileDescriptorEntity(pid, descriptor)
+                    data.source = DataEntity.FileEntity(source)
+                    return listOf(data)
+                }
+            }
+
+            // cache it
+            val tempFile = File.createTempFile(UUID.randomUUID().toString(), null, File(cacheDirectory))
+            tempFile.outputStream().use { output ->
+                assetFileDescriptor.use {
+                    it.createInputStream().copyTo(output)
+                }
+            }
+            return listOf(DataEntity.FileEntity(tempFile.absolutePath))
+        }*/
 
     private suspend fun analyseEntities(data: List<DataEntity>): List<AppEntity> =
         AnalyserRepoImpl.doWork(installer.config, data, AnalyseExtraEntity(cacheDirectory))
@@ -574,9 +686,36 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     /**
+     * Custom extension function for InputStream to copy data to an OutputStream
+     * while reporting progress.
+     *
+     * @param out The OutputStream to write to.
+     * @param totalSize The total number of bytes to be copied.
+     * @param onProgress A lambda that will be invoked with the current progress (0.0f to 1.0f).
+     */
+    private fun InputStream.copyToWithProgress(
+        out: OutputStream,
+        totalSize: Long,
+        onProgress: (Float) -> Unit
+    ) {
+        var bytesCopied: Long = 0
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        var bytes = read(buffer)
+        while (bytes >= 0) {
+            out.write(buffer, 0, bytes)
+            bytesCopied += bytes
+            onProgress(bytesCopied.toFloat() / totalSize)
+            bytes = read(buffer)
+        }
+    }
+
+    /**
      * Converts legacy Android language codes to their modern equivalents.
      * This logic is migrated from the original PackageUtil to ensure compatibility.
-     * Source: https://developer.android.com/reference/java/util/Locale#legacy-language-codes
+     *
+     * @param code The legacy language code to convert.
+     * @return The modern language code.
+     * @see <a href="https://developer.android.com/reference/java/util/Locale#legacy-language-codes">java.util.Locale#legacy-language-codes</a>
      */
     private fun convertLegacyLanguageCode(code: String): String {
         return when (code) {

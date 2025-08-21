@@ -21,9 +21,7 @@ import org.koin.core.component.get
 import timber.log.Timber
 import java.io.FileDescriptor
 import java.io.IOException
-import java.io.InputStream
 import java.util.zip.ZipFile
-import java.util.zip.ZipInputStream
 
 object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
     private val reflect = get<ReflectRepo>()
@@ -34,18 +32,23 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         val apps = mutableListOf<AppEntity>()
-        data.forEach { apps.addAll(doWork(config, it, extra)) }
+        // The upstream handler now ensures all data entities are FileEntity.
+        data.forEach { entity ->
+            val fileEntity = entity as? DataEntity.FileEntity
+                ?: throw IllegalArgumentException("ApkAnalyserRepoImpl expected a FileEntity.")
+            apps.addAll(doFileWork(config, fileEntity, extra))
+        }
         return apps
     }
 
-    private fun doWork(config: ConfigEntity, data: DataEntity, extra: AnalyseExtraEntity): List<AppEntity> {
-        return when (data) {
-            // pass extra to sub-analyser
-            is DataEntity.FileEntity -> doFileWork(config, data, extra)
-            is DataEntity.FileDescriptorEntity -> doFileDescriptorWork(config, data, extra)
-            else -> throw Exception("can't analyse this entity: $data")
-        }
-    }
+    /*    private fun doWork(config: ConfigEntity, data: DataEntity, extra: AnalyseExtraEntity): List<AppEntity> {
+            return when (data) {
+                // pass extra to sub-analyser
+                is DataEntity.FileEntity -> doFileWork(config, data, extra)
+                is DataEntity.FileDescriptorEntity -> doFileDescriptorWork(config, data, extra)
+                else -> throw Exception("can't analyse this entity: $data")
+            }
+        }*/
 
     private fun <R> useResources(block: (resources: Resources) -> R): R {
         val resources = createResources()
@@ -63,7 +66,35 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         return Resources(assetManager, resources.displayMetrics, resources.configuration)
     }
 
+    /**
+     * Analyzes a single APK file and returns the AppEntity representation.
+     * This method is used for both FileEntity and FileDescriptorEntity.
+     *
+     * @param config The configuration entity containing settings for the analysis.
+     * @param data The data entity representing the APK file.
+     * @param extra Additional analysis parameters.
+     * @return A list of AppEntity representing the analyzed APK.
+     */
     private fun doFileWork(
+        config: ConfigEntity,
+        data: DataEntity.FileEntity,
+        extra: AnalyseExtraEntity
+    ): List<AppEntity> {
+        Timber.d("doFileWork: ${data.path}, extra: $extra")
+        val path = data.path
+        val bestArch = analyseAndSelectBestArchitecture(path, RsConfig.supportedArchitectures)
+        return useResources { resources ->
+            try {
+                setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
+            } catch (e: IOException) {
+                Timber.e(e, "Failed to load APK assets from path: $path")
+                throw AnalyseFailedAllFilesUnsupportedException("Failed to load APK assets. Maybe the file is corrupted or not supported?")
+            }
+            listOf(loadAppEntity(resources, resources.newTheme(), data, extra, bestArch ?: Architecture.UNKNOWN))
+        }
+    }
+
+    /*private fun doFileWork(
         config: ConfigEntity,
         data: DataEntity.FileEntity,
         extra: AnalyseExtraEntity
@@ -105,7 +136,7 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         addAssetPathMtd.isAccessible = true
         val cookie = addAssetPathMtd.invoke(assetManager, path) as Int
         if (cookie == 0) throw Exception("the cookie of the added asset, or 0 on failure.")
-    }
+    }*/
 
     private fun setAssetPath(assetManager: AssetManager, assets: Array<ApkAssets>) {
         val setApkAssetsMtd = reflect.getDeclaredMethod(
@@ -288,7 +319,8 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
  * @param inputStream The input stream of the APK file. The stream will be closed by this method.
  * @param deviceSupportedArchs A prioritized list of architectures supported by the device.
  * @return The best matching Architecture for the device, or null if no compatible architecture is found.
- */
+ *//*
+
 private fun analyseAndSelectBestArchitectureFromStream(
     inputStream: InputStream,
     deviceSupportedArchs: List<Architecture>
@@ -338,4 +370,4 @@ private fun analyseAndSelectBestArchitectureFromStream(
 
     Timber.w("No compatible architecture found between device and APK.")
     return null
-}
+}*/

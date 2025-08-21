@@ -15,7 +15,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import java.io.File
 import java.util.zip.ZipFile
-import java.util.zip.ZipInputStream
 
 object ApkMAnalyserRepoImpl : AnalyserRepo, KoinComponent {
     private val json = get<Json>()
@@ -26,21 +25,13 @@ object ApkMAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         val apps = mutableListOf<AppEntity>()
-        data.forEach { apps.addAll(doWork(config, it, extra)) }
-        return apps
-    }
-
-    private fun doWork(
-        config: ConfigEntity,
-        data: DataEntity,
-        extra: AnalyseExtraEntity
-    ): List<AppEntity> {
-        return when (data) {
-            is DataEntity.FileEntity -> doFileWork(config, data, extra)
-            is DataEntity.FileDescriptorEntity -> doFileDescriptorWork(config, data, extra)
-            is DataEntity.ZipFileEntity -> doZipFileWork(config, data, extra)
-            is DataEntity.ZipInputStreamEntity -> doZipInputStreamWork(config, data, extra)
+        // The upstream handler now ensures all data entities are FileEntity.
+        data.forEach { entity ->
+            val fileEntity = entity as? DataEntity.FileEntity
+                ?: throw IllegalArgumentException("ApkMAnalyserRepoImpl expected a FileEntity.")
+            apps.addAll(doFileWork(config, fileEntity, extra))
         }
+        return apps
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -50,6 +41,7 @@ object ApkMAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         val apps = mutableListOf<AppEntity>()
+        // Use the efficient ZipFile API.
         ZipFile(data.path).use { zip ->
             val manifest =
                 json.decodeFromStream<Manifest>(zip.getInputStream(zip.getEntry("info.json")))
@@ -64,7 +56,8 @@ object ApkMAnalyserRepoImpl : AnalyserRepo, KoinComponent {
                         manifest,
                         icon,
                         it.name,
-                        DataEntity.ZipFileEntity(it.name, DataEntity.FileEntity(data.path)),
+                        // Create a ZipFileEntity to represent the entry within the file.
+                        DataEntity.ZipFileEntity(it.name, data),
                         extra
                     )
                 )
@@ -73,70 +66,113 @@ object ApkMAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         return apps
     }
 
-    private fun doFileDescriptorWork(
-        config: ConfigEntity,
-        data: DataEntity.FileDescriptorEntity,
-        extra: AnalyseExtraEntity
-    ): List<AppEntity> = doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()), extra)
+    /* private fun doWork(
+         config: ConfigEntity,
+         data: DataEntity,
+         extra: AnalyseExtraEntity
+     ): List<AppEntity> {
+         return when (data) {
+             is DataEntity.FileEntity -> doFileWork(config, data, extra)
+             is DataEntity.FileDescriptorEntity -> doFileDescriptorWork(config, data, extra)
+             is DataEntity.ZipFileEntity -> doZipFileWork(config, data, extra)
+             is DataEntity.ZipInputStreamEntity -> doZipInputStreamWork(config, data, extra)
+         }
+     }
 
-    private fun doZipFileWork(
-        config: ConfigEntity,
-        data: DataEntity.ZipFileEntity,
-        extra: AnalyseExtraEntity
-    ): List<AppEntity> =
-        doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()), extra)
+     @OptIn(ExperimentalSerializationApi::class)
+     private fun doFileWork(
+         config: ConfigEntity,
+         data: DataEntity.FileEntity,
+         extra: AnalyseExtraEntity
+     ): List<AppEntity> {
+         val apps = mutableListOf<AppEntity>()
+         ZipFile(data.path).use { zip ->
+             val manifest =
+                 json.decodeFromStream<Manifest>(zip.getInputStream(zip.getEntry("info.json")))
+             val icon = zip.getEntry("icon.png")?.let {
+                 Drawable.createFromStream(zip.getInputStream(it), it.name)
+             }
+             zip.entries().iterator().forEach {
+                 if (it.isDirectory) return@forEach
+                 apps.addAll(
+                     doSingleWork(
+                         config,
+                         manifest,
+                         icon,
+                         it.name,
+                         DataEntity.ZipFileEntity(it.name, DataEntity.FileEntity(data.path)),
+                         extra
+                     )
+                 )
+             }
+         }
+         return apps
+     }
 
-    private fun doZipInputStreamWork(
-        config: ConfigEntity,
-        data: DataEntity,
-        extra: AnalyseExtraEntity
-    ): List<AppEntity> =
-        doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()), extra)
+     private fun doFileDescriptorWork(
+         config: ConfigEntity,
+         data: DataEntity.FileDescriptorEntity,
+         extra: AnalyseExtraEntity
+     ): List<AppEntity> = doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()), extra)
 
-    @OptIn(ExperimentalSerializationApi::class)
-    private fun doZipInputStreamWork(
-        config: ConfigEntity,
-        data: DataEntity,
-        zip: ZipInputStream,
-        extra: AnalyseExtraEntity
-    ): List<AppEntity> {
-        val apps = mutableListOf<AppEntity>()
-        val names = mutableListOf<String>()
-        var manifestOrNull: Manifest? = null
-        var icon: Drawable? = null
-        zip.use { inputStream ->
-            while (true) {
-                val entry = inputStream.nextEntry ?: break
-                if (entry.isDirectory) continue
-                val file = File(entry.name)
-                when {
-                    file.extension == "apk" -> names.add(entry.name)
-                    file.extension == "dm" -> names.add(entry.name)
-                    entry.name == "info.json" -> manifestOrNull =
-                        json.decodeFromStream(inputStream)
+     private fun doZipFileWork(
+         config: ConfigEntity,
+         data: DataEntity.ZipFileEntity,
+         extra: AnalyseExtraEntity
+     ): List<AppEntity> =
+         doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()), extra)
 
-                    entry.name == "icon.png" -> icon =
-                        Drawable.createFromStream(inputStream, entry.name)
-                }
-            }
-        }
-        if (names.isEmpty()) return apps
-        if (manifestOrNull == null) return apps
-        val manifest = manifestOrNull
-        names.forEach {
-            apps.addAll(
-                doSingleWork(
-                    config,
-                    manifest,
-                    icon,
-                    it,
-                    DataEntity.ZipInputStreamEntity(it, data),
-                    extra
-                )
-            )
-        }
-        return apps
-    }
+     private fun doZipInputStreamWork(
+         config: ConfigEntity,
+         data: DataEntity,
+         extra: AnalyseExtraEntity
+     ): List<AppEntity> =
+         doZipInputStreamWork(config, data, ZipInputStream(data.getInputStream()), extra)
+
+     @OptIn(ExperimentalSerializationApi::class)
+     private fun doZipInputStreamWork(
+         config: ConfigEntity,
+         data: DataEntity,
+         zip: ZipInputStream,
+         extra: AnalyseExtraEntity
+     ): List<AppEntity> {
+         val apps = mutableListOf<AppEntity>()
+         val names = mutableListOf<String>()
+         var manifestOrNull: Manifest? = null
+         var icon: Drawable? = null
+         zip.use { inputStream ->
+             while (true) {
+                 val entry = inputStream.nextEntry ?: break
+                 if (entry.isDirectory) continue
+                 val file = File(entry.name)
+                 when {
+                     file.extension == "apk" -> names.add(entry.name)
+                     file.extension == "dm" -> names.add(entry.name)
+                     entry.name == "info.json" -> manifestOrNull =
+                         json.decodeFromStream(inputStream)
+
+                     entry.name == "icon.png" -> icon =
+                         Drawable.createFromStream(inputStream, entry.name)
+                 }
+             }
+         }
+         if (names.isEmpty()) return apps
+         if (manifestOrNull == null) return apps
+         val manifest = manifestOrNull
+         names.forEach {
+             apps.addAll(
+                 doSingleWork(
+                     config,
+                     manifest,
+                     icon,
+                     it,
+                     DataEntity.ZipInputStreamEntity(it, data),
+                     extra
+                 )
+             )
+         }
+         return apps
+     }*/
 
     private fun doSingleWork(
         config: ConfigEntity,
