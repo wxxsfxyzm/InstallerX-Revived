@@ -88,26 +88,6 @@ fun LegacyInstallerGlobalSettingsPage(
                 )
             }
             item {
-                AnimatedVisibility(
-                    visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
-                ) {
-                    IntNumberPickerWidget(
-                        icon = AppIcons.Working,
-                        title = stringResource(R.string.set_countdown),
-                        description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                        value = state.dhizukuAutoCloseCountDown,
-                        startInt = 1,
-                        endInt = 10
-                    ) {
-                        viewModel.dispatch(
-                            PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
-                        )
-                    }
-                }
-            }
-            item {
                 DataInstallModeWidget(
                     currentInstallMode = state.installMode,
                     changeInstallMode = { newMode ->
