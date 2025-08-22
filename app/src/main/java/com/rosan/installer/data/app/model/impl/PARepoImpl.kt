@@ -39,9 +39,9 @@ object PARepoImpl : PARepo, KoinComponent {
         useUserService(authorizer, special = specialAuth) {
             try {
                 // On success, this value is returned by 'useUserService'.
-                it.privileged.isPermissionGranted(packageName, permission)
+                it.privileged.grantRuntimePermission(packageName, permission)
             } catch (e: Exception) {
-                Timber.e(e, "Failed to check permission '$permission' for '$packageName'")
+                Timber.e(e, "Failed to grant permission '$permission' for '$packageName'")
                 // Re-throw to notify the caller (UI) that the query failed.
                 throw e
             }
