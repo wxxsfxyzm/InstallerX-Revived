@@ -294,12 +294,13 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         result: Result<Unit>
     ) {
         Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
-        if (result.isSuccess) {
+        // TODO Uncomment this if you want to perform extra work after installation
+        /*if (result.isSuccess) {
             coroutineScope.launch {
                 runCatching { onExtraWork() }.exceptionOrNull()
                     ?.printStackTrace()
             }
-        }
+        }*/
         // Never Delete Multi-APK-ZIP files automatically
         // Enable autoDelete only when the containerType is not MULTI_APK_ZIP_ZIP
         if (result.isSuccess && config.autoDelete && entities.first().containerType != DataType.MULTI_APK_ZIP) {
