@@ -28,10 +28,12 @@ import com.rosan.installer.data.installer.model.impl.InstallerRepoImpl
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.installer.util.getRealPathFromUri
 import com.rosan.installer.data.installer.util.pathUnify
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -48,6 +50,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     override val installer: InstallerRepoImpl = super.installer as InstallerRepoImpl
     private var job: Job? = null
     private val context by inject<Context>()
+    private val appDataStore by inject<AppDataStore>()
     private val cacheParcelFileDescriptors = mutableListOf<ParcelFileDescriptor>()
     private val cacheDirectory = "${context.externalCacheDir?.absolutePath}/${installer.id}".apply {
         File(this).mkdirs()
@@ -250,20 +253,31 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Timber.d("[id=${installer.id}] install: Starting. Emitting ProgressEntity.Installing.")
         installer.progress.emit(ProgressEntity.Installing)
         runCatching {
-            installEntities(installer.config, installer.entities.filter { it.selected }.map {
-                InstallEntity(
-                    name = it.app.name,
-                    packageName = it.app.packageName,
-                    arch = it.app.arch,
-                    data = when (val app = it.app) {
-                        is AppEntity.BaseEntity -> app.data
-                        is AppEntity.SplitEntity -> app.data
-                        is AppEntity.DexMetadataEntity -> app.data
-                        is AppEntity.CollectionEntity -> app.data
-                    },
-                    containerType = it.app.containerType!!
-                )
-            }, InstallExtraInfoEntity(Os.getuid() / 100000, cacheDirectory))
+            Timber.d("[id=${installer.id}] install: Loading blacklist from AppDataStore.")
+            val blacklist = appDataStore
+                .getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
+                .first() // Gets the latest value from the Flow
+                .map { it.packageName } // We only need the package name strings
+            Timber.d("[id=${installer.id}] install: Blacklist loaded with ${blacklist.size} entries.")
+            installEntities(
+                installer.config,
+                installer.entities.filter { it.selected }.map {
+                    InstallEntity(
+                        name = it.app.name,
+                        packageName = it.app.packageName,
+                        arch = it.app.arch,
+                        data = when (val app = it.app) {
+                            is AppEntity.BaseEntity -> app.data
+                            is AppEntity.SplitEntity -> app.data
+                            is AppEntity.DexMetadataEntity -> app.data
+                            is AppEntity.CollectionEntity -> app.data
+                        },
+                        containerType = it.app.containerType!!
+                    )
+                },
+                InstallExtraInfoEntity(Os.getuid() / 100000, cacheDirectory),
+                blacklist
+            )
         }.getOrElse {
             Timber.e(it, "[id=${installer.id}] install: Failed.")
             installer.error = it
@@ -482,69 +496,12 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         })
     }
 
-    /*    private fun resolveDataUri(activity: Activity, uri: Uri): List<DataEntity> {
-            Timber.d("Source URI: $uri")
-            if (uri.scheme == ContentResolver.SCHEME_FILE) return resolveDataFileUri(activity, uri)
-            return resolveDataContentFile(activity, uri)
-        }
-
-        private fun resolveDataContentFile(
-            activity: Activity,
-            uri: Uri,
-            retry: Int = 3
-        ): List<DataEntity> {
-            // wait for PermissionRecords ok.
-            // if not, maybe show Uri Read Permission Denied
-            if (activity.checkCallingOrSelfUriPermission(
-                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
-                ) != PackageManager.PERMISSION_GRANTED &&
-                retry > 0
-            ) {
-                Thread.sleep(50)
-                return resolveDataContentFile(activity, uri, retry - 1)
-            }
-            val assetFileDescriptor = context.contentResolver?.openAssetFileDescriptor(uri, "r")
-                ?: throw Exception("can't open file descriptor: $uri")
-            val parcelFileDescriptor = assetFileDescriptor.parcelFileDescriptor
-            val pid = Os.getpid()
-            val descriptor = parcelFileDescriptor.fd
-            val path = "/proc/$pid/fd/$descriptor"
-
-            // only full file, can't handle a sub-section of a file
-            if (assetFileDescriptor.declaredLength < 0) {
-
-                // file descriptor can't be pipe or socket
-                val source = Os.readlink(path).getRealPathFromUri(uri).pathUnify()
-                Timber.d("Source path: $source")
-                if (source.startsWith('/')) {
-                    cacheParcelFileDescriptors.add(parcelFileDescriptor)
-                    val file = File(path)
-                    val data = if (file.exists() && file.canRead() && runCatching {
-                            file.inputStream().use { }
-                            return@runCatching true
-                        }.getOrDefault(false)) DataEntity.FileEntity(path)
-                    else DataEntity.FileDescriptorEntity(pid, descriptor)
-                    data.source = DataEntity.FileEntity(source)
-                    return listOf(data)
-                }
-            }
-
-            // cache it
-            val tempFile = File.createTempFile(UUID.randomUUID().toString(), null, File(cacheDirectory))
-            tempFile.outputStream().use { output ->
-                assetFileDescriptor.use {
-                    it.createInputStream().copyTo(output)
-                }
-            }
-            return listOf(DataEntity.FileEntity(tempFile.absolutePath))
-        }*/
-
     private suspend fun analyseEntities(data: List<DataEntity>): List<AppEntity> =
         AnalyserRepoImpl.doWork(installer.config, data, AnalyseExtraEntity(cacheDirectory))
 
     private suspend fun installEntities(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
-    ) = com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doInstallWork(config, entities, extra)
+        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity, blacklist: List<String>
+    ) = com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doInstallWork(config, entities, extra, blacklist)
 
     private enum class SplitCategory { ABI, DENSITY, LANGUAGE, FEATURE }
 

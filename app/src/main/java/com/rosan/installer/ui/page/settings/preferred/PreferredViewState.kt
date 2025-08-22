@@ -16,7 +16,8 @@ data class PreferredViewState(
     val dhizukuAutoCloseCountDown: Int = 3,
     val versionCompareInSingleLine: Boolean = false,
     val showRefreshedUI: Boolean = true,
-    val managedPackages: List<NamedPackage> = emptyList()
+    val managedInstallerPackages: List<NamedPackage> = emptyList(),
+    val managedBlacklistPackages: List<NamedPackage> = emptyList(),
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 

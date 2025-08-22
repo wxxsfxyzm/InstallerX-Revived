@@ -221,10 +221,35 @@ fun NewInstallerGlobalSettingsPage(
                 SplicedColumnGroup(
                     title = stringResource(R.string.config_managed_packages_title),
                     content = listOf {
-                        ManagedPackagesWidget(viewModel = viewModel)
+                        ManagedPackagesWidget(
+                            noContentTitle = "没有预设的安装者"/*stringResource(R.string.config_no_managed_packages)*/,
+                            packages = state.managedInstallerPackages,
+                            onAddPackage = {
+                                viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it))
+                            },
+                            onRemovePackage = {
+                                viewModel.dispatch(PreferredViewAction.RemoveManagedInstallerPackage(it))
+                            }
+                        )
                     }
                 )
-
+            }
+            item {
+                SplicedColumnGroup(
+                    title = "禁止安装的应用"/*stringResource()*/,
+                    content = listOf {
+                        ManagedPackagesWidget(
+                            noContentTitle = "在这里填写禁止安装的应用包名"/*stringResource(R.string.config_no_managed_packages)*/,
+                            packages = state.managedBlacklistPackages,
+                            onAddPackage = {
+                                viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it))
+                            },
+                            onRemovePackage = {
+                                viewModel.dispatch(PreferredViewAction.RemoveManagedBlacklistPackage(it))
+                            }
+                        )
+                    }
+                )
             }
         }
     }

@@ -5,7 +5,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 data class EditViewState(
     val data: Data = Data.build(ConfigEntity.default),
-    val managedPackages: List<NamedPackage> = emptyList()
+    val managedInstallerPackages: List<NamedPackage> = emptyList()
 ) {
     data class Data(
         val name: String,

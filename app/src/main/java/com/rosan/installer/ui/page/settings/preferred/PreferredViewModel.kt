@@ -7,6 +7,7 @@ import android.provider.Settings
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
@@ -61,8 +62,30 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(action.countDown)
             is PreferredViewAction.ChangeShowRefreshedUI -> changeRefreshedUI(action.showRefreshedUI)
             is PreferredViewAction.ChangeVersionCompareInSingleLine -> changeVersionCompareInSingleLine(action.versionCompareInSingleLine)
-            is PreferredViewAction.AddManagedPackage -> addManagedPackage(action.item)
-            is PreferredViewAction.RemoveManagedPackage -> removeManagedPackage(action.item)
+            is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
+                state.managedInstallerPackages,
+                AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST,
+                action.item
+            )
+
+            is PreferredViewAction.RemoveManagedInstallerPackage -> removeManagedPackage(
+                state.managedInstallerPackages,
+                AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST,
+                action.item
+            )
+
+            is PreferredViewAction.AddManagedBlacklistPackage -> addManagedPackage(
+                state.managedBlacklistPackages,
+                AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST,
+                action.item
+            )
+
+            is PreferredViewAction.RemoveManagedBlacklistPackage -> removeManagedPackage(
+                state.managedBlacklistPackages,
+                AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST,
+                action.item
+            )
+
 
             is PreferredViewAction.SetAdbVerifyEnabledState -> viewModelScope.launch {
                 setAdbVerifyEnabled(
@@ -104,7 +127,10 @@ class PreferredViewModel(
             val versionCompareInSingleLineFlow =
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
             val showRefreshedUIFlow = appDataStore.getBoolean(AppDataStore.UI_FRESH_SWITCH, true)
-            val managedPackagesFlow = appDataStore.getNamedPackageList()
+            val managedInstallerPackagesFlow =
+                appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST)
+            val managedBlacklistPackagesFlow =
+                appDataStore.getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
             val adbVerifyEnabledFlow = getSettingsGlobalIntAsFlow(
                 context.contentResolver,
                 "verifier_verify_adb_installs",
@@ -122,7 +148,8 @@ class PreferredViewModel(
                 dhizukuAutoCloseCountDownFlow,
                 versionCompareInSingleLineFlow,
                 showRefreshedUIFlow,
-                managedPackagesFlow,
+                managedInstallerPackagesFlow,
+                managedBlacklistPackagesFlow,
                 adbVerifyEnabledFlow
             ) { values: Array<Any?> ->
                 val authorizer = values[0] as ConfigEntity.Authorizer
@@ -135,8 +162,9 @@ class PreferredViewModel(
                 val countDown = values[7] as Int
                 val versionCompareInSingleLine = values[8] as Boolean
                 val showRefreshedUI = values[9] as Boolean
-                val managedPackages = (values[10] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[11] as Boolean
+                val managedInstallerPackages = (values[10] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedBlacklistPackages = (values[11] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[12] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -151,7 +179,8 @@ class PreferredViewModel(
                     dhizukuAutoCloseCountDown = countDown,
                     versionCompareInSingleLine = versionCompareInSingleLine,
                     showRefreshedUI = showRefreshedUI,
-                    managedPackages = managedPackages,
+                    managedInstallerPackages = managedInstallerPackages,
+                    managedBlacklistPackages = managedBlacklistPackages,
                     adbVerifyEnabled = adbVerifyEnabled
                 )
             }.collectLatest { state = it }
@@ -225,27 +254,27 @@ class PreferredViewModel(
         }
     }
 
-    private fun addManagedPackage(item: NamedPackage) {
+    private fun addManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, item: NamedPackage) {
         viewModelScope.launch {
             // Create a new list from the current state
-            val currentList = state.managedPackages.toMutableList()
+            val currentList = list.toMutableList()
             // Add the new item if it's not already in the list
             if (!currentList.contains(item)) {
                 currentList.add(item)
                 // Save the updated list back to DataStore
-                appDataStore.putNamedPackageList(currentList)
+                appDataStore.putNamedPackageList(key, currentList)
             }
         }
     }
 
-    private fun removeManagedPackage(item: NamedPackage) {
+    private fun removeManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, item: NamedPackage) {
         viewModelScope.launch {
             // Create a new list from the current state
-            val currentList = state.managedPackages.toMutableList()
+            val currentList = list.toMutableList()
             // Remove the item
             currentList.remove(item)
             // Save the updated list back to DataStore
-            appDataStore.putNamedPackageList(currentList)
+            appDataStore.putNamedPackageList(key, currentList)
         }
     }
 

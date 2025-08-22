@@ -113,8 +113,8 @@ class DialogViewModel(
     val defaultInstallerFromSettings: StateFlow<String?> = _defaultInstallerFromSettings.asStateFlow()
 
     // StateFlow to hold the list of managed installer packages.
-    private val _managedPackages = MutableStateFlow<List<NamedPackage>>(emptyList())
-    val managedPackages: StateFlow<List<NamedPackage>> = _managedPackages.asStateFlow()
+    private val _managedInstallerPackages = MutableStateFlow<List<NamedPackage>>(emptyList())
+    val managedInstallerPackages: StateFlow<List<NamedPackage>> = _managedInstallerPackages.asStateFlow()
 
     // StateFlow to hold the currently selected installer package name.
     private val _selectedInstaller = MutableStateFlow(repo.config.installer)
@@ -144,8 +144,8 @@ class DialogViewModel(
             versionCompareInSingleLine =
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false).first()
             // Load managed packages for installer selection.
-            appDataStore.getNamedPackageList().collect { packages ->
-                _managedPackages.value = packages
+            appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
+                _managedInstallerPackages.value = packages
             }
         }
     }

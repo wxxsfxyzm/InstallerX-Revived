@@ -247,6 +247,7 @@
     <string name="exception_install_failed_unknown">Unknown error</string>
     <string name="exception_analyse_failed_all_files_unsupported">File not supported</string>
     <string name="exception_install_failed_already_exists">This app version is already installed, please uninstall and try again</string>
+    <string name="exception_install_failed_blacklisted_package">You don\'t allow installation of the app!</string>
     <string name="exception_install_failed_invalid_apk">This app version is already installed, please uninstall and try again</string>
     <string name="exception_install_failed_invalid_uri">Invalid URI</string>
     <string name="exception_install_failed_insufficient_storage">Storage full, try clearing some space</string>

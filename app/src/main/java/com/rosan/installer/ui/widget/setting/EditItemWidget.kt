@@ -222,7 +222,7 @@ fun DataDeclareInstallerWidget(viewModel: EditViewModel) {
 @Composable
 fun DataInstallerWidget(viewModel: EditViewModel) {
     val stateData = viewModel.state.data
-    val managedPackages = viewModel.state.managedPackages
+    val managedPackages = viewModel.state.managedInstallerPackages
     val currentInstaller = stateData.installer
     var expanded by remember { mutableStateOf(false) }
     // Find a matching package to display its friendly name

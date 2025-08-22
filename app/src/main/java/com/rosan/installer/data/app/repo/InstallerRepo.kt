@@ -12,7 +12,8 @@ interface InstallerRepo {
     suspend fun doInstallWork(
         config: ConfigEntity,
         entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity
+        extra: InstallExtraInfoEntity,
+        blacklist: List<String>,
     )
 
     /**
