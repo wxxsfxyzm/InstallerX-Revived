@@ -57,13 +57,10 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeShowDialogInstallExtendedMenu -> changeShowDialogInstallExtendedMenu(action.showMenu)
             is PreferredViewAction.ChangeShowSuggestion -> changeShowSuggestionState(action.showIntelligentSuggestion)
             is PreferredViewAction.ChangeShowDisableNotification -> changeDisableNotificationState(action.showDisableNotification)
-
-            is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialogWhenPressingNotification(
-                action.showDialog
-            )
-
+            is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialog(action.showDialog)
             is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(action.countDown)
             is PreferredViewAction.ChangeShowRefreshedUI -> changeRefreshedUI(action.showRefreshedUI)
+            is PreferredViewAction.ChangeVersionCompareInSingleLine -> changeVersionCompareInSingleLine(action.versionCompareInSingleLine)
             is PreferredViewAction.AddManagedPackage -> addManagedPackage(action.item)
             is PreferredViewAction.RemoveManagedPackage -> removeManagedPackage(action.item)
 
@@ -104,6 +101,8 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true)
             val dhizukuAutoCloseCountDownFlow =
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
+            val versionCompareInSingleLineFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
             val showRefreshedUIFlow = appDataStore.getBoolean(AppDataStore.UI_FRESH_SWITCH, true)
             val managedPackagesFlow = appDataStore.getNamedPackageList()
             val adbVerifyEnabledFlow = getSettingsGlobalIntAsFlow(
@@ -121,6 +120,7 @@ class PreferredViewModel(
                 showNotificationForDialogInstallFlow,
                 showDialogWhenPressingNotificationFlow,
                 dhizukuAutoCloseCountDownFlow,
+                versionCompareInSingleLineFlow,
                 showRefreshedUIFlow,
                 managedPackagesFlow,
                 adbVerifyEnabledFlow
@@ -133,9 +133,10 @@ class PreferredViewModel(
                 val showNotification = values[5] as Boolean
                 val showDialog = values[6] as Boolean
                 val countDown = values[7] as Int
-                val showRefreshedUI = values[8] as Boolean
-                val managedPackages = (values[9] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[10] as Boolean
+                val versionCompareInSingleLine = values[8] as Boolean
+                val showRefreshedUI = values[9] as Boolean
+                val managedPackages = (values[10] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[11] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -148,6 +149,7 @@ class PreferredViewModel(
                     disableNotificationForDialogInstall = showNotification,
                     showDialogWhenPressingNotification = showDialog,
                     dhizukuAutoCloseCountDown = countDown,
+                    versionCompareInSingleLine = versionCompareInSingleLine,
                     showRefreshedUI = showRefreshedUI,
                     managedPackages = managedPackages,
                     adbVerifyEnabled = adbVerifyEnabled
@@ -196,7 +198,7 @@ class PreferredViewModel(
         }
     }
 
-    private fun changeShowDialogWhenPressingNotification(showDialog: Boolean) {
+    private fun changeShowDialog(showDialog: Boolean) {
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, showDialog)
         }
@@ -214,6 +216,12 @@ class PreferredViewModel(
     private fun changeRefreshedUI(showRefreshedUI: Boolean) {
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.UI_FRESH_SWITCH, showRefreshedUI)
+        }
+    }
+
+    private fun changeVersionCompareInSingleLine(singleLine: Boolean) {
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, singleLine)
         }
     }
 

@@ -35,6 +35,7 @@ class AppDataStore(private val dataStore: DataStore<Preferences>) {
         val APPLY_SHOW_PACKAGE_NAME = booleanPreferencesKey("apply_show_package_name")
 
         // DialogViewModel
+        val DIALOG_VERSION_COMPARE_SINGLE_LINE = booleanPreferencesKey("show_dialog_version_compare_single_line")
         val DIALOG_AUTO_CLOSE_COUNTDOWN = intPreferencesKey("show_dhizuku_auto_close_count_down_menu")
         val DIALOG_SHOW_EXTENDED_MENU = booleanPreferencesKey("show_dialog_install_extended_menu")
         val DIALOG_SHOW_INTELLIGENT_SUGGESTION = booleanPreferencesKey("show_dialog_install_intelligent_suggestion")

@@ -154,6 +154,8 @@
     <string name="installer_resolving">分析中…</string>
     <string name="installer_resolve_failed">分析失败</string>
     <string name="installer_resolve_success">分析成功</string>
+    <string name="installer_preparing">正在读取文件</string>
+    <string name="installer_preparing_desc">正在读取文件，请稍候…</string>
     <string name="installer_analysing">解析中…</string>
     <string name="installer_analyse_failed">解析失败</string>
     <string name="installer_select_install">选择安装</string>
@@ -283,6 +285,8 @@
 
     <string name="show_dialog_when_pressing_notification">点击通知时显示对话框</string>
     <string name="change_notification_touch_behavior">更改通知触摸行为</string>
+    <string name="version_compare_in_single_line">单行显示版本对比</string>
+    <string name="version_compare_in_single_line_desc">在对话框安装时将版本对比展示为一行</string>
     <string name="show_dialog_install_extended_menu">显示扩展菜单</string>
     <string name="show_dialog_install_extended_menu_desc">在安装对话框中显示更多操作选项</string>
     <string name="extended_menu">扩展菜单</string>

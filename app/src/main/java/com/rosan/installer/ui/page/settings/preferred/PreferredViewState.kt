@@ -14,13 +14,14 @@ data class PreferredViewState(
     val disableNotificationForDialogInstall: Boolean = false,
     val showDialogWhenPressingNotification: Boolean = true,
     val dhizukuAutoCloseCountDown: Int = 3,
+    val versionCompareInSingleLine: Boolean = false,
     val showRefreshedUI: Boolean = true,
     val managedPackages: List<NamedPackage> = emptyList()
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 
     sealed class Progress {
-        object Loading : Progress()
-        object Loaded : Progress()
+        data object Loading : Progress()
+        data object Loaded : Progress()
     }
 }

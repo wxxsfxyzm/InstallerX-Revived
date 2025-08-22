@@ -65,6 +65,9 @@ class DialogViewModel(
     var disableNotificationOnDismiss by mutableStateOf(false)
         private set
 
+    var versionCompareInSingleLine by mutableStateOf(false)
+        private set
+
     // 用于显示批量安装的进度文本
     private val _installProgressText = MutableStateFlow<UiText?>(null)
     val installProgressText: StateFlow<UiText?> = _installProgressText.asStateFlow()
@@ -138,6 +141,8 @@ class DialogViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, false).first()
             disableNotificationOnDismiss =
                 appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first()
+            versionCompareInSingleLine =
+                appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false).first()
             // Load managed packages for installer selection.
             appDataStore.getNamedPackageList().collect { packages ->
                 _managedPackages.value = packages

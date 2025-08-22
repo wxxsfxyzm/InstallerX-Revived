@@ -155,6 +155,8 @@
     <string name="installer_resolving">Checking…</string>
     <string name="installer_resolve_failed">Resolve failed</string>
     <string name="installer_resolve_success">Resolve passed</string>
+    <string name="installer_preparing">Preparing</string>
+    <string name="installer_preparing_desc">Preparing files, please wait…</string>
     <string name="installer_analysing">Analysing…</string>
     <string name="installer_analyse_failed">Analyse failed</string>
     <string name="installer_select_install">Select apps to install</string>
@@ -286,6 +288,8 @@
 
     <string name="show_dialog_when_pressing_notification">Show Dialog when pressing Notification</string>
     <string name="change_notification_touch_behavior">Change Notification touch behavior</string>
+    <string name="version_compare_in_single_line">Show version compare in single line</string>
+    <string name="version_compare_in_single_line_desc">Show version compare in single line in install dialog</string>
     <string name="show_dialog_install_extended_menu">Show extended menu</string>
     <string name="show_dialog_install_extended_menu_desc">Show more options in the install dialog</string>
     <string name="extended_menu">Extended Menu</string>
@@ -348,7 +352,7 @@
     <string name="dry_run">Dry Run</string>
     <string name="dry_run_desc">Verify the package, but don\'t install it.</string>
 
-    <string name="unarchive">Unarchive existing package</string>
+    <string name="unarchive">Unarchive</string>
     <string name="unarchive_desc">Unarchive an existing package.</string>
     <string name="replace_existing">Replace Existing</string>
     <string name="replace_existing_desc">If the package being installed already exists, replace/upgrade it.</string>
@@ -390,7 +394,4 @@
     <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
     <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
     <string name="suggestion_bypass_low_target_sdk">Temporarily allow bypassing restrictions and retry</string>
-
-    <string name="installer_preparing">正在准备文件</string>
-    <string name="installer_preparing_desc">正在读取文件内容，请稍候…</string>
 </resources>

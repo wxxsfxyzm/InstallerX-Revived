@@ -1,11 +1,19 @@
 package com.rosan.installer.ui.page.installer.dialog.inner
 
 import android.os.Build
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,8 +30,12 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -146,50 +158,52 @@ fun installInfoDialog(
                             modifier = Modifier.basicMarquee()
                         )
                     } else {
-                        // 更新安装: 显示对比，带前缀
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        // true = singleLine, false = multiLine
+                        val defaultIsSingleLine = viewModel.versionCompareInSingleLine
+
+                        // Pair(first = isSingleLine, second = shouldAnimate)
+                        var contentState by remember {
+                            mutableStateOf(Pair(defaultIsSingleLine, false)) // Initial state, don't animate
+                        }
+
+                        // Sync with ViewModel default value without animation
+                        LaunchedEffect(defaultIsSingleLine) {
+                            if (contentState.first != defaultIsSingleLine) {
+                                contentState = Pair(defaultIsSingleLine, false) // Sync state, but flag for no animation
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier.clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                // On every click, toggle the line mode and ALWAYS enable animation
+                                contentState = Pair(!contentState.first, true)
+                            }
                         ) {
-                            Text( // 旧版本带前缀
-                                text = stringResource(R.string.old_version_prefix) +
-                                        stringResource(
-                                            R.string.installer_version_short,
-                                            if (preInstallAppInfo.isArchived)
-                                                stringResource(R.string.old_version_archived)
-                                            else preInstallAppInfo.versionName,
-                                            preInstallAppInfo.versionCode
-                                        ),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.basicMarquee()
-                            )
-                            Icon(
-                                imageVector = AppIcons.ArrowDropDownFilled,
-                                contentDescription = "to",
-                                tint =
-                                    if (preInstallAppInfo.versionCode > entityToInstall.versionCode)
-                                        MaterialTheme.colorScheme.error
-                                    else
-                                        MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Text( // 新版本带前缀
-                                text = if (entityToInstall.versionCode >= preInstallAppInfo.versionCode)
-                                    stringResource(R.string.upgrade_version_prefix) + stringResource(
-                                        R.string.installer_version_short,
-                                        entityToInstall.versionName,
-                                        entityToInstall.versionCode.toLong()
-                                    ) else stringResource(R.string.downgrade_version_prefix) + stringResource(
-                                    R.string.installer_version_short,
-                                    entityToInstall.versionName,
-                                    entityToInstall.versionCode
-                                ),
-                                color = if (preInstallAppInfo.versionCode > entityToInstall.versionCode)
-                                    MaterialTheme.colorScheme.error
-                                else
-                                    MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.basicMarquee()
-                            )
+                            AnimatedContent(
+                                targetState = contentState,
+                                transitionSpec = {
+                                    // Check the 'shouldAnimate' flag from our state Pair
+                                    if (targetState.second) {
+                                        // Animate: This is for user clicks
+                                        fadeIn(tween(200)) togetherWith fadeOut(tween(200)) using
+                                                SizeTransform { _, _ -> tween(250) }
+                                    } else {
+                                        // No animation: This is for initial composition or programmatic changes
+                                        fadeIn(tween(0)) togetherWith fadeOut(tween(0))
+                                    }
+                                },
+                                label = "VersionViewAnimation"
+                            ) { state ->
+                                // state is the Pair(isSingleLine, shouldAnimate)
+                                if (state.first) {
+                                    VersionCompareSingleLine(preInstallAppInfo, entityToInstall)
+                                } else {
+                                    VersionCompareMultiLine(preInstallAppInfo, entityToInstall)
+                                }
+                            }
                         }
                     }
                 }
@@ -286,4 +300,100 @@ fun installInfoDialog(
             }
         }
     )
+}
+
+/**
+ * Composable for displaying version comparison in multiple lines (the original style).
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun VersionCompareMultiLine(
+    preInstallAppInfo: InstalledAppInfo,
+    entityToInstall: AppEntity.BaseEntity
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text( // Old version with prefix
+            text = stringResource(R.string.old_version_prefix) +
+                    stringResource(
+                        R.string.installer_version_short,
+                        if (preInstallAppInfo.isArchived)
+                            stringResource(R.string.old_version_archived)
+                        else preInstallAppInfo.versionName,
+                        preInstallAppInfo.versionCode
+                    ),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.basicMarquee()
+        )
+        Icon(
+            imageVector = AppIcons.ArrowDropDownFilled,
+            contentDescription = "to",
+            tint =
+                if (preInstallAppInfo.versionCode > entityToInstall.versionCode)
+                    MaterialTheme.colorScheme.error
+                else
+                    MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+        Text( // New version with prefix
+            text = if (entityToInstall.versionCode >= preInstallAppInfo.versionCode)
+                stringResource(R.string.upgrade_version_prefix) + stringResource(
+                    R.string.installer_version_short,
+                    entityToInstall.versionName,
+                    entityToInstall.versionCode.toLong()
+                ) else stringResource(R.string.downgrade_version_prefix) + stringResource(
+                R.string.installer_version_short,
+                entityToInstall.versionName,
+                entityToInstall.versionCode
+            ),
+            color = if (preInstallAppInfo.versionCode > entityToInstall.versionCode)
+                MaterialTheme.colorScheme.error
+            else
+                MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.basicMarquee()
+        )
+    }
+}
+
+/**
+ * Composable for displaying version comparison in a single line (e.g., "1.0 (1) -> 2.0 (2)").
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun VersionCompareSingleLine(
+    preInstallAppInfo: InstalledAppInfo,
+    entityToInstall: AppEntity.BaseEntity
+) {
+    val isDowngrade = preInstallAppInfo.versionCode > entityToInstall.versionCode
+    val color = if (isDowngrade) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val oldVersionText = if (preInstallAppInfo.isArchived)
+        stringResource(R.string.old_version_archived)
+    else
+        stringResource(
+            R.string.installer_version_short,
+            preInstallAppInfo.versionName,
+            preInstallAppInfo.versionCode
+        )
+    val newVersionText = stringResource(
+        R.string.installer_version2,
+        entityToInstall.versionName,
+        entityToInstall.versionCode
+    )
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+    ) {
+        Text(text = oldVersionText, textAlign = TextAlign.Center)
+        Icon(
+            imageVector = AppIcons.ArrowRight,
+            contentDescription = "to",
+            tint = color,
+            modifier = Modifier.size(24.dp)
+        )
+        Text(text = newVersionText, color = color, textAlign = TextAlign.Center)
+    }
 }

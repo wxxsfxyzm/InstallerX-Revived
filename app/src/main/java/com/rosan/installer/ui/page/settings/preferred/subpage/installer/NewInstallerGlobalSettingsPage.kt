@@ -116,9 +116,20 @@ fun NewInstallerGlobalSettingsPage(
                 ) {
                     SplicedColumnGroup(
                         title = stringResource(R.string.installer_settings_dialog_mode_options),
-                        content = listOfNotNull(
+                        content = buildList {
+                            add {
+                                SwitchWidget(
+                                    icon = AppIcons.BugReport,
+                                    title = stringResource(id = R.string.version_compare_in_single_line),
+                                    description = stringResource(id = R.string.version_compare_in_single_line_desc),
+                                    checked = state.versionCompareInSingleLine,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it))
+                                    }
+                                )
+                            }
                             if (state.installMode == ConfigEntity.InstallMode.Dialog) {
-                                {
+                                add {
                                     SwitchWidget(
                                         icon = AppIcons.MenuOpen,
                                         title = stringResource(id = R.string.show_dialog_install_extended_menu),
@@ -126,15 +137,14 @@ fun NewInstallerGlobalSettingsPage(
                                         checked = state.showDialogInstallExtendedMenu,
                                         onCheckedChange = {
                                             viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowDialogInstallExtendedMenu(
-                                                    it
-                                                )
+                                                PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
                                             )
                                         }
                                     )
                                 }
-                            } else null,
-                            {
+                            }
+                            // Add the other SwitchWidgets unconditionally
+                            add {
                                 SwitchWidget(
                                     icon = AppIcons.Suggestion,
                                     title = stringResource(id = R.string.show_intelligent_suggestion),
@@ -144,8 +154,8 @@ fun NewInstallerGlobalSettingsPage(
                                         viewModel.dispatch(PreferredViewAction.ChangeShowSuggestion(it))
                                     }
                                 )
-                            },
-                            {
+                            }
+                            add {
                                 SwitchWidget(
                                     icon = AppIcons.NotificationDisabled,
                                     title = stringResource(id = R.string.disable_notification),
@@ -153,14 +163,12 @@ fun NewInstallerGlobalSettingsPage(
                                     checked = state.disableNotificationForDialogInstall,
                                     onCheckedChange = {
                                         viewModel.dispatch(
-                                            PreferredViewAction.ChangeShowDisableNotification(
-                                                it
-                                            )
+                                            PreferredViewAction.ChangeShowDisableNotification(it)
                                         )
                                     }
                                 )
                             }
-                        )
+                        }
                     )
                 }
             }
