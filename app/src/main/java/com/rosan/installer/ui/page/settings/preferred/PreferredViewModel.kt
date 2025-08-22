@@ -304,8 +304,8 @@ class PreferredViewModel(
         block: suspend () -> Unit
     ) {
         runCatching {
-            withContext(Dispatchers.IO) {
-                block() // 现在这个 block 内部的所有代码都在后台 IO 线程上运行
+            withContext(Dispatchers.IO) { // Ensure privileged actions run on IO dispatcher
+                block()
             }
         }.onSuccess {
             Timber.d("Privileged action succeeded")

@@ -19,7 +19,6 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import timber.log.Timber
-import java.io.FileDescriptor
 import java.io.IOException
 import java.util.zip.ZipFile
 
@@ -40,15 +39,6 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         }
         return apps
     }
-
-    /*    private fun doWork(config: ConfigEntity, data: DataEntity, extra: AnalyseExtraEntity): List<AppEntity> {
-            return when (data) {
-                // pass extra to sub-analyser
-                is DataEntity.FileEntity -> doFileWork(config, data, extra)
-                is DataEntity.FileDescriptorEntity -> doFileDescriptorWork(config, data, extra)
-                else -> throw Exception("can't analyse this entity: $data")
-            }
-        }*/
 
     private fun <R> useResources(block: (resources: Resources) -> R): R {
         val resources = createResources()
@@ -94,50 +84,6 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         }
     }
 
-    /*private fun doFileWork(
-        config: ConfigEntity,
-        data: DataEntity.FileEntity,
-        extra: AnalyseExtraEntity
-    ): List<AppEntity> {
-        Timber.d("doFileWork: ${data.path}, extra: $extra")
-        val path = data.path
-        val bestArch = analyseAndSelectBestArchitecture(path, RsConfig.supportedArchitectures)
-        return useResources { resources ->
-            try {
-                setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
-            } catch (e: IOException) {
-                Timber.e(e, "Failed to load APK assets from path: $path")
-                throw AnalyseFailedAllFilesUnsupportedException("Failed to load APK assets. Maybe the file is corrupted or not supported?")
-            }
-            listOf(loadAppEntity(resources, resources.newTheme(), data, extra, bestArch ?: Architecture.UNKNOWN))
-        }
-    }
-
-    private fun doFileDescriptorWork(
-        config: ConfigEntity, data: DataEntity.FileDescriptorEntity, extra: AnalyseExtraEntity
-    ): List<AppEntity> {
-        Timber.d("doFileDescriptorWork: $data, extra: $extra")
-        val fileDescriptor =
-            data.getFileDescriptor() ?: throw Exception("can't get fd from '$data'")
-        val bestArch = analyseAndSelectBestArchitectureFromStream(
-            data.getInputStream(), // Create an InputStream from the FileDescriptor
-            RsConfig.supportedArchitectures
-        )
-        return useResources { resources ->
-            setAssetPath(resources.assets, arrayOf(loadFromFd(fileDescriptor)))
-            listOf(loadAppEntity(resources, resources.newTheme(), data, extra, bestArch ?: Architecture.UNKNOWN))
-        }
-    }
-
-    private fun addAssetPath(assetManager: AssetManager, path: String) {
-        val addAssetPathMtd = reflect.getDeclaredMethod(
-            AssetManager::class.java, "addAssetPath", String::class.java
-        )!!
-        addAssetPathMtd.isAccessible = true
-        val cookie = addAssetPathMtd.invoke(assetManager, path) as Int
-        if (cookie == 0) throw Exception("the cookie of the added asset, or 0 on failure.")
-    }*/
-
     private fun setAssetPath(assetManager: AssetManager, assets: Array<ApkAssets>) {
         val setApkAssetsMtd = reflect.getDeclaredMethod(
             AssetManager::class.java,
@@ -147,13 +93,6 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         )!!
         setApkAssetsMtd.isAccessible = true
         setApkAssetsMtd.invoke(assetManager, assets, true)
-    }
-
-    private fun loadFromFd(fileDescriptor: FileDescriptor): ApkAssets {
-        val friendlyName = "${fileDescriptor.hashCode()}.apk"
-        return ApkAssets.loadFromFd(
-            fileDescriptor, friendlyName, 0, null
-        )
     }
 
     private fun loadAppEntity(
@@ -311,63 +250,3 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         return null
     }
 }
-
-/**
- * Analyses the APK's supported architectures from an InputStream and selects the best one.
- * This method is suitable for sources like FileDescriptors where a direct path is not available.
- *
- * @param inputStream The input stream of the APK file. The stream will be closed by this method.
- * @param deviceSupportedArchs A prioritized list of architectures supported by the device.
- * @return The best matching Architecture for the device, or null if no compatible architecture is found.
- *//*
-
-private fun analyseAndSelectBestArchitectureFromStream(
-    inputStream: InputStream,
-    deviceSupportedArchs: List<Architecture>
-): Architecture? {
-    Timber.d("Analysing architecture from stream. Device supports: ${deviceSupportedArchs.joinToString(", ")}")
-    val apkArchs = mutableSetOf<Architecture>()
-
-    try {
-        // Use ZipInputStream to read from the stream without needing a file path.
-        ZipInputStream(inputStream).use { zipStream ->
-            // Iterate through each entry in the zip stream.
-            var entry = zipStream.nextEntry
-            while (entry != null) {
-                val entryName = entry.name
-                // Check for native library directories, same logic as before.
-                if (!entry.isDirectory && entryName.startsWith("lib/") && entryName.count { it == '/' } >= 2) {
-                    val archString = entryName.split('/')[1]
-                    val architecture = Architecture.fromArchString(archString)
-                    if (architecture != Architecture.UNKNOWN) {
-                        Timber.d("Found architecture in stream: $architecture")
-                        apkArchs.add(architecture)
-                    }
-                }
-                zipStream.closeEntry()
-                entry = zipStream.nextEntry
-            }
-        }
-    } catch (e: Exception) {
-        // Catch potential exceptions during stream processing.
-        Timber.e(e, "Failed to analyse architecture from InputStream.")
-        return null
-    }
-
-
-    if (apkArchs.isEmpty()) {
-        Timber.d("APK contains no native libraries (or is architecture-independent).")
-        return Architecture.NONE // The APK is architecture-independent or contains no native libs.
-    }
-
-    // Find the best match, same logic as before.
-    for (deviceArch in deviceSupportedArchs) {
-        if (apkArchs.contains(deviceArch)) {
-            Timber.d("Best matching architecture found: $deviceArch")
-            return deviceArch
-        }
-    }
-
-    Timber.w("No compatible architecture found between device and APK.")
-    return null
-}*/

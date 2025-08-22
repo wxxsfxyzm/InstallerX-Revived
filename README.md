@@ -28,11 +28,14 @@
 ## 功能变化
 
 - [测试中]可切换经典界面/基于Material 3 Expressive设计的新UI界面
+- 更多可自定义化的界面设置
 - 修复了原仓库项目在某些系统上无法正确删除安装包的问题
+- 优化解析速度，优化各种安装包类型的解析
 - 文本调整，支持英文，繁体中文，西班牙语。更多语言欢迎提交PR
 - 优化对话框安装的显示效果
-- 支持显示系统图标包，方法来自[RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt)
-- 加入了安装时显示targetSDK与minSDK的功能
+- 支持安装时显示系统图标包，方法来自[RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt)
+- 支持单行/多行显示版本号对比
+- 安装对话框支持显示targetSDK与minSDK
 - Shizuku/Root安装完成打开App时可以绕过定制UI的链式启动拦截
     - 使用原生api实现，不使用shell命令
     - 目前仅实现了对话框安装
@@ -41,10 +44,10 @@
     - 支持查看应用申明的权限
     - 支持设定InstallFlags（可以继承全局Profile设置）部分实现来自[zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions/blob/main/app/src/main/java/dev/zwander/installwithoptions/data/InstallOption.kt)
        - **注意**：设定InstallFlags并不能保证一定生效，部分选项有可能带来安全风险，具体取决于系统
+- 支持在设置中预设安装来源的包名，并可以在配置文件和对话框安装菜单中快速选择
 - 支持安装zip压缩包内的apk文件，用 InstallerX 打开zip压缩包即可 
     - 仅支持对话框安装
-    - 不限制数量
-    - 仅支持apk文件
+    - 不限制数量，支持zip内嵌套目录中的apk文件，**不仅限于根目录**
     - 支持自动处理相同包名的多版本
        - 支持去重
        - 支持智能地选择最佳安装包
@@ -65,12 +68,14 @@
     - 该功能仅支持Android14以上，Android14请优先尝试安装选项中的`允许降级安装`，失败后再点击建议尝试该功能
     - 该功能在对话框安装的智能建议中，需要体验请先打开`显示智能建议（实验性）`选项
     - 该功能禁止/请谨慎用于系统app，误操作导致系统应用数据丢失可能会导致系统无法正常使用
-    - 不适用于OneUI7.0（oem限制），已经屏蔽。如果只看见不保留数据降级安装选项，说明你的系统不支持保留数据降级安装
+    - 不适用于OneUI7.0、RealmeUI、部分ColorOS（oem限制），已经针对性屏蔽。如果只看见不保留数据降级安装选项，说明你的系统不支持保留数据降级安装
 
 ## 常见问题
 
 - Dhizuku无法使用怎么办
-    - 我不使用Dhizuku，对它了解也不多...但是已经尽力考虑过Dhizuku的使用需求，在SDK34以上AVD均有测试，SDK34以下无法保证
+    - 目前仅对**官方Dhizuku**提供最低限度的支持，在SDK34以上AVD均有测试，SDK34以下无法保证
+    - 使用`OwnDroid`时可能无法正确调用`安装完成后自动删除`功能
+    - 国产ROM遇到偶发性报错一般是Dhizuku被系统限制了后台，请优先重启Dhizuku应用后再试
     - Dhizuku的权限不够大，很多操作无法完成，例如绕过系统intent拦截，指定安装来源等，有条件建议使用Shizuku
 
 - 锁定器无法锁定怎么办
@@ -79,18 +84,20 @@
 - HyperOS更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
     - 系统安全限制，需要在配置中声明安装者为系统app，推荐 `com.android.fileexplorer` 或 `com.android.vending`
     - Shizuku/Root有效，Dhizuku不支持
-    - 为全新安装添加了 `检测到系统为 HyperOS 时自动为 Default 配置加上安装者` 的功能
+    - 本应用在HyperOS上启动时会自动添加配置，默认为`com.miui.packageinstaller`，如果需要更改请在设置中修改
 
-- HyperOS安装器锁定失效变回系统默认安装器怎么办
+- HyperOS无法锁定安装器/锁定失效变回系统默认安装器怎么办
+    - HyperOS在某些时候会撤销用户对安装器的设定，原因尚待调查
+    - 某些HyperOS版本无法锁定是正常的
     - HyperOS会以对话框形式拦截USB安装请求(adb/shizuku)，若用户在全新安装一款应用时点击拒绝安装，系统会撤销其安装器设定并强行改回默认安装器，若出现这种情况请重新锁定
     
 - HyperOS使用通知安装的时候，通知进度条卡住怎么办
     - HyperOS对应用后台管控非常严格，如果遇到这种情况请设置后台无限制
-    - 应用已经对后台管理做了优化，在完成安装任务（用户点击完成或清理通知）后延时5秒自动清理所有后台服务并退出，因此可以放心启用无限制后台，不会造成额外耗电，前台服务通知可以保留，以便观察服务运行状态
+    - 应用已经对后台管理做了优化，在完成安装任务（用户点击完成或清理通知）后延时0.5秒自动清理所有后台服务并退出，因此可以放心启用无限制后台，不会造成额外耗电，前台服务通知可以保留，以便观察服务运行状态
 
-- Oppo/Vivo/联想的系统用不了了怎么办
-    - 手头没有这些品牌的手机，可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)
-    进行讨论
+- Oppo/Vivo/联想/...的系统用不了了怎么办
+    - 手头没有这些品牌的手机，可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)进行讨论
+    - Oppo，Vivo锁定安装器请使用锁定器
 
 ## 关于版本发布
 
