@@ -30,6 +30,7 @@ import com.rosan.installer.ui.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
+import com.rosan.installer.ui.widget.setting.ManagedPackagesWidget
 import com.rosan.installer.ui.widget.setting.SwitchWidget
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -195,8 +196,31 @@ fun LegacyInstallerGlobalSettingsPage(
                     }
                 }
             }
-            item { LabelWidget(label = stringResource(id = R.string.config_managed_packages_title)) }
-            /*item { ManagedPackagesWidget(viewModel = viewModel) }*/
+            item { LabelWidget(label = stringResource(id = R.string.config_managed_installer_packages_title)) }
+            item {
+                ManagedPackagesWidget(
+                    noContentTitle = stringResource(R.string.config_no_managed_installer_packages),
+                    packages = state.managedInstallerPackages,
+                    onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
+                    onRemovePackage = {
+                        viewModel.dispatch(
+                            PreferredViewAction.RemoveManagedInstallerPackage(it)
+                        )
+                    })
+            }
+            item { LabelWidget(label = stringResource(id = R.string.config_managed_blacklist_title)) }
+            item {
+                ManagedPackagesWidget(
+                    noContentTitle = stringResource(R.string.config_no_managed_blacklist),
+                    packages = state.managedBlacklistPackages,
+                    onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it)) },
+                    onRemovePackage = {
+                        viewModel.dispatch(
+                            PreferredViewAction.RemoveManagedBlacklistPackage(it)
+                        )
+                    })
+            }
+
         }
     }
 }
