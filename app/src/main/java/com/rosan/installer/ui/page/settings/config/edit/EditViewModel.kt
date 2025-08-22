@@ -280,8 +280,10 @@ class EditViewModel(
             val initialData = EditViewState.Data.build(configEntity)
             // UPDATE: Store this initial data as the "original" state.
             originalData = initialData
-            val managedPackages = appDataStore.getNamedPackageList().firstOrNull() ?: emptyList()
-            state = state.copy(data = initialData, managedPackages = managedPackages)
+            val managedInstallerPackages =
+                appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).firstOrNull()
+                    ?: emptyList()
+            state = state.copy(data = initialData, managedInstallerPackages = managedInstallerPackages)
             Timber.i("[LOAD_DATA] Original data has been set: $initialData")
             globalAuthorizer = getGlobalAuthorizer()
             globalInstallMode = getGlobalInstallMode()

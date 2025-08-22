@@ -65,6 +65,9 @@ class DialogViewModel(
     var disableNotificationOnDismiss by mutableStateOf(false)
         private set
 
+    var versionCompareInSingleLine by mutableStateOf(false)
+        private set
+
     // 用于显示批量安装的进度文本
     private val _installProgressText = MutableStateFlow<UiText?>(null)
     val installProgressText: StateFlow<UiText?> = _installProgressText.asStateFlow()
@@ -110,8 +113,8 @@ class DialogViewModel(
     val defaultInstallerFromSettings: StateFlow<String?> = _defaultInstallerFromSettings.asStateFlow()
 
     // StateFlow to hold the list of managed installer packages.
-    private val _managedPackages = MutableStateFlow<List<NamedPackage>>(emptyList())
-    val managedPackages: StateFlow<List<NamedPackage>> = _managedPackages.asStateFlow()
+    private val _managedInstallerPackages = MutableStateFlow<List<NamedPackage>>(emptyList())
+    val managedInstallerPackages: StateFlow<List<NamedPackage>> = _managedInstallerPackages.asStateFlow()
 
     // StateFlow to hold the currently selected installer package name.
     private val _selectedInstaller = MutableStateFlow(repo.config.installer)
@@ -138,9 +141,11 @@ class DialogViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, false).first()
             disableNotificationOnDismiss =
                 appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first()
+            versionCompareInSingleLine =
+                appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false).first()
             // Load managed packages for installer selection.
-            appDataStore.getNamedPackageList().collect { packages ->
-                _managedPackages.value = packages
+            appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
+                _managedInstallerPackages.value = packages
             }
         }
     }
@@ -210,6 +215,7 @@ class DialogViewModel(
                         newPackageNameFromProgress = null
                     }
 
+                    is ProgressEntity.Preparing -> newState = DialogViewState.Preparing(progress.progress)
                     is ProgressEntity.Resolving -> newState = DialogViewState.Resolving
                     is ProgressEntity.ResolvedFailed -> newState = DialogViewState.ResolveFailed
                     is ProgressEntity.Analysing -> newState = DialogViewState.Analysing

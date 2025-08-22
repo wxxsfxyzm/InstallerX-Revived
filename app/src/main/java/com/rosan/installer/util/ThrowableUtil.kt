@@ -6,6 +6,7 @@ import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.exception.InstallFailedAlreadyExistsException
+import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedContainerErrorException
 import com.rosan.installer.data.app.model.exception.InstallFailedCpuAbiIncompatibleException
@@ -53,6 +54,7 @@ private fun Throwable.getStringResourceId(): Int {
     return when (this) {
         is AnalyseFailedAllFilesUnsupportedException -> R.string.exception_analyse_failed_all_files_unsupported
         is InstallFailedAlreadyExistsException -> R.string.exception_install_failed_already_exists
+        is InstallFailedBlacklistedPackageException -> R.string.exception_install_failed_blacklisted_package
         is InstallFailedInvalidAPKException -> R.string.exception_install_failed_invalid_apk
         is InstallFailedInvalidURIException -> R.string.exception_install_failed_invalid_uri
         is InstallFailedInsufficientStorageException -> R.string.exception_install_failed_insufficient_storage

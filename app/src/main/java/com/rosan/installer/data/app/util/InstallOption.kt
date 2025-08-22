@@ -243,7 +243,7 @@ sealed class InstallOption(
     @Keep
     data object UnArchive : InstallOption(
         value = 1 shl 30,
-        minSdk = Build.VERSION_CODES.VANILLA_ICE_CREAM,
+        minSdk = Int.MAX_VALUE, // Don't show on List because handled elsewhere
         labelResource = R.string.unarchive,
         descResource = R.string.unarchive_desc,
     )

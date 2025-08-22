@@ -65,7 +65,7 @@ fun installExtendedMenuDialog(
 ): DialogParams {
     val installOptions = rememberInstallOptions()
     val installFlags by viewModel.installFlags.collectAsState()
-    val managedPackages by viewModel.managedPackages.collectAsState()
+    val managedPackages by viewModel.managedInstallerPackages.collectAsState()
     val selectedInstallerPackageName by viewModel.selectedInstaller.collectAsState()
     val selectedInstaller = remember(selectedInstallerPackageName, managedPackages) {
         managedPackages.find { it.packageName == selectedInstallerPackageName }

@@ -24,6 +24,7 @@ import com.rosan.installer.build.Architecture
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
+import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.abiOverride
@@ -49,10 +50,9 @@ import java.util.concurrent.TimeUnit
 
 abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     private val context by inject<Context>()
+    private val reflect = get<ReflectRepo>()
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
-
-    private val reflect = get<ReflectRepo>()
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
 
@@ -125,11 +125,11 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     override suspend fun doInstallWork(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
+        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity, blacklist: List<String>
     ) {
         val result = kotlin.runCatching {
             entities.groupBy { it.packageName }.forEach { (packageName, entities) ->
-                doInnerWork(config, entities, extra, packageName)
+                doInnerWork(config, entities, extra, packageName, blacklist)
             }
         }
         doFinishWork(config, entities, extra, result)
@@ -154,7 +154,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         val receiver = LocalIntentReceiver()
         val flags = config.uninstallFlags
         val versionedPackage = VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST)
-        val callerPackageName = "com.android.shell"
+        val callerPackageName = context.packageName
 
         Timber.d("Directly calling IPackageInstaller.uninstall with flags: $flags")
 
@@ -175,8 +175,13 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         config: ConfigEntity,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
-        packageName: String
+        packageName: String,
+        managedBlacklistPackages: List<String>
     ) {
+        if (managedBlacklistPackages.contains(packageName)) {
+            Timber.w("Installation blocked for $packageName because it is in the blacklist.")
+            throw InstallFailedBlacklistedPackageException("Installation blocked for $packageName because it is in the blacklist.")
+        }
         if (entities.isEmpty()) return
         val packageInstaller = getPackageInstaller(config, entities, extra)
         var session: Session? = null

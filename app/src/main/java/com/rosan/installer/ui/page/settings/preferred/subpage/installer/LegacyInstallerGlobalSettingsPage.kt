@@ -30,6 +30,7 @@ import com.rosan.installer.ui.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
+import com.rosan.installer.ui.widget.setting.ManagedPackagesWidget
 import com.rosan.installer.ui.widget.setting.SwitchWidget
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,26 +89,6 @@ fun LegacyInstallerGlobalSettingsPage(
                 )
             }
             item {
-                AnimatedVisibility(
-                    visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
-                ) {
-                    IntNumberPickerWidget(
-                        icon = AppIcons.Working,
-                        title = stringResource(R.string.set_countdown),
-                        description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                        value = state.dhizukuAutoCloseCountDown,
-                        startInt = 1,
-                        endInt = 10
-                    ) {
-                        viewModel.dispatch(
-                            PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
-                        )
-                    }
-                }
-            }
-            item {
                 DataInstallModeWidget(
                     currentInstallMode = state.installMode,
                     changeInstallMode = { newMode ->
@@ -124,6 +105,15 @@ fun LegacyInstallerGlobalSettingsPage(
                 ) {
                     Column(modifier = Modifier.animateContentSize()) {
                         LabelWidget(label = stringResource(id = R.string.installer_settings_dialog_mode_options))
+                        SwitchWidget(
+                            icon = AppIcons.BugReport,
+                            title = stringResource(id = R.string.version_compare_in_single_line),
+                            description = stringResource(id = R.string.version_compare_in_single_line_desc),
+                            checked = state.versionCompareInSingleLine,
+                            onCheckedChange = {
+                                viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it))
+                            }
+                        )
                         AnimatedVisibility(
                             visible = state.installMode == ConfigEntity.InstallMode.Dialog,
                             enter = fadeIn(),
@@ -206,6 +196,31 @@ fun LegacyInstallerGlobalSettingsPage(
                     }
                 }
             }
+            item { LabelWidget(label = stringResource(id = R.string.config_managed_installer_packages_title)) }
+            item {
+                ManagedPackagesWidget(
+                    noContentTitle = stringResource(R.string.config_no_managed_installer_packages),
+                    packages = state.managedInstallerPackages,
+                    onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
+                    onRemovePackage = {
+                        viewModel.dispatch(
+                            PreferredViewAction.RemoveManagedInstallerPackage(it)
+                        )
+                    })
+            }
+            item { LabelWidget(label = stringResource(id = R.string.config_managed_blacklist_title)) }
+            item {
+                ManagedPackagesWidget(
+                    noContentTitle = stringResource(R.string.config_no_managed_blacklist),
+                    packages = state.managedBlacklistPackages,
+                    onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it)) },
+                    onRemovePackage = {
+                        viewModel.dispatch(
+                            PreferredViewAction.RemoveManagedBlacklistPackage(it)
+                        )
+                    })
+            }
+
         }
     }
 }

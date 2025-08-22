@@ -112,9 +112,11 @@
     <string name="config_dialog_title_unsaved_changes">Unsaved changes</string>
     <string name="config_dialog_message_unsaved_changes">Quit without saving?</string>
     <string name="config_follow_settings">Follow Profile</string>
-    <string name="config_managed_packages_title">Install Source Presets</string>
-    <string name="config_managed_packages_description">Add or remove managed packages</string>
-    <string name="config_no_managed_packages">No managed packages</string>
+    <string name="config_managed_installer_packages_title">Install Source Presets</string>
+    <string name="config_managed_blacklist_title">Apps prohibited from installation</string>
+    <string name="config_no_managed_installer_packages">No managed installer packages</string>
+    <string name="config_no_managed_blacklist">Fill in the package names of blocked apps here</string>
+    <string name="config_managed_packages_desc">Add or remove managed packages</string>
     <string name="config_add_one_to_get_started">Click \'Add\' below to start</string>
     <string name="config_add_new_package">Add new package</string>
     <string name="config_package_name">Package Name</string>
@@ -155,6 +157,8 @@
     <string name="installer_resolving">Checking…</string>
     <string name="installer_resolve_failed">Resolve failed</string>
     <string name="installer_resolve_success">Resolve passed</string>
+    <string name="installer_preparing">Preparing</string>
+    <string name="installer_preparing_desc">Preparing files, please wait…</string>
     <string name="installer_analysing">Analysing…</string>
     <string name="installer_analyse_failed">Analyse failed</string>
     <string name="installer_select_install">Select apps to install</string>
@@ -245,6 +249,7 @@
     <string name="exception_install_failed_unknown">Unknown error</string>
     <string name="exception_analyse_failed_all_files_unsupported">File not supported</string>
     <string name="exception_install_failed_already_exists">This app version is already installed, please uninstall and try again</string>
+    <string name="exception_install_failed_blacklisted_package">You don\'t allow installation of the app!</string>
     <string name="exception_install_failed_invalid_apk">This app version is already installed, please uninstall and try again</string>
     <string name="exception_install_failed_invalid_uri">Invalid URI</string>
     <string name="exception_install_failed_insufficient_storage">Storage full, try clearing some space</string>
@@ -286,6 +291,8 @@
 
     <string name="show_dialog_when_pressing_notification">Show Dialog when pressing Notification</string>
     <string name="change_notification_touch_behavior">Change Notification touch behavior</string>
+    <string name="version_compare_in_single_line">Show version compare in single line</string>
+    <string name="version_compare_in_single_line_desc">Show version compare in single line in install dialog</string>
     <string name="show_dialog_install_extended_menu">Show extended menu</string>
     <string name="show_dialog_install_extended_menu_desc">Show more options in the install dialog</string>
     <string name="extended_menu">Extended Menu</string>
@@ -348,7 +355,7 @@
     <string name="dry_run">Dry Run</string>
     <string name="dry_run_desc">Verify the package, but don\'t install it.</string>
 
-    <string name="unarchive">Unarchive existing package</string>
+    <string name="unarchive">Unarchive</string>
     <string name="unarchive_desc">Unarchive an existing package.</string>
     <string name="replace_existing">Replace Existing</string>
     <string name="replace_existing_desc">If the package being installed already exists, replace/upgrade it.</string>

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -478,27 +479,37 @@ fun BottomSheetContent(
 }
 
 /**
- * A widget to display and manage a list of NamedPackage items.
- * Allows adding new packages and deleting existing ones.
+ * A reusable widget to display and manage a list of NamedPackage items.
+ * It is stateless and relies on callbacks to handle data modifications.
  *
- * @param viewModel The ViewModel that holds the state and handles actions.
+ * @param title The title to display above the list.
+ * @param packages The list of NamedPackage items to display.
+ * @param onAddPackage A callback invoked when a new package should be added.
+ * @param onRemovePackage A callback invoked when an existing package should be removed.
+ * @param modifier The modifier to be applied to the widget's container.
  */
 @Composable
-fun ManagedPackagesWidget(viewModel: PreferredViewModel) {
-    val state = viewModel.state
+fun ManagedPackagesWidget(
+    noContentTitle: String,
+    packages: List<NamedPackage>,
+    onAddPackage: (NamedPackage) -> Unit,
+    onRemovePackage: (NamedPackage) -> Unit,
+    modifier: Modifier = Modifier
+) {
     var showAddDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf<NamedPackage?>(null) }
 
     // Main container for the widget
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    Column(modifier = modifier.padding(vertical = 8.dp)) {
         // Display each package in the list
-        if (state.managedPackages.isEmpty()) {
+        if (packages.isEmpty()) {
             ListItem(
-                headlineContent = { Text(stringResource(R.string.config_no_managed_packages)) },
+                headlineContent = { Text(noContentTitle) },
                 supportingContent = { Text(stringResource(R.string.config_add_one_to_get_started)) },
                 leadingContent = {
                     Icon(
-                        imageVector = AppIcons.Info,
+                        // imageVector = AppIcons.Info,
+                        imageVector = Icons.Default.Info, // Placeholder icon
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -506,14 +517,14 @@ fun ManagedPackagesWidget(viewModel: PreferredViewModel) {
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent)
             )
         } else {
-            state.managedPackages.forEach { item ->
+            packages.forEach { item ->
                 ListItem(
                     headlineContent = { Text(item.name) },
                     supportingContent = { Text(item.packageName) },
                     leadingContent = {
                         Icon(
-                            imageVector = AppIcons.BugReport, // Or any other relevant icon
-                            contentDescription = null,
+                            imageVector = AppIcons.Android, // Placeholder icon
+                            contentDescription = "Icon Placeholder",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     },
@@ -557,7 +568,7 @@ fun ManagedPackagesWidget(viewModel: PreferredViewModel) {
         AddPackageDialog(
             onDismiss = { showAddDialog = false },
             onConfirm = { newItem ->
-                viewModel.dispatch(PreferredViewAction.AddManagedPackage(newItem))
+                onAddPackage(newItem) // Use the callback
                 showAddDialog = false
             }
         )
@@ -569,7 +580,7 @@ fun ManagedPackagesWidget(viewModel: PreferredViewModel) {
             item = itemToDelete,
             onDismiss = { showDeleteConfirmation = null },
             onConfirm = {
-                viewModel.dispatch(PreferredViewAction.RemoveManagedPackage(itemToDelete))
+                onRemovePackage(itemToDelete) // Use the callback
                 showDeleteConfirmation = null
             }
         )
