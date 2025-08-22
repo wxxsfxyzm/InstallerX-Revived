@@ -435,6 +435,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         // Attempt to get a direct, readable file path first.
         val procPath = "/proc/${Os.getpid()}/fd/${assetFileDescriptor.parcelFileDescriptor.fd}"
         val file = File(procPath)
+        val sourcePath = runCatching { Os.readlink(procPath).getRealPathFromUri(uri).pathUnify() }.getOrDefault("")
 
         // Check if the proc path is a valid, readable file. This is the zero-copy happy path.
         if (file.exists() && file.canRead()) {
@@ -445,7 +446,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 RandomAccessFile(file, "r").use { } // Test open and immediately close.
 
                 // If the test above passes, we have sufficient permission to use this path directly.
-                val sourcePath = Os.readlink(procPath).getRealPathFromUri(uri).pathUnify()
                 if (sourcePath.startsWith('/')) {
                     Timber.d("Success! Got direct, usable file access through procfs: $sourcePath")
                     cacheParcelFileDescriptors.add(assetFileDescriptor.parcelFileDescriptor)
@@ -492,7 +492,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Timber.d("Caching complete. Temp file: ${tempFile.absolutePath}")
         // Return a FileEntity pointing to the newly cached file.
         return listOf(DataEntity.FileEntity(tempFile.absolutePath).apply {
-            source = DataEntity.FileEntity(uri.toString()) // Set original URI as source
+            source = DataEntity.FileEntity(sourcePath) // Set original URI as source
         })
     }
 
