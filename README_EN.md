@@ -73,7 +73,10 @@ Compared to stock installers, **InstallerX** offers more installation options:
     - Integrated into "Smart Suggestions (Experimental)" in dialog installation
     - Do **not** use on system apps — may cause data loss and render the system unusable
     - Not supported on OneUI 7.0, RealmeUI, or some ColorOS (OEM-limited) — only non-data-preserving downgrade will appear if unsupported
-
+  - [Experimental] Support for configuring a blocklist of package names in settings. Apps listed there will be denied during installation.
+    - Currently under development — only manual entry is supported for now.  
+      In the future, default blocklists will be provided based on device manufacturers
+      (especially useful on HyperOS to prevent accidental installation of system apps from other devices)
 ## FAQ
 
 - **Dhizuku not working properly**
