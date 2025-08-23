@@ -13,6 +13,7 @@ import com.rosan.installer.data.settings.model.room.dao.ConfigDao
 import com.rosan.installer.data.settings.model.room.entity.AppEntity
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
+import com.rosan.installer.data.settings.model.room.entity.converter.DexoptModeConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,18 +23,20 @@ import org.koin.core.component.get
 
 @Database(
     entities = [AppEntity::class, ConfigEntity::class],
-    version = 5,
+    version = 6,
     exportSchema = true,
     autoMigrations = [
         /*        AutoMigration(from = 1, to = 2),
                 AutoMigration(from = 2, to = 3, spec = InstallerRoom.AUTO_MIGRATION_2_3::class),*/
         AutoMigration(from = 3, to = 4),
-        AutoMigration(from = 4, to = 5)
+        AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 5, to = 6)
     ]
 )
 @TypeConverters(
     AuthorizerConverter::class,
-    InstallModeConverter::class
+    InstallModeConverter::class,
+    DexoptModeConverter::class
 )
 abstract class InstallerRoom : RoomDatabase() {
     // Since this fork starts from version 3, we can remove the auto migration from 2 to 3

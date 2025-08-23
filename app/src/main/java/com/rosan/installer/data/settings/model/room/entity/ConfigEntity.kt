@@ -21,6 +21,11 @@ data class ConfigEntity(
     @ColumnInfo(name = "customize_authorizer") var customizeAuthorizer: String,
     @ColumnInfo(name = "install_mode") var installMode: InstallMode,
     @ColumnInfo(name = "installer") var installer: String?,
+    @ColumnInfo(name = "enable_manual_dexopt", defaultValue = "0") var enableManualDexopt: Boolean = false,
+    @ColumnInfo(
+        name = "dexopt_mode",
+        defaultValue = "'speed-profile'"
+    ) var dexoptMode: DexoptMode = DexoptMode.SpeedProfile,
     @ColumnInfo(name = "auto_delete") var autoDelete: Boolean,
     @ColumnInfo(name = "display_sdk", defaultValue = "0") var displaySdk: Boolean = false,
     @ColumnInfo(name = "for_all_user") var forAllUser: Boolean,
@@ -39,6 +44,8 @@ data class ConfigEntity(
             customizeAuthorizer = "",
             installMode = InstallMode.Global,
             installer = null,
+            enableManualDexopt = false,
+            dexoptMode = DexoptMode.SpeedProfile,
             autoDelete = false,
             forAllUser = false,
             allowTestOnly = false,
@@ -54,6 +61,8 @@ data class ConfigEntity(
             customizeAuthorizer = "",
             installMode = InstallMode.Dialog,
             installer = "com.miui.packageinstaller",
+            enableManualDexopt = false,
+            dexoptMode = DexoptMode.SpeedProfile,
             autoDelete = false,
             forAllUser = false,
             allowTestOnly = false,
@@ -89,6 +98,13 @@ data class ConfigEntity(
         Notification("notification"),
         AutoNotification("auto_notification"),
         Ignore("ignore");
+    }
+
+    enum class DexoptMode(val value: String) {
+        Verify("verify"),
+        SpeedProfile("speed-profile"),
+        Speed("speed"),
+        Everything("everything");
     }
 
     enum class Analyser(val value: String) {

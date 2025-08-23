@@ -400,4 +400,12 @@
     <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
     <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
     <string name="suggestion_bypass_low_target_sdk">Temporarily allow bypassing restrictions and retry</string>
+
+    <string name="config_manual_dexopt">手动 Dex 优化</string>
+    <string name="config_manual_dexopt_desc">在安装后手动触发 dex2oat 进程</string>
+    <string name="config_dexopt_mode">优化模式</string>
+    <string name="config_dexopt_mode_verify">Verify</string>
+    <string name="config_dexopt_mode_speed_profile">Speed Profile</string>
+    <string name="config_dexopt_mode_speed">Speed</string>
+    <string name="config_dexopt_mode_everything">Everything</string>
 </resources>
