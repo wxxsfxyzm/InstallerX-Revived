@@ -185,7 +185,6 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.core.splashscreen)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
@@ -201,7 +200,7 @@ dependencies {
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
-    implementation(libs.work.runtime.ktx)
+    // implementation(libs.work.runtime.ktx)
 
     implementation(libs.ktx.serializationJson)
     implementation(libs.kotlin.reflect)
