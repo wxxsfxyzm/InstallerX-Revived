@@ -119,7 +119,7 @@ fun NewInstallerGlobalSettingsPage(
                         content = buildList {
                             add {
                                 SwitchWidget(
-                                    icon = AppIcons.BugReport,
+                                    icon = AppIcons.SingleLineSettingIcon,
                                     title = stringResource(id = R.string.version_compare_in_single_line),
                                     description = stringResource(id = R.string.version_compare_in_single_line_desc),
                                     checked = state.versionCompareInSingleLine,
