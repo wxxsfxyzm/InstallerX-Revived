@@ -315,10 +315,32 @@ fun DisableAdbVerify(
     SwitchWidget(
         icon = AppIcons.DisableAdbVerify,
         title = stringResource(R.string.disable_adb_install_verify),
-        description = if (!isError)
-            stringResource(R.string.disable_adb_install_verify_desc)
+        description = if (!isError) stringResource(R.string.disable_adb_install_verify_desc)
         else stringResource(R.string.disable_adb_install_verify_not_support_dhizuku_desc),
         isError = isError,
+        checked = checked,
+        enabled = enabled,
+        onCheckedChange = onCheckedChange
+    )
+}
+
+/**
+ * A setting item for requesting to ignore battery optimizations.
+ *
+ * @param checked Whether the app is currently ignoring battery optimizations.
+ * @param onCheckedChange Callback invoked when the user toggles the switch.
+ */
+@Composable
+fun IgnoreBatteryOptimizationSetting(
+    checked: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    SwitchWidget(
+        icon = AppIcons.BatteryOptimization, // You need to add this icon
+        title = stringResource(R.string.ignore_battery_optimizations),
+        description = if (enabled) stringResource(R.string.ignore_battery_optimizations_desc)
+        else stringResource(R.string.ignore_battery_optimizations_desc_disabled),
         checked = checked,
         enabled = enabled,
         onCheckedChange = onCheckedChange

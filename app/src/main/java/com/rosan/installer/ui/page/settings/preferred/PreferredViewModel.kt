@@ -1,12 +1,16 @@
 package com.rosan.installer.ui.page.settings.preferred
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,6 +29,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -94,6 +99,8 @@ class PreferredViewModel(
                 )
             }
 
+            is PreferredViewAction.RequestIgnoreBatteryOptimization -> requestIgnoreBatteryOptimization()
+            is PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus -> refreshIgnoreBatteryOptStatus()
             is PreferredViewAction.SetDefaultInstaller -> viewModelScope.launch {
                 setDefaultInstaller(
                     action.lock,
@@ -136,6 +143,7 @@ class PreferredViewModel(
                 "verifier_verify_adb_installs",
                 1
             ).map { it != 0 }
+            val isIgnoringBatteryOptFlow = getIsIgnoreBatteryOptAsFlow()
 
             combine(
                 authorizerFlow,
@@ -150,7 +158,8 @@ class PreferredViewModel(
                 showRefreshedUIFlow,
                 managedInstallerPackagesFlow,
                 managedBlacklistPackagesFlow,
-                adbVerifyEnabledFlow
+                adbVerifyEnabledFlow,
+                isIgnoringBatteryOptFlow
             ) { values: Array<Any?> ->
                 val authorizer = values[0] as ConfigEntity.Authorizer
                 val customize = values[1] as String
@@ -165,6 +174,7 @@ class PreferredViewModel(
                 val managedInstallerPackages = (values[10] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
                 val managedBlacklistPackages = (values[11] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
                 val adbVerifyEnabled = values[12] as Boolean
+                val isIgnoringBatteryOptimizations = values[13] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -181,19 +191,19 @@ class PreferredViewModel(
                     showRefreshedUI = showRefreshedUI,
                     managedInstallerPackages = managedInstallerPackages,
                     managedBlacklistPackages = managedBlacklistPackages,
-                    adbVerifyEnabled = adbVerifyEnabled
+                    adbVerifyEnabled = adbVerifyEnabled,
+                    isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations
                 )
             }.collectLatest { state = it }
         }
     }
 
-    private fun changeGlobalAuthorizer(authorizer: ConfigEntity.Authorizer) {
+    private fun changeGlobalAuthorizer(authorizer: ConfigEntity.Authorizer) =
         viewModelScope.launch {
             appDataStore.putString(AppDataStore.AUTHORIZER, AuthorizerConverter.convert(authorizer))
         }
-    }
 
-    private fun changeGlobalCustomizeAuthorizer(customizeAuthorizer: String) {
+    private fun changeGlobalCustomizeAuthorizer(customizeAuthorizer: String) =
         viewModelScope.launch {
             if (state.authorizerCustomize) {
                 appDataStore.putString(AppDataStore.CUSTOMIZE_AUTHORIZER, customizeAuthorizer)
@@ -201,60 +211,51 @@ class PreferredViewModel(
                 appDataStore.putString(AppDataStore.CUSTOMIZE_AUTHORIZER, "")
             }
         }
-    }
 
-    private fun changeGlobalInstallMode(installMode: ConfigEntity.InstallMode) {
+    private fun changeGlobalInstallMode(installMode: ConfigEntity.InstallMode) =
         viewModelScope.launch {
             appDataStore.putString(AppDataStore.INSTALL_MODE, InstallModeConverter.convert(installMode))
         }
-    }
 
-    private fun changeShowDialogInstallExtendedMenu(installExtendedMenu: Boolean) {
+    private fun changeShowDialogInstallExtendedMenu(installExtendedMenu: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, installExtendedMenu)
         }
-    }
 
-    private fun changeShowSuggestionState(showIntelligentSuggestion: Boolean) {
+    private fun changeShowSuggestionState(showIntelligentSuggestion: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, showIntelligentSuggestion)
         }
-    }
 
-    private fun changeDisableNotificationState(showDisableNotification: Boolean) {
+    private fun changeDisableNotificationState(showDisableNotification: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, showDisableNotification)
         }
-    }
 
-    private fun changeShowDialog(showDialog: Boolean) {
+    private fun changeShowDialog(showDialog: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, showDialog)
         }
-    }
 
-    private fun changeDhizukuAutoCloseCountDown(countDown: Int) {
+    private fun changeDhizukuAutoCloseCountDown(countDown: Int) =
         viewModelScope.launch {
             // Ensure countDown is within the valid range
             if (countDown in 1..10) {
                 appDataStore.putInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, countDown)
             }
         }
-    }
 
-    private fun changeRefreshedUI(showRefreshedUI: Boolean) {
+    private fun changeRefreshedUI(showRefreshedUI: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.UI_FRESH_SWITCH, showRefreshedUI)
         }
-    }
 
-    private fun changeVersionCompareInSingleLine(singleLine: Boolean) {
+    private fun changeVersionCompareInSingleLine(singleLine: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, singleLine)
         }
-    }
 
-    private fun addManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, item: NamedPackage) {
+    private fun addManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, item: NamedPackage) =
         viewModelScope.launch {
             // Create a new list from the current state
             val currentList = list.toMutableList()
@@ -265,9 +266,8 @@ class PreferredViewModel(
                 appDataStore.putNamedPackageList(key, currentList)
             }
         }
-    }
 
-    private fun removeManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, item: NamedPackage) {
+    private fun removeManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, item: NamedPackage) =
         viewModelScope.launch {
             // Create a new list from the current state
             val currentList = list.toMutableList()
@@ -276,7 +276,6 @@ class PreferredViewModel(
             // Save the updated list back to DataStore
             appDataStore.putNamedPackageList(key, currentList)
         }
-    }
 
     /**
      * A reusable helper function to get a Settings.Global integer value as a Flow,
@@ -286,7 +285,47 @@ class PreferredViewModel(
         emit(Settings.Global.getInt(cr, name, defaultValue))
     }.flowOn(Dispatchers.IO)
 
-    private suspend fun setAdbVerifyEnabled(enabled: Boolean, action: PreferredViewAction) {
+    private fun getIsIgnoreBatteryOptAsFlow(): Flow<Boolean> = flow {
+        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        emit(pm.isIgnoringBatteryOptimizations(context.packageName))
+    }.flowOn(Dispatchers.IO)
+
+    /**
+     * Creates and starts an Intent to navigate the user to the system's battery optimization settings page for this app.
+     */
+    @SuppressLint("BatteryLife")
+    private fun requestIgnoreBatteryOptimization() =
+        try {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = "package:${context.packageName}".toUri()
+                // The intent needs to be started from a non-activity context (ViewModel),
+                // so FLAG_ACTIVITY_NEW_TASK is required.
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Timber.e(e, "Could not start activity to request ignore battery optimizations")
+            viewModelScope.launch {
+                _uiEvents.send(PreferredViewEvent.ShowSnackbar("无法打开电池优化设置"))
+            }
+        }
+
+    /**
+     * Re-checks the battery optimization status and updates the UI state.
+     * This is called when the user returns to the preferred screen.
+     */
+    private fun refreshIgnoreBatteryOptStatus() =
+        viewModelScope.launch {
+            // Use .first() to get a single, up-to-date value from the flow.
+            val isIgnoring = getIsIgnoreBatteryOptAsFlow().first()
+
+            // After refreshing, update the state.
+            state = state.copy(
+                isIgnoringBatteryOptimizations = isIgnoring,
+            )
+        }
+
+    private suspend fun setAdbVerifyEnabled(enabled: Boolean, action: PreferredViewAction) =
         runPrivilegedAction(
             action = action,
             titleForError = context.getString(R.string.disable_adb_install_verify_failed),
@@ -311,9 +350,6 @@ class PreferredViewModel(
                 state = state.copy(adbVerifyEnabled = enabled)
             }
         )
-        // Optimistically update the UI state
-        // state = state.copy(adbVerifyEnabled = enabled)
-    }
 
     private suspend fun setDefaultInstaller(lock: Boolean, action: PreferredViewAction) {
         val config = ConfigUtil.getByPackageName(null)
@@ -331,7 +367,7 @@ class PreferredViewModel(
         titleForError: String,
         successMessage: String?,
         block: suspend () -> Unit
-    ) {
+    ) =
         runCatching {
             withContext(Dispatchers.IO) { // Ensure privileged actions run on IO dispatcher
                 block()
@@ -344,5 +380,5 @@ class PreferredViewModel(
             Timber.e(exception, "Privileged action failed")
             _uiEvents.send(PreferredViewEvent.ShowErrorDialog(titleForError, exception, action))
         }
-    }
+
 }

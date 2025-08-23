@@ -23,6 +23,7 @@ import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.ArrowUpward
 import androidx.compose.material.icons.twotone.AutoFixHigh
 import androidx.compose.material.icons.twotone.Badge
+import androidx.compose.material.icons.twotone.BatterySaver
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.ClearAll
 import androidx.compose.material.icons.twotone.Close
@@ -105,6 +106,7 @@ object AppIcons {
     val Authorizer = Icons.TwoTone.Memory
     val DisableAdbVerify = Icons.TwoTone.Security
     val InstallMode = Icons.TwoTone.Downloading
+    val BatteryOptimization = Icons.TwoTone.BatterySaver
     val LockDefault = Icons.TwoTone.Favorite
     val UnlockDefault = Icons.TwoTone.FavoriteBorder
     val ClearAll = Icons.TwoTone.ClearAll
