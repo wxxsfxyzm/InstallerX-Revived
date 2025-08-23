@@ -4,7 +4,7 @@ import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 sealed class PreferredViewAction {
-    object Init : PreferredViewAction()
+    data object Init : PreferredViewAction()
 
     data class ChangeGlobalAuthorizer(val authorizer: ConfigEntity.Authorizer) : PreferredViewAction()
     data class ChangeGlobalCustomizeAuthorizer(val customizeAuthorizer: String) : PreferredViewAction()
@@ -23,5 +23,7 @@ sealed class PreferredViewAction {
     data class RemoveManagedBlacklistPackage(val item: NamedPackage) : PreferredViewAction()
 
     data class SetAdbVerifyEnabledState(val enabled: Boolean) : PreferredViewAction()
+    data object RequestIgnoreBatteryOptimization : PreferredViewAction()
+    data object RefreshIgnoreBatteryOptimizationStatus : PreferredViewAction()
     data class SetDefaultInstaller(val lock: Boolean) : PreferredViewAction()
 }

@@ -10,14 +10,11 @@
 [versions]
 agp = "8.12.1"
 commonsCompress = "1.28.0"
-kotlin = "2.2.0"
-ksp = "2.2.0-2.0.2"
-composeBom = "2025.07.00"
-compose = "1.8.3"
-coreSplashscreenVersion = "1.0.1"
-# Note: When 1.4.0 goes to stable, the Material Expressive APIs will move to the next alpha (1.5.0-alphaX),
-# and will no longer be available in 1.4.0. The APIs will go stable in the 1.5.0 release.
-material3 = "1.5.0-alpha01"
+kotlin = "2.2.10"
+ksp = "2.2.10-2.0.2"
+composeBom = "2025.08.00"
+compose = "1.9.0"
+material3 = "1.5.0-alpha02"
 room = "2.7.2"
 ktx-serialization = "1.9.0"
 accompanist = "0.37.3"
@@ -41,10 +38,8 @@ room = { id = "androidx.room", version.ref = "room" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
 
-
 [libraries]
-androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.16.0" }
-androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreenVersion" }
+androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.17.0" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.2" }
@@ -58,14 +53,14 @@ compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = 
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.2" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.3" }
 compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.10.2" }
+# work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.10.3" }
 
 # Kotlin Serialization
 # https://github.com/Kotlin/kotlinx.serialization/blob/master/README.md#setup

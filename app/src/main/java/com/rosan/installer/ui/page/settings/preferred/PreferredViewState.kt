@@ -9,6 +9,7 @@ data class PreferredViewState(
     val customizeAuthorizer: String = "",
     val installMode: ConfigEntity.InstallMode = ConfigEntity.InstallMode.Dialog,
     val adbVerifyEnabled: Boolean = true,
+    val isIgnoringBatteryOptimizations: Boolean = false,
     val showDialogInstallExtendedMenu: Boolean = false,
     val showIntelligentSuggestion: Boolean = false,
     val disableNotificationForDialogInstall: Boolean = false,

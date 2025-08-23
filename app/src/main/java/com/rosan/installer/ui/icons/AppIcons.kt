@@ -23,10 +23,12 @@ import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.ArrowUpward
 import androidx.compose.material.icons.twotone.AutoFixHigh
 import androidx.compose.material.icons.twotone.Badge
+import androidx.compose.material.icons.twotone.BatterySaver
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.ClearAll
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.ColorLens
+import androidx.compose.material.icons.twotone.Compress
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
 import androidx.compose.material.icons.twotone.Downloading
@@ -103,8 +105,10 @@ object AppIcons {
 
     // --- 设置图标集合 ---
     val Authorizer = Icons.TwoTone.Memory
+    val SingleLineSettingIcon = Icons.TwoTone.Compress
     val DisableAdbVerify = Icons.TwoTone.Security
     val InstallMode = Icons.TwoTone.Downloading
+    val BatteryOptimization = Icons.TwoTone.BatterySaver
     val LockDefault = Icons.TwoTone.Favorite
     val UnlockDefault = Icons.TwoTone.FavoriteBorder
     val ClearAll = Icons.TwoTone.ClearAll

@@ -32,6 +32,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.build.Level
@@ -44,6 +47,7 @@ import com.rosan.installer.ui.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.widget.setting.ClearCache
 import com.rosan.installer.ui.widget.setting.DefaultInstaller
 import com.rosan.installer.ui.widget.setting.DisableAdbVerify
+import com.rosan.installer.ui.widget.setting.IgnoreBatteryOptimizationSetting
 import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.ui.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.widget.setting.SettingsNavigationItemWidget
@@ -59,6 +63,16 @@ fun PreferredPage(
     val context = LocalContext.current
     val state = viewModel.state
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(lifecycleOwner) {
+        // repeatOnLifecycle will ensure that the action is dispatched only when the lifecycle is in RESUMED state
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            // Dispatch the action to refresh the ignore battery optimization status
+            // This will be called when the lifecycle is resumed, ensuring the status is up-to-date
+            viewModel.dispatch(PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus)
+        }
+    }
 
     val revLevel = when (RsConfig.LEVEL) {
         Level.STABLE -> stringResource(id = R.string.stable)
@@ -177,6 +191,12 @@ fun PreferredPage(
                                 )
                             }
                         )
+                    }
+                    item {
+                        IgnoreBatteryOptimizationSetting(
+                            checked = state.isIgnoringBatteryOptimizations,
+                            enabled = !state.isIgnoringBatteryOptimizations,
+                        ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
                     }
                     item { DefaultInstaller(true) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) } }
                     item { DefaultInstaller(false) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) } }

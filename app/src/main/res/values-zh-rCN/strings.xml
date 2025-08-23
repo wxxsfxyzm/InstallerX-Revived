@@ -1,6 +1,5 @@
 <resources>
     <string name="agreement_title">温馨提示</string>
-    <string name="agreement_text">根据相关政策规定，您需要先阅读并同意&lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/terms&quot;&gt;《用户条款》&lt;/a&gt;与&lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/privacy&quot;&gt;《隐私政策》&lt;/a&gt;后才能开始使用本软件。\n同意后不再弹出此提示，可通过设置页点击链接可再次查看相关文件内容。</string>
 
     <string name="user_terms">用户条款</string>
     <string name="privacy_policy">隐私政策</string>
@@ -47,6 +46,9 @@
     <string name="disable_adb_install_verify_desc">在一些系统上可以禁止安装扫描（Play 保护机制等）</string>
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">Dhizuku不受支持</string>
     <string name="disable_adb_install_verify_failed">无法停用安装验证</string>
+    <string name="ignore_battery_optimizations">忽略电池优化</string>
+    <string name="ignore_battery_optimizations_desc">在某些具有严格后台策略的ROM上很有用</string>
+    <string name="ignore_battery_optimizations_desc_disabled">已被忽略</string>
     <string name="lock_default_installer">锁定为默认安装器</string>
     <string name="lock_default_installer_desc">多个授权器配合效果更佳，少数系统需要配合Xposed模块</string>
     <string name="lock_default_installer_success">锁定成功</string>
@@ -392,6 +394,4 @@
     <string name="suggestion_mi_isolation">临时添加有效安装者并重试</string>
     <string name="suggestion_user_restricted">前往开发者选项启用USB安装</string>
     <string name="suggestion_bypass_low_target_sdk">临时允许绕过限制并重试</string>
-
-
 </resources>
