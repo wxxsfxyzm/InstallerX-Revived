@@ -97,5 +97,5 @@ jobs:
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
         run: |
           pip3 install telethon
-          APK_PATH="app/build/outputs/apk/Stable/release/InstallerX-Revived-${{ inputs.version_tag }}.apk"
+          APK_PATH=$(find ./app/build/outputs/apk/Stable/release -name "*.apk")
           python3 .github/bot.py "$APK_PATH"
