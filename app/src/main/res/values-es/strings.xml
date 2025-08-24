@@ -120,11 +120,11 @@
     <string name="config_no_managed_installer_packages">Sin paquetes de instalador gestionados</string>
     <string name="config_no_managed_blacklist">Ingresa aquí los nombres de paquete de las apps bloqueadas</string>
     <string name="config_managed_packages_desc">Agregar o eliminar paquetes gestionados</string>
-    <string name="config_add_one_to_get_started">Haz clic en 'Agregar' abajo para comenzar</string>
+    <string name="config_add_one_to_get_started">Haz clic en \'Agregar\' abajo para comenzar</string>
     <string name="config_add_new_package">Agregar nuevo paquete</string>
     <string name="config_package_name">Nombre del Paquete</string>
     <string name="config_confirm_deletion">Confirmar eliminación</string>
-    <string name="config_confirm_deletion_desc">¿Quieres eliminar '%1$s'? Esto no se puede deshacer.</string>
+    <string name="config_confirm_deletion_desc">¿Quieres eliminar \'%1$s\'? Esto no se puede deshacer.</string>
     <string name="config_installer_matches">Coincidencia: %1$s</string>
     <string name="config_no_managed_packages_to_suggest">Nada que sugerir</string>
 
@@ -301,7 +301,6 @@
     <string name="extended_menu">Menú extendido</string>
     <string name="disable_notification">Desactivar notificación</string>
     <string name="close_immediately_on_dialog_dismiss">El diálogo permanece en primer plano durante la instalación</string>
-    <string name="close_immediately_on_dialog_dismiss_desc">El diálogo permanece en primer plano mientras se instala, hacer clic en un área en blanco saldrá silenciosamente</string>
     <string name="disable_notification_on_dismiss">Cerrar al descartar diálogo</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Descartar diálogo cerrará la app</string>
     <string name="set_countdown">Establecer cuenta regresiva</string>
