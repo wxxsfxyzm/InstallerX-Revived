@@ -17,7 +17,7 @@ import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.InstalledAppInfo
-import com.rosan.installer.data.app.util.PackageInstallerUtil
+import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
@@ -138,7 +138,7 @@ class DialogViewModel(
             showExtendedMenu =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false).first()
             showIntelligentSuggestion =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, false).first()
+                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true).first()
             disableNotificationOnDismiss =
                 appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first()
             versionCompareInSingleLine =
@@ -562,7 +562,7 @@ class DialogViewModel(
             return
         }
         repo.config.uninstallFlags = if (keepData)
-            PackageInstallerUtil.DELETE_KEEP_DATA
+            PackageManagerUtil.DELETE_KEEP_DATA
         else 0 // Default flags (complete removal)
 
         // Set the flag before starting the operation
