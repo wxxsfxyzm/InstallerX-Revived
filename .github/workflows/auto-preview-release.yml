@@ -11,18 +11,18 @@ jobs:
       contents: write
 
     steps:
-      # 1. 检出代码
+      # Step 1: Check out the code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2. 获取提交短哈希值
+      # Step 2: Get the short commit SHA
       - name: Get commit short SHA
         id: commit_sha
         run: echo "SHORT_SHA=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
 
-      # 3. 设置 JDK 环境
+      # Step 3: Set up the JDK environment
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -30,26 +30,28 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      # 4. 修改 versionName 格式为 A.B.C.hash
+      # Step 4: Update the versionName in build file to format A.B.C.hash
       - name: Update versionName format
         id: version
         run: |
-          # 提取 A.B.C
+          # Extract A.B.C from build.gradle.kts
           VERSION=$(grep -oP 'versionName = "\K([0-9]+\.[0-9]+\.[0-9]+)' app/build.gradle.kts)
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           A=$(echo $VERSION | cut -d. -f1)
           B=$(echo $VERSION | cut -d. -f2)
           C=$(echo $VERSION | cut -d. -f3)
           C_NEW=$((C + 1))
+          # The new version name written to the gradle file
           NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
           sed -i "s/versionName = \".*\"/versionName = \"${NEW_VERSION}\"/" app/build.gradle.kts
+          # The new version tag for the release (e.g., v1.2.4)
           echo "VNEW_VERSION=v${A}.${B}.${C_NEW}" >> $GITHUB_OUTPUT
 
-      # 5. gradlew 权限
+      # Step 5: Grant execute permission for gradlew
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 6. 签名准备
+      # Step 6: Decode and set up the signing key
       - name: Decode and set up signing key
         run: |
           mkdir -p keystore
@@ -59,24 +61,59 @@ jobs:
           echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> keystore.properties
           echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> keystore.properties
 
-      # 7. 构建 APK
+      # Step 7: Build the APK
       - name: Build Preview Release APK
         run: ./gradlew assemblePreviewRelease
 
-      # 8. 删除旧的 Alpha Release 和 tag
+      # Step 8: Find and rename the generated APK
+      - name: Find and Rename Preview APK
+        id: rename_apk
+        run: |
+          PROJECT_NAME="InstallerX-Revived"
+          # Construct the version part of the filename (e.g., v1.2.4-a1b2c3d-alpha)
+          VERSION_TAG="${{ steps.version.outputs.VNEW_VERSION }}-${{ steps.commit_sha.outputs.SHORT_SHA }}-alpha"
+          APK_DIR="app/build/outputs/apk/Preview/release/"
+          
+          # Find the original APK file path
+          ORIGINAL_APK_PATH=$(find "$APK_DIR" -maxdepth 1 -type f -name "*.apk")
+
+          # Error handling if APK is not found or multiple are found
+          if [ -z "$ORIGINAL_APK_PATH" ]; then
+            echo "ERROR: APK file not found in $APK_DIR!"
+            # List directory contents for easier debugging
+            ls -R app/build/outputs/apk
+            exit 1
+          elif [ $(echo "$ORIGINAL_APK_PATH" | wc -l) -ne 1 ]; then
+            echo "ERROR: Expected 1 APK file, but found multiple!"
+            echo "$ORIGINAL_APK_PATH"
+            exit 1
+          fi
+          
+          # Define the new file name and path
+          NEW_APK_NAME="${PROJECT_NAME}-${VERSION_TAG}.apk"
+          NEW_APK_PATH="${APK_DIR}${NEW_APK_NAME}"
+          
+          echo "Found APK: $ORIGINAL_APK_PATH"
+          echo "Renaming to: $NEW_APK_PATH"
+          mv "$ORIGINAL_APK_PATH" "$NEW_APK_PATH"
+          
+          # Output the new path for subsequent steps
+          echo "new_path=${NEW_APK_PATH}" >> $GITHUB_OUTPUT
+
+      # Step 9: Delete the old alpha release and its corresponding git tag
       - name: Delete old alpha release and tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           LATEST_TAG=$(git tag --list "*-alpha-latest" | sort -Vr | head -n 1)
           if [[ -n "$LATEST_TAG" ]]; then
-            gh release delete "$LATEST_TAG" --yes || echo "No previous alpha release found."
-            git push origin --delete "$LATEST_TAG" || echo "No previous alpha tag found."
+            gh release delete "$LATEST_TAG" --yes || echo "No previous alpha release found to delete."
+            git push origin --delete "$LATEST_TAG" || echo "No previous alpha tag found to delete."
           else
             echo "No alpha-latest tag to delete."
           fi
 
-      # 9. 自动生成commit changelog
+      # Step 10: Automatically generate changelog from commit history
       - name: Generate changelog
         id: changelog
         run: |
@@ -89,7 +126,7 @@ jobs:
             LOG_RANGE="$PREV_TAG..HEAD"
           fi
 
-          # 获取不包含 Merge pull request 的提交
+          # Get the last 5 commits, excluding merge commits
           CHANGELOG_LIST=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | head -n 5)
           CHANGELOG_COUNT=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | wc -l)
           
@@ -126,7 +163,7 @@ jobs:
           echo "--- Generated Changelog for Release Body ---"
           echo -e "${CHANGELOG_BODY_OUTPUT}${CHANGELOG_LINK_OUTPUT}"
 
-      # 10. 新建带哈希后缀的 Alpha Release
+      # Step 11: Create a new GitHub pre-release
       - name: Create Latest Alpha Pre-Release
         uses: softprops/action-gh-release@v2
         with:
@@ -148,8 +185,10 @@ jobs:
             ${{ steps.changelog.outputs.changelog_body }}${{ steps.changelog.outputs.changelog_full_link }}
 
           prerelease: true
-          files: app/build/outputs/apk/Preview/release/*.apk
+          # Use the exact path of the renamed APK
+          files: ${{ steps.rename_apk.outputs.new_path }}
 
+      # Step 12: Upload the APK to Telegram
       - name: Upload to Telegram
         env:
           API_ID: ${{ secrets.API_ID }}
@@ -158,7 +197,9 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
           COMMIT_MESSAGE: ${{ steps.changelog.outputs.changelog_body }}
+          # Pass the renamed APK path to the script as an environment variable
+          APK_PATH: ${{ steps.rename_apk.outputs.new_path }}
         run: |
           pip3 install telethon
-          APK=$(find ./app/build/outputs/apk/Preview/release -name "*.apk")
-          python3 .github/bot.py $APK
+          # Use the APK_PATH environment variable directly
+          python3 .github/bot.py "$APK_PATH"

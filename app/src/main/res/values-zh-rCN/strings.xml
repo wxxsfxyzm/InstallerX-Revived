@@ -101,6 +101,11 @@
     <string name="config_install_mode_ignore">忽略</string>
     <string name="config_declare_installer">声明安装者（安装来源）</string>
     <string name="config_installer">安装者（包名）</string>
+    <string name="config_manual_dexopt">手动 Dex 优化</string>
+    <string name="config_manual_dexopt_desc">在安装后手动触发 dex2oat 进程</string>
+    <string name="config_dexopt_mode">优化模式</string>
+    <string name="config_force_dexopt">强制优化</string>
+    <string name="config_force_dexopt_desc">即使系统认为没有必要，也强制重新编译</string>
     <string name="config_auto_delete">自动删除</string>
     <string name="config_auto_delete_dsp">安装成功后自动删除安装包</string>
     <string name="config_display_sdk_version">显示SDK信息</string>
@@ -390,6 +395,7 @@
     <string name="suggestion_uninstall_alert_dialog_confirm_action">确认操作</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">将保留数据卸载应用，然后尝试安装。请勿用于系统应用！</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">将会卸载你的应用然后安装新版，所有数据都会丢失。请勿用于系统应用！</string>
+    <string name="suggestion_allow_downgrade">临时允许降级并重试</string>
     <string name="suggestion_allow_test_app">临时允许测试包并重试</string>
     <string name="suggestion_mi_isolation">临时添加有效安装者并重试</string>
     <string name="suggestion_user_restricted">前往开发者选项启用USB安装</string>

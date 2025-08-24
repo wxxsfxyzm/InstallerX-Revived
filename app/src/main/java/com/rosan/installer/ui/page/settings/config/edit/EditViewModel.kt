@@ -84,6 +84,9 @@ class EditViewModel(
                     is EditViewAction.ChangeDataInstallMode -> changeDataInstallMode(action.installMode)
                     is EditViewAction.ChangeDataDeclareInstaller -> changeDataDeclareInstaller(action.declareInstaller)
                     is EditViewAction.ChangeDataInstaller -> changeDataInstaller(action.installer)
+                    is EditViewAction.ChangeDataEnableManualDexopt -> changeDataEnableManualDexopt(action.enable)
+                    is EditViewAction.ChangeDataForceDexopt -> changeDataForceDexopt(action.force)
+                    is EditViewAction.ChangeDataDexoptMode -> changeDataDexoptMode(action.mode)
                     is EditViewAction.ChangeDataAutoDelete -> changeDataAutoDelete(action.autoDelete)
                     is EditViewAction.ChangeDisplaySdk -> changeDisplaySdk(action.displaySdk)
                     is EditViewAction.ChangeDataForAllUser -> changeDataForAllUser(action.forAllUser)
@@ -194,6 +197,28 @@ class EditViewModel(
         state = state.copy(
             data = state.data.copy(
                 installer = installer
+            )
+        )
+    }
+
+    private fun changeDataEnableManualDexopt(enable: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                enableManualDexopt = enable
+            )
+        )
+    }
+
+    private fun changeDataForceDexopt(force: Boolean) {
+        state = state.copy(
+            data = state.data.copy(forceDexopt = force)
+        )
+    }
+
+    private fun changeDataDexoptMode(mode: ConfigEntity.DexoptMode) {
+        state = state.copy(
+            data = state.data.copy(
+                dexoptMode = mode
             )
         )
     }

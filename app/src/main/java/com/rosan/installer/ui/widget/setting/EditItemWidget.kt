@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.automirrored.twotone.More
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Memory
+import androidx.compose.material.icons.twotone.Speed
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -295,6 +297,54 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
                             ) else MenuDefaults.itemColors()
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DataManualDexoptWidget(viewModel: EditViewModel) {
+    SwitchWidget(
+        icon = Icons.TwoTone.Speed,
+        title = stringResource(id = R.string.config_manual_dexopt),
+        description = stringResource(id = R.string.config_manual_dexopt_desc),
+        checked = viewModel.state.data.enableManualDexopt,
+        onCheckedChange = {
+            viewModel.dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))
+        }
+    )
+
+    AnimatedVisibility(
+        visible = viewModel.state.data.enableManualDexopt,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        val currentMode = viewModel.state.data.dexoptMode
+        val data = mapOf(
+            ConfigEntity.DexoptMode.Verify to stringResource(R.string.config_dexopt_mode_verify),
+            ConfigEntity.DexoptMode.SpeedProfile to stringResource(R.string.config_dexopt_mode_speed_profile),
+            ConfigEntity.DexoptMode.Speed to stringResource(R.string.config_dexopt_mode_speed),
+            ConfigEntity.DexoptMode.Everything to stringResource(R.string.config_dexopt_mode_everything),
+        )
+        Column {
+            SwitchWidget(
+                //icon = AppIcons.Build,
+                title = stringResource(id = R.string.config_force_dexopt),
+                description = stringResource(id = R.string.config_force_dexopt_desc),
+                checked = viewModel.state.data.forceDexopt,
+                onCheckedChange = {
+                    viewModel.dispatch(EditViewAction.ChangeDataForceDexopt(it))
+                }
+            )
+            DropDownMenuWidget(
+                title = stringResource(R.string.config_dexopt_mode),
+                description = data[currentMode],
+                choice = data.keys.toList().indexOf(currentMode),
+                data = data.values.toList(),
+            ) {
+                data.keys.toList().getOrNull(it)?.let { mode ->
+                    viewModel.dispatch(EditViewAction.ChangeDataDexoptMode(mode))
                 }
             }
         }

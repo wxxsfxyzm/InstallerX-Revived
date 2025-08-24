@@ -43,6 +43,28 @@ import com.rosan.installer.data.app.model.impl.installer.IBinderInstallerRepoImp
 
 class PackageManagerUtil {
     companion object {
+
+        /**
+         * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
+         * package's data directory.
+         */
+        const val DELETE_KEEP_DATA = 0x00000001
+
+        /**
+         * Flag parameter for {@link #deletePackage} to indicate that you want the
+         * package deleted for all users.
+         */
+        const val DELETE_ALL_USERS = 0x00000002
+
+        /**
+         * Flag parameter for {@link #deletePackage} to indicate that, if you are calling
+         * uninstall on a system that has been updated, then don't do the normal process
+         * of uninstalling the update and rolling back to the older system version (which
+         * needs to happen for all users); instead, just mark the app as uninstalled for
+         * the current user.
+         */
+        const val DELETE_SYSTEM_APP = 0x00000004;
+
         const val INSTALL_FAILED_ALREADY_EXISTS = -1
         const val INSTALL_FAILED_INVALID_APK = -2
         const val INSTALL_FAILED_INVALID_URI = -3

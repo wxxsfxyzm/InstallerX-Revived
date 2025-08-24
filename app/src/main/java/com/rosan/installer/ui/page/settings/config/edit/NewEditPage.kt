@@ -57,6 +57,7 @@ import com.rosan.installer.ui.widget.setting.DataDeclareInstallerWidget
 import com.rosan.installer.ui.widget.setting.DataDescriptionWidget
 import com.rosan.installer.ui.widget.setting.DataForAllUserWidget
 import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
+import com.rosan.installer.ui.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.widget.setting.DataNameWidget
 import com.rosan.installer.ui.widget.setting.DisplaySdkWidget
 import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
@@ -235,34 +236,29 @@ fun NewEditPage(
         ) {
             // --- Group 1: Main Settings ---
             item {
-                // Dynamically build the content list to handle conditional visibility.
-                val mainSettingsContent = mutableListOf<@Composable () -> Unit>().apply {
-                    add { DataNameWidget(viewModel, { DataDescriptionWidget(viewModel) }) }
-                    add { DataAuthorizerWidget(viewModel) }
-                    // Add customize authorizer widget only if the condition is met.
-                    if (viewModel.state.data.authorizerCustomize)
-                        add { DataCustomizeAuthorizerWidget(viewModel) }
-                    add { DataInstallModeWidget(viewModel) }
-                }
-
                 SplicedColumnGroup(
                     title = stringResource(R.string.config_label_main_settings),
-                    content = mainSettingsContent
+                    content = buildList {
+                        add { DataNameWidget(viewModel, { DataDescriptionWidget(viewModel) }) }
+                        add { DataAuthorizerWidget(viewModel) }
+                        // Add customize authorizer widget only if the condition is met.
+                        if (viewModel.state.data.authorizerCustomize)
+                            add { DataCustomizeAuthorizerWidget(viewModel) }
+                        add { DataInstallModeWidget(viewModel) }
+                    }
                 )
             }
 
             // --- Group 2: Installer Settings ---
             item {
-                // Similar dynamic list for installer settings.
-                val installerSettingsContent = mutableListOf<@Composable () -> Unit>().apply {
-                    add { DataDeclareInstallerWidget(viewModel) }
-                    add { DataAutoDeleteWidget(viewModel) }
-                    add { DisplaySdkWidget(viewModel) }
-                }
-
                 SplicedColumnGroup(
                     title = stringResource(R.string.config_label_installer_settings),
-                    content = installerSettingsContent
+                    content = buildList {
+                        add { DataDeclareInstallerWidget(viewModel) }
+                        add { DataManualDexoptWidget(viewModel) }
+                        add { DataAutoDeleteWidget(viewModel) }
+                        add { DisplaySdkWidget(viewModel) }
+                    }
                 )
             }
 

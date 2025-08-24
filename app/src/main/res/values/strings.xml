@@ -104,6 +104,15 @@
     <string name="config_install_mode_ignore">Ignore</string>
     <string name="config_declare_installer">Set install source</string>
     <string name="config_installer">installed by (package name)</string>
+    <string name="config_manual_dexopt">Manual Dex Optimization</string>
+    <string name="config_manual_dexopt_desc">Manually trigger the dex2oat process after installation</string>
+    <string name="config_dexopt_mode">Optimization Mode</string>
+    <string name="config_force_dexopt">Force Optimization</string>
+    <string name="config_force_dexopt_desc">Force recompilation even if the system deems it unnecessary</string>
+    <string name="config_dexopt_mode_verify" translatable="false">Verify</string>
+    <string name="config_dexopt_mode_speed_profile" translatable="false">Speed Profile</string>
+    <string name="config_dexopt_mode_speed" translatable="false">Speed</string>
+    <string name="config_dexopt_mode_everything" translatable="false">Everything</string>
     <string name="config_auto_delete">Auto deletion</string>
     <string name="config_auto_delete_dsp">Automatically delete the apk after it\'s been installed</string>
     <string name="config_display_sdk_version">Display SDK information</string>

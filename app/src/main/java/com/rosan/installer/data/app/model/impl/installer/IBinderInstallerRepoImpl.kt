@@ -287,6 +287,53 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         PackageManagerUtil.installResultVerify(context, receiver)
     }
 
+    /**
+     * Performs dex-optimization on a given package using the specified compiler filter.
+     * This is done via reflection on the hidden IPackageManager API.
+     *
+     * @param packageName The package to be optimized.
+     * @param compilerFilter The dex2oat compiler filter (e.g., "speed", "speed-profile").
+     * @param force Whether to force recompilation even if the system thinks it's unnecessary.
+     */
+    private suspend fun performDexOpt(
+        packageName: String,
+        compilerFilter: String,
+        force: Boolean
+    ) {
+        Timber.tag("performDexOpt").d("Attempting to run dex2oat for $packageName with filter $compilerFilter")
+        try {
+            val iPackageManager = IPackageManager.Stub.asInterface(iBinderWrapper(ServiceManager.getService("package")))
+
+            val method = reflect.getDeclaredMethod(
+                iPackageManager::class.java,
+                "performDexOptMode",
+                String::class.java,    // packageName
+                Boolean::class.java,   // checkProfiles
+                String::class.java,    // targetCompilerFilter
+                Boolean::class.java,   // force
+                Boolean::class.java,   // bootComplete
+                String::class.java     // splitName
+            ) ?: throw NoSuchMethodException("performDexOptMode not found in ${iPackageManager::class.java.name}")
+
+            method.isAccessible = true
+
+            val result = method.invoke(
+                iPackageManager,
+                packageName,
+                false,           // checkProfiles (set to false to ignore profile checks)
+                compilerFilter,  // targetCompilerFilter
+                force,           // force
+                true,            // bootComplete
+                null             // splitName (null for base APK)
+            ) as Boolean
+
+            Timber.tag("performDexOpt").i("Dispatching dex2oat for $packageName successful: $result")
+        } catch (e: Exception) {
+            // Catch all possible Exceptions (NoSuchMethodException, SecurityException, etc.)
+            Timber.tag("performDexOpt").e(e, "Failed to perform dex-opt for $packageName")
+        }
+    }
+
     open suspend fun doFinishWork(
         config: ConfigEntity,
         entities: List<InstallEntity>,
@@ -294,27 +341,33 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         result: Result<Unit>
     ) {
         Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
-        // TODO Uncomment this if you want to perform extra work after installation
-        /*if (result.isSuccess) {
-            coroutineScope.launch {
-                runCatching { onExtraWork() }.exceptionOrNull()
-                    ?.printStackTrace()
+        if (result.isSuccess) {
+            // Trigger dex optimization after installation
+            if (config.enableManualDexopt) {
+                val packageName = entities.firstOrNull()?.packageName
+                if (packageName != null) {
+                    Timber.tag("doFinishWork")
+                        .d("Manual dexopt is enabled. Triggering with mode: ${config.dexoptMode.value}")
+                    coroutineScope.launch {
+                        performDexOpt(
+                            packageName = packageName,
+                            compilerFilter = config.dexoptMode.value,
+                            force = config.forceDexopt
+                        )
+                    }
+                }
             }
-        }*/
-        // Never Delete Multi-APK-ZIP files automatically
-        // Enable autoDelete only when the containerType is not MULTI_APK_ZIP_ZIP
-        if (result.isSuccess && config.autoDelete && entities.first().containerType != DataType.MULTI_APK_ZIP) {
-            Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
-            coroutineScope.launch {
-                runCatching { onDeleteWork(config, entities, extraInfo) }.exceptionOrNull()
-                    ?.printStackTrace()
+
+            // Never Delete Multi-APK-ZIP files automatically
+            // Enable autoDelete only when the containerType is not MULTI_APK_ZIP_ZIP
+            if (config.autoDelete && entities.first().containerType != DataType.MULTI_APK_ZIP) {
+                Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
+                coroutineScope.launch {
+                    runCatching { onDeleteWork(config, entities, extraInfo) }.exceptionOrNull()
+                        ?.printStackTrace()
+                }
             }
         }
-    }
-
-    protected open suspend fun onExtraWork() {
-        // TODO Override this method to perform any extra work after installation
-        Timber.tag("onExtraWork").d("No extra work defined.")
     }
 
     protected open suspend fun onDeleteWork(
