@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "e89f5b4bd7ebb7fb43ed11e57877fff3",
+    "identityHash": "b42ca3721318599a2cafe5eaf91188b4",
     "entities": [
       {
         "tableName": "app",
@@ -80,7 +80,7 @@
       },
       {
         "tableName": "config",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL DEFAULT 'Default', `description` TEXT NOT NULL, `authorizer` TEXT NOT NULL, `customize_authorizer` TEXT NOT NULL, `install_mode` TEXT NOT NULL, `installer` TEXT, `enable_manual_dexopt` INTEGER NOT NULL DEFAULT 0, `dexopt_mode` TEXT NOT NULL DEFAULT 'speed-profile', `auto_delete` INTEGER NOT NULL, `display_sdk` INTEGER NOT NULL DEFAULT 0, `for_all_user` INTEGER NOT NULL, `allow_test_only` INTEGER NOT NULL, `allow_downgrade` INTEGER NOT NULL, `allow_restricted_permissions` INTEGER NOT NULL DEFAULT 0, `bypass_low_target_sdk` INTEGER NOT NULL DEFAULT 0, `allow_all_requested_permissions` INTEGER NOT NULL DEFAULT 0, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL DEFAULT 'Default', `description` TEXT NOT NULL, `authorizer` TEXT NOT NULL, `customize_authorizer` TEXT NOT NULL, `install_mode` TEXT NOT NULL, `installer` TEXT, `enable_manual_dexopt` INTEGER NOT NULL DEFAULT 0, `force_dexopt` INTEGER NOT NULL DEFAULT 0, `dexopt_mode` TEXT NOT NULL DEFAULT 'speed-profile', `auto_delete` INTEGER NOT NULL, `display_sdk` INTEGER NOT NULL DEFAULT 0, `for_all_user` INTEGER NOT NULL, `allow_test_only` INTEGER NOT NULL, `allow_downgrade` INTEGER NOT NULL, `allow_restricted_permissions` INTEGER NOT NULL DEFAULT 0, `bypass_low_target_sdk` INTEGER NOT NULL DEFAULT 0, `allow_all_requested_permissions` INTEGER NOT NULL DEFAULT 0, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -127,6 +127,13 @@
           {
             "fieldPath": "enableManualDexopt",
             "columnName": "enable_manual_dexopt",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "forceDexopt",
+            "columnName": "force_dexopt",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
@@ -213,7 +220,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e89f5b4bd7ebb7fb43ed11e57877fff3')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b42ca3721318599a2cafe5eaf91188b4')"
     ]
   }
 }

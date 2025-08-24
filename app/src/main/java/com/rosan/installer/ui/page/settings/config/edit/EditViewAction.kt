@@ -12,6 +12,7 @@ sealed class EditViewAction {
     data class ChangeDataDeclareInstaller(val declareInstaller: Boolean) : EditViewAction()
     data class ChangeDataInstaller(val installer: String) : EditViewAction()
     data class ChangeDataEnableManualDexopt(val enable: Boolean) : EditViewAction()
+    data class ChangeDataForceDexopt(val force: Boolean) : EditViewAction()
     data class ChangeDataDexoptMode(val mode: ConfigEntity.DexoptMode) : EditViewAction()
     data class ChangeDataAutoDelete(val autoDelete: Boolean) : EditViewAction()
     data class ChangeDisplaySdk(val displaySdk: Boolean) : EditViewAction()

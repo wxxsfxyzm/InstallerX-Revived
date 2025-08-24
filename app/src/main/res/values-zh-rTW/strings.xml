@@ -390,6 +390,7 @@
     <string name="suggestion_uninstall_alert_dialog_confirm_action">確認操作</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">將保留資料解除安裝應用程式，然後嘗試安裝。請勿用於系統應用程式！</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">將會解除安裝你的應用程式然後安裝新版，所有資料都會遺失。請勿用於系統應用程式！</string>
+    <string name="suggestion_allow_downgrade">臨時允許降級並重試</string>
     <string name="suggestion_allow_test_app">臨時允許測試包並重試</string>
     <string name="suggestion_mi_isolation">臨時添加有效安裝者並重試</string>
     <string name="suggestion_user_restricted">前往開發者選項啟用USB安裝</string>

@@ -85,6 +85,7 @@ class EditViewModel(
                     is EditViewAction.ChangeDataDeclareInstaller -> changeDataDeclareInstaller(action.declareInstaller)
                     is EditViewAction.ChangeDataInstaller -> changeDataInstaller(action.installer)
                     is EditViewAction.ChangeDataEnableManualDexopt -> changeDataEnableManualDexopt(action.enable)
+                    is EditViewAction.ChangeDataForceDexopt -> changeDataForceDexopt(action.force)
                     is EditViewAction.ChangeDataDexoptMode -> changeDataDexoptMode(action.mode)
                     is EditViewAction.ChangeDataAutoDelete -> changeDataAutoDelete(action.autoDelete)
                     is EditViewAction.ChangeDisplaySdk -> changeDisplaySdk(action.displaySdk)
@@ -205,6 +206,12 @@ class EditViewModel(
             data = state.data.copy(
                 enableManualDexopt = enable
             )
+        )
+    }
+
+    private fun changeDataForceDexopt(force: Boolean) {
+        state = state.copy(
+            data = state.data.copy(forceDexopt = force)
         )
     }
 

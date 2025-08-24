@@ -352,7 +352,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                         performDexOpt(
                             packageName = packageName,
                             compilerFilter = config.dexoptMode.value,
-                            force = false
+                            force = config.forceDexopt
                         )
                     }
                 }

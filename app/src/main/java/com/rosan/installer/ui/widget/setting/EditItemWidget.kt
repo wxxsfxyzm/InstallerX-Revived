@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -326,15 +327,25 @@ fun DataManualDexoptWidget(viewModel: EditViewModel) {
             ConfigEntity.DexoptMode.Speed to stringResource(R.string.config_dexopt_mode_speed),
             ConfigEntity.DexoptMode.Everything to stringResource(R.string.config_dexopt_mode_everything),
         )
-
-        DropDownMenuWidget(
-            title = stringResource(R.string.config_dexopt_mode),
-            description = data[currentMode],
-            choice = data.keys.toList().indexOf(currentMode),
-            data = data.values.toList(),
-        ) {
-            data.keys.toList().getOrNull(it)?.let { mode ->
-                viewModel.dispatch(EditViewAction.ChangeDataDexoptMode(mode))
+        Column {
+            SwitchWidget(
+                //icon = AppIcons.Build,
+                title = stringResource(id = R.string.config_force_dexopt),
+                description = stringResource(id = R.string.config_force_dexopt_desc),
+                checked = viewModel.state.data.forceDexopt,
+                onCheckedChange = {
+                    viewModel.dispatch(EditViewAction.ChangeDataForceDexopt(it))
+                }
+            )
+            DropDownMenuWidget(
+                title = stringResource(R.string.config_dexopt_mode),
+                description = data[currentMode],
+                choice = data.keys.toList().indexOf(currentMode),
+                data = data.values.toList(),
+            ) {
+                data.keys.toList().getOrNull(it)?.let { mode ->
+                    viewModel.dispatch(EditViewAction.ChangeDataDexoptMode(mode))
+                }
             }
         }
     }

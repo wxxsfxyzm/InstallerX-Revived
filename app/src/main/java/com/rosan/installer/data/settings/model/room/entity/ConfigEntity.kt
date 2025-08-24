@@ -22,6 +22,7 @@ data class ConfigEntity(
     @ColumnInfo(name = "install_mode") var installMode: InstallMode,
     @ColumnInfo(name = "installer") var installer: String?,
     @ColumnInfo(name = "enable_manual_dexopt", defaultValue = "0") var enableManualDexopt: Boolean = false,
+    @ColumnInfo(name = "force_dexopt", defaultValue = "0") var forceDexopt: Boolean = false,
     @ColumnInfo(
         name = "dexopt_mode",
         defaultValue = "'speed-profile'"
@@ -45,6 +46,7 @@ data class ConfigEntity(
             installMode = InstallMode.Global,
             installer = null,
             enableManualDexopt = false,
+            forceDexopt = false,
             dexoptMode = DexoptMode.SpeedProfile,
             autoDelete = false,
             forAllUser = false,
@@ -62,6 +64,7 @@ data class ConfigEntity(
             installMode = InstallMode.Dialog,
             installer = "com.miui.packageinstaller",
             enableManualDexopt = false,
+            forceDexopt = false,
             dexoptMode = DexoptMode.SpeedProfile,
             autoDelete = false,
             forAllUser = false,
