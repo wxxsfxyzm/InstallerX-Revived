@@ -1,6 +1,6 @@
 # InstallerX Revived (Community Edition)
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![Latest Release](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=Stable)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![Prerelease](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=Beta)](https://github.com/wxxsfxyzm/InstallerX/releases)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![Latest Release](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=Stable)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![Prerelease](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=Beta)](https://github.com/wxxsfxyzm/InstallerX/releases)[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
 - This is a community-maintained fork after the [original project](https://github.com/iamr0s/InstallerX) was archived by the author
 - Provides limited open-source updates and support
@@ -29,86 +29,79 @@ Compared to stock installers, **InstallerX** offers more installation options:
 - **Full support:** Android SDK 34 - 36
 - **Limited support:** Android SDK 30 - 33 (please report issues)
 
-## Key Changes
+## Key Changes and Features
 
-- **UI Options:** Switch between the classic UI style and a new Material 3 Expressive design [Experimental]
-- **Customization:** More configurable UI settings
-- **Bug fixes:** Resolved APK deletion issues from the original project on certain systems
-- **Performance:** Improved parsing speed and compatibility with more package types
-- **Multilingual support:** English, Traditional Chinese, and Spanish. Contributions for more languages welcome!
-- **Dialog optimization:** Improved installation dialog display
-- **New features:**
-  - Single-line / multi-line version comparison display
-  - Shows targetSDK and minSDK during installation
-  - Displays system icon packs (method from [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku))
-  - Shizuku/Root can bypass chained launch interception on customized systems (dialog installation only)
-    - Implemented via native API, no shell commands
-    - Dhizuku lacks permission, so a countdown option is provided to allow opening apps in time
-  - Extended installation dialog menu (enable in settings):
-    - Displays requested permissions by the app to install
-    - InstallFlags configuration (inherits global Profile settings, based on [InstallWithOptions](https://github.com/zacharee/InstallWithOptions))
-      - **Note:** Effectiveness depends on the system, and some options may pose security risks
-  - Preset installation source package names in settings, selectable in config and dialog menu
-  - Supports installing APKs inside ZIP archives using InstallerX:
-    - Dialog installation only
-    - No file count limits; supports nested directories (not limited to root directory of ZIP)
-    - Automatically handles multiple versions of the same package
-      - Supports deduplication
-      - Intelligent selection of the best APK
-  - Batch installation (multi-select and share to InstallerX):
-    - Dialog installation only
-    - No file count limits
-    - APK files only
-    - Automatically handles multiple versions of the same package
-      - Supports deduplication
-      - Intelligent selection of the best APK
-  - APKS/APKM/XAPK split package auto-selection (inspired by [vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller/tree/master/app))
-    - Works in both notification and dialog installation
-      - Notification installation always chooses the best option
-      - Dialog defaults to best option but allows manual override
-    - Split selection UI shows user-friendly descriptions
-  - [Experimental] Install armeabi-v7a packages on arm64-v8a only systems (runtime compatibility depends on system)
-  - [Experimental] Data-preserving and non-data-preserving downgrade installation on some OEM Android 14/15 systems
-    - Requires Android 14+. On Android 14, first try the built-in `Allow downgrade` install option, then this feature if it fails
-    - Integrated into "Smart Suggestions (Experimental)" in dialog installation
-    - Do **not** use on system apps — may cause data loss and render the system unusable
-    - Not supported on OneUI 7.0, RealmeUI, or some ColorOS (OEM-limited) — only non-data-preserving downgrade will appear if unsupported
-  - [Experimental] Support for configuring a blocklist of package names in settings. Apps listed there will be denied during installation.
-    - Currently under development — only manual entry is supported for now.  
-      In the future, default blocklists will be provided based on device manufacturers
-      (especially useful on HyperOS to prevent accidental installation of system apps from other devices)
+- **UI Options:** [Testing] Switchable between the classic interface and a new UI design based on Material 3 Expressive.
+- **More Customization:** More customizable interface settings.
+- **Bug fixes:** Resolved APK deletion issues from the original project on certain systems.
+- **Performance:** Optimized parsing speed, improved parsing of various package types.
+- **Multilingual support:** English, Traditional Chinese, and Spanish. Contributions for more languages are welcome via PR!
+- **Dialog optimization:** Improved installation dialog display.
+- **System Icons:** Support for displaying system icon packs during installation (method from [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt)).
+- **Version Comparison:** Support for displaying version number comparison in single-line or multi-line format.
+- **SDK Information:** Installation dialogs show targetSDK and minSDK.
+- **Bypass Interceptions:** Shizuku/Root can bypass custom UI chain-start restrictions when opening an App after installation.
+    - Implemented using native APIs, not shell commands.
+    - Currently only works for dialog installation.
+    - Dhizuku cannot invoke permissions, so a customizable countdown option was added to reserve time for the app opening action.
+- **Extended Menu:** For dialog installation (enable in settings):
+    - Displays permissions requested by the application.
+    - InstallFlags configuration (can inherit global Profile settings). Partially based on code from [zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions/blob/main/app/src/main/java/dev/zwander/installwithoptions/data/InstallOption.kt).
+      - **Important Note:** Setting InstallFlags **does not guarantee** they will always work. Some options might pose security risks, depending on the system.
+- **Preset Sources:** Support for pre-configuring installation source package names in settings, allowing quick selection in profiles and the dialog installation menu.
+- **Install from ZIP:** Support for installing APK files inside ZIP archives (dialog installation only).
+    - No quantity limit.
+    - Supports APK files in nested directories within the ZIP, **not limited to the root directory**.
+    - Supports automatic handling of multiple versions of the same package:
+        - Deduplication.
+        - Intelligent selection of the best package to install.
+- **Batch Installation:** Support for installing multiple APKs at once (multi-select and share to InstallerX).
+    - Dialog installation only.
+    - No quantity limit.
+    - APK files only.
+    - Supports automatic handling of multiple versions of the same package (deduplication and intelligent selection).
+- **APKS/APKM/XAPK Files:** Support for automatic selection of the best split. Partially based on ideas and code from [vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller/tree/master/app).
+    - Supports both notification and dialog installation.
+        - Clicking "Install" in the notification chooses the best option.
+        - In the dialog, the best option is selected by default, but can be chosen manually.
+    - The split selection interface shows user-friendly descriptions.
+- [Testing] **Architecture Support:** Allows installing armeabi-v7a packages on arm64-v8a only systems. Actual functionality depends on the system providing runtime translation.
+- [Testing] **Downgrade with/without Data:** Support for performing app downgrades with or without data preservation on some OEM Android 15 systems.
+    - This feature only supports Android 14 and above. On Android 14, try the `Allow downgrade` option in the installation settings first, and if it fails, use this suggestion.
+    - The feature is available in the smart suggestions of the dialog installation. To use it, first enable the `Show intelligent suggestions (Experimental)` option.
+    - **Use this feature with extreme caution on system apps!** Loss of system app data could render the device unusable.
+    - Not compatible with OneUI 7.0, RealmeUI, and some ColorOS versions (OEM restrictions). If you only see the downgrade option *without* data preservation, it means your system does not support downgrade *with* data.
+- [Testing] **Blacklist:** Support for configuring a list of banned package names for installation in the settings.
+    - Under development. Currently only allows manual additions. A default list based on device model will be provided in the future (useful to prevent incorrect installation of system software from other models on HyperOS).
+
 ## FAQ
 
-- **Dhizuku not working properly**
-  - Only minimal support for **official Dhizuku**
-  - Tested on SDK ≥34 AVDs; not guaranteed below SDK 34
-  - `OwnDroid` may break "auto-delete after install"
-  - On some Chinese ROMs, Dhizuku is restricted in background. Restart the app and try again if encountering issues
-  - Dhizuku has insufficient permissions (cannot bypass intent interception, set installer source, etc.). Therefore Shizuku is recommended
+- **Dhizuku not working properly?**
+    - Support for **official Dhizuku** is limited. Tested on AVDs with SDK ≥34. Operation on SDK <34 is not guaranteed.
+    - When using `OwnDroid`, the `Auto delete after installation` function might not work correctly.
+    - On Chinese ROMs, occasional errors are usually due to the system restricting Dhizuku's background operation. It is recommended to restart the Dhizuku app first.
+    - Dhizuku has limited permissions. Many operations are not possible (like bypassing system intent interceptors or specifying the installation source). Using Shizuku is recommended if possible.
 
-- **Lock tool not working**
-  - Due to package name changes, use the modified [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
+- **Lock tool not working?**
+    - Due to the package name change, use the modified [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk) from this repository.
 
-- **HyperOS shows "System app installation requires valid installer declaration" error**
-  - System security restriction
-  - Declare a system installer (recommended: `com.android.fileexplorer` or `com.android.vending`)
-  - Works with Shizuku/Root (Dhizuku not supported)
-  - App auto-adds `com.miui.packageinstaller` to config on HyperOS startup; change it in settings if needed
+- **HyperOS shows "Installing system apps requires declaring a valid installer" error**
+    - It's a system security restriction. You must declare an installer that is a system app (recommended: `com.android.fileexplorer` or `com.android.vending`).
+    - Works with Shizuku/Root. **Dhizuku is not supported**.
+    - New feature: InstallerX automatically detects HyperOS and adds a default configuration (`com.miui.packageinstaller`). You can change it in the settings if needed.
 
-- **HyperOS reverts to default installer**
-  - HyperOS may occasionally revoke the user’s installer setting for unknown reasons
-  - On some HyperOS versions, being unable to lock the installer is expected
-  - HyperOS revokes permissions if user rejects ADB/Shizuku installation
-  - Solution: Manually relock the installer
+- **HyperOS reinstalls the default installer / locking fails**
+    - HyperOS sometimes revokes the user's installer configuration (reason under investigation).
+    - On some HyperOS versions, locking failure is normal.
+    - HyperOS intercepts USB installation requests (ADB/Shizuku) with a dialog. If the user rejects the installation of a new app, the system will revoke the installer setting and force the default one. If this happens, lock InstallerX again.
 
-- **Installation notification freezes on HyperOS**
-  - HyperOS has strict background app controls
-  - Enable "No background restrictions"
-  - App automatically closes 0.5 seconds after completing installation
+- **Notification progress bar freezes on HyperOS**
+    - HyperOS has very strict background app controls. Set "No background restrictions" for the app.
+    - The app is optimized: it ends all background services and closes 0.5 seconds after completing the installation task (when the user clicks "Done" or clears the notification). You can enable the foreground service notification to monitor.
 
-- **Issues on Oppo/Vivo/Lenovo devices**
-  - We don't have these devices for testing. Discuss solutions in [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)
-  - For Oppo/Vivo devices, use the Lock Tool to set InstallerX may be always required
+- **Problems on Oppo/Vivo/Lenovo/... systems?**
+    - We do not have devices from these brands for testing. You can discuss it in [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions).
+    - To lock the installer on Oppo/Vivo, use the lock tool (Lock Tool).
 
 ## About Releases
 
@@ -116,15 +109,15 @@ Compared to stock installers, **InstallerX** offers more installation options:
 > Development versions may be unstable and features may change/be removed without notice.
 > Switching build channels may require data wipe/reinstallation.
 
-- **`dev` branch:** Features in testing (find builds in [Pull Requests](https://github.com/wxxsfxyzm/InstallerX-Revived/pulls))
-  - Changes documented in PRs (may be AI-generated)
-- **Alpha versions:** Automatic when merged to `main`
-- **Stable releases:** Manually published when incrementing `versionCode`
+- **`dev` branch:** Contains features under development. If you want to test them, look for the corresponding builds in [Pull Requests](https://github.com/wxxsfxyzm/InstallerX-Revived/pulls).
+  - Changes for each commit are detailed in the PRs (may be AI-generated).
+- **`main` branch:** When stable changes are merged from `dev`, the CI/CD system automatically builds and publishes a new alpha version.
+- **Stable releases:** Manually published when finishing a development phase and increasing the `versionCode`. CI/CD automatically publishes them as a release.
 
 ## License
 
 Copyright © [iamr0s](https://github.com/iamr0s) and [contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
 
-InstallerX is currently released under [**GNU GPL v3**](http://www.gnu.org/copyleft/gpl.html), though this commitment may change in the future. Maintainers reserve the right to modify license terms or close the source.
+InstallerX is currently released under [**GNU General Public License v3 (GPL-3)**](http://www.gnu.org/licenses/gpl-3.0), though this commitment may change in the future. Maintainers reserve the right to modify license terms or the open-source status of the project.
 
-If you create derivative works based on InstallerX, you must comply with the GPL-3.0 terms of the specific version you use as base, regardless of future changes to the main project.
+If you base your development on InstallerX, you must comply with the terms of the open-source license of the specific version of the source code you use as a base, regardless of future changes made to the main project.
