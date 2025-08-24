@@ -61,7 +61,7 @@ data class ConfigEntity(
             description = "",
             authorizer = Authorizer.Global,
             customizeAuthorizer = "",
-            installMode = InstallMode.Dialog,
+            installMode = InstallMode.Global,
             installer = "com.miui.packageinstaller",
             enableManualDexopt = false,
             forceDexopt = false,

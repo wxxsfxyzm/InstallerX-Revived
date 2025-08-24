@@ -74,7 +74,16 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate. SavedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}")
         restoreInstaller(savedInstanceState)
-        checkPermissionsAndStartProcess()
+        val installerId =
+            if (savedInstanceState == null) intent?.getStringExtra(KEY_ID) else savedInstanceState.getString(KEY_ID)
+
+        if (installerId == null) {
+            Timber.d("onCreate: This is a fresh launch for a new task. Starting permission and resolve process.")
+            // Only start the process for a completely new task.
+            checkPermissionsAndStartProcess()
+        } else {
+            Timber.d("onCreate: Re-attaching to existing installer ($installerId). Skipping resolve process.")
+        }
         showContent()
     }
 
