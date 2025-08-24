@@ -384,7 +384,7 @@
     <string name="split_dpi_hdpi">High (~240dpi)</string>
     <string name="split_dpi_xhdpi">Very High (~320dpi)</string>
     <string name="split_dpi_xxhdpi">Extremely High (~480dpi)</string>
-    <string name="split_dpi_xxxhdpi">Maximun (~640dpi)</string>
+    <string name="split_dpi_xxxhdpi">Maximum (~640dpi)</string>
     <string name="split_dpi_tvdpi">TV (~213dpi)</string>
     <string name="split_dpi_nodpi">No scaling</string>
     <string name="split_dpi_anydpi">Any density</string>
