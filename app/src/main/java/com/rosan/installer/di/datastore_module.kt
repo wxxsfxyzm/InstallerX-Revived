@@ -20,6 +20,6 @@ val datastoreModule = module {
     }
 
     single {
-        AppDataStore(get())
+        AppDataStore(get(), get())
     }
 }
