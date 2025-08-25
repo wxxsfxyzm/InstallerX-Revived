@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.settings.config.edit
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -41,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.widget.dialog.UnsavedChangesDialog
@@ -266,14 +268,18 @@ fun NewEditPage(
             item {
                 SplicedColumnGroup(
                     title = stringResource(R.string.config_label_install_options),
-                    content = listOf(
-                        { DataForAllUserWidget(viewModel) },
-                        { DataAllowTestOnlyWidget(viewModel) },
-                        { DataAllowDowngradeWidget(viewModel) },
-                        { DataBypassLowTargetSdkWidget(viewModel) },
-                        { DataAllowRestrictedPermissionsWidget(viewModel) },
-                        { DataAllowAllRequestedPermissionsWidget(viewModel) }
-                    )
+                    content = buildList {
+                        add { DataForAllUserWidget(viewModel) }
+                        add { DataAllowTestOnlyWidget(viewModel) }
+                        if (Build.VERSION.SDK_INT <= InstallOption.AllowDowngrade.maxSdk) add {
+                            DataAllowDowngradeWidget(
+                                viewModel
+                            )
+                        }
+                        add { DataBypassLowTargetSdkWidget(viewModel) }
+                        add { DataAllowRestrictedPermissionsWidget(viewModel) }
+                        add { DataAllowAllRequestedPermissionsWidget(viewModel) }
+                    }
                 )
             }
         }

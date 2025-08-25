@@ -12,9 +12,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 
-class AppDataStore(private val dataStore: DataStore<Preferences>) {
-    private val json = Json { ignoreUnknownKeys = true }
-
+class AppDataStore(
+    private val dataStore: DataStore<Preferences>,
+    private val json: Json
+) {
     companion object {
         // UI Fresh Switch
         val UI_FRESH_SWITCH = booleanPreferencesKey("ui_fresh_switch")
