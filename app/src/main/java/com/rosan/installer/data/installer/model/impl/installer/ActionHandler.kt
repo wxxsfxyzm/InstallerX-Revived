@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -23,6 +24,7 @@ import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsuppo
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
+import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.model.exception.ResolveException
 import com.rosan.installer.data.installer.model.impl.InstallerRepoImpl
 import com.rosan.installer.data.installer.repo.InstallerRepo
@@ -34,6 +36,7 @@ import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -62,9 +65,14 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             installer.action.collect { action ->
                 Timber.d("[id=${installer.id}] Received action: ${action::class.simpleName}")
                 when (action) {
-                    is InstallerRepoImpl.Action.Resolve -> resolve(action.activity)
+                    is InstallerRepoImpl.Action.ResolveInstall -> resolve(action.activity)
                     is InstallerRepoImpl.Action.Analyse -> analyse()
                     is InstallerRepoImpl.Action.Install -> install()
+                    is InstallerRepoImpl.Action.ResolveUninstall -> resolveUninstall(
+                        action.activity,
+                        action.packageName
+                    )
+
                     is InstallerRepoImpl.Action.Uninstall -> uninstall(action.packageName)
                     is InstallerRepoImpl.Action.Finish -> finish()
                 }
@@ -91,7 +99,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.Ready) // Also reset progress
 
         Timber.d("[id=${installer.id}] resolve: State has been reset. Emitting ProgressEntity.Resolving.")
-        installer.progress.emit(ProgressEntity.Resolving)
+        installer.progress.emit(ProgressEntity.InstallResolving)
 
 
         installer.config = try {
@@ -99,7 +107,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         } catch (e: Exception) {
             Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve config.")
             installer.error = e
-            installer.progress.emit(ProgressEntity.ResolvedFailed)
+            installer.progress.emit(ProgressEntity.InstallResolvedFailed)
             return
         }
         Timber.d("[id=${installer.id}] resolve: Config resolved. installMode=${installer.config.installMode}")
@@ -124,24 +132,24 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         } catch (e: Exception) {
             Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve and stabilize data.")
             installer.error = e
-            installer.progress.emit(ProgressEntity.ResolvedFailed)
+            installer.progress.emit(ProgressEntity.InstallResolvedFailed)
             return
         }
 
         Timber
             .d("[id=${installer.id}] resolve: Data resolved successfully (${installer.data.size} items). Emitting ProgressEntity.ResolveSuccess.")
-        installer.progress.emit(ProgressEntity.ResolveSuccess)
+        installer.progress.emit(ProgressEntity.InstallResolveSuccess)
     }
 
     private suspend fun analyse() {
         Timber.d("[id=${installer.id}] analyse: Starting. Emitting ProgressEntity.Analysing.")
-        installer.progress.emit(ProgressEntity.Analysing)
+        installer.progress.emit(ProgressEntity.InstallAnalysing)
         val rawAppEntities = runCatching {
             analyseEntities(installer.data)
         }.getOrElse {
             Timber.e(it, "[id=${installer.id}] analyse: Failed.")
             installer.error = it
-            installer.progress.emit(ProgressEntity.AnalysedFailed)
+            installer.progress.emit(ProgressEntity.InstallAnalysedFailed)
             return
         }
         // --- Add a check here for empty results. ---
@@ -149,7 +157,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             Timber.w("[id=${installer.id}] analyse: Analysis resulted in an empty list. No valid apps found.")
             // You can either use a generic error or a more specific one.
             installer.error = AnalyseFailedAllFilesUnsupportedException("No valid files were found in the selection.")
-            installer.progress.emit(ProgressEntity.AnalysedFailed)
+            installer.progress.emit(ProgressEntity.InstallAnalysedFailed)
             return
         }
 
@@ -241,11 +249,11 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         if (isNotificationInstall && isMultiAppMode) {
             Timber.w("[id=${installer.id}] analyse: Multi-APK not supported in notification mode. Emitting AnalysedUnsupported.")
             installer.progress.emit(
-                ProgressEntity.AnalysedUnsupported(context.getString(R.string.installer_current_install_mode_not_supported))
+                ProgressEntity.InstallAnalysedUnsupported(context.getString(R.string.installer_current_install_mode_not_supported))
             )
         } else {
             Timber.d("[id=${installer.id}] analyse: Emitting ProgressEntity.AnalysedSuccess.")
-            installer.progress.emit(ProgressEntity.AnalysedSuccess)
+            installer.progress.emit(ProgressEntity.InstallAnalysedSuccess)
         }
     }
 
@@ -287,6 +295,59 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
         Timber.d("[id=${installer.id}] install: Succeeded. Emitting ProgressEntity.InstallSuccess.")
         installer.progress.emit(ProgressEntity.InstallSuccess)
+    }
+
+    /**
+     * Resolves information for the package to be uninstalled and prepares for user confirmation.
+     */
+    private suspend fun resolveUninstall(activity: Activity, packageName: String) {
+        Timber.d("[id=${installer.id}] resolveUninstall: Starting for $packageName.")
+
+        installer.config = try {
+            resolveConfig(activity)
+        } catch (e: Exception) {
+            Timber.e(e, "[id=${installer.id}] resolveUninstall: Failed to resolve config.")
+            installer.error = e
+            installer.progress.emit(ProgressEntity.UninstallResolveFailed)
+            return
+        }
+
+        Timber.d("[id=${installer.id}] resolveUninstall: Config resolved. Authorizer is '${installer.config.authorizer}'")
+        installer.progress.emit(ProgressEntity.UninstallResolving)
+
+        try {
+            val pm = context.packageManager
+            val appInfo: ApplicationInfo = pm.getApplicationInfo(packageName, 0)
+
+            val appLabel = pm.getApplicationLabel(appInfo).toString()
+            val packageInfo = pm.getPackageInfo(packageName, 0)
+            val versionName = packageInfo.versionName
+            val versionCode = packageInfo.longVersionCode
+            val appIcon = pm.getApplicationIcon(packageName)
+
+            val uninstallDetails = UninstallInfo(
+                packageName = packageName,
+                appLabel = appLabel,
+                versionName = versionName,
+                versionCode = versionCode,
+                appIcon = appIcon
+            )
+
+            // Update the repo with the fetched information
+            installer.uninstallInfo.update { uninstallDetails }
+
+            Timber.d("[id=${installer.id}] resolveUninstall: Success. Emitting UninstallReady.")
+            installer.progress.emit(ProgressEntity.UninstallReady)
+
+        } catch (e: PackageManager.NameNotFoundException) {
+            Timber.e(e, "[id=${installer.id}] resolveUninstall: Failed. Package not found.")
+            installer.error = e
+            installer.progress.emit(ProgressEntity.UninstallResolveFailed)
+        } catch (e: Exception) {
+            Timber.e(e, "[id=${installer.id}] resolveUninstall: An unexpected error occurred.")
+            installer.error = e
+            installer.progress.emit(ProgressEntity.UninstallResolveFailed)
+        }
     }
 
     private suspend fun uninstall(packageName: String) {
@@ -474,15 +535,15 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     if (totalSize > 0) {
                         // We can show determinate progress.
                         Timber.d("Starting copy of $totalSize bytes.")
-                        installer.progress.emit(ProgressEntity.Preparing(0f)) // Show progress bar at 0%
+                        installer.progress.emit(ProgressEntity.InstallPreparing(0f)) // Show progress bar at 0%
                         input.copyToWithProgress(output, totalSize) { progress ->
                             // Update progress in a coroutine to avoid blocking.
-                            scope.launch { installer.progress.emit(ProgressEntity.Preparing(progress)) }
+                            scope.launch { installer.progress.emit(ProgressEntity.InstallPreparing(progress)) }
                         }
                     } else {
                         // Indeterminate progress.
                         Timber.d("Starting copy of unknown size.")
-                        installer.progress.emit(ProgressEntity.Preparing(-1f)) // Use -1 for indeterminate
+                        installer.progress.emit(ProgressEntity.InstallPreparing(-1f)) // Use -1 for indeterminate
                         input.copyTo(output)
                     }
                 }

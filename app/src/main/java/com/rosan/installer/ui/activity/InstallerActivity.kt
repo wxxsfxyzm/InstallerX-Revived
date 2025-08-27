@@ -61,7 +61,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (Environment.isExternalStorageManager()) {
                 Timber.d("Storage permission GRANTED after returning from settings.")
-                installer?.resolve(this)
+                installer?.resolveInstall(this)
             } else {
                 Timber.d("Storage permission DENIED after returning from settings.")
                 this.toast(R.string.enable_storage_permission_hint, Toast.LENGTH_LONG)
@@ -176,7 +176,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     private fun checkStoragePermissionAndProceed() {
         if (Environment.isExternalStorageManager()) {
             Timber.d("Storage permission already granted. Calling resolve().")
-            installer?.resolve(this)
+            installer?.resolveInstall(this)
         } else {
             Timber.d("Requesting storage permission by opening settings.")
             val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
@@ -203,7 +203,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             val background by installer.background.collectAsState(false)
             val progress by installer.progress.collectAsState(ProgressEntity.Ready)
 
-            if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.Resolving || progress is ProgressEntity.Finish)
+            if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.Finish)
             // Return@setContent to show nothing, logs will explain why.
                 return@setContent
 

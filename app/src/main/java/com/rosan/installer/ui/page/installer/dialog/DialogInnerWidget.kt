@@ -18,6 +18,10 @@ import com.rosan.installer.ui.page.installer.dialog.inner.preparingDialog
 import com.rosan.installer.ui.page.installer.dialog.inner.readyDialog
 import com.rosan.installer.ui.page.installer.dialog.inner.resolveFailedDialog
 import com.rosan.installer.ui.page.installer.dialog.inner.resolvingDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.uninstallFailedDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.uninstallReadyDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.uninstallSuccessDialog
+import com.rosan.installer.ui.page.installer.dialog.inner.uninstallingDialog
 
 // change the content when the id been changed
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
@@ -60,7 +64,13 @@ fun dialogGenerateParams(
             (viewModel.state as DialogViewState.InstallCompleted).results
         )
 
-        is DialogViewState.Uninstalling -> installingDialog(installer, viewModel)
+        is DialogViewState.InstallRetryDowngradeUsingUninstall -> installingDialog(installer, viewModel)
+        // is DialogViewState. -> installingDialog(installer, viewModel)
+        is DialogViewState.UninstallReady -> uninstallReadyDialog(viewModel)
+        is DialogViewState.UninstallSuccess -> uninstallSuccessDialog(viewModel)
+        is DialogViewState.UninstallFailed -> uninstallFailedDialog(installer, viewModel)
+        is DialogViewState.Uninstalling -> uninstallingDialog(installer, viewModel)
+        is DialogViewState.UninstallResolveFailed -> uninstallFailedDialog(installer, viewModel)
         // when is exhaustive, so no need to handle the else case
-        // else -> readyDialog(installer, viewModel)
+        //else -> readyDialog(installer, viewModel)
     }

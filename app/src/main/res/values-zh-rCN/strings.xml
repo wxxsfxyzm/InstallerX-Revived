@@ -140,6 +140,7 @@
     <string name="cancel">取消</string>
     <string name="retry">重试</string>
     <string name="install">安装</string>
+    <string name="uninstall">卸载</string>
     <string name="next">下一步</string>
     <string name="previous">上一步</string>
     <string name="close">关闭</string>
@@ -187,6 +188,10 @@
     <string name="installer_channel_name">安装通知</string>
     <string name="installer_progress_channel_name">安装过程通知</string>
     <string name="installer_background_channel_name">后台通知</string>
+    <string name="uninstall_keep_data">保留数据</string>
+    <string name="uninstall_all_users">为所有用户卸载</string>
+    <string name="uninstall_delete_system_app">允许卸载系统应用</string>
+    <string name="uninstall_success_message">卸载成功</string>
 
     <string name="permission_read_external_storage">读取外部存储</string>
     <string name="permission_write_external_storage">写入外部存储</string>
@@ -280,6 +285,7 @@
     <string name="exception_install_failed_rejected_by_build_type">系统禁止跨区安装</string>
     <string name="exception_install_failed_duplicate_permission">包正在尝试重新声明其他安装包已声明的权限</string>
     <string name="exception_install_failed_user_restricted">系统限制USB安装，请启用它。</string>
+    <string name="exception_uninstall_failed_hyperos_system_app">HyperOS不允许在此处卸载该应用</string>
     <string name="exception_shizuku_not_work">请激活Sui或Shizuku，并授予权限</string>
     <string name="exception_dhizuku_not_work">请激活Dhizuku，并授予权限</string>
     <string name="exception_root_not_work">请授予ROOT权限</string>

@@ -80,6 +80,23 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.activity.UninstallerActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Installer.Translucent">
+
+            <intent-filter android:priority="2">
+                <action android:name="android.intent.action.DELETE" />
+                <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+            </intent-filter>
+
+        </activity>
+
         <service
             android:name="com.rosan.installer.data.installer.model.impl.InstallerService"
             android:permission="android.permission.FOREGROUND_SERVICE"

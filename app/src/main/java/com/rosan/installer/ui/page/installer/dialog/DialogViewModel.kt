@@ -21,6 +21,7 @@ import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
+import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
@@ -121,6 +122,24 @@ class DialogViewModel(
     val selectedInstaller: StateFlow<String?> = _selectedInstaller.asStateFlow()
 
     /**
+     * Holds information about the app to be uninstalled.
+     */
+    val uninstallInfo: StateFlow<UninstallInfo?> = repo.uninstallInfo
+
+    /**
+     * Holds information about the app being uninstalled for UI display.
+     * This is separate from repo.uninstallInfo to prevent info from being cleared.
+     */
+    private val _uiUninstallInfo = MutableStateFlow<UninstallInfo?>(null)
+    val uiUninstallInfo: StateFlow<UninstallInfo?> = _uiUninstallInfo.asStateFlow()
+
+    /**
+     * Holds the bitmask for uninstall flags (e.g., KEEP_DATA).
+     */
+    private val _uninstallFlags = MutableStateFlow(0)
+    val uninstallFlags: StateFlow<Int> = _uninstallFlags.asStateFlow()
+
+    /**
      * Flag to track if the current operation is an uninstall-and-retry flow.
      * This helps the progress collector know when to trigger a reinstall.
      */
@@ -163,6 +182,24 @@ class DialogViewModel(
             is DialogViewAction.Install -> install()
             is DialogViewAction.Background -> background()
             is DialogViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData)
+            is DialogViewAction.Uninstall -> {
+                // Trigger uninstall using the package name from the collected info
+                repo.uninstallInfo.value?.packageName?.let { repo.uninstall(it) }
+            }
+
+            is DialogViewAction.ToggleUninstallFlag -> {
+                // Update the uninstall flags bitmask
+                val currentFlags = _uninstallFlags.value
+                _uninstallFlags.value = if (action.enable) {
+                    currentFlags or action.flag
+                } else {
+                    currentFlags and action.flag.inv()
+                }
+                // Sync to the repo config so the backend uses the flags
+                repo.config.uninstallFlags = _uninstallFlags.value
+            }
+
+            is DialogViewAction.SetInstaller -> selectInstaller(action.installer)
         }
     }
 
@@ -215,12 +252,12 @@ class DialogViewModel(
                         newPackageNameFromProgress = null
                     }
 
-                    is ProgressEntity.Preparing -> newState = DialogViewState.Preparing(progress.progress)
-                    is ProgressEntity.Resolving -> newState = DialogViewState.Resolving
-                    is ProgressEntity.ResolvedFailed -> newState = DialogViewState.ResolveFailed
-                    is ProgressEntity.Analysing -> newState = DialogViewState.Analysing
-                    is ProgressEntity.AnalysedFailed -> newState = DialogViewState.AnalyseFailed
-                    is ProgressEntity.AnalysedSuccess -> {
+                    is ProgressEntity.InstallPreparing -> newState = DialogViewState.Preparing(progress.progress)
+                    is ProgressEntity.InstallResolving -> newState = DialogViewState.Resolving
+                    is ProgressEntity.InstallResolvedFailed -> newState = DialogViewState.ResolveFailed
+                    is ProgressEntity.InstallAnalysing -> newState = DialogViewState.Analysing
+                    is ProgressEntity.InstallAnalysedFailed -> newState = DialogViewState.AnalyseFailed
+                    is ProgressEntity.InstallAnalysedSuccess -> {
                         val containerType = repo.entities.firstOrNull()?.app?.containerType
                         val isMultiAppMode =
                             containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
@@ -287,13 +324,22 @@ class DialogViewModel(
                     }
 
                     is ProgressEntity.Uninstalling -> {
-                        newState = DialogViewState.Uninstalling
+                        newState = if (isRetryingInstall) {
+                            //isRetryingInstall = false
+                            DialogViewState.InstallRetryDowngradeUsingUninstall
+                        } else {
+                            DialogViewState.Uninstalling
+                        }
                     }
 
                     is ProgressEntity.UninstallFailed -> {
                         // If uninstall fails during retry, revert to install failed state
-                        isRetryingInstall = false
-                        newState = DialogViewState.InstallFailed
+                        if (isRetryingInstall) {
+                            isRetryingInstall = false
+                            newState = DialogViewState.InstallFailed
+                        } else {
+                            newState = DialogViewState.UninstallFailed
+                        }
                     }
 
                     is ProgressEntity.UninstallSuccess -> {
@@ -302,11 +348,18 @@ class DialogViewModel(
                             isRetryingInstall = false
                             repo.install()
                             // Stay in a transitional state until Install starts
-                            newState = DialogViewState.Uninstalling
+                            newState = DialogViewState.InstallRetryDowngradeUsingUninstall
                         } else {
-                            // This case shouldn't be hit in normal flow, but as a fallback:
-                            newState = DialogViewState.Ready
+                            // now it has a meaning of normal uninstall success
+                            newState = DialogViewState.UninstallSuccess
                         }
+                    }
+
+                    is ProgressEntity.UninstallReady -> {
+                        _uiUninstallInfo.value = repo.uninstallInfo.value
+                        _uninstallFlags.value = 0 // Reset flags for new session
+                        repo.config.uninstallFlags = 0
+                        newState = DialogViewState.UninstallReady
                     }
 
                     else -> newState = DialogViewState.Ready
@@ -370,7 +423,7 @@ class DialogViewModel(
         repo.config.installFlags = _installFlags.value // 同步到 repo.config
     }
 
-    fun selectInstaller(packageName: String?) {
+    private fun selectInstaller(packageName: String?) {
         repo.config.installer = packageName // Update the repository
         _selectedInstaller.value = packageName // Update the StateFlow
     }
