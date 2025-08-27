@@ -68,6 +68,25 @@ object RsConfig {
                 Architecture.fromArchString(abiString)
             }
 
+    /**
+     * Checks if the primary device architecture is part of the ARM family.
+     * @return True if the architecture is ARM64, ARMv7a, or ARMEABI.
+     */
+    val isArm: Boolean
+        get() = when (currentArchitecture) {
+            Architecture.ARM64, Architecture.ARM, Architecture.ARMEABI -> true
+            else -> false
+        }
+
+    /**
+     * Checks if the primary device architecture is part of the x86 family.
+     * @return True if the architecture is x86_64 or x86.
+     */
+    val isX86: Boolean
+        get() = when (currentArchitecture) {
+            Architecture.X86_64, Architecture.X86 -> true
+            else -> false
+        }
 
     /**
      * Gets a prioritized list of screen densities for the device.
