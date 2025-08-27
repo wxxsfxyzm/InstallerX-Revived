@@ -83,6 +83,9 @@
 - 锁定器无法锁定怎么办
     - 由于包名改变，需要使用本仓库的修改版锁定器[InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
 
+- 分析阶段报错`No Content Provider`
+    - 你启用了`隐藏应用列表`或类似功能，请配置白名单
+
 - HyperOS更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
     - 系统安全限制，需要在配置中声明安装者为系统app，推荐 `com.android.fileexplorer` 或 `com.android.vending`
     - Shizuku/Root有效，Dhizuku不支持
