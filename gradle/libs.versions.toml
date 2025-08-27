@@ -9,7 +9,6 @@
 
 [versions]
 agp = "8.12.1"
-commonsCompress = "1.28.0"
 kotlin = "2.2.10"
 ksp = "2.2.10-2.0.2"
 composeBom = "2025.08.00"
@@ -45,7 +44,6 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.2" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
 
-commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "compose" }
