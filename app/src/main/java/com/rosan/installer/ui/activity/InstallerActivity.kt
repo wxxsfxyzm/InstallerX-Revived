@@ -70,6 +70,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        logIntentDetails("onNewIntent", intent)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         Timber.d("onCreate. SavedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}")
@@ -96,6 +97,9 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     override fun onNewIntent(intent: Intent) {
         Timber.d("onNewIntent: Received new intent.")
+        logIntentDetails("onNewIntent", intent)
+        if (intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK == 0)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         this.intent = intent
         super.onNewIntent(intent)
         restoreInstaller()
@@ -213,5 +217,26 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 }
             }
         }
+    }
+
+    private fun logIntentDetails(tag: String, intent: Intent?) {
+        if (intent == null) {
+            Timber.tag(tag).d("Intent is null")
+            return
+        }
+        val flags = intent.flags
+        val hexFlags = String.format("0x%08X", flags)
+
+        Timber.tag(tag).d("---------- Intent Details Start ----------")
+        Timber.tag(tag).d("Full Intent: ${intent.toString()}")
+        Timber.tag(tag).d("Action: ${intent.action}")
+        Timber.tag(tag).d("Data: ${intent.dataString}")
+        Timber.tag(tag).d("Type: ${intent.type}")
+        Timber.tag(tag).d("Categories: ${intent.categories?.joinToString(", ")}")
+        Timber.tag(tag).d("Flags (Decimal): $flags")
+        Timber.tag(tag).d("Flags (Hex): $hexFlags") // Flags 是关键！
+        Timber.tag(tag).d("Component: ${intent.component}")
+        Timber.tag(tag).d("Extras: ${intent.extras?.keySet()?.joinToString(", ")}")
+        Timber.tag(tag).d("---------- Intent Details End ----------")
     }
 }
