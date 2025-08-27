@@ -19,9 +19,9 @@ class ProgressHandler(scope: CoroutineScope, installer: InstallerRepo) : Handler
                 // Log all progress changes for debugging
                 Timber.d("[id=${installer.id}] Collected progress: ${it::class.simpleName}")
                 when (it) {
-                    is ProgressEntity.ResolvedFailed -> onResolved(false)
-                    is ProgressEntity.ResolveSuccess -> onResolved(true)
-                    is ProgressEntity.AnalysedSuccess -> onAnalysedSuccess()
+                    is ProgressEntity.InstallResolvedFailed -> onResolved(false)
+                    is ProgressEntity.InstallResolveSuccess -> onResolved(true)
+                    is ProgressEntity.InstallAnalysedSuccess -> onAnalysedSuccess()
                     else -> {}
                 }
             }

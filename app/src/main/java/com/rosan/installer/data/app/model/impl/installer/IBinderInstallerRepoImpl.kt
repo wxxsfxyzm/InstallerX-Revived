@@ -234,16 +234,20 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                     InstallOption.ReplaceExisting.value
                 }
 
-        Timber.d(
-            "Current Arch to install: ${entities.firstOrNull { it.name == "base.apk" }?.arch}, isUnknownArch: ${
-                entities.firstOrNull { it.name == "base.apk" }?.arch == Architecture.UNKNOWN
-            }"
-        )
+        val baseApkArch = entities.firstOrNull { it.name == "base.apk" }?.arch
+        Timber.d("Current Arch to install: $baseApkArch")
 
         if ((containerType == DataType.APK || containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP) &&
-            entities.firstOrNull { it.name == "base.apk" }?.arch == Architecture.UNKNOWN
-        )
-            params.abiOverride = "armeabi-v7a"
+            baseApkArch != null && baseApkArch != Architecture.NONE
+        ) {
+            val abiToOverride = if (baseApkArch != Architecture.UNKNOWN) {
+                baseApkArch.arch
+            } else {
+                "armeabi-v7a" // Retain original fallback for UNKNOWN
+            }
+            Timber.d("Setting abiOverride to $abiToOverride")
+            params.abiOverride = abiToOverride
+        }
 
         val sessionId = packageInstaller.createSession(params)
         val session = packageInstaller.openSession(sessionId)

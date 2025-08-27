@@ -44,6 +44,7 @@
 
         <activity
             android:name="com.rosan.installer.ui.activity.InstallerActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:excludeFromRecents="true"
             android:exported="true"
             android:launchMode="singleInstance"
@@ -54,7 +55,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>-->
 
-            <intent-filter>
+            <intent-filter android:priority="10">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.INSTALL_PACKAGE" />
 
@@ -78,6 +79,23 @@
                 <data android:pathPattern=".*" />
                 <data android:mimeType="*/*" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.activity.UninstallerActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Installer.Translucent">
+
+            <intent-filter android:priority="10">
+                <action android:name="android.intent.action.DELETE" />
+                <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+            </intent-filter>
+
         </activity>
 
         <service

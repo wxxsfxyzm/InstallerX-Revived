@@ -222,7 +222,7 @@ fun MenuItemWidget(
                         DropdownMenuItem(
                             text = { Text(text = stringResource(id = R.string.config_follow_settings)) },
                             onClick = {
-                                viewmodel.selectInstaller(defaultInstallerFromSettings)
+                                viewmodel.dispatch(DialogViewAction.SetInstaller(defaultInstallerFromSettings))
                                 expanded = false
                             }
                         )
@@ -231,7 +231,7 @@ fun MenuItemWidget(
                             DropdownMenuItem(
                                 text = { Text(text = pkg.name) },
                                 onClick = {
-                                    viewmodel.selectInstaller(pkg.packageName)
+                                    viewmodel.dispatch(DialogViewAction.SetInstaller(pkg.packageName))
                                     expanded = false
                                 }
                             )

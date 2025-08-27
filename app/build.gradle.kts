@@ -232,6 +232,4 @@ dependencies {
 
     // log
     implementation(libs.timber)
-
-    implementation(libs.commons.compress)
 }

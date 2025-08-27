@@ -61,7 +61,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
                 Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=$showDialog")
 
-                if (progress is ProgressEntity.AnalysedUnsupported) {
+                if (progress is ProgressEntity.InstallAnalysedUnsupported) {
                     Timber.w("[id=${installer.id}] AnalysedUnsupported: ${progress.reason}")
                     scope.launch(Dispatchers.Main) {
                         Toast.makeText(context, progress.reason, Toast.LENGTH_LONG).show()
@@ -137,25 +137,25 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private val workingProgresses = listOf(
         ProgressEntity.Ready,
-        ProgressEntity.Resolving,
-        ProgressEntity.ResolveSuccess,
-        ProgressEntity.Analysing,
-        ProgressEntity.AnalysedSuccess,
+        ProgressEntity.InstallResolving,
+        ProgressEntity.InstallResolveSuccess,
+        ProgressEntity.InstallAnalysing,
+        ProgressEntity.InstallAnalysedSuccess,
         ProgressEntity.Installing,
         ProgressEntity.InstallSuccess
     )
 
     private val importanceProgresses = listOf(
-        ProgressEntity.ResolvedFailed,
-        ProgressEntity.AnalysedFailed,
-        ProgressEntity.AnalysedSuccess,
+        ProgressEntity.InstallResolvedFailed,
+        ProgressEntity.InstallAnalysedFailed,
+        ProgressEntity.InstallAnalysedSuccess,
         ProgressEntity.InstallFailed,
         ProgressEntity.InstallSuccess
     )
 
     private val installProgresses = mapOf(
-        ProgressEntity.Resolving to 0,
-        ProgressEntity.Analysing to 40,
+        ProgressEntity.InstallResolving to 0,
+        ProgressEntity.InstallAnalysing to 40,
         ProgressEntity.Installing to 80
     )
 
@@ -227,18 +227,18 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val builder = newNotificationBuilder(progress, background, showDialog)
         return when (progress) {
             is ProgressEntity.Ready -> onReady(builder)
-            is ProgressEntity.Resolving -> onResolving(builder)
-            is ProgressEntity.ResolvedFailed -> onResolvedFailed(builder)
-            is ProgressEntity.ResolveSuccess -> onResolveSuccess(builder)
-            is ProgressEntity.Analysing -> onAnalysing(builder)
-            is ProgressEntity.AnalysedFailed -> onAnalysedFailed(builder)
-            is ProgressEntity.AnalysedSuccess -> onAnalysedSuccess(builder)
+            is ProgressEntity.InstallResolving -> onResolving(builder)
+            is ProgressEntity.InstallResolvedFailed -> onResolvedFailed(builder)
+            is ProgressEntity.InstallResolveSuccess -> onResolveSuccess(builder)
+            is ProgressEntity.InstallAnalysing -> onAnalysing(builder)
+            is ProgressEntity.InstallAnalysedFailed -> onAnalysedFailed(builder)
+            is ProgressEntity.InstallAnalysedSuccess -> onAnalysedSuccess(builder)
             is ProgressEntity.Installing -> onInstalling(builder)
             is ProgressEntity.InstallFailed -> onInstallFailed(builder)
             is ProgressEntity.InstallSuccess -> onInstallSuccess(builder)
             is ProgressEntity.Finish -> null
             is ProgressEntity.Error -> null
-            is ProgressEntity.AnalysedUnsupported -> null
+            is ProgressEntity.InstallAnalysedUnsupported -> null
             // TODO temporarily disable uninstall notification
             else -> null
         }

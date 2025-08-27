@@ -104,9 +104,9 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     override val background: MutableSharedFlow<Boolean> = MutableStateFlow(false)
     override val uninstallInfo: MutableStateFlow<UninstallInfo?> = MutableStateFlow(null)
 
-    override fun resolve(activity: Activity) {
+    override fun resolveInstall(activity: Activity) {
         Timber.d("[id=$id] resolve() called. Emitting Action.Resolve.")
-        action.tryEmit(Action.Resolve(activity))
+        action.tryEmit(Action.ResolveInstall(activity))
     }
 
     override fun analyse() {
@@ -117,6 +117,11 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     override fun install() {
         Timber.d("[id=$id] install() called. Emitting Action.Install.")
         action.tryEmit(Action.Install)
+    }
+
+    override fun resolveUninstall(activity: Activity, packageName: String) {
+        Timber.d("[id=$id] resolveUninstall() called for $packageName. Emitting Action.ResolveUninstall.")
+        action.tryEmit(Action.ResolveUninstall(activity, packageName))
     }
 
     override fun uninstall(packageName: String) {
@@ -143,9 +148,10 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     }
 
     sealed class Action {
-        data class Resolve(val activity: Activity) : Action()
+        data class ResolveInstall(val activity: Activity) : Action()
         data object Analyse : Action()
         data object Install : Action()
+        data class ResolveUninstall(val activity: Activity, val packageName: String) : Action()
         data class Uninstall(val packageName: String) : Action()
         data object Finish : Action()
     }

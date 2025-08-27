@@ -36,6 +36,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVerificationTim
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
 import com.rosan.installer.data.app.model.exception.UninstallFailedAbortedException
 import com.rosan.installer.data.app.model.exception.UninstallFailedDevicePolicyManagerException
+import com.rosan.installer.data.app.model.exception.UninstallFailedHyperOSSystemAppException
 import com.rosan.installer.data.app.model.exception.UninstallFailedInternalErrorException
 import com.rosan.installer.data.app.model.exception.UninstallFailedOwnerBlockedException
 import com.rosan.installer.data.app.model.exception.UninstallFailedUserRestrictedException
@@ -102,6 +103,7 @@ class PackageManagerUtil {
         const val DELETE_FAILED_USER_RESTRICTED = -3
         const val DELETE_FAILED_OWNER_BLOCKED = -4
         const val DELETE_FAILED_ABORTED = -5
+        const val DELETE_FAILED_HYPEROS_SYSTEM_APP = -1000
 
         fun installResultVerify(
             context: Context,
@@ -202,6 +204,7 @@ class PackageManagerUtil {
                 DELETE_FAILED_OWNER_BLOCKED -> UninstallFailedOwnerBlockedException(ecpMsg)
                 DELETE_FAILED_ABORTED -> UninstallFailedAbortedException(ecpMsg)
                 DELETE_FAILED_INTERNAL_ERROR -> UninstallFailedInternalErrorException(ecpMsg)
+                DELETE_FAILED_HYPEROS_SYSTEM_APP -> UninstallFailedHyperOSSystemAppException(ecpMsg)
                 else -> IllegalStateException(ecpMsg)
             }
         }

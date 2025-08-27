@@ -36,6 +36,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedUserRestrictedE
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationFailureException
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationTimeoutException
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
+import com.rosan.installer.data.app.model.exception.UninstallFailedHyperOSSystemAppException
 import com.rosan.installer.data.recycle.model.exception.AppProcessNotWorkException
 import com.rosan.installer.data.recycle.model.exception.DhizukuNotWorkException
 import com.rosan.installer.data.recycle.model.exception.RootNotWorkException
@@ -86,6 +87,7 @@ private fun Throwable.getStringResourceId(): Int {
         is InstallFailedUserRestrictedException -> R.string.exception_install_failed_user_restricted
         is ShizukuNotWorkException -> R.string.exception_shizuku_not_work
         is DhizukuNotWorkException -> R.string.exception_dhizuku_not_work
+        is UninstallFailedHyperOSSystemAppException -> R.string.exception_uninstall_failed_hyperos_system_app
         is RootNotWorkException -> R.string.exception_root_not_work
         is AppProcessNotWorkException -> R.string.exception_app_process_not_work
         else -> R.string.exception_install_failed_unknown

@@ -234,6 +234,7 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         }
 
         if (apkArchs.isEmpty()) {
+            Timber.d("No native architectures found in APK: $path")
             return Architecture.NONE // The APK is architecture-independent or contains no native libs.
         }
 
@@ -242,11 +243,30 @@ object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
         for (deviceArch in deviceSupportedArchs) {
             // Return the first one that is also supported by the APK.
             if (apkArchs.contains(deviceArch)) {
+                Timber.d("Selected architecture: $deviceArch for APK: $path")
                 return deviceArch
             }
         }
 
+        Timber.d("No direct architecture match found. Applying fallback logic.")
+        if (RsConfig.isArm) {
+            if (apkArchs.contains(Architecture.ARM)) {
+                Timber.d("Fallback match for ARM device: ${Architecture.ARM}")
+                return Architecture.ARM // armeabi-v7a
+            }
+            if (apkArchs.contains(Architecture.ARMEABI)) {
+                Timber.d("Fallback match for ARM device: ${Architecture.ARMEABI}")
+                return Architecture.ARMEABI // armeabi
+            }
+        } else if (RsConfig.isX86) {
+            if (apkArchs.contains(Architecture.X86)) {
+                Timber.d("Fallback match for x86 device: ${Architecture.X86}")
+                return Architecture.X86
+            }
+        }
+
         // Return null if no match was found.
+        Timber.d("No compatible architecture found for APK: $path")
         return null
     }
 }

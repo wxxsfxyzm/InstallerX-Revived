@@ -63,8 +63,6 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.SettingsScreen
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -72,12 +70,10 @@ import kotlin.math.absoluteValue
 fun AllPage(
     navController: NavController,
     windowInsets: WindowInsets,
-    viewModel: AllViewModel = koinViewModel {
-        parametersOf(navController)
-    }
+    viewModel: AllViewModel
 ) {
     LaunchedEffect(Unit) {
-        viewModel.dispatch(AllViewAction.Init)
+        //viewModel.dispatch(AllViewAction.Init)
         viewModel.navController = navController
     }
 

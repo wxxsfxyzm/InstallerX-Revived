@@ -14,5 +14,16 @@ sealed class DialogViewAction {
     data object Install : DialogViewAction()
     data object Background : DialogViewAction()
 
+    /** Triggers the uninstallation process. */
+    data object Uninstall : DialogViewAction()
+
+    data class SetInstaller(val installer: String?) : DialogViewAction()
+
+    /**
+     * Toggles a specific flag for the uninstallation process.
+     * @param flag The flag to toggle, e.g., DELETE_KEEP_DATA.
+     * @param enable true to add the flag, false to remove it.
+     */
+    data class ToggleUninstallFlag(val flag: Int, val enable: Boolean) : DialogViewAction()
     data class UninstallAndRetryInstall(val keepData: Boolean) : DialogViewAction()
 }

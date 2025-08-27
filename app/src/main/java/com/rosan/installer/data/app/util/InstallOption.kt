@@ -27,6 +27,7 @@
  */
 package com.rosan.installer.data.app.util
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.Keep
 import androidx.annotation.StringRes
@@ -35,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.rosan.installer.R
 
+@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun rememberInstallOptions(): List<InstallOption> {
     val context = LocalContext.current
@@ -46,7 +48,7 @@ fun rememberInstallOptions(): List<InstallOption> {
     }
 }
 
-fun getInstallOptions() = InstallOption::class.sealedSubclasses
+private fun getInstallOptions() = InstallOption::class.sealedSubclasses
     .mapNotNull { it.objectInstance }
     .filter { Build.VERSION.SDK_INT >= it.minSdk && Build.VERSION.SDK_INT <= it.maxSdk }
 
@@ -106,6 +108,8 @@ sealed class InstallOption(
     data object AllowDowngrade : InstallOption(
         value = 0x00000080 or
                 0x00100000,
+        // Starting Android 15, there is no way to downgrade an app without using the rollback feature,
+        maxSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
         labelResource = R.string.config_allow_downgrade,
         descResource = R.string.config_allow_downgrade_desc,
     )
@@ -238,6 +242,14 @@ sealed class InstallOption(
         minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
         labelResource = R.string.config_bypass_low_target_sdk,
         descResource = R.string.config_bypass_low_target_sdk_desc,
+    )
+
+    @Keep
+    data object RequestUpdateOwnerShip : InstallOption(
+        value = 1 shl 25,
+        minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+        labelResource = R.string.config_request_update_ownership,
+        descResource = R.string.config_request_update_ownership_desc,
     )
 
     @Keep

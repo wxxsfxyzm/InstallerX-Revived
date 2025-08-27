@@ -24,6 +24,17 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
         super.doInstallWork(config, entities, extra, blacklist)
     }
 
+    override suspend fun doUninstallWork(config: ConfigEntity, packageName: String, extra: InstallExtraInfoEntity) {
+        recycler = AppProcessRecyclers.get(
+            when (config.authorizer) {
+                ConfigEntity.Authorizer.Root -> "su"
+                ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
+                else -> "sh"
+            }
+        ).make()
+        super.doUninstallWork(config, packageName, extra)
+    }
+
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder =
         recycler.entity.binderWrapper(iBinder)
 

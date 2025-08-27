@@ -25,4 +25,8 @@ sealed class DialogParamsType(val id: String) {
     data object InstallerInstallSuccess : DialogParamsType("install_success")
     data object InstallerInstallFailed : DialogParamsType("install_failed")
     data object InstallerInstallCompleted : DialogParamsType("install_completed")
+    data object InstallerUninstallInfo : DialogParamsType("uninstaller_info")
+    data object InstallerUninstallReady : DialogParamsType("uninstaller_ready")
+    data object InstallerUninstallSuccess : DialogParamsType("uninstaller_uninstall_success")
+    data object InstallerUninstallFailed : DialogParamsType("uninstaller_uninstall_failed")
 }

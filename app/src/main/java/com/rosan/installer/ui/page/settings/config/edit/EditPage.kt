@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.settings.config.edit
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -37,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.widget.dialog.UnsavedChangesDialog
@@ -150,9 +152,7 @@ fun EditPage(
         topBar = {
             TopAppBar(
                 scrollBehavior = scrollBehavior,
-                title = {
-                    Text(text = stringResource(id = if (id == null) R.string.add else R.string.update))
-                },
+                title = { Text(text = stringResource(id = if (id == null) R.string.add else R.string.update)) },
                 navigationIcon = { AppBackButton(onClick = { navController.navigateUp() }) },
                 // 新增: 当滚动到底部时，在 actions 中显示 FAB
                 actions = {
@@ -197,12 +197,8 @@ fun EditPage(
                             contentDescription = text
                         )
                     },
-                    text = {
-                        Text(text)
-                    },
-                    onClick = {
-                        viewModel.dispatch(EditViewAction.SaveData)
-                    }
+                    text = { Text(text) },
+                    onClick = { viewModel.dispatch(EditViewAction.SaveData) }
                 )
             }
         },
@@ -227,11 +223,10 @@ fun EditPage(
             item { LabelWidget(label = stringResource(R.string.config_label_install_options)) }
             item { DataForAllUserWidget(viewModel = viewModel) }
             item { DataAllowTestOnlyWidget(viewModel = viewModel) }
-            item { DataAllowDowngradeWidget(viewModel = viewModel) }
+            if (Build.VERSION.SDK_INT <= InstallOption.AllowDowngrade.maxSdk) item { DataAllowDowngradeWidget(viewModel = viewModel) }
             item { DataBypassLowTargetSdkWidget(viewModel = viewModel) }
             item { DataAllowRestrictedPermissionsWidget(viewModel = viewModel) }
             item { DataAllowAllRequestedPermissionsWidget(viewModel = viewModel) }
         }
     }
 }
-
