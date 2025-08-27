@@ -347,7 +347,7 @@
     <string name="allocate_aggressive">激进分配</string>
     <string name="allocate_aggressive_desc">指示包“对系统健康或安全至关重要”，并将更积极地删除可清除的文件，以便在需要时腾出空间</string>
     <string name="virtual_preload">虚拟预加载</string>
-    <string name="virtual_preload_desc">表示软件包是虚拟预加载。</string>
+    <string name="virtual_preload_desc">表示软件包是虚拟预加载</string>
     <string name="apex_desc">正在安装的软件包是一个 APEX 软件包</string>
     <string name="enable_rollback">启用回滚</string>
     <string name="enable_rollback_desc">允许此软件包的回滚。</string>
@@ -363,6 +363,8 @@
     <string name="config_bypass_low_target_sdk_desc">允许针对旧的 SDK 版本的应用安装</string>
     <string name="dry_run">试运行</string>
     <string name="dry_run_desc">验证包，但不要安装</string>
+    <string name="config_request_update_ownership">请求更新所有权</string>
+    <string name="config_request_update_ownership_desc">请求更新应用所有权</string>
 
     <string name="unarchive">取消归档</string>
     <string name="unarchive_desc">取消一个现有安装的归档</string>

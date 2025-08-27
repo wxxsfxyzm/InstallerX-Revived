@@ -245,6 +245,14 @@ sealed class InstallOption(
     )
 
     @Keep
+    data object RequestUpdateOwnerShip : InstallOption(
+        value = 1 shl 25,
+        minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+        labelResource = R.string.config_request_update_ownership,
+        descResource = R.string.config_request_update_ownership_desc,
+    )
+
+    @Keep
     data object UnArchive : InstallOption(
         value = 1 shl 30,
         minSdk = Int.MAX_VALUE, // Don't show on List because handled elsewhere
