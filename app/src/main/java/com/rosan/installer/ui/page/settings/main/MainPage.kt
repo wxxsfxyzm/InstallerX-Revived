@@ -1,5 +1,9 @@
 package com.rosan.installer.ui.page.settings.main
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +17,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -26,6 +32,7 @@ import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -36,16 +43,27 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.config.all.AllPage
+import com.rosan.installer.ui.page.settings.config.all.AllViewAction
+import com.rosan.installer.ui.page.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.settings.preferred.NewPreferredPage
 import com.rosan.installer.ui.page.settings.preferred.PreferredPage
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.theme.exclude
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainPage(navController: NavController, preferredViewModel: PreferredViewModel) {
+    val allViewModel: AllViewModel = koinViewModel {
+        parametersOf(navController)
+    }
+    LaunchedEffect(Unit) {
+        allViewModel.dispatch(AllViewAction.Init)
+    }
+    val configCount = allViewModel.state.data.configs.size
     val data = arrayOf(
         /*        NavigationData(
                     icon = Icons.TwoTone.Home,
@@ -57,7 +75,7 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
             icon = AppIcons.RoomPreferences,
             label = stringResource(R.string.config)
         ) { insets ->
-            AllPage(navController, insets)
+            AllPage(navController, insets, allViewModel)
         },
         NavigationData(
             icon = AppIcons.SettingsSuggest,
@@ -126,7 +144,8 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
                         windowInsets = navigationWindowInsets,
                         data = data,
                         currentPage = currentPage,
-                        onPageChanged = { onPageChanged(it) }
+                        onPageChanged = { onPageChanged(it) },
+                        configCount
                     )
                 }
             }
@@ -140,7 +159,8 @@ fun RowNavigation(
     windowInsets: WindowInsets,
     data: Array<NavigationData>,
     currentPage: Int,
-    onPageChanged: (Int) -> Unit
+    onPageChanged: (Int) -> Unit,
+    configCount: Int
 ) {
     FlexibleBottomAppBar(
         modifier = Modifier
@@ -155,10 +175,25 @@ fun RowNavigation(
                     selected = currentPage == index,
                     onClick = { onPageChanged(index) },
                     icon = {
-                        Icon(
-                            imageVector = navigationData.icon,
-                            contentDescription = navigationData.label
-                        )
+                        val showBadge = index == 0 && configCount > 1
+
+                        BadgedBox(
+                            badge = {
+                                androidx.compose.animation.AnimatedVisibility(
+                                    visible = showBadge,
+                                    enter = scaleIn() + fadeIn(),
+                                    exit = scaleOut() + fadeOut(),
+                                    label = "badge"
+                                ) {
+                                    Badge { Text(configCount.toString()) }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = navigationData.icon,
+                                contentDescription = navigationData.label
+                            )
+                        }
                     },
                     label = {
                         Text(text = navigationData.label)
