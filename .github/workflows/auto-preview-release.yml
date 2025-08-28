@@ -70,7 +70,7 @@ jobs:
         id: rename_apks
         run: |
           PROJECT_NAME="InstallerX-Revived"
-          VERSION_TAG="${{ steps.version.outputs.VNEW_VERSION }}-${{ steps.commit_sha.outputs.SHORT_SHA }}-alpha"
+          VERSION_TAG="${{ steps.version.outputs.VNEW_VERSION }}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
 
           ONLINE_APK_DIR="app/build/outputs/apk/onlinePreview/release/"
           OFFLINE_APK_DIR="app/build/outputs/apk/offlinePreview/release/"
@@ -84,8 +84,8 @@ jobs:
             exit 1
           fi
 
-          NEW_ONLINE_APK_NAME="${PROJECT_NAME}-${VERSION_TAG}-online.apk"
-          NEW_OFFLINE_APK_NAME="${PROJECT_NAME}-${VERSION_TAG}-offline.apk"
+          NEW_ONLINE_APK_NAME="${PROJECT_NAME}-online-${VERSION_TAG}.apk"
+          NEW_OFFLINE_APK_NAME="${PROJECT_NAME}-offline-${VERSION_TAG}.apk"
 
           NEW_ONLINE_APK_PATH="${ONLINE_APK_DIR}${NEW_ONLINE_APK_NAME}"
           NEW_OFFLINE_APK_PATH="${OFFLINE_APK_DIR}${NEW_OFFLINE_APK_NAME}"
@@ -190,7 +190,6 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
-          COMMIT_MESSAGE: ${{ steps.changelog.outputs.changelog_body }}
         run: |
           pip3 install telethon
           python3 .github/bot.py "${{ steps.rename_apks.outputs.online_apk }}" "${{ steps.rename_apks.outputs.offline_apk }}"
