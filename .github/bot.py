@@ -24,8 +24,7 @@ def get_caption():
     )
     return msg
 
-async def send_telegram_message():
-    files = sys.argv[1]
+async def send_telegram_message(files):
     async with TelegramClient(StringSession(BOT_CI_SESSION), api_id=API_ID, api_hash=API_HASH) as client:
         await client.start(bot_token=BOT_TOKEN)
         print("[+] Caption: ")
@@ -41,6 +40,7 @@ async def send_telegram_message():
 
 if __name__ == '__main__':
     try:
-        asyncio.run(send_telegram_message())
+        apk_files = sys.argv[1:]
+        asyncio.run(send_telegram_message(apk_files))
     except Exception as e:
         print(f"[-] An error occurred: {e}")

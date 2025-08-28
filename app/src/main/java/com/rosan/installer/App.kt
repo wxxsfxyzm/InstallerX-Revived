@@ -1,6 +1,8 @@
 package com.rosan.installer
 
 import android.app.Application
+import com.rosan.installer.build.Level
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.di.init.appModules
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -11,7 +13,7 @@ class App : Application() {
     override fun onCreate() {
         CrashHandler.init()
         super.onCreate()
-        if (BuildConfig.DEBUG) {
+        if (RsConfig.LEVEL == Level.PREVIEW || RsConfig.isDebug) {
             Timber.plant(Timber.DebugTree())
         }
         startKoin {

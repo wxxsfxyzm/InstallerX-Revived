@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.Os
+import androidx.core.net.toUri
 import com.rosan.installer.R
 import com.rosan.installer.build.Architecture
 import com.rosan.installer.build.Density
@@ -26,6 +27,7 @@ import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.model.exception.ResolveException
+import com.rosan.installer.data.installer.model.exception.ResolvedFailedNoInternetAccessException
 import com.rosan.installer.data.installer.model.impl.InstallerRepoImpl
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.installer.util.getRealPathFromUri
@@ -46,6 +48,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.RandomAccessFile
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.UUID
 
 class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
@@ -412,13 +416,29 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         val uris = when (intentAction) {
             Intent.ACTION_SEND -> {
-                val uri =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                        intent.getParcelableExtra(
-                            Intent.EXTRA_STREAM, Uri::class.java
-                        )
-                    else intent.getParcelableExtra(Intent.EXTRA_STREAM)
-                if (uri == null) emptyList() else listOf(uri)
+                // Handle text/plain for URLs, otherwise handle as a file stream.
+                if (intent.type?.startsWith("text/") == true) {
+                    if (!RsConfig.isInternetAccessEnabled) {
+                        Timber.d("Internet access is disabled in the app settings.")
+                        throw ResolvedFailedNoInternetAccessException("No internet access to download files.")
+                    }
+                    val urlString = intent.getStringExtra(Intent.EXTRA_TEXT)
+                    if (urlString.isNullOrBlank()) {
+                        emptyList()
+                    } else {
+                        // Attempt to parse the received text as a URI.
+                        runCatching { listOf(urlString.trim().toUri()) }.getOrDefault(emptyList())
+                    }
+                } else {
+                    // Keep original logic for file streams.
+                    val uri =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                            intent.getParcelableExtra(
+                                Intent.EXTRA_STREAM, Uri::class.java
+                            )
+                        else intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                    if (uri == null) emptyList() else listOf(uri)
+                }
             }
 
             Intent.ACTION_SEND_MULTIPLE -> {
@@ -453,8 +473,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
      */
     private suspend fun resolveDataUri(activity: Activity, uri: Uri): List<DataEntity> {
         Timber.d("Source URI: $uri")
-        if (uri.scheme == ContentResolver.SCHEME_FILE) return resolveDataFileUri(uri)
-        return resolveDataContentFile(activity, uri)
+        // Route URI based on its scheme.
+        return when (uri.scheme?.lowercase()) {
+            ContentResolver.SCHEME_FILE -> resolveDataFileUri(uri)
+            ContentResolver.SCHEME_CONTENT -> resolveDataContentFile(activity, uri)
+            "http", "https" -> downloadAndCacheHttpUri(uri) // New case for HTTP/HTTPS links.
+            else -> throw ResolveException(action = "Unsupported URI scheme: ${uri.scheme}", uris = listOf(uri))
+        }
     }
 
     /**
@@ -563,6 +588,86 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun installEntities(
         config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity, blacklist: List<String>
     ) = com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doInstallWork(config, entities, extra, blacklist)
+
+    /**
+     * Downloads a file from an HTTP/HTTPS URL, caches it locally, and reports progress.
+     *
+     * @param uri The HTTP/HTTPS URI to download.
+     * @return A list containing a single DataEntity.FileEntity pointing to the cached file.
+     * @throws IOException for network errors or if the server response is not successful.
+     * @throws ResolveException if the link doesn't appear to be a direct download link for a supported file type.
+     */
+    private suspend fun downloadAndCacheHttpUri(uri: Uri): List<DataEntity> {
+        Timber.d("[id=${installer.id}] Starting download for HTTP URI: $uri")
+
+        // Emit initial progress state (indeterminate) as we don't know the file size yet.
+        installer.progress.emit(ProgressEntity.InstallPreparing(-1f))
+
+        val url = URL(uri.toString())
+        val connection = url.openConnection() as HttpURLConnection
+        // Set a reasonable timeout for connection and reading.
+        connection.connectTimeout = 15000 // 15 seconds
+        connection.readTimeout = 15000 // 15 seconds
+        connection.requestMethod = "GET"
+        connection.connect() // Executes the request
+
+        try {
+            // Check for successful HTTP response.
+            if (connection.responseCode !in 200..299) {
+                throw IOException("HTTP error ${connection.responseCode}: ${connection.responseMessage}")
+            }
+
+            // Validate if the URL points to a likely installer file.
+            // First, check the URL path extension.
+            val path = uri.path ?: ""
+            val isSupportedExtension = listOf(".apk", ".xapk", ".apkm", ".apks").any { ext ->
+                path.endsWith(ext, ignoreCase = true)
+            }
+            // As a fallback, check the Content-Type header from the server response.
+            val contentType = connection.contentType
+            val isSupportedMimeType = contentType != null && (
+                    contentType.equals("application/vnd.android.package-archive", ignoreCase = true) ||
+                            contentType.equals("application/octet-stream", ignoreCase = true)
+                    )
+
+            if (!isSupportedExtension && !isSupportedMimeType) {
+                throw ResolveException(
+                    action = "Unsupported file type from URL. Path: $path, Content-Type: $contentType",
+                    uris = listOf(uri)
+                )
+            }
+
+            // Create a temporary file in the installer's specific cache directory.
+            val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".apk_cache", File(cacheDirectory))
+            val totalSize = connection.contentLengthLong
+
+            connection.inputStream.use { input ->
+                tempFile.outputStream().use { output ->
+                    if (totalSize > 0) {
+                        // If file size is known, show determinate progress.
+                        Timber.d("Starting download of $totalSize bytes from URL.")
+                        installer.progress.emit(ProgressEntity.InstallPreparing(0f)) // Start at 0%
+                        input.copyToWithProgress(output, totalSize) { progress ->
+                            // Update progress state in a coroutine.
+                            scope.launch { installer.progress.emit(ProgressEntity.InstallPreparing(progress)) }
+                        }
+                    } else {
+                        // If file size is unknown, show indeterminate progress.
+                        Timber.d("Starting download of unknown size from URL.")
+                        installer.progress.emit(ProgressEntity.InstallPreparing(-1f))
+                        input.copyTo(output)
+                    }
+                }
+            }
+
+            Timber.d("URL download and caching complete. Cached file: ${tempFile.absolutePath}")
+
+            // Return a FileEntity pointing to the newly cached file, which feeds into the analysis process.
+            return listOf(DataEntity.FileEntity(tempFile.absolutePath))
+        } finally {
+            connection.disconnect() // Ensure the connection is always closed.
+        }
+    }
 
     private enum class SplitCategory { ABI, DENSITY, LANGUAGE, FEATURE }
 

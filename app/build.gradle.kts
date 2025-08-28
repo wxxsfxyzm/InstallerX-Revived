@@ -87,9 +87,21 @@ android {
         }
     }
 
-    flavorDimensions += "level"
+    flavorDimensions.addAll(listOf("connectivity", "level"))
 
     productFlavors {
+        create("online") {
+            dimension = "connectivity"
+            // Set the build config field for this flavor.
+            buildConfigField("boolean", "INTERNET_ACCESS_ENABLED", "true")
+        }
+
+        create("offline") {
+            dimension = "connectivity"
+            // Set the build config field for this flavor.
+            buildConfigField("boolean", "INTERNET_ACCESS_ENABLED", "false")
+        }
+
         create("Unstable") {
             dimension = "level"
             isDefault = true
@@ -104,21 +116,13 @@ android {
         }
     }
 
-    /*    val isReleaseBuild = gradle.startParameter.taskNames.any {
-            it.contains("Release", ignoreCase = true)
-        }
-
-        splits {
-            abi {
-                isEnable = isReleaseBuild
-                reset()
-                include("arm64-v8a", "x86_64")
-                isUniversalApk = false
-            }
-        }*/
-
     applicationVariants.all {
-        val level = when (flavorName) {
+        val variant = this
+
+        val levelFlavor = variant.productFlavors.find { it.dimension == "level" }
+
+
+        val level = when (levelFlavor?.name) {
             "Unstable" -> 0
             "Preview" -> 1
             "Stable" -> 2
