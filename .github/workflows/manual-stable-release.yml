@@ -51,35 +51,30 @@ jobs:
           storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}
           EOF
 
-      - name: Build Stable Release APK
-        run: ./gradlew assembleStableRelease
+      - name: Build Stable Release APKs
+        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease
 
-      - name: Find and Rename Universal APK
+      - name: Find and Rename Universal APKs
         id: rename_apk
         run: |
           PROJECT_NAME="InstallerX-Revived"
           VERSION_TAG="${{ inputs.version_tag }}"
-          APK_DIR="app/build/outputs/apk/Stable/release/"
-          
-          ORIGINAL_APK_PATH=$(find "$APK_DIR" -maxdepth 1 -type f -name "*.apk")
+          for FLAVOR in online offline; do
+            APK_DIR="app/build/outputs/apk/${FLAVOR}Stable/release/"
+            ORIGINAL_APK=$(find "$APK_DIR" -maxdepth 1 -type f -name "*.apk" | head -n 1)
 
-          if [ -z "$ORIGINAL_APK_PATH" ]; then
-            echo "ERROR: Universal APK file not found in $APK_DIR!"
-            # List directory contents for easier debugging
-            ls -R app/build/outputs/apk
-            exit 1
-          elif [ $(echo "$ORIGINAL_APK_PATH" | wc -l) -ne 1 ]; then
-            echo "ERROR: Expected 1 APK file, but found multiple!"
-            echo "$ORIGINAL_APK_PATH"
-            exit 1
-          fi
-          
-          NEW_APK_NAME="${PROJECT_NAME}-${VERSION_TAG}.apk"
-          NEW_APK_PATH="${APK_DIR}${NEW_APK_NAME}"
-          
-          echo "Found APK: $ORIGINAL_APK_PATH"
-          echo "Renaming to: $NEW_APK_PATH"
-          mv "$ORIGINAL_APK_PATH" "$NEW_APK_PATH"
+            if [ -z "$ORIGINAL_APK" ]; then
+              echo "ERROR: APK not found in $APK_DIR!"
+              ls -R app/build/outputs/apk
+              exit 1
+            fi
+
+            NEW_APK_NAME="${PROJECT_NAME}-${FLAVOR}-${VERSION_TAG}.apk"
+            NEW_APK_PATH="${APK_DIR}${NEW_APK_NAME}"
+
+            echo "Renaming $ORIGINAL_APK -> $NEW_APK_PATH"
+            mv "$ORIGINAL_APK" "$NEW_APK_PATH"
+          done
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -88,16 +83,6 @@ jobs:
           tag_name: ${{ inputs.version_tag }}
           body: ${{ inputs.changelog }}
           prerelease: false
-          files: app/build/outputs/apk/Stable/release/InstallerX-Revived-${{ inputs.version_tag }}.apk
-
-      - name: Upload to Telegram
-        env:
-          API_ID: ${{ secrets.API_ID }}
-          API_HASH: ${{ secrets.API_HASH }}
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
-          BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
-        run: |
-          pip3 install telethon
-          APK_PATH=$(find ./app/build/outputs/apk/Stable/release -name "*.apk")
-          python3 .github/bot.py "$APK_PATH"
+          files: |
+            app/build/outputs/apk/onlineStable/release/InstallerX-Revived-online-${{ inputs.version_tag }}.apk
+            app/build/outputs/apk/offlineStable/release/InstallerX-Revived-offline-${{ inputs.version_tag }}.apk

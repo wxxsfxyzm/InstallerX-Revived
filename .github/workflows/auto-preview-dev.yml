@@ -66,7 +66,7 @@ jobs:
 
       # 7. 构建 APK
       - name: Build Dev Release APK
-        run: ./gradlew assembleUnstableRelease
+        run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease
 
       # 8. 上传 APK 作为 Artifact
       #    将所有构建产物打包到一个ZIP文件中
@@ -75,7 +75,9 @@ jobs:
         with:
           # Artifact 的名称，包含提交哈希以便于识别
           name: dev-apk-${{ steps.commit_sha.outputs.SHORT_SHA }}
-          # 需要上传的文件的路径 (使用通配符匹配所有APK)
-          path: app/build/outputs/apk/Unstable/release/*.apk
+          # 需要上传的文件的路径
+          path: |
+            app/build/outputs/apk/onlineUnstable/release/*.apk
+            app/build/outputs/apk/offlineUnstable/release/*.apk
           # 设置产物的保留天数
           retention-days: 15
