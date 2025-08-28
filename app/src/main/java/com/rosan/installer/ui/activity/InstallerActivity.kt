@@ -2,6 +2,7 @@ package com.rosan.installer.ui.activity
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -18,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
@@ -57,17 +59,27 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             }
         }
 
-    private val requestStoragePermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (Environment.isExternalStorageManager()) {
-                Timber.d("Storage permission GRANTED after returning from settings.")
-                installer?.resolveInstall(this)
-            } else {
-                Timber.d("Storage permission DENIED after returning from settings.")
-                this.toast(R.string.enable_storage_permission_hint, Toast.LENGTH_LONG)
-                finish()
-            }
+    private val requestStoragePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+        if (isGranted) {
+            Timber.d("Storage permission GRANTED from user.")
+            installer?.resolveInstall(this)
+        } else {
+            Timber.d("Storage permission DENIED from user.")
+            this.toast(R.string.enable_storage_permission_hint, Toast.LENGTH_LONG)
+            finish()
         }
+    }
+
+    private val requestStoragePermissionLauncherFromSettings = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (Environment.isExternalStorageManager()) {
+            Timber.d("Storage permission GRANTED after returning from settings.")
+            installer?.resolveInstall(this)
+        } else {
+            Timber.d("Storage permission DENIED after returning from settings.")
+            this.toast(R.string.enable_storage_permission_hint, Toast.LENGTH_LONG)
+            finish()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         logIntentDetails("onNewIntent", intent)
@@ -178,25 +190,38 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     private fun checkStoragePermissionAndProceed() {
-        if (Environment.isExternalStorageManager()) {
-            Timber.d("Storage permission already granted. Calling resolve().")
-            installer?.resolveInstall(this)
-        } else {
-            Timber.d("Requesting storage permission by opening settings.")
-            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                data = "package:$packageName".toUri()
-            }
-
-            // Check if there is an activity to handle this intent
-            if (intent.resolveActivity(packageManager) != null) {
-                try {
-                    requestStoragePermissionLauncher.launch(intent)
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to launch storage permission settings, even after resolving activity.")
-                }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (Environment.isExternalStorageManager()) {
+                Timber.d("Storage permission already granted. Calling resolveInstall().")
+                installer?.resolveInstall(this)
             } else {
-                // If no activity can handle the specific intent, open the generic app settings page.
-                Timber.w("No activity found to handle ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION.")
+                Timber.d("Requesting storage permission by opening settings.")
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                    data = "package:$packageName".toUri()
+                }
+
+                // Check if there is an activity to handle this intent
+                if (intent.resolveActivity(packageManager) != null) {
+                    try {
+                        requestStoragePermissionLauncherFromSettings.launch(intent)
+                    } catch (e: Exception) {
+                        Timber.e(e, "Failed to launch storage permission settings, even after resolving activity.")
+                    }
+                } else {
+                    // If no activity can handle the specific intent, open the generic app settings page.
+                    Timber.w("No activity found to handle ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION.")
+                }
+            }
+        } else {
+            // Android 10 and below
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED) {
+                Timber.d("Storage permission already granted. Calling resolveInstall().")
+                installer?.resolveInstall(this)
+            } else {
+                requestStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
     }
