@@ -65,12 +65,11 @@ fun dialogGenerateParams(
         )
 
         is DialogViewState.InstallRetryDowngradeUsingUninstall -> installingDialog(installer, viewModel)
-        // is DialogViewState. -> installingDialog(installer, viewModel)
         is DialogViewState.UninstallReady -> uninstallReadyDialog(viewModel)
         is DialogViewState.UninstallSuccess -> uninstallSuccessDialog(viewModel)
         is DialogViewState.UninstallFailed -> uninstallFailedDialog(installer, viewModel)
         is DialogViewState.Uninstalling -> uninstallingDialog(installer, viewModel)
         is DialogViewState.UninstallResolveFailed -> uninstallFailedDialog(installer, viewModel)
         // when is exhaustive, so no need to handle the else case
-        //else -> readyDialog(installer, viewModel)
+        // else -> readyDialog(installer, viewModel)
     }

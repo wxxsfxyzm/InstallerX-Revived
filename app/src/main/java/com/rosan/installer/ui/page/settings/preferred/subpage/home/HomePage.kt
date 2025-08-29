@@ -116,7 +116,7 @@ fun HomePage(
  * @author iamr0s
  */
 @Composable
-fun StatusWidget() {
+private fun StatusWidget() {
     val containerColor = when (RsConfig.LEVEL) {
         Level.STABLE -> MaterialTheme.colorScheme.primaryContainer
         Level.PREVIEW -> MaterialTheme.colorScheme.secondaryContainer
@@ -128,6 +128,9 @@ fun StatusWidget() {
         Level.PREVIEW -> MaterialTheme.colorScheme.onSecondaryContainer
         Level.UNSTABLE -> MaterialTheme.colorScheme.onTertiaryContainer
     }
+
+    val internetAccessHint = if (RsConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
+    else stringResource(R.string.internet_access_disabled)
 
     val level = when (RsConfig.LEVEL) {
         Level.STABLE -> stringResource(id = R.string.stable)
@@ -164,7 +167,7 @@ fun StatusWidget() {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
-                    text = "$level ${RsConfig.VERSION_NAME} (${RsConfig.VERSION_CODE})",
+                    text = "$internetAccessHint$level ${RsConfig.VERSION_NAME} (${RsConfig.VERSION_CODE})",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }

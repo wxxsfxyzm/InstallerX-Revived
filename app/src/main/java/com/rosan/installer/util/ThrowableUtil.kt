@@ -37,6 +37,8 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVerificationFai
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationTimeoutException
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
 import com.rosan.installer.data.app.model.exception.UninstallFailedHyperOSSystemAppException
+import com.rosan.installer.data.installer.model.exception.ResolveException
+import com.rosan.installer.data.installer.model.exception.ResolvedFailedNoInternetAccessException
 import com.rosan.installer.data.recycle.model.exception.AppProcessNotWorkException
 import com.rosan.installer.data.recycle.model.exception.DhizukuNotWorkException
 import com.rosan.installer.data.recycle.model.exception.RootNotWorkException
@@ -51,8 +53,10 @@ import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
  * @author iamr0s wxxsfxyzm
  * @return R.string 的资源 ID。
  */
-private fun Throwable.getStringResourceId(): Int {
-    return when (this) {
+private fun Throwable.getStringResourceId() =
+    when (this) {
+        is ResolveException -> R.string.exception_resolve_failed
+        is ResolvedFailedNoInternetAccessException -> R.string.exception_resolve_failed_no_internet_access
         is AnalyseFailedAllFilesUnsupportedException -> R.string.exception_analyse_failed_all_files_unsupported
         is InstallFailedAlreadyExistsException -> R.string.exception_install_failed_already_exists
         is InstallFailedBlacklistedPackageException -> R.string.exception_install_failed_blacklisted_package
@@ -92,7 +96,6 @@ private fun Throwable.getStringResourceId(): Int {
         is AppProcessNotWorkException -> R.string.exception_app_process_not_work
         else -> R.string.exception_install_failed_unknown
     }
-}
 
 /**
  * [公开API - Composable]

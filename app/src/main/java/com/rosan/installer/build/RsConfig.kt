@@ -8,6 +8,8 @@ import com.rosan.installer.BuildConfig
 object RsConfig {
     val LEVEL: Level = getLevel()
     val isDebug: Boolean = BuildConfig.DEBUG
+    val isInternetAccessEnabled
+        get() = BuildConfig.INTERNET_ACCESS_ENABLED
 
     private fun getLevel(): Level {
         return when (BuildConfig.BUILD_LEVEL) {
