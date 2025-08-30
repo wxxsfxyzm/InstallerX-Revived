@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.aboutLibraries) apply false
 }
 
-
 tasks.register("Delete", Delete::class) {
     delete(rootProject.layout.buildDirectory)
 }
