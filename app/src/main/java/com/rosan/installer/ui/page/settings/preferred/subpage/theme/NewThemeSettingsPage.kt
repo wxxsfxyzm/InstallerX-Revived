@@ -1,5 +1,7 @@
 package com.rosan.installer.ui.page.settings.preferred.subpage.theme
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -43,7 +45,7 @@ fun NewThemeSettingsPage(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
-                modifier = Modifier.padding(start = 12.dp),
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = { Text(stringResource(R.string.theme_settings)) },
                 navigationIcon = {
                     AppBackButton(
