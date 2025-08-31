@@ -264,8 +264,8 @@
     <string name="installer_package_min_sdk_label" translatable="false">Min: </string>
     <string name="installer_package_target_sdk_label" translatable="false">Target: </string>
     <string name="installer_package_sdk_value" translatable="false">%1$s (Android %2$s)</string>
-    <string name="installer_package_min_sdk_label_short" translatable="false">Min: %1$s</string>
-    <string name="installer_package_target_sdk_label_short" translatable="false">Target: %1$s</string>
+    <string name="installer_package_min_sdk_label_short" translatable="false">MinSDK: %1$s</string>
+    <string name="installer_package_target_sdk_label_short" translatable="false">TargetSDK: %1$s</string>
     <string name="installer_file_path">Path: %1$s</string>
 
     <string name="exception_install_failed_unknown">Unknown error</string>

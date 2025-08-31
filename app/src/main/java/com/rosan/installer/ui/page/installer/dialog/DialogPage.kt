@@ -65,25 +65,4 @@ fun DialogPage(
             centerButton = dialogInnerWidget(installer, params.buttons)
         )
     }
-    PositionDialog(
-        onDismissRequest = {
-            if (viewModel.isDismissible) {
-                // Only allow dismiss if the current state is dismissible
-                // If the setting is enabled, close the dialog directly.
-                // Otherwise, send it to the background (which shows a notification).
-                if (viewModel.disableNotificationOnDismiss) {
-                    viewModel.dispatch(DialogViewAction.Close)
-                } else {
-                    viewModel.dispatch(DialogViewAction.Background)
-                }
-            }
-        },
-        //modifier = Modifier.animateContentSize(),
-        centerIcon = dialogInnerWidget(installer, params.icon),
-        centerTitle = dialogInnerWidget(installer, params.title),
-        centerSubtitle = dialogInnerWidget(installer, params.subtitle),
-        centerText = dialogInnerWidget(installer, params.text),
-        centerContent = dialogInnerWidget(installer, params.content),
-        centerButton = dialogInnerWidget(installer, params.buttons)
-    )
 }
