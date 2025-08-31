@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.installer.dialog
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -35,14 +34,7 @@ fun DialogPage(
     )
 
     Box(
-        modifier = Modifier
-            .alpha(alpha)
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            )
+        modifier = Modifier.alpha(alpha)
     ) {
         PositionDialog(
             onDismissRequest = {

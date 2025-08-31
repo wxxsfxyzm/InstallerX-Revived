@@ -246,7 +246,7 @@ private val SubtitlePadding =
 private val TextPadding =
     PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
 private val ContentPadding = PaddingValues.Absolute(bottom = 8.dp)
-private val ButtonPadding = PaddingValues(start = DialogSinglePadding, end = DialogSinglePadding, bottom = 8.dp)
+private val ButtonPadding = PaddingValues(start = DialogSinglePadding, end = DialogSinglePadding, bottom = 0.dp)
 
 private val MinWidth = 280.dp
-private val MaxHeight = 600.dp
+private val MaxHeight = 650.dp
