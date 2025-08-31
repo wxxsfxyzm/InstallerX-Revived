@@ -31,13 +31,11 @@ fun installingDialog(
 ): DialogParams {
     val progressTextResource by viewModel.installProgressText.collectAsState()
     val progress by viewModel.installProgress.collectAsState()
-    val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
 
     // Call InstallInfoDialog for base structure (icon, title, subtitle with new version)
     val baseParams = installInfoDialog(
         installer = installer,
         viewModel = viewModel,
-        preInstallAppInfo = preInstallAppInfo,
         onTitleExtraClick = {}
     )
 

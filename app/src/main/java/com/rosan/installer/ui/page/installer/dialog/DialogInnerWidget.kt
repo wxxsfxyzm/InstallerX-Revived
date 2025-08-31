@@ -1,7 +1,6 @@
 package com.rosan.installer.ui.page.installer.dialog
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.runtime.Composable
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.inner.analyseFailedDialog
@@ -32,11 +31,11 @@ fun dialogInnerWidget(
     if (params.content == null) null
     else {
         {
-            AnimatedContent(
+            /*AnimatedContent(
                 targetState = "${installer.id}_${params.id}"
             ) {
                 params.content.invoke()
-            }
+            }*/params.content.invoke()
         }
     }
 
@@ -45,7 +44,7 @@ fun dialogGenerateParams(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams =
     when (viewModel.state) {
-        is DialogViewState.Ready -> readyDialog(installer, viewModel)
+        is DialogViewState.Ready -> readyDialog(viewModel)
         is DialogViewState.Resolving -> resolvingDialog(installer, viewModel)
         is DialogViewState.ResolveFailed -> resolveFailedDialog(installer, viewModel)
         is DialogViewState.Preparing -> preparingDialog(installer, viewModel)

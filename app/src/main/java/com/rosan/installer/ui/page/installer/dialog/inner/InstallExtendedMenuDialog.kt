@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -160,7 +161,9 @@ fun MenuItemWidget(
     val defaultInstallerFromSettings by viewmodel.defaultInstallerFromSettings.collectAsState()
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp), // 卡片之间的间距
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .heightIn(max = 325.dp),
     ) {
         itemsIndexed(entities) { _, item ->
             if (item.action is InstallExtendedMenuAction.CustomizeInstaller) {
@@ -348,8 +351,14 @@ fun MenuItemWidget(
 fun installExtendedMenuSubMenuDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
-    val entity =
-        installer.entities.filter { it.selected }.map { it.app }.sortedBest().firstOrNull()
+    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
+
+    val entity = currentPackage?.appEntities
+        ?.filter { it.selected }
+        ?.map { it.app }
+        ?.sortedBest()
+        ?.firstOrNull()
     val permissionList = remember(entity) {
         (entity as? AppEntity.BaseEntity)?.permissions?.sorted()?.toMutableStateList()
             ?: mutableStateListOf()

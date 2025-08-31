@@ -7,6 +7,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
@@ -29,6 +30,7 @@ fun AppBackButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector = AppIcons.ArrowBack, // Default icon is ArrowBack
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     contentDescription: String = stringResource(id = R.string.back)
 ) {
     IconButton(
@@ -45,7 +47,7 @@ fun AppBackButton(
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             // The background color of the button.
             // Using a more standard color for a filled icon button variant.
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            containerColor = containerColor,
         )
     ) {
         Icon(

@@ -9,11 +9,15 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -161,22 +165,26 @@ fun NewEditPage(
             ) {
                 focusManager.clearFocus()
             },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
-                scrollBehavior = scrollBehavior,
-                title = {
-                    Text(text = stringResource(id = if (id == null) R.string.add else R.string.update))
-                },
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                title = { Text(text = stringResource(id = if (id == null) R.string.add else R.string.update)) },
                 navigationIcon = {
-                    AppBackButton(onClick = {
-                        if (viewModel.hasUnsavedChanges) {
-                            showUnsavedDialog = true
-                        } else {
-                            navController.navigateUp()
-                        }
-                    })
+                    AppBackButton(
+                        onClick = { navController.navigateUp() },
+                        icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                        modifier = Modifier.size(36.dp),
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
                 },
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
                 actions = {
                     AnimatedVisibility(
                         visible = !showFloating, // 只有在滚动到底部时可见

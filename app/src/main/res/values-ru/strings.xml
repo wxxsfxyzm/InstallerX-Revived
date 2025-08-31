@@ -182,9 +182,7 @@
     <string name="installer_installing">Установка…</string>
     <string name="installer_multi_apk_description">Пожалуйста, выберите приложения, которые вы хотите установить</string>
     <string name="installer_multi_apk_zip_description">Этот файл содержит несколько отдельных приложений, пожалуйста, выберите приложения, которые вы хотите установить</string>
-    <string name="installer_package_min_sdk">MinSDK: %1$s</string>
     <string name="installer_package_name">Пакет: %1$s</string>
-    <string name="installer_package_target_sdk">Целевой SDK: %1$s</string>
     <string name="installer_prepare_install">Перед установкой</string>
     <string name="installer_prepare_install_empty">Пожалуйста, выберите хотя бы один пакет</string>
     <string name="installer_prepare_install_too_many">Пожалуйста, выберите только одну базу.apk</string>

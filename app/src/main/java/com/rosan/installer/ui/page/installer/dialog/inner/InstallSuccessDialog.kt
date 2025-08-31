@@ -30,20 +30,19 @@ fun installSuccessDialog( // 小写开头
     viewModel: DialogViewModel
 ): DialogParams {
     val context = LocalContext.current
+    val currentPackageName by viewModel.currentPackageName.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     // Collect preInstallAppInfo (represents the state *before* the successful install)
-    val currentPreInstallInfo by viewModel.preInstallAppInfo.collectAsState()
-    val currentPackageName by viewModel.currentPackageName.collectAsState()
-    val packageName = currentPackageName ?: installer.entities.filter { it.selected }.map { it.app }
-        .firstOrNull()?.packageName ?: ""
+    // val currentPreInstallInfo by viewModel.preInstallAppInfo.collectAsState()
+
+    val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
 
     // Call InstallInfoDialog, passing the collected preInstallAppInfo.
     // InstallInfoDialog will now handle the logic of displaying one or two versions.
     val baseParams = installInfoDialog(
         installer = installer,
         viewModel = viewModel,
-        preInstallAppInfo = currentPreInstallInfo, // Pass the potentially null old info
         onTitleExtraClick = {
             if (packageName.isNotEmpty()) {
                 context.startActivity(

@@ -11,7 +11,7 @@ import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
-import com.rosan.installer.data.app.repo.AnalyserRepo
+import com.rosan.installer.data.app.repo.FileAnalyserRepo
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.res.model.impl.AxmlTreeRepoImpl
 import com.rosan.installer.data.res.repo.AxmlTreeRepo
@@ -22,7 +22,7 @@ import timber.log.Timber
 import java.io.IOException
 import java.util.zip.ZipFile
 
-object ApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
+object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
     private val reflect = get<ReflectRepo>()
 
     override suspend fun doWork(

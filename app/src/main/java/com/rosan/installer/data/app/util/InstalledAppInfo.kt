@@ -45,7 +45,6 @@ data class InstalledAppInfo(
                     label = applicationInfo?.loadLabel(packageManager)?.toString()
                         ?: packageName, // Fallback to package name
                     versionCode = packageInfo.compatVersionCode,
-                    // --- FIX 2: AVOID CRASH ---
                     // Safely handle nullable versionName.
                     versionName = packageInfo.versionName ?: "",
                     applicationInfo = applicationInfo,

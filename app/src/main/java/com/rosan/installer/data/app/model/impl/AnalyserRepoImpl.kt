@@ -1,16 +1,24 @@
 package com.rosan.installer.data.app.model.impl
 
+import com.rosan.installer.build.Architecture
+import com.rosan.installer.build.Density
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.MultiApkZipAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.XApkAnalyserRepoImpl
 import com.rosan.installer.data.app.repo.AnalyserRepo
+import com.rosan.installer.data.app.repo.FileAnalyserRepo
+import com.rosan.installer.data.app.util.InstalledAppInfo
+import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.util.convertLegacyLanguageCode
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import timber.log.Timber
@@ -26,12 +34,12 @@ object AnalyserRepoImpl : AnalyserRepo {
         config: ConfigEntity,
         data: List<DataEntity>,
         extra: AnalyseExtraEntity
-    ): List<AppEntity> {
+    ): List<PackageAnalysisResult> {
         // --- Logic to analyse data and return a list of AppEntity ---
         // A list to hold all raw analysis results before final processing.
         val rawApps = mutableListOf<AppEntity>()
         // A map of all available analysers for different file types.
-        val analysers = mapOf(
+        val analysers: Map<DataType, FileAnalyserRepo> = mapOf(
             DataType.APK to ApkAnalyserRepoImpl,
             DataType.APKS to ApksAnalyserRepoImpl,
             DataType.APKM to ApkMAnalyserRepoImpl,
@@ -74,7 +82,7 @@ object AnalyserRepoImpl : AnalyserRepo {
         val groupedByPackage = rawApps.groupBy { it.packageName }
 
         // --- Determine the final installation type and correct entity properties ---
-        val finalApps = mutableListOf<AppEntity>()
+        val finalResults = mutableListOf<PackageAnalysisResult>()
 
         // Check if all analyzed files belong to one single package name.
         val isSinglePackageInstall = groupedByPackage.size == 1
@@ -91,13 +99,18 @@ object AnalyserRepoImpl : AnalyserRepo {
             DataType.MULTI_APK
         }
 
-        // --- Post-process all entities to apply corrections ---
-        groupedByPackage.forEach { (_, entitiesInPackage) ->
-            // Find the BaseEntity in the group to use its info as the source of truth.
+        // Iterate over each package group to build the final result
+        groupedByPackage.forEach { (packageName, entitiesInPackage) ->
+            // --- CORE REFACTORING LOGIC ---
+            // Fetch information about the currently installed package.
+            // This logic is now part of the backend analysis, not the ViewModel.
+            val installedAppInfo = InstalledAppInfo.buildByPackageName(packageName)
+
+            // --- Post-process all entities to apply corrections ---
+            val correctedEntities = mutableListOf<AppEntity>()
             val baseEntity = entitiesInPackage.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
             val authoritativeTargetSdk = baseEntity?.targetSdk
 
-            // Correct each entity within the package group.
             entitiesInPackage.forEach { entity ->
                 var correctedEntity = entity
 
@@ -117,11 +130,21 @@ object AnalyserRepoImpl : AnalyserRepo {
                         else -> correctedEntity // BaseEntity and others are already correct.
                     }
                 }
-                finalApps.add(correctedEntity)
+                correctedEntities.add(correctedEntity)
             }
+            // --- End of correction logic ---
+            val selectableEntities = determineDefaultSelections(correctedEntities, sessionContainerType)
+            // Create the final result object for this package
+            finalResults.add(
+                PackageAnalysisResult(
+                    packageName = packageName,
+                    appEntities = selectableEntities,
+                    installedAppInfo = installedAppInfo
+                )
+            )
         }
 
-        return finalApps
+        return finalResults
     }
 
     /**
@@ -226,5 +249,225 @@ object AnalyserRepoImpl : AnalyserRepo {
             Timber.e(e, "Failed to parse info.json as genuine APKM info.")
             false
         }
+    }
+
+    /**
+     * Determines the default selection state for a list of entities.
+     * This method contains the business logic moved from ActionHandler.
+     */
+    private fun determineDefaultSelections(
+        entities: List<AppEntity>,
+        containerType: DataType?
+    ): List<SelectInstallEntity> {
+        val finalSelectEntities = mutableListOf<SelectInstallEntity>()
+        val isMultiAppMode = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
+
+        if (isMultiAppMode) {
+            // --- Multi App Mode Logic ---
+            val allBaseEntities = entities.filterIsInstance<AppEntity.BaseEntity>()
+            val uniqueBaseEntities =
+                allBaseEntities.distinctBy { "${it.packageName}:${it.versionCode}:${it.versionName}:${it.arch?.arch}" }
+
+            if (uniqueBaseEntities.isEmpty()) {
+                finalSelectEntities.addAll(entities.map { SelectInstallEntity(it, selected = true) })
+            } else {
+                val deviceAbis = RsConfig.supportedArchitectures.map { it.arch }
+                val sortedBases = uniqueBaseEntities.sortedWith(
+                    compareBy<AppEntity.BaseEntity> {
+                        val abiIndex = it.arch?.let { arch -> deviceAbis.indexOf(arch.arch) } ?: -1
+                        if (abiIndex == -1) Int.MAX_VALUE else abiIndex
+                    }
+                        .thenByDescending { it.versionCode }
+                        .thenByDescending { it.versionName }
+                )
+                val bestInGroup = sortedBases.firstOrNull()
+                finalSelectEntities.addAll(uniqueBaseEntities.map {
+                    SelectInstallEntity(it, selected = (it == bestInGroup))
+                })
+            }
+        } else {
+            // --- Single App Mode Logic ---
+            val splits = entities.filterIsInstance<AppEntity.SplitEntity>()
+            val optimalSplits = if (splits.isNotEmpty()) findOptimalSplits(splits).toSet() else emptySet()
+
+            val processedEntities = entities.map { entity ->
+                val isSelected = when (entity) {
+                    is AppEntity.BaseEntity,
+                    is AppEntity.DexMetadataEntity -> true
+
+                    is AppEntity.SplitEntity -> entity in optimalSplits
+                    is AppEntity.CollectionEntity -> false
+                }
+                SelectInstallEntity(app = entity, selected = isSelected)
+            }
+            finalSelectEntities.addAll(processedEntities)
+        }
+        return finalSelectEntities
+    }
+
+    private enum class SplitCategory { ABI, DENSITY, LANGUAGE, FEATURE }
+
+    private data class ParsedSplit(
+        val category: SplitCategory,
+        val value: String, // The extracted value, e.g., "arm64-v8a", "xhdpi", "en"
+        val entity: AppEntity.SplitEntity
+    )
+
+    /**
+     * Parses a raw split name into a clean configuration value.
+     * This logic is now robust against filenames containing dots.
+     *
+     * Example transformations:
+     * - "split_config.arm64_v8a.apk" -> "arm64_v8a"
+     * - "split_phonesky_data_loader.config.arm64_v8a.apk" -> "arm64_v8a"
+     * - "split_config_zh.apk" -> "zh"
+     * - "split_phonesky_data_loader.apk" -> "phonesky_data_loader"
+     */
+    private fun AppEntity.SplitEntity.getCleanConfigValue(): String {
+        // Safely remove only the .apk suffix
+        val nameWithoutApk = this.splitName.removeSuffix(".apk")
+
+        // Remove the standard split_ prefix
+        val strippedPrefix = nameWithoutApk.removePrefix("split_")
+
+        // Extract the actual config value. This is the crucial part.
+        // If ".config." exists, take the part after the last occurrence.
+        // Otherwise, if it starts with "config.", remove that prefix.
+        // If neither, use the whole string (for feature splits like "phonesky_data_loader").
+        val configValue = if (strippedPrefix.contains(".config.")) {
+            strippedPrefix.substringAfterLast(".config.")
+        } else if (strippedPrefix.startsWith("config.")) {
+            strippedPrefix.removePrefix("config.")
+        } else {
+            strippedPrefix
+        }
+
+        Timber.d("-> Parsing split '${this.splitName}': raw='${configValue}'")
+        return configValue
+    }
+
+    /**
+     * Finds the most suitable split APKs from a list based on the current device's configuration.
+     * This version implements the final, correct selection logic for each category.
+     *
+     * @param splits The list of all available SplitEntity objects.
+     * @return A list containing only the best-matching splits for each category.
+     */
+    private fun findOptimalSplits(splits: List<AppEntity.SplitEntity>): List<AppEntity.SplitEntity> {
+        if (splits.isEmpty()) return emptyList()
+
+        Timber.d("--- Begin findOptimalSplits for ${splits.size} splits ---")
+
+        val isoLanguages = java.util.Locale.getISOLanguages().toSet()
+
+        // Parse and categorize all splits
+        val parsedSplits = splits.mapNotNull { split ->
+            val rawConfigValue = split.getCleanConfigValue()
+            if (rawConfigValue.isEmpty()) {
+                Timber.w("Parsed empty config value from split: '${split.splitName}', skipping.")
+                return@mapNotNull null
+            }
+
+            val category = when {
+                Architecture.fromArchString(rawConfigValue) != Architecture.UNKNOWN -> SplitCategory.ABI
+                Density.fromDensityString(rawConfigValue) != Density.UNKNOWN -> SplitCategory.DENSITY
+                isoLanguages.contains(
+                    rawConfigValue.convertLegacyLanguageCode().substringBefore('-')
+                ) -> SplitCategory.LANGUAGE
+
+                else -> SplitCategory.FEATURE
+            }
+            Timber.d("   > Categorized '$rawConfigValue' (from ${split.splitName}) as $category")
+
+            val normalizedValue = rawConfigValue.replace('_', '-')
+            ParsedSplit(category, normalizedValue, split)
+        }
+
+        val categorized = parsedSplits.groupBy { it.category }
+        val optimalSplits = mutableListOf<AppEntity.SplitEntity>()
+
+        // Select BEST ABI
+        val abiSplitsGroups = categorized[SplitCategory.ABI]?.groupBy { it.value } ?: emptyMap()
+        if (abiSplitsGroups.isNotEmpty()) {
+            val deviceAbis = RsConfig.supportedArchitectures.map { it.arch }
+            Timber.d("Device ABIs (priority order): $deviceAbis")
+            Timber.d("Available ABI splits: ${abiSplitsGroups.keys}")
+
+            // Find the single best ABI that is available
+            val bestAbi = deviceAbis.firstOrNull { abi -> abiSplitsGroups.containsKey(abi) }
+
+            if (bestAbi != null) {
+                Timber.d("   -> Best ABI match is '$bestAbi'. Selecting all splits for this ABI.")
+                // Add all splits for that best ABI ONLY
+                abiSplitsGroups.getValue(bestAbi).forEach { optimalSplits.add(it.entity) }
+            } else {
+                Timber.w("No matching ABI splits found for this device's architectures.")
+            }
+        }
+
+        // Select BEST Density
+        val densitySplitsGroups = categorized[SplitCategory.DENSITY]?.groupBy { it.value } ?: emptyMap()
+        if (densitySplitsGroups.isNotEmpty()) {
+            val deviceDensities = RsConfig.supportedDensities.map { it.key }
+            Timber.d("Device Densities (priority order): $deviceDensities")
+            Timber.d("Available Density splits: ${densitySplitsGroups.keys}")
+
+            val bestDensity = deviceDensities.firstOrNull { density -> densitySplitsGroups.containsKey(density) }
+
+            if (bestDensity != null) {
+                Timber.d("   -> Best Density match is '$bestDensity'. Selecting.")
+                densitySplitsGroups.getValue(bestDensity).forEach { optimalSplits.add(it.entity) }
+            }
+            // Include 'nodpi' if it exists, as it's universal
+            // TODO is there a nodpi split ?
+            /*densitySplitsGroups["nodpi"]?.let {
+                Timber.d("   -> Found 'nodpi' split(s). Selecting.")
+                it.forEach { p -> optimalSplits.add(p.entity) }
+            }*/
+        }
+
+        // Select BEST Language
+        val langSplitsGroups =
+            categorized[SplitCategory.LANGUAGE]?.groupBy { it.value.convertLegacyLanguageCode() } ?: emptyMap()
+        if (langSplitsGroups.isNotEmpty()) {
+            val applicationLanguages = langSplitsGroups.keys
+            Timber.d("Available Language splits: $applicationLanguages")
+            val deviceLanguages = RsConfig.supportedLocales
+            Timber.d("Device Languages (priority order): $deviceLanguages")
+            var langFound = false
+            // First, try for an exact match (e.g., 'zh-cn')
+            for (lang in deviceLanguages) {
+                val modernLang = lang.convertLegacyLanguageCode()
+                if (langSplitsGroups.containsKey(modernLang)) {
+                    Timber.d("   -> Found best Language match (exact): '$modernLang'. Selecting.")
+                    langSplitsGroups.getValue(modernLang).forEach { optimalSplits.add(it.entity) }
+                    langFound = true
+                    break
+                }
+            }
+            // If no exact match, try for a base language match (e.g., 'zh')
+            if (!langFound) {
+                for (lang in deviceLanguages) {
+                    val baseLang = lang.convertLegacyLanguageCode().substringBefore('-')
+                    if (langSplitsGroups.containsKey(baseLang)) {
+                        Timber.d("   -> Found best Language match (base): '$baseLang'. Selecting.")
+                        langSplitsGroups.getValue(baseLang).forEach { optimalSplits.add(it.entity) }
+                        langFound = true
+                        break
+                    }
+                }
+            }
+        }
+
+        // ALWAYS include all feature splits
+        categorized[SplitCategory.FEATURE]?.forEach {
+            Timber.d("   -> Including feature split: '${it.value}'")
+            optimalSplits.add(it.entity)
+        }
+
+        Timber.d("--- Finished findOptimalSplits. Total selected: ${optimalSplits.distinct().size} ---")
+        val result = optimalSplits.distinct()
+        result.forEach { Timber.d("   >> Final Selected: ${it.splitName}") }
+        return result
     }
 }

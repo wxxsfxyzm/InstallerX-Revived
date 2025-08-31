@@ -2,8 +2,8 @@ package com.rosan.installer.data.installer.repo
 
 import android.app.Activity
 import com.rosan.installer.data.app.model.entity.DataEntity
+import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
-import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +15,7 @@ interface InstallerRepo : Closeable {
     var error: Throwable
     var config: ConfigEntity
     var data: List<DataEntity>
-    var entities: List<SelectInstallEntity>
+    var analysisResults: List<PackageAnalysisResult>
     val progress: Flow<ProgressEntity>
     val background: Flow<Boolean>
     val uninstallInfo: MutableStateFlow<UninstallInfo?>

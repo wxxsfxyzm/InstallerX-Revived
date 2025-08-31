@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.installer.dialog
 
+import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 
 sealed class DialogViewAction {
@@ -17,6 +18,16 @@ sealed class DialogViewAction {
     /** Triggers the uninstallation process. */
     data object Uninstall : DialogViewAction()
 
+    /**
+     * Toggles the selection state of the current app.
+     */
+    data class ToggleSelection(val packageName: String, val entity: SelectInstallEntity, val isMultiSelect: Boolean) :
+        DialogViewAction()
+
+    /**
+     * Sets the installer package name.
+     * @param installer The installer package name.
+     */
     data class SetInstaller(val installer: String?) : DialogViewAction()
 
     /**
@@ -25,5 +36,10 @@ sealed class DialogViewAction {
      * @param enable true to add the flag, false to remove it.
      */
     data class ToggleUninstallFlag(val flag: Int, val enable: Boolean) : DialogViewAction()
+
+    /**
+     * Triggers the uninstallation process with the option to keep data.
+     * @param keepData true to keep data, false to delete it.
+     */
     data class UninstallAndRetryInstall(val keepData: Boolean) : DialogViewAction()
 }

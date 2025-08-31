@@ -8,7 +8,6 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
 
 @Composable
@@ -25,8 +24,10 @@ fun analysingDialog(
         }, buttons = DialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
-            listOf(DialogButton(stringResource(R.string.cancel)) {
+            // disable the cancel button
+            emptyList()
+            /*listOf(DialogButton(stringResource(R.string.cancel)) {
                 viewModel.dispatch(DialogViewAction.Close)
-            })
+            })*/
         })
 }

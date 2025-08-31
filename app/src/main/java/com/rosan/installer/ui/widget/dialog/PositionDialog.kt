@@ -1,6 +1,9 @@
 package com.rosan.installer.ui.widget.dialog
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,18 +66,20 @@ fun PositionDialog(
     rightButton: @Composable (() -> Unit)? = null
 ) {
     Dialog(onDismissRequest = onDismissRequest, properties = properties) {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(null) {
-                detectTapGestures(onTap = {
-                    onDismissRequest()
-                })
-            }) {
-            Box(modifier = Modifier
-                .align(Alignment.Center)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
                 .pointerInput(null) {
-                    detectTapGestures(onTap = {})
+                    detectTapGestures(onTap = {
+                        onDismissRequest()
+                    })
                 }) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .pointerInput(null) {
+                        detectTapGestures(onTap = {})
+                    }) {
                 Surface(
                     modifier = modifier,
                     shape = shape,
@@ -91,11 +96,21 @@ fun PositionDialog(
                             mutableIntStateOf(0)
                         }
                         val buttonHeight = (buttonHeightPx / LocalDensity.current.density).dp
-                        Box(modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .onSizeChanged {
-                                buttonHeightPx = it.height
-                            }) {
+                        val animatedButtonHeight by animateDpAsState(
+                            targetValue = buttonHeight,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMedium
+                            ),
+                            label = "button_height"
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .onSizeChanged {
+                                    buttonHeightPx = it.height
+                                }) {
                             PositionChildWidget(
                                 leftButton, centerButton, rightButton
                             ) { button ->
@@ -113,7 +128,15 @@ fun PositionDialog(
                         }
 
                         Column(
-                            modifier = Modifier.padding(bottom = animateDpAsState(targetValue = buttonHeight).value)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = animatedButtonHeight)
+                                .animateContentSize(
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                    )
+                                )
                         ) {
                             PositionChildWidget(
                                 leftIcon, centerIcon, rightIcon
@@ -211,7 +234,7 @@ private fun PositionChildWidget(
 private val ButtonsMainAxisSpacing = 8.dp
 private val ButtonsCrossAxisSpacing = 12.dp
 
-private val DialogSinglePadding = 24.dp
+private val DialogSinglePadding = 16.dp
 
 private val DialogPadding = PaddingValues(top = DialogSinglePadding, bottom = DialogSinglePadding)
 private val IconPadding =
@@ -222,8 +245,8 @@ private val SubtitlePadding =
     PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
 private val TextPadding =
     PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
-private val ContentPadding = PaddingValues.Absolute(bottom = 12.dp)
-private val ButtonPadding = PaddingValues(horizontal = DialogSinglePadding)
+private val ContentPadding = PaddingValues.Absolute(bottom = 8.dp)
+private val ButtonPadding = PaddingValues(start = DialogSinglePadding, end = DialogSinglePadding, bottom = 0.dp)
 
 private val MinWidth = 280.dp
-private val MaxHeight = 600.dp
+private val MaxHeight = 650.dp

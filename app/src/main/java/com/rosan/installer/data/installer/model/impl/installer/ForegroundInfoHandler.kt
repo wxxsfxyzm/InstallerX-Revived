@@ -96,9 +96,14 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     override suspend fun onFinish() {
         Timber.d("[id=${installer.id}] onFinish: Cancelling notification and job.")
         // Clear cache for all involved packages to ensure freshness on next install
-        installer.entities.filter { it.selected }.map { it.app.packageName }.distinct().forEach {
-            appIconRepo.clearCacheForPackage(it)
-        }
+        installer.analysisResults
+            .flatMap { it.appEntities }
+            .filter { it.selected }
+            .map { it.app.packageName }
+            .distinct()
+            .forEach {
+                appIconRepo.clearCacheForPackage(it)
+            }
         setNotification(null)
         job?.cancel()
     }
@@ -163,7 +168,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
      * Gets the large icon for notifications as a Bitmap by fetching it from the AppIconRepository.
      */
     private suspend fun getLargeIconBitmap(): Bitmap? {
-        val entities = installer.entities.filter { it.selected }.map { it.app }
+        val entities = installer.analysisResults
+            .flatMap { it.appEntities }
+            .filter { it.selected }
+            .map { it.app }
         val entityToInstall = entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
             ?: entities.sortedBest().firstOrNull()
             ?: return null // Return null if no suitable entity is found
@@ -282,12 +290,16 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .addAction(0, getString(R.string.cancel), finishIntent).build()
 
     private suspend fun onAnalysedSuccess(builder: NotificationCompat.Builder): Notification {
-        val selected = installer.entities.filter { it.selected }
-        return (if (selected.groupBy { it.app.packageName }.size != 1) builder.setContentTitle(
+        val selectedEntities = installer.analysisResults
+            .flatMap { it.appEntities }
+            .filter { it.selected }
+        val selectedApps = selectedEntities.map { it.app }
+
+        return (if (selectedApps.groupBy { it.packageName }.size != 1) builder.setContentTitle(
             getString(R.string.installer_prepare_install)
         ).addAction(0, getString(R.string.cancel), finishIntent)
         else {
-            val info = selected.map { it.app }.getInfo(context)
+            val info = selectedApps.getInfo(context)
             builder.setContentTitle(info.title)
                 .setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
                 .setLargeIcon(getLargeIconBitmap())
@@ -297,7 +309,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     private suspend fun onInstalling(builder: NotificationCompat.Builder): Notification {
-        val info = installer.entities.filter { it.selected }.map { it.app }.getInfo(context)
+        val info = installer.analysisResults
+            .flatMap { it.appEntities }
+            .filter { it.selected }
+            .map { it.app }
+            .getInfo(context)
         return builder.setContentTitle(info.title)
             .setContentText(getString(R.string.installer_installing))
             .setLargeIcon(getLargeIconBitmap())
@@ -307,7 +323,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun onInstallFailed(
         builder: NotificationCompat.Builder
     ): Notification {
-        val info = installer.entities.filter { it.selected }.map { it.app }.getInfo(context)
+        val info = installer.analysisResults
+            .flatMap { it.appEntities }
+            .filter { it.selected }
+            .map { it.app }
+            .getInfo(context)
         val reason = installer.error.getErrorMessage(context)
         val contentText = getString(R.string.installer_install_failed)
         val bigTextStyle = NotificationCompat.BigTextStyle()
@@ -326,7 +346,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     private suspend fun onInstallSuccess(builder: NotificationCompat.Builder): Notification {
-        val entities = installer.entities.filter { it.selected }.map { it.app }
+        val entities = installer.analysisResults
+            .flatMap { it.appEntities }
+            .filter { it.selected }
+            .map { it.app }
         val info = entities.getInfo(context)
         val launchIntent =
             context.packageManager.getLaunchIntentForPackage(entities.first().packageName)

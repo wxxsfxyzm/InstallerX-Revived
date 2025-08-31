@@ -27,7 +27,7 @@ import timber.log.Timber
 class InstallerService : Service() {
     companion object {
         const val EXTRA_ID = "id"
-        private const val IDLE_TIMEOUT_MS = 500L
+        private const val IDLE_TIMEOUT_MS = 1000L
     }
 
     enum class Action(val value: String) {

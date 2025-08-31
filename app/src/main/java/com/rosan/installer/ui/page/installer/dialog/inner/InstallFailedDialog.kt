@@ -54,17 +54,16 @@ fun installFailedDialog( // 小写开头
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
     val context = LocalContext.current
-
-    val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
     val currentPackageName by viewModel.currentPackageName.collectAsState()
-    val packageName = currentPackageName ?: installer.entities.filter { it.selected }.map { it.app }
-        .firstOrNull()?.packageName ?: ""
+    // val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
+
+    val packageName = currentPackageName ?: // Fallback logic is now simpler
+    installer.analysisResults.firstOrNull()?.packageName ?: ""
 
     // Call InstallInfoDialog for base structure
     val baseParams = installInfoDialog(
         installer = installer,
         viewModel = viewModel,
-        preInstallAppInfo = preInstallAppInfo,
         onTitleExtraClick = {
             if (packageName.isNotEmpty()) {
                 context.startActivity(

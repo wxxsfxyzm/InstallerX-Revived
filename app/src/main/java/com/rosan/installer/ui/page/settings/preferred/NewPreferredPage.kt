@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -83,6 +84,7 @@ fun NewPreferredPage(
     val snackBarHostState = remember { SnackbarHostState() }
     var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowErrorDialog?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
@@ -111,16 +113,17 @@ fun NewPreferredPage(
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
         contentWindowInsets = WindowInsets.none,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                title = { Text(text = stringResource(id = R.string.preferred)) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
-                title = {
-                    Text(text = stringResource(id = R.string.preferred))
-                }
+                )
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
@@ -250,17 +253,7 @@ fun NewPreferredPage(
                                         supportingContentText = stringResource(R.string.get_update_detail),
                                         onClick = { showBottomSheet = true }
                                     )
-                                }/*,
-                                {
-                                    SettingsAboutItemWidget(
-                                        imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
-                                        headlineContentText = stringResource(R.string.telegram_group),
-                                        supportingContentText = stringResource(R.string.telegram_group_desc),
-                                        onClick = {
-                                            openUrl(context, "https://t.me/installerx_revived")
-                                        }
-                                    )
-                                }*/
+                                }
                             )
                         )
                     }
