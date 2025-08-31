@@ -11,9 +11,9 @@
 agp = "8.12.2"
 kotlin = "2.2.10"
 ksp = "2.2.10-2.0.2"
-composeBom = "2025.08.00"
+composeBom = "2025.08.01"
 compose = "1.9.0"
-material3 = "1.5.0-alpha02"
+material3 = "1.5.0-alpha03"
 room = "2.7.2"
 ktx-serialization = "1.9.0"
 accompanist = "0.37.3"
@@ -41,7 +41,7 @@ aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "abo
 androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.17.0" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
-androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.2" }
+androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.3" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
 
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }

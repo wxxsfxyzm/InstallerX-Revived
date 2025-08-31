@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.settings.preferred
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -42,7 +40,6 @@ import com.rosan.installer.R
 import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.ui.AnimatedDialog
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.SettingsScreen
 import com.rosan.installer.ui.theme.none
@@ -115,16 +112,17 @@ fun NewPreferredPage(
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
         contentWindowInsets = WindowInsets.none,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
+                modifier = Modifier.padding(start = 12.dp),
+                title = { Text(text = stringResource(id = R.string.preferred)) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
-                title = {
-                    Text(text = stringResource(id = R.string.preferred))
-                }
+                )
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
@@ -254,24 +252,6 @@ fun NewPreferredPage(
                                         supportingContentText = stringResource(R.string.get_update_detail),
                                         onClick = { showBottomSheet = true }
                                     )
-                                },/*,
-                                {
-                                    SettingsAboutItemWidget(
-                                        imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
-                                        headlineContentText = stringResource(R.string.telegram_group),
-                                        supportingContentText = stringResource(R.string.telegram_group_desc),
-                                        onClick = {
-                                            openUrl(context, "https://t.me/installerx_revived")
-                                        }
-                                    )
-                                }*/
-                                {
-                                    SettingsAboutItemWidget(
-                                        imageVector = AppIcons.Update,
-                                        headlineContentText = stringResource(R.string.get_update),
-                                        supportingContentText = stringResource(R.string.get_update_detail),
-                                        onClick = { showDialog = true }
-                                    )
                                 }
                             )
                         )
@@ -295,14 +275,5 @@ fun NewPreferredPage(
         BottomSheetContent(
             title = stringResource(R.string.get_update)
         )
-    }
-    AnimatedDialog(showDialog, onDismiss = { showDialog = false }) {
-        Box(
-            modifier = Modifier
-                .background(Color.White)
-                .padding(16.dp)
-        ) {
-            Text(text = "Hello, Compose!")
-        }
     }
 }

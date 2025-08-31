@@ -100,16 +100,17 @@ fun PositionDialog(
                             targetValue = buttonHeight,
                             animationSpec = spring(
                                 dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessLow
+                                stiffness = Spring.StiffnessMedium
                             ),
                             label = "button_height"
                         )
 
-                        Box(modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .onSizeChanged {
-                                buttonHeightPx = it.height
-                            }) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .onSizeChanged {
+                                    buttonHeightPx = it.height
+                                }) {
                             PositionChildWidget(
                                 leftButton, centerButton, rightButton
                             ) { button ->
@@ -233,7 +234,7 @@ private fun PositionChildWidget(
 private val ButtonsMainAxisSpacing = 8.dp
 private val ButtonsCrossAxisSpacing = 12.dp
 
-private val DialogSinglePadding = 24.dp
+private val DialogSinglePadding = 16.dp
 
 private val DialogPadding = PaddingValues(top = DialogSinglePadding, bottom = DialogSinglePadding)
 private val IconPadding =
@@ -244,8 +245,8 @@ private val SubtitlePadding =
     PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
 private val TextPadding =
     PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
-private val ContentPadding = PaddingValues.Absolute(bottom = 12.dp)
-private val ButtonPadding = PaddingValues(horizontal = DialogSinglePadding)
+private val ContentPadding = PaddingValues.Absolute(bottom = 8.dp)
+private val ButtonPadding = PaddingValues(start = DialogSinglePadding, end = DialogSinglePadding, bottom = 8.dp)
 
 private val MinWidth = 280.dp
 private val MaxHeight = 600.dp

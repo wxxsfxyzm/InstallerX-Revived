@@ -7,6 +7,7 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,7 +55,6 @@ import com.rosan.installer.util.asUserReadableSplitName
 fun installChoiceDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
-    // Read state directly from the repository's single source of truth.
     val analysisResults = installer.analysisResults
     val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
 
@@ -100,38 +100,46 @@ private fun ChoiceContent(
     viewModel: DialogViewModel,
     isMultiApk: Boolean
 ) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        items(analysisResults, key = { it.packageName }) { packageResult ->
-            if (isMultiApk) {
+    // A much cleaner implementation using contentPadding for consistent spacing.
+    if (isMultiApk) {
+        // --- Multi-APK Mode ---
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            items(analysisResults, key = { it.packageName }) { packageResult ->
                 MultiApkGroupCard(
                     packageResult = packageResult,
                     viewModel = viewModel
                 )
-            } else {
-                // Default single-package split selection (checkboxes)
-                packageResult.appEntities.forEach { item ->
-                    SingleItemCard(
-                        item = item,
-                        onClick = {
-                            viewModel.dispatch(
-                                DialogViewAction.ToggleSelection(
-                                    packageName = packageResult.packageName,
-                                    entity = item,
-                                    isMultiSelect = true // Checkbox behavior
-                                )
+            }
+        }
+    } else {
+        // --- Single-Package Split Mode ---
+        val entities = analysisResults.firstOrNull()?.appEntities ?: emptyList()
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            items(entities, key = { it.app.name + it.app.packageName }) { item ->
+                SingleItemCard(
+                    item = item,
+                    onClick = {
+                        viewModel.dispatch(
+                            DialogViewAction.ToggleSelection(
+                                packageName = item.app.packageName,
+                                entity = item,
+                                isMultiSelect = true
                             )
-                        }
-                    )
-                }
+                        )
+                    }
+                )
             }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun MultiApkGroupCard(
     packageResult: PackageAnalysisResult,
@@ -140,14 +148,12 @@ private fun MultiApkGroupCard(
     val itemsInGroup = packageResult.appEntities
     val isSingleItemInGroup = itemsInGroup.size == 1
 
-    // The card's expansion state is now local UI state.
     var isExpanded by remember { mutableStateOf(itemsInGroup.any { it.selected }) }
 
     val baseInfo = remember(itemsInGroup) { itemsInGroup.firstNotNullOfOrNull { it.app as? AppEntity.BaseEntity } }
     val appLabel = baseInfo?.label ?: packageResult.packageName
 
     if (isSingleItemInGroup) {
-        // --- Render a single card with checkbox behavior ---
         val item = itemsInGroup.first()
         SingleItemCard(
             item = item,
@@ -156,16 +162,17 @@ private fun MultiApkGroupCard(
                     DialogViewAction.ToggleSelection(
                         packageName = packageResult.packageName,
                         entity = item,
-                        isMultiSelect = true // Checkbox behavior
+                        isMultiSelect = true
                     )
                 )
             }
         )
     } else {
-        // --- Render an expandable card with radio button behavior ---
         val rotation by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f, label = "arrowRotation")
-
-        Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -201,13 +208,13 @@ private fun MultiApkGroupCard(
                         .forEach { item ->
                             SelectableSubCard(
                                 item = item,
-                                isRadio = true, // Use RadioButton for multi-item groups
+                                isRadio = true,
                                 onClick = {
                                     viewModel.dispatch(
                                         DialogViewAction.ToggleSelection(
                                             packageName = packageResult.packageName,
                                             entity = item,
-                                            isMultiSelect = false // Radio button behavior
+                                            isMultiSelect = false
                                         )
                                     )
                                 }
@@ -224,13 +231,14 @@ private fun MultiApkGroupCard(
 private fun SingleItemCard(item: SelectInstallEntity, onClick: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     Card(
+        // Padding is now handled by the parent LazyColumn's contentPadding.
         modifier = Modifier.fillMaxWidth(),
         onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
             onClick()
         },
-        colors = CardDefaults.cardColors(containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (item.selected) 2.dp else 1.dp)
+        colors = CardDefaults.cardColors(containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp/*defaultElevation = if (item.selected) 2.dp else 1.dp*/)
     ) {
         Row(
             modifier = Modifier
@@ -259,8 +267,8 @@ private fun SelectableSubCard(item: SelectInstallEntity, isRadio: Boolean, onCli
             haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
             onClick()
         },
-        elevation = CardDefaults.cardElevation(defaultElevation = if (item.selected) 1.dp else 2.dp),
-        colors = CardDefaults.cardColors(containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp/*defaultElevation = if (item.selected) 1.dp else 2.dp*/),
+        colors = CardDefaults.cardColors(containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Row(
             modifier = Modifier
@@ -281,9 +289,11 @@ private fun SelectableSubCard(item: SelectInstallEntity, isRadio: Boolean, onCli
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ItemContent(app: AppEntity) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(end = 12.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(end = 12.dp)
+    ) {
         when (app) {
             is AppEntity.BaseEntity -> {
                 Text(

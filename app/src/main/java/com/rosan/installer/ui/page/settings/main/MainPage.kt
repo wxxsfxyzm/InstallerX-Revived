@@ -25,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FlexibleBottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.WideNavigationRail
@@ -45,6 +46,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.settings.config.all.AllPage
 import com.rosan.installer.ui.page.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.settings.config.all.AllViewModel
+import com.rosan.installer.ui.page.settings.config.all.NewAllPage
 import com.rosan.installer.ui.page.settings.preferred.NewPreferredPage
 import com.rosan.installer.ui.page.settings.preferred.PreferredPage
 import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
@@ -75,7 +77,10 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
             icon = AppIcons.RoomPreferences,
             label = stringResource(R.string.config)
         ) { insets ->
-            AllPage(navController, insets, allViewModel)
+            if (preferredViewModel.state.showRefreshedUI)
+                NewAllPage(navController, insets, allViewModel)
+            else
+                AllPage(navController, insets, allViewModel)
         },
         NavigationData(
             icon = AppIcons.SettingsSuggest,
@@ -168,6 +173,7 @@ fun RowNavigation(
             .wrapContentSize(),
         windowInsets = windowInsets,
         expandedHeight = 72.dp,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         horizontalArrangement = BottomAppBarDefaults.FlexibleFixedHorizontalArrangement,
         content = {
             data.forEachIndexed { index, navigationData ->

@@ -13,14 +13,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,11 +47,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
@@ -62,7 +56,7 @@ import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AllPage(
+fun NewAllPage(
     navController: NavController,
     windowInsets: WindowInsets,
     viewModel: AllViewModel
@@ -126,11 +120,16 @@ fun AllPage(
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = windowInsets,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
-                title = {
-                    Text(text = stringResource(id = R.string.config))
-                }
+                modifier = Modifier.padding(start = 12.dp),
+                title = { Text(text = stringResource(id = R.string.config)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                )
             )
         },
         floatingActionButton = {
@@ -200,41 +199,6 @@ fun AllPage(
     }
 }
 
-@Composable
-fun LottieWidget(
-    spec: LottieCompositionSpec,
-    text: String
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val composition by rememberLottieComposition(spec)
-            val progress by animateLottieCompositionAsState(
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-            )
-            LottieAnimation(
-                modifier = Modifier
-                    .size(200.dp),
-                composition = composition,
-                progress = { progress }
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleLarge
-            )
-        }
-    }
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ShowDataWidget(
@@ -262,7 +226,8 @@ private fun DataItemWidget(
 ) {
     ElevatedCard(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright)
     ) {
         Column(
             modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
@@ -284,7 +249,8 @@ private fun DataItemWidget(
         HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp),
+            color = MaterialTheme.colorScheme.outline
         )
         Row(
             modifier = Modifier
@@ -304,15 +270,12 @@ private fun DataItemWidget(
                         contentDescription = stringResource(id = R.string.edit)
                     )
                 }
-                // TODO Do not allow to delete default config
-                //if (entity.name != "Default") {
                 IconButton(onClick = { viewModel.dispatch(AllViewAction.DeleteDataConfig(entity)) }) {
                     Icon(
                         imageVector = AppIcons.Delete,
                         contentDescription = stringResource(id = R.string.delete)
                     )
                 }
-                //}
                 IconButton(onClick = {
                     viewModel.dispatch(AllViewAction.ApplyConfig(entity))
                 }) {
@@ -322,21 +285,6 @@ private fun DataItemWidget(
                     )
                 }
             }
-            /*            Row(
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                                .padding(horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            var enabled by remember {
-                                mutableStateOf(false)
-                            }
-                            Switch(
-                                checked = enabled,
-                                onCheckedChange = { enabled = !enabled }
-                            )
-                        }*/
         }
     }
 }
