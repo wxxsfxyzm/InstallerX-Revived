@@ -226,9 +226,9 @@ class DialogViewModel(
         // sync to repo.config
         repo.config.installFlags = _installFlags.value
         // When collecting for the first time, save the original list for multi-install restoration.
-        if (originalAnalysisResults.isEmpty()) {
+        /*if (originalAnalysisResults.isEmpty()) {
             originalAnalysisResults = repo.analysisResults
-        }
+        }*/
         //_preInstallAppInfo.value = null
         _currentPackageName.value = null
         val newPackageNames = repo.analysisResults.map { it.packageName }.toSet()
@@ -261,6 +261,11 @@ class DialogViewModel(
                     is ProgressEntity.InstallAnalysing -> newState = DialogViewState.Analysing
                     is ProgressEntity.InstallAnalysedFailed -> newState = DialogViewState.AnalyseFailed
                     is ProgressEntity.InstallAnalysedSuccess -> {
+                        // When analysis is successful, this is the first moment we have the full, original list.
+                        // This is the correct time to back it up.
+                        if (originalAnalysisResults.isEmpty()) {
+                            originalAnalysisResults = repo.analysisResults
+                        }
                         val analysisResults = repo.analysisResults
                         val isMultiAppMode = analysisResults.size > 1
 
