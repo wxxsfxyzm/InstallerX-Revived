@@ -5,10 +5,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
+import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.InstallerPage
 import com.rosan.installer.ui.theme.InstallerTheme
+import com.rosan.installer.ui.util.PermissionDenialReason
+import com.rosan.installer.ui.util.PermissionManager
+import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,24 +31,23 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
     private var installer: InstallerRepo? = null
     private var job: Job? = null
+    private lateinit var permissionManager: PermissionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("UninstallerActivity onCreate.")
 
+        permissionManager = PermissionManager(this)
         val installerId = savedInstanceState?.getString(KEY_ID)
         installer = get { parametersOf(installerId) }
 
         // Start the process only if it's a fresh launch, not a configuration change
         if (savedInstanceState == null) {
-            var packageName: String? = null
-
-            // --- NEW LOGIC TO GET PACKAGE NAME ---
-
-            // 1. First, try to get it from our custom extra (for internal calls)
+            var packageName: String?
+            // First, try to get it from our custom extra (for internal calls)
             packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME)
 
-            // 2. If not found, try to get it from the intent data (for system calls)
+            // If not found, try to get it from the intent data (for system calls)
             if (packageName.isNullOrBlank()) {
                 val action = intent.action
                 if (action == Intent.ACTION_UNINSTALL_PACKAGE || action == Intent.ACTION_DELETE) {
@@ -53,7 +56,6 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                     }
                 }
             }
-            // --- END OF NEW LOGIC ---
 
             if (packageName.isNullOrBlank()) {
                 Timber.e("UninstallerActivity started without a package name.")
@@ -63,7 +65,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
             Timber.d("Target package to uninstall: $packageName")
             // Trigger the uninstall resolution process
-            installer?.resolveUninstall(this@UninstallerActivity, packageName)
+            requestPermissionsAndProceed(packageName)
         }
 
         startCollectors()
@@ -83,6 +85,29 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         // Do not call installer.close() here if you want the process to continue in the background
         Timber.d("UninstallerActivity is being destroyed.")
         super.onDestroy()
+    }
+
+    private fun requestPermissionsAndProceed(packageName: String) {
+        permissionManager.requestEssentialPermissions(
+            onGranted = {
+                Timber.d("Permissions granted. Proceeding with uninstall for $packageName")
+                installer?.resolveUninstall(this@UninstallerActivity, packageName)
+            },
+            onDenied = { reason ->
+                when (reason) {
+                    PermissionDenialReason.NOTIFICATION -> {
+                        Timber.w("Notification permission was denied.")
+                        this.toast(R.string.enable_notification_hint)
+                    }
+
+                    PermissionDenialReason.STORAGE -> {
+                        Timber.w("Storage permission was denied.")
+                        this.toast(R.string.enable_storage_permission_hint)
+                    }
+                }
+                finish()
+            }
+        )
     }
 
     private fun startCollectors() {

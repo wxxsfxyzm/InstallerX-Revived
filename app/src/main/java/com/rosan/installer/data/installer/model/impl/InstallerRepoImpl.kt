@@ -8,8 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.rosan.installer.data.app.model.entity.DataEntity
+import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
-import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -98,7 +98,7 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     override var error: Throwable = Throwable()
     override var config: ConfigEntity = ConfigEntity.default
     override var data: List<DataEntity> by mutableStateOf(emptyList())
-    override var entities: List<SelectInstallEntity> by mutableStateOf(emptyList())
+    override var analysisResults: List<PackageAnalysisResult> by mutableStateOf(emptyList())
     override val progress: MutableSharedFlow<ProgressEntity> = MutableStateFlow(ProgressEntity.Ready)
     val action: MutableSharedFlow<Action> = MutableSharedFlow(replay = 1, extraBufferCapacity = 1)
     override val background: MutableSharedFlow<Boolean> = MutableStateFlow(false)

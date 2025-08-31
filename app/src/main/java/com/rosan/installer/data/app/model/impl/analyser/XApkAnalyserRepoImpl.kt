@@ -4,7 +4,7 @@ import android.graphics.drawable.Drawable
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.app.repo.AnalyserRepo
+import com.rosan.installer.data.app.repo.FileAnalyserRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
@@ -16,7 +16,7 @@ import org.koin.core.component.get
 import java.io.File
 import java.util.zip.ZipFile
 
-object XApkAnalyserRepoImpl : AnalyserRepo, KoinComponent {
+object XApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
     private val json = get<Json>()
 
     override suspend fun doWork(

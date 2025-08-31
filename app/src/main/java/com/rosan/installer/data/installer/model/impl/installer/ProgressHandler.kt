@@ -55,8 +55,7 @@ class ProgressHandler(scope: CoroutineScope, installer: InstallerRepo) : Handler
             return
         }
 
-        val isSinglePackage = installer.entities.filter { it.selected }
-            .groupBy { it.app.packageName }.keys.size == 1
+        val isSinglePackage = installer.analysisResults.size == 1
 
         if (!isSinglePackage) {
             Timber.d("[id=${installer.id}] onAnalysedSuccess: Not a single package install. Doing nothing.")

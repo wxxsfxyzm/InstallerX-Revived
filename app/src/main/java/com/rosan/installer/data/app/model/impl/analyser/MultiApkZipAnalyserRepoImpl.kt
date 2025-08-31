@@ -3,7 +3,7 @@ package com.rosan.installer.data.app.model.impl.analyser
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.app.repo.AnalyserRepo
+import com.rosan.installer.data.app.repo.FileAnalyserRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import timber.log.Timber
 import java.io.File
@@ -15,7 +15,7 @@ import java.util.zip.ZipFile
  * Analyzes ZIP archives containing multiple, independent APK files.
  * It iterates through the archive and analyzes each .apk file individually.
  */
-object MultiApkZipAnalyserRepoImpl : AnalyserRepo {
+object MultiApkZipAnalyserRepoImpl : FileAnalyserRepo {
 
     override suspend fun doWork(
         config: ConfigEntity,

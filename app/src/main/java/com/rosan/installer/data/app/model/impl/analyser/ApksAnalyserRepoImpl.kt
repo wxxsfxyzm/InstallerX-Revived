@@ -3,7 +3,7 @@ package com.rosan.installer.data.app.model.impl.analyser
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.app.repo.AnalyserRepo
+import com.rosan.installer.data.app.repo.FileAnalyserRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import timber.log.Timber
 import java.io.File
@@ -12,7 +12,7 @@ import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
-object ApksAnalyserRepoImpl : AnalyserRepo {
+object ApksAnalyserRepoImpl : FileAnalyserRepo {
     override suspend fun doWork(
         config: ConfigEntity, data: List<DataEntity>, extra: AnalyseExtraEntity
     ): List<AppEntity> {

@@ -1,17 +1,10 @@
 package com.rosan.installer.ui.activity
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
@@ -19,13 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.InstallerPage
 import com.rosan.installer.ui.theme.InstallerTheme
+import com.rosan.installer.ui.util.PermissionDenialReason
+import com.rosan.installer.ui.util.PermissionManager
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,49 +36,16 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     private var installer by mutableStateOf<InstallerRepo?>(null)
     private var job: Job? = null
+    private lateinit var permissionManager: PermissionManager
 
-    private val requestNotificationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val allGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                permissions[Manifest.permission.POST_NOTIFICATIONS] == true
-            } else true
-
-            Timber.d("Notification permission result: allGranted=$allGranted")
-            if (allGranted) {
-                checkStoragePermissionAndProceed()
-            } else {
-                Toast.makeText(this, R.string.enable_notification_hint, Toast.LENGTH_LONG).show()
-                finish()
-            }
-        }
-
-    private val requestStoragePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            Timber.d("Storage permission GRANTED from user.")
-            installer?.resolveInstall(this)
-        } else {
-            Timber.d("Storage permission DENIED from user.")
-            this.toast(R.string.enable_storage_permission_hint, Toast.LENGTH_LONG)
-            finish()
-        }
-    }
-
-    private val requestStoragePermissionLauncherFromSettings = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (Environment.isExternalStorageManager()) {
-            Timber.d("Storage permission GRANTED after returning from settings.")
-            installer?.resolveInstall(this)
-        } else {
-            Timber.d("Storage permission DENIED after returning from settings.")
-            this.toast(R.string.enable_storage_permission_hint, Toast.LENGTH_LONG)
-            finish()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         logIntentDetails("onNewIntent", intent)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         Timber.d("onCreate. SavedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}")
+
+        permissionManager = PermissionManager(this)
         restoreInstaller(savedInstanceState)
         val installerId =
             if (savedInstanceState == null) intent?.getStringExtra(KEY_ID) else savedInstanceState.getString(KEY_ID)
@@ -98,6 +58,40 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             Timber.d("onCreate: Re-attaching to existing installer ($installerId). Skipping resolve process.")
         }
         showContent()
+    }
+
+    private fun checkPermissionsAndStartProcess() {
+        if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) {
+            Timber.d("checkPermissionsAndStartProcess: Launched from history, skipping permission checks.")
+            return
+        }
+        Timber.d("checkPermissionsAndStartProcess: Starting permission check flow.")
+
+        // Call the manager to request permissions and handle the results in the callbacks.
+        permissionManager.requestEssentialPermissions(
+            onGranted = {
+                // This is called when all permissions are successfully granted.
+                Timber.d("All essential permissions are granted.")
+                installer?.resolveInstall(this)
+            },
+            onDenied = { reason ->
+                // This is called if any permission is denied.
+                // The 'reason' enum tells you which one failed.
+                when (reason) {
+                    PermissionDenialReason.NOTIFICATION -> {
+                        Timber.w("Notification permission was denied.")
+                        this.toast(R.string.enable_notification_hint)
+                    }
+
+                    PermissionDenialReason.STORAGE -> {
+                        Timber.w("Storage permission was denied.")
+                        this.toast(R.string.enable_storage_permission_hint)
+                    }
+                }
+                // Finish the activity if permissions are not granted.
+                finish()
+            }
+        )
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -161,67 +155,6 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                         this@InstallerActivity.finish()
                     }
                 }
-            }
-        }
-    }
-
-    private fun checkPermissionsAndStartProcess() {
-        if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) {
-            Timber.d("checkPermissionsAndStartProcess: Launched from history, skipping permission checks.")
-            return
-        }
-        Timber.d("checkPermissionsAndStartProcess: Starting permission check flow.")
-        checkNotificationPermissionAndProceed()
-    }
-
-    private fun checkNotificationPermissionAndProceed() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                Timber.d("Notification permission already granted.")
-                checkStoragePermissionAndProceed()
-            } else {
-                Timber.d("Requesting notification permission.")
-                requestNotificationPermissionLauncher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
-            }
-        } else {
-            Timber.d("No notification permission needed for this API level.")
-            checkStoragePermissionAndProceed()
-        }
-    }
-
-    private fun checkStoragePermissionAndProceed() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (Environment.isExternalStorageManager()) {
-                Timber.d("Storage permission already granted. Calling resolveInstall().")
-                installer?.resolveInstall(this)
-            } else {
-                Timber.d("Requesting storage permission by opening settings.")
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                    data = "package:$packageName".toUri()
-                }
-
-                // Check if there is an activity to handle this intent
-                if (intent.resolveActivity(packageManager) != null) {
-                    try {
-                        requestStoragePermissionLauncherFromSettings.launch(intent)
-                    } catch (e: Exception) {
-                        Timber.e(e, "Failed to launch storage permission settings, even after resolving activity.")
-                    }
-                } else {
-                    // If no activity can handle the specific intent, open the generic app settings page.
-                    Timber.w("No activity found to handle ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION.")
-                }
-            }
-        } else {
-            // Android 10 and below
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED) {
-                Timber.d("Storage permission already granted. Calling resolveInstall().")
-                installer?.resolveInstall(this)
-            } else {
-                requestStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
     }

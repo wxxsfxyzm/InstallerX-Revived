@@ -1,6 +1,8 @@
 package com.rosan.installer.ui.widget.dialog
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,18 +65,20 @@ fun PositionDialog(
     rightButton: @Composable (() -> Unit)? = null
 ) {
     Dialog(onDismissRequest = onDismissRequest, properties = properties) {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(null) {
-                detectTapGestures(onTap = {
-                    onDismissRequest()
-                })
-            }) {
-            Box(modifier = Modifier
-                .align(Alignment.Center)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
                 .pointerInput(null) {
-                    detectTapGestures(onTap = {})
+                    detectTapGestures(onTap = {
+                        onDismissRequest()
+                    })
                 }) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .pointerInput(null) {
+                        detectTapGestures(onTap = {})
+                    }) {
                 Surface(
                     modifier = modifier,
                     shape = shape,
@@ -91,11 +95,20 @@ fun PositionDialog(
                             mutableIntStateOf(0)
                         }
                         val buttonHeight = (buttonHeightPx / LocalDensity.current.density).dp
-                        Box(modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .onSizeChanged {
-                                buttonHeightPx = it.height
-                            }) {
+                        val animatedButtonHeight by animateDpAsState(
+                            targetValue = buttonHeight,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            ),
+                            label = "button_height"
+                        )
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .onSizeChanged {
+                                    buttonHeightPx = it.height
+                                }) {
                             PositionChildWidget(
                                 leftButton, centerButton, rightButton
                             ) { button ->

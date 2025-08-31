@@ -2,6 +2,12 @@ package com.rosan.installer.ui.page.installer.dialog
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.inner.analyseFailedDialog
@@ -33,7 +39,24 @@ fun dialogInnerWidget(
     else {
         {
             AnimatedContent(
-                targetState = "${installer.id}_${params.id}"
+                targetState = "${installer.id}_${params.id}",
+                transitionSpec = {
+                    // 定义进入动画：淡入 + 从下方轻微向上滑动
+                    val enter = fadeIn(animationSpec = tween(220, delayMillis = 90)) +
+                            slideInVertically(
+                                initialOffsetY = { height -> height / 10 }, // 从内容高度10%的位置开始
+                                animationSpec = tween(220, delayMillis = 90)
+                            )
+
+                    // 定义退出动画：快速淡出
+                    val exit = fadeOut(animationSpec = tween(90))
+
+                    // 组合进入和退出动画，并指定尺寸变换的方式
+                    enter.togetherWith(exit).using(
+                        // 关键：确保尺寸变化也是平滑的，并且不裁剪内容
+                        SizeTransform(clip = false)
+                    )
+                }
             ) {
                 params.content.invoke()
             }

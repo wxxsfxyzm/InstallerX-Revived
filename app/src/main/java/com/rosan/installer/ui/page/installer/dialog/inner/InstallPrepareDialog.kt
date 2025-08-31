@@ -101,52 +101,28 @@ private fun installPrepareTooManyDialog(
 fun installPrepareDialog( // 小写开头
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
-    val entities = installer.entities.filter { it.selected }.map { it.app }.sortedBest()
-    entities.forEach { entity ->
-        when (entity.containerType) {
-            DataType.APK -> {
-                // Log the type of the entity
-                Timber.tag("AppEntity").d("Entity: ${entity.packageName}, DataType: APK, Type: ${entity.containerType}")
-            }
+    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
 
-            DataType.APKS -> {
-                Timber.tag("AppEntity")
-                    .d("Entity: ${entity.packageName}, Type: APKS, DataType: ${entity.containerType}")
-            }
-
-            DataType.APKM -> {
-                Timber.tag("AppEntity")
-                    .d("Entity: ${entity.packageName}, Type: APKM, DataType: ${entity.containerType}")
-            }
-
-            DataType.XAPK -> {
-                Timber.tag("AppEntity")
-                    .d("Entity: ${entity.packageName}, Type: XAPK, DataType: ${entity.containerType}")
-            }
-
-            DataType.MULTI_APK_ZIP -> {
-                Timber.tag("AppEntity")
-                    .d("Entity: ${entity.packageName}, Type: MULTI_APK_ZIP, DataType: ${entity.containerType}")
-            }
-
-            else -> {
-                Timber.tag("AppEntity")
-                    .d("Entity: ${entity.packageName}, Type: Else, DataType: ${entity.containerType}")
-            }
+    // If there is no specific package to prepare, show an empty/error dialog.
+    if (currentPackage == null) {
+        return if (installer.analysisResults.size > 1) {
+            installPrepareTooManyDialog(installer, viewModel)
+        } else {
+            installPrepareEmptyDialog(installer, viewModel)
         }
     }
 
-    if (entities.isEmpty()) return installPrepareEmptyDialog(installer, viewModel)
-    if (entities.groupBy { it.packageName }.size > 1) return installPrepareTooManyDialog(installer, viewModel)
+    val selectedEntities = currentPackage.appEntities.filter { it.selected }.map { it.app }.sortedBest()
+    if (selectedEntities.isEmpty()) return installPrepareEmptyDialog(installer, viewModel)
 
-    val primaryEntity = entities.first()
-    val entityToInstall = entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+    val primaryEntity = selectedEntities.first()
+    val entityToInstall = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val containerType = primaryEntity.containerType
+    val preInstallAppInfo = currentPackage.installedAppInfo // Get pre-install info from the new model
 
     Timber.tag("AppEntity")
-        .d("Package: ${primaryEntity.packageName}, Container: $containerType, Total files: ${entities.size}")
-
-    val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
+        .d("Package: ${primaryEntity.packageName}, Container: $containerType, Total files: ${installer.analysisResults.size}")
 
     var showChips by remember { mutableStateOf(false) }
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
@@ -162,7 +138,6 @@ fun installPrepareDialog( // 小写开头
     val baseParams = installInfoDialog(
         installer = installer,
         viewModel = viewModel,
-        preInstallAppInfo = preInstallAppInfo,
         onTitleExtraClick = { showChips = !showChips }
     )
 

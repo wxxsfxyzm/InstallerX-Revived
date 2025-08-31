@@ -25,7 +25,7 @@ android {
         // Please change the applicationId to one that does not conflict with any official release.
         applicationId = "com.rosan.installer.x.revived"
         namespace = "com.rosan.installer"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 36
         // Version control
         // Github Actions will automatically use versionName A.B.C+1 when building preview releases

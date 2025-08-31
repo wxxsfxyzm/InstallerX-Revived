@@ -13,10 +13,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.InstallOption
-import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
@@ -27,7 +26,6 @@ import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.page.installer.dialog.inner.UiText
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +34,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -51,8 +48,8 @@ class DialogViewModel(
     var state by mutableStateOf<DialogViewState>(DialogViewState.Ready)
         private set
 
-    // 持有原始的、完整的实体列表，用于批量安装
-    private var originalEntities: List<SelectInstallEntity> = emptyList()
+    // Hold the original, complete analysis results for multi-install scenarios.
+    private var originalAnalysisResults: List<PackageAnalysisResult> = emptyList()
 
     var autoCloseCountDown by mutableIntStateOf(3)
         private set
@@ -95,8 +92,8 @@ class DialogViewModel(
             else -> true
         }
 
-    private val _preInstallAppInfo = MutableStateFlow<InstalledAppInfo?>(null)
-    val preInstallAppInfo: StateFlow<InstalledAppInfo?> = _preInstallAppInfo.asStateFlow()
+    //private val _preInstallAppInfo = MutableStateFlow<InstalledAppInfo?>(null)
+    //val preInstallAppInfo: StateFlow<InstalledAppInfo?> = _preInstallAppInfo.asStateFlow()
 
     private val _currentPackageName = MutableStateFlow<String?>(null)
     val currentPackageName: StateFlow<String?> = _currentPackageName.asStateFlow()
@@ -145,7 +142,7 @@ class DialogViewModel(
      */
     private var isRetryingInstall = false
 
-    private var fetchPreInstallInfoJob: Job? = null
+    //private var fetchPreInstallInfoJob: Job? = null
     private val iconJobs = mutableMapOf<String, Job>()
     private var autoInstallJob: Job? = null
     private var collectRepoJob: Job? = null
@@ -187,6 +184,12 @@ class DialogViewModel(
                 repo.uninstallInfo.value?.packageName?.let { repo.uninstall(it) }
             }
 
+            is DialogViewAction.ToggleSelection -> toggleSelection(
+                action.packageName,
+                action.entity,
+                action.isMultiSelect
+            )
+
             is DialogViewAction.ToggleUninstallFlag -> {
                 // Update the uninstall flags bitmask
                 val currentFlags = _uninstallFlags.value
@@ -222,17 +225,17 @@ class DialogViewModel(
         ).fold(0) { acc, flag -> acc or flag }
         // sync to repo.config
         repo.config.installFlags = _installFlags.value
-        // 第一次收集时，保存原始列表
-        if (originalEntities.isEmpty()) {
-            originalEntities = repo.entities
+        // When collecting for the first time, save the original list for multi-install restoration.
+        if (originalAnalysisResults.isEmpty()) {
+            originalAnalysisResults = repo.analysisResults
         }
-        _preInstallAppInfo.value = null
+        //_preInstallAppInfo.value = null
         _currentPackageName.value = null
-        val newPackageNames = repo.entities.map { it.app.packageName }.toSet()
+        val newPackageNames = repo.analysisResults.map { it.packageName }.toSet()
         _displayIcons.update { old -> old.filterKeys { it in newPackageNames } }
         collectRepoJob?.cancel()
         autoInstallJob?.cancel()
-        fetchPreInstallInfoJob?.cancel()
+        //fetchPreInstallInfoJob?.cancel()
 
         collectRepoJob = viewModelScope.launch {
             repo.progress.collect { progress ->
@@ -258,68 +261,50 @@ class DialogViewModel(
                     is ProgressEntity.InstallAnalysing -> newState = DialogViewState.Analysing
                     is ProgressEntity.InstallAnalysedFailed -> newState = DialogViewState.AnalyseFailed
                     is ProgressEntity.InstallAnalysedSuccess -> {
-                        val containerType = repo.entities.firstOrNull()?.app?.containerType
-                        val isMultiAppMode =
-                            containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
+                        val analysisResults = repo.analysisResults
+                        val isMultiAppMode = analysisResults.size > 1
 
                         if (isMultiAppMode) {
                             // If the backend (ActionHandler) determined it's a multi-app scenario,
                             // ALWAYS go to the choice screen, regardless of package names.
-                            Timber.d("ViewModel: Multi-app mode detected (type: $containerType). Forcing InstallChoice state.")
+                            Timber.d("ViewModel: Multi-app mode detected. Forcing InstallChoice state.")
                             newState = DialogViewState.InstallChoice
                             newPackageNameFromProgress = null // No single package is the focus.
 
                             // Trigger icon loading for all apps in the list.
-                            repo.entities.forEach { entity ->
-                                loadDisplayIcon(entity.app.packageName)
+                            analysisResults.forEach { result ->
+                                loadDisplayIcon(result.packageName)
                             }
                         } else {
                             // If it's not a multi-app scenario (e.g., single APK with splits),
                             // it's safe to proceed directly to the prepare screen for the single app.
                             Timber.d("ViewModel: Single-app mode detected. Proceeding to InstallPrepare.")
                             newState = DialogViewState.InstallPrepare
-                            newPackageNameFromProgress = repo.entities.firstOrNull()?.app?.packageName
+                            newPackageNameFromProgress = analysisResults.firstOrNull()?.packageName
                         }
                     }
 
                     is ProgressEntity.Installing -> {
                         newState = DialogViewState.Installing
                         autoInstallJob?.cancel()
-                        if (newPackageNameFromProgress == null && repo.entities.isNotEmpty()) {
-                            val selectedEntities = repo.entities.filter { it.selected }
-                            val mappedApps = selectedEntities.map { it.app }
-                            val uniquePackages =
-                                mappedApps.groupBy { appEntity: AppEntity -> appEntity.packageName }
-                            if (uniquePackages.size == 1) {
-                                newPackageNameFromProgress =
-                                    selectedEntities.first().app.packageName
-                            }
+                        if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
+                            newPackageNameFromProgress = repo.analysisResults.first().packageName
                         }
                     }
 
                     is ProgressEntity.InstallFailed -> {
                         newState = DialogViewState.InstallFailed
                         autoInstallJob?.cancel()
-                        // [FIX] Add logic to ensure the package name is identified
-                        // when the dialog opens directly into this state.
-                        if (newPackageNameFromProgress == null && repo.entities.isNotEmpty()) {
-                            val selectedEntities = repo.entities.filter { it.selected }
-                            if (selectedEntities.isNotEmpty()) {
-                                newPackageNameFromProgress = selectedEntities.first().app.packageName
-                            }
+                        if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
+                            newPackageNameFromProgress = repo.analysisResults.first().packageName
                         }
                     }
 
                     is ProgressEntity.InstallSuccess -> {
                         newState = DialogViewState.InstallSuccess
                         autoInstallJob?.cancel()
-                        // [FIX] Add logic to ensure the package name is identified
-                        // when the dialog opens directly into this state.
-                        if (newPackageNameFromProgress == null && repo.entities.isNotEmpty()) {
-                            val selectedEntities = repo.entities.filter { it.selected }
-                            if (selectedEntities.isNotEmpty()) {
-                                newPackageNameFromProgress = selectedEntities.first().app.packageName
-                            }
+                        if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
+                            newPackageNameFromProgress = repo.analysisResults.first().packageName
                         }
                     }
 
@@ -365,18 +350,14 @@ class DialogViewModel(
                     else -> newState = DialogViewState.Ready
                 }
 
+                // Simplified package name handling. No more fetching is required.
                 if (newPackageNameFromProgress != null) {
                     if (_currentPackageName.value != newPackageNameFromProgress) {
                         _currentPackageName.value = newPackageNameFromProgress
-                        _preInstallAppInfo.value = null
-                        fetchPreInstallAppInfo(newPackageNameFromProgress)
                         loadDisplayIcon(newPackageNameFromProgress)
-                    } else if (_preInstallAppInfo.value == null) {
-                        fetchPreInstallAppInfo(newPackageNameFromProgress)
                     }
                 } else {
                     if (_currentPackageName.value != null) _currentPackageName.value = null
-                    if (_preInstallAppInfo.value != null) _preInstallAppInfo.value = null
                 }
 
                 if (newState !is DialogViewState.InstallPrepare && autoInstallJob?.isActive == true) {
@@ -384,9 +365,9 @@ class DialogViewModel(
                 }
 
                 if (newState is DialogViewState.InstallPrepare && previousState !is DialogViewState.InstallPrepare) {
-                    if (_currentPackageName.value != null && (_preInstallAppInfo.value == null || _preInstallAppInfo.value?.packageName != _currentPackageName.value)) {
+                    /*if (_currentPackageName.value != null && (_preInstallAppInfo.value == null || _preInstallAppInfo.value?.packageName != _currentPackageName.value)) {
                         fetchPreInstallAppInfo(_currentPackageName.value!!)
-                    }
+                    }*/
 
                     if (repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
                         autoInstallJob?.cancel()
@@ -450,11 +431,12 @@ class DialogViewModel(
         iconJobs[packageName]?.cancel() // Cancel any existing job for this package name
         iconJobs[packageName] = viewModelScope.launch {
             // Find the entity from the repo to pass to the repository method
-            val entityToInstall = repo.entities
-                .filter { it.selected && it.app.packageName == packageName }
-                .map { it.app }
-                .filterIsInstance<AppEntity.BaseEntity>()
-                .firstOrNull()
+            val entityToInstall = repo.analysisResults
+                .find { it.packageName == packageName }
+                ?.appEntities
+                ?.map { it.app }
+                ?.filterIsInstance<AppEntity.BaseEntity>()
+                ?.firstOrNull()
 
             // Define a generic icon size, could also be passed as a parameter if needed
             val iconSizePx = 256 // A reasonably high resolution
@@ -484,7 +466,7 @@ class DialogViewModel(
         }
     }
 
-    private fun fetchPreInstallAppInfo(packageName: String) {
+    /*private fun fetchPreInstallAppInfo(packageName: String) {
         if (packageName.isBlank()) {
             _preInstallAppInfo.value = null
             return
@@ -516,7 +498,7 @@ class DialogViewModel(
                 _preInstallAppInfo.value = info
             }
         }
-    }
+    }*/
 
     fun toast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
@@ -528,9 +510,9 @@ class DialogViewModel(
 
     private fun close() {
         autoInstallJob?.cancel()
-        fetchPreInstallInfoJob?.cancel()
+        //fetchPreInstallInfoJob?.cancel()
         collectRepoJob?.cancel()
-        _preInstallAppInfo.value = null
+        //_preInstallAppInfo.value = null
         _currentPackageName.value = null
         iconJobs.values.forEach { it.cancel() }
         iconJobs.clear()
@@ -544,36 +526,23 @@ class DialogViewModel(
 
     private fun installChoice() {
         autoInstallJob?.cancel()
-        fetchPreInstallInfoJob?.cancel()
+        //fetchPreInstallInfoJob?.cancel()
         if (_currentPackageName.value != null) _currentPackageName.value = null
-        if (_preInstallAppInfo.value != null) _preInstallAppInfo.value = null
+        //if (_preInstallAppInfo.value != null) _preInstallAppInfo.value = null
         state = DialogViewState.InstallChoice
     }
 
     private fun installPrepare() {
-        val targetStateIsPrepare = state is DialogViewState.InstallPrepare
-        val selectedEntities = repo.entities.filter { it.selected }
-        val mappedApps = selectedEntities.map { it.app }
-        val uniquePackages = mappedApps.groupBy { appEntity: AppEntity -> appEntity.packageName }
-        var targetPackageName: String? = null
+        val selectedEntities = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
+        val uniquePackages = selectedEntities.groupBy { it.app.packageName }
+
         if (uniquePackages.size == 1) {
-            targetPackageName = selectedEntities.first().app.packageName
-        }
-        if (targetPackageName != null) {
-            if (_currentPackageName.value != targetPackageName) {
-                _currentPackageName.value = targetPackageName
-                _preInstallAppInfo.value = null
-            }
-            // Fetch info if needed when entering or already in prepare state
-            if ((targetStateIsPrepare && _preInstallAppInfo.value == null) || !targetStateIsPrepare) {
-                fetchPreInstallAppInfo(targetPackageName)
-            }
-        } else {
-            if (_currentPackageName.value != null) _currentPackageName.value = null
-            if (_preInstallAppInfo.value != null) _preInstallAppInfo.value = null
-        }
-        if (!targetStateIsPrepare) {
+            val targetPackageName = selectedEntities.first().app.packageName
+            _currentPackageName.value = targetPackageName
             state = DialogViewState.InstallPrepare
+        } else {
+            // Handle case where multiple packages are selected, maybe go back to choice.
+            state = DialogViewState.InstallChoice
         }
     }
 
@@ -606,6 +575,39 @@ class DialogViewModel(
 
     private fun background() {
         repo.background(true)
+    }
+
+    /**
+     * Toggles the selection state of a specific entity within a package.
+     * This method handles the complexity of updating the immutable state.
+     */
+    fun toggleSelection(packageName: String, entityToToggle: SelectInstallEntity, isMultiSelect: Boolean) {
+        val currentResults = repo.analysisResults.toMutableList()
+        val packageIndex = currentResults.indexOfFirst { it.packageName == packageName }
+
+        if (packageIndex != -1) {
+            val packageToUpdate = currentResults[packageIndex]
+            val updatedEntities = packageToUpdate.appEntities.map { currentEntity ->
+                // Use object reference for precise matching
+                if (currentEntity === entityToToggle) {
+                    currentEntity.copy(selected = !currentEntity.selected)
+                } else if (!isMultiSelect) {
+                    // For single-select (radio button) behavior, deselect others
+                    currentEntity.copy(selected = false)
+                } else {
+                    currentEntity
+                }
+            }.toMutableList()
+
+            // In multi-select mode (radio buttons), if the user clicks an already selected item,
+            // we should deselect everything in that group.
+            if (!isMultiSelect && entityToToggle.selected) {
+                updatedEntities.replaceAll { it.copy(selected = false) }
+            }
+
+            currentResults[packageIndex] = packageToUpdate.copy(appEntities = updatedEntities)
+            repo.analysisResults = currentResults
+        }
     }
 
     private fun uninstallAndRetryInstall(keepData: Boolean) {
@@ -652,51 +654,87 @@ class DialogViewModel(
     }
 
     /**
-     * 启动批量安装
+     * Starts the multi-package installation process.
      */
     private fun installMultiple() {
-        multiInstallQueue = repo.entities.filter { it.selected }
+        multiInstallQueue = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
         multiInstallResults.clear()
         currentMultiInstallIndex = 0
-        _installProgress.value = 0f // [新增] 批量安装开始时，进度初始化为0
+        _installProgress.value = 0f // Initialize progress to 0 at the start of multi-install.
         triggerNextMultiInstall()
     }
 
     /**
-     * 触发队列中的下一个安装任务
+     * Triggers the next installation task in the queue.
+     * This method temporarily modifies the repo's state to isolate the single app
+     * being installed, then triggers the install action.
      */
     private fun triggerNextMultiInstall() {
         if (currentMultiInstallIndex < multiInstallQueue.size) {
             val entityToInstall = multiInstallQueue[currentMultiInstallIndex]
-            // 修改 repo.entities，使其只包含当前要安装的这一个应用，并确保它是 selected
-            repo.entities = listOf(entityToInstall.copy(selected = true))
+
+            // --- MODIFIED LOGIC TO PREPARE REPO STATE ---
+            // Instead of modifying 'repo.entities', we now temporarily modify 'repo.analysisResults'.
+
+            // 1. Find the original PackageAnalysisResult that the current entity belongs to.
+            //    We search in 'originalAnalysisResults' which holds the complete, unmodified analysis.
+            val originalPackageResult =
+                originalAnalysisResults.find { it.packageName == entityToInstall.app.packageName }
+
+            if (originalPackageResult == null) {
+                // This is a safeguard. If the original package can't be found, skip to the next.
+                Timber.e("Could not find original package for ${entityToInstall.app.packageName}. Skipping.")
+                multiInstallResults.add(
+                    InstallResult(
+                        entity = entityToInstall,
+                        success = false,
+                        error = IllegalStateException("Original package info not found.")
+                    )
+                )
+                currentMultiInstallIndex++
+                triggerNextMultiInstall()
+                return
+            }
+
+            // 2. Create a new, temporary PackageAnalysisResult containing ONLY the current entity to be installed.
+            //    We ensure it's marked as 'selected = true'.
+            val tempPackageResult = originalPackageResult.copy(
+                appEntities = listOf(entityToInstall.copy(selected = true))
+            )
+
+            // 3. Set the repository's state to this temporary, single-item state.
+            //    The 'ActionHandler.install()' method will read this state.
+            repo.analysisResults = listOf(tempPackageResult)
+
             val appLabel = (entityToInstall.app as? AppEntity.BaseEntity)?.label ?: entityToInstall.app.packageName
 
-            // 更新进度文本
+            // Update progress text (this logic remains the same)
             _installProgressText.value = UiText(
                 id = R.string.installing_progress_text,
                 formatArgs = listOf(appLabel, currentMultiInstallIndex + 1, multiInstallQueue.size)
             )
-            _currentPackageName.value = entityToInstall.app.packageName // 更新当前包名，让UI可以显示信息
-            // 更新数值进度
-            // 在任务开始前更新，所以是 (当前索引 / 总数)
+            _currentPackageName.value = entityToInstall.app.packageName // Update current package name for the UI
+
+            // Update numeric progress (this logic remains the same)
             _installProgress.value = currentMultiInstallIndex.toFloat() / multiInstallQueue.size.toFloat()
 
-            // 切换到安装中状态
+            // Switch to the 'Installing' state
             state = DialogViewState.Installing
 
-            // 调用 repo 的 install，但只传递当前要安装的这一个实体
+            // Call the repo's install method. It will now operate on the temporary state we just set.
             repo.install()
         } else {
-            // 所有任务完成
+            // All installation tasks are complete.
             state = DialogViewState.InstallCompleted(multiInstallResults.toList())
-            // 清理并恢复状态
+
+            // Clean up and restore the original state.
             multiInstallQueue = emptyList()
             _installProgressText.value = null
             _currentPackageName.value = null
-            // 恢复 repo 的原始状态，以便用户可以返回或查看
-            repo.entities = originalEntities
-            originalEntities = emptyList()
+
+            // MODIFICATION: Restore the repo's original, full analysis results.
+            repo.analysisResults = originalAnalysisResults
+            originalAnalysisResults = emptyList()
         }
     }
 }

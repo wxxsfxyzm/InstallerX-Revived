@@ -348,8 +348,14 @@ fun MenuItemWidget(
 fun installExtendedMenuSubMenuDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
-    val entity =
-        installer.entities.filter { it.selected }.map { it.app }.sortedBest().firstOrNull()
+    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
+
+    val entity = currentPackage?.appEntities
+        ?.filter { it.selected }
+        ?.map { it.app }
+        ?.sortedBest()
+        ?.firstOrNull()
     val permissionList = remember(entity) {
         (entity as? AppEntity.BaseEntity)?.permissions?.sorted()?.toMutableStateList()
             ?: mutableStateListOf()
