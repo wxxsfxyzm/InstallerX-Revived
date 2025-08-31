@@ -5,6 +5,7 @@
 - This is a community-maintained fork after the [original project](https://github.com/iamr0s/InstallerX) was archived by the author
 - Provides limited open-source updates and support
 - Strictly follows GNU GPLv3 - all modifications are open source
+- We welcome community contributions!
 
 ## Introduction
 
@@ -15,19 +16,20 @@ Looking for a better app installer? Try **InstallerX**!
 Many customized Chinese ROMs come with subpar default installers. You can replace them with **InstallerX**.
 
 Compared to stock installers, **InstallerX** offers more installation options:
+- Rich installation types: APK, APKS, APKM, XAPK, APKs inside ZIP, and batch APKs.
 - Dialog-based installation
 - Notification-based installation
 - Automatic installation
 - Installer declaration
-- Option to install for all users
-- Allow test packages
-- Allow downgrade installation
+- Setting install flags (can inherit Profile settings)
+- Dex2oat after success installation
+- Block installation of specific apps
 - Auto-delete APK after installation
 
 ## Supported Versions
 
 - **Full support:** Android SDK 34 - 36 (Android 14 - 16)
-- **Limited support:** Android SDK 23 - 33 (Android 6.0 - 13) (please report issues)
+- **Limited support:** Android SDK 24 - 33 (Android 7.0 - 13) (please report issues)
 
 ## Key Changes and Features
 
@@ -39,7 +41,7 @@ Compared to stock installers, **InstallerX** offers more installation options:
 - **Dialog optimization:** Improved installation dialog display.
 - **System Icons:** Support for displaying system icon packs during installation (method from [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt)).
 - **Version Comparison:** Support for displaying version number comparison in single-line or multi-line format.
-- **SDK Information:** Installation dialogs show targetSDK and minSDK.
+- **SDK Information:** Installation dialogs show targetSDK and minSDK in single-line or multi-line format.
 - **Bypass Interceptions:** Shizuku/Root can bypass custom UI chain-start restrictions when opening an App after installation.
     - Implemented using native APIs, not shell commands.
     - Currently only works for dialog installation.
@@ -73,6 +75,8 @@ Compared to stock installers, **InstallerX** offers more installation options:
     - Not compatible with OneUI 7.0, RealmeUI, and some ColorOS versions (OEM restrictions). If you only see the downgrade option *without* data preservation, it means your system does not support downgrade *with* data.
 - [Testing] **Blacklist:** Support for configuring a list of banned package names for installation in the settings.
     - Under development. Currently only allows manual additions. A default list based on device model will be provided in the future (useful to prevent incorrect installation of system software from other models on HyperOS).
+- [Testing] **DexOpt:** After successful installation, the app can automatically perform dex2oat on the installed applications according to the configured Profile settings.
+- [Testing] **Directly Install From Download Link:** The online version supports directly sharing the download link of an APK file to InstallerX for installation. Currently, the APK is not kept locally, but an option to retain the installation package will be added in the future.
 
 ## FAQ
 
@@ -91,7 +95,7 @@ Compared to stock installers, **InstallerX** offers more installation options:
     - New feature: InstallerX automatically detects HyperOS and adds a default configuration (`com.miui.packageinstaller`). You can change it in the settings if needed.
 
 - **HyperOS reinstalls the default installer / locking fails**
-    - HyperOS sometimes revokes the user's installer configuration (reason under investigation).
+    - HyperOS may reset the default installer after the user installs an APK-handling app.
     - On some HyperOS versions, locking failure is normal.
     - HyperOS intercepts USB installation requests (ADB/Shizuku) with a dialog. If the user rejects the installation of a new app, the system will revoke the installer setting and force the default one. If this happens, lock InstallerX again.
 
@@ -113,6 +117,9 @@ Compared to stock installers, **InstallerX** offers more installation options:
   - Changes for each commit are detailed in the PRs (may be AI-generated).
 - **`main` branch:** When stable changes are merged from `dev`, the CI/CD system automatically builds and publishes a new alpha version.
 - **Stable releases:** Manually published when finishing a development phase and increasing the `versionCode`. CI/CD automatically publishes them as a release.
+- About network permission: With feature expansion, some network-related functions have been introduced. However, many users prefer the installer to remain purely local without requiring network access. Therefore, two versions will be released: **online** and **offline**. Both versions share the same package name, version code, and signature, and can be installed side by side. Please download according to your needs.
+  - **Online version**: Supports sharing direct download links to InstallerX for installation. More network-related utilities may be added in the future, but network permission will **never** be used for non-installation purposes. Safe to use.
+  - **Offline version**: Requests no network permissions at all. When attempting to use online features, you will receive a clear error message. This version remains a purely local installer.
 
 ## License
 

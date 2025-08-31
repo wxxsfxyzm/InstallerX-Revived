@@ -5,6 +5,7 @@
 - Esta es una versión mantenida por la comunidad. El [proyecto original](https://github.com/iamr0s/InstallerX) fue archivado por el autor.
 - Se ofrecen actualizaciones y soporte limitados en código abierto.
 - Este fork sigue estrictamente la GNU GPLv3. Todas las modificaciones son de código abierto.
+- ¡Damos la bienvenida a las contribuciones de la comunidad!
 
 ## Introducción
 
@@ -27,7 +28,7 @@ Además, comparado con instaladores del sistema, **InstallerX** ofrece más opci
 ## Versiones compatibles
 
 - **Compatibilidad total:** Android SDK 34 - 36 (Android 14 - 16)
-- **Soporte limitado:** Android SDK 23 - 33 (Android 6.0 - 13) (Si tienes problemas, puedes reportarlos en el apartado de *issues*)
+- **Soporte limitado:** Android SDK 24 - 33 (Android 7.0 - 13) (Si tienes problemas, puedes reportarlos en el apartado de *issues*)
 
 ## Cambios y características principales
 
