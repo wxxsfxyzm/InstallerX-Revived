@@ -2,12 +2,6 @@ package com.rosan.installer.ui.page.installer.dialog
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.installer.dialog.inner.analyseFailedDialog
@@ -51,7 +45,7 @@ fun dialogGenerateParams(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams =
     when (viewModel.state) {
-        is DialogViewState.Ready -> readyDialog(installer, viewModel)
+        is DialogViewState.Ready -> readyDialog(viewModel)
         is DialogViewState.Resolving -> resolvingDialog(installer, viewModel)
         is DialogViewState.ResolveFailed -> resolveFailedDialog(installer, viewModel)
         is DialogViewState.Preparing -> preparingDialog(installer, viewModel)
