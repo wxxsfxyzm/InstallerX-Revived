@@ -130,7 +130,7 @@ fun PositionDialog(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = animatedButtonHeight)
+                                .padding(bottom = animatedButtonHeight.coerceAtLeast(0.dp))
                                 .animateContentSize(
                                     animationSpec = spring(
                                         dampingRatio = Spring.DampingRatioMediumBouncy,

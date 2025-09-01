@@ -176,7 +176,7 @@ fun NewEditPage(
                         onClick = { navController.navigateUp() },
                         icon = Icons.AutoMirrored.TwoTone.ArrowBack,
                         modifier = Modifier.size(36.dp),
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = MaterialTheme.colorScheme.surfaceBright
                     )
                 },
                 scrollBehavior = scrollBehavior,
