@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -299,7 +300,6 @@ fun installInfoDialog(
                                     entityToInstall.minSdk?.let { newMinSdk ->
                                         SdkInfoExpanded(
                                             labelPrefixResId = R.string.installer_package_min_sdk_label,
-                                            valueFormatResId = R.string.installer_package_sdk_value,
                                             newSdk = newMinSdk,
                                             oldSdk = preInstallAppInfo?.minSdk?.toString(),
                                             isArchived = preInstallAppInfo?.isArchived ?: false,
@@ -309,7 +309,6 @@ fun installInfoDialog(
                                     entityToInstall.targetSdk?.let { newTargetSdk ->
                                         SdkInfoExpanded(
                                             labelPrefixResId = R.string.installer_package_target_sdk_label,
-                                            valueFormatResId = R.string.installer_package_sdk_value,
                                             newSdk = newTargetSdk,
                                             oldSdk = preInstallAppInfo?.targetSdk?.toString(),
                                             isArchived = preInstallAppInfo?.isArchived ?: false,
@@ -492,7 +491,6 @@ private fun SdkInfoCompact(
 @Composable
 private fun SdkInfoExpanded(
     @StringRes labelPrefixResId: Int,
-    @StringRes valueFormatResId: Int,
     newSdk: String,
     oldSdk: String?,
     isArchived: Boolean,
@@ -506,50 +504,87 @@ private fun SdkInfoExpanded(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
     ) {
+        val labelPrefix = stringResource(labelPrefixResId)
+
         if (showComparison) {
             val isDowngrade = newSdkInt < oldSdkInt
             val isIncompatible = type == "min" && newSdkInt > Build.VERSION.SDK_INT
             val color =
                 if (isDowngrade || isIncompatible) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
 
-            // label prefix (only once)
-            val labelPrefix = stringResource(labelPrefixResId)
-            // old value (or archived)
-            val oldValueText = if (isArchived) {
-                stringResource(R.string.old_version_archived)
-            } else {
-                // value format: "%1$s (Android %2$s)" -> oldSdk, oldSdk.toAndroidVersionName()
-                stringResource(valueFormatResId, oldSdk, oldSdk!!.toAndroidVersionName())
-            }
+            // --- Label (一次即可) ---
+            Text(text = labelPrefix, style = MaterialTheme.typography.bodyMedium)
 
-            Text(text = "$labelPrefix $oldValueText", style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.size(4.dp))
+
+            // --- Old value ---
+            if (isArchived) {
+                Text(
+                    text = stringResource(R.string.old_version_archived),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                SdkValueWithIcon(sdk = oldSdk!!, color = MaterialTheme.colorScheme.onSurface)
+            }
 
             Icon(
                 imageVector = AppIcons.ArrowRight,
                 contentDescription = "to",
                 tint = color,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .size(20.dp)
             )
 
-            // new value (no label)
-            val newValueText = stringResource(valueFormatResId, newSdk, newSdk.toAndroidVersionName())
-            Text(
-                text = newValueText,
-                color = color,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            // --- New value ---
+            SdkValueWithIcon(sdk = newSdk, color = color)
+
         } else {
             val textColor = if (type == "min" && newSdkInt != null && newSdkInt > Build.VERSION.SDK_INT) {
                 MaterialTheme.colorScheme.error
             } else {
                 MaterialTheme.colorScheme.onSurface
             }
-            val labelPrefix = stringResource(labelPrefixResId)
-            val newValueText = stringResource(valueFormatResId, newSdk, newSdk.toAndroidVersionName())
+
+            Text(text = labelPrefix, style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.size(4.dp))
+            SdkValueWithIcon(sdk = newSdk, color = textColor)
+        }
+    }
+}
+
+@Composable
+private fun SdkValueWithIcon(
+    sdk: String,
+    color: Color
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = sdk,
+            color = color,
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Spacer(modifier = Modifier.size(4.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(color.copy(alpha = 0.1f))
+                .padding(horizontal = 6.dp, vertical = 2.dp)
+        ) {
+            Icon(
+                imageVector = AppIcons.Android,
+                contentDescription = "Android",
+                tint = color,
+                modifier = Modifier.size(14.dp)
+            )
+            Spacer(modifier = Modifier.size(2.dp))
             Text(
-                text = "$labelPrefix $newValueText",
-                color = textColor,
-                style = MaterialTheme.typography.bodyMedium
+                text = sdk.toAndroidVersionName(),
+                color = color,
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }

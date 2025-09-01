@@ -35,6 +35,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -145,6 +146,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun analyse() {
         Timber.d("[id=${installer.id}] analyse: Starting. Emitting ProgressEntity.Analysing.")
+        // --- Enforce a minimum duration for the "Analysing" state ---
+        val startTime = System.currentTimeMillis()
         installer.progress.emit(ProgressEntity.InstallAnalysing)
         val analysisResults = runCatching {
             analyseEntities(installer.data)
@@ -160,6 +163,14 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             installer.error = AnalyseFailedAllFilesUnsupportedException("No valid files were found in the selection.")
             installer.progress.emit(ProgressEntity.InstallAnalysedFailed)
             return
+        }
+
+        // This ensures the "Analysing" UI state is visible for at least a brief moment (e.g., 100ms),
+        // providing a stable starting point for the transition animation, regardless of how fast the analysis is.
+        val elapsedTime = System.currentTimeMillis() - startTime
+        val minDuration = 100L // 100 milliseconds
+        if (elapsedTime < minDuration) {
+            delay(minDuration - elapsedTime)
         }
 
         // --- REFACTORED LOGIC ---
