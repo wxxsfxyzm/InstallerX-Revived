@@ -587,9 +587,11 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             val contentType = connection.contentType
             val isSupportedMimeType = contentType != null && (
                     contentType.equals("application/vnd.android.package-archive", ignoreCase = true) ||
-                            contentType.equals("application/octet-stream", ignoreCase = true)
+                            contentType.equals("application/octet-stream", ignoreCase = true) ||
+                            contentType.equals("application/vnd.apkm", ignoreCase = true) ||
+                            contentType.equals("application/vnd.apks", ignoreCase = true) ||
+                            contentType.equals("application/xapk-package-archive", ignoreCase = true)
                     )
-
             if (!isSupportedExtension && !isSupportedMimeType) {
                 throw ResolveException(
                     action = "Unsupported file type from URL. Path: $path, Content-Type: $contentType",
