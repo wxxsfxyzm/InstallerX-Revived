@@ -1,5 +1,6 @@
 package com.rosan.installer.data.app.model.impl.analyser
 
+import android.content.Context
 import android.content.res.ApkAssets
 import android.content.res.AssetManager
 import android.content.res.Resources
@@ -12,18 +13,21 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.repo.FileAnalyserRepo
+import com.rosan.installer.data.app.util.SignatureUtils
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.res.model.impl.AxmlTreeRepoImpl
 import com.rosan.installer.data.res.repo.AxmlTreeRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.IOException
 import java.util.zip.ZipFile
 
 object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
     private val reflect = get<ReflectRepo>()
+    private val context by inject<Context>()
 
     override suspend fun doWork(
         config: ConfigEntity,
@@ -108,6 +112,10 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
         var minSdk: String? = null
         var targetSdk: String? = null
         val permissions = mutableListOf<String>()
+        val signatureHash = (data as? DataEntity.FileEntity)?.path?.let {
+            SignatureUtils.getApkSignatureHash(context, it)
+        }
+        Timber.d("Signature hash for ${data.getSourceTop()}: $signatureHash")
         AxmlTreeRepoImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml"))
             .register("/manifest") {
                 packageName = getAttributeValue(null, "package")
@@ -186,7 +194,8 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
             minSdk = minSdk,
             arch = arch,
             permissions = permissions,
-            containerType = extra.dataType
+            containerType = extra.dataType,
+            signatureHash = signatureHash
         ) else AppEntity.SplitEntity(
             packageName = packageName,
             data = data,

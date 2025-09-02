@@ -135,6 +135,10 @@
     <string name="cancel">取消</string>
     <string name="retry">重試</string>
     <string name="install">安裝</string>
+    <string name="upgrade">升級</string>
+    <string name="reinstall">重新安裝</string>
+    <string name="install_anyway">強制安裝</string>
+    <string name="uninstall">解除安裝</string>
     <string name="next">下一步</string>
     <string name="previous">上一步</string>
     <string name="close">關閉</string>
@@ -174,6 +178,8 @@
     <string name="installer_prepare_type_sidegrade">將變更目前版本的應用程式</string>
     <string name="installer_prepare_type_unarchive">將取消歸檔目前應用程式</string>
     <string name="installer_prepare_type_unknown_confirm">您確定要安裝嗎？</string>
+    <string name="installer_prepare_signature_mismatch">簽名不一致！繼續安裝可能導致數據丟失或帶來安全風險。</string>
+    <string name="installer_prepare_signature_unknown">無法驗證應用簽名，請謹慎操作。</string>
     <string name="installer_installing">安裝中…</string>
     <string name="installer_install_failed">安裝失敗</string>
     <string name="installer_install_success">安裝成功</string>

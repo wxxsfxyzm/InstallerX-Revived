@@ -238,6 +238,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallResolving -> onResolving(builder)
             is ProgressEntity.InstallResolvedFailed -> onResolvedFailed(builder)
             is ProgressEntity.InstallResolveSuccess -> onResolveSuccess(builder)
+            is ProgressEntity.InstallPreparing -> onPreparing(builder, progress)
             is ProgressEntity.InstallAnalysing -> onAnalysing(builder)
             is ProgressEntity.InstallAnalysedFailed -> onAnalysedFailed(builder)
             is ProgressEntity.InstallAnalysedSuccess -> onAnalysedSuccess(builder)
@@ -270,6 +271,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private fun onResolving(builder: NotificationCompat.Builder) =
         builder.setContentTitle(getString(R.string.installer_resolving))
+            .addAction(0, getString(R.string.cancel), finishIntent).build()
+
+    private fun onPreparing(builder: NotificationCompat.Builder, progress: ProgressEntity.InstallPreparing) =
+        builder.setContentTitle(getString(R.string.installer_prepare_install))
+            .setProgress(100, (progress.progress * 100).toInt(), progress.progress < 0)
             .addAction(0, getString(R.string.cancel), finishIntent).build()
 
     private fun onResolvedFailed(builder: NotificationCompat.Builder) =

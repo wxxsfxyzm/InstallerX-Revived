@@ -73,27 +73,6 @@ private fun getLanguageDisplayName(code: String): String? {
 }
 
 /**
- * 识别常见的 ABI 名称并返回更具描述性的版本
- *
- * @param name ABI 名称
- * @return 描述性的 ABI 名称，如果无法识别则返回 null
- */
-private fun getAbiDisplayName(name: String): String? {
-    return when (name) {
-        "armeabi" -> "ARM (32-bit)"
-        "armeabi-v7a" -> "ARMv7a (32-bit)"
-        "armeabi_v7a" -> "ARMv7a (32-bit)"
-        "arm64-v8a" -> "ARMv8a (64-bit)"
-        "arm64_v8a" -> "ARMv8a (64-bit)"
-        "x86" -> "x86 (32-bit)"
-        "x86_64" -> "x86 (64-bit)"
-        "mips" -> "MIPS"
-        "mips64" -> "MIPS64"
-        else -> null
-    }
-}
-
-/**
  * 识别常见的屏幕密度(DPI)名称并返回更具描述性的版本。
  *
  * @param name DPI 名称

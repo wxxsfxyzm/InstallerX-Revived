@@ -1,6 +1,5 @@
 package com.rosan.installer.data.app.model.entity
 
-import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 
 /**
@@ -11,5 +10,6 @@ import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 data class PackageAnalysisResult(
     val packageName: String,
     val appEntities: List<SelectInstallEntity>,
-    val installedAppInfo: InstalledAppInfo?
+    val installedAppInfo: InstalledAppInfo?,
+    val signatureMatchStatus: SignatureMatchStatus
 )
