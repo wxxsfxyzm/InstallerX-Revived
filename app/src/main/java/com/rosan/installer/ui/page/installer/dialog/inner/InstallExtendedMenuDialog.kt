@@ -375,7 +375,9 @@ fun installExtendedMenuSubMenuDialog(
         ) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 0.dp)
+                    .heightIn(max = 400.dp),
             ) {
                 itemsIndexed(permissionList) { index, permission ->
                     PermissionCard(
