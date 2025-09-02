@@ -27,8 +27,8 @@ import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.app.util.InstallOption
-import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.abiOverride
-import com.rosan.installer.data.app.util.PackageInstallerUtil.Companion.installFlags
+import com.rosan.installer.data.app.util.PackageInstallerUtil.abiOverride
+import com.rosan.installer.data.app.util.PackageInstallerUtil.installFlags
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
 import com.rosan.installer.data.common.util.isPackageArchivedCompat
@@ -233,7 +233,10 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                     Timber.d("Package $packageName is not archived, using replace existing option.")
                     InstallOption.ReplaceExisting.value
                 }
-
+        // Disable Dhizuku not supported stuff
+        if (config.authorizer == ConfigEntity.Authorizer.Dhizuku)
+            params.installFlags = params.installFlags and InstallOption.GrantAllRequestedPermissions.value.inv()
+        
         val baseApkArch = entities.firstOrNull { it.name == "base.apk" }?.arch
         Timber.d("Current Arch to install: $baseApkArch")
 

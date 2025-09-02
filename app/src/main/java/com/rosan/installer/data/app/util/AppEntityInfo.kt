@@ -55,23 +55,3 @@ fun List<AppEntity>.sortedBest(): List<AppEntity> = this.sortedWith(
 
 fun List<AppEntity>.getInfo(context: Context): AppEntityInfo =
     this.sortedBest().first().getInfo(context)
-
-/**
- * Reusable extension function to deduplicate a list of AppEntity.
- * It uses a composite key to uniquely identify an app version.
- */
-// TODO cpu abi
-fun List<AppEntity>.deduplicate(): List<AppEntity> {
-    return this.distinctBy { app ->
-        when (app) {
-            // For BaseEntity, the unique key is a combination of these three properties.
-            is AppEntity.BaseEntity -> Triple(app.packageName, app.versionCode, app.versionName)
-            // For other types, their specific properties (like split name) are part of the name.
-            // Temporarily not needed, but can be added if necessary.
-            // is AppEntity.SplitEntity -> Pair(app.packageName, app.name)
-            // is AppEntity.DexMetadataEntity -> Pair(app.packageName, app.name)
-            // Use object identity as a fallback for any other types.
-            else -> app
-        }
-    }
-}

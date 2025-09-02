@@ -31,6 +31,7 @@ sealed class AppEntity {
         override val containerType: DataType? = null,
         // Get from AndroidManifest.xml
         val permissions: List<String>? = null,
+        val signatureHash: String? = null,
     ) : AppEntity()
 
     data class SplitEntity(

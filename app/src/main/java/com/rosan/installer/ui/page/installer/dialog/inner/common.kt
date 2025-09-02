@@ -35,7 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
@@ -154,6 +156,49 @@ fun ErrorTextBlock(
             exit = fadeOut() + shrinkVertically()
         ) {
             suggestions()
+        }
+    }
+}
+
+/**
+ * A composable that displays a list of warnings in a styled block.
+ * The style is similar to ErrorTextBlock but without title or icons.
+ *
+ * @param warnings A list of pairs, where each pair contains the text string
+ * and the specific Color for that text.
+ * @param modifier Modifier for the root Column.
+ */
+@Composable
+fun WarningTextBlock(
+    warnings: List<Pair<String, Color>>,
+    modifier: Modifier = Modifier,
+) {
+    // Only display the block if there are warnings to show.
+    if (warnings.isNotEmpty()) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.errorContainer)
+                .padding(12.dp)
+        ) {
+            // Provide a default text color for the container.
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
+                warnings.forEachIndexed { index, (text, color) ->
+                    // Add a spacer between messages for readability.
+                    if (index > 0) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    Text(
+                        text = text,
+                        // Use the specific color provided for the text,
+                        // otherwise fallback to the container's default color.
+                        color = if (color == Color.Unspecified) LocalContentColor.current else color,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         }
     }
 }

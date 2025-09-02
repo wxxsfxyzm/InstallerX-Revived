@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.os.Build
 import android.text.TextUtils
 import com.rosan.installer.BuildConfig
+import com.rosan.installer.util.convertLegacyLanguageCode
 
 object RsConfig {
     val LEVEL: Level = getLevel()
@@ -124,7 +125,7 @@ object RsConfig {
                     // Get the base language code (e.g., "en" from "en-US") and add it directly.
                     // No conversion logic is applied.
                     val langCode = locale.toLanguageTag().substringBefore('-')
-                    languageSet.add(langCode.convertLanguageCode())
+                    languageSet.add(langCode.convertLegacyLanguageCode())
                 }
             }
 
@@ -133,25 +134,5 @@ object RsConfig {
             return languageSet.toList()
         }
 
-    /**
-     * Converts legacy ISO 639 language codes to their modern equivalents.
-     * This ensures compatibility with older and non-standard APK splits.
-     *
-     * Logic is from the PackageUtil.kt file in the PackageInstaller project.
-     * Under Apache License 2.0.
-     *
-     * @param code The language code to convert.
-     * @return The converted, modern language code.
-     *
-     * @see <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>
-     * @see <a href="https://github.com/vvb2060/PackageInstaller/blob/master/app/src/main/java/io/github/vvb2060/packageinstaller/model/PackageUtil.kt">PackageUtil</a>
-     */
-    private fun String.convertLanguageCode(): String =
-        when (this) {
-            "tl" -> "fil" // Tagalog -> Filipino
-            "iw" -> "he"  // Old Hebrew -> Hebrew
-            "ji" -> "yi"  // Old Yiddish -> Yiddish
-            "in" -> "id"  // Old Indonesian -> Indonesian
-            else -> this
-        }
+
 }

@@ -24,11 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.icons.AppIcons
@@ -101,6 +101,7 @@ private fun installPrepareTooManyDialog(
 fun installPrepareDialog( // 小写开头
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
+    val context = LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
 
@@ -141,60 +142,89 @@ fun installPrepareDialog( // 小写开头
         onTitleExtraClick = { showChips = !showChips }
     )
 
-    // --- NEW LOGIC: Determine message, color, and error state ---
-    val context = LocalContext.current
-    val (summaryText, summaryColorKey) = remember(entityToInstall, preInstallAppInfo) {
-        val newEntity = entityToInstall
-        val oldInfo = preInstallAppInfo
+    val errorColor = MaterialTheme.colorScheme.error
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
 
-        // Highest priority: SDK check
+    // This single block calculates all warnings and the final button text based on priority.
+    val (warningMessages, buttonTextId) = remember(currentPackage, entityToInstall, preInstallAppInfo) {
+        val newEntity = entityToInstall
+        val oldInfo = currentPackage.installedAppInfo // Use currentPackage directly
+        val signatureStatus = currentPackage.signatureMatchStatus
+
+        val warnings = mutableListOf<Pair<String, Color>>()
+        var finalButtonTextId = R.string.install // Default button text
+
+        // Determine the base operation type (upgrade, downgrade, etc.)
+        // This helps set the initial button text for non-error cases.
+        if (newEntity != null) {
+            if (oldInfo == null) {
+                finalButtonTextId = R.string.install // New install
+            } else {
+                when {
+                    newEntity.versionCode > oldInfo.versionCode -> {
+                        finalButtonTextId = R.string.upgrade
+                    }
+
+                    newEntity.versionCode < oldInfo.versionCode -> {
+                        warnings.add(
+                            context.getString(R.string.installer_prepare_type_downgrade) to errorColor
+                        )
+                        finalButtonTextId = R.string.install_anyway
+                    }
+
+                    oldInfo.isArchived -> {
+                        finalButtonTextId = R.string.unarchive
+                    }
+
+                    newEntity.versionName == oldInfo.versionName -> {
+                        finalButtonTextId = R.string.reinstall
+                    }
+
+                    else -> {
+                        finalButtonTextId = R.string.install // Sidegrade
+                    }
+                }
+            }
+        }
+
+        // Check for signature status. This has HIGHER priority and can OVERRIDE the button text.
+        // Currently only enable for APK and APKS
+        if (containerType == DataType.APK || containerType == DataType.APKS)
+            when (signatureStatus) {
+                SignatureMatchStatus.MISMATCH -> {
+                    // Add the signature warning to the top of the list for prominence.
+                    warnings.add(
+                        0, // Add to the beginning
+                        context.getString(R.string.installer_prepare_signature_mismatch) to errorColor
+                    )
+                    // CRITICAL: If signatures mismatch, ALWAYS force the button to "Install Anyway".
+                    finalButtonTextId = R.string.install_anyway
+                }
+
+                SignatureMatchStatus.UNKNOWN_ERROR -> {
+                    warnings.add(
+                        0,
+                        context.getString(R.string.installer_prepare_signature_unknown) to tertiaryColor
+                    )
+                }
+
+                else -> {
+                    // Signatures match or app not installed, do nothing.
+                }
+            }
+
+        // Final check for SDK incompatibility. This is a blocking error.
         val newMinSdk = newEntity?.minSdk?.toIntOrNull()
         if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
-            return@remember Pair(
-                context.getString(R.string.installer_prepare_sdk_incompatible),
-                "error"
+            warnings.add(
+                0,
+                context.getString(R.string.installer_prepare_sdk_incompatible) to errorColor
             )
         }
 
-        // Determine install type
-        if (newEntity != null) {
-            if (oldInfo == null) {
-                Pair(context.getString(R.string.installer_prepare_type_new_install), "default")
-            } else {
-                when {
-                    newEntity.versionCode > oldInfo.versionCode ->
-                        Pair(context.getString(R.string.installer_prepare_type_upgrade), "default")
-
-                    newEntity.versionCode < oldInfo.versionCode ->
-                        Pair(context.getString(R.string.installer_prepare_type_downgrade), "error")
-                    // newEntity.versionCode == oldInfo.versionCode already inferred
-                    newEntity.versionName == oldInfo.versionName ->
-                        Pair(
-                            context.getString(R.string.installer_prepare_type_reinstall),
-                            "default"
-                        )
-                    // UnArchive an application
-                    oldInfo.isArchived -> Pair(context.getString(R.string.installer_prepare_type_unarchive), "default")
-                    // versionCode same, versionName different
-                    else ->
-                        Pair(
-                            context.getString(R.string.installer_prepare_type_sidegrade),
-                            "default"
-                        )
-                }
-            }
-        } else {
-            // Fallback for splits or other cases
-            Pair(context.getString(R.string.installer_prepare_type_unknown_confirm), "default")
-        }
+        // Return the final list of warnings and the determined button text ID
+        Pair(warnings, finalButtonTextId)
     }
-
-    val summaryColor = if (summaryColorKey == "error") {
-        MaterialTheme.colorScheme.error
-    } else {
-        Color.Unspecified
-    }
-    // --- LOGIC END ---
 
     // Override text and buttons
     return baseParams.copy(
@@ -203,13 +233,7 @@ fun installPrepareDialog( // 小写开头
             DialogParamsType.InstallerPrepareInstall.id
         ) {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-                item {
-                    Text(
-                        text = summaryText,
-                        color = summaryColor,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                item { WarningTextBlock(warnings = warningMessages) }
                 // --- NEW LOGIC: Show package name and version with animation ---
                 item {
                     // Use AnimatedVisibility to show package name and version
@@ -256,7 +280,7 @@ fun installPrepareDialog( // 小写开头
                 // Install button is shown if the entity's minSdk is compatible
                 val canInstall = entityToInstall?.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true
                 if (canInstall) {
-                    add(DialogButton(stringResource(R.string.install)) {
+                    add(DialogButton(stringResource(buttonTextId)) {
                         viewModel.dispatch(DialogViewAction.Install)
                     })
                 }

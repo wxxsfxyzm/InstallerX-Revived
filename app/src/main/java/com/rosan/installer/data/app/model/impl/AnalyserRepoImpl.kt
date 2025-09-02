@@ -7,7 +7,9 @@ import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.entity.InstalledAppInfo
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
+import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
 import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
@@ -15,7 +17,6 @@ import com.rosan.installer.data.app.model.impl.analyser.MultiApkZipAnalyserRepoI
 import com.rosan.installer.data.app.model.impl.analyser.XApkAnalyserRepoImpl
 import com.rosan.installer.data.app.repo.AnalyserRepo
 import com.rosan.installer.data.app.repo.FileAnalyserRepo
-import com.rosan.installer.data.app.util.InstalledAppInfo
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.convertLegacyLanguageCode
@@ -106,9 +107,41 @@ object AnalyserRepoImpl : AnalyserRepo {
             // This logic is now part of the backend analysis, not the ViewModel.
             val installedAppInfo = InstalledAppInfo.buildByPackageName(packageName)
 
+            // Find the base entity to get the new signature
+            val baseEntity = entitiesInPackage.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+            val newApkSignatureHash = baseEntity?.signatureHash
+            Timber.d("Signature hash for $packageName: $newApkSignatureHash")
+            // --- SIGNATURE COMPARISON LOGIC ---
+            val signatureMatchStatus = when {
+                installedAppInfo == null -> {
+                    // The app is not installed yet.
+                    SignatureMatchStatus.NOT_INSTALLED
+                }
+
+                newApkSignatureHash.isNullOrBlank() || installedAppInfo.signatureHash.isNullOrBlank() -> {
+                    // We failed to get a signature from either the APK or the installed app.
+                    Timber.w("Could not compare signatures. New: '$newApkSignatureHash', Installed: '${installedAppInfo.signatureHash}'")
+                    SignatureMatchStatus.UNKNOWN_ERROR
+                }
+
+                newApkSignatureHash == installedAppInfo.signatureHash -> {
+                    // Signatures match, this is a safe update.
+                    Timber.d("Signatures match for $packageName.")
+                    SignatureMatchStatus.MATCH
+                }
+
+                else -> {
+                    // Signatures do NOT match. This is a potential issue.
+                    Timber.w("SIGNATURE MISMATCH for $packageName. New: '$newApkSignatureHash', Installed: '${installedAppInfo.signatureHash}'")
+                    SignatureMatchStatus.MISMATCH
+                }
+            }
+            // --- ++ END OF SIGNATURE LOGIC ++ ---
+
             // --- Post-process all entities to apply corrections ---
             val correctedEntities = mutableListOf<AppEntity>()
-            val baseEntity = entitiesInPackage.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+            // moved upwards
+            // val baseEntity = entitiesInPackage.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
             val authoritativeTargetSdk = baseEntity?.targetSdk
 
             entitiesInPackage.forEach { entity ->
@@ -139,7 +172,8 @@ object AnalyserRepoImpl : AnalyserRepo {
                 PackageAnalysisResult(
                     packageName = packageName,
                     appEntities = selectableEntities,
-                    installedAppInfo = installedAppInfo
+                    installedAppInfo = installedAppInfo,
+                    signatureMatchStatus = signatureMatchStatus
                 )
             )
         }

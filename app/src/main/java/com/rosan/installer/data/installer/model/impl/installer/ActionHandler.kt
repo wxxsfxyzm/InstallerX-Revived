@@ -104,7 +104,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Timber.d("[id=${installer.id}] resolve: State has been reset. Emitting ProgressEntity.Resolving.")
         installer.progress.emit(ProgressEntity.InstallResolving)
 
-
         installer.config = try {
             resolveConfig(activity)
         } catch (e: Exception) {
@@ -114,6 +113,16 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             return
         }
         Timber.d("[id=${installer.id}] resolve: Config resolved. installMode=${installer.config.installMode}")
+
+        // Check for notification mode immediately after resolving config.
+        val isNotificationInstall = installer.config.installMode == ConfigEntity.InstallMode.Notification ||
+                installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
+
+        if (isNotificationInstall) {
+            Timber.d("[id=${installer.id}] Notification mode detected early. Switching to background.")
+            // This will trigger the Activity to finish itself and the ForegroundInfoHandler to start showing notifications.
+            installer.background(true)
+        }
 
         if (installer.config.installMode == ConfigEntity.InstallMode.Ignore) {
             Timber.d("[id=${installer.id}] resolve: InstallMode is Ignore. Finishing task.")

@@ -1,10 +1,11 @@
-package com.rosan.installer.data.app.util
+package com.rosan.installer.data.app.model.entity
 
 import android.content.Context
-import android.content.pm.ApplicationInfo // Import ApplicationInfo
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
+import com.rosan.installer.data.app.util.SignatureUtils
 import com.rosan.installer.data.common.util.compatVersionCode
 import com.rosan.installer.data.common.util.isPackageArchivedCompat
 import org.koin.core.component.KoinComponent
@@ -19,12 +20,15 @@ data class InstalledAppInfo(
     val applicationInfo: ApplicationInfo?, // Add this field
     val minSdk: Int?,
     val targetSdk: Int?,
+    val signatureHash: String? = null,
+    val isSystemApp: Boolean = false,
     val isArchived: Boolean = false
 ) {
     companion object : KoinComponent {
         fun buildByPackageName(packageName: String): InstalledAppInfo? {
             val context: Context = get()
             val packageManager = context.packageManager
+            val signatureHash = SignatureUtils.getInstalledAppSignatureHash(context, packageName)
             return try {
                 val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     packageManager.getPackageInfo(
@@ -50,6 +54,8 @@ data class InstalledAppInfo(
                     applicationInfo = applicationInfo,
                     minSdk = applicationInfo?.minSdkVersion,
                     targetSdk = applicationInfo?.targetSdkVersion,
+                    signatureHash = signatureHash,
+                    isSystemApp = ((applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_SYSTEM) != 0,
                     isArchived = packageManager.isPackageArchivedCompat(packageName)
                 )
             } catch (e: PackageManager.NameNotFoundException) {
