@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">InstallerX</string>
@@ -82,7 +81,7 @@
 
     <string name="delete_success">تم الحذف بنجاح</string>
 
-    <string name="loading">جارٍ التحميل...</string>
+    <string name="loading">جارٍ التحميل…</string>
     <string name="empty_configs">لا توجد ملفات شخصية، أضف واحداً أدناه</string>
     <string name="filter">تصفية</string>
     <string name="order">ترتيب</string>
@@ -172,12 +171,12 @@
     <string name="sort_by_show_package_name">عرض اسم الحزمة</string>
 
     <string name="installer_ready">جاهز</string>
-    <string name="installer_resolving">جارٍ التحقق...</string>
+    <string name="installer_resolving">جارٍ التحقق…</string>
     <string name="installer_resolve_failed">فشل التحقق</string>
     <string name="installer_resolve_success">نجح التحقق</string>
-    <string name="installer_preparing">جارٍ التحضير...</string>
-    <string name="installer_preparing_desc">جارٍ تحضير الملفات، يرجى الانتظار...</string>
-    <string name="installer_analysing">جارٍ التحليل...</string>
+    <string name="installer_preparing">جارٍ التحضير…</string>
+    <string name="installer_preparing_desc">جارٍ تحضير الملفات، يرجى الانتظار…</string>
+    <string name="installer_analysing">جارٍ التحليل…</string>
     <string name="installer_analyse_failed">فشل التحليل</string>
     <string name="installer_select_install">حدد التطبيقات المراد تثبيتها</string>
     <string name="installer_prepare_install">قبل التثبيت</string>
@@ -191,7 +190,7 @@
     <string name="installer_prepare_type_sidegrade">سيتم تغيير الإصدار الحالي من التطبيق</string>
     <string name="installer_prepare_type_unarchive">سيتم إلغاء أرشفة التطبيق الحالي</string>
     <string name="installer_prepare_type_unknown_confirm">هل أنت متأكد أنك تريد التثبيت؟</string>
-    <string name="installer_installing">جارٍ التثبيت...</string>
+    <string name="installer_installing">جارٍ التثبيت…</string>
     <string name="installer_install_failed">فشل التثبيت</string>
     <string name="installer_install_success">نجح التثبيت</string>
     <string name="installer_silent_install">تثبيت صامت</string>
