@@ -8,7 +8,6 @@
     <string name="apex">APEX</string>
     <string name="apex_desc">Указывает, что устанавливаемый пакет является пакетом APEX</string>
     <string name="app">Приложение</string>
-    <string name="app_name">InstallerX</string>
     <string name="apply">Применить</string>
     <string name="back">Назад</string>
     <string name="basic">Основные</string>

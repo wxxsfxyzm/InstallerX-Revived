@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">InstallerX</string>
-
     <string name="agreement_title">السياسة</string>
     <string name="agreement_text">هذه هي سياسة المستخدم الخاصة بنا، نرجو قراءتها والموافقة عليها. &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/terms&quot;&gt;سياسة المستخدم&lt;/a&gt;، &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/privacy&quot;&gt;سياسة الخصوصية&lt;/a&gt;. لن تظهر هذه الرسالة مرة أخرى بعد موافقتك.</string>
 

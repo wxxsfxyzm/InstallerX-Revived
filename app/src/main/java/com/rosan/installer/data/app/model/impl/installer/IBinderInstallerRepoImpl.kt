@@ -236,7 +236,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         // Disable Dhizuku not supported stuff
         if (config.authorizer == ConfigEntity.Authorizer.Dhizuku)
             params.installFlags = params.installFlags and InstallOption.GrantAllRequestedPermissions.value.inv()
-        
+
         val baseApkArch = entities.firstOrNull { it.name == "base.apk" }?.arch
         Timber.d("Current Arch to install: $baseApkArch")
 

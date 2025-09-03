@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">InstallerX</string>
+    <string name="app_name" translatable="false">InstallerX Revived</string>
 
     <string name="agreement_title">Policy</string>
     <string name="agreement_text">Here is our user policy, Please read and agree to it. &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/terms&quot;&gt;User Policy&lt;/a&gt;, &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/privacy&quot;&gt;Privacy Policy&lt;/a&gt; This message won\'t show up again after you agree.</string>
