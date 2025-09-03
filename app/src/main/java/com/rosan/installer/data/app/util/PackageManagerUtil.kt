@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInstaller
 import androidx.core.content.IntentCompat
+import com.rosan.installer.data.app.model.exception.InstallFailedAbortedException
 import com.rosan.installer.data.app.model.exception.InstallFailedAlreadyExistsException
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedContainerErrorException
@@ -94,6 +95,7 @@ object PackageManagerUtil {
     const val INSTALL_FAILED_USER_RESTRICTED = -111
     const val INSTALL_FAILED_DUPLICATE_PERMISSION = -112
     const val INSTALL_FAILED_NO_MATCHING_ABIS = -113
+    const val INSTALL_FAILED_ABORTED = -115
     const val INSTALL_FAILED_REJECTED_BY_BUILDTYPE = -3001
     const val INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION = -1000
 
@@ -145,6 +147,7 @@ object PackageManagerUtil {
             INSTALL_FAILED_TEST_ONLY -> InstallFailedTestOnlyException(ecpMsg)
             INSTALL_FAILED_CPU_ABI_INCOMPATIBLE -> InstallFailedCpuAbiIncompatibleException(ecpMsg)
             INSTALL_FAILED_NO_MATCHING_ABIS -> InstallFailedCpuAbiIncompatibleException(ecpMsg)
+            INSTALL_FAILED_ABORTED -> InstallFailedAbortedException(ecpMsg)
             INSTALL_FAILED_MISSING_FEATURE -> InstallFailedMissingFeatureException(ecpMsg)
             INSTALL_FAILED_CONTAINER_ERROR -> InstallFailedContainerErrorException(ecpMsg)
             INSTALL_FAILED_INVALID_INSTALL_LOCATION -> InstallFailedInvalidInstallLocationException(ecpMsg)

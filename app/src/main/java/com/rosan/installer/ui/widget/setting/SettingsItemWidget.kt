@@ -147,6 +147,7 @@ fun DataAuthorizerWidget(
                 // 遍历 Map 来动态创建 InputChip
                 authorizerOptions.forEach { (authorizerType, authorizerInfo) ->
                     InputChip(
+                        enabled = authorizerType != ConfigEntity.Authorizer.None,
                         selected = currentAuthorizer == authorizerType,
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.ContextClick)

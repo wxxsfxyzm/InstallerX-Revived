@@ -80,6 +80,10 @@ Compared to stock installers, **InstallerX** offers more installation options:
 
 ## FAQ
 
+> [!NOTE]
+> Please read the FAQ before providing feedback.
+> When providing feedback, please specify your phone brand, system version, software version, and operation in detail.
+
 - **Dhizuku not working properly?**
     - Support for **official Dhizuku** is limited. Tested on AVDs with SDK ≥34. Operation on SDK <34 is not guaranteed.
     - When using `OwnDroid`, the `Auto delete after installation` function might not work correctly.
@@ -88,6 +92,9 @@ Compared to stock installers, **InstallerX** offers more installation options:
 
 - **Lock tool not working?**
     - Due to the package name change, use the modified [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk) from this repository.
+
+- An error occurred in the resolving phase: `No Content Provider` or `reading provider` reported `Permission Denial`?
+    - You have enabled Hide app list or similar functions, please configure the whitelist.
 
 - **HyperOS shows "Installing system apps requires declaring a valid installer" error**
     - It's a system security restriction. You must declare an installer that is a system app (recommended: `com.android.fileexplorer` or `com.android.vending`).
@@ -110,14 +117,14 @@ Compared to stock installers, **InstallerX** offers more installation options:
 ## About Releases
 
 > [!WARNING]
-> Development versions may be unstable and features may change/be removed without notice.
+> Development versions may be unstable and features may change/be removed without any notice.
 > Switching build channels may require data wipe/reinstallation.
 
 - **`dev` branch:** Contains features under development. If you want to test them, look for the corresponding builds in [Pull Requests](https://github.com/wxxsfxyzm/InstallerX-Revived/pulls).
   - Changes for each commit are detailed in the PRs (may be AI-generated).
 - **`main` branch:** When stable changes are merged from `dev`, the CI/CD system automatically builds and publishes a new alpha version.
 - **Stable releases:** Manually published when finishing a development phase and increasing the `versionCode`. CI/CD automatically publishes them as a release.
-- About network permission: With feature expansion, some network-related functions have been introduced. However, many users prefer the installer to remain purely local without requiring network access. Therefore, two versions will be released: **online** and **offline**. Both versions share the same package name, version code, and signature, and can be installed side by side. Please download according to your needs.
+- **About network permission:** With feature expansion, some network-related functions have been introduced. However, many users prefer the installer to remain purely local without requiring network access. Therefore, two versions will be released: **online** and **offline**. Both versions share the same package name, version code, and signature, and can be installed side by side. Please download according to your needs.
   - **Online version**: Supports sharing direct download links to InstallerX for installation. More network-related utilities may be added in the future, but network permission will **never** be used for non-installation purposes. Safe to use.
   - **Offline version**: Requests no network permissions at all. When attempting to use online features, you will receive a clear error message. This version remains a purely local installer.
 

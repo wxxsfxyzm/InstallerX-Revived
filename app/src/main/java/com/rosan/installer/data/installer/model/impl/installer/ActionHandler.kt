@@ -9,6 +9,9 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
+import android.provider.DocumentsContract
+import android.provider.OpenableColumns
 import android.system.Os
 import androidx.core.net.toUri
 import com.rosan.installer.R
@@ -34,11 +37,13 @@ import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -53,6 +58,12 @@ import java.util.UUID
 
 class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
+    companion object {
+        // Try a larger buffer. 1MB is a good starting point for modern devices.
+        // It reduces the number of system calls for I/O operations.
+        private const val COPY_BUFFER_SIZE = 1 * 1024 * 1024 // 1MB
+    }
+
     override val installer: InstallerRepoImpl = super.installer as InstallerRepoImpl
     private var job: Job? = null
     private val context by inject<Context>()
@@ -396,7 +407,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                             intent.getParcelableExtra(
                                 Intent.EXTRA_STREAM, Uri::class.java
                             )
-                        else intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                        else @Suppress("DEPRECATION") intent.getParcelableExtra(Intent.EXTRA_STREAM)
                     if (uri == null) emptyList() else listOf(uri)
                 }
             }
@@ -512,28 +523,38 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         // including the one that was previously creating a FileDescriptorEntity.
         Timber.d("Direct file access failed. Falling back to caching with progress.")
         val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
-        val totalSize = assetFileDescriptor.declaredLength
 
-        assetFileDescriptor.use { afd ->
-            afd.createInputStream().use { input ->
-                tempFile.outputStream().use { output ->
-                    if (totalSize > 0) {
-                        // We can show determinate progress.
-                        Timber.d("Starting copy of $totalSize bytes.")
-                        installer.progress.emit(ProgressEntity.InstallPreparing(0f)) // Show progress bar at 0%
-                        input.copyToWithProgress(output, totalSize) { progress ->
-                            // Update progress in a coroutine to avoid blocking.
-                            scope.launch { installer.progress.emit(ProgressEntity.InstallPreparing(progress)) }
+        // Aggressively guess file size and go to determinate progress
+        val totalSize = guessContentLength(uri, assetFileDescriptor)
+
+        withContext(Dispatchers.IO) {
+            assetFileDescriptor.use { afd ->
+                afd.createInputStream().use { input ->
+                    tempFile.outputStream().use { output ->
+                        if (totalSize > 0) {
+                            installer.progress.emit(ProgressEntity.InstallPreparing(0f))
+                            // Directly emit progress
+                            input.copyToFastWithProgress(output, totalSize) { progress ->
+                                installer.progress.tryEmit(
+                                    ProgressEntity.InstallPreparing(progress)
+                                )
+                            }
+                        } else {
+                            // Unknown size: emit indeterminate progress
+                            installer.progress.emit(ProgressEntity.InstallPreparing(-1f))
+                            // Keep using a large buffer for all cases
+                            val buf = ByteArray(COPY_BUFFER_SIZE)
+                            var n = input.read(buf)
+                            while (n >= 0) {
+                                output.write(buf, 0, n)
+                                n = input.read(buf)
+                            }
                         }
-                    } else {
-                        // Indeterminate progress.
-                        Timber.d("Starting copy of unknown size.")
-                        installer.progress.emit(ProgressEntity.InstallPreparing(-1f)) // Use -1 for indeterminate
-                        input.copyTo(output)
                     }
                 }
             }
         }
+
 
         Timber.d("Caching complete. Temp file: ${tempFile.absolutePath}")
         // Return a FileEntity pointing to the newly cached file.
@@ -587,9 +608,11 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             val contentType = connection.contentType
             val isSupportedMimeType = contentType != null && (
                     contentType.equals("application/vnd.android.package-archive", ignoreCase = true) ||
-                            contentType.equals("application/octet-stream", ignoreCase = true)
+                            contentType.equals("application/octet-stream", ignoreCase = true) ||
+                            contentType.equals("application/vnd.apkm", ignoreCase = true) ||
+                            contentType.equals("application/vnd.apks", ignoreCase = true) ||
+                            contentType.equals("application/xapk-package-archive", ignoreCase = true)
                     )
-
             if (!isSupportedExtension && !isSupportedMimeType) {
                 throw ResolveException(
                     action = "Unsupported file type from URL. Path: $path, Content-Type: $contentType",
@@ -601,21 +624,24 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".apk_cache", File(cacheDirectory))
             val totalSize = connection.contentLengthLong
 
+            // Emit initial progress state. If size is unknown, it's indeterminate (-1f).
+            // Otherwise, start at a determinate 0f.
+            if (totalSize > 0) {
+                Timber.d("Starting download of $totalSize bytes from URL.")
+                installer.progress.emit(ProgressEntity.InstallPreparing(0f))
+            } else {
+                Timber.d("Starting download of unknown size from URL.")
+                installer.progress.emit(ProgressEntity.InstallPreparing(-1f))
+            }
+
             connection.inputStream.use { input ->
                 tempFile.outputStream().use { output ->
-                    if (totalSize > 0) {
-                        // If file size is known, show determinate progress.
-                        Timber.d("Starting download of $totalSize bytes from URL.")
-                        installer.progress.emit(ProgressEntity.InstallPreparing(0f)) // Start at 0%
-                        input.copyToWithProgress(output, totalSize) { progress ->
-                            // Update progress state in a coroutine.
-                            scope.launch { installer.progress.emit(ProgressEntity.InstallPreparing(progress)) }
-                        }
-                    } else {
-                        // If file size is unknown, show indeterminate progress.
-                        Timber.d("Starting download of unknown size from URL.")
-                        installer.progress.emit(ProgressEntity.InstallPreparing(-1f))
-                        input.copyTo(output)
+                    // Unified call to the fast copy method.
+                    // It uses a large buffer for all cases and handles progress reporting
+                    // only when totalSize is known.
+                    input.copyToFastWithProgress(output, totalSize) { progress ->
+                        // Use tryEmit for efficiency, it's non-suspending and suitable for frequent updates.
+                        installer.progress.tryEmit(ProgressEntity.InstallPreparing(progress))
                     }
                 }
             }
@@ -630,26 +656,94 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     /**
-     * Custom extension function for InputStream to copy data to an OutputStream
-     * while reporting progress.
+     * Faster copy
      *
-     * @param out The OutputStream to write to.
-     * @param totalSize The total number of bytes to be copied.
-     * @param onProgress A lambda that will be invoked with the current progress (0.0f to 1.0f).
+     * @param minStepRatio
+     * @param minIntervalMs
      */
-    private fun InputStream.copyToWithProgress(
+    private fun InputStream.copyToFastWithProgress(
         out: OutputStream,
         totalSize: Long,
+        minStepRatio: Float = 0.01f,
+        minIntervalMs: Long = 200L,
         onProgress: (Float) -> Unit
     ) {
-        var bytesCopied: Long = 0
-        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-        var bytes = read(buffer)
-        while (bytes >= 0) {
-            out.write(buffer, 0, bytes)
-            bytesCopied += bytes
-            onProgress(bytesCopied.toFloat() / totalSize)
-            bytes = read(buffer)
+        var bytesCopied = 0L
+        val buf = ByteArray(COPY_BUFFER_SIZE)
+        val step = if (totalSize > 0) (totalSize * minStepRatio).toLong().coerceAtLeast(128 * 1024) else Long.MAX_VALUE
+        var nextEmitAt = step
+        var lastEmitTime = 0L
+
+        var read = read(buf)
+        while (read >= 0) {
+            out.write(buf, 0, read)
+            bytesCopied += read
+
+            if (totalSize > 0) {
+                val now = SystemClock.uptimeMillis()
+                if (bytesCopied >= nextEmitAt && now - lastEmitTime >= minIntervalMs) {
+                    onProgress(bytesCopied.toFloat() / totalSize)
+                    lastEmitTime = now
+                    nextEmitAt = (bytesCopied / step + 1) * step
+                }
+            }
+            read = read(buf)
         }
+
+        if (totalSize > 0) onProgress(1f)
     }
+
+    /**
+     * Guess the content length of a file.
+     * 1) AssetFileDescriptor.declaredLength
+     * 2) ParcelFileDescriptor.statSize
+     * 3) ContentResolver.query(OpenableColumns.SIZE / DocumentsContract.Document.COLUMN_SIZE)
+     * 4) Os.fstat(fd).st_size
+     */
+    private fun guessContentLength(uri: Uri, afd: android.content.res.AssetFileDescriptor?): Long {
+        // 1) AFD 的 declaredLength
+        if (afd != null && afd.declaredLength > 0) return afd.declaredLength
+
+        // 2) PFD.statSize
+        runCatching {
+            context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+                if (pfd.statSize > 0) return pfd.statSize
+            }
+        }
+
+        // 3) query OpenableColumns / DocumentsContract
+        fun queryLong(projection: Array<String>): Long {
+            context.contentResolver.query(uri, projection, null, null, null)?.use { c ->
+                if (c.moveToFirst()) {
+                    for (col in projection) {
+                        val idx = c.getColumnIndex(col)
+                        if (idx != -1) {
+                            val v = c.getLong(idx)
+                            if (v > 0) return v
+                        }
+                    }
+                }
+            }
+            return -1L
+        }
+
+        val fromOpenable = queryLong(arrayOf(OpenableColumns.SIZE))
+        if (fromOpenable > 0) return fromOpenable
+
+        if (DocumentsContract.isDocumentUri(context, uri)) {
+            val fromDoc = queryLong(arrayOf(DocumentsContract.Document.COLUMN_SIZE))
+            if (fromDoc > 0) return fromDoc
+        }
+
+        // 4) fstat(fd)
+        runCatching {
+            afd?.parcelFileDescriptor?.fileDescriptor?.let { fd ->
+                val st = Os.fstat(fd)
+                if (st.st_size > 0) return st.st_size
+            }
+        }
+
+        return -1L
+    }
+
 }
