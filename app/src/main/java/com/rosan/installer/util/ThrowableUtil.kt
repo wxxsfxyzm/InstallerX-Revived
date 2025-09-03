@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
+import com.rosan.installer.data.app.model.exception.InstallFailedAbortedException
 import com.rosan.installer.data.app.model.exception.InstallFailedAlreadyExistsException
 import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
@@ -76,6 +77,7 @@ private fun Throwable.getStringResourceId() =
         is InstallFailedNewerSDKException -> R.string.exception_install_failed_newer_sdk
         is InstallFailedTestOnlyException -> R.string.exception_install_failed_test_only
         is InstallFailedCpuAbiIncompatibleException -> R.string.exception_install_failed_cpu_abi_incompatible
+        is InstallFailedAbortedException -> R.string.exception_install_failed_aborted
         is InstallFailedMissingFeatureException -> R.string.exception_install_failed_missing_feature
         is InstallFailedContainerErrorException -> R.string.exception_install_failed_container_error
         is InstallFailedInvalidInstallLocationException -> R.string.exception_install_failed_invalid_install_location

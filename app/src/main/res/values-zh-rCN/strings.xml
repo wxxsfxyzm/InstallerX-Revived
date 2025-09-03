@@ -282,6 +282,7 @@
     <string name="exception_install_failed_newer_sdk">系统版本过新，安装包不支持当前系统</string>
     <string name="exception_install_failed_test_only">用于测试的安装包，请打开允许测试包</string>
     <string name="exception_install_failed_cpu_abi_incompatible">CPU不受支持，请下载支持当前CPU的安装包</string>
+    <string name="exception_install_failed_aborted">安装因错误中止</string>
     <string name="exception_install_failed_missing_feature">安装包使用了一个无效特性</string>
     <string name="exception_install_failed_container_error">SD卡访问失败</string>
     <string name="exception_install_failed_invalid_install_location">无效的安装路径</string>

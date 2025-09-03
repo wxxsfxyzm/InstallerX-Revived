@@ -95,7 +95,7 @@ fun DataAuthorizerWidget(viewModel: EditViewModel) {
         ConfigEntity.Authorizer.Global to stringResource(
             R.string.config_authorizer_global_desc,
             when (globalAuthorizer) {
-                ConfigEntity.Authorizer.None -> stringResource(R.string.config_authorizer_none)
+                // ConfigEntity.Authorizer.None -> stringResource(R.string.config_authorizer_none)
                 ConfigEntity.Authorizer.Root -> stringResource(R.string.config_authorizer_root)
                 ConfigEntity.Authorizer.Shizuku -> stringResource(R.string.config_authorizer_shizuku)
                 ConfigEntity.Authorizer.Dhizuku -> stringResource(R.string.config_authorizer_dhizuku)
@@ -103,7 +103,7 @@ fun DataAuthorizerWidget(viewModel: EditViewModel) {
                 else -> stringResource(R.string.config_authorizer_global)
             }
         ),
-        ConfigEntity.Authorizer.None to stringResource(R.string.config_authorizer_none),
+        // ConfigEntity.Authorizer.None to stringResource(R.string.config_authorizer_none),
         ConfigEntity.Authorizer.Root to stringResource(R.string.config_authorizer_root),
         ConfigEntity.Authorizer.Shizuku to stringResource(R.string.config_authorizer_shizuku),
         ConfigEntity.Authorizer.Dhizuku to stringResource(R.string.config_authorizer_dhizuku),

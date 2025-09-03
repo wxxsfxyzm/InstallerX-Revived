@@ -294,6 +294,7 @@
     <string name="exception_install_failed_newer_sdk">The package is too old for the system version</string>
     <string name="exception_install_failed_test_only">Installing debug applications is disabled, enable it and try again</string>
     <string name="exception_install_failed_cpu_abi_incompatible">CPU ABI incompatible, please download the package that supports the current CPU</string>
+    <string name="exception_install_failed_aborted">Installation aborted</string>
     <string name="exception_install_failed_missing_feature">The package uses an invalid feature</string>
     <string name="exception_install_failed_container_error">Failed to access the SD card</string>
     <string name="exception_install_failed_invalid_install_location">Invalid install location</string>
