@@ -11,9 +11,11 @@ object NoneInstallerRepoImpl : IBinderInstallerRepoImpl() {
     private val newProcess = NewProcessImpl();
 
     override suspend fun doInstallWork(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity, blacklist: List<String>
+        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity, blacklist: List<String>,
+        sharedUserIdBlacklist: List<String>,
+        sharedUserIdExemption: List<String>
     ) {
-        super.doInstallWork(config, entities, extra, blacklist)
+        super.doInstallWork(config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
     }
 
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder =

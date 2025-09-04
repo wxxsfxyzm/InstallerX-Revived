@@ -208,7 +208,7 @@ fun LegacyInstallerGlobalSettingsPage(
                         )
                     })
             }
-            item { LabelWidget(label = stringResource(id = R.string.config_managed_blacklist_title)) }
+            item { LabelWidget(label = stringResource(id = R.string.config_managed_blacklist_by_package_name_title)) }
             item {
                 ManagedPackagesWidget(
                     noContentTitle = stringResource(R.string.config_no_managed_blacklist),

@@ -14,13 +14,15 @@ object InstallerRepoImpl : InstallerRepo {
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         blacklist: List<String>,
+        sharedUserIdBlacklist: List<String>,
+        sharedUserIdExemption: List<String>
     ) {
         val repo = when (config.authorizer) {
             ConfigEntity.Authorizer.Shizuku -> ShizukuInstallerRepoImpl
             ConfigEntity.Authorizer.Dhizuku -> DhizukuInstallerRepoImpl
             else -> ProcessInstallerRepoImpl
         }
-        repo.doInstallWork(config, entities, extra, blacklist)
+        repo.doInstallWork(config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
     }
 
     override suspend fun doUninstallWork(

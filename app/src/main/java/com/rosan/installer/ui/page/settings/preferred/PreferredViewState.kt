@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.settings.preferred
 
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
+import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 data class PreferredViewState(
@@ -19,6 +20,8 @@ data class PreferredViewState(
     val showRefreshedUI: Boolean = true,
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
     val managedBlacklistPackages: List<NamedPackage> = emptyList(),
+    val managedSharedUserIdBlacklist: List<SharedUid> = emptyList(),
+    val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList(),
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 

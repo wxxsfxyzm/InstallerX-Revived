@@ -12,7 +12,12 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     private lateinit var recycler: Recyclable<AppProcess>
 
     override suspend fun doInstallWork(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity, blacklist: List<String>
+        config: ConfigEntity,
+        entities: List<InstallEntity>,
+        extra: InstallExtraInfoEntity,
+        blacklist: List<String>,
+        sharedUserIdBlacklist: List<String>,
+        sharedUserIdExemption: List<String>
     ) {
         recycler = AppProcessRecyclers.get(
             when (config.authorizer) {
@@ -21,7 +26,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
                 else -> "sh"
             }
         ).make()
-        super.doInstallWork(config, entities, extra, blacklist)
+        super.doInstallWork(config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
     }
 
     override suspend fun doUninstallWork(config: ConfigEntity, packageName: String, extra: InstallExtraInfoEntity) {

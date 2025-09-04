@@ -101,6 +101,7 @@ object XApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
             containerType = extra.dataType
         ) else AppEntity.BaseEntity(
             packageName = manifest.packageName,
+            sharedUserId = null,
             data = data,
             versionCode = manifest.versionCode,
             versionName = manifest.versionName,

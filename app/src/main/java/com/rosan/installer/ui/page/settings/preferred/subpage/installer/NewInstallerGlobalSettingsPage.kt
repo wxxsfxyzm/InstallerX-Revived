@@ -36,6 +36,7 @@ import com.rosan.installer.ui.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.widget.setting.ManagedPackagesWidget
+import com.rosan.installer.ui.widget.setting.ManagedUidsWidget
 import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.widget.setting.SwitchWidget
 
@@ -256,7 +257,7 @@ fun NewInstallerGlobalSettingsPage(
             }
             item {
                 SplicedColumnGroup(
-                    title = stringResource(id = R.string.config_managed_blacklist_title),
+                    title = stringResource(id = R.string.config_managed_blacklist_by_package_name_title),
                     content = listOf {
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_blacklist),
@@ -268,6 +269,53 @@ fun NewInstallerGlobalSettingsPage(
                                 viewModel.dispatch(PreferredViewAction.RemoveManagedBlacklistPackage(it))
                             }
                         )
+                    }
+                )
+            }
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.config_managed_blacklist_by_shared_user_id_title),
+                    content = buildList {
+                        add {
+                            ManagedUidsWidget(
+                                noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
+                                uids = state.managedSharedUserIdBlacklist,
+                                onAddUid = {
+                                    viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
+                                },
+                                onRemoveUid = {
+                                    viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it))
+                                }
+                            )
+                        }
+                        add {
+                            AnimatedVisibility(
+                                // 条件：仅当黑名单列表不为空时，才显示白名单设置
+                                visible = state.managedSharedUserIdBlacklist.isNotEmpty(),
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically()
+                            ) {
+                                ManagedPackagesWidget(
+                                    noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist_whitelist), // New: Add this string resource
+                                    noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc), // New: Add this string resource
+                                    packages = state.managedSharedUserIdExemptedPackages, // New: Add this to state
+                                    onAddPackage = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
+                                                it
+                                            )
+                                        ) // New: Add this action
+                                    },
+                                    onRemovePackage = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
+                                                it
+                                            )
+                                        )
+                                    }
+                                )
+                            }
+                        }
                     }
                 )
             }

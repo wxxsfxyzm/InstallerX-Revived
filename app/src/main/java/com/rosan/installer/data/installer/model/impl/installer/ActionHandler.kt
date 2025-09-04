@@ -15,6 +15,7 @@ import android.provider.OpenableColumns
 import android.system.Os
 import androidx.core.net.toUri
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
@@ -229,20 +230,42 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Timber.d("[id=${installer.id}] install: Starting. Emitting ProgressEntity.Installing.")
         installer.progress.emit(ProgressEntity.Installing)
         runCatching {
-            Timber.d("[id=${installer.id}] install: Loading blacklist from AppDataStore.")
-            val blacklist = appDataStore
+            // Load the blacklist by package name from AppDataStore.
+            Timber.d("[id=${installer.id}] install: Loading package name blacklist from AppDataStore.")
+            val packageBlacklist = appDataStore
                 .getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
-                .first() // Gets the latest value from the Flow
-                .map { it.packageName } // We only need the package name strings
-            Timber.d("[id=${installer.id}] install: Blacklist loaded with ${blacklist.size} entries.")
+                .first()
+                .map { it.packageName }
+            Timber.d("[id=${installer.id}] install: Package name blacklist loaded with ${packageBlacklist.size} entries.")
+
+            // Load the blacklist by UID from AppDataStore.
+            Timber.d("[id=${installer.id}] install: Loading SharedUID blacklist from AppDataStore.")
+            val sharedUserIdBlacklist = appDataStore
+                .getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
+                .first()
+                .map { it.uidName } // Extract the UID names to compare
+            Timber.d("[id=${installer.id}] install: SharedUID blacklist loaded with ${sharedUserIdBlacklist.size} entries.")
+
+            // Load the whitelist by UID from AppDataStore.
+            Timber.d("[id=${installer.id}] install: Loading SharedUID whitelist from AppDataStore.")
+            val sharedUserIdExemption = appDataStore
+                .getNamedPackageList(
+                    key = AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST,
+                    default = if (RsConfig.currentManufacturer == Manufacturer.XIAOMI) AppDataStore.defaultSharedUidExemptedPackagesForXiaoMi else emptyList()
+                )
+                .first()
+                .map { it.packageName } // Extract the package names to compare
+            Timber.d("[id=${installer.id}] install: SharedUID whitelist loaded with ${sharedUserIdExemption.size} entries.")
+
             // Read from the new 'analysisResults' data source.
             val entitiesToInstall = installer.analysisResults
-                .flatMap { it.appEntities } // 1. Flatten the list of packages into a single list of selectable entities.
+                .flatMap { it.appEntities }  // 1. Flatten the list of packages into a single list of selectable entities.
                 .filter { it.selected }      // 2. Filter for the ones the user has selected.
-                .map {                      // 3. Map to the InstallEntity model
+                .map {                       // 3. Map to the InstallEntity model
                     InstallEntity(
                         name = it.app.name,
                         packageName = it.app.packageName,
+                        sharedUserId = if (it.app is AppEntity.BaseEntity) it.app.sharedUserId else null,
                         arch = it.app.arch,
                         data = when (val app = it.app) {
                             is AppEntity.BaseEntity -> app.data
@@ -258,7 +281,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 installer.config,
                 entitiesToInstall, // Pass the newly constructed list to the installer backend.
                 InstallExtraInfoEntity(Os.getuid() / 100000, cacheDirectory),
-                blacklist
+                packageBlacklist,
+                sharedUserIdBlacklist,
+                sharedUserIdExemption
             )
         }.getOrElse {
             Timber.e(it, "[id=${installer.id}] install: Failed.")
@@ -567,8 +592,15 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         AnalyserRepoImpl.doWork(installer.config, data, AnalyseExtraEntity(cacheDirectory))
 
     private suspend fun installEntities(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity, blacklist: List<String>
-    ) = com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doInstallWork(config, entities, extra, blacklist)
+        config: ConfigEntity,
+        entities: List<InstallEntity>,
+        extra: InstallExtraInfoEntity,
+        blacklist: List<String>,
+        sharedUserIdBlacklist: List<String>,
+        sharedUserIdExemption: List<String>
+    ) = com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doInstallWork(
+        config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption
+    )
 
     /**
      * Downloads a file from an HTTP/HTTPS URL, caches it locally, and reports progress.

@@ -19,6 +19,7 @@ sealed class AppEntity {
 
     data class BaseEntity(
         override val packageName: String,
+        val sharedUserId: String?,
         val data: DataEntity,
         val versionCode: Long,
         val versionName: String,
@@ -65,7 +66,7 @@ sealed class AppEntity {
         override val minSdk: String? = null,
         override val arch: Architecture? = null,
         override val containerType: DataType? = null,
-        val label: String = "安装包集合",
+        val label: String = "Collection of APKs",
         val versionCode: Long = -1,
         val versionName: String = "",
     ) : AppEntity() {

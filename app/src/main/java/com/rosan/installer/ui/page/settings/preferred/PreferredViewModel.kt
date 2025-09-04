@@ -18,6 +18,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.repo.PrivilegedActionRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
+import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
@@ -70,27 +71,40 @@ class PreferredViewModel(
             is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
                 state.managedInstallerPackages,
                 AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST,
-                action.item
+                action.pkg
             )
 
             is PreferredViewAction.RemoveManagedInstallerPackage -> removeManagedPackage(
                 state.managedInstallerPackages,
                 AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST,
-                action.item
+                action.pkg
             )
 
             is PreferredViewAction.AddManagedBlacklistPackage -> addManagedPackage(
                 state.managedBlacklistPackages,
                 AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST,
-                action.item
+                action.pkg
             )
 
             is PreferredViewAction.RemoveManagedBlacklistPackage -> removeManagedPackage(
                 state.managedBlacklistPackages,
                 AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST,
-                action.item
+                action.pkg
             )
 
+            is PreferredViewAction.AddManagedSharedUserIdBlacklist -> addSharedUserIdToBlacklist(action.uid)
+            is PreferredViewAction.RemoveManagedSharedUserIdBlacklist -> removeSharedUserIdFromBlacklist(action.uid)
+            is PreferredViewAction.AddManagedSharedUserIdExemptedPackages -> addManagedPackage(
+                state.managedSharedUserIdExemptedPackages,
+                AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST,
+                action.pkg
+            )
+
+            is PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages -> removeManagedPackage(
+                state.managedSharedUserIdExemptedPackages,
+                AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST,
+                action.pkg
+            )
 
             is PreferredViewAction.SetAdbVerifyEnabledState -> viewModelScope.launch {
                 setAdbVerifyEnabled(
@@ -116,11 +130,9 @@ class PreferredViewModel(
         if (initialized) return
         initialized = true
         viewModelScope.launch {
-            val authorizerFlow = appDataStore.getString(AppDataStore.AUTHORIZER)
-                .map { AuthorizerConverter.revert(it) }
+            val authorizerFlow = appDataStore.getString(AppDataStore.AUTHORIZER).map { AuthorizerConverter.revert(it) }
             val customizeAuthorizerFlow = appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER)
-            val installModeFlow = appDataStore.getString(AppDataStore.INSTALL_MODE)
-                .map { InstallModeConverter.revert(it) }
+            val installModeFlow = appDataStore.getString(AppDataStore.INSTALL_MODE).map { InstallModeConverter.revert(it) }
             val showDialogInstallExtendedMenuFlow =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU)
             val showIntelligentSuggestionFlow =
@@ -138,6 +150,11 @@ class PreferredViewModel(
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST)
             val managedBlacklistPackagesFlow =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
+            val managedSharedUserIdBlacklistFlow =
+                appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
+            val managedSharedUserIdExemptPkgFlow =
+                appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
+
             val adbVerifyEnabledFlow = getSettingsGlobalIntAsFlow(
                 context.contentResolver,
                 "verifier_verify_adb_installs",
@@ -158,6 +175,8 @@ class PreferredViewModel(
                 showRefreshedUIFlow,
                 managedInstallerPackagesFlow,
                 managedBlacklistPackagesFlow,
+                managedSharedUserIdBlacklistFlow,
+                managedSharedUserIdExemptPkgFlow,
                 adbVerifyEnabledFlow,
                 isIgnoringBatteryOptFlow
             ) { values: Array<Any?> ->
@@ -173,8 +192,10 @@ class PreferredViewModel(
                 val showRefreshedUI = values[9] as Boolean
                 val managedInstallerPackages = (values[10] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
                 val managedBlacklistPackages = (values[11] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[12] as Boolean
-                val isIgnoringBatteryOptimizations = values[13] as Boolean
+                val managedSharedUserIdBlacklist = (values[12] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
+                val managedSharedUserIdExemptPkg = (values[13] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[14] as Boolean
+                val isIgnoringBatteryOptimizations = values[15] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -191,6 +212,8 @@ class PreferredViewModel(
                     showRefreshedUI = showRefreshedUI,
                     managedInstallerPackages = managedInstallerPackages,
                     managedBlacklistPackages = managedBlacklistPackages,
+                    managedSharedUserIdBlacklist = managedSharedUserIdBlacklist,
+                    managedSharedUserIdExemptedPackages = managedSharedUserIdExemptPkg,
                     adbVerifyEnabled = adbVerifyEnabled,
                     isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations
                 )
@@ -255,27 +278,47 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, singleLine)
         }
 
-    private fun addManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, item: NamedPackage) =
+    private fun addManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, pkg: NamedPackage) =
         viewModelScope.launch {
             // Create a new list from the current state
             val currentList = list.toMutableList()
-            // Add the new item if it's not already in the list
-            if (!currentList.contains(item)) {
-                currentList.add(item)
+            // Add the new pkg if it's not already in the list
+            if (!currentList.contains(pkg)) {
+                currentList.add(pkg)
                 // Save the updated list back to DataStore
                 appDataStore.putNamedPackageList(key, currentList)
             }
         }
 
-    private fun removeManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, item: NamedPackage) =
+    private fun removeManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, pkg: NamedPackage) =
         viewModelScope.launch {
             // Create a new list from the current state
             val currentList = list.toMutableList()
-            // Remove the item
-            currentList.remove(item)
+            // Remove the pkg
+            currentList.remove(pkg)
             // Save the updated list back to DataStore
             appDataStore.putNamedPackageList(key, currentList)
         }
+
+    private fun addSharedUserIdToBlacklist(uid: SharedUid) {
+        viewModelScope.launch {
+            val currentList = state.managedSharedUserIdBlacklist
+            if (uid in currentList) return@launch
+
+            val newList = currentList + uid
+            appDataStore.putSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST, newList)
+        }
+    }
+
+    private fun removeSharedUserIdFromBlacklist(uid: SharedUid) {
+        viewModelScope.launch {
+            val currentList = state.managedSharedUserIdBlacklist
+            if (uid !in currentList) return@launch
+
+            val newList = currentList.toMutableList().apply { remove(uid) }
+            appDataStore.putSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST, newList)
+        }
+    }
 
     /**
      * A reusable helper function to get a Settings.Global integer value as a Flow,
@@ -318,11 +361,8 @@ class PreferredViewModel(
         viewModelScope.launch {
             // Use .first() to get a single, up-to-date value from the flow.
             val isIgnoring = getIsIgnoreBatteryOptAsFlow().first()
-
             // After refreshing, update the state.
-            state = state.copy(
-                isIgnoringBatteryOptimizations = isIgnoring,
-            )
+            state = state.copy(isIgnoringBatteryOptimizations = isIgnoring)
         }
 
     private suspend fun setAdbVerifyEnabled(enabled: Boolean, action: PreferredViewAction) =

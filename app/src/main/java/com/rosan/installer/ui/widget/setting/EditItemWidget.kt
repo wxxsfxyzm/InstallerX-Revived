@@ -291,7 +291,7 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
                                 viewModel.dispatch(EditViewAction.ChangeDataInstaller(item.packageName))
                                 expanded = false
                             },
-                            // Highlight the selected item
+                            // Highlight the selected pkg
                             colors = if (isSelected) MenuDefaults.itemColors(
                                 textColor = MaterialTheme.colorScheme.primary
                             ) else MenuDefaults.itemColors()

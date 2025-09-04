@@ -103,6 +103,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
         resources: Resources, theme: Resources.Theme?, data: DataEntity, extra: AnalyseExtraEntity, arch: Architecture
     ): AppEntity {
         var packageName: String? = null
+        var sharedUserId: String? = null
         var splitName: String? = null
         var versionCode: Long = -1
         var versionName = ""
@@ -119,6 +120,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
         AxmlTreeRepoImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml"))
             .register("/manifest") {
                 packageName = getAttributeValue(null, "package")
+                sharedUserId = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "sharedUserId")
                 splitName = getAttributeValue(null, "split")
                 val versionCodeMajor = getAttributeIntValue(
                     AxmlTreeRepo.ANDROID_NAMESPACE, "versionCodeMajor", 0
@@ -142,7 +144,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
                     else -> {
                         try {
                             resources.getString(resId)
-                        } catch (e: Resources.NotFoundException) {
+                        } catch (_: Resources.NotFoundException) {
                             null
                         }
                     }
@@ -155,7 +157,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
                     else -> {
                         try {
                             ResourcesCompat.getDrawable(resources, resId, theme)
-                        } catch (e: Resources.NotFoundException) {
+                        } catch (_: Resources.NotFoundException) {
                             null
                         }
                     }
@@ -169,7 +171,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
                     else -> {
                         try {
                             ResourcesCompat.getDrawable(resources, resId, theme)
-                        } catch (e: Resources.NotFoundException) {
+                        } catch (_: Resources.NotFoundException) {
                             null
                         }
                     }
@@ -185,6 +187,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
         if (packageName.isNullOrEmpty()) throw Exception("can't get the package from this package")
         return if (splitName.isNullOrEmpty()) AppEntity.BaseEntity(
             packageName = packageName,
+            sharedUserId = sharedUserId,
             data = data,
             versionCode = versionCode,
             versionName = versionName,
