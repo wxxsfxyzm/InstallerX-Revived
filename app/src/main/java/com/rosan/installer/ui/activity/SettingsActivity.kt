@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.activity
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,15 +16,14 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Enable edge-to-edge mode for immersive experience
         enableEdgeToEdge()
+        // Compat Navigation Bar color for Xiaomi Devices
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            window.isNavigationBarContrastEnforced = false
         super.onCreate(savedInstanceState)
         setContent {
             // A surface based on material design theme.
             InstallerTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    // Disable AgreementDialog for now
-                    // AgreementDialog()
+                Surface(modifier = Modifier.fillMaxSize()) {
                     SettingsPage()
                 }
             }
