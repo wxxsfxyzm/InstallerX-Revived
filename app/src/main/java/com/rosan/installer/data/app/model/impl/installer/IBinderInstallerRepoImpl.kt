@@ -125,11 +125,16 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     override suspend fun doInstallWork(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity, blacklist: List<String>
+        config: ConfigEntity,
+        entities: List<InstallEntity>,
+        extra: InstallExtraInfoEntity,
+        blacklist: List<String>,
+        sharedUserIdBlacklist: List<String>,
+        sharedUserIdExemption: List<String>
     ) {
         val result = kotlin.runCatching {
             entities.groupBy { it.packageName }.forEach { (packageName, entities) ->
-                doInnerWork(config, entities, extra, packageName, blacklist)
+                doInnerWork(config, entities, extra, packageName, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
             }
         }
         doFinishWork(config, entities, extra, result)
@@ -176,12 +181,27 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         packageName: String,
-        managedBlacklistPackages: List<String>
+        managedBlacklistPackages: List<String>,
+        sharedUserIdBlacklist: List<String>,
+        sharedUserIdExemption: List<String>
     ) {
+        // Blacklisted package names
         if (managedBlacklistPackages.contains(packageName)) {
             Timber.w("Installation blocked for $packageName because it is in the blacklist.")
             throw InstallFailedBlacklistedPackageException("Installation blocked for $packageName because it is in the blacklist.")
         }
+
+        // Blacklisted SharedUserID
+        // We can simply take the first entity's sharedUserId because they are all the same.
+        val sharedUid = entities.firstOrNull()?.sharedUserId
+
+        if (sharedUid != null) {
+            if (sharedUserIdBlacklist.contains(sharedUid) && !sharedUserIdExemption.contains(packageName)) {
+                Timber.w("Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted.")
+                throw InstallFailedBlacklistedPackageException("Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted.")
+            }
+        }
+
         if (entities.isEmpty()) return
         val packageInstaller = getPackageInstaller(config, entities, extra)
         var session: Session? = null

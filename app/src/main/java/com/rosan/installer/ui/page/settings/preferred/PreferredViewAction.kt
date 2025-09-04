@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.settings.preferred
 
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
+import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 sealed class PreferredViewAction {
@@ -17,10 +18,15 @@ sealed class PreferredViewAction {
     data class ChangeShowRefreshedUI(val showRefreshedUI: Boolean) : PreferredViewAction()
     data class ChangeVersionCompareInSingleLine(val versionCompareInSingleLine: Boolean) : PreferredViewAction()
 
-    data class AddManagedInstallerPackage(val item: NamedPackage) : PreferredViewAction()
-    data class RemoveManagedInstallerPackage(val item: NamedPackage) : PreferredViewAction()
-    data class AddManagedBlacklistPackage(val item: NamedPackage) : PreferredViewAction()
-    data class RemoveManagedBlacklistPackage(val item: NamedPackage) : PreferredViewAction()
+    data class AddManagedInstallerPackage(val pkg: NamedPackage) : PreferredViewAction()
+    data class RemoveManagedInstallerPackage(val pkg: NamedPackage) : PreferredViewAction()
+    data class AddManagedBlacklistPackage(val pkg: NamedPackage) : PreferredViewAction()
+    data class RemoveManagedBlacklistPackage(val pkg: NamedPackage) : PreferredViewAction()
+
+    data class AddManagedSharedUserIdBlacklist(val uid: SharedUid) : PreferredViewAction()
+    data class RemoveManagedSharedUserIdBlacklist(val uid: SharedUid) : PreferredViewAction()
+    data class AddManagedSharedUserIdExemptedPackages(val pkg: NamedPackage) : PreferredViewAction()
+    data class RemoveManagedSharedUserIdExemptedPackages(val pkg: NamedPackage) : PreferredViewAction()
 
     data class SetAdbVerifyEnabledState(val enabled: Boolean) : PreferredViewAction()
     data object RequestIgnoreBatteryOptimization : PreferredViewAction()

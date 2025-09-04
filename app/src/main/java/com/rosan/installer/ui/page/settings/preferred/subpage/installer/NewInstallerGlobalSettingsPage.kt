@@ -36,6 +36,7 @@ import com.rosan.installer.ui.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.widget.setting.ManagedPackagesWidget
+import com.rosan.installer.ui.widget.setting.ManagedUidsWidget
 import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.widget.setting.SwitchWidget
 
@@ -256,7 +257,7 @@ fun NewInstallerGlobalSettingsPage(
             }
             item {
                 SplicedColumnGroup(
-                    title = stringResource(id = R.string.config_managed_blacklist_title),
+                    title = stringResource(id = R.string.config_managed_blacklist_by_package_name_title),
                     content = listOf {
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_blacklist),
@@ -268,6 +269,55 @@ fun NewInstallerGlobalSettingsPage(
                                 viewModel.dispatch(PreferredViewAction.RemoveManagedBlacklistPackage(it))
                             }
                         )
+                    }
+                )
+            }
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.config_managed_blacklist_by_shared_user_id_title),
+                    content = buildList {
+                        add {
+                            ManagedUidsWidget(
+                                noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
+                                uids = state.managedSharedUserIdBlacklist,
+                                onAddUid = {
+                                    viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
+                                },
+                                onRemoveUid = {
+                                    viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it))
+                                }
+                            )
+                        }
+                        add {
+                            AnimatedVisibility(
+                                // Only show exempted packages if there are any blacklisted UIDs
+                                visible = state.managedSharedUserIdBlacklist.isNotEmpty(),
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically()
+                            ) {
+                                ManagedPackagesWidget(
+                                    noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                                    noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
+                                    packages = state.managedSharedUserIdExemptedPackages,
+                                    infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                                    isInfoVisible = state.managedSharedUserIdExemptedPackages.isNotEmpty(),
+                                    onAddPackage = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
+                                                it
+                                            )
+                                        )
+                                    },
+                                    onRemovePackage = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
+                                                it
+                                            )
+                                        )
+                                    }
+                                )
+                            }
+                        }
                     }
                 )
             }

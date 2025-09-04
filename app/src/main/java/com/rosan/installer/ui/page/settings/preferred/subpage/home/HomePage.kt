@@ -81,13 +81,13 @@ fun HomePage(
                 .padding(it),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            item {
+            pkg {
                 StatusWidget()
             }
-            *//*            item {
+            *//*            pkg {
                             DonateWidget()
                         }
-                        item {
+                        pkg {
                             DiscussWidget()
                         }*//*
         }*/

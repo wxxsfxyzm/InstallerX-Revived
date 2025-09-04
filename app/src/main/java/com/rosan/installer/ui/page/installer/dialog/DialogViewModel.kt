@@ -604,7 +604,7 @@ class DialogViewModel(
                 }
             }.toMutableList()
 
-            // In multi-select mode (radio buttons), if the user clicks an already selected item,
+            // In multi-select mode (radio buttons), if the user clicks an already selected pkg,
             // we should deselect everything in that group.
             if (!isMultiSelect && entityToToggle.selected) {
                 updatedEntities.replaceAll { it.copy(selected = false) }
@@ -707,7 +707,7 @@ class DialogViewModel(
                 appEntities = listOf(entityToInstall.copy(selected = true))
             )
 
-            // 3. Set the repository's state to this temporary, single-item state.
+            // 3. Set the repository's state to this temporary, single-pkg state.
             //    The 'ActionHandler.install()' method will read this state.
             repo.analysisResults = listOf(tempPackageResult)
 

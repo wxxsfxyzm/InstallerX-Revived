@@ -114,7 +114,7 @@ object AppIcons {
     val ClearAll = Icons.TwoTone.ClearAll
     // --- 设置图标结束 ---
 
-    // --- Profile item 图标集合 ---
+    // --- Profile pkg 图标集合 ---
     val InstallSource = Icons.TwoTone.Face
     val InstallSourceInput = Icons.TwoTone.Badge
     val InstallForAllUsers = Icons.TwoTone.People

@@ -65,7 +65,7 @@ fun SplicedColumnGroup(
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             content.forEachIndexed { index, itemContent ->
-                // Determine the shape based on the item's position.
+                // Determine the shape based on the pkg's position.
                 val shape = when {
                     content.size == 1 -> singleShape
                     index == 0 -> topShape
@@ -73,7 +73,7 @@ fun SplicedColumnGroup(
                     else -> middleShape
                 }
 
-                // Apply background with the correct shape to the item.
+                // Apply background with the correct shape to the pkg.
                 Column(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.surfaceBright, shape)

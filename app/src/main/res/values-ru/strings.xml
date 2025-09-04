@@ -71,7 +71,7 @@
     <string name="config_label_install_options">Параметры установки</string>
     <string name="config_label_installer_settings">Настройки установщика</string>
     <string name="config_label_main_settings">Основные настройки</string>
-    <string name="config_managed_blacklist_title">Приложения, запрещенные к установке</string>
+    <string name="config_managed_blacklist_by_package_name_title">Приложения, запрещенные к установке</string>
     <string name="config_managed_installer_packages_title">Установка исходных предустановок</string>
     <string name="config_managed_packages_desc">Добавление или удаление управляемых пакетов</string>
     <string name="config_name">Имя профиля</string>

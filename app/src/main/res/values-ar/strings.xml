@@ -127,7 +127,7 @@
     <string name="config_dialog_message_unsaved_changes">هل تريد الخروج دون حفظ؟</string>
     <string name="config_follow_settings">اتباع الملف الشخصي</string>
     <string name="config_managed_installer_packages_title">مصادر التثبيت المعينة مسبقًا</string>
-    <string name="config_managed_blacklist_title">التطبيقات المحظور تثبيتها</string>
+    <string name="config_managed_blacklist_by_package_name_title">التطبيقات المحظور تثبيتها</string>
     <string name="config_no_managed_installer_packages">لا توجد حزم تثبيت مُدارة</string>
     <string name="config_no_managed_blacklist">أدخل أسماء حزم التطبيقات المحظورة هنا</string>
     <string name="config_managed_packages_desc">إضافة أو إزالة الحزم المُدارة</string>

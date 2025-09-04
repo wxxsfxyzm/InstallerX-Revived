@@ -44,7 +44,7 @@ fun AppBackButton(
         // Consistent colors for the button.
         colors = IconButtonDefaults.iconButtonColors(
             // The color of the icon inside the button.
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface,
             // The background color of the button.
             // Using a more standard color for a filled icon button variant.
             containerColor = containerColor,

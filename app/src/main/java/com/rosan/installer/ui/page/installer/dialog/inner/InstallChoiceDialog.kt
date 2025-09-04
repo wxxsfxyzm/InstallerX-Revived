@@ -241,7 +241,7 @@ private fun SingleItemCard(item: SelectInstallEntity, onClick: () -> Unit) {
             onClick()
         },
         colors = CardDefaults.cardColors(containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp/*defaultElevation = if (item.selected) 2.dp else 1.dp*/)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp/*defaultElevation = if (pkg.selected) 2.dp else 1.dp*/)
     ) {
         Row(
             modifier = Modifier
@@ -270,7 +270,7 @@ private fun SelectableSubCard(item: SelectInstallEntity, isRadio: Boolean, onCli
             haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
             onClick()
         },
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp/*defaultElevation = if (item.selected) 1.dp else 2.dp*/),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp/*defaultElevation = if (pkg.selected) 1.dp else 2.dp*/),
         colors = CardDefaults.cardColors(containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Row(

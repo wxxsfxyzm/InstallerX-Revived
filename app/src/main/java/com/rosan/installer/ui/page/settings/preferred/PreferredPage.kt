@@ -157,7 +157,7 @@ fun PreferredPage(
                         .padding(paddingValues)
                 ) {
                     item { LabelWidget(stringResource(R.string.global)) }
-                    // item { DataAuthorizerWidget(viewModel) }
+                    // pkg { DataAuthorizerWidget(viewModel) }
                     item {
                         SettingsNavigationItemWidget(
                             icon = AppIcons.Theme,
@@ -202,9 +202,9 @@ fun PreferredPage(
                     item { DefaultInstaller(true) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) } }
                     item { DefaultInstaller(false) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) } }
                     item { ClearCache() }
-                    // item { LabelWidget(label = stringResource(id = R.string.more)) }
-                    // item { UserTerms() }
-                    // item { PrivacyPolicy() }
+                    // pkg { LabelWidget(label = stringResource(id = R.string.more)) }
+                    // pkg { UserTerms() }
+                    // pkg { PrivacyPolicy() }
                     item { LabelWidget(stringResource(R.string.other)) }
                     item {
                         SettingsAboutItemWidget(
@@ -223,7 +223,7 @@ fun PreferredPage(
                         )
                     }
                     // Temporarily Disable This
-                    /*                    item {
+                    /*                    pkg {
                                             SettingsAboutItemWidget(
                                                 imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
                                                 headlineContentText = stringResource(R.string.telegram_group),
