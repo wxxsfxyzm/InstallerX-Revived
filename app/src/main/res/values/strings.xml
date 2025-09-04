@@ -137,7 +137,8 @@
     <string name="config_add_new_shared_uid">Add New Shared User ID</string>
     <string name="config_shared_uid_name">Shared User ID name</string>
     <string name="config_shared_uid_value">Shared User ID value</string>
-    <string name="config_no_managed_shared_user_id_exempted_packages">No exempted apps</string>
+    <string name="config_no_managed_shared_user_id_exempted_packages">Exempted Apps List</string>
+    <string name="config_no_managed_shared_user_id_no_exempted_packages">No Exempted Apps</string>
     <string name="config_managed_packages_desc">Add or remove managed packages</string>
     <string name="config_add_one_to_get_started">Click \'Add\' below to start</string>
     <string name="config_add_new_package">Add new package</string>

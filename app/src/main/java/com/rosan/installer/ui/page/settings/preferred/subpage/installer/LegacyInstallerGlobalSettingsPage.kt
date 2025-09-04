@@ -243,6 +243,8 @@ fun LegacyInstallerGlobalSettingsPage(
                         noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
                         noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
                         packages = state.managedSharedUserIdExemptedPackages,
+                        infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                        isInfoVisible = state.managedSharedUserIdExemptedPackages.isNotEmpty(),
                         onAddPackage = {
                             viewModel.dispatch(
                                 PreferredViewAction.AddManagedSharedUserIdExemptedPackages(

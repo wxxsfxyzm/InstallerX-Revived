@@ -1,8 +1,13 @@
 package com.rosan.installer.ui.widget.setting
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -12,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -39,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -520,6 +527,9 @@ fun ManagedPackagesWidget(
     noContentTitle: String,
     noContentDescription: String = stringResource(R.string.config_add_one_to_get_started),
     packages: List<NamedPackage>,
+    infoText: String? = null,
+    isInfoVisible: Boolean = false,
+    infoColor: Color = MaterialTheme.colorScheme.primary,
     onAddPackage: (NamedPackage) -> Unit,
     onRemovePackage: (NamedPackage) -> Unit,
 ) {
@@ -574,15 +584,40 @@ fun ManagedPackagesWidget(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.End
+            verticalAlignment = Alignment.CenterVertically // 垂直居中对齐
         ) {
+            // 1. 左侧新增的 AnimatedVisibility 文本区域
+            AnimatedVisibility(
+                visible = isInfoVisible && !infoText.isNullOrBlank(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                // 使用一个 Box 来应用背景和圆角
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50)) // 50%的圆角使其成为胶囊形状
+                        .background(infoColor.copy(alpha = 0.1f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = infoText!!, // 确定不为空时才显示
+                        color = infoColor,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+
+            // 2. 一个带权重的 Spacer，它会“推开”两边的元素，占据所有可用空间
+            Spacer(modifier = Modifier.weight(1f))
+
+            // 3. 右侧原有的 "添加" 按钮
             TextButton(onClick = { showAddDialog = true }) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
-                Spacer(modifier = Modifier.size(8.dp))
+                Spacer(modifier = Modifier.width(8.dp)) // 使用 width 比 size 更精确
                 Text(stringResource(R.string.add))
             }
         }
