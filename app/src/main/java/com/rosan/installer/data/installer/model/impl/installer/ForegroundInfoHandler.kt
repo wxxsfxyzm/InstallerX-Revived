@@ -5,13 +5,16 @@ import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Build
 import android.widget.Toast
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
@@ -73,8 +76,13 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 if (background) {
                     val startTime = System.currentTimeMillis()
 
-                    // [FIXED] Call the new suspend function to build the notification
-                    val notification = newNotification(progress, true, showDialog)
+                    // --- VERSION CHECK & DISPATCH ---
+                    // This is the main branching point. It decides which notification style to use.
+                    val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                        buildModernNotification(progress, showDialog)
+                    } else {
+                        buildLegacyNotification(progress, true, showDialog)
+                    }
                     setNotification(notification)
 
                     val elapsedTime = System.currentTimeMillis() - startTime
@@ -108,6 +116,137 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         job?.cancel()
     }
 
+    /**
+     * Builds and returns a Notification for Android 15+ devices.
+     * This is the entry point for the modern notification logic.
+     */
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    private suspend fun buildModernNotification(
+        progress: ProgressEntity,
+        showDialog: Boolean
+    ): Notification? {
+        if (progress is ProgressEntity.Finish || progress is ProgressEntity.Error || progress is ProgressEntity.InstallAnalysedUnsupported) {
+            return null
+        }
+        val builder = newModernNotificationBuilder(progress, showDialog)
+
+        // Finalize notification content for terminal states, which might require async operations.
+        return when (progress) {
+            is ProgressEntity.InstallFailed -> onInstallFailed(builder).build()
+            is ProgressEntity.InstallSuccess -> onInstallSuccess(builder).build()
+            else -> builder.build()
+        }
+    }
+
+    /**
+     * Creates and configures a NotificationCompat.Builder using Android 15's rich ProgressStyle.
+     */
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    private suspend fun newModernNotificationBuilder(
+        progress: ProgressEntity,
+        showDialog: Boolean
+    ): NotificationCompat.Builder {
+        val channel = NotificationChannelCompat.Builder(
+            Channel.InstallerLiveChannel.value,
+            NotificationManagerCompat.IMPORTANCE_MAX
+        )
+            .setName(getString(R.string.installer_live_channel_name))
+            .build()
+        notificationManager.createNotificationChannel(channel)
+
+        val contentIntent = when (installer.config.installMode) {
+            ConfigEntity.InstallMode.Notification,
+            ConfigEntity.InstallMode.AutoNotification -> if (showDialog) openIntent else null
+
+            else -> openIntent
+        }
+
+        val baseBuilder = NotificationCompat.Builder(context, channel.id)
+            .setSmallIcon(Icon.Working.resId)
+            .setContentIntent(contentIntent)
+            .setDeleteIntent(finishIntent)
+            .setOnlyAlertOnce(true)
+            .setOngoing(true)
+            .setRequestPromotedOngoing(true)
+
+        // === 定义进度点 ===
+        val progressStyle = NotificationCompat.ProgressStyle()
+            .setProgressPoints(
+                listOf(
+                    NotificationCompat.ProgressStyle.Point(20),
+                    NotificationCompat.ProgressStyle.Point(40),
+                    NotificationCompat.ProgressStyle.Point(100)
+                )
+            )
+
+        var progressValue = 0
+        var contentTitle = getString(R.string.installer_ready)
+
+        when (progress) {
+            ProgressEntity.InstallResolving,
+            ProgressEntity.InstallResolveSuccess -> {
+                progressValue = 20
+                contentTitle = getString(R.string.installer_resolving)
+                progressStyle.setProgressTrackerIcon(
+                    IconCompat.createWithResource(context, R.drawable.round_hourglass_empty_black_24)
+                )
+                baseBuilder.addAction(0, getString(R.string.cancel), finishIntent)
+            }
+
+            ProgressEntity.InstallAnalysing -> {
+                progressValue = 40
+                contentTitle = getString(R.string.installer_analysing)
+                baseBuilder.addAction(0, getString(R.string.cancel), finishIntent)
+            }
+
+            ProgressEntity.InstallAnalysedSuccess -> {
+                val selectedEntities = installer.analysisResults
+                    .flatMap { it.appEntities }
+                    .filter { it.selected }
+                val selectedApps = selectedEntities.map { it.app }
+                progressValue = 40
+                contentTitle = selectedApps.getInfo(context).title
+                baseBuilder.setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
+                baseBuilder.setShortCriticalText("Pending Install")
+                baseBuilder.addAction(0, getString(R.string.install), installIntent)
+                baseBuilder.addAction(0, getString(R.string.cancel), finishIntent)
+                baseBuilder.setLargeIcon(getLargeIconBitmap())
+            }
+
+            ProgressEntity.Installing -> {
+                progressValue = 80
+                contentTitle = getString(R.string.installer_installing)
+                baseBuilder.addAction(0, getString(R.string.cancel), finishIntent)
+            }
+
+            is ProgressEntity.InstallSuccess -> {
+                progressValue = 100
+                contentTitle = getString(R.string.installer_install_success)
+                baseBuilder
+                    .setOnlyAlertOnce(false)
+                    .setLargeIcon(getLargeIconBitmap())
+            }
+
+            is ProgressEntity.InstallFailed -> {
+                contentTitle = getString(R.string.installer_install_failed)
+                baseBuilder
+                    .setOnlyAlertOnce(false)
+            }
+
+            else -> { /* ignore */
+            }
+        }
+
+        baseBuilder.setContentTitle(contentTitle)
+
+        // 应用进度样式
+        progressStyle.setProgress(progressValue)
+        baseBuilder.setStyle(progressStyle)
+
+        return baseBuilder
+    }
+
+
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun setNotification(notification: Notification? = null) {
         if (notification == null) {
@@ -122,7 +261,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     enum class Channel(val value: String) {
         InstallerChannel("installer_channel"),
-        InstallerProgressChannel("installer_progress_channel")
+        InstallerProgressChannel("installer_progress_channel"),
+        InstallerLiveChannel("installer_live_channel")
     }
 
     enum class Icon(@param:DrawableRes val resId: Int) {
@@ -132,12 +272,17 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private val notificationChannels = mapOf(
         Channel.InstallerChannel to NotificationChannelCompat.Builder(
-            Channel.InstallerChannel.value, NotificationManagerCompat.IMPORTANCE_MAX
+            Channel.InstallerChannel.value, NotificationManagerCompat.IMPORTANCE_HIGH // Use HIGH for final pop-up
         ).setName(getString(R.string.installer_channel_name)).build(),
 
         Channel.InstallerProgressChannel to NotificationChannelCompat.Builder(
-            Channel.InstallerProgressChannel.value, NotificationManagerCompat.IMPORTANCE_MIN
-        ).setName(getString(R.string.installer_progress_channel_name)).build()
+            Channel.InstallerProgressChannel.value,
+            NotificationManagerCompat.IMPORTANCE_LOW // Use LOW to be less intrusive
+        ).setName(getString(R.string.installer_progress_channel_name)).build(),
+
+        Channel.InstallerLiveChannel to NotificationChannelCompat.Builder(
+            Channel.InstallerLiveChannel.value, NotificationManagerCompat.IMPORTANCE_HIGH
+        ).setName(getString(R.string.installer_live_channel_name)).build()
     )
 
     private val workingProgresses = listOf(
@@ -190,49 +335,16 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return drawable?.toBitmapOrNull(width = iconSizePx, height = iconSizePx)
     }
 
-    private fun newNotificationBuilder(
-        progress: ProgressEntity,
-        background: Boolean,
-        showDialog: Boolean
-    ): NotificationCompat.Builder {
-        val isWorking = workingProgresses.contains(progress)
-        val isImportance = importanceProgresses.contains(progress)
-
-        val channel =
-            notificationChannels[if (isImportance && background) Channel.InstallerChannel else Channel.InstallerProgressChannel]!!
-
-        notificationManager.createNotificationChannel(channel)
-
-        val icon = (if (isWorking) Icon.Working else Icon.Pausing).resId
-
-        // Set content intent based on user setting
-        val contentIntent = when (installer.config.installMode) {
-            ConfigEntity.InstallMode.Notification, ConfigEntity.InstallMode.AutoNotification -> {
-                if (showDialog) openIntent else null
-            }
-
-            else -> openIntent
-        }
-
-        var builder = NotificationCompat.Builder(context, channel.id).setSmallIcon(icon)
-            .setContentIntent(contentIntent)
-            .setDeleteIntent(finishIntent)
-
-        installProgresses[progress]?.let {
-            builder = builder.setProgress(100, it, false)
-        }
-
-        return builder
-    }
-
-    private suspend fun newNotification(
+    /**
+     * (Renamed from newNotification)
+     * Builds and returns a Notification for legacy Android versions.
+     */
+    private suspend fun buildLegacyNotification(
         progress: ProgressEntity,
         background: Boolean,
         showDialog: Boolean
     ): Notification? {
-        // No need to show notification for unsupported analysis since handled in collector
-        // if (progress is ProgressEntity.AnalysedUnsupported) return null
-        val builder = newNotificationBuilder(progress, background, showDialog)
+        val builder = newLegacyNotificationBuilder(progress, background, showDialog)
         return when (progress) {
             is ProgressEntity.Ready -> onReady(builder)
             is ProgressEntity.InstallResolving -> onResolving(builder)
@@ -243,15 +355,65 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallAnalysedFailed -> onAnalysedFailed(builder)
             is ProgressEntity.InstallAnalysedSuccess -> onAnalysedSuccess(builder)
             is ProgressEntity.Installing -> onInstalling(builder)
-            is ProgressEntity.InstallFailed -> onInstallFailed(builder)
-            is ProgressEntity.InstallSuccess -> onInstallSuccess(builder)
-            is ProgressEntity.Finish -> null
-            is ProgressEntity.Error -> null
-            is ProgressEntity.InstallAnalysedUnsupported -> null
-            // TODO temporarily disable uninstall notification
-            else -> null
+            is ProgressEntity.InstallFailed -> onInstallFailed(builder).build()
+            is ProgressEntity.InstallSuccess -> onInstallSuccess(builder).build()
+            is ProgressEntity.Finish, is ProgressEntity.Error, is ProgressEntity.InstallAnalysedUnsupported -> null
+            else -> null // TODO temporarily disable uninstall notification
         }
     }
+
+    /**
+     * (Renamed from newNotificationBuilder)
+     * Creates and configures a standard NotificationCompat.Builder for legacy Android versions.
+     */
+    private fun newLegacyNotificationBuilder(
+        progress: ProgressEntity,
+        background: Boolean,
+        showDialog: Boolean
+    ): NotificationCompat.Builder {
+        val isWorking = workingProgresses.contains(progress)
+        val isImportance = importanceProgresses.contains(progress)
+
+        // 1. Determine the correct enum constant directly. This is safe and reliable.
+        val channelEnum = if (isImportance && background) {
+            Channel.InstallerChannel
+        } else {
+            Channel.InstallerProgressChannel
+        }
+
+        // 2. Get the actual NotificationChannelCompat object from the map using the enum as the key.
+        val channel = notificationChannels[channelEnum]!!
+        notificationManager.createNotificationChannel(channel)
+
+        val icon = (if (isWorking) Icon.Working else Icon.Pausing).resId
+
+        val contentIntent = when (installer.config.installMode) {
+            ConfigEntity.InstallMode.Notification, ConfigEntity.InstallMode.AutoNotification -> {
+                if (showDialog) openIntent else null
+            }
+
+            else -> openIntent
+        }
+
+        val builder = NotificationCompat.Builder(context, channel.id)
+            .setSmallIcon(icon)
+            .setContentIntent(contentIntent)
+            .setDeleteIntent(finishIntent)
+            .setOnlyAlertOnce(true)
+            .setOngoing(true)
+
+        if (progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallFailed) {
+            builder.setOngoing(false)
+                .setOnlyAlertOnce(false)
+        }
+
+        installProgresses[progress]?.let {
+            builder.setProgress(100, it, false)
+        }
+
+        return builder
+    }
+
 
     private fun getString(@StringRes resId: Int): String = context.getString(resId)
     private val openIntent = BroadcastHandler.openIntent(context, installer)
@@ -328,7 +490,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun onInstallFailed(
         builder: NotificationCompat.Builder
-    ): Notification {
+    ): NotificationCompat.Builder { // Changed return type
         val info = installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }
@@ -343,15 +505,14 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                         getString(R.string.installer_error_reason) +
                         ": $reason"
             )
-        return builder.setContentTitle(info.title)
+        return builder.setContentTitle(info.title) // Return builder directly
             .setContentText(contentText)
             .setStyle(bigTextStyle)
-            .setLargeIcon(getLargeIconBitmap())
             .addAction(0, getString(R.string.retry), installIntent)
-            .addAction(0, getString(R.string.cancel), finishIntent).build()
+            .addAction(0, getString(R.string.cancel), finishIntent)
     }
 
-    private suspend fun onInstallSuccess(builder: NotificationCompat.Builder): Notification {
+    private fun onInstallSuccess(builder: NotificationCompat.Builder): NotificationCompat.Builder { // Changed return type
         val entities = installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }
@@ -365,11 +526,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         var newBuilder = builder.setContentTitle(info.title)
             .setContentText(getString(R.string.installer_install_success))
-            .setLargeIcon(getLargeIconBitmap())
         if (launchIntent != null) newBuilder =
             newBuilder.addAction(0, getString(R.string.open), launchPendingIntent)
-        return newBuilder
+        return newBuilder // Return builder directly
             .addAction(0, getString(R.string.finish), finishIntent)
-            .build()
     }
+
 }

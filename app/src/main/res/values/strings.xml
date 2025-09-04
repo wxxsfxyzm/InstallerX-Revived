@@ -19,7 +19,7 @@
     <string name="menu">Menu</string>
     <string name="about">About</string>
     <string name="other">Other</string>
-    <string name="about_detail">About InstallerX</string>
+    <string name="about_detail">About InstallerX Revived</string>
     <string name="get_update">Get update</string>
     <string name="get_update_detail">Check for software updates and new features.</string>
 
@@ -172,6 +172,7 @@
     <string name="sort_by_show_system_app">Display system app</string>
     <string name="sort_by_show_package_name">Display package name</string>
 
+    <string name="installer_live_channel_name">Install Progress</string>
     <string name="installer_ready">Ready</string>
     <string name="installer_resolving">Checking…</string>
     <string name="installer_resolve_failed">Resolve failed</string>
