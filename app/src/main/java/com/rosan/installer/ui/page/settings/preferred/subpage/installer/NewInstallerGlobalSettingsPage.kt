@@ -290,21 +290,21 @@ fun NewInstallerGlobalSettingsPage(
                         }
                         add {
                             AnimatedVisibility(
-                                // 条件：仅当黑名单列表不为空时，才显示白名单设置
+                                // Only show exempted packages if there are any blacklisted UIDs
                                 visible = state.managedSharedUserIdBlacklist.isNotEmpty(),
                                 enter = fadeIn() + expandVertically(),
                                 exit = fadeOut() + shrinkVertically()
                             ) {
                                 ManagedPackagesWidget(
-                                    noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist_whitelist), // New: Add this string resource
-                                    noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc), // New: Add this string resource
-                                    packages = state.managedSharedUserIdExemptedPackages, // New: Add this to state
+                                    noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                                    noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
+                                    packages = state.managedSharedUserIdExemptedPackages,
                                     onAddPackage = {
                                         viewModel.dispatch(
                                             PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
                                                 it
                                             )
-                                        ) // New: Add this action
+                                        )
                                     },
                                     onRemovePackage = {
                                         viewModel.dispatch(

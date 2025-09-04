@@ -130,7 +130,7 @@
     <string name="config_add_new_shared_uid">添加新的共享用户 ID</string>
     <string name="config_shared_uid_name">SharedUID 名称</string>
     <string name="config_shared_uid_value">SharedUID 值</string>
-    <string name="config_no_managed_shared_user_id_blacklist_whitelist">没有豁免的应用</string>
+    <string name="config_no_managed_shared_user_id_exempted_packages">没有豁免的应用</string>
     <string name="config_managed_packages_desc">添加或移除需要特殊处理的应用</string>
     <string name="config_add_one_to_get_started">点击下方的“添加”按钮开始</string>
     <string name="config_add_new_package">添加新应用</string>

@@ -31,6 +31,7 @@ import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.widget.setting.LabelWidget
 import com.rosan.installer.ui.widget.setting.ManagedPackagesWidget
+import com.rosan.installer.ui.widget.setting.ManagedUidsWidget
 import com.rosan.installer.ui.widget.setting.SwitchWidget
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -220,7 +221,45 @@ fun LegacyInstallerGlobalSettingsPage(
                         )
                     })
             }
-
+            item { LabelWidget(label = stringResource(id = R.string.config_managed_blacklist_by_shared_user_id_title)) }
+            item {
+                ManagedUidsWidget(
+                    noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
+                    uids = state.managedSharedUserIdBlacklist,
+                    onAddUid = {
+                        viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
+                    },
+                    onRemoveUid = {
+                        viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it))
+                    }
+                )
+                AnimatedVisibility(
+                    // Only show exempted packages if there are any blacklisted UIDs
+                    visible = state.managedSharedUserIdBlacklist.isNotEmpty(),
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    ManagedPackagesWidget(
+                        noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                        noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
+                        packages = state.managedSharedUserIdExemptedPackages,
+                        onAddPackage = {
+                            viewModel.dispatch(
+                                PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
+                                    it
+                                )
+                            )
+                        },
+                        onRemovePackage = {
+                            viewModel.dispatch(
+                                PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
+                                    it
+                                )
+                            )
+                        }
+                    )
+                }
+            }
         }
     }
 }
