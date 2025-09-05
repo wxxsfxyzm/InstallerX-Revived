@@ -142,14 +142,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             return
         }
 
-        /*        installer.data = try {
-                    resolveData(activity)
-                } catch (e: Exception) {
-                    Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve data.")
-                    installer.error = e
-                    installer.progress.emit(ProgressEntity.ResolvedFailed)
-                    return
-                }*/
         // OPTIMIZATION: The caching logic is now integrated directly into the data resolution step.
         installer.data = try {
             resolveAndStabilizeData(activity)
@@ -178,6 +170,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             installer.progress.emit(ProgressEntity.InstallAnalysedFailed)
             return
         }
+
         // --- Add a check here for empty results. ---
         if (analysisResults.isEmpty()) {
             Timber.w("[id=${installer.id}] analyse: Analysis resulted in an empty list. No valid apps found.")
@@ -201,8 +194,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         // 1. Store the final, complete result in the repository. This is now the single source of truth.
         installer.analysisResults = analysisResults
-
-        // 2. Perform final checks based on the result.
+        // 2. Close any open file descriptors.
+        if (cacheParcelFileDescriptors.isNotEmpty()) {
+            Timber.d("[id=${installer.id}] Analysis complete. Closing ${cacheParcelFileDescriptors.size} held file descriptor(s).")
+            cacheParcelFileDescriptors.forEach { it.runCatching { close() } }
+            cacheParcelFileDescriptors.clear()
+        }
+        // 3. Perform final checks based on the result.
         // Get the containerType from the first entity in the result to check the session type.
         val containerType = analysisResults.firstOrNull()
             ?.appEntities?.firstOrNull()
@@ -531,7 +529,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 if (sourcePath.startsWith('/')) {
                     Timber.d("Success! Got direct, usable file access through procfs: $sourcePath")
                     cacheParcelFileDescriptors.add(assetFileDescriptor.parcelFileDescriptor)
-                    return listOf(DataEntity.FileEntity(procPath).apply {
+                    return listOf(DataEntity.FileEntity(procPath, originalUri = uri).apply {
                         source = DataEntity.FileEntity(sourcePath)
                     })
                 }
