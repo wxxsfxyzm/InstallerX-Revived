@@ -21,6 +21,7 @@ import android.os.ServiceManager
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.build.Architecture
+import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
@@ -39,11 +40,13 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
 import timber.log.Timber
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.lang.reflect.Field
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
@@ -290,19 +293,52 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     private suspend fun installIt(
         config: ConfigEntity, entity: InstallEntity, extra: InstallExtraInfoEntity, session: Session
     ) {
-        val inputStream = entity.data.getInputStreamWhileNotEmpty()
-            ?: throw Exception("can't open input stream for this data: '${entity.data}'")
-        session.openWrite(
-            entity.name, 0,
-            withContext(Dispatchers.IO) {
-                inputStream.available()
-            }.toUInt().toLong()
-        ).use {
-            inputStream.copyTo(it)
-            session.fsync(it)
+        // Get DataEntity from InstallEntity
+        val dataEntity = entity.data.getSourceTop() as? DataEntity.FileEntity
+            ?: throw IOException("DataEntity is not a valid FileEntity for installation.")
+
+        // Get originalUri from DataEntity
+        val originalUri = dataEntity.originalUri
+
+        val inputStream: InputStream
+        val totalSize: Long
+
+        // Smart check: Does the dataEntity have an originalUri?
+        // only zero-copy method has originalUri, cache method will keep it null
+        // we also check if it starts with /proc
+        if (dataEntity.path.startsWith("/proc/") && originalUri != null) {
+            // --- Condition 1: Original File ---
+            // Reopen a new fd from the original URI
+            Timber.d("Streaming from original URI (was zero-copy path): $originalUri")
+            val afd = context.contentResolver.openAssetFileDescriptor(originalUri, "r")
+                ?: throw IOException("Failed to re-open URI: $originalUri")
+
+            try {
+                totalSize = afd.length
+                inputStream = afd.createInputStream()
+            } catch (e: Exception) {
+                afd.close()
+                throw e
+            }
+        } else {
+            // --- Condition B: Cache File ---
+            // Use path directly from DataEntity
+            Timber.d("Streaming from cache file path: ${dataEntity.path}")
+            val file = File(dataEntity.path)
+            totalSize = file.length()
+            inputStream = file.inputStream()
+        }
+
+        // Stream the data to the session
+        inputStream.use { input ->
+            session.openWrite(entity.name, 0, totalSize).use { output ->
+                input.copyTo(output)
+                session.fsync(output)
+            }
         }
     }
 
+    @SuppressLint("RequestInstallPackagesPolicy")
     private fun commit(
         config: ConfigEntity,
         entities: List<InstallEntity>,
