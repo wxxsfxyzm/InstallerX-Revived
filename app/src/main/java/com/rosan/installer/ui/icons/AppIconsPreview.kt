@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rosan.installer.ui.theme.InstallerTheme
+import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 
 @Composable
 fun IconPreview(icon: ImageVector, name: String) {
@@ -24,7 +24,7 @@ fun IconPreview(icon: ImageVector, name: String) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewAllIcons() {
-    InstallerTheme {
+    InstallerMaterialExpressiveTheme {
         Column {
             IconPreview(AppIcons.Android, "Android")
             IconPreview(AppIcons.None, "None")

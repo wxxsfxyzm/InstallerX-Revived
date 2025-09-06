@@ -2,11 +2,11 @@ package com.rosan.installer.di
 
 import androidx.navigation.NavController
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.page.settings.config.all.AllViewModel
-import com.rosan.installer.ui.page.settings.config.apply.ApplyViewModel
-import com.rosan.installer.ui.page.settings.config.edit.EditViewModel
-import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
+import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
+import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 

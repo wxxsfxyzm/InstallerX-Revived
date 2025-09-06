@@ -20,6 +20,7 @@ class AppDataStore(
     companion object {
         // UI Fresh Switch
         val UI_FRESH_SWITCH = booleanPreferencesKey("ui_fresh_switch")
+        val UI_USE_MIUIX = booleanPreferencesKey("ui_use_miuix")
 
         // ForegroundInfoHandler
         val SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION = booleanPreferencesKey("show_dialog_when_pressing_notification")

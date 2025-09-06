@@ -60,8 +60,8 @@ import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
+import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.util.openUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

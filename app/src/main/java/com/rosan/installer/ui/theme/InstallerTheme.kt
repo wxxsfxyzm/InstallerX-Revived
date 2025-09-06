@@ -11,6 +11,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private val LightColorScheme = lightColorScheme(
     primary = primaryLight,
@@ -78,7 +79,7 @@ private val DarkColorScheme = darkColorScheme(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun InstallerTheme(
+fun InstallerMaterialExpressiveTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
     content: @Composable () -> Unit
@@ -105,6 +106,22 @@ fun InstallerTheme(
         colorScheme = colorScheme,
         motionScheme = MotionScheme.expressive(),
         typography = Typography,
+        content = content
+    )
+}
+
+@Composable
+fun InstallerMiuixTheme(
+    colorMode: Int = 0,
+    content: @Composable () -> Unit
+) {
+    val darkTheme = isSystemInDarkTheme()
+    return MiuixTheme(
+        colors = when (colorMode) {
+            1 -> top.yukonga.miuix.kmp.theme.lightColorScheme()
+            2 -> top.yukonga.miuix.kmp.theme.darkColorScheme()
+            else -> if (darkTheme) top.yukonga.miuix.kmp.theme.darkColorScheme() else top.yukonga.miuix.kmp.theme.lightColorScheme()
+        },
         content = content
     )
 }

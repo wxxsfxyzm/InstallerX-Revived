@@ -38,8 +38,8 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.settings.config.edit.EditViewAction
-import com.rosan.installer.ui.page.settings.config.edit.EditViewModel
+import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
+import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
 
 @Composable
 fun DataNameWidget(

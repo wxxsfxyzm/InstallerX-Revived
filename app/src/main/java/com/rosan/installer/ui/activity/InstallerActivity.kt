@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.InstallerPage
-import com.rosan.installer.ui.theme.InstallerTheme
+import com.rosan.installer.ui.page.main.installer.InstallerPage
+import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import com.rosan.installer.ui.util.PermissionDenialReason
 import com.rosan.installer.ui.util.PermissionManager
 import com.rosan.installer.util.toast
@@ -169,7 +169,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             // Return@setContent to show nothing, logs will explain why.
                 return@setContent
 
-            InstallerTheme {
+            InstallerMaterialExpressiveTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
                     InstallerPage(installer)
                 }
