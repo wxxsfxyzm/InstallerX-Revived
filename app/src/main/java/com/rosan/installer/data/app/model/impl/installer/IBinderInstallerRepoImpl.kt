@@ -294,7 +294,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         config: ConfigEntity, entity: InstallEntity, extra: InstallExtraInfoEntity, session: Session
     ) {
         // Get DataEntity from InstallEntity
-        val dataEntity = entity.data.getSourceTop() as? DataEntity.FileEntity
+        val dataEntity = entity.data as? DataEntity.FileEntity
             ?: throw IOException("DataEntity is not a valid FileEntity for installation.")
 
         // Get originalUri from DataEntity
@@ -321,7 +321,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                 throw e
             }
         } else {
-            // --- Condition B: Cache File ---
+            // --- Condition 2: Cache File ---
             // Use path directly from DataEntity
             Timber.d("Streaming from cache file path: ${dataEntity.path}")
             val file = File(dataEntity.path)
