@@ -109,7 +109,9 @@ iamr0s-androidAppProcess = { group = "io.github.iamr0s", name = "AndroidAppProce
 # Core module (required for accessing library data)
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
 # Compose UI modules (choose one or both)
-aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }      # Material 3 UI
+aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" } # Material 3 UI
 
 # log
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+
+apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.28.0" }
