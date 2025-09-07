@@ -81,7 +81,7 @@ fun SettingsPage() {
             }
         ) {
             val id = it.arguments?.getLong("id")
-            if (preferredViewModel.state.showRefreshedUI)
+            if (preferredViewModel.state.showExpressiveUI)
                 NewEditPage(
                     navController = navController,
                     id = if (id != -1L) id
@@ -143,7 +143,7 @@ fun SettingsPage() {
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
             popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() } // Your predictive back animation
         ) {
-            if (preferredViewModel.state.showRefreshedUI) {
+            if (preferredViewModel.state.showExpressiveUI) {
                 NewThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
             } else {
                 LegacyThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
@@ -154,7 +154,7 @@ fun SettingsPage() {
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
             popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() } // Your predictive back animation
         ) {
-            if (preferredViewModel.state.showRefreshedUI) {
+            if (preferredViewModel.state.showExpressiveUI) {
                 NewInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
             } else {
                 LegacyInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)

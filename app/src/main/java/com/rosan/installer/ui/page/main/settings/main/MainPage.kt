@@ -71,7 +71,7 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
             icon = AppIcons.RoomPreferences,
             label = stringResource(R.string.config)
         ) { insets ->
-            if (preferredViewModel.state.showRefreshedUI)
+            if (preferredViewModel.state.showExpressiveUI)
                 NewAllPage(navController, insets, allViewModel)
             else
                 AllPage(navController, insets, allViewModel)
@@ -80,7 +80,7 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
             icon = AppIcons.SettingsSuggest,
             label = stringResource(R.string.preferred)
         ) { insets ->
-            if (preferredViewModel.state.showRefreshedUI)
+            if (preferredViewModel.state.showExpressiveUI)
                 NewPreferredPage(navController, preferredViewModel)
             else
                 PreferredPage(navController, insets, preferredViewModel)

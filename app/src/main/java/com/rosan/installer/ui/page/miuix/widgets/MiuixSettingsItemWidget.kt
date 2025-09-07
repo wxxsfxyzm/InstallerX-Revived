@@ -823,3 +823,60 @@ private fun MiuixDeleteSharedUidConfirmationDialog(
         }
     )
 }
+
+/**
+ * Theme Engine selection widget using SuperSpinner, following the provided pattern.
+ * Simplified version without data class and icons.
+ *
+ * @param currentThemeIsMiuix True if MIUIX theme is selected, false if Google theme is selected.
+ * @param onThemeChange Callback when the selection changes. Boolean parameter indicates new selection (true = MIUIX).
+ */
+@Composable
+fun MiuixThemeEngineWidget(
+    modifier: Modifier = Modifier,
+    currentThemeIsMiuix: Boolean,
+    onThemeChange: (Boolean) -> Unit,
+) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+
+    val themeOptions = remember {
+        mapOf(
+            true to R.string.theme_settings_miuix_ui, // Key = true -> MIUIX UI string resource
+            false to R.string.theme_settings_google_ui // Key = false -> Google UI string resource
+        )
+    }
+
+    // Convert map entries to List<SpinnerEntry> for SuperSpinner.
+    // Ensure the order matches the keys: index 0 = true, index 1 = false.
+    val spinnerEntries = remember(themeOptions) {
+        themeOptions.entries.sortedByDescending { it.key }.map { entry ->
+            SpinnerEntry(
+                title = context.getString(entry.value) // Get string from resource ID directly
+            )
+        }
+    }
+
+    // Determine selected index based on currentThemeIsMiuix state.
+    // Index 0 corresponds to true (MIUIX), Index 1 corresponds to false (Google).
+    val selectedIndex = remember(currentThemeIsMiuix) {
+        if (currentThemeIsMiuix) 0 else 1
+    }
+
+    // Implement SuperSpinner.
+    SuperSpinner(
+        modifier = modifier,
+        title = stringResource(id = R.string.theme_settings_ui_engine),
+        summary = spinnerEntries[selectedIndex].title,
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+            // Convert index back to boolean key (0 -> true, 1 -> false)
+            val newModeIsMiuix = themeOptions.keys.sortedDescending().elementAt(newIndex)
+            if (currentThemeIsMiuix != newModeIsMiuix) {
+                onThemeChange(newModeIsMiuix)
+            }
+        }
+    )
+}

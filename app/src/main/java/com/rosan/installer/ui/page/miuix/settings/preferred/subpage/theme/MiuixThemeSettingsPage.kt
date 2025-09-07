@@ -10,11 +10,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeEngineWidget
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -44,7 +43,7 @@ fun MiuixThemeSettingsPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
         ) {
             item {
                 SmallTitle(stringResource(R.string.theme_settings_ui_style))
@@ -55,17 +54,41 @@ fun MiuixThemeSettingsPage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 6.dp)
                 ) {
-                    MiuixSwitchWidget(
-                        icon = AppIcons.Theme,
-                        title = stringResource(R.string.theme_settings_use_refreshed_ui),
-                        description = stringResource(R.string.theme_settings_use_refreshed_ui_desc),
-                        checked = state.showRefreshedUI,
-                        onCheckedChange = {
-                            viewModel.dispatch(PreferredViewAction.ChangeShowRefreshedUI(it))
+                    MiuixThemeEngineWidget(
+                        currentThemeIsMiuix = state.showMiuixUI,
+                        onThemeChange = { useMiuix ->
+                            viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(useMiuix))
                         }
                     )
                 }
             }
+
+            /* // --- Conditional Google UI Options ---
+             item {
+                 // Show "Refreshed UI" switch only if Google UI is logically selected
+                 AnimatedVisibility(visible = !state.showMiuixUI) {
+                     Column {
+                         SmallTitle(
+                             text = "Google UI 样式", // TODO: Add string resource
+                             modifier = Modifier.padding(top = 8.dp)
+                         )
+                         Card(
+                             modifier = Modifier
+                                 .padding(horizontal = 12.dp)
+                                 .padding(bottom = 6.dp)
+                         ) {
+                             MiuixSwitchWidget(
+                                 icon = AppIcons.Theme,
+                                 title = stringResource(R.string.theme_settings_use_refreshed_ui),
+                                 description = stringResource(R.string.theme_settings_use_refreshed_ui_desc),
+                                 checked = state.showExpressiveUI,
+                                 onCheckedChange = {
+                                     viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))
+                                 }
+                             )
+                         }
+                     }
+                 }*/
         }
     }
 }

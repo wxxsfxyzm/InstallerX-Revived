@@ -68,7 +68,8 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeShowDisableNotification -> changeDisableNotificationState(action.showDisableNotification)
             is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialog(action.showDialog)
             is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(action.countDown)
-            is PreferredViewAction.ChangeShowRefreshedUI -> changeRefreshedUI(action.showRefreshedUI)
+            is PreferredViewAction.ChangeShowExpressiveUI -> changeUseExpressiveUI(action.showRefreshedUI)
+            is PreferredViewAction.ChangeUseMiuix -> changeUseMiuix(action.useMiuix)
             is PreferredViewAction.ChangeVersionCompareInSingleLine -> changeVersionCompareInSingleLine(action.versionCompareInSingleLine)
             is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
                 state.managedInstallerPackages,
@@ -147,7 +148,8 @@ class PreferredViewModel(
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
             val versionCompareInSingleLineFlow =
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
-            val showRefreshedUIFlow = appDataStore.getBoolean(AppDataStore.UI_FRESH_SWITCH, true)
+            val showExpressiveUIFlow = appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
+            val showMiuixUIFlow = appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
             val managedInstallerPackagesFlow =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST)
             val managedBlacklistPackagesFlow =
@@ -177,7 +179,8 @@ class PreferredViewModel(
                 showDialogWhenPressingNotificationFlow,
                 dhizukuAutoCloseCountDownFlow,
                 versionCompareInSingleLineFlow,
-                showRefreshedUIFlow,
+                showExpressiveUIFlow,
+                showMiuixUIFlow,
                 managedInstallerPackagesFlow,
                 managedBlacklistPackagesFlow,
                 managedSharedUserIdBlacklistFlow,
@@ -194,13 +197,14 @@ class PreferredViewModel(
                 val showDialog = values[6] as Boolean
                 val countDown = values[7] as Int
                 val versionCompareInSingleLine = values[8] as Boolean
-                val showRefreshedUI = values[9] as Boolean
-                val managedInstallerPackages = (values[10] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedBlacklistPackages = (values[11] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedSharedUserIdBlacklist = (values[12] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
-                val managedSharedUserIdExemptPkg = (values[13] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[14] as Boolean
-                val isIgnoringBatteryOptimizations = values[15] as Boolean
+                val showExpressiveUI = values[9] as Boolean
+                val showMiuixUI = values[10] as Boolean
+                val managedInstallerPackages = (values[11] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedBlacklistPackages = (values[12] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedSharedUserIdBlacklist = (values[13] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
+                val managedSharedUserIdExemptPkg = (values[14] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[15] as Boolean
+                val isIgnoringBatteryOptimizations = values[16] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -214,7 +218,8 @@ class PreferredViewModel(
                     showDialogWhenPressingNotification = showDialog,
                     dhizukuAutoCloseCountDown = countDown,
                     versionCompareInSingleLine = versionCompareInSingleLine,
-                    showRefreshedUI = showRefreshedUI,
+                    showExpressiveUI = showExpressiveUI,
+                    showMiuixUI = showMiuixUI,
                     managedInstallerPackages = managedInstallerPackages,
                     managedBlacklistPackages = managedBlacklistPackages,
                     managedSharedUserIdBlacklist = managedSharedUserIdBlacklist,
@@ -273,10 +278,16 @@ class PreferredViewModel(
             }
         }
 
-    private fun changeRefreshedUI(showRefreshedUI: Boolean) =
+    private fun changeUseExpressiveUI(showRefreshedUI: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.UI_FRESH_SWITCH, showRefreshedUI)
+            appDataStore.putBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, showRefreshedUI)
         }
+
+    private fun changeUseMiuix(useMiuix: Boolean) = viewModelScope.launch {
+        appDataStore.putBoolean(AppDataStore.UI_USE_MIUIX, useMiuix)
+        // Send event to request UI to show restart prompt
+        _uiEvents.send(PreferredViewEvent.ShowRestartRequired)
+    }
 
     private fun changeVersionCompareInSingleLine(singleLine: Boolean) =
         viewModelScope.launch {

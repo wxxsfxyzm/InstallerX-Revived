@@ -15,7 +15,8 @@ sealed class PreferredViewAction {
     data class ChangeShowDisableNotification(val showDisableNotification: Boolean) : PreferredViewAction()
     data class ChangeShowDialogWhenPressingNotification(val showDialog: Boolean) : PreferredViewAction()
     data class ChangeDhizukuAutoCloseCountDown(val countDown: Int) : PreferredViewAction()
-    data class ChangeShowRefreshedUI(val showRefreshedUI: Boolean) : PreferredViewAction()
+    data class ChangeShowExpressiveUI(val showRefreshedUI: Boolean) : PreferredViewAction()
+    data class ChangeUseMiuix(val useMiuix: Boolean) : PreferredViewAction()
     data class ChangeVersionCompareInSingleLine(val versionCompareInSingleLine: Boolean) : PreferredViewAction()
 
     data class AddManagedInstallerPackage(val pkg: NamedPackage) : PreferredViewAction()

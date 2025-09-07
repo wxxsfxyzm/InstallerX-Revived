@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.widget.setting.AppBackButton
+import com.rosan.installer.ui.widget.setting.SelectableSettingItem
 import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.widget.setting.SwitchWidget
 
@@ -38,6 +40,7 @@ fun NewThemeSettingsPage(
 ) {
     val state = viewModel.state
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -72,18 +75,56 @@ fun NewThemeSettingsPage(
             item {
                 SplicedColumnGroup(
                     title = stringResource(R.string.theme_settings_ui_style),
-                    content = listOf {
-                        SwitchWidget(
-                            icon = AppIcons.Theme,
-                            title = stringResource(R.string.theme_settings_use_refreshed_ui),
-                            description = stringResource(R.string.theme_settings_use_refreshed_ui_desc),
-                            checked = state.showRefreshedUI,
-                            onCheckedChange = {
-                                viewModel.dispatch(PreferredViewAction.ChangeShowRefreshedUI(it))
-                            }
-                        )
-                    }
+                    content = listOf(
+                        {
+                            // Option 1: Google UI
+                            SelectableSettingItem(
+                                title = "Google UI", // TODO: Replace with stringResource
+                                description = "标准 Material Design 界面", // TODO: Replace with stringResource
+                                selected = !state.showMiuixUI,
+                                onClick = {
+                                    if (state.showMiuixUI) { // Only dispatch if changing state
+                                        viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(false))
+                                    }
+                                }
+                            )
+                        },
+                        {
+                            // Option 2: MIUIX UI
+                            SelectableSettingItem(
+                                title = "MIUIX UI", // TODO: Replace with stringResource
+                                description = "类 HyperOS 风格界面", // TODO: Replace with stringResource
+                                selected = state.showMiuixUI,
+                                onClick = {
+                                    if (!state.showMiuixUI) { // Only dispatch if changing state
+                                        viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(true))
+                                    }
+                                }
+                            )
+                        }
+                    )
                 )
+            }
+
+            // --- Group 2: Google UI Style Options (Legacy vs Expressive) ---
+            item {
+                // Only show this section if Google UI is selected
+                AnimatedVisibility(visible = !state.showMiuixUI) {
+                    SplicedColumnGroup(
+                        title = "Google UI 样式", // TODO: Replace with stringResource
+                        content = listOf {
+                            SwitchWidget(
+                                icon = AppIcons.Theme,
+                                title = stringResource(R.string.theme_settings_use_refreshed_ui), // "Use Refreshed UI"
+                                description = stringResource(R.string.theme_settings_use_refreshed_ui_desc), // "Enable M3 expressive style..."
+                                checked = state.showExpressiveUI,
+                                onCheckedChange = {
+                                    viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))
+                                }
+                            )
+                        }
+                    )
+                }
             }
         }
     }

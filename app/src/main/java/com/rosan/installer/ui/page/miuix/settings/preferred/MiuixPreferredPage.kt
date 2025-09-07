@@ -49,6 +49,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsNavigationItemWidget
 import com.rosan.installer.ui.widget.dialog.ErrorDisplayDialog
 import org.koin.androidx.compose.koinViewModel
+import timber.log.Timber
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -101,6 +102,10 @@ fun MiuixPreferredPage(
                     if (snackbarResult == SnackbarResult.ActionPerformed) {
                         errorDialogInfo = event
                     }
+                }
+
+                PreferredViewEvent.ShowRestartRequired -> {
+                    Timber.d("Restart required")
                 }
             }
         }
