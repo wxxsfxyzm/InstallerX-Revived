@@ -6,13 +6,11 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.miuix.settings.config.apply.MiuixApplyPage
 import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
@@ -20,16 +18,10 @@ import com.rosan.installer.ui.page.miuix.settings.main.MiuixMainPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home.MiuixHomePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.MiuixInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixThemeSettingsPage
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun MiuixSettingsPage() {
-    val preferredViewModel: PreferredViewModel = koinViewModel()
+fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
     val navController = rememberNavController()
-
-    LaunchedEffect(Unit) {
-        preferredViewModel.dispatch(PreferredViewAction.Init)
-    }
 
     NavHost(
         navController = navController,

@@ -6,7 +6,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,23 +15,16 @@ import com.rosan.installer.ui.page.main.settings.config.apply.ApplyPage
 import com.rosan.installer.ui.page.main.settings.config.edit.EditPage
 import com.rosan.installer.ui.page.main.settings.config.edit.NewEditPage
 import com.rosan.installer.ui.page.main.settings.main.MainPage
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.HomePage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.LegacyInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.NewInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.LegacyThemeSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.NewThemeSettingsPage
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SettingsPage() {
-    val preferredViewModel: PreferredViewModel = koinViewModel()
+fun SettingsPage(preferredViewModel: PreferredViewModel) {
     val navController = rememberNavController()
-
-    LaunchedEffect(Unit) {
-        preferredViewModel.dispatch(PreferredViewAction.Init)
-    }
 
     NavHost(
         navController = navController,

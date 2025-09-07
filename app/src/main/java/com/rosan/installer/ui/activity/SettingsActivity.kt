@@ -59,13 +59,13 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
             if (state.showMiuixUI) {
                 InstallerMiuixTheme {
                     MiuixSurface(modifier = Modifier.fillMaxSize()) {
-                        MiuixSettingsPage() // Assuming navigation setup inside MiuixSettingsPage
+                        MiuixSettingsPage(preferredViewModel)
                     }
                 }
             } else {
                 InstallerMaterialExpressiveTheme {
                     Material3Surface(modifier = Modifier.fillMaxSize()) {
-                        SettingsPage() // Assuming navigation setup inside SettingsPage
+                        SettingsPage(preferredViewModel)
                     }
                 }
             }

@@ -173,6 +173,7 @@ jobs:
             
             ## This is an automatically built latest Alpha pre-release.
             - **This is a pre-release version and is not intended for production use.**
+            - We appreciate any feedback!
             
             **更新日志（Changelog）:**
             ${{ steps.changelog.outputs.changelog_body }}${{ steps.changelog.outputs.changelog_full_link }}
