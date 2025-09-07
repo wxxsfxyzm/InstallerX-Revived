@@ -13,6 +13,7 @@ kotlin = "2.2.10"
 ksp = "2.2.10-2.0.2"
 composeBom = "2025.08.01"
 compose = "1.9.0"
+splashScreen = "1.0.1"
 material3 = "1.5.0-alpha03"
 room = "2.7.2"
 ktx-serialization = "1.9.0"
@@ -20,7 +21,7 @@ accompanist = "0.37.3"
 rikka-shizuku = "13.1.5"
 lottie = "6.6.7"
 koin-bom = "4.1.0"
-materialVersion = "1.12.0"
+materialVersion = "1.13.0"
 datastoreCoreAndroid = "1.2.0-alpha02"
 aboutLibraries = "12.2.4"
 appiconloader = "1.5.0"
@@ -43,6 +44,7 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.3" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
+androix-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
 
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
@@ -57,8 +59,6 @@ compose-materialIcons = { group = "androidx.compose.material", name = "material-
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-
-# work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.10.3" }
 
 # Kotlin Serialization
 # https://github.com/Kotlin/kotlinx.serialization/blob/master/README.md#setup
@@ -109,7 +109,12 @@ iamr0s-androidAppProcess = { group = "io.github.iamr0s", name = "AndroidAppProce
 # Core module (required for accessing library data)
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
 # Compose UI modules (choose one or both)
-aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }      # Material 3 UI
+aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" } # Material 3 UI
 
 # log
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+
+apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.28.0" }
+
+# miuix
+miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version = "0.5.1" }

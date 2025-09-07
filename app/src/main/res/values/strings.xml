@@ -438,4 +438,7 @@
     <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
     <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
     <string name="suggestion_bypass_low_target_sdk">Temporarily allow bypassing restrictions and retry</string>
+    <string name="theme_settings_miuix_ui">MIUIX UI</string>
+    <string name="theme_settings_google_ui">Google UI</string>
+    <string name="theme_settings_ui_engine">UI Engine</string>
 </resources>

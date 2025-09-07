@@ -8,4 +8,8 @@
         <!--沉浸状态栏和导航栏-->
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
+
+    <!--<style name="Theme.Installer.Starting" parent="Theme.SplashScreen">
+        <item name="postSplashScreenTheme">@style/Theme.Installer</item>
+    </style>-->
 </resources>

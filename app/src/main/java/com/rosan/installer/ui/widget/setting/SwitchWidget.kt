@@ -2,11 +2,6 @@ package com.rosan.installer.ui.widget.setting
 
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
@@ -22,14 +17,14 @@ fun SwitchWidget(
 ) {
     // Create a local state to drive the Switch's visual animation.
     // It always starts as 'false' to ensure the Switch is composed in the "off" state.
-    var visualState by remember { mutableStateOf(false) }
+    // var visualState by remember { mutableStateOf(false) }
 
     // Use LaunchedEffect to synchronize the visual state with the authoritative state.
     // This runs when the composable first appears or when the 'checked' state changes.
     // The change from the initial 'false' to a 'true' authoritative state will trigger the animation.
-    LaunchedEffect(checked) {
+    /*LaunchedEffect(checked) {
         visualState = checked
-    }
+    }*/
 
     val toggleAction = {
         if (enabled) {
@@ -48,7 +43,7 @@ fun SwitchWidget(
     ) {
         Switch(
             enabled = enabled,
-            checked = visualState,
+            checked = checked,
             onCheckedChange = null
         )
     }

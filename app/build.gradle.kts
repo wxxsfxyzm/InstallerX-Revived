@@ -25,7 +25,7 @@ android {
         // Please change the applicationId to one that does not conflict with any official release.
         applicationId = "com.rosan.installer.x.revived"
         namespace = "com.rosan.installer"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         // Version control
         // Github Actions will automatically use versionName A.B.C+1 when building preview releases
@@ -189,6 +189,7 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androix.splashscreen)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
@@ -236,4 +237,9 @@ dependencies {
 
     // log
     implementation(libs.timber)
+
+    // miuix
+    implementation(libs.miuix)
+
+    implementation(libs.apache.commons.compress)
 }

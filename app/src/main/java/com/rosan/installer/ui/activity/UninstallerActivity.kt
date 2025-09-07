@@ -8,8 +8,8 @@ import androidx.compose.runtime.LaunchedEffect
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.installer.InstallerPage
-import com.rosan.installer.ui.theme.InstallerTheme
+import com.rosan.installer.ui.page.main.installer.InstallerPage
+import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import com.rosan.installer.ui.util.PermissionDenialReason
 import com.rosan.installer.ui.util.PermissionManager
 import com.rosan.installer.util.toast
@@ -135,7 +135,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                 return@setContent
             }
 
-            InstallerTheme {
+            InstallerMaterialExpressiveTheme {
                 // The UninstallerPage composable will be created later.
                 // It will be responsible for creating the ViewModel and displaying the UI.
                 InstallerPage(installer = currentInstaller)

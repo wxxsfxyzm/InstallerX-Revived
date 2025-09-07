@@ -2,8 +2,8 @@ package com.rosan.installer.data.installer.model.entity
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.rosan.installer.data.app.util.InstallOption
-import com.rosan.installer.ui.page.installer.dialog.inner.InstallExtendedMenuAction
-import com.rosan.installer.ui.page.installer.dialog.inner.InstallExtendedSubMenuId
+import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallExtendedMenuAction
+import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallExtendedSubMenuId
 
 data class ExtendedMenuEntity(
     val selected: Boolean = false,
