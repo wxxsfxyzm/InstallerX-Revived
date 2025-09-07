@@ -28,7 +28,7 @@ Además, comparado con instaladores del sistema, **InstallerX** ofrece más opci
 ## Versiones compatibles
 
 - **Compatibilidad total:** Android SDK 34 - 36 (Android 14 - 16)
-- **Soporte limitado:** Android SDK 24 - 33 (Android 7.0 - 13) (Si tienes problemas, puedes reportarlos en el apartado de *issues*)
+- **Soporte limitado:** Android SDK 26 - 33 (Android 8.0 - 13) (Si tienes problemas, puedes reportarlos en el apartado de *issues*)
 
 ## Cambios y características principales
 

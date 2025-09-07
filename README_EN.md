@@ -29,7 +29,7 @@ Compared to stock installers, **InstallerX** offers more installation options:
 ## Supported Versions
 
 - **Full support:** Android SDK 34 - 36 (Android 14 - 16)
-- **Limited support:** Android SDK 24 - 33 (Android 7.0 - 13) (please report issues)
+- **Limited support:** Android SDK 26 - 33 (Android 8.0 - 13) (please report issues)
 
 ## Key Changes and Features
 
