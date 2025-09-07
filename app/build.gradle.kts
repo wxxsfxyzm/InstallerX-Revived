@@ -189,7 +189,6 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.splashscreen)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
@@ -240,4 +239,6 @@ dependencies {
 
     // miuix
     implementation(libs.miuix)
+
+    implementation(libs.apache.commons.compress)
 }

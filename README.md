@@ -24,7 +24,7 @@
 
 支持 Android SDK 34 - 36（Android 14 - 16）
 
-对 Android SDK 24 - 33（Android 7.0 - Android 13）提供有限支持，如有问题请提交 issue
+对 Android SDK 26 - 33（Android 8.0 - Android 13）提供有限支持，如有问题请提交 issue
 
 ## 功能变化
 
