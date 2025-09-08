@@ -129,8 +129,32 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
                     AxmlTreeRepo.ANDROID_NAMESPACE, "versionCode", 0
                 ).toLong()
                 versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
-                versionName =
-                    getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName") ?: versionName
+                // Read versionName using a when expression to handle resource references.
+                versionName = when (val resId = getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName", -1)) {
+                    -1 -> {
+                        // Case 1: Not a resource reference (-1 indicates literal value).
+                        // Get the literal string value. Fallback to existing value if null.
+                        getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName") ?: versionName
+                    }
+
+                    0 -> {
+                        // Case 2: Resource reference is @null (0 indicates null resource).
+                        // Keep the default value assigned during initialization.
+                        versionName
+                    }
+
+                    else -> {
+                        // Case 3: It is a valid resource ID.
+                        try {
+                            // Attempt to resolve the string resource.
+                            resources.getString(resId)
+                        } catch (e: Resources.NotFoundException) {
+                            // Fallback: If resource lookup fails, log warning and use the raw attribute value.
+                            Timber.w(e, "Could not resolve versionName resource ID: %x. Falling back to raw value.", resId)
+                            getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName") ?: versionName
+                        }
+                    }
+                }
             }
             .register("/manifest/uses-sdk") {
                 minSdk = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "minSdkVersion")
