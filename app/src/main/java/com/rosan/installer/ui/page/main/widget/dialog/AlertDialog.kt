@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.widget.dialog
+package com.rosan.installer.ui.page.main.widget.dialog
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

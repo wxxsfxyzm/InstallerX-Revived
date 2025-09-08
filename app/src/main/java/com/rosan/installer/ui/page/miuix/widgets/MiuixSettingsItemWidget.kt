@@ -59,6 +59,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
+import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import java.io.File
@@ -126,7 +127,7 @@ fun MiuixDataAuthorizerWidget(
     // Use SuperSpinner directly, as shown in your TextComponent.kt example.
     // This single component replaces the entire ListItem + FlowRow + InputChip structure.
     SuperSpinner(
-        modifier = modifier,
+        mode = SpinnerMode.AlwaysOnRight,
         // The main title for the setting item.
         title = stringResource(id = R.string.config_authorizer),
         // The summary can display the currently selected option's title.
@@ -211,7 +212,7 @@ fun MiuixDataInstallModeWidget(
 
     // Replace the old ListItem and FlowRow with a single SuperSpinner component.
     SuperSpinner(
-        modifier = modifier,
+        mode = SpinnerMode.AlwaysOnRight,
         // The main title for the setting item.
         title = stringResource(id = R.string.config_install_mode),
         // The summary shows the name of the currently selected mode.
@@ -865,7 +866,7 @@ fun MiuixThemeEngineWidget(
 
     // Implement SuperSpinner.
     SuperSpinner(
-        modifier = modifier,
+        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.theme_settings_ui_engine),
         summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,

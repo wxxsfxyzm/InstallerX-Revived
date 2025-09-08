@@ -10,7 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.widget.dialog.PositionDialog
+import com.rosan.installer.ui.page.main.widget.dialog.PositionDialog
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 

@@ -21,11 +21,11 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAuthorizerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
-import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold

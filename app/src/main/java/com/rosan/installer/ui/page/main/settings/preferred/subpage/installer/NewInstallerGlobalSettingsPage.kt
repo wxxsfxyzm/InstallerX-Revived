@@ -30,16 +30,15 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.DataAuthorizerWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
+import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
+import com.rosan.installer.ui.page.main.widget.setting.ManagedPackagesWidget
+import com.rosan.installer.ui.page.main.widget.setting.ManagedUidsWidget
+import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.none
-import com.rosan.installer.ui.widget.setting.AppBackButton
-import com.rosan.installer.ui.widget.setting.DataAuthorizerWidget
-import com.rosan.installer.ui.widget.setting.DataInstallModeWidget
-import com.rosan.installer.ui.widget.setting.IntNumberPickerWidget
-import com.rosan.installer.ui.widget.setting.ManagedPackagesWidget
-import com.rosan.installer.ui.widget.setting.ManagedUidsWidget
-import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
-import com.rosan.installer.ui.widget.setting.SwitchWidget
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -28,6 +28,7 @@ import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
+import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 
 @Composable
@@ -103,6 +104,7 @@ fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
 
     // Replace DropDownMenuWidget with SuperSpinner.
     SuperSpinner(
+        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(R.string.config_authorizer),
         summary = data[stateAuthorizer], // Display current selection text
         items = spinnerEntries,
@@ -176,6 +178,7 @@ fun MiuixDataInstallModeWidget(viewModel: EditViewModel) {
 
     // Replace DropDownMenuWidget with SuperSpinner.
     SuperSpinner(
+        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(R.string.config_install_mode),
         summary = data[stateInstallMode], // Display current selection text
         items = spinnerEntries,
@@ -317,6 +320,7 @@ fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
 
             // Replace DropDownMenuWidget with SuperSpinner.
             SuperSpinner(
+                mode = SpinnerMode.AlwaysOnRight,
                 title = stringResource(R.string.config_dexopt_mode),
                 // Display the currently selected mode name as summary.
                 summary = data[currentMode] ?: spinnerEntries.firstOrNull()?.title ?: "",
