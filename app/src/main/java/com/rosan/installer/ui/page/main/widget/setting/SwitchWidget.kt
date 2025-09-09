@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.widget.setting
+package com.rosan.installer.ui.page.main.widget.setting
 
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable

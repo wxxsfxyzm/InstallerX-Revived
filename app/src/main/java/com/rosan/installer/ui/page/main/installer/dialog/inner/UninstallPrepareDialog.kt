@@ -24,7 +24,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.widget.chip.Chip
+import com.rosan.installer.ui.page.main.widget.chip.Chip
 
 /**
  * Displays the initial confirmation screen for an uninstall operation.

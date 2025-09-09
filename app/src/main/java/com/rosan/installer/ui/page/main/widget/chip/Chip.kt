@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.widget.chip
+package com.rosan.installer.ui.page.main.widget.chip
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api

@@ -41,9 +41,9 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.widget.chip.Chip
-import com.rosan.installer.ui.widget.chip.SuggestionChipInfo
-import com.rosan.installer.ui.widget.dialog.UninstallConfirmationDialog
+import com.rosan.installer.ui.page.main.widget.chip.Chip
+import com.rosan.installer.ui.page.main.widget.chip.SuggestionChipInfo
+import com.rosan.installer.ui.page.main.widget.dialog.UninstallConfirmationDialog
 import kotlinx.coroutines.delay
 import timber.log.Timber
 

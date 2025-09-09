@@ -42,8 +42,8 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.rosan.installer.R
 import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
-import com.rosan.installer.ui.widget.setting.AppBackButton
-import com.rosan.installer.ui.widget.setting.LabelWidget
+import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable

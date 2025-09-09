@@ -42,15 +42,15 @@ import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
-import com.rosan.installer.ui.widget.dialog.ErrorDisplayDialog
-import com.rosan.installer.ui.widget.setting.BottomSheetContent
-import com.rosan.installer.ui.widget.setting.ClearCache
-import com.rosan.installer.ui.widget.setting.DefaultInstaller
-import com.rosan.installer.ui.widget.setting.DisableAdbVerify
-import com.rosan.installer.ui.widget.setting.IgnoreBatteryOptimizationSetting
-import com.rosan.installer.ui.widget.setting.LabelWidget
-import com.rosan.installer.ui.widget.setting.SettingsAboutItemWidget
-import com.rosan.installer.ui.widget.setting.SettingsNavigationItemWidget
+import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
+import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
+import com.rosan.installer.ui.page.main.widget.setting.ClearCache
+import com.rosan.installer.ui.page.main.widget.setting.DefaultInstaller
+import com.rosan.installer.ui.page.main.widget.setting.DisableAdbVerify
+import com.rosan.installer.ui.page.main.widget.setting.IgnoreBatteryOptimizationSetting
+import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
+import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
+import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
