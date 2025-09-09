@@ -115,7 +115,7 @@ fun NewThemeSettingsPage(
                         content = listOf {
                             SwitchWidget(
                                 icon = AppIcons.Theme,
-                                title = stringResource(R.string.theme_settings_use_refreshed_ui), // "Use Refreshed UI"
+                                title = stringResource(R.string.theme_settings_use_expressive_ui), // "Use Refreshed UI"
                                 description = stringResource(R.string.theme_settings_use_refreshed_ui_desc), // "Enable M3 expressive style..."
                                 checked = state.showExpressiveUI,
                                 onCheckedChange = {

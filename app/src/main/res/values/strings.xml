@@ -40,7 +40,7 @@
     <string name="theme_settings">Theme Settings</string>
     <string name="theme_settings_ui_style">UI Style</string>
     <string name="theme_settings_desc">Change the theme of the app</string>
-    <string name="theme_settings_use_refreshed_ui">Use Refreshed UI</string>
+    <string name="theme_settings_use_expressive_ui">Use Expressive UI</string>
     <string name="theme_settings_use_refreshed_ui_desc">Use the new Google UI for the App</string>
     <string name="installer_settings">Installer Settings</string>
     <string name="installer_settings_desc">Change the global settings of the installer</string>

@@ -218,17 +218,14 @@ fun MiuixApplyPage(
         Box(modifier = Modifier.padding(it)) {
             when {
                 viewModel.state.apps.progress is ViewContent.Progress.Loading && viewModel.state.apps.data.isEmpty() -> {
-                    // 使用 Box 将加载指示器和文本居中
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        // 使用 Column 将指示器和文本垂直排列
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            //  M3E 风格的加载指示器
                             ContainedLoadingIndicator()
                             Text(
                                 text = stringResource(id = R.string.loading),

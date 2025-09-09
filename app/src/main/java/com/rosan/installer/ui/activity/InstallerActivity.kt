@@ -186,7 +186,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         val hexFlags = String.format("0x%08X", flags)
 
         Timber.tag(tag).d("---------- Intent Details Start ----------")
-        Timber.tag(tag).d("Full Intent: ${intent.toString()}")
+        Timber.tag(tag).d("Full Intent: $intent")
         Timber.tag(tag).d("Action: ${intent.action}")
         Timber.tag(tag).d("Data: ${intent.dataString}")
         Timber.tag(tag).d("Type: ${intent.type}")

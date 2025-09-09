@@ -33,7 +33,7 @@
     <string name="theme_settings">主題設定</string>
     <string name="theme_settings_ui_style">主題風格</string>
     <string name="theme_settings_desc">更改應用主題</string>
-    <string name="theme_settings_use_refreshed_ui">使用全新的外觀</string>
+    <string name="theme_settings_use_expressive_ui">使用全新的外觀</string>
     <string name="theme_settings_use_refreshed_ui_desc">使用來自谷歌的全新設計風格</string>
     <string name="installer_settings">安裝器設定</string>
     <string name="installer_settings_desc">更改安裝器的全局設定</string>

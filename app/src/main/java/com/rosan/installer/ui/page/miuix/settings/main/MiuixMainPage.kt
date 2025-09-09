@@ -22,6 +22,8 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.useful.Settings
 
 @Composable
 fun MiuixMainPage(navController: NavController, preferredViewModel: PreferredViewModel) {
@@ -40,7 +42,7 @@ fun MiuixMainPage(navController: NavController, preferredViewModel: PreferredVie
             MiuixAllPage(navController, allViewModel)
         },
         NavigationData(
-            icon = AppIcons.SettingsSuggest,
+            icon = MiuixIcons.Useful.Settings,
             label = stringResource(R.string.preferred)
         ) {
             MiuixPreferredPage(navController, preferredViewModel)
@@ -65,10 +67,10 @@ fun MiuixMainPage(navController: NavController, preferredViewModel: PreferredVie
             pages[page].content.invoke()
         }
 
-        // 底部导航
         NavigationBar(
             items = pages.map { NavigationItem(label = it.label, icon = it.icon) },
             selected = currentPage,
+            showDivider = true,
             onClick = { index -> onPageChanged(index) }
         )
     }

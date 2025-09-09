@@ -6,8 +6,7 @@ import org.koin.core.component.KoinComponent
 import org.xmlpull.v1.XmlPullParser
 
 class AxmlTreeRepoImpl(private val xmlPull: XmlResourceParser, private val rootPath: String = "") :
-    AxmlTreeRepo,
-    KoinComponent {
+    AxmlTreeRepo, KoinComponent {
 
     private val names = mutableListOf<String>()
 
@@ -44,9 +43,11 @@ class AxmlTreeRepoImpl(private val xmlPull: XmlResourceParser, private val rootP
                     }
                     xmlPull.action(path)
                 }
+
                 XmlPullParser.END_TAG -> {
                     names.removeLastOrNull()
                 }
+
                 XmlPullParser.END_DOCUMENT -> break
             }
         }
