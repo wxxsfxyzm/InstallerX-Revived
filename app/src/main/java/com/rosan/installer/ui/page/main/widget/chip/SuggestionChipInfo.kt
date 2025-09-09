@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.widget.chip
+package com.rosan.installer.ui.page.main.widget.chip
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector

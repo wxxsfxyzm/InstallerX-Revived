@@ -119,10 +119,7 @@ class PreferredViewModel(
             is PreferredViewAction.RequestIgnoreBatteryOptimization -> requestIgnoreBatteryOptimization()
             is PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus -> refreshIgnoreBatteryOptStatus()
             is PreferredViewAction.SetDefaultInstaller -> viewModelScope.launch {
-                setDefaultInstaller(
-                    action.lock,
-                    action
-                )
+                setDefaultInstaller(action.lock, action)
             }
         }
 

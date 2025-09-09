@@ -97,10 +97,10 @@ import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewAction
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewApp
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewState
+import com.rosan.installer.ui.page.main.widget.chip.Chip
+import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.theme.none
-import com.rosan.installer.ui.widget.chip.Chip
-import com.rosan.installer.ui.widget.setting.AppBackButton
-import com.rosan.installer.ui.widget.setting.LabelWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel

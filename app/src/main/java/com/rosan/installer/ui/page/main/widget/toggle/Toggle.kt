@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.widget.toggle
+package com.rosan.installer.ui.page.main.widget.toggle
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.interaction.MutableInteractionSource

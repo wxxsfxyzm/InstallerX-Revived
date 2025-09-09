@@ -25,10 +25,10 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
-import com.rosan.installer.ui.widget.setting.AppBackButton
-import com.rosan.installer.ui.widget.setting.SelectableSettingItem
-import com.rosan.installer.ui.widget.setting.SplicedColumnGroup
-import com.rosan.installer.ui.widget.setting.SwitchWidget
+import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.SelectableSettingItem
+import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 
 // This is now a top-level composable, likely in its own file.
 // It takes NavController instead of an onBack lambda.

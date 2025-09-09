@@ -39,6 +39,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewState
+import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBottomSheetContent
 import com.rosan.installer.ui.page.miuix.widgets.MiuixClearCache
@@ -47,7 +48,6 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDisableAdbVerify
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationSetting
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsNavigationItemWidget
-import com.rosan.installer.ui.widget.dialog.ErrorDisplayDialog
 import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 import top.yukonga.miuix.kmp.basic.Card
