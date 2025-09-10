@@ -52,7 +52,6 @@ import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import org.koin.androidx.compose.koinViewModel
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -102,10 +101,6 @@ fun PreferredPage(
                     if (snackbarResult == SnackbarResult.ActionPerformed) {
                         errorDialogInfo = event
                     }
-                }
-
-                PreferredViewEvent.ShowRestartRequired -> {
-                    Timber.d("Restart required")
                 }
             }
         }

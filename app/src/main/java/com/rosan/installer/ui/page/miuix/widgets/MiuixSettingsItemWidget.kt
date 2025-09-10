@@ -376,7 +376,7 @@ fun MiuixBottomSheetContent(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                 // 点击按钮时调用 openUrl 工具函数
-                openUrl(context, "https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
+                context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
             },
             modifier = Modifier.fillMaxWidth() // 按钮填充横向宽度
         ) {
@@ -391,7 +391,7 @@ fun MiuixBottomSheetContent(
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                openUrl(context, "https://t.me/installerx_revived")
+                context.openUrl("https://t.me/installerx_revived")
             },
             modifier = Modifier.fillMaxWidth()
         ) {

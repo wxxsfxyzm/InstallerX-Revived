@@ -19,6 +19,7 @@ data class PreferredViewState(
     val versionCompareInSingleLine: Boolean = false,
     val showExpressiveUI: Boolean = true,
     val showMiuixUI: Boolean = false,
+    val showLauncherIcon: Boolean = true,
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
     val managedBlacklistPackages: List<NamedPackage> = emptyList(),
     val managedSharedUserIdBlacklist: List<SharedUid> = emptyList(),

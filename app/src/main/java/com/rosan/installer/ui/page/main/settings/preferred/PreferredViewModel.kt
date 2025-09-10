@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.runtime.getValue
@@ -70,6 +71,7 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(action.countDown)
             is PreferredViewAction.ChangeShowExpressiveUI -> changeUseExpressiveUI(action.showRefreshedUI)
             is PreferredViewAction.ChangeUseMiuix -> changeUseMiuix(action.useMiuix)
+            is PreferredViewAction.ChangeShowLauncherIcon -> changeShowLauncherIcon(action.showLauncherIcon)
             is PreferredViewAction.ChangeVersionCompareInSingleLine -> changeVersionCompareInSingleLine(action.versionCompareInSingleLine)
             is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
                 state.managedInstallerPackages,
@@ -147,6 +149,7 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
             val showExpressiveUIFlow = appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
             val showMiuixUIFlow = appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
+            val showLauncherIconFlow = appDataStore.getBoolean(AppDataStore.SHOW_LAUNCHER_ICON, true)
             val managedInstallerPackagesFlow =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST)
             val managedBlacklistPackagesFlow =
@@ -178,6 +181,7 @@ class PreferredViewModel(
                 versionCompareInSingleLineFlow,
                 showExpressiveUIFlow,
                 showMiuixUIFlow,
+                showLauncherIconFlow,
                 managedInstallerPackagesFlow,
                 managedBlacklistPackagesFlow,
                 managedSharedUserIdBlacklistFlow,
@@ -196,12 +200,13 @@ class PreferredViewModel(
                 val versionCompareInSingleLine = values[8] as Boolean
                 val showExpressiveUI = values[9] as Boolean
                 val showMiuixUI = values[10] as Boolean
-                val managedInstallerPackages = (values[11] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedBlacklistPackages = (values[12] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedSharedUserIdBlacklist = (values[13] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
-                val managedSharedUserIdExemptPkg = (values[14] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[15] as Boolean
-                val isIgnoringBatteryOptimizations = values[16] as Boolean
+                val showLauncherIcon = values[11] as Boolean
+                val managedInstallerPackages = (values[12] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedBlacklistPackages = (values[13] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedSharedUserIdBlacklist = (values[14] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
+                val managedSharedUserIdExemptPkg = (values[15] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[16] as Boolean
+                val isIgnoringBatteryOptimizations = values[17] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -217,6 +222,7 @@ class PreferredViewModel(
                     versionCompareInSingleLine = versionCompareInSingleLine,
                     showExpressiveUI = showExpressiveUI,
                     showMiuixUI = showMiuixUI,
+                    showLauncherIcon = showLauncherIcon,
                     managedInstallerPackages = managedInstallerPackages,
                     managedBlacklistPackages = managedBlacklistPackages,
                     managedSharedUserIdBlacklist = managedSharedUserIdBlacklist,
@@ -280,10 +286,25 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, showRefreshedUI)
         }
 
-    private fun changeUseMiuix(useMiuix: Boolean) = viewModelScope.launch {
-        appDataStore.putBoolean(AppDataStore.UI_USE_MIUIX, useMiuix)
-        // Send event to request UI to show restart prompt
-        _uiEvents.send(PreferredViewEvent.ShowRestartRequired)
+    private fun changeUseMiuix(useMiuix: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.UI_USE_MIUIX, useMiuix)
+        }
+
+    private fun changeShowLauncherIcon(show: Boolean) = viewModelScope.launch {
+        appDataStore.putBoolean(AppDataStore.SHOW_LAUNCHER_ICON, show)
+        val componentName = ComponentName(context, "com.rosan.installer.ui.activity.LauncherAlias")
+        val newState = if (show) {
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        } else {
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        }
+        context.packageManager.setComponentEnabledSetting(
+            componentName,
+            newState,
+            PackageManager.DONT_KILL_APP
+        )
+        state = state.copy(showLauncherIcon = show)
     }
 
     private fun changeVersionCompareInSingleLine(singleLine: Boolean) =

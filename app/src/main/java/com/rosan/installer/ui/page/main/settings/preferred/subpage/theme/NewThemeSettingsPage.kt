@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
@@ -107,9 +106,9 @@ fun NewThemeSettingsPage(
             }
 
             // --- Group 2: Google UI Style Options (Legacy vs Expressive) ---
-            item {
-                // Only show this section if Google UI is selected
-                AnimatedVisibility(visible = !state.showMiuixUI) {
+            // Only show this section if Google UI is selected
+            if (!state.showMiuixUI) {
+                item {
                     SplicedColumnGroup(
                         title = "Google UI 样式", // TODO: Replace with stringResource
                         content = listOf {
@@ -125,6 +124,22 @@ fun NewThemeSettingsPage(
                         }
                     )
                 }
+            }
+            item {
+                SplicedColumnGroup(
+                    title = "桌面图标",
+                    content = listOf {
+                        SwitchWidget(
+                            icon = AppIcons.BugReport,
+                            title = "显示桌面图标",
+                            description = "隐藏后可以从系统设置中访问",
+                            checked = state.showLauncherIcon,
+                            onCheckedChange = {
+                                viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(it))
+                            }
+                        )
+                    }
+                )
             }
         }
     }

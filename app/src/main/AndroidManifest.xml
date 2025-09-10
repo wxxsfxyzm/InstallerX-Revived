@@ -37,10 +37,21 @@
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
+                <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity-alias
+            android:name="com.rosan.installer.ui.activity.LauncherAlias"
+            android:targetActivity="com.rosan.installer.ui.activity.SettingsActivity"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <activity
             android:name="com.rosan.installer.ui.activity.InstallerActivity"
