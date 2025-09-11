@@ -52,7 +52,7 @@ data class ConfigEntity(
             forAllUser = false,
             allowTestOnly = false,
             allowDowngrade = false,
-            allowRestrictedPermissions = false,
+            allowRestrictedPermissions = true,
             bypassLowTargetSdk = false,
             allowAllRequestedPermissions = false,
         )
@@ -70,7 +70,7 @@ data class ConfigEntity(
             forAllUser = false,
             allowTestOnly = false,
             allowDowngrade = false,
-            allowRestrictedPermissions = false,
+            allowRestrictedPermissions = true,
             bypassLowTargetSdk = false,
             allowAllRequestedPermissions = false,
         )
