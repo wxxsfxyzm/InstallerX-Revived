@@ -1,6 +1,6 @@
 # InstallerX Revived (Community Edition)
 
-[![中文文档](https://img.shields.io/badge/README_%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-239120?style=flat-square)](./README_CN.md)[![README en español](https://img.shields.io/badge/README_ES-0077b5?style=flat-square)](./README_ES.md)
+**English** | [简体中文](README_CN.md) | [Español](README_ES.md)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![Latest Release](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=Stable)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![Prerelease](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=Beta)](https://github.com/wxxsfxyzm/InstallerX/releases)[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
