@@ -40,7 +40,7 @@
     <string name="theme_settings_ui_style">نمط واجهة المستخدم</string>
     <string name="theme_settings_desc">تغيير سمة التطبيق</string>
     <string name="theme_settings_use_expressive_ui">استخدام الواجهة المحدثة</string>
-    <string name="theme_settings_use_refreshed_ui_desc">استخدام واجهة جوجل الجديدة للتطبيق</string>
+    <string name="theme_settings_use_expressive_ui_desc">استخدام واجهة جوجل الجديدة للتطبيق</string>
     <string name="installer_settings">إعدادات المُثبِّت</string>
     <string name="installer_settings_desc">تغيير الإعدادات العامة للمُثبِّت</string>
     <string name="installer_settings_global_installer">عام</string>

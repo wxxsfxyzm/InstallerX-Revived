@@ -185,3 +185,33 @@ fun ErrorDisplayDialog(
         }
     )
 }
+
+@Composable
+fun HideLauncherIconWarningDialog(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    if (show) {
+        val dialogTitle = "WARNING"
+
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(text = dialogTitle) },
+            text = {
+                // Otherwise, show the generic unsaved changes message.
+                Text(text = "Please make sure you can access this page before hiding launcher icon!")
+            },
+            confirmButton = {
+                TextButton(onClick = onConfirm) {
+                    Text(text = stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+}

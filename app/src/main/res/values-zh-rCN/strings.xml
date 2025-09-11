@@ -37,7 +37,7 @@
     <string name="theme_settings_ui_style">主题风格</string>
     <string name="theme_settings_desc">更改应用主题</string>
     <string name="theme_settings_use_expressive_ui">使用全新的外观</string>
-    <string name="theme_settings_use_refreshed_ui_desc">使用来自谷歌的全新设计风格</string>
+    <string name="theme_settings_use_expressive_ui_desc">使用来自谷歌的全新设计风格</string>
     <string name="installer_settings">安装器设置</string>
     <string name="installer_settings_desc">更改安装器的全局设置</string>
     <string name="installer_settings_global_installer">全局</string>

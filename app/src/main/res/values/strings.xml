@@ -41,7 +41,11 @@
     <string name="theme_settings_ui_style">UI Style</string>
     <string name="theme_settings_desc">Change the theme of the app</string>
     <string name="theme_settings_use_expressive_ui">Use Expressive UI</string>
-    <string name="theme_settings_use_refreshed_ui_desc">Use the new Google UI for the App</string>
+    <string name="theme_settings_use_expressive_ui_desc">Use the new Google UI for the App</string>
+    <string name="theme_settings_google_ui_style">Google UI style</string>
+    <string name="theme_settings_launcher_icons">Launcher icon</string>
+    <string name="theme_settings_hide_launcher_icon">Hide launcher icon</string>
+    <string name="theme_settings_hide_launcher_icon_desc">Hide icon from launcher</string>
     <string name="installer_settings">Installer Settings</string>
     <string name="installer_settings_desc">Change the global settings of the installer</string>
     <string name="installer_settings_global_installer">Global</string>

@@ -78,7 +78,7 @@ fun LegacyThemeSettingsPage(
                 SwitchWidget(
                     icon = AppIcons.Theme,
                     title = stringResource(R.string.theme_settings_use_expressive_ui),
-                    description = stringResource(R.string.theme_settings_use_refreshed_ui_desc),
+                    description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
                     checked = state.showExpressiveUI,
                     onCheckedChange = {
                         viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))

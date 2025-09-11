@@ -37,7 +37,7 @@
     <string name="theme_settings_ui_style">Estilo de la interfaz</string>
     <string name="theme_settings_desc">Cambiar el tema de la aplicación</string>
     <string name="theme_settings_use_expressive_ui">Usar nueva interfaz</string>
-    <string name="theme_settings_use_refreshed_ui_desc">Usar la nueva interfaz de Google para la App</string>
+    <string name="theme_settings_use_expressive_ui_desc">Usar la nueva interfaz de Google para la App</string>
     <string name="installer_settings">Configuración del instalador</string>
     <string name="installer_settings_desc">Cambiar la configuración global del instalador</string>
     <string name="installer_settings_global_installer">Global</string>

@@ -36,7 +36,11 @@ fun MiuixHomePage(
             TopAppBar(
                 title = stringResource(id = R.string.about),
                 scrollBehavior = scrollBehavior,
-                navigationIcon = { MiuixBackButton(onClick = { navController.navigateUp() }) }
+                navigationIcon = {
+                    MiuixBackButton(
+                        modifier = Modifier.padding(start = 16.dp),
+                        onClick = { navController.navigateUp() })
+                }
             )
         },
     ) {

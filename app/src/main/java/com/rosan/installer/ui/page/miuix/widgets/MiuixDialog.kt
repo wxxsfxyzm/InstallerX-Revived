@@ -1,32 +1,19 @@
 package com.rosan.installer.ui.page.miuix.widgets
 
 import android.app.ProgressDialog.show
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.util.help
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
@@ -108,63 +95,47 @@ fun MiuixUnsavedChangesDialog(
     )
 }
 
-/**
- * A reusable AlertDialog to display detailed information about an exception.
- *
- * @param exception The exception to display.
- * @param onDismissRequest Callback invoked when the user wants to dismiss the dialog.
- * @param onRetry Callback invoked when the user clicks the "Retry" button. Can be null if retry is not applicable.
- * @param title The title of the dialog.
- */
 @Composable
-fun MiuixErrorDisplayDialog(
-    exception: Throwable,
-    onDismissRequest: () -> Unit,
-    onRetry: (() -> Unit)?,
-    title: String
+fun MiuixHideLauncherIconWarningDialog(
+    showState: MutableState<Boolean>,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(title) },
-        text = {
-            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
-                LazyColumn(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.errorContainer)
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+    SuperDialog(
+        show = showState,
+        onDismissRequest = onDismiss,
+        title = "Warning"/*stringResource(R.string.warning)*/,
+        content = {
+            // Custom content layout with body text and action buttons
+            Column {
+                // Warning message
+                Text(text = "Please make sure you can access this page before hiding launcher icon!")
+
+                Spacer(modifier = Modifier.height(24.dp)) // Spacing before buttons
+
+                // Action buttons row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    item {
-                        Text(exception.help(), fontWeight = FontWeight.Bold)
-                    }
-                    item {
-                        SelectionContainer {
-                            Text(
-                                if (RsConfig.isDebug) {
-                                    exception.stackTraceToString()
-                                } else {
-                                    exception.message ?: "An unknown error occurred."
-                                }.trim()
-                            )
-                        }
-                    }
+                    // Dismiss button
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss,
+                        text = stringResource(R.string.cancel)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Confirm button with primary color styling
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onConfirm,
+                        text = stringResource(R.string.confirm),
+                        colors = ButtonDefaults.textButtonColorsPrimary() // Apply primary color style
+                    )
                 }
             }
-        },
-        confirmButton = {
-            if (onRetry != null)
-                TextButton(
-                    onClick = onRetry,
-                    text = stringResource(R.string.retry)
-                )
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismissRequest,
-                text = stringResource(R.string.cancel)
-            )
         }
     )
 }

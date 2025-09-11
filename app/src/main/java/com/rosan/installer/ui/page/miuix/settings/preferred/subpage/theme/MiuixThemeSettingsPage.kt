@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -13,6 +15,8 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.MiuixHideLauncherIconWarningDialog
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeEngineWidget
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -27,6 +31,16 @@ fun MiuixThemeSettingsPage(
 ) {
     val state = viewModel.state
     val scrollBehavior = MiuixScrollBehavior()
+    val showHideLauncherIconDialog = remember { mutableStateOf(false) }
+
+    MiuixHideLauncherIconWarningDialog(
+        showState = showHideLauncherIconDialog,
+        onDismiss = { showHideLauncherIconDialog.value = false },
+        onConfirm = {
+            showHideLauncherIconDialog.value = false
+            viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(false))
+        }
+    )
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -62,33 +76,29 @@ fun MiuixThemeSettingsPage(
                     )
                 }
             }
-
-            /* // --- Conditional Google UI Options ---
-             item {
-                 // Show "Refreshed UI" switch only if Google UI is logically selected
-                 AnimatedVisibility(visible = !state.showMiuixUI) {
-                     Column {
-                         SmallTitle(
-                             text = "Google UI 样式", // TODO: Add string resource
-                             modifier = Modifier.padding(top = 8.dp)
-                         )
-                         Card(
-                             modifier = Modifier
-                                 .padding(horizontal = 12.dp)
-                                 .padding(bottom = 6.dp)
-                         ) {
-                             MiuixSwitchWidget(
-                                 icon = AppIcons.Theme,
-                                 title = stringResource(R.string.theme_settings_use_refreshed_ui),
-                                 description = stringResource(R.string.theme_settings_use_refreshed_ui_desc),
-                                 checked = state.showExpressiveUI,
-                                 onCheckedChange = {
-                                     viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))
-                                 }
-                             )
-                         }
-                     }
-                 }*/
+            item {
+                SmallTitle(stringResource(R.string.theme_settings_launcher_icons))
+            }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 6.dp)
+                ) {
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.theme_settings_hide_launcher_icon),
+                        description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
+                        checked = !state.showLauncherIcon,
+                        onCheckedChange = { newCheckedState ->
+                            if (newCheckedState) {
+                                showHideLauncherIconDialog.value = true
+                            } else {
+                                viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
+                            }
+                        }
+                    )
+                }
+            }
         }
     }
 }

@@ -15,6 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -24,6 +28,7 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.SelectableSettingItem
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
@@ -39,6 +44,16 @@ fun NewThemeSettingsPage(
 ) {
     val state = viewModel.state
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var showHideLauncherIconDialog by remember { mutableStateOf(false) }
+
+    HideLauncherIconWarningDialog(
+        show = showHideLauncherIconDialog,
+        onDismiss = { showHideLauncherIconDialog = false },
+        onConfirm = {
+            showHideLauncherIconDialog = false
+            viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(false))
+        }
+    )
 
     Scaffold(
         modifier = Modifier
@@ -110,12 +125,12 @@ fun NewThemeSettingsPage(
             if (!state.showMiuixUI) {
                 item {
                     SplicedColumnGroup(
-                        title = "Google UI 样式", // TODO: Replace with stringResource
+                        title = stringResource(R.string.theme_settings_google_ui),
                         content = listOf {
                             SwitchWidget(
                                 icon = AppIcons.Theme,
                                 title = stringResource(R.string.theme_settings_use_expressive_ui), // "Use Refreshed UI"
-                                description = stringResource(R.string.theme_settings_use_refreshed_ui_desc), // "Enable M3 expressive style..."
+                                description = stringResource(R.string.theme_settings_use_expressive_ui_desc), // "Enable M3 expressive style..."
                                 checked = state.showExpressiveUI,
                                 onCheckedChange = {
                                     viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))
@@ -127,15 +142,19 @@ fun NewThemeSettingsPage(
             }
             item {
                 SplicedColumnGroup(
-                    title = "桌面图标",
+                    title = stringResource(R.string.theme_settings_launcher_icons),
                     content = listOf {
                         SwitchWidget(
                             icon = AppIcons.BugReport,
-                            title = "显示桌面图标",
-                            description = "隐藏后可以从系统设置中访问",
-                            checked = state.showLauncherIcon,
-                            onCheckedChange = {
-                                viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(it))
+                            title = stringResource(R.string.theme_settings_hide_launcher_icon),
+                            description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
+                            checked = !state.showLauncherIcon,
+                            onCheckedChange = { newCheckedState ->
+                                if (newCheckedState) {
+                                    showHideLauncherIconDialog = true
+                                } else {
+                                    viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
+                                }
                             }
                         )
                     }
