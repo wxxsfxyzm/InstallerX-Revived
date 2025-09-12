@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
@@ -110,7 +112,8 @@ fun MiuixHideLauncherIconWarningDialog(
             Column {
                 // Warning message
                 Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
-
+                if (RsConfig.currentManufacturer == Manufacturer.XIAOMI)
+                    Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi))
                 Spacer(modifier = Modifier.height(24.dp)) // Spacing before buttons
 
                 // Action buttons row

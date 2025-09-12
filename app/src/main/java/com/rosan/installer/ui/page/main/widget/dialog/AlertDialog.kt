@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.util.help
@@ -199,8 +200,9 @@ fun HideLauncherIconWarningDialog(
             onDismissRequest = onDismiss,
             title = { Text(text = dialogTitle) },
             text = {
-                // Otherwise, show the generic unsaved changes message.
                 Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
+                if (RsConfig.currentManufacturer == Manufacturer.XIAOMI)
+                    Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi))
             },
             confirmButton = {
                 TextButton(onClick = onConfirm) {

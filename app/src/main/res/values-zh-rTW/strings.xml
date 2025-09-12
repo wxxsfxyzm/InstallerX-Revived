@@ -46,6 +46,7 @@
     <string name="theme_settings_hide_launcher_icon">隱藏桌面圖標</string>
     <string name="theme_settings_hide_launcher_icon_desc">透過 *#*#46789#*#* 訪問設定</string>
     <string name="theme_settings_hide_launcher_icon_warning">請在隱藏之前確認你能夠訪問本應用程式設定介面！</string>
+    <string name="theme_settings_hide_launcher_icon_warning_xiaomi">HyperOS需要啟用自啟動以及允許後臺彈出介面才能響應撥號盤代碼</string>
     <string name="installer_settings">安裝器設定</string>
     <string name="installer_settings_desc">更改安裝器的全局設定</string>
     <string name="installer_settings_global_installer">全局</string>

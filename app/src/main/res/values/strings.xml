@@ -54,7 +54,8 @@
     <string name="theme_settings_launcher_icons">Launcher icon</string>
     <string name="theme_settings_hide_launcher_icon">Hide launcher icon</string>
     <string name="theme_settings_hide_launcher_icon_desc">Dial *#*#46789#*#* to open settings</string>
-    <string name="theme_settings_hide_launcher_icon_warning">Please make sure you can access this page before hiding launcher icon!\n</string>
+    <string name="theme_settings_hide_launcher_icon_warning">Please make sure you can access this page before hiding launcher icon!</string>
+    <string name="theme_settings_hide_launcher_icon_warning_xiaomi">For HyperOS, please allow "Autostart" and "Open new windows while running in the background" to receive dialer code.</string>
     <string name="installer_settings">Installer Settings</string>
     <string name="installer_settings_desc">Change the global settings of the installer</string>
     <string name="installer_settings_global_installer">Global</string>
