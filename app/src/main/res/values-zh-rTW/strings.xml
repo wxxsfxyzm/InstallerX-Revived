@@ -44,7 +44,7 @@
     <string name="theme_settings_google_ui_style">Google UI 風格</string>
     <string name="theme_settings_launcher_icons">桌面圖標</string>
     <string name="theme_settings_hide_launcher_icon">隱藏桌面圖標</string>
-    <string name="theme_settings_hide_launcher_icon_desc">從啟動器中隱藏本應用程式圖標</string>
+    <string name="theme_settings_hide_launcher_icon_desc">透過 *#*#46789#*#* 訪問設定</string>
     <string name="theme_settings_hide_launcher_icon_warning">請在隱藏之前確認你能夠訪問本應用程式設定介面！</string>
     <string name="installer_settings">安裝器設定</string>
     <string name="installer_settings_desc">更改安裝器的全局設定</string>

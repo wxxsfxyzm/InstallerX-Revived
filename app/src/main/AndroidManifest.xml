@@ -132,6 +132,17 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <receiver
+            android:name=".SecretCodeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SECRET_CODE" />
+                <data
+                    android:scheme="android_secret_code"
+                    android:host="46789" />
+            </intent-filter>
+        </receiver>
+
         <meta-data
             android:name="ScopedStorage"
             android:value="true" />
