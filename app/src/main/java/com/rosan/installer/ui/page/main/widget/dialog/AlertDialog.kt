@@ -193,14 +193,14 @@ fun HideLauncherIconWarningDialog(
     onConfirm: () -> Unit,
 ) {
     if (show) {
-        val dialogTitle = "WARNING"
+        val dialogTitle = stringResource(R.string.warning)
 
         AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text(text = dialogTitle) },
             text = {
                 // Otherwise, show the generic unsaved changes message.
-                Text(text = "Please make sure you can access this page before hiding launcher icon!")
+                Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
             },
             confirmButton = {
                 TextButton(onClick = onConfirm) {

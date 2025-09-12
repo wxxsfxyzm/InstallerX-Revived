@@ -93,8 +93,8 @@ fun NewThemeSettingsPage(
                         {
                             // Option 1: Google UI
                             SelectableSettingItem(
-                                title = "Google UI", // TODO: Replace with stringResource
-                                description = "标准 Material Design 界面", // TODO: Replace with stringResource
+                                title = stringResource(R.string.theme_settings_google_ui),
+                                description = stringResource(R.string.theme_settings_google_ui_desc),
                                 selected = !state.showMiuixUI,
                                 onClick = {
                                     if (state.showMiuixUI) { // Only dispatch if changing state
@@ -106,8 +106,8 @@ fun NewThemeSettingsPage(
                         {
                             // Option 2: MIUIX UI
                             SelectableSettingItem(
-                                title = "MIUIX UI", // TODO: Replace with stringResource
-                                description = "类 HyperOS 风格界面", // TODO: Replace with stringResource
+                                title = stringResource(R.string.theme_settings_miuix_ui),
+                                description = stringResource(R.string.theme_settings_miuix_ui_desc),
                                 selected = state.showMiuixUI,
                                 onClick = {
                                     if (!state.showMiuixUI) { // Only dispatch if changing state
@@ -129,8 +129,8 @@ fun NewThemeSettingsPage(
                         content = listOf {
                             SwitchWidget(
                                 icon = AppIcons.Theme,
-                                title = stringResource(R.string.theme_settings_use_expressive_ui), // "Use Refreshed UI"
-                                description = stringResource(R.string.theme_settings_use_expressive_ui_desc), // "Enable M3 expressive style..."
+                                title = stringResource(R.string.theme_settings_use_expressive_ui),
+                                description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
                                 checked = state.showExpressiveUI,
                                 onCheckedChange = {
                                     viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))

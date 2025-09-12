@@ -7,6 +7,7 @@
     <string name="user_terms">User policy</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="agree">Agree</string>
+    <string name="warning">Warning</string>
     <string name="open_source_license">Open Source License</string>
 
     <string name="back">Back</string>
@@ -36,16 +37,24 @@
     <string name="discuss">Chat &amp; Feedback &amp; Update</string>
     <string name="telegram_group">Telegram group</string>
     <string name="telegram_group_desc">Join the group!</string>
+    <string name="telegram_channel">Telegram Channel</string>
+    <string name="telegram_channel_desc">Join the channel to receive news and updates!</string>
 
     <string name="theme_settings">Theme Settings</string>
     <string name="theme_settings_ui_style">UI Style</string>
     <string name="theme_settings_desc">Change the theme of the app</string>
+    <string name="theme_settings_miuix_ui">Miuix</string>
+    <string name="theme_settings_miuix_ui_desc">Similar to Hyperos</string>
+    <string name="theme_settings_google_ui">Google Material 3</string>
+    <string name="theme_settings_google_ui_desc">Standard Material Design UI</string>
+    <string name="theme_settings_ui_engine">UI Engine</string>
     <string name="theme_settings_use_expressive_ui">Use Expressive UI</string>
-    <string name="theme_settings_use_expressive_ui_desc">Use the new Google UI for the App</string>
+    <string name="theme_settings_use_expressive_ui_desc">Use the new M3 Expressive style</string>
     <string name="theme_settings_google_ui_style">Google UI style</string>
     <string name="theme_settings_launcher_icons">Launcher icon</string>
     <string name="theme_settings_hide_launcher_icon">Hide launcher icon</string>
     <string name="theme_settings_hide_launcher_icon_desc">Hide icon from launcher</string>
+    <string name="theme_settings_hide_launcher_icon_warning">Please make sure you can access this page before hiding launcher icon!</string>
     <string name="installer_settings">Installer Settings</string>
     <string name="installer_settings_desc">Change the global settings of the installer</string>
     <string name="installer_settings_global_installer">Global</string>
@@ -442,7 +451,4 @@
     <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
     <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
     <string name="suggestion_bypass_low_target_sdk">Temporarily allow bypassing restrictions and retry</string>
-    <string name="theme_settings_miuix_ui">MIUIX UI</string>
-    <string name="theme_settings_google_ui">Google UI</string>
-    <string name="theme_settings_ui_engine">UI Engine</string>
 </resources>

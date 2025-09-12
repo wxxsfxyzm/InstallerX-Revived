@@ -359,8 +359,8 @@
     <string name="theme_settings">การตั้งค่าธีม</string>
     <string name="theme_settings_desc">เปลี่ยนธีมของแอป</string>
     <string name="theme_settings_ui_style">สไตล์ UI</string>
-    <string name="theme_settings_use_refreshed_ui">ใช้ UI ที่รีเฟรชแล้ว</string>
-    <string name="theme_settings_use_refreshed_ui_desc">ใช้ UI ใหม่ของ Google สำหรับแอป</string>
+    <string name="theme_settings_use_expressive_ui">ใช้ UI ที่รีเฟรชแล้ว</string>
+    <string name="theme_settings_use_expressive_ui_desc">ใช้ UI ใหม่ของ Google สำหรับแอป</string>
     <string name="unarchive">ยกเลิกการเก็บถาวร</string>
     <string name="unarchive_desc">ยกเลิกการเก็บถาวรแพ็คเกจที่มีอยู่</string>
     <string name="uninstall">ถอนการติดตั้ง</string>

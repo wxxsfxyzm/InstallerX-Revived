@@ -104,12 +104,12 @@ fun MiuixHideLauncherIconWarningDialog(
     SuperDialog(
         show = showState,
         onDismissRequest = onDismiss,
-        title = "Warning"/*stringResource(R.string.warning)*/,
+        title = stringResource(R.string.warning),
         content = {
             // Custom content layout with body text and action buttons
             Column {
                 // Warning message
-                Text(text = "Please make sure you can access this page before hiding launcher icon!")
+                Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
 
                 Spacer(modifier = Modifier.height(24.dp)) // Spacing before buttons
 
