@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.miuix.widgets
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -389,11 +390,26 @@ fun MiuixDataAllowTestOnlyWidget(viewModel: EditViewModel) {
 
 @Composable
 fun MiuixDataAllowDowngradeWidget(viewModel: EditViewModel) {
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+
+    val isRoot = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.Root -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Root
+        else -> false
+    }
+    val isBlocked = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && !isRoot
+
+    val description =
+        if (isBlocked) stringResource(R.string.config_allow_downgrade_blocked_desc)
+        else stringResource(id = R.string.config_allow_downgrade_desc)
+
     MiuixSwitchWidget(
         icon = AppIcons.InstallAllowDowngrade,
         title = stringResource(id = R.string.config_allow_downgrade),
-        description = stringResource(id = R.string.config_allow_downgrade_desc),
+        description = description,
         checked = viewModel.state.data.allowDowngrade,
+        enabled = !isBlocked,
         onCheckedChange = {
             viewModel.dispatch(EditViewAction.ChangeDataAllowDowngrade(it))
         }

@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.main.settings.config.edit
 
-import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -38,7 +37,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
@@ -223,7 +221,7 @@ fun EditPage(
             item { LabelWidget(label = stringResource(R.string.config_label_install_options)) }
             item { DataForAllUserWidget(viewModel = viewModel) }
             item { DataAllowTestOnlyWidget(viewModel = viewModel) }
-            if (Build.VERSION.SDK_INT <= InstallOption.AllowDowngrade.maxSdk) item { DataAllowDowngradeWidget(viewModel = viewModel) }
+            item { DataAllowDowngradeWidget(viewModel = viewModel) }
             item { DataBypassLowTargetSdkWidget(viewModel = viewModel) }
             item { DataAllowRestrictedPermissionsWidget(viewModel = viewModel) }
             item { DataAllowAllRequestedPermissionsWidget(viewModel = viewModel) }
