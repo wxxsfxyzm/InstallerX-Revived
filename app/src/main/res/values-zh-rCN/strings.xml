@@ -1,12 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="agreement_title">温馨提示</string>
-
     <string name="user_terms">用户条款</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="agree">同意</string>
     <string name="warning">警告</string>
     <string name="open_source_license">开放源代码许可</string>
-
     <string name="back">返回</string>
     <string name="home">主页</string>
     <string name="config">配置</string>
@@ -19,23 +18,18 @@
     <string name="other">其它</string>
     <string name="about_detail">关于 InstallerX</string>
     <string name="get_update_detail">检查软件更新和新功能</string>
-
     <string name="internet_access_enabled">联网</string>
     <string name="internet_access_disabled">离线</string>
-
     <string name="stable">正式版</string>
     <string name="preview">预览版</string>
     <string name="unstable">测试版</string>
-
     <string name="enable_notification_hint">请启用通知以进行安装！</string>
     <string name="enable_storage_permission_hint">请启用“所有文件访问”权限！</string>
-
     <string name="discuss">讨论 &amp; 反馈 &amp; 更新</string>
     <string name="telegram_group">Telegram群组</string>
     <string name="telegram_group_desc">来一起划水！</string>
     <string name="telegram_channel">Telegram频道</string>
     <string name="telegram_channel_desc">加入频道以获取最新更新与动态！</string>
-
     <string name="theme_settings">主题设置</string>
     <string name="theme_settings_ui_style">主题风格</string>
     <string name="theme_settings_desc">更改应用主题</string>
@@ -56,7 +50,6 @@
     <string name="installer_settings_global_installer">全局</string>
     <string name="installer_settings_dialog_mode_options">对话框安装自定义选项</string>
     <string name="installer_settings_notification_mode_options">通知安装自定义选项</string>
-
     <string name="basic">常规</string>
     <string name="disable_adb_install_verify">停用系统安装验证</string>
     <string name="disable_adb_install_verify_desc">在一些系统上可以禁止安装扫描（Play 保护机制等）</string>
@@ -75,9 +68,7 @@
     <string name="unlock_default_installer_failed">清除失败</string>
     <string name="clear_cache">清理缓存</string>
     <string name="success">成功</string>
-
     <string name="details">详情</string>
-
     <string name="add">新增</string>
     <string name="update">更新</string>
     <string name="save">保存</string>
@@ -86,14 +77,11 @@
     <string name="apply">应用</string>
     <string name="delete">删除</string>
     <string name="restore">恢复</string>
-
     <string name="delete_success">删除成功</string>
-
     <string name="loading">加载中…</string>
     <string name="empty_configs">没有配置</string>
     <string name="filter">过滤</string>
     <string name="order">排序</string>
-
     <string name="config_name">名称</string>
     <string name="config_info">信息</string>
     <string name="config_description">描述</string>
@@ -151,14 +139,11 @@
     <string name="config_package_name">包名</string>
     <string name="config_confirm_deletion">确认删除</string>
     <string name="config_confirm_deletion_desc">您确定要删除“%1$s”吗？此操作无法撤销。</string>
-
     <string name="config_installer_matches">匹配到: %1$s</string>
     <string name="config_no_managed_packages_to_suggest">没有可建议的应用</string>
-
     <string name="config_error_name">名称不得为空</string>
     <string name="config_error_customize_authorizer">自定义授权器不得为空</string>
     <string name="config_error_installer">安装者不得为空</string>
-
     <string name="discard">放弃更改</string>
     <string name="confirm">确认</string>
     <string name="cancel">取消</string>
@@ -176,7 +161,6 @@
     <string name="select">选择</string>
     <string name="clear">清除</string>
     <string name="global">全局</string>
-
     <string name="options">选项</string>
     <string name="sort">排序</string>
     <string name="sort_by_label">名称</string>
@@ -186,7 +170,6 @@
     <string name="sort_by_selected_first">选中优先</string>
     <string name="sort_by_show_system_app">显示系统应用</string>
     <string name="sort_by_show_package_name">显示包名</string>
-
     <string name="installer_ready">准备就绪</string>
     <string name="installer_resolving">分析中…</string>
     <string name="installer_resolve_failed">分析失败</string>
@@ -221,7 +204,6 @@
     <string name="uninstall_all_users">为所有用户卸载</string>
     <string name="uninstall_delete_system_app">允许卸载系统应用</string>
     <string name="uninstall_success_message">卸载成功</string>
-
     <string name="permission_read_external_storage">读取外部存储</string>
     <string name="permission_write_external_storage">写入外部存储</string>
     <string name="permission_access_fine_location">精确位置</string>
@@ -273,15 +255,12 @@
     <string name="permission_access_mock_location">访问模拟定位</string>
     <string name="permission_dhizuku">使用Dhizuku</string>
     <string name="permission_unknown">未知权限</string>
-
     <string name="installer_running">InstallerX 运行中</string>
-
     <string name="installer_version_short">版本：%1$s (%2$s)</string>
     <string name="installer_version">版本：%1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">包名：%1$s</string>
     <string name="installer_file_path">路径：%1$s</string>
-
     <string name="exception_install_failed_unknown">未知错误</string>
     <string name="exception_resolve_failed">URI解析失败</string>
     <string name="exception_resolve_failed_no_internet_access">该版本无法访问互联网，要使用此功能，请安装支持联网的版本。</string>
@@ -330,7 +309,6 @@
     <string name="installer_error_reason">错误原因</string>
     <string name="exception_install_failed_hyperos_isolation_violation">HyperOS安装系统app需要声明有效安装者！</string>
     <string name="get_update">获取更新</string>
-
     <string name="show_dialog_when_pressing_notification">点击通知时显示对话框</string>
     <string name="change_notification_touch_behavior">更改通知触摸行为</string>
     <string name="version_compare_in_single_line">单行显示版本对比</string>
@@ -350,7 +328,6 @@
     <string name="show_intelligent_suggestion_desc">当安装失败时显示智能建议</string>
     <string name="permission_list">权限列表</string>
     <string name="permission_list_desc">正在安装的软件包请求的权限列表</string>
-
     <!--  InstallOptions Start  -->
     <string name="config_allow_test">允许测试包</string>
     <string name="config_allow_test_desc">允许安装带TestOnly标签的安装包</string>
@@ -398,7 +375,6 @@
     <string name="dry_run_desc">验证包，但不要安装</string>
     <string name="config_request_update_ownership">请求更新所有权</string>
     <string name="config_request_update_ownership_desc">请求更新应用所有权</string>
-
     <string name="unarchive">取消归档</string>
     <string name="unarchive_desc">取消一个现有安装的归档</string>
     <string name="replace_existing">替换已有</string>
