@@ -32,8 +32,6 @@
     <string name="theme_settings">Налаштування теми</string>
     <string name="theme_settings_ui_style">Стиль інтерфейсу</string>
     <string name="theme_settings_desc">Змінити тему застосунку</string>
-    <string name="theme_settings_use_refreshed_ui">Використовувати оновлений інтерфейс</string>
-    <string name="theme_settings_use_refreshed_ui_desc">Використовувати новий інтерфейс Google для застосунку</string>
     <string name="installer_settings">Налаштування встановлювача</string>
     <string name="installer_settings_desc">Змінити глобальні налаштування встановлювача</string>
     <string name="installer_settings_global_installer">Глобальні</string>
