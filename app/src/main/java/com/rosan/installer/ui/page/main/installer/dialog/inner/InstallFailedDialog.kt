@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
 import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolationException
 import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
@@ -138,6 +139,7 @@ private fun ErrorSuggestions(
                 SuggestionChipInfo(
                     InstallFailedUpdateIncompatibleException::class,
                     InstallFailedVersionDowngradeException::class,
+                    InstallFailedConflictingProviderException::class,
                     selected = { true }, // This is an action, not a state toggle.
                     onClick = {
                         confirmKeepData = false

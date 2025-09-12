@@ -63,7 +63,6 @@ fun NewAllPage(
     viewModel: AllViewModel
 ) {
     LaunchedEffect(Unit) {
-        //viewModel.dispatch(AllViewAction.Init)
         viewModel.navController = navController
     }
 

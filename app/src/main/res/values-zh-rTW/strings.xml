@@ -4,6 +4,7 @@
     <string name="user_terms">用戶條款</string>
     <string name="privacy_policy">隱私政策</string>
     <string name="agree">同意</string>
+    <string name="warning">警告</string>
     <string name="open_source_license">開放原始碼許可</string>
 
     <string name="back">返回</string>
@@ -33,8 +34,18 @@
     <string name="theme_settings">主題設定</string>
     <string name="theme_settings_ui_style">主題風格</string>
     <string name="theme_settings_desc">更改應用主題</string>
-    <string name="theme_settings_use_refreshed_ui">使用全新的外觀</string>
-    <string name="theme_settings_use_refreshed_ui_desc">使用來自谷歌的全新設計風格</string>
+    <string name="theme_settings_miuix_ui">Miuix</string>
+    <string name="theme_settings_miuix_ui_desc">類 HyperOS 風格介面</string>
+    <string name="theme_settings_google_ui">Google Material 3</string>
+    <string name="theme_settings_google_ui_desc">標準Material Design介面</string>
+    <string name="theme_settings_ui_engine">UI 引擎</string>
+    <string name="theme_settings_use_expressive_ui">使用M3 Expressive外觀</string>
+    <string name="theme_settings_use_expressive_ui_desc">使用全新Material 3 Expressive設計風格</string>
+    <string name="theme_settings_google_ui_style">Google UI 風格</string>
+    <string name="theme_settings_launcher_icons">桌面圖標</string>
+    <string name="theme_settings_hide_launcher_icon">隱藏桌面圖標</string>
+    <string name="theme_settings_hide_launcher_icon_desc">從啟動器中隱藏本應用程式圖標</string>
+    <string name="theme_settings_hide_launcher_icon_warning">請在隱藏之前確認你能夠訪問本應用程式設定介面！</string>
     <string name="installer_settings">安裝器設定</string>
     <string name="installer_settings_desc">更改安裝器的全局設定</string>
     <string name="installer_settings_global_installer">全局</string>

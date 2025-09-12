@@ -4,6 +4,7 @@
     <string name="user_terms">用户条款</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="agree">同意</string>
+    <string name="warning">警告</string>
     <string name="open_source_license">开放源代码许可</string>
 
     <string name="back">返回</string>
@@ -32,12 +33,24 @@
     <string name="discuss">讨论 &amp; 反馈 &amp; 更新</string>
     <string name="telegram_group">Telegram群组</string>
     <string name="telegram_group_desc">来一起划水！</string>
+    <string name="telegram_channel">Telegram频道</string>
+    <string name="telegram_channel_desc">加入频道以获取最新更新与动态！</string>
 
     <string name="theme_settings">主题设置</string>
     <string name="theme_settings_ui_style">主题风格</string>
     <string name="theme_settings_desc">更改应用主题</string>
-    <string name="theme_settings_use_refreshed_ui">使用全新的外观</string>
-    <string name="theme_settings_use_refreshed_ui_desc">使用来自谷歌的全新设计风格</string>
+    <string name="theme_settings_miuix_ui">Miuix</string>
+    <string name="theme_settings_miuix_ui_desc">类 HyperOS 风格界面</string>
+    <string name="theme_settings_google_ui">Google Material 3</string>
+    <string name="theme_settings_google_ui_desc">标准Material Design界面</string>
+    <string name="theme_settings_ui_engine">UI 引擎</string>
+    <string name="theme_settings_use_expressive_ui">使用M3 Expressive外观</string>
+    <string name="theme_settings_use_expressive_ui_desc">使用全新Material 3 Expressive设计风格</string>
+    <string name="theme_settings_google_ui_style">Google UI 风格</string>
+    <string name="theme_settings_launcher_icons">桌面图标</string>
+    <string name="theme_settings_hide_launcher_icon">隐藏桌面图标</string>
+    <string name="theme_settings_hide_launcher_icon_desc">从启动器中隐藏本应用图标</string>
+    <string name="theme_settings_hide_launcher_icon_warning">请在隐藏之前确认你能够访问本应用设置界面！</string>
     <string name="installer_settings">安装器设置</string>
     <string name="installer_settings_desc">更改安装器的全局设置</string>
     <string name="installer_settings_global_installer">全局</string>

@@ -4,15 +4,19 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -20,7 +24,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -34,7 +37,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -52,6 +57,7 @@ import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import kotlinx.coroutines.flow.collectLatest
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
+import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
@@ -59,6 +65,10 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.useful.Delete
+import top.yukonga.miuix.kmp.icon.icons.useful.Edit
+import top.yukonga.miuix.kmp.icon.icons.useful.SelectAll
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -257,17 +267,18 @@ private fun DataItemWidget(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Column {
                 Text(
                     text = entity.name,
-                    style = MiuixTheme.textStyles.title2
+                    style = MiuixTheme.textStyles.headline1
                 )
                 if (entity.description.isNotEmpty()) {
                     Text(
                         text = entity.description,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                         style = MiuixTheme.textStyles.subtitle
                     )
                 }
@@ -276,39 +287,65 @@ private fun DataItemWidget(
         HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 16.dp)
         )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .align(Alignment.CenterVertically),
-                verticalAlignment = Alignment.CenterVertically
+            IconButton(
+                minHeight = 35.dp,
+                minWidth = 35.dp,
+                backgroundColor = MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
+                onClick = { viewModel.dispatch(AllViewAction.MiuixEditDataConfig(entity)) }) {
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = MiuixIcons.Useful.Edit,
+                    tint = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
+                    contentDescription = stringResource(id = R.string.edit)
+                )
+            }
+            IconButton(
+                minHeight = 35.dp,
+                minWidth = 35.dp,
+                backgroundColor = MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
+                onClick = { viewModel.dispatch(AllViewAction.DeleteDataConfig(entity)) }) {
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = MiuixIcons.Useful.Delete,
+                    tint = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
+                    contentDescription = stringResource(id = R.string.delete)
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                minHeight = 35.dp,
+                minWidth = 35.dp,
+                backgroundColor = MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
+                onClick = { viewModel.dispatch(AllViewAction.ApplyConfig(entity)) }
             ) {
-                // Use Miuix IconButton and Icon
-                IconButton(onClick = { viewModel.dispatch(AllViewAction.MiuixEditDataConfig(entity)) }) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
-                        imageVector = AppIcons.Edit,
-                        contentDescription = stringResource(id = R.string.edit)
-                    )
-                }
-                IconButton(onClick = { viewModel.dispatch(AllViewAction.DeleteDataConfig(entity)) }) {
-                    Icon(
-                        imageVector = AppIcons.Delete,
-                        contentDescription = stringResource(id = R.string.delete)
-                    )
-                }
-                IconButton(onClick = {
-                    viewModel.dispatch(AllViewAction.ApplyConfig(entity))
-                }) {
-                    Icon(
-                        imageVector = AppIcons.Rule,
+                        modifier = Modifier.size(20.dp),
+                        imageVector = MiuixIcons.Useful.SelectAll,
+                        tint = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
                         contentDescription = stringResource(id = R.string.apply)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        modifier = Modifier.padding(end = 3.dp),
+                        text = "作用域",
+                        color = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 15.sp
                     )
                 }
             }

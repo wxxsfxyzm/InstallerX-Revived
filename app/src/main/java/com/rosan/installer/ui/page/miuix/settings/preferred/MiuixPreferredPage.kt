@@ -48,8 +48,8 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDisableAdbVerify
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationSetting
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsNavigationItemWidget
+import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import org.koin.androidx.compose.koinViewModel
-import timber.log.Timber
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -102,10 +102,6 @@ fun MiuixPreferredPage(
                     if (snackbarResult == SnackbarResult.ActionPerformed) {
                         errorDialogInfo = event
                     }
-                }
-
-                PreferredViewEvent.ShowRestartRequired -> {
-                    Timber.d("Restart required")
                 }
             }
         }
@@ -240,9 +236,11 @@ fun MiuixPreferredPage(
         )
     }
     // ModalBottomSheet is kept from Material3 as there is no direct Miuix replacement
-    if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-        MiuixBottomSheetContent(
-            title = stringResource(R.string.get_update)
-        )
+    if (showBottomSheet) InstallerMaterialExpressiveTheme {
+        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+            MiuixBottomSheetContent(
+                title = stringResource(R.string.get_update)
+            )
+        }
     }
 }

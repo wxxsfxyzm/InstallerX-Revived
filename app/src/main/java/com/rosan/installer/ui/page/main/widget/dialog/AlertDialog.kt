@@ -185,3 +185,33 @@ fun ErrorDisplayDialog(
         }
     )
 }
+
+@Composable
+fun HideLauncherIconWarningDialog(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    if (show) {
+        val dialogTitle = stringResource(R.string.warning)
+
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(text = dialogTitle) },
+            text = {
+                // Otherwise, show the generic unsaved changes message.
+                Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
+            },
+            confirmButton = {
+                TextButton(onClick = onConfirm) {
+                    Text(text = stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+}

@@ -13,7 +13,6 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.Session
 import android.content.pm.PackageManager
 import android.content.pm.VersionedPackage
-import android.content.res.AssetFileDescriptor
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
@@ -22,7 +21,6 @@ import android.os.ServiceManager
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.build.Architecture
-import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
@@ -41,13 +39,11 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.apache.commons.compress.archivers.zip.ZipFile
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
 import timber.log.Timber
-import java.io.File
-import java.io.IOException
 import java.lang.reflect.Field
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
@@ -211,7 +207,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         var session: Session? = null
         try {
             session = createSession(config, entities, extra, packageInstaller, packageName)
-            installAll(session, entities)
+            installIts(config, entities, extra, session)
             commit(config, entities, extra, session)
         } catch (e: Exception) {
             // 如果在提交之前或期间发生任何错误，应该放弃会话
@@ -282,92 +278,31 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         return session
     }
 
-    private fun installAll(
-        session: Session,
-        entities: List<InstallEntity>
+    private suspend fun installIts(
+        config: ConfigEntity,
+        entities: List<InstallEntity>,
+        extra: InstallExtraInfoEntity,
+        session: Session
     ) {
-        // Group entities by their container path to process each container file once.
-        val groupedByContainerPath = entities.groupBy { entity ->
-            when (val data = entity.data) {
-                is DataEntity.FileEntity -> data.path // Single files group by their own path.
-                is DataEntity.ZipFileEntity -> data.parent.path // Splits group by their parent zip file path.
-                else -> throw IllegalStateException("Unexpected data type: $data")
-            }
-        }
+        for (entity in entities) installIt(config, entity, extra, session)
+    }
 
-        for ((containerPath, entitiesInContainer) in groupedByContainerPath) {
-            val firstData = entitiesInContainer.first().data
-
-            // Determine how to access the container file (FileEntity or parent of ZipFileEntity)
-            val containerFileEntity = when (firstData) {
-                is DataEntity.FileEntity -> firstData
-                is DataEntity.ZipFileEntity -> firstData.parent
-                else -> null
-            } ?: continue // Skip if container type is unexpected
-
-            // Get access information directly from the container entity
-            val originalUri = containerFileEntity.originalUri
-            val useUriStreaming = containerPath.startsWith("/proc/") && originalUri != null
-
-            when (firstData) {
-                is DataEntity.FileEntity -> {
-                    // --- Case A: Installing a single FileEntity ---
-                    Timber.d("Processing container as single FileEntity: $containerPath")
-                    if (useUriStreaming) {
-                        // Zero-copy path: re-open from URI.
-                        Timber.d("Staging FileEntity from original URI (was zero-copy path): $originalUri")
-                        context.contentResolver.openAssetFileDescriptor(originalUri, "r")?.use { afd ->
-                            session.openWrite(entitiesInContainer.first().name, 0, afd.length).use { output ->
-                                afd.createInputStream().use { input -> input.copyTo(output) }
-                            }
-                        } ?: throw IOException("Failed to re-open URI: $originalUri")
-                    } else {
-                        // Cache path: read directly from file.
-                        Timber.d("Staging FileEntity from cache file path: $containerPath")
-                        val file = File(containerPath)
-                        session.openWrite(entitiesInContainer.first().name, 0, file.length()).use { output ->
-                            file.inputStream().use { input -> input.copyTo(output) }
-                        }
-                    }
-                }
-
-                is DataEntity.ZipFileEntity -> {
-                    // --- Case B: Installing splits from a container ZIP file ---
-                    Timber.d("Processing container as ZIP file: $containerPath")
-                    var zipFile: ZipFile? = null
-                    var tempAfd: AssetFileDescriptor? = null
-                    try {
-                        // Open parent zip file once using smart logic.
-                        if (useUriStreaming) {
-                            tempAfd = context.contentResolver.openAssetFileDescriptor(originalUri, "r")!!
-                            zipFile = ZipFile.builder()
-                                .setSeekableByteChannel(tempAfd.createInputStream().channel)
-                                .get()
-                        } else {
-                            zipFile = ZipFile(containerPath)
-                        }
-
-                        // Install all selected splits from this single opened ZipFile instance.
-                        for (entity in entitiesInContainer) {
-                            val entryName = (entity.data as DataEntity.ZipFileEntity).name
-                            val entry =
-                                zipFile.getEntry(entryName) ?: throw IOException("Entry $entryName not found in $containerPath")
-                            session.openWrite(entity.name, 0, entry.size).use { output ->
-                                zipFile.getInputStream(entry).use { input -> input.copyTo(output) }
-                            }
-                        }
-                    } finally {
-                        runCatching { zipFile?.close() }
-                        runCatching { tempAfd?.close() }
-                    }
-                }
-
-                else -> throw IllegalStateException("Unexpected data type: $firstData")
-            }
+    private suspend fun installIt(
+        config: ConfigEntity, entity: InstallEntity, extra: InstallExtraInfoEntity, session: Session
+    ) {
+        val inputStream = entity.data.getInputStreamWhileNotEmpty()
+            ?: throw Exception("can't open input stream for this data: '${entity.data}'")
+        session.openWrite(
+            entity.name, 0,
+            withContext(Dispatchers.IO) {
+                inputStream.available()
+            }.toUInt().toLong()
+        ).use {
+            inputStream.copyTo(it)
+            session.fsync(it)
         }
     }
 
-    @SuppressLint("RequestInstallPackagesPolicy")
     private fun commit(
         config: ConfigEntity,
         entities: List<InstallEntity>,

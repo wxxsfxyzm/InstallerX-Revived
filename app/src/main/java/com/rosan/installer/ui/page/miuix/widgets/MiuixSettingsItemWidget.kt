@@ -81,7 +81,6 @@ fun MiuixDataAuthorizerWidget(
     trailingContent: @Composable () -> Unit = {},
 ) {
     val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
     // The data source remains unchanged.
@@ -127,19 +126,13 @@ fun MiuixDataAuthorizerWidget(
     // Use SuperSpinner directly, as shown in your TextComponent.kt example.
     // This single component replaces the entire ListItem + FlowRow + InputChip structure.
     SuperSpinner(
+        modifier = modifier,
         mode = SpinnerMode.AlwaysOnRight,
-        // The main title for the setting item.
         title = stringResource(id = R.string.config_authorizer),
-        // The summary can display the currently selected option's title.
         summary = spinnerEntries[selectedIndex].title,
-        // Provide the list of SpinnerEntry objects.
         items = spinnerEntries,
-        // Provide the current selected index.
         selectedIndex = selectedIndex,
-        // When the index changes, find the corresponding Authorizer enum
-        // and call the changeAuthorizer callback.
         onSelectedIndexChange = { newIndex ->
-            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
             val newAuthorizer = authorizerOptions.keys.elementAt(newIndex)
             if (currentAuthorizer != newAuthorizer) {
                 changeAuthorizer(newAuthorizer)
@@ -148,10 +141,7 @@ fun MiuixDataAuthorizerWidget(
         // SuperSpinner has a disabled state, so we disable the "None" option by checking its index.
         enabled = selectedIndex != authorizerOptions.keys.indexOf(ConfigEntity.Authorizer.None)
     )
-
-    // The trailingContent from your original function signature is preserved and called here.
     trailingContent()
-
 }
 
 data class InstallModeInfo(
@@ -170,7 +160,6 @@ fun MiuixDataInstallModeWidget(
     changeInstallMode: (ConfigEntity.InstallMode) -> Unit,
 ) {
     val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
 
     // The data source definition remains the same.
     val installModeOptions = remember {
@@ -210,20 +199,14 @@ fun MiuixDataInstallModeWidget(
         installModeOptions.keys.indexOf(currentInstallMode).coerceAtLeast(0)
     }
 
-    // Replace the old ListItem and FlowRow with a single SuperSpinner component.
     SuperSpinner(
+        modifier = modifier,
         mode = SpinnerMode.AlwaysOnRight,
-        // The main title for the setting item.
         title = stringResource(id = R.string.config_install_mode),
-        // The summary shows the name of the currently selected mode.
         summary = spinnerEntries[selectedIndex].title,
-        // Provide the converted list of items.
         items = spinnerEntries,
-        // Set the current selection index.
         selectedIndex = selectedIndex,
-        // When selection changes, convert the index back to an enum and call the callback.
         onSelectedIndexChange = { newIndex ->
-            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
             val newMode = installModeOptions.keys.elementAt(newIndex)
             if (currentInstallMode != newMode) {
                 changeInstallMode(newMode)
@@ -393,7 +376,7 @@ fun MiuixBottomSheetContent(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                 // 点击按钮时调用 openUrl 工具函数
-                openUrl(context, "https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
+                context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
             },
             modifier = Modifier.fillMaxWidth() // 按钮填充横向宽度
         ) {
@@ -408,7 +391,7 @@ fun MiuixBottomSheetContent(
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                openUrl(context, "https://t.me/installerx_revived")
+                context.openUrl("https://t.me/installerx_revived")
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -839,7 +822,6 @@ fun MiuixThemeEngineWidget(
     onThemeChange: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
 
     val themeOptions = remember {
         mapOf(
@@ -853,7 +835,7 @@ fun MiuixThemeEngineWidget(
     val spinnerEntries = remember(themeOptions) {
         themeOptions.entries.sortedByDescending { it.key }.map { entry ->
             SpinnerEntry(
-                title = context.getString(entry.value) // Get string from resource ID directly
+                title = context.getString(entry.value)
             )
         }
     }
@@ -864,15 +846,14 @@ fun MiuixThemeEngineWidget(
         if (currentThemeIsMiuix) 0 else 1
     }
 
-    // Implement SuperSpinner.
     SuperSpinner(
+        modifier = modifier,
         mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.theme_settings_ui_engine),
         summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
-            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
             // Convert index back to boolean key (0 -> true, 1 -> false)
             val newModeIsMiuix = themeOptions.keys.sortedDescending().elementAt(newIndex)
             if (currentThemeIsMiuix != newModeIsMiuix) {

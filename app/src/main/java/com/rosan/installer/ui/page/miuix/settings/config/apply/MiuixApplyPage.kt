@@ -97,9 +97,12 @@ import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewAction
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewApp
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewState
+import com.rosan.installer.ui.page.main.settings.config.apply.ItemWidget
+import com.rosan.installer.ui.page.main.settings.config.apply.ItemsWidget
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
+import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -127,155 +130,153 @@ fun MiuixApplyPage(
             lazyListState.firstVisibleItemIndex > 0 || lazyListState.firstVisibleItemScrollOffset > 0
         }
     }
-
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentWindowInsets = WindowInsets.none,
-        topBar = {
-            var searchBarActivated by remember { mutableStateOf(false) }
-            TopAppBar(
-                scrollBehavior = scrollBehavior,
-                title = {
-                    AnimatedContent(targetState = searchBarActivated) {
-                        if (!it) Text(stringResource(R.string.app))
-                        else {
-                            val focusRequester = remember { FocusRequester() }
-                            OutlinedTextField(
-                                modifier = Modifier.focusRequester(focusRequester),
-                                value = viewModel.state.search,
-                                onValueChange = { viewModel.dispatch(ApplyViewAction.Search(it)) },
-                                singleLine = true,
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = AppIcons.Search,
-                                        contentDescription = stringResource(R.string.search)
-                                    )
-                                },
-                                trailingIcon = {
-                                    IconButton(
-                                        shapes = IconButtonShapes(
-                                            shape = IconButtonDefaults.smallRoundShape,
-                                            pressedShape = IconButtonDefaults.smallPressedShape
-                                        ),
-                                        onClick = {
-                                            searchBarActivated = false
-                                            viewModel.dispatch(ApplyViewAction.Search(""))
-                                        }) {
+    InstallerMaterialExpressiveTheme {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentWindowInsets = WindowInsets.none,
+            topBar = {
+                var searchBarActivated by remember { mutableStateOf(false) }
+                TopAppBar(
+                    scrollBehavior = scrollBehavior,
+                    title = {
+                        AnimatedContent(targetState = searchBarActivated) {
+                            if (!it) Text(stringResource(R.string.app))
+                            else {
+                                val focusRequester = remember { FocusRequester() }
+                                OutlinedTextField(
+                                    modifier = Modifier.focusRequester(focusRequester),
+                                    value = viewModel.state.search,
+                                    onValueChange = { viewModel.dispatch(ApplyViewAction.Search(it)) },
+                                    singleLine = true,
+                                    leadingIcon = {
                                         Icon(
-                                            imageVector = AppIcons.Close,
-                                            contentDescription = stringResource(R.string.close)
+                                            imageVector = AppIcons.Search,
+                                            contentDescription = stringResource(R.string.search)
                                         )
-                                    }
-                                },
-                                textStyle = MaterialTheme.typography.titleMedium
+                                    },
+                                    trailingIcon = {
+                                        IconButton(
+                                            shapes = IconButtonShapes(
+                                                shape = IconButtonDefaults.smallRoundShape,
+                                                pressedShape = IconButtonDefaults.smallPressedShape
+                                            ),
+                                            onClick = {
+                                                searchBarActivated = false
+                                                viewModel.dispatch(ApplyViewAction.Search(""))
+                                            }) {
+                                            Icon(
+                                                imageVector = AppIcons.Close,
+                                                contentDescription = stringResource(R.string.close)
+                                            )
+                                        }
+                                    },
+                                    textStyle = MaterialTheme.typography.titleMedium
+                                )
+                                SideEffect {
+                                    focusRequester.requestFocus()
+                                }
+                            }
+                        }
+                    },
+                    navigationIcon = {
+                        AppBackButton(onClick = { navController.navigateUp() })
+                    },
+                    actions = {
+                        AnimatedVisibility(visible = !searchBarActivated) {
+                            IconButton(
+                                onClick = { searchBarActivated = !searchBarActivated }) {
+                                Icon(
+                                    imageVector = AppIcons.Search,
+                                    contentDescription = stringResource(R.string.search)
+                                )
+                            }
+                        }
+                        IconButton(onClick = { showBottomSheet = true }) {
+                            Icon(
+                                imageVector = AppIcons.Menu,
+                                contentDescription = stringResource(R.string.menu)
                             )
-                            SideEffect {
-                                focusRequester.requestFocus()
+                        }
+                    }
+                )
+            },
+            floatingActionButton = {
+                AnimatedVisibility(
+                    visible = showFloating,
+                    enter = scaleIn(),
+                    exit = scaleOut(),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    FloatingActionButton({
+                        coroutineScope.launch {
+                            lazyListState.animateScrollToItem(0)
+                        }
+                    }) {
+                        Icon(imageVector = AppIcons.ArrowUp, contentDescription = null)
+                    }
+                }
+            }) {
+            Box(modifier = Modifier.padding(it)) {
+                when {
+                    viewModel.state.apps.progress is ViewContent.Progress.Loading && viewModel.state.apps.data.isEmpty() -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                ContainedLoadingIndicator()
+                                Text(
+                                    text = stringResource(id = R.string.loading),
+                                    style = MaterialTheme.typography.titleLarge
+                                )
                             }
                         }
                     }
-                },
-                navigationIcon = {
-                    AppBackButton(onClick = { navController.navigateUp() })
-                },
-                actions = {
-                    AnimatedVisibility(visible = !searchBarActivated) {
-                        IconButton(
-                            onClick = { searchBarActivated = !searchBarActivated }) {
-                            Icon(
-                                imageVector = AppIcons.Search,
-                                contentDescription = stringResource(R.string.search)
-                            )
-                        }
-                    }
-                    IconButton(onClick = { showBottomSheet = true }) {
-                        Icon(
-                            imageVector = AppIcons.Menu,
-                            contentDescription = stringResource(R.string.menu)
-                        )
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = showFloating,
-                enter = scaleIn(),
-                exit = scaleOut(),
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
-                FloatingActionButton({
-                    coroutineScope.launch {
-                        lazyListState.animateScrollToItem(0)
-                    }
-                }) {
-                    Icon(imageVector = AppIcons.ArrowUp, contentDescription = null)
-                }
-            }
-        }) {
-        Box(modifier = Modifier.padding(it)) {
-            when {
-                viewModel.state.apps.progress is ViewContent.Progress.Loading && viewModel.state.apps.data.isEmpty() -> {
-                    // 使用 Box 将加载指示器和文本居中
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        // 使用 Column 将指示器和文本垂直排列
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+
+                    else -> {
+                        val refreshing = viewModel.state.apps.progress is ViewContent.Progress.Loading
+                        val pullToRefreshState = rememberPullToRefreshState()
+                        // 使用 PullToRefreshBox 作为根容器
+                        PullToRefreshBox(
+                            state = pullToRefreshState,
+                            isRefreshing = refreshing,
+                            onRefresh = { viewModel.dispatch(ApplyViewAction.LoadApps) },
+                            modifier = Modifier.fillMaxSize(), // 将修饰符应用在这里
+                            indicator = {
+                                //  将 Indicator 替换为 LoadingIndicator
+                                PullToRefreshDefaults.LoadingIndicator(
+                                    modifier = Modifier.align(Alignment.TopCenter),
+                                    state = pullToRefreshState,
+                                    isRefreshing = refreshing,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                                )
+                            }
                         ) {
-                            //  M3E 风格的加载指示器
-                            ContainedLoadingIndicator()
-                            Text(
-                                text = stringResource(id = R.string.loading),
-                                style = MaterialTheme.typography.titleLarge
+                            ItemsWidget(
+                                modifier = Modifier.fillMaxSize(),
+                                viewModel = viewModel,
+                                lazyListState = lazyListState
                             )
+                            // PullToRefreshBox 默认已经包含了一个居中对齐的指示器 (Indicator)。
+                            // 不需要再手动添加 PullRefreshIndicator。
+                            // 如果需要自定义指示器，可以使用 indicator 参数。
                         }
-                    }
-                }
 
-                else -> {
-                    val refreshing = viewModel.state.apps.progress is ViewContent.Progress.Loading
-                    val pullToRefreshState = rememberPullToRefreshState()
-                    // 使用 PullToRefreshBox 作为根容器
-                    PullToRefreshBox(
-                        state = pullToRefreshState,
-                        isRefreshing = refreshing,
-                        onRefresh = { viewModel.dispatch(ApplyViewAction.LoadApps) },
-                        modifier = Modifier.fillMaxSize(), // 将修饰符应用在这里
-                        indicator = {
-                            //  将 Indicator 替换为 LoadingIndicator
-                            PullToRefreshDefaults.LoadingIndicator(
-                                modifier = Modifier.align(Alignment.TopCenter),
-                                state = pullToRefreshState,
-                                isRefreshing = refreshing,
-                                color = MaterialTheme.colorScheme.primary,
-                                containerColor = MaterialTheme.colorScheme.surfaceContainer
-                            )
-                        }
-                    ) {
-                        ItemsWidget(
-                            modifier = Modifier.fillMaxSize(),
-                            viewModel = viewModel,
-                            lazyListState = lazyListState
-                        )
-                        // PullToRefreshBox 默认已经包含了一个居中对齐的指示器 (Indicator)。
-                        // 不需要再手动添加 PullRefreshIndicator。
-                        // 如果需要自定义指示器，可以使用 indicator 参数。
                     }
 
                 }
-
             }
         }
-    }
 
-    if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-        BottomSheetContent(viewModel)
+        if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+            BottomSheetContent(viewModel)
+        }
     }
 }
 
@@ -420,37 +421,6 @@ private fun BottomSheetContent(viewModel: ApplyViewModel) {
     }
 }
 
-/*@Composable
-private fun LabelWidget(text: String) {
-    CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.titleMedium) {
-        Text(text)
-    }
-}*/
-
-/*@Composable
-private fun OrderWidget(viewModel: ApplyViewModel) {
-    LabelWidget(stringResource(R.string.sort))
-
-    data class OrderData(val labelResId: Int, val type: ApplyViewState.OrderType)
-
-    val map = listOf(
-        OrderData(R.string.sort_by_label, ApplyViewState.OrderType.Label),
-        OrderData(R.string.sort_by_package_name, ApplyViewState.OrderType.PackageName),
-        OrderData(R.string.sort_by_install_time, ApplyViewState.OrderType.FirstInstallTime)
-    )
-
-    val selectedIndex = map.map { it.type }.indexOf(viewModel.state.orderType)
-    ToggleRow(selectedIndex = selectedIndex) {
-        val a = mutableListOf<String>()
-        map.forEachIndexed { index, value ->
-            Toggle(selected = selectedIndex == index, onSelected = {
-                viewModel.dispatch(ApplyViewAction.Order(value.type))
-            }) {
-                Text(stringResource(value.labelResId))
-            }
-        }
-    }
-}*/
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun OrderWidget(viewModel: ApplyViewModel) {
