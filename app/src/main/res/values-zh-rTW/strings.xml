@@ -1,12 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="agreement_title">溫馨提示</string>
-
     <string name="user_terms">用戶條款</string>
     <string name="privacy_policy">隱私政策</string>
     <string name="agree">同意</string>
     <string name="warning">警告</string>
     <string name="open_source_license">開放原始碼許可</string>
-
     <string name="back">返回</string>
     <string name="home">首頁</string>
     <string name="config">配置</string>
@@ -19,18 +18,14 @@
     <string name="other">其他</string>
     <string name="about_detail">關於 InstallerX</string>
     <string name="get_update_detail">檢查軟體更新和新功能</string>
-
     <string name="stable">正式版</string>
     <string name="preview">預覽版</string>
     <string name="unstable">測試版</string>
-
     <string name="enable_notification_hint">請啟用通知以進行安裝！</string>
     <string name="enable_storage_permission_hint">請啟用「所有檔案存取」權限！</string>
-
     <string name="discuss">討論 &amp; 回饋 &amp; 更新</string>
     <string name="telegram_group">Telegram群组</string>
     <string name="telegram_group_desc">歡迎加入討論！</string>
-
     <string name="theme_settings">主題設定</string>
     <string name="theme_settings_ui_style">主題風格</string>
     <string name="theme_settings_desc">更改應用主題</string>
@@ -52,7 +47,6 @@
     <string name="installer_settings_global_installer">全局</string>
     <string name="installer_settings_dialog_mode_options">對話框安裝自定義選項</string>
     <string name="installer_settings_notification_mode_options">通知安裝自定義選項</string>
-
     <string name="basic">常規</string>
     <string name="disable_adb_install_verify">停用系統安裝驗證</string>
     <string name="disable_adb_install_verify_desc">在某些系統上可以禁止安裝掃描（Play 保護機制等）</string>
@@ -71,9 +65,7 @@
     <string name="unlock_default_installer_failed">清除失敗</string>
     <string name="clear_cache">清理快取</string>
     <string name="success">成功</string>
-
     <string name="details">詳情</string>
-
     <string name="add">新增</string>
     <string name="update">更新</string>
     <string name="save">保存</string>
@@ -82,14 +74,11 @@
     <string name="apply">應用</string>
     <string name="delete">刪除</string>
     <string name="restore">恢復</string>
-
     <string name="delete_success">刪除成功</string>
-
     <string name="loading">載入中…</string>
     <string name="empty_configs">沒有配置</string>
     <string name="filter">過濾</string>
     <string name="order">排序</string>
-
     <string name="config_name">名稱</string>
     <string name="config_info">資訊</string>
     <string name="config_description">描述</string>
@@ -142,14 +131,11 @@
     <string name="config_package_name">套件名稱</string>
     <string name="config_confirm_deletion">確認刪除</string>
     <string name="config_confirm_deletion_desc">您確定要刪除「%1$s」嗎？此操作無法撤銷。</string>
-
     <string name="config_installer_matches">符合: %1$s</string>
     <string name="config_no_managed_packages_to_suggest">沒有可建議的應用程式</string>
-
     <string name="config_error_name">名稱不得為空</string>
     <string name="config_error_customize_authorizer">自定授權器不得為空</string>
     <string name="config_error_installer">安裝者不得為空</string>
-
     <string name="discard">放棄更改</string>
     <string name="confirm">確認</string>
     <string name="cancel">取消</string>
@@ -167,7 +153,6 @@
     <string name="select">選擇</string>
     <string name="clear">清除</string>
     <string name="global">全局</string>
-
     <string name="options">選項</string>
     <string name="sort">排序</string>
     <string name="sort_by_label">名稱</string>
@@ -177,7 +162,6 @@
     <string name="sort_by_selected_first">選中優先</string>
     <string name="sort_by_show_system_app">顯示系統應用</string>
     <string name="sort_by_show_package_name">顯示包名</string>
-
     <string name="installer_ready">準備就緒</string>
     <string name="installer_resolving">分析中…</string>
     <string name="installer_resolve_failed">分析失敗</string>
@@ -208,7 +192,6 @@
     <string name="installer_channel_name">安裝通知</string>
     <string name="installer_progress_channel_name">安裝過程通知</string>
     <string name="installer_background_channel_name">後臺通知</string>
-
     <string name="permission_read_external_storage">读取外部存储</string>
     <string name="permission_write_external_storage">写入外部存储</string>
     <string name="permission_access_fine_location">精确位置</string>
@@ -260,15 +243,12 @@
     <string name="permission_access_mock_location">访问模拟定位</string>
     <string name="permission_dhizuku">使用Dhizuku</string>
     <string name="permission_unknown">未知权限</string>
-
     <string name="installer_running">InstallerX 執行中</string>
-
     <string name="installer_version_short">版本：%1$s (%2$s)</string>
     <string name="installer_version">版本：%1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">包名：%1$s</string>
     <string name="installer_file_path">路徑：%1$s</string>
-
     <string name="exception_install_failed_unknown">未知錯誤</string>
     <string name="exception_analyse_failed_all_files_unsupported">不支援的檔案格式</string>
     <string name="exception_install_failed_already_exists">應用已安裝（包名相同、版本相同），請先解除安裝然後重試</string>
@@ -313,7 +293,6 @@
     <string name="installer_error_reason">錯誤原因</string>
     <string name="exception_install_failed_hyperos_isolation_violation">HyperOS 安裝系統應用程式需要聲明有效的安裝者！</string>
     <string name="get_update">取得更新</string>
-
     <string name="show_dialog_when_pressing_notification">點擊通知時顯示對話框</string>
     <string name="change_notification_touch_behavior">更改通知觸控行為</string>
     <string name="version_compare_in_single_line">單行顯示版本對比</string>
@@ -333,7 +312,6 @@
     <string name="show_intelligent_suggestion_desc">當安裝失敗時顯示智能建議</string>
     <string name="permission_list">查看應用的權限列表</string>
     <string name="permission_list_desc">正在安裝的軟體包請求的權限列表</string>
-
     <!--  InstallOptions Start  -->
     <string name="config_allow_test">允許測試</string>
     <string name="config_allow_test_desc">如果要安裝的套件是僅供測試的應用程式，則允許其安裝。</string>
@@ -379,7 +357,6 @@
     <string name="config_bypass_low_target_sdk_desc">允許安裝目標SDK版本較低的應用程式。</string>
     <string name="dry_run">空執行</string>
     <string name="dry_run_desc">驗證套件，但不安裝它。</string>
-
     <string name="unarchive">取消歸檔</string>
     <string name="unarchive_desc">取消一個現有安裝的歸檔</string>
     <string name="replace_existing">取代現有</string>
