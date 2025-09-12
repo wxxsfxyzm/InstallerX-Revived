@@ -1,5 +1,7 @@
 # InstallerX Revived (Community Edition)
 
+[English](README.md) | **简体中文** | [Español](README_ES.md)
+
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![Latest Release](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=稳定版)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![Prerelease](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=测试版)](https://github.com/wxxsfxyzm/InstallerX/releases)[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
 - 这是一个由社区维护的分支版本， [原项目](https://github.com/iamr0s/InstallerX)已被作者归档。
@@ -123,6 +125,24 @@
 - 关于联网权限：由于功能扩展，引入了联网相关功能，然而许多用户希望安装器保持纯粹的本地安装，不需要联网权限。因此发布时会打包成online和offline两个版本，两个版本的包名、版本号、签名完全相同，可以混装，请按需下载。
   - `online版` 支持分享下载直链到InstallerX进行安装，以后可能会添加更多联网相关的实用功能，**永远**不会将联网权限用于非安装用途，请放心使用
   - `offline版` 完全不申请联网权限，尝试online版功能时会得到明确的出错提示，做一个纯粹的本地安装器
+
+## 关于本地化
+
+欢迎参与贡献翻译，请前往：https://hosted.weblate.org/projects/installerx-revived/
+
+### 本地化状态 (Localization Status)
+
+| 语言 (Language)              | 状态 (Status)                                                                                                                                                                                                  |
+|:---------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **所有语言 (All Languages)**   | [![Translation status](https://hosted.weblate.org/widget/installerx-revived/strings/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/)                                         |
+| 英语 (English)               | [![Translation status for English](https://hosted.weblate.org/widget/installerx-revived/strings/en/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/en/)                       |
+| 简体中文 (Simplified Chinese)  | [![Translation status for Simplified Chinese](https://hosted.weblate.org/widget/installerx-revived/strings/zh_Hans/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/zh_Hans/)  |
+| 繁體中文 (Traditional Chinese) | [![Translation status for Traditional Chinese](https://hosted.weblate.org/widget/installerx-revived/strings/zh_Hant/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/zh_Hant/) |
+| 俄语 (Russian)               | [![Translation status for Russian](https://hosted.weblate.org/widget/installerx-revived/strings/ru/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/ru/)                       |
+| 西班牙语 (Spanish)             | [![Translation status for Spanish](https://hosted.weblate.org/widget/installerx-revived/strings/es/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/es/)                       |
+| 泰语 (Thai)                  | [![Translation status for Thai](https://hosted.weblate.org/widget/installerx-revived/strings/th/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/th/)                          |
+| 阿拉伯语 (Arabic)              | [![Translation status for Arabic](https://hosted.weblate.org/widget/installerx-revived/strings/ar/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/ar/)                        |
+| 乌克兰语 (Ukrainian)           | [![Translation status for Ukrainian](https://hosted.weblate.org/widget/installerx-revived/strings/uk/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/uk/)                     |
 
 ## 开源协议
 
