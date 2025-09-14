@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.miuix.settings.config.edit
 
-import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.WindowInsets
@@ -21,7 +20,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewEvent
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
@@ -56,6 +54,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
@@ -96,7 +95,7 @@ fun MiuixEditPage(
         showUnsavedDialogState.value = true
     }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is EditViewEvent.SnackBar -> {
@@ -147,6 +146,7 @@ fun MiuixEditPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .scrollEndHaptic()
                 .padding(it)
         ) {
             item { MiuixDataNameWidget(viewModel = viewModel) }
@@ -185,7 +185,7 @@ fun MiuixEditPage(
                 ) {
                     MiuixDataForAllUserWidget(viewModel = viewModel)
                     MiuixDataAllowTestOnlyWidget(viewModel = viewModel)
-                    if (Build.VERSION.SDK_INT <= InstallOption.AllowDowngrade.maxSdk) MiuixDataAllowDowngradeWidget(viewModel = viewModel)
+                    MiuixDataAllowDowngradeWidget(viewModel = viewModel)
                     MiuixDataBypassLowTargetSdkWidget(viewModel = viewModel)
                     MiuixDataAllowRestrictedPermissionsWidget(viewModel = viewModel)
                     MiuixDataAllowAllRequestedPermissionsWidget(viewModel = viewModel)

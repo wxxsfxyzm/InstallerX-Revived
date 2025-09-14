@@ -64,7 +64,7 @@ import com.rosan.installer.util.getBestPermissionLabel
 fun installExtendedMenuDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
-    val installOptions = rememberInstallOptions()
+    val installOptions = rememberInstallOptions(installer.config.authorizer)
     val installFlags by viewModel.installFlags.collectAsState()
     val managedPackages by viewModel.managedInstallerPackages.collectAsState()
     val selectedInstallerPackageName by viewModel.selectedInstaller.collectAsState()

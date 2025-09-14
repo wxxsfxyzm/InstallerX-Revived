@@ -35,22 +35,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.rosan.installer.R
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 @SuppressLint("LocalContextResourcesRead")
 @Composable
-fun rememberInstallOptions(): List<InstallOption> {
+fun rememberInstallOptions(authorizer: ConfigEntity.Authorizer): List<InstallOption> {
     val context = LocalContext.current
 
-    return remember {
-        getInstallOptions().sortedBy { opt ->
+    return remember(authorizer) {
+        getInstallOptions(authorizer).sortedBy { opt ->
             context.resources.getString(opt.labelResource)
         }
     }
 }
 
-private fun getInstallOptions() = InstallOption::class.sealedSubclasses
+private fun getInstallOptions(authorizer: ConfigEntity.Authorizer) = InstallOption::class.sealedSubclasses
     .mapNotNull { it.objectInstance }
-    .filter { Build.VERSION.SDK_INT >= it.minSdk && Build.VERSION.SDK_INT <= it.maxSdk }
+    .filter {
+        // First, check if the option is compatible with the current SDK version.
+        val sdkVersionMatch = Build.VERSION.SDK_INT >= it.minSdk && Build.VERSION.SDK_INT <= it.maxSdk
+        if (!sdkVersionMatch) {
+            return@filter false
+        }
+
+        // Second, apply custom logic based on the authorizer.
+        when (it) {
+            // The AllowDowngrade option should only be available when the authorizer is Root.
+            is InstallOption.AllowDowngrade -> authorizer == ConfigEntity.Authorizer.Root
+            // All other options are available by default.
+            else -> true
+        }
+    }
 
 @Suppress("unused")
 sealed class InstallOption(
@@ -108,8 +123,9 @@ sealed class InstallOption(
     data object AllowDowngrade : InstallOption(
         value = 0x00000080 or
                 0x00100000,
-        // Starting Android 15, there is no way to downgrade an app without using the rollback feature,
-        maxSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+        // Starting Android 15, only user root or system is allowed to downgrade app.
+        // Simply setting maxSdk will break root install, so we handle it elsewhere.
+        // maxSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
         labelResource = R.string.config_allow_downgrade,
         descResource = R.string.config_allow_downgrade_desc,
     )

@@ -53,8 +53,9 @@
     <string name="theme_settings_google_ui_style">Google UI style</string>
     <string name="theme_settings_launcher_icons">Launcher icon</string>
     <string name="theme_settings_hide_launcher_icon">Hide launcher icon</string>
-    <string name="theme_settings_hide_launcher_icon_desc">Hide icon from launcher</string>
+    <string name="theme_settings_hide_launcher_icon_desc">Dial *#*#46789#*#* to open settings</string>
     <string name="theme_settings_hide_launcher_icon_warning">Please make sure you can access this page before hiding launcher icon!</string>
+    <string name="theme_settings_hide_launcher_icon_warning_xiaomi">For HyperOS, please allow "Autostart" and "Open new windows while running in the background" to receive dialer code.</string>
     <string name="installer_settings">Installer Settings</string>
     <string name="installer_settings_desc">Change the global settings of the installer</string>
     <string name="installer_settings_global_installer">Global</string>
@@ -183,6 +184,10 @@
     <string name="clear">Clear</string>
     <string name="global">Global</string>
 
+    <string name="pull_to_refresh_hint1">Pull down to refresh</string>
+    <string name="pull_to_refresh_hint2">Release to refresh</string>
+    <string name="pull_to_refresh_hint3">Refreshing…</string>
+    <string name="pull_to_refresh_hint4">Refreshed successfully</string>
     <string name="options">Options</string>
     <string name="sort">Sort</string>
     <string name="sort_by_label">Label</string>
@@ -373,6 +378,7 @@
     <string name="config_all_users">Install For All Users</string>
     <string name="config_all_users_desc">Install the package for all users on the system, instead of just the specified or default user</string>
     <string name="config_allow_downgrade">Allow Downgrade</string>
+    <string name="config_allow_downgrade_blocked_desc">Not supported for Android 15+ without ROOT!</string>
     <string name="config_allow_downgrade_desc">Attempts to downgrade the currently-installed version of the package to the one being installed (may not work on all ROMs)</string>
     <string name="config_grant_all_permissions">Grant All Requested Permissions</string>
     <string name="config_grant_all_permissions_desc">Automatically grant all permissions the package is requesting. Note that this only applies to runtime permissions. Special permissions like All Files Access or Accessibility won\'t be automatically granted.</string>

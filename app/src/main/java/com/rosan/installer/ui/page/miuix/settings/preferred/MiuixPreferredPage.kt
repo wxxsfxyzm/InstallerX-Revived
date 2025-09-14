@@ -57,6 +57,7 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -146,6 +147,7 @@ fun MiuixPreferredPage(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
+                        .scrollEndHaptic()
                         .padding(top = innerPadding.calculateTopPadding())
                 ) {
                     item { SmallTitle(stringResource(R.string.global)) }

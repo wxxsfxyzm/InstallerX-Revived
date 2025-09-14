@@ -253,10 +253,16 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                     Timber.d("Package $packageName is not archived, using replace existing option.")
                     InstallOption.ReplaceExisting.value
                 }
-        // Disable Dhizuku not supported stuff
-        if (config.authorizer == ConfigEntity.Authorizer.Dhizuku)
-            params.installFlags = params.installFlags and InstallOption.GrantAllRequestedPermissions.value.inv()
 
+        // --- Disable Dhizuku not supported stuff ---
+        if (config.authorizer == ConfigEntity.Authorizer.Dhizuku)
+        // Dhizuku does not support GrantAllRequestedPermissions
+            params.installFlags = params.installFlags and InstallOption.GrantAllRequestedPermissions.value.inv()
+        // --- Dhizuku End ---
+
+        // Android System will ignore INSTALL_ALLOW_DOWNGRADE for None ROOT/SYSTEM on Android 15+, no need to disable it here
+
+        // --- Set abiOverride ---
         val baseApkArch = entities.firstOrNull { it.name == "base.apk" }?.arch
         Timber.d("Current Arch to install: $baseApkArch")
 
@@ -271,6 +277,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             Timber.d("Setting abiOverride to $abiToOverride")
             params.abiOverride = abiToOverride
         }
+        // --- abiOverride End ---
 
         val sessionId = packageInstaller.createSession(params)
         val session = packageInstaller.openSession(sessionId)
