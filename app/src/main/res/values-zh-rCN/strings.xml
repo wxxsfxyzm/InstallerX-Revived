@@ -162,6 +162,10 @@
     <string name="select">选择</string>
     <string name="clear">清除</string>
     <string name="global">全局</string>
+    <string name="pull_to_refresh_hint1">下拉触发刷新</string>
+    <string name="pull_to_refresh_hint2">释放即可刷新</string>
+    <string name="pull_to_refresh_hint3">正在刷新…</string>
+    <string name="pull_to_refresh_hint4">刷新成功</string>
     <string name="options">选项</string>
     <string name="sort">排序</string>
     <string name="sort_by_label">名称</string>
