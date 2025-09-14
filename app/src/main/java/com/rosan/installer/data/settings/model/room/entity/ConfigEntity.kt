@@ -21,6 +21,8 @@ data class ConfigEntity(
     @ColumnInfo(name = "customize_authorizer") var customizeAuthorizer: String,
     @ColumnInfo(name = "install_mode") var installMode: InstallMode,
     @ColumnInfo(name = "installer") var installer: String?,
+    @ColumnInfo(name = "enable_customize_user", defaultValue = "0") var enableCustomizeUser: Boolean = false,
+    @ColumnInfo(name = "target_user_id", defaultValue = "0") var targetUserId: Int = 0,
     @ColumnInfo(name = "enable_manual_dexopt", defaultValue = "0") var enableManualDexopt: Boolean = false,
     @ColumnInfo(name = "force_dexopt", defaultValue = "0") var forceDexopt: Boolean = false,
     @ColumnInfo(
@@ -45,6 +47,8 @@ data class ConfigEntity(
             customizeAuthorizer = "",
             installMode = InstallMode.Global,
             installer = null,
+            enableCustomizeUser = false,
+            targetUserId = 0,
             enableManualDexopt = false,
             forceDexopt = false,
             dexoptMode = DexoptMode.SpeedProfile,
@@ -53,7 +57,7 @@ data class ConfigEntity(
             allowTestOnly = false,
             allowDowngrade = false,
             allowRestrictedPermissions = true,
-            bypassLowTargetSdk = false,
+            bypassLowTargetSdk = true,
             allowAllRequestedPermissions = false,
         )
 
@@ -63,6 +67,8 @@ data class ConfigEntity(
             customizeAuthorizer = "",
             installMode = InstallMode.Global,
             installer = "com.miui.packageinstaller",
+            enableCustomizeUser = false,
+            targetUserId = 0,
             enableManualDexopt = false,
             forceDexopt = false,
             dexoptMode = DexoptMode.SpeedProfile,
@@ -71,7 +77,7 @@ data class ConfigEntity(
             allowTestOnly = false,
             allowDowngrade = false,
             allowRestrictedPermissions = true,
-            bypassLowTargetSdk = false,
+            bypassLowTargetSdk = true,
             allowAllRequestedPermissions = false,
         )
     }
