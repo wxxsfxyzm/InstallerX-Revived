@@ -276,7 +276,7 @@ fun ApplyPage(
 }
 
 @Composable
-fun ItemsWidget(
+private fun ItemsWidget(
     modifier: Modifier,
     viewModel: ApplyViewModel,
     lazyListState: LazyListState,

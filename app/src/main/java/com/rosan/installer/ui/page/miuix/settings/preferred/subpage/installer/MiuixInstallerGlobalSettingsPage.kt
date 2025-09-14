@@ -31,6 +31,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixInstallerGlobalSettingsPage(
@@ -55,6 +56,7 @@ fun MiuixInstallerGlobalSettingsPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .scrollEndHaptic()
                 .padding(paddingValues)
         ) {
             item { SmallTitle(stringResource(R.string.installer_settings_global_installer)) }

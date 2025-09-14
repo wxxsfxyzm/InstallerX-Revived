@@ -184,6 +184,10 @@
     <string name="clear">Clear</string>
     <string name="global">Global</string>
 
+    <string name="pull_to_refresh_hint1">Pull down to refresh</string>
+    <string name="pull_to_refresh_hint2">Release to refresh</string>
+    <string name="pull_to_refresh_hint3">Refreshing…</string>
+    <string name="pull_to_refresh_hint4">Refreshed successfully</string>
     <string name="options">Options</string>
     <string name="sort">Sort</string>
     <string name="sort_by_label">Label</string>

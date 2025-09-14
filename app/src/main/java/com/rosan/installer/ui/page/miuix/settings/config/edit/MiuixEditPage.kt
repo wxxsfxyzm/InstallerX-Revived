@@ -54,6 +54,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
@@ -94,7 +95,7 @@ fun MiuixEditPage(
         showUnsavedDialogState.value = true
     }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is EditViewEvent.SnackBar -> {
@@ -145,6 +146,7 @@ fun MiuixEditPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .scrollEndHaptic()
                 .padding(it)
         ) {
             item { MiuixDataNameWidget(viewModel = viewModel) }

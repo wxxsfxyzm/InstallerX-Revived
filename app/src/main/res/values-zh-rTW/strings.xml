@@ -168,6 +168,10 @@
     <string name="clear">清除</string>
     <string name="global">全局</string>
 
+    <string name="pull_to_refresh_hint1">下拉觸發更新</string>
+    <string name="pull_to_refresh_hint2">放開立即更新</string>
+    <string name="pull_to_refresh_hint3">正在更新…</string>
+    <string name="pull_to_refresh_hint4">更新成功</string>
     <string name="options">選項</string>
     <string name="sort">排序</string>
     <string name="sort_by_label">名稱</string>

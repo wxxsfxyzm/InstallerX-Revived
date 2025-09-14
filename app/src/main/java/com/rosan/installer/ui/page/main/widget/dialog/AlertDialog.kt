@@ -200,9 +200,11 @@ fun HideLauncherIconWarningDialog(
             onDismissRequest = onDismiss,
             title = { Text(text = dialogTitle) },
             text = {
-                Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
-                if (RsConfig.currentManufacturer == Manufacturer.XIAOMI)
-                    Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi))
+                Column {
+                    Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
+                    if (RsConfig.currentManufacturer == Manufacturer.XIAOMI)
+                        Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi))
+                }
             },
             confirmButton = {
                 TextButton(onClick = onConfirm) {
