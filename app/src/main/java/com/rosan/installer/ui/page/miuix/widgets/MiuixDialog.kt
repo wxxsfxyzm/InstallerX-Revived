@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.miuix.widgets
 
-import android.app.ProgressDialog.show
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
