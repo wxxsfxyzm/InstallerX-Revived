@@ -13,6 +13,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.repo.ConfigRepo
 import com.rosan.installer.data.settings.util.ConfigUtil.Companion.getGlobalAuthorizer
 import com.rosan.installer.data.settings.util.ConfigUtil.Companion.getGlobalInstallMode
+import com.rosan.installer.data.settings.util.ConfigUtil.Companion.readGlobal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -147,24 +148,45 @@ class EditViewModel(
     }
 
     private fun changeDataAuthorizer(authorizer: ConfigEntity.Authorizer) {
-        // 更新 authorizer 的值
-        val newAuthorizer = authorizer
-        var newState = state.copy(
-            data = state.data.copy(authorizer = newAuthorizer)
+        var updatedData = state.data.copy(
+            authorizer = authorizer
         )
 
-        // 检查新 authorizer 并更新依赖它的状态
-        if (newAuthorizer == ConfigEntity.Authorizer.Dhizuku) {
-            newState = newState.copy(
-                data = newState.data.copy(
-                    // 当切换到 Dhizuku 时，强制将 declareInstaller 的真实状态也设为 false
-                    declareInstaller = false
-                )
+        // Dependency logic for Dhizuku: also disable declareInstaller
+        if (authorizer == ConfigEntity.Authorizer.Dhizuku) {
+            updatedData = updatedData.copy()
+        }
+
+        // Determine the effective authorizer after this change.
+        val effectiveAuthorizer = if (authorizer == ConfigEntity.Authorizer.Global)
+            globalAuthorizer
+        else authorizer
+
+        // If the effective authorizer is Dhizuku, force disable the customize user feature.
+        if (effectiveAuthorizer == ConfigEntity.Authorizer.Dhizuku) {
+            updatedData = updatedData.copy(
+                declareInstaller = false,
+                enableCustomizeUser = false,
+                enableManualDexopt = false
             )
         }
 
-        // 使用包含了所有正确状态的 newState 来更新 state
-        state = newState
+        // Apply the data changes to the state.
+        state = state.copy(data = updatedData)
+
+        // Now, decide what to do with the user list based on the *new* state.
+        if (state.data.enableCustomizeUser) {
+            // If customize user is enabled (which means authorizer is not Dhizuku),
+            // we should reload the user list as it might have changed.
+            loadAvailableUsers()
+        } else {
+            // If customize user is now disabled (either manually or forced by Dhizuku),
+            // clear the user list and reset the target user ID.
+            state = state.copy(
+                availableUsers = emptyMap(),
+                data = state.data.copy(targetUserId = 0)
+            )
+        }
     }
 
     private fun changeDataCustomizeAuthorizer(customizeAuthorizer: String) {
@@ -200,11 +222,19 @@ class EditViewModel(
     }
 
     private fun changeDataCustomizeUser(enable: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                enableCustomizeUser = enable
-            )
+        val updatedData = state.data.copy(
+            enableCustomizeUser = enable
         )
+        if (enable) {
+            state = state.copy(data = updatedData)
+            loadAvailableUsers()
+        } else {
+            // When disabling, also clear the user list and reset the selected user ID.
+            state = state.copy(
+                data = updatedData.copy(targetUserId = 0),
+                availableUsers = emptyMap()
+            )
+        }
     }
 
     private fun changeDataTargetUserId(userId: Int) {
@@ -302,6 +332,35 @@ class EditViewModel(
         )
     }
 
+    private fun loadAvailableUsers() {
+        viewModelScope.launch {
+            Timber.i("[LOAD_USERS] Starting to load available users.")
+            val newAvailableUsers = runCatching {
+                val authorizer = state.data.authorizer.readGlobal()
+                withContext(Dispatchers.IO) { paRepo.getUsers(authorizer) }
+            }.getOrElse {
+                Timber.e(it, "Failed to load available users.")
+                _eventFlow.emit(EditViewEvent.SnackBar(message = it.message ?: "Failed to load users"))
+                emptyMap()
+            }
+
+            val currentTargetUserId = state.data.targetUserId
+            // Validate if the current target user still exists. If not, reset to 0.
+            val newTargetUserId = if (newAvailableUsers.containsKey(currentTargetUserId)) {
+                currentTargetUserId
+            } else {
+                Timber.w("[LOAD_USERS] Current target user ID $currentTargetUserId not found in new user list. Resetting to 0.")
+                0
+            }
+
+            state = state.copy(
+                availableUsers = newAvailableUsers,
+                data = state.data.copy(targetUserId = newTargetUserId)
+            )
+            Timber.i("[LOAD_USERS] Available users loaded: ${newAvailableUsers.keys}. Target user ID set to: $newTargetUserId")
+        }
+    }
+
     private var loadDataJob: Job? = null
 
     private fun loadData() {
@@ -316,33 +375,44 @@ class EditViewModel(
                 repo.find(id) ?: ConfigEntity.default.copy(name = "")
             }
             // Build the initial data state from the entity.
-            val initialData = EditViewState.Data.build(configEntity)
+            var initialData = EditViewState.Data.build(configEntity)
+            val currentGlobalAuthorizer = getGlobalAuthorizer()
+            globalAuthorizer = currentGlobalAuthorizer
+            globalInstallMode = getGlobalInstallMode()
+            // Check if the effective authorizer is Dhizuku and force disable customize user if so.
+            val effectiveAuthorizer = if (configEntity.authorizer == ConfigEntity.Authorizer.Global)
+                currentGlobalAuthorizer
+            else
+                configEntity.authorizer
+
+            if (effectiveAuthorizer == ConfigEntity.Authorizer.Dhizuku) {
+                // Overwrite the enableCustomizeUser value from the loaded entity.
+                initialData = initialData.copy(
+                    declareInstaller = false,
+                    enableCustomizeUser = false,
+                    enableManualDexopt = false
+                )
+            }
             // Store this initial data as the "original" state.
             originalData = initialData
             val managedInstallerPackages =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).firstOrNull()
                     ?: emptyList()
-            var availableUsers = emptyMap<Int, String>()
-            runCatching {
-                withContext(Dispatchers.IO) { availableUsers = paRepo.getUsers(configEntity.authorizer.getAuthorizer()) }
-            }
+            // Set the initial state, but with an empty user list for now.
             state = state.copy(
                 data = initialData,
                 managedInstallerPackages = managedInstallerPackages,
-                availableUsers = availableUsers
+                availableUsers = emptyMap()
             )
+            // Only load the available users if the feature is enabled.
+            if (initialData.enableCustomizeUser) {
+                // This call is non-blocking and will update the state again once users are loaded.
+                loadAvailableUsers()
+            }
             Timber.i("[LOAD_DATA] Original data has been set: $initialData")
-            globalAuthorizer = getGlobalAuthorizer()
-            globalInstallMode = getGlobalInstallMode()
+
         }
     }
-
-    private suspend fun ConfigEntity.Authorizer.getAuthorizer() =
-        if (this == ConfigEntity.Authorizer.Global)
-            getGlobalAuthorizer()
-        else
-            this
-
 
     private var saveDataJob: Job? = null
 

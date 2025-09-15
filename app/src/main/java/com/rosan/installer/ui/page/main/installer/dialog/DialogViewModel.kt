@@ -246,17 +246,11 @@ class DialogViewModel(
         ).fold(0) { acc, flag -> acc or flag }
         // sync to repo.config
         repo.config.installFlags = _installFlags.value
-        // When collecting for the first time, save the original list for multi-install restoration.
-        /*if (originalAnalysisResults.isEmpty()) {
-            originalAnalysisResults = repo.analysisResults
-        }*/
-        //_preInstallAppInfo.value = null
         _currentPackageName.value = null
         val newPackageNames = repo.analysisResults.map { it.packageName }.toSet()
         _displayIcons.update { old -> old.filterKeys { it in newPackageNames } }
         collectRepoJob?.cancel()
         autoInstallJob?.cancel()
-        //fetchPreInstallInfoJob?.cancel()
 
         collectRepoJob = viewModelScope.launch {
             repo.progress.collect { progress ->

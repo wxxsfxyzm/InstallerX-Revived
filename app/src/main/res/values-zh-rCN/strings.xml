@@ -331,7 +331,9 @@
     <string name="close_notification_immediately_on_dialog_dismiss">关闭对话框将静默退出</string>
     <string name="set_countdown">设定倒计时</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku安装成功后自动关闭的倒计时</string>
-    <string name="dhizuku_cannot_set_installer_desc">Dhizuku 模式下不支持设置安装器！</string>
+    <string name="dhizuku_cannot_set_installer_desc">Dhizuku模式下不支持设置安装器！</string>
+    <string name="dhizuku_cannot_set_user_desc">Dhizuku模式下不支持设置用户！</string>
+    <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku模式下不支持设置DexOpt！</string>
     <string name="grant_permission_after_install">点击以在安装完成后授予权限</string>
     <string name="show_intelligent_suggestion">显示智能建议（实验性）</string>
     <string name="show_intelligent_suggestion_desc">当安装失败时显示智能建议</string>

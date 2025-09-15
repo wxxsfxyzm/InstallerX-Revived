@@ -38,6 +38,12 @@ class ConfigUtil {
             return AuthorizerConverter.revert(str)
         }
 
+        suspend fun ConfigEntity.Authorizer.readGlobal() =
+            if (this == ConfigEntity.Authorizer.Global)
+                getGlobalAuthorizer()
+            else
+                this
+
         suspend fun getGlobalCustomizeAuthorizer(): String {
             return appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER, "").first()
         }

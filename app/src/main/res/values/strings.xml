@@ -364,6 +364,8 @@
     <string name="set_countdown">Set countdown</string>
     <string name="dhizuku_auto_close_countdown_desc">Countdown to auto-close after Dhizuku installation succeeds</string>
     <string name="dhizuku_cannot_set_installer_desc">Dhizuku mode does not support setting installer!</string>
+    <string name="dhizuku_cannot_set_user_desc">Dhizuku mode does not support setting target user!</string>
+    <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku mode does not support setting dexopt!</string>
     <string name="grant_permission_after_install">Click to grant permission after installation</string>
     <string name="show_intelligent_suggestion">Show Intelligent Suggestions (Experimental)</string>
     <string name="show_intelligent_suggestion_desc">Show intelligent suggestions when installation fails</string>
