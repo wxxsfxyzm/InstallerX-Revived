@@ -68,6 +68,7 @@ private fun getRecyclableInstance(
     special: (() -> String?)?
 ): Recyclable<out UserService>? {
     // special為null，或special.invoke()時，遵循config
+    Timber.tag("PrivilegedService").d("Authorizer: $authorizer")
     return if (special?.invoke() == null) when (authorizer) {
         ConfigEntity.Authorizer.Root -> ProcessUserServiceRecyclers.get("su").make()
         ConfigEntity.Authorizer.Shizuku -> ShizukuUserServiceRecycler.make()

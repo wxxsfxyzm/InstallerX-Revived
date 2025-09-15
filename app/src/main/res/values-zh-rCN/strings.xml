@@ -16,7 +16,7 @@
     <string name="menu">菜单</string>
     <string name="about">关于</string>
     <string name="other">其它</string>
-    <string name="about_detail">关于 InstallerX</string>
+    <string name="about_detail">关于 InstallerX Revived</string>
     <string name="get_update_detail">检查软件更新和新功能</string>
     <string name="internet_access_enabled">联网</string>
     <string name="internet_access_disabled">离线</string>
@@ -106,6 +106,10 @@
     <string name="config_install_mode_ignore">忽略</string>
     <string name="config_declare_installer">声明安装者（安装来源）</string>
     <string name="config_installer">安装者（包名）</string>
+    <string name="config_customize_user">设定用户</string>
+    <string name="config_customize_user_desc">手动设置为目标用户安装应用</string>
+    <string name="config_user_not_found">获取用户失败</string>
+    <string name="config_target_user">目标安装用户</string>
     <string name="config_manual_dexopt">手动 Dex 优化</string>
     <string name="config_manual_dexopt_desc">在安装后手动触发 dex2oat 进程</string>
     <string name="config_dexopt_mode">优化模式</string>

@@ -7,18 +7,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
+import com.rosan.installer.data.app.repo.PARepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
-import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
 import com.rosan.installer.data.settings.repo.ConfigRepo
+import com.rosan.installer.data.settings.util.ConfigUtil.Companion.getGlobalAuthorizer
+import com.rosan.installer.data.settings.util.ConfigUtil.Companion.getGlobalInstallMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -26,6 +27,7 @@ import timber.log.Timber
 class EditViewModel(
     private val repo: ConfigRepo,
     private val appDataStore: AppDataStore,
+    private val paRepo: PARepo,
     private val id: Long? = null
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
@@ -74,7 +76,7 @@ class EditViewModel(
     fun dispatch(action: EditViewAction) {
         Timber.i("[DISPATCH] Action received: ${action::class.simpleName}")
         viewModelScope.launch {
-            val errorMessage = kotlin.runCatching {
+            val errorMessage = runCatching {
                 when (action) {
                     is EditViewAction.Init -> init()
                     is EditViewAction.ChangeDataName -> changeDataName(action.name)
@@ -84,6 +86,8 @@ class EditViewModel(
                     is EditViewAction.ChangeDataInstallMode -> changeDataInstallMode(action.installMode)
                     is EditViewAction.ChangeDataDeclareInstaller -> changeDataDeclareInstaller(action.declareInstaller)
                     is EditViewAction.ChangeDataInstaller -> changeDataInstaller(action.installer)
+                    is EditViewAction.ChangeDataCustomizeUser -> changeDataCustomizeUser(action.enable)
+                    is EditViewAction.ChangeDataTargetUserId -> changeDataTargetUserId(action.userId)
                     is EditViewAction.ChangeDataEnableManualDexopt -> changeDataEnableManualDexopt(action.enable)
                     is EditViewAction.ChangeDataForceDexopt -> changeDataForceDexopt(action.force)
                     is EditViewAction.ChangeDataDexoptMode -> changeDataDexoptMode(action.mode)
@@ -179,12 +183,6 @@ class EditViewModel(
         )
     }
 
-    private suspend fun getGlobalAuthorizer() =
-        AuthorizerConverter.revert(appDataStore.getString(AppDataStore.AUTHORIZER).first())
-
-    private suspend fun getGlobalInstallMode() =
-        InstallModeConverter.revert(appDataStore.getString(AppDataStore.INSTALL_MODE).first())
-
     private fun changeDataDeclareInstaller(declareInstaller: Boolean) {
         state = state.copy(
             data = state.data.copy(
@@ -197,6 +195,22 @@ class EditViewModel(
         state = state.copy(
             data = state.data.copy(
                 installer = installer
+            )
+        )
+    }
+
+    private fun changeDataCustomizeUser(enable: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                enableCustomizeUser = enable
+            )
+        )
+    }
+
+    private fun changeDataTargetUserId(userId: Int) {
+        state = state.copy(
+            data = state.data.copy(
+                targetUserId = userId
             )
         )
     }
@@ -301,19 +315,34 @@ class EditViewModel(
                 // If editing, find the config by id. Fallback to a default empty one if not found.
                 repo.find(id) ?: ConfigEntity.default.copy(name = "")
             }
-            // UPDATE: Build the initial data state from the entity.
+            // Build the initial data state from the entity.
             val initialData = EditViewState.Data.build(configEntity)
-            // UPDATE: Store this initial data as the "original" state.
+            // Store this initial data as the "original" state.
             originalData = initialData
             val managedInstallerPackages =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).firstOrNull()
                     ?: emptyList()
-            state = state.copy(data = initialData, managedInstallerPackages = managedInstallerPackages)
+            var availableUsers = emptyMap<Int, String>()
+            runCatching {
+                withContext(Dispatchers.IO) { availableUsers = paRepo.getUsers(configEntity.authorizer.getAuthorizer()) }
+            }
+            state = state.copy(
+                data = initialData,
+                managedInstallerPackages = managedInstallerPackages,
+                availableUsers = availableUsers
+            )
             Timber.i("[LOAD_DATA] Original data has been set: $initialData")
             globalAuthorizer = getGlobalAuthorizer()
             globalInstallMode = getGlobalInstallMode()
         }
     }
+
+    private suspend fun ConfigEntity.Authorizer.getAuthorizer() =
+        if (this == ConfigEntity.Authorizer.Global)
+            getGlobalAuthorizer()
+        else
+            this
+
 
     private var saveDataJob: Job? = null
 
@@ -334,7 +363,7 @@ class EditViewModel(
                 else repo.update(entity.also {
                     it.id = id
                 })
-                // UPDATE: After a successful save, update the "original" data
+                // After a successful save, update the "original" data
                 // to match the current state. This resets the hasUnsavedChanges flag.
                 originalData = state.data
                 Timber.i("[SAVE_DATA] Data saved. Original data updated to: $originalData")

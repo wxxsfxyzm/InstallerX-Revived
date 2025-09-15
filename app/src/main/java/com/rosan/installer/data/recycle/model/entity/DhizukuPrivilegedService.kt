@@ -126,4 +126,9 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
             return false
         }
     }
+
+    override fun getUsers(): Map<Int, String> {
+        // TODO temporarily not necessary for dhizuku
+        return emptyMap()
+    }
 }

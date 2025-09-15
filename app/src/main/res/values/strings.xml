@@ -20,7 +20,7 @@
     <string name="menu">Menu</string>
     <string name="about">About</string>
     <string name="other">Other</string>
-    <string name="about_detail">About InstallerX</string>
+    <string name="about_detail">About InstallerX Revived</string>
     <string name="get_update">Get update</string>
     <string name="get_update_detail">Check for software updates and new features.</string>
 
@@ -121,6 +121,10 @@
     <string name="config_install_mode_ignore">Ignore</string>
     <string name="config_declare_installer">Set install source</string>
     <string name="config_installer">installed by (package name)</string>
+    <string name="config_customize_user">Set user to install</string>
+    <string name="config_customize_user_desc">Manually set the user you want to install app to</string>
+    <string name="config_user_not_found">User not found</string>
+    <string name="config_target_user">Target User</string>
     <string name="config_manual_dexopt">Manual Dex Optimization</string>
     <string name="config_manual_dexopt_desc">Manually trigger the dex2oat process after installation</string>
     <string name="config_dexopt_mode">Optimization Mode</string>

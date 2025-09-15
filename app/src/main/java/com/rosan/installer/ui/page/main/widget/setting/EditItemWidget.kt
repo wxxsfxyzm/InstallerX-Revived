@@ -305,6 +305,43 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
 }
 
 @Composable
+fun DataUserWidget(viewModel: EditViewModel) {
+    val enableCustomizeUser = viewModel.state.data.enableCustomizeUser
+    val targetUserId = viewModel.state.data.targetUserId
+    val availableUsers = viewModel.state.availableUsers // 从 ViewModel 获取用户列表
+
+    Column {
+        SwitchWidget(
+            icon = AppIcons.InstallUser, // 你可能需要一个新图标
+            title = stringResource(id = R.string.config_customize_user),
+            description = stringResource(id = R.string.config_customize_user_desc),
+            checked = enableCustomizeUser,
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataCustomizeUser(it))
+            }
+        )
+
+        AnimatedVisibility(
+            visible = enableCustomizeUser,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            val description = availableUsers[targetUserId] ?: stringResource(R.string.config_user_not_found)
+            DropDownMenuWidget(
+                title = stringResource(R.string.config_target_user),
+                description = description,
+                choice = availableUsers.keys.toList().indexOf(targetUserId),
+                data = availableUsers.values.toList(),
+            ) { index ->
+                availableUsers.keys.toList().getOrNull(index)?.let {
+                    viewModel.dispatch(EditViewAction.ChangeDataTargetUserId(it))
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun DataManualDexoptWidget(viewModel: EditViewModel) {
     SwitchWidget(
         icon = Icons.TwoTone.Speed,

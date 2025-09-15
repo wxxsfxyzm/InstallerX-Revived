@@ -15,6 +15,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.repo.AppIconRepo
+import com.rosan.installer.data.app.repo.PARepo
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.installer.model.entity.InstallResult
@@ -25,7 +26,9 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.util.ConfigUtil.Companion.getGlobalAuthorizer
 import com.rosan.installer.ui.page.main.installer.dialog.inner.UiText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +37,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -41,7 +45,8 @@ import timber.log.Timber
 class DialogViewModel(
     private var repo: InstallerRepo,
     private val appDataStore: AppDataStore,
-    private val appIconRepo: AppIconRepo
+    private val appIconRepo: AppIconRepo,
+    private val paRepo: PARepo
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
@@ -66,15 +71,15 @@ class DialogViewModel(
     var versionCompareInSingleLine by mutableStateOf(false)
         private set
 
-    // 用于显示批量安装的进度文本
+    // Text to show in the progress bar
     private val _installProgressText = MutableStateFlow<UiText?>(null)
     val installProgressText: StateFlow<UiText?> = _installProgressText.asStateFlow()
 
-    // 用于驱动进度条的数值进度 (0.0f to 1.0f)
+    // Progress to drive the progress bar
     private val _installProgress = MutableStateFlow<Float?>(null)
     val installProgress: StateFlow<Float?> = _installProgress.asStateFlow()
 
-    // 批量安装队列和结果
+    // Queue and result for multi-install scenarios
     private var multiInstallQueue: List<SelectInstallEntity> = emptyList()
     private val multiInstallResults = mutableListOf<InstallResult>()
     private var currentMultiInstallIndex = 0
@@ -92,9 +97,6 @@ class DialogViewModel(
             else -> true
         }
 
-    //private val _preInstallAppInfo = MutableStateFlow<InstalledAppInfo?>(null)
-    //val preInstallAppInfo: StateFlow<InstalledAppInfo?> = _preInstallAppInfo.asStateFlow()
-
     private val _currentPackageName = MutableStateFlow<String?>(null)
     val currentPackageName: StateFlow<String?> = _currentPackageName.asStateFlow()
 
@@ -107,7 +109,7 @@ class DialogViewModel(
     val installFlags: StateFlow<Int> = _installFlags.asStateFlow()
 
     // StateFlow to hold the default installer package name from global settings.
-    private val _defaultInstallerFromSettings = MutableStateFlow<String?>(repo.config.installer)
+    private val _defaultInstallerFromSettings = MutableStateFlow(repo.config.installer)
     val defaultInstallerFromSettings: StateFlow<String?> = _defaultInstallerFromSettings.asStateFlow()
 
     // StateFlow to hold the list of managed installer packages.
@@ -117,6 +119,14 @@ class DialogViewModel(
     // StateFlow to hold the currently selected installer package name.
     private val _selectedInstaller = MutableStateFlow(repo.config.installer)
     val selectedInstaller: StateFlow<String?> = _selectedInstaller.asStateFlow()
+
+    // StateFlow to hold the list of available users.
+    private val _availableUsers = MutableStateFlow<Map<Int, String>>(emptyMap())
+    val availableUsers: StateFlow<Map<Int, String>> = _availableUsers.asStateFlow()
+
+    // StateFlow to hold the currently selected user ID.
+    private val _selectedUserId = MutableStateFlow(0)
+    val selectedUserId: StateFlow<Int> = _selectedUserId.asStateFlow()
 
     /**
      * Holds information about the app to be uninstalled.
@@ -142,7 +152,6 @@ class DialogViewModel(
      */
     private var isRetryingInstall = false
 
-    //private var fetchPreInstallInfoJob: Job? = null
     private val iconJobs = mutableMapOf<String, Job>()
     private var autoInstallJob: Job? = null
     private var collectRepoJob: Job? = null
@@ -163,6 +172,8 @@ class DialogViewModel(
             appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
                 _managedInstallerPackages.value = packages
             }
+            // Load available users for target user selection.
+            _availableUsers.value = paRepo.getUsers(repo.config.authorizer.getAuthorizer())
         }
     }
 
@@ -203,11 +214,21 @@ class DialogViewModel(
             }
 
             is DialogViewAction.SetInstaller -> selectInstaller(action.installer)
+            is DialogViewAction.SetTargetUser -> selectTargetUser(action.userId)
         }
     }
 
     private fun collectRepo(repo: InstallerRepo) {
         this.repo = repo
+        // Load available users for target user selection.
+        viewModelScope.launch {
+            // Switch to the IO dispatcher for the blocking call
+            val users = withContext(Dispatchers.IO) {
+                paRepo.getUsers(repo.config.authorizer.getAuthorizer())
+            }
+            // The code below this line will execute back on the Main dispatcher
+            _availableUsers.value = users
+        }
         // initialize install flags based on repo.config
         _installFlags.value = listOfNotNull(
             repo.config.allowTestOnly.takeIf { it }
@@ -370,10 +391,6 @@ class DialogViewModel(
                 }
 
                 if (newState is DialogViewState.InstallPrepare && previousState !is DialogViewState.InstallPrepare) {
-                    /*if (_currentPackageName.value != null && (_preInstallAppInfo.value == null || _preInstallAppInfo.value?.packageName != _currentPackageName.value)) {
-                        fetchPreInstallAppInfo(_currentPackageName.value!!)
-                    }*/
-
                     if (repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
                         autoInstallJob?.cancel()
                         autoInstallJob = viewModelScope.launch {
@@ -391,6 +408,12 @@ class DialogViewModel(
             }
         }
     }
+
+    private suspend fun ConfigEntity.Authorizer.getAuthorizer() =
+        if (this == ConfigEntity.Authorizer.Global)
+            getGlobalAuthorizer()
+        else
+            this
 
     /**
      * 切换（启用/禁用）一个安装标志位
@@ -412,6 +435,11 @@ class DialogViewModel(
     private fun selectInstaller(packageName: String?) {
         repo.config.installer = packageName // Update the repository
         _selectedInstaller.value = packageName // Update the StateFlow
+    }
+
+    private fun selectTargetUser(userId: Int) {
+        repo.config.targetUserId = userId
+        _selectedUserId.value = userId
     }
 
     /**
@@ -471,40 +499,6 @@ class DialogViewModel(
         }
     }
 
-    /*private fun fetchPreInstallAppInfo(packageName: String) {
-        if (packageName.isBlank()) {
-            _preInstallAppInfo.value = null
-            return
-        }
-        if (fetchPreInstallInfoJob?.isActive == true && _currentPackageName.value == packageName) {
-            return
-        }
-        if (_preInstallAppInfo.value != null && _preInstallAppInfo.value?.packageName == packageName) {
-            return
-        }
-
-        fetchPreInstallInfoJob?.cancel()
-        fetchPreInstallInfoJob = viewModelScope.launch {
-            val packageNameAtFetchStart = packageName
-            val info = try {
-                withContext(Dispatchers.IO) {
-                    InstalledAppInfo.buildByPackageName(packageNameAtFetchStart)
-                }
-            } catch (e: Exception) {
-                null
-            }
-
-            // 只在状态不是最终状态（成功/失败）时更新 preInstallAppInfo
-            // 并且包名仍然匹配
-            if (state !is DialogViewState.InstallSuccess &&
-                state !is DialogViewState.InstallFailed &&
-                _currentPackageName.value == packageNameAtFetchStart
-            ) {
-                _preInstallAppInfo.value = info
-            }
-        }
-    }*/
-
     fun toast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
@@ -515,9 +509,7 @@ class DialogViewModel(
 
     private fun close() {
         autoInstallJob?.cancel()
-        //fetchPreInstallInfoJob?.cancel()
         collectRepoJob?.cancel()
-        //_preInstallAppInfo.value = null
         _currentPackageName.value = null
         iconJobs.values.forEach { it.cancel() }
         iconJobs.clear()

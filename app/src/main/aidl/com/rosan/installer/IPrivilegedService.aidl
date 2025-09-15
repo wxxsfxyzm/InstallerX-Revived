@@ -70,4 +70,11 @@ interface IPrivilegedService {
      * @return {@code true} if the permission is granted, {@code false} otherwise.
      */
     boolean isPermissionGranted(String packageName, String permission);
+
+    /**
+     * Retrieves a list of all users on the device.
+     *
+     * @return A Map where the key is the integer user ID and the value is the user's name.
+     */
+    Map getUsers();
 }
