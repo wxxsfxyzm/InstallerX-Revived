@@ -101,5 +101,6 @@ fun IntNumberPickerWidget(
             Spacer(modifier = Modifier.width(16.dp))
             Text(text = value.toString())
         }
+        Spacer(modifier = Modifier.size(8.dp))
     }
 }

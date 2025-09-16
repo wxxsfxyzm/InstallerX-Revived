@@ -5,7 +5,8 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 data class EditViewState(
     val data: Data = Data.build(ConfigEntity.default),
-    val managedInstallerPackages: List<NamedPackage> = emptyList()
+    val managedInstallerPackages: List<NamedPackage> = emptyList(),
+    val availableUsers: Map<Int, String> = emptyMap()
 ) {
     data class Data(
         val name: String,
@@ -15,6 +16,8 @@ data class EditViewState(
         val installMode: ConfigEntity.InstallMode,
         val declareInstaller: Boolean,
         val installer: String,
+        val enableCustomizeUser: Boolean,
+        val targetUserId: Int,
         val enableManualDexopt: Boolean,
         val forceDexopt: Boolean,
         val dexoptMode: ConfigEntity.DexoptMode,
@@ -42,6 +45,8 @@ data class EditViewState(
             customizeAuthorizer = if (this.authorizerCustomize) this.customizeAuthorizer else "",
             installMode = this.installMode,
             installer = if (this.declareInstaller) this.installer else null,
+            enableCustomizeUser = this.enableCustomizeUser,
+            targetUserId = this.targetUserId,
             enableManualDexopt = this.enableManualDexopt,
             dexoptMode = this.dexoptMode,
             forceDexopt = this.forceDexopt,
@@ -64,6 +69,8 @@ data class EditViewState(
                 installMode = config.installMode,
                 declareInstaller = config.installer != null,
                 installer = config.installer ?: "",
+                enableCustomizeUser = config.enableCustomizeUser,
+                targetUserId = config.targetUserId,
                 enableManualDexopt = config.enableManualDexopt,
                 forceDexopt = config.forceDexopt,
                 dexoptMode = config.dexoptMode,

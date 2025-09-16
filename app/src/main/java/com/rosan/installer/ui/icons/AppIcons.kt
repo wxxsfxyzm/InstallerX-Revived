@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.outlined.WebAsset
+import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.AdminPanelSettings
 import androidx.compose.material.icons.twotone.Android
@@ -115,6 +116,7 @@ object AppIcons {
     // --- 设置图标结束 ---
 
     // --- Profile pkg 图标集合 ---
+    val InstallUser = Icons.TwoTone.AccountCircle
     val InstallSource = Icons.TwoTone.Face
     val InstallSourceInput = Icons.TwoTone.Badge
     val InstallForAllUsers = Icons.TwoTone.People

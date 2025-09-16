@@ -62,6 +62,7 @@ import com.rosan.installer.ui.page.main.widget.setting.DataForAllUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.theme.none
@@ -262,6 +263,7 @@ fun NewEditPage(
                 SplicedColumnGroup(
                     title = stringResource(R.string.config_label_installer_settings),
                     content = buildList {
+                        add { DataUserWidget(viewModel) }
                         add { DataDeclareInstallerWidget(viewModel) }
                         add { DataManualDexoptWidget(viewModel) }
                         add { DataAutoDeleteWidget(viewModel) }

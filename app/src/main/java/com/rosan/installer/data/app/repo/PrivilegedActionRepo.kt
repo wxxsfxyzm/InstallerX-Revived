@@ -76,4 +76,11 @@ interface PrivilegedActionRepo {
      * @return True if the activity was successfully started, false otherwise.
      */
     suspend fun startActivityPrivileged(config: ConfigEntity, intent: Intent): Boolean
+
+    /**
+     * Fetches all users from the system.
+     * @param authorizer The authorizer to use for the check.
+     * @return A map of user IDs to their display names.
+     */
+    suspend fun getUsers(authorizer: ConfigEntity.Authorizer): Map<Int, String>
 }

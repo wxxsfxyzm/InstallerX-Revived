@@ -108,17 +108,30 @@ fun MiuixApplyPage(
             .fillMaxSize(),
         contentWindowInsets = WindowInsets.none,
         topBar = {
-            TopAppBar(
-                scrollBehavior = scrollBehavior,
-                title = stringResource(R.string.app),
-                navigationIcon = {
-                    MiuixBackButton(
-                        modifier = Modifier.padding(start = 16.dp),
-                        icon = MiuixIcons.Useful.Cancel,
-                        onClick = { navController.navigateUp() })
-                },
-                actions = { TopAppBarActions(viewModel = viewModel) }
-            )
+            Column {
+                TopAppBar(
+                    scrollBehavior = scrollBehavior,
+                    title = stringResource(R.string.config_scope),
+                    navigationIcon = {
+                        MiuixBackButton(
+                            modifier = Modifier.padding(start = 16.dp),
+                            icon = MiuixIcons.Useful.Cancel,
+                            onClick = { navController.navigateUp() })
+                    },
+                    actions = { TopAppBarActions(viewModel = viewModel) }
+                )
+                InputField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    query = viewModel.state.search,
+                    onQueryChange = { viewModel.dispatch(ApplyViewAction.Search(it)) },
+                    label = stringResource(R.string.search),
+                    expanded = false,
+                    onExpandedChange = {},
+                    onSearch = {}
+                )
+            }
         },
         floatingActionButton = {
             AnimatedVisibility(

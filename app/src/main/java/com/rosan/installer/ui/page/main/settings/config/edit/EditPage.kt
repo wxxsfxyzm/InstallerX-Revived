@@ -54,6 +54,7 @@ import com.rosan.installer.ui.page.main.widget.setting.DataForAllUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.theme.none
@@ -206,7 +207,7 @@ fun EditPage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),
-            state = listState, // 关键: 将 state 传入 LazyColumn
+            state = listState,
         ) {
             item { DataNameWidget(viewModel = viewModel) }
             item { DataDescriptionWidget(viewModel = viewModel) }
@@ -214,6 +215,7 @@ fun EditPage(
             item { DataCustomizeAuthorizerWidget(viewModel = viewModel) }
             item { DataInstallModeWidget(viewModel = viewModel) }
             item { LabelWidget(label = stringResource(R.string.config_label_installer_settings)) }
+            item { DataUserWidget(viewModel) }
             item { DataDeclareInstallerWidget(viewModel = viewModel) }
             item { DataManualDexoptWidget(viewModel) }
             item { DataAutoDeleteWidget(viewModel = viewModel) }

@@ -1,18 +1,14 @@
 package com.rosan.installer.data.app.model.impl
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import com.rosan.installer.data.app.repo.PARepo
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 
 object PARepoImpl : PARepo, KoinComponent {
-    private val context by inject<Context>()
-
     override suspend fun setDefaultInstaller(
         config: ConfigEntity,
         component: ComponentName,
@@ -109,5 +105,23 @@ object PARepoImpl : PARepo, KoinComponent {
             }
         }
         return success
+    }
+
+    override suspend fun getUsers(authorizer: ConfigEntity.Authorizer): Map<Int, String> {
+        var users: Map<Int, String> = emptyMap()
+        useUserService(authorizer) {
+            try {
+                // Call the new getUsers method on the privileged service
+                // The result from AIDL is Map<*, *>, so we cast it safely.
+                @Suppress("UNCHECKED_CAST")
+                users = it.privileged.users as? Map<Int, String> ?: emptyMap()
+                Timber.d("Fetched users: $users")
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to get user list from privileged service")
+                // Return an empty map on failure
+                users = emptyMap()
+            }
+        }
+        return users
     }
 }

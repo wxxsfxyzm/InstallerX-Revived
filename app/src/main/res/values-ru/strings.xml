@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <resources>
     <string name="about">О приложении </string>
-    <string name="about_detail">Об InstallerX</string>
+    <string name="about_detail">Об InstallerX Revived</string>
     <string name="add">Добавить</string>
     <string name="allocate_aggressive">Выделять Агрессивные</string>
     <string name="allocate_aggressive_desc">Указывает, что пакет "критически важен для работоспособности или безопасности системы" и при необходимости будет более агрессивно удалять доступные для очистки файлы, чтобы освободить место.</string>

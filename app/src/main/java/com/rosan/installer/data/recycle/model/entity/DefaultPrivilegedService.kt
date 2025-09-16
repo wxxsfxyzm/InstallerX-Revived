@@ -23,6 +23,7 @@ import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.inject
+import rikka.shizuku.SystemServiceHelper
 import java.io.IOException
 import android.os.Process as AndroidProcess
 
@@ -226,6 +227,76 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             Log.e("PrivilegedService", "startActivityPrivileged failed with an exception", e)
             return false
         }
+    }
+
+    /**
+     * Implements the getUsers method from our AIDL interface.
+     * This method runs inside the privileged process and uses reflection
+     * to call hidden system APIs for fetching a complete user list.
+     */
+    @SuppressLint("PrivateApi")
+    override fun getUsers(): Map<Int, String> {
+        val userMap = mutableMapOf<Int, String>()
+        try {
+            Log.d("PrivilegedService", "Using context: ${context.packageName}, UID: ${AndroidProcess.myUid()}")
+
+            val userManagerBinder = SystemServiceHelper.getSystemService(Context.USER_SERVICE)
+            val userManagerClass = Class.forName("android.os.IUserManager\$Stub")
+            val asInterfaceMethod = reflect.getMethod(userManagerClass, "asInterface", IBinder::class.java)
+                ?: throw NoSuchMethodException("asInterface method not found")
+            val userManagerInstance = asInterfaceMethod.invoke(null, userManagerBinder)
+
+            val getUsersMethod = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                reflect.getMethod(
+                    userManagerInstance::class.java,
+                    "getUsers",
+                    Boolean::class.java,
+                    Boolean::class.java,
+                    Boolean::class.java
+                )
+            } else {
+                reflect.getMethod(
+                    userManagerInstance::class.java,
+                    "getUsers",
+                    Boolean::class.java
+                )
+            } ?: throw NoSuchMethodException("getUsers method not found")
+
+            val usersList = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                getUsersMethod.invoke(userManagerInstance, false, false, false)
+            } else {
+                getUsersMethod.invoke(userManagerInstance, false)
+            }) as? List<*>
+
+            if (usersList == null) {
+                Log.e("PrivilegedService", "Failed to get user list, method returned null.")
+                return userMap
+            }
+
+            val userInfoClass = Class.forName("android.content.pm.UserInfo")
+            val idField = reflect.getField(userInfoClass, "id")
+                ?: throw NoSuchFieldException("Field 'id' not found in UserInfo")
+            val nameField = reflect.getField(userInfoClass, "name")
+                ?: throw NoSuchFieldException("Field 'name' not found in UserInfo")
+
+            for (userObject in usersList) {
+                if (userObject != null) {
+                    idField.isAccessible = true
+                    nameField.isAccessible = true
+                    val userId = idField.getInt(userObject)
+                    val userName = nameField.get(userObject) as? String ?: "Unknown User"
+                    userMap[userId] = userName
+                }
+            }
+            Log.d("PrivilegedService", "Fetched users: $userMap")
+        } catch (e: SecurityException) {
+            Log.e("PrivilegedService", "Permission denied for getUsers, falling back to current user", e)
+            val userId = AndroidProcess.myUid() / 100000
+            userMap[userId] = "Current User"
+        } catch (e: Exception) {
+            Log.e("PrivilegedService", "Error getting users using ReflectRepo", e)
+        }
+        return userMap
     }
 
     private fun addPreferredActivity(
