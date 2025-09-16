@@ -54,6 +54,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @OptIn(
@@ -147,7 +148,9 @@ fun MiuixEditPage(
             modifier = Modifier
                 .fillMaxSize()
                 .scrollEndHaptic()
-                .padding(it)
+                .overScrollVertical()
+                .padding(it),
+            overscrollEffect = null,
         ) {
             item { MiuixDataNameWidget(viewModel = viewModel) }
             item { MiuixDataDescriptionWidget(viewModel = viewModel) }
