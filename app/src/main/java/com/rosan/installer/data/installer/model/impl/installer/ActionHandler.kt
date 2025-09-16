@@ -277,10 +277,21 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     )
                 }
 
+            val targetUserId = if (installer.config.enableCustomizeUser) {
+                // Use UserId from profile if enableCustomizeUser is true
+                Timber.d("Custom user is enabled. Installing for user: ${installer.config.targetUserId}")
+                installer.config.targetUserId
+            } else {
+                // Otherwise, use the current userId instead
+                val currentUserId = Os.getuid() / 100000
+                Timber.d("Custom user is disabled. Installing for current user: $currentUserId")
+                currentUserId
+            }
+
             installEntities(
                 installer.config,
                 entitiesToInstall, // Pass the newly constructed list to the installer backend.
-                InstallExtraInfoEntity(Os.getuid() / 100000, cacheDirectory),
+                InstallExtraInfoEntity(targetUserId, cacheDirectory),
                 packageBlacklist,
                 sharedUserIdBlacklist,
                 sharedUserIdExemption

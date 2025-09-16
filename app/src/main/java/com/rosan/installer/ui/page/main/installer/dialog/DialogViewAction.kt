@@ -31,6 +31,12 @@ sealed class DialogViewAction {
     data class SetInstaller(val installer: String?) : DialogViewAction()
 
     /**
+     * Sets the target user ID.
+     * @param userId The target user ID.
+     */
+    data class SetTargetUser(val userId: Int) : DialogViewAction()
+
+    /**
      * Toggles a specific flag for the uninstallation process.
      * @param flag The flag to toggle, e.g., DELETE_KEEP_DATA.
      * @param enable true to add the flag, false to remove it.

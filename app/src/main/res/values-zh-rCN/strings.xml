@@ -16,7 +16,7 @@
     <string name="menu">菜单</string>
     <string name="about">关于</string>
     <string name="other">其它</string>
-    <string name="about_detail">关于 InstallerX</string>
+    <string name="about_detail">关于 InstallerX Revived</string>
     <string name="get_update_detail">检查软件更新和新功能</string>
     <string name="internet_access_enabled">联网</string>
     <string name="internet_access_disabled">离线</string>
@@ -85,6 +85,7 @@
     <string name="order">排序</string>
     <string name="config_name">名称</string>
     <string name="config_info">信息</string>
+    <string name="config_scope">作用域</string>
     <string name="config_description">描述</string>
     <string name="config_authorizer">授权器</string>
     <!--    <string name="config_authorizer_msg">用于执行解析与执行命令，请确保拥有足够的权限。</string>-->
@@ -106,6 +107,10 @@
     <string name="config_install_mode_ignore">忽略</string>
     <string name="config_declare_installer">声明安装者（安装来源）</string>
     <string name="config_installer">安装者（包名）</string>
+    <string name="config_customize_user">设定用户</string>
+    <string name="config_customize_user_desc">手动设置为目标用户安装应用</string>
+    <string name="config_user_not_found">获取用户失败</string>
+    <string name="config_target_user">目标安装用户</string>
     <string name="config_manual_dexopt">手动 Dex 优化</string>
     <string name="config_manual_dexopt_desc">在安装后手动触发 dex2oat 进程</string>
     <string name="config_dexopt_mode">优化模式</string>
@@ -162,6 +167,10 @@
     <string name="select">选择</string>
     <string name="clear">清除</string>
     <string name="global">全局</string>
+    <string name="pull_to_refresh_hint1">下拉触发刷新</string>
+    <string name="pull_to_refresh_hint2">释放即可刷新</string>
+    <string name="pull_to_refresh_hint3">正在刷新…</string>
+    <string name="pull_to_refresh_hint4">刷新成功</string>
     <string name="options">选项</string>
     <string name="sort">排序</string>
     <string name="sort_by_label">名称</string>
@@ -323,7 +332,9 @@
     <string name="close_notification_immediately_on_dialog_dismiss">关闭对话框将静默退出</string>
     <string name="set_countdown">设定倒计时</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku安装成功后自动关闭的倒计时</string>
-    <string name="dhizuku_cannot_set_installer_desc">Dhizuku 模式下不支持设置安装器！</string>
+    <string name="dhizuku_cannot_set_installer_desc">Dhizuku模式下不支持设置安装器！</string>
+    <string name="dhizuku_cannot_set_user_desc">Dhizuku模式下不支持设置用户！</string>
+    <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku模式下不支持设置DexOpt！</string>
     <string name="grant_permission_after_install">点击以在安装完成后授予权限</string>
     <string name="show_intelligent_suggestion">显示智能建议（实验性）</string>
     <string name="show_intelligent_suggestion_desc">当安装失败时显示智能建议</string>
@@ -418,4 +429,5 @@
     <string name="suggestion_mi_isolation">临时添加有效安装者并重试</string>
     <string name="suggestion_user_restricted">前往开发者选项启用USB安装</string>
     <string name="suggestion_bypass_low_target_sdk">临时允许绕过限制并重试</string>
+    <string name="suggestion_bypass_blacklist_set_by_user">本次允许安装</string>
 </resources>

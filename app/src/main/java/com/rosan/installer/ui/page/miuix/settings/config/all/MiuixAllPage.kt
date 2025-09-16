@@ -70,6 +70,7 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Delete
 import top.yukonga.miuix.kmp.icon.icons.useful.Edit
 import top.yukonga.miuix.kmp.icon.icons.useful.SelectAll
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 @Composable
 fun MiuixAllPage(
@@ -244,11 +245,14 @@ private fun ShowDataWidget(
     listState: LazyStaggeredGridState = rememberLazyStaggeredGridState()
 ) {
     LazyVerticalStaggeredGrid(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .overScrollVertical(),
         columns = StaggeredGridCells.Adaptive(350.dp),
         contentPadding = PaddingValues(16.dp),
         verticalItemSpacing = 16.dp,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
+        overscrollEffect = null,
         state = listState,
     ) {
         items(viewModel.state.data.configs) {
@@ -342,7 +346,7 @@ private fun DataItemWidget(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         modifier = Modifier.padding(end = 3.dp),
-                        text = "作用域",
+                        text = stringResource(R.string.config_scope),
                         color = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
                         fontWeight = FontWeight.Medium,
                         fontSize = 15.sp

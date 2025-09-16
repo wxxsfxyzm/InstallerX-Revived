@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="about">เกี่ยวกับ</string>
-    <string name="about_detail">เกี่ยวกับ InstallerX</string>
+    <string name="about_detail">เกี่ยวกับ InstallerX Revived</string>
     <string name="add">เพิ่ม</string>
     <string name="allocate_aggressive">จัดสรรอย่างเข้มข้น</string>
     <string name="allocate_aggressive_desc">ระบุว่าแพ็คเกจเป็น ส่วนสำคัญต่อสุขภาพหรือความปลอดภัยของระบบ และจะลบไฟล์ที่ล้างได้มากขึ้นเพื่อเพิ่มพื้นที่หากจำเป็น</string>

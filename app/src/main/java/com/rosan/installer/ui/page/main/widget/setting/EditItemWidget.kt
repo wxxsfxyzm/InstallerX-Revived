@@ -196,7 +196,7 @@ fun DataDeclareInstallerWidget(viewModel: EditViewModel) {
 
     val description =
         if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_installer_desc)
-        else null // 其他模式下没有特殊描述
+        else null
 
     SwitchWidget(
         icon = AppIcons.InstallSource,
@@ -305,12 +305,78 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
 }
 
 @Composable
+fun DataUserWidget(viewModel: EditViewModel) {
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+    val enableCustomizeUser = viewModel.state.data.enableCustomizeUser
+    val targetUserId = viewModel.state.data.targetUserId
+    val availableUsers = viewModel.state.availableUsers
+
+    val isDhizuku = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.Dhizuku -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
+        else -> false
+    }
+
+    val description =
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_user_desc)
+        else stringResource(id = R.string.config_customize_user_desc)
+
+    Column {
+        SwitchWidget(
+            icon = AppIcons.InstallUser,
+            title = stringResource(id = R.string.config_customize_user),
+            description = description,
+            checked = enableCustomizeUser,
+            enabled = !isDhizuku,
+            isError = isDhizuku,
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataCustomizeUser(it))
+            }
+        )
+
+        AnimatedVisibility(
+            visible = enableCustomizeUser,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            val description = availableUsers[targetUserId] ?: stringResource(R.string.config_user_not_found)
+            DropDownMenuWidget(
+                title = stringResource(R.string.config_target_user),
+                description = description,
+                choice = availableUsers.keys.toList().indexOf(targetUserId),
+                data = availableUsers.values.toList(),
+            ) { index ->
+                availableUsers.keys.toList().getOrNull(index)?.let {
+                    viewModel.dispatch(EditViewAction.ChangeDataTargetUserId(it))
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun DataManualDexoptWidget(viewModel: EditViewModel) {
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+
+    val isDhizuku = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.Dhizuku -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
+        else -> false
+    }
+
+    val description =
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
+        else stringResource(R.string.config_manual_dexopt_desc)
+
     SwitchWidget(
         icon = Icons.TwoTone.Speed,
         title = stringResource(id = R.string.config_manual_dexopt),
-        description = stringResource(id = R.string.config_manual_dexopt_desc),
+        description = description,
         checked = viewModel.state.data.enableManualDexopt,
+        enabled = !isDhizuku,
+        isError = isDhizuku,
         onCheckedChange = {
             viewModel.dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))
         }
@@ -463,4 +529,3 @@ fun DataAllowAllRequestedPermissionsWidget(viewModel: EditViewModel) {
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowAllRequestedPermissions(it)) }
     )
 }
-

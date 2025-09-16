@@ -57,6 +57,7 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -148,7 +149,9 @@ fun MiuixPreferredPage(
                     modifier = Modifier
                         .fillMaxSize()
                         .scrollEndHaptic()
-                        .padding(top = innerPadding.calculateTopPadding())
+                        .overScrollVertical()
+                        .padding(top = innerPadding.calculateTopPadding()),
+                    overscrollEffect = null
                 ) {
                     item { SmallTitle(stringResource(R.string.global)) }
                     item {

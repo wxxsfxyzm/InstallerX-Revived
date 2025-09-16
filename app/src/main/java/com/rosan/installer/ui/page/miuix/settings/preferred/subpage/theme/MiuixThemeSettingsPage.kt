@@ -23,6 +23,8 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixThemeSettingsPage(
@@ -57,11 +59,12 @@ fun MiuixThemeSettingsPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
+                .scrollEndHaptic()
+                .overScrollVertical()
+                .padding(top = paddingValues.calculateTopPadding()),
+            overscrollEffect = null
         ) {
-            item {
-                SmallTitle(stringResource(R.string.theme_settings_ui_style))
-            }
+            item { SmallTitle(stringResource(R.string.theme_settings_ui_style)) }
             item {
                 Card(
                     modifier = Modifier
@@ -76,9 +79,7 @@ fun MiuixThemeSettingsPage(
                     )
                 }
             }
-            item {
-                SmallTitle(stringResource(R.string.theme_settings_launcher_icons))
-            }
+            item { SmallTitle(stringResource(R.string.theme_settings_launcher_icons)) }
             item {
                 Card(
                     modifier = Modifier

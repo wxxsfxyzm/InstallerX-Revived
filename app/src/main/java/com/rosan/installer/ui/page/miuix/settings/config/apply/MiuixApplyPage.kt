@@ -81,6 +81,7 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.ImmersionMore
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
@@ -110,7 +111,7 @@ fun MiuixApplyPage(
             Column {
                 TopAppBar(
                     scrollBehavior = scrollBehavior,
-                    title = stringResource(R.string.app),
+                    title = stringResource(R.string.config_scope),
                     navigationIcon = {
                         MiuixBackButton(
                             modifier = Modifier.padding(start = 16.dp),
@@ -213,9 +214,11 @@ fun MiuixApplyPage(
                                 viewModel.dispatch(ApplyViewAction.Order(newOrderType))
                             }
                         )
+
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
+                                .overScrollVertical()
                         ) {
                             MiuixItemsWidget(
                                 modifier = Modifier.fillMaxSize(),
@@ -237,10 +240,12 @@ private fun MiuixItemsWidget(
     lazyListState: LazyListState,
 ) {
     LazyColumn(
-        modifier = modifier.scrollEndHaptic(),
+        modifier = modifier
+            .scrollEndHaptic(),
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(8.dp)
+        contentPadding = PaddingValues(8.dp),
+        overscrollEffect = null
     ) {
         items(viewModel.state.checkedApps, key = { it.packageName }) {
             var alpha by remember {

@@ -38,6 +38,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDataForAllUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataManualDexoptWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataNameWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixDataUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySdkWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
 import com.rosan.installer.ui.theme.none
@@ -54,6 +55,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @OptIn(
@@ -147,7 +149,9 @@ fun MiuixEditPage(
             modifier = Modifier
                 .fillMaxSize()
                 .scrollEndHaptic()
-                .padding(it)
+                .overScrollVertical()
+                .padding(it),
+            overscrollEffect = null,
         ) {
             item { MiuixDataNameWidget(viewModel = viewModel) }
             item { MiuixDataDescriptionWidget(viewModel = viewModel) }
@@ -170,6 +174,7 @@ fun MiuixEditPage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 6.dp)
                 ) {
+                    MiuixDataUserWidget(viewModel = viewModel)
                     MiuixDataDeclareInstallerWidget(viewModel = viewModel)
                     MiuixDataManualDexoptWidget(viewModel)
                     MiuixDataAutoDeleteWidget(viewModel = viewModel)

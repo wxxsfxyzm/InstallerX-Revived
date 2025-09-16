@@ -71,25 +71,30 @@ fun installExtendedMenuDialog(
     val selectedInstaller = remember(selectedInstallerPackageName, managedPackages) {
         managedPackages.find { it.packageName == selectedInstallerPackageName }
     }
+    val availableUsers by viewModel.availableUsers.collectAsState()
+    val selectedUserId by viewModel.selectedUserId.collectAsState()
+    val customizeUserEnabled = installer.config.enableCustomizeUser
     val defaultInstallerHintText = stringResource(id = R.string.config_follow_settings)
-    val menuEntities = remember(installOptions, selectedInstaller) {
-        // 保留原来的静态“权限列表”子菜单
-        val permissionMenus = listOf(
-            ExtendedMenuEntity(
-                action = InstallExtendedMenuAction.PermissionList,
-                subMenuId = InstallExtendedSubMenuId.PermissionList,
-                menuItem = ExtendedMenuItemEntity(
-                    nameResourceId = R.string.permission_list,
-                    descriptionResourceId = R.string.permission_list_desc,
-                    icon = AppIcons.Permission,
-                    action = null
+    val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, availableUsers) {
+        buildList {
+            // Permission List
+            add(
+                ExtendedMenuEntity(
+                    action = InstallExtendedMenuAction.PermissionList,
+                    subMenuId = InstallExtendedSubMenuId.PermissionList,
+                    menuItem = ExtendedMenuItemEntity(
+                        nameResourceId = R.string.permission_list,
+                        descriptionResourceId = R.string.permission_list_desc,
+                        icon = AppIcons.Permission,
+                        action = null
+                    )
                 )
             )
-        )
-        val installerMenus = buildList {
+
+            // Installer selection
             if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
                 installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
-            )
+            ) {
                 add(
                     ExtendedMenuEntity(
                         action = InstallExtendedMenuAction.CustomizeInstaller,
@@ -101,29 +106,47 @@ fun installExtendedMenuDialog(
                         )
                     )
                 )
-        }
-        // 动态地将每个 InstallOption 转换为一个 ExtendedMenuEntity
-        val dynamicOptions =
+            }
+
+            // User selection
+            if ((installer.config.authorizer == ConfigEntity.Authorizer.Root ||
+                        installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+                        ) && customizeUserEnabled
+            ) {
+                add(
+                    ExtendedMenuEntity(
+                        action = InstallExtendedMenuAction.CustomizeUser,
+                        menuItem = ExtendedMenuItemEntity(
+                            nameResourceId = R.string.config_target_user,
+                            description = availableUsers[selectedUserId] ?: "Unknown User",
+                            icon = AppIcons.InstallUser,
+                            action = null
+                        )
+                    )
+                )
+            }
+
+            // 动态安装选项
             if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
                 installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
-            )
-                installOptions.map { option ->
-                    ExtendedMenuEntity(
-                        action = InstallExtendedMenuAction.InstallOption,
-                        menuItem = ExtendedMenuItemEntity(
-                            // 使用 stringResource 从资源ID解析文本
-                            nameResourceId = option.labelResource,
-                            descriptionResourceId = option.descResource,
-                            icon = null, // 这里没有图标
-                            // 将原始的 option 对象存起来，以便后续使用
-                            action = option
+            ) {
+                installOptions.forEach { option ->
+                    add(
+                        ExtendedMenuEntity(
+                            action = InstallExtendedMenuAction.InstallOption,
+                            menuItem = ExtendedMenuItemEntity(
+                                nameResourceId = option.labelResource,
+                                descriptionResourceId = option.descResource,
+                                icon = null,
+                                action = option
+                            )
                         )
                     )
                 }
-            else emptyList()
-        // 合并列表并创建可观察的状态列表
-        (permissionMenus + installerMenus + dynamicOptions).toMutableStateList()
+            }
+        }.toMutableStateList()
     }
+
 
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.IconMenu.id, menuIcon),
@@ -136,7 +159,7 @@ fun installExtendedMenuDialog(
             )
         },
         content = DialogInnerParams(DialogParamsType.InstallExtendedMenu.id) {
-            MenuItemWidget(menuEntities, viewModel, installFlags, managedPackages)
+            MenuItemWidget(menuEntities, viewModel, installFlags, managedPackages, availableUsers)
         },
         buttons = DialogButtons(
             DialogParamsType.InstallExtendedMenu.id
@@ -155,7 +178,8 @@ fun MenuItemWidget(
     entities: SnapshotStateList<ExtendedMenuEntity>,
     viewmodel: DialogViewModel,
     installFlags: Int, // flags from viewmodel
-    managedPackages: List<NamedPackage>
+    managedPackages: List<NamedPackage>,
+    availableUsers: Map<Int, String>
 ) {
     val haptic = LocalHapticFeedback.current
     val defaultInstallerFromSettings by viewmodel.defaultInstallerFromSettings.collectAsState()
@@ -166,20 +190,191 @@ fun MenuItemWidget(
             .heightIn(max = 325.dp),
     ) {
         itemsIndexed(entities) { _, item ->
-            if (item.action is InstallExtendedMenuAction.CustomizeInstaller) {
-                var expanded by remember { mutableStateOf(false) }
+            when (item.action) {
+                is InstallExtendedMenuAction.CustomizeInstaller -> {
+                    var expanded by remember { mutableStateOf(false) }
 
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = !expanded }
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable), // This is important for the dropdown position
+                            onClick = { /* Card itself is not clickable, dropdown handles it */ },
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    imageVector = item.menuItem.icon ?: Icons.TwoTone.PermDeviceInformation,
+                                    contentDescription = stringResource(item.menuItem.nameResourceId),
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(item.menuItem.nameResourceId),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    // Use the dynamic description from the entity
+                                    item.menuItem.description?.let { description ->
+                                        Text(
+                                            text = description,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                                Icon(
+                                    imageVector = Icons.TwoTone.ArrowDropDown,
+                                    contentDescription = "Open menu"
+                                )
+                            }
+                        }
+
+                        // The actual dropdown menu
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            // "System Default" option
+                            // Not needed for the moment
+                            DropdownMenuItem(
+                                text = { Text(text = stringResource(id = R.string.config_follow_settings)) },
+                                onClick = {
+                                    viewmodel.dispatch(DialogViewAction.SetInstaller(defaultInstallerFromSettings))
+                                    expanded = false
+                                }
+                            )
+                            // Options from managed packages
+                            managedPackages.forEach { pkg ->
+                                DropdownMenuItem(
+                                    text = { Text(text = pkg.name) },
+                                    onClick = {
+                                        viewmodel.dispatch(DialogViewAction.SetInstaller(pkg.packageName))
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                is InstallExtendedMenuAction.CustomizeUser -> {
+                    var expanded by remember { mutableStateOf(false) }
+
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = !expanded }
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                            onClick = { /* No-op */ },
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    imageVector = item.menuItem.icon ?: Icons.TwoTone.PermDeviceInformation,
+                                    contentDescription = stringResource(item.menuItem.nameResourceId),
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(item.menuItem.nameResourceId),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    item.menuItem.description?.let { description ->
+                                        Text(
+                                            text = description,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                                Icon(
+                                    imageVector = Icons.TwoTone.ArrowDropDown,
+                                    contentDescription = "Open menu"
+                                )
+                            }
+                        }
+
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            availableUsers.forEach { (userId, userName) ->
+                                DropdownMenuItem(
+                                    text = { Text("$userName($userId)") },
+                                    onClick = {
+                                        viewmodel.dispatch(DialogViewAction.SetTargetUser(userId))
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                else -> { // Logic for other card types (PermissionList, InstallOption)
+                    val option = when (item.action) {
+                        is InstallExtendedMenuAction.InstallOption -> item.menuItem.action
+                        else -> null
+                    }
+
+                    // 判断是否选中，仅对安装选项有效
+                    val isSelected = option?.let { (installFlags and it.value) != 0 } ?: false
+
+                    // 使用 Card 作为可点击区域和背景
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable), // This is important for the dropdown position
-                        onClick = { /* Card itself is not clickable, dropdown handles it */ },
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            when (item.action) {
+                                is InstallExtendedMenuAction.PermissionList ->
+                                    when (item.subMenuId) {
+                                        InstallExtendedSubMenuId.PermissionList -> {
+                                            viewmodel.dispatch(DialogViewAction.InstallExtendedSubMenu)
+                                        }
+
+                                        else -> {}
+                                    }
+
+                                is InstallExtendedMenuAction.InstallOption -> {
+                                    haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                                    option?.let { opt ->
+                                        viewmodel.toggleInstallFlag(opt.value, !isSelected)
+                                    }
+                                }
+
+                                else -> {}
+                            }
+                        },
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 0.dp, // if (option != null && isSelected) 1.dp else 2.dp
+                        ),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (option != null && isSelected)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.surfaceContainer
+                        )
                     ) {
                         Row(
                             modifier = Modifier
@@ -188,155 +383,57 @@ fun MenuItemWidget(
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
+                            Box(
                                 modifier = Modifier.size(24.dp),
-                                imageVector = item.menuItem.icon ?: Icons.TwoTone.PermDeviceInformation,
-                                contentDescription = stringResource(item.menuItem.nameResourceId),
-                            )
+                                contentAlignment = Alignment.Center
+                            ) {
+                                when (item.action) {
+                                    is InstallExtendedMenuAction.PermissionList ->
+                                        Icon(
+                                            modifier = Modifier.size(24.dp),
+                                            imageVector = item.menuItem.icon
+                                                ?: Icons.TwoTone.PermDeviceInformation,
+                                            contentDescription = stringResource(item.menuItem.nameResourceId),
+                                        )
+
+                                    is InstallExtendedMenuAction.CustomizeInstaller ->
+                                        Icon(
+                                            modifier = Modifier.size(24.dp),
+                                            imageVector = item.menuItem.icon
+                                                ?: Icons.TwoTone.PermDeviceInformation,
+                                            contentDescription = stringResource(item.menuItem.nameResourceId),
+                                        )
+
+                                    is InstallExtendedMenuAction.CustomizeUser ->
+                                        Icon(
+                                            modifier = Modifier.size(24.dp),
+                                            imageVector = item.menuItem.icon
+                                                ?: Icons.TwoTone.PermDeviceInformation,
+                                            contentDescription = stringResource(item.menuItem.nameResourceId),
+                                        )
+
+                                    is InstallExtendedMenuAction.InstallOption ->
+                                        Checkbox(
+                                            checked = isSelected,
+                                            onCheckedChange = null, // 交互处理在 Card 的 onClick 中
+                                        )
+
+                                    is InstallExtendedMenuAction.TextField -> {}
+                                }
+                            }
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = stringResource(item.menuItem.nameResourceId),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
-                                // Use the dynamic description from the entity
-                                item.menuItem.description?.let { description ->
+                                item.menuItem.descriptionResourceId?.let { descriptionId ->
                                     Text(
-                                        text = description,
+                                        text = stringResource(descriptionId),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                            }
-                            Icon(
-                                imageVector = Icons.TwoTone.ArrowDropDown,
-                                contentDescription = "Open menu"
-                            )
-                        }
-                    }
-
-                    // The actual dropdown menu
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        // "System Default" option
-                        // Not needed for the moment
-                        DropdownMenuItem(
-                            text = { Text(text = stringResource(id = R.string.config_follow_settings)) },
-                            onClick = {
-                                viewmodel.dispatch(DialogViewAction.SetInstaller(defaultInstallerFromSettings))
-                                expanded = false
-                            }
-                        )
-                        // Options from managed packages
-                        managedPackages.forEach { pkg ->
-                            DropdownMenuItem(
-                                text = { Text(text = pkg.name) },
-                                onClick = {
-                                    viewmodel.dispatch(DialogViewAction.SetInstaller(pkg.packageName))
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-            // --- END: Dropdown Menu Logic ---
-            else { // Logic for other card types (PermissionList, InstallOption)
-                val option = when (item.action) {
-                    is InstallExtendedMenuAction.InstallOption -> item.menuItem.action
-                    else -> null
-                }
-
-                // 判断是否选中，仅对安装选项有效
-                val isSelected = option?.let { (installFlags and it.value) != 0 } ?: false
-
-                // 使用 Card 作为可点击区域和背景
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        when (item.action) {
-                            is InstallExtendedMenuAction.PermissionList ->
-                                when (item.subMenuId) {
-                                    InstallExtendedSubMenuId.PermissionList -> {
-                                        viewmodel.dispatch(DialogViewAction.InstallExtendedSubMenu)
-                                    }
-
-                                    else -> {}
-                                }
-
-                            is InstallExtendedMenuAction.CustomizeInstaller -> {}
-
-                            is InstallExtendedMenuAction.InstallOption -> {
-                                haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
-                                option?.let { opt ->
-                                    viewmodel.toggleInstallFlag(opt.value, !isSelected)
-                                }
-                            }
-
-                            is InstallExtendedMenuAction.TextField -> {}
-                        }
-                    },
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 0.dp, // if (option != null && isSelected) 1.dp else 2.dp
-                    ),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (option != null && isSelected)
-                            MaterialTheme.colorScheme.primaryContainer
-                        else
-                            MaterialTheme.colorScheme.surfaceContainer
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier.size(24.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            when (item.action) {
-                                is InstallExtendedMenuAction.PermissionList ->
-                                    Icon(
-                                        modifier = Modifier.size(24.dp),
-                                        imageVector = item.menuItem.icon
-                                            ?: Icons.TwoTone.PermDeviceInformation,
-                                        contentDescription = stringResource(item.menuItem.nameResourceId),
-                                    )
-
-                                is InstallExtendedMenuAction.CustomizeInstaller ->
-                                    Icon(
-                                        modifier = Modifier.size(24.dp),
-                                        imageVector = item.menuItem.icon
-                                            ?: Icons.TwoTone.PermDeviceInformation,
-                                        contentDescription = stringResource(item.menuItem.nameResourceId),
-                                    )
-
-                                is InstallExtendedMenuAction.InstallOption ->
-                                    Checkbox(
-                                        checked = isSelected,
-                                        onCheckedChange = null, // 交互处理在 Card 的 onClick 中
-                                    )
-
-                                is InstallExtendedMenuAction.TextField -> {}
-                            }
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(item.menuItem.nameResourceId),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            item.menuItem.descriptionResourceId?.let { descriptionId ->
-                                Text(
-                                    text = stringResource(descriptionId),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
                             }
                         }
                     }

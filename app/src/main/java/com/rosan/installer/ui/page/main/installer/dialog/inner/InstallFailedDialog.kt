@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
 import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolationException
@@ -232,6 +233,18 @@ private fun ErrorSuggestions(
                     },
                     labelRes = R.string.suggestion_bypass_low_target_sdk,
                     icon = AppIcons.InstallBypassLowTargetSdk
+                )
+            )
+            add(
+                SuggestionChipInfo(
+                    InstallFailedBlacklistedPackageException::class,
+                    selected = { true }, // This is an action, not a state toggle.
+                    onClick = {
+                        viewModel.toggleBypassBlacklist(true)
+                        viewModel.dispatch(DialogViewAction.Install)
+                    },
+                    labelRes = R.string.suggestion_bypass_blacklist_set_by_user,
+                    icon = AppIcons.BugReport
                 )
             )
         }

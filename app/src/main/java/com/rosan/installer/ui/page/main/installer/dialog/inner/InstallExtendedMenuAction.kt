@@ -1,10 +1,11 @@
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 sealed class InstallExtendedMenuAction {
-    object PermissionList : InstallExtendedMenuAction()
-    object CustomizeInstaller : InstallExtendedMenuAction()
-    object InstallOption : InstallExtendedMenuAction()
-    object TextField : InstallExtendedMenuAction()
+    data object PermissionList : InstallExtendedMenuAction()
+    data object CustomizeInstaller : InstallExtendedMenuAction()
+    data object CustomizeUser : InstallExtendedMenuAction()
+    data object InstallOption : InstallExtendedMenuAction()
+    data object TextField : InstallExtendedMenuAction()
 }
 
 sealed class InstallExtendedSubMenuId(val id: String) {
