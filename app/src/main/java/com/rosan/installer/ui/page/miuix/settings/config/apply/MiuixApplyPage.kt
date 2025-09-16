@@ -81,6 +81,7 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.ImmersionMore
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
@@ -203,7 +204,20 @@ fun MiuixApplyPage(
                         val dropdownItems = orderOptions.map { stringResource(it.labelResId) }
                         val selectedIndex = orderOptions.indexOfFirst { it.type == viewModel.state.orderType }.coerceAtLeast(0)
 
-                        // Use the StandaloneDropdown instead of SmallTitle.
+                        // Miuix Searchbar
+                        InputField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            query = viewModel.state.search,
+                            onQueryChange = { viewModel.dispatch(ApplyViewAction.Search(it)) },
+                            label = stringResource(R.string.search),
+                            expanded = false,
+                            onExpandedChange = {},
+                            onSearch = {}
+                        )
+
+                        // Use miuixDropdown instead of SmallTitle.
                         MiuixDropdown(
                             items = dropdownItems,
                             selectedIndex = selectedIndex,
@@ -213,9 +227,11 @@ fun MiuixApplyPage(
                                 viewModel.dispatch(ApplyViewAction.Order(newOrderType))
                             }
                         )
+
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
+                                .overScrollVertical()
                         ) {
                             MiuixItemsWidget(
                                 modifier = Modifier.fillMaxSize(),
@@ -237,10 +253,12 @@ private fun MiuixItemsWidget(
     lazyListState: LazyListState,
 ) {
     LazyColumn(
-        modifier = modifier.scrollEndHaptic(),
+        modifier = modifier
+            .scrollEndHaptic(),
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(8.dp)
+        contentPadding = PaddingValues(8.dp),
+        overscrollEffect = null
     ) {
         items(viewModel.state.checkedApps, key = { it.packageName }) {
             var alpha by remember {

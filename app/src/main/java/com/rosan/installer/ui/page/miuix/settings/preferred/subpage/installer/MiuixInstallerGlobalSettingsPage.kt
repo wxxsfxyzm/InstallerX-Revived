@@ -31,6 +31,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
@@ -57,7 +58,9 @@ fun MiuixInstallerGlobalSettingsPage(
             modifier = Modifier
                 .fillMaxSize()
                 .scrollEndHaptic()
-                .padding(paddingValues)
+                .overScrollVertical()
+                .padding(paddingValues),
+            overscrollEffect = null
         ) {
             item { SmallTitle(stringResource(R.string.installer_settings_global_installer)) }
             item {
