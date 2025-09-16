@@ -300,6 +300,7 @@
     <string name="downgrade_version_prefix">降級</string>
     <string name="install_choice">安裝包選擇</string>
     <string name="installer_error_reason">錯誤原因</string>
+    <string name="exception_install_failed_origin_os_blacklist">Vivo 安裝系統應用程式需要聲明有效的安裝者！</string>
     <string name="exception_install_failed_hyperos_isolation_violation">HyperOS 安裝系統應用程式需要聲明有效的安裝者！</string>
     <string name="get_update">取得更新</string>
     <string name="show_dialog_when_pressing_notification">點擊通知時顯示對話框</string>
