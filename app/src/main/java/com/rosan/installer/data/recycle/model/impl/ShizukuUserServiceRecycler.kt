@@ -51,6 +51,22 @@ object ShizukuUserServiceRecycler : Recycler<ShizukuUserServiceRecycler.UserServ
         override fun getPrivilegedService(): IPrivilegedService = privileged
     }
 
+    /**
+     * Creates a system-level [Context] for operations that require elevated privileges.
+     *
+     * This method attempts to obtain the system context via reflection on the
+     * `ActivityThread` class, then creates a package context as the `com.android.shell` user.
+     * If any part of this process fails, it falls back to the provided [fallbackContext].
+     *
+     * Logic is from the ShellInterface.kt file in the InstallWithOptions project.
+     * Under MIT License.
+     *
+     * @param fallbackContext The fallback context to return if system context creation fails.
+     * @return A [Context] instance for `com.android.shell`, or [fallbackContext] if an error occurs.
+     *
+     * @see <a href="https://github.com/zacharee/InstallWithOptions/blob/main/app/src/main/java/dev/zwander/installwithoptions/util/ShellInterface.kt">ShellInterface</a>
+     * @see <a href="https://github.com/zacharee/InstallWithOptions/blob/main/LICENSE">MIT License</a>
+     */
     private fun createSystemContext(fallbackContext: Context): Context {
         try {
             // Get system context
