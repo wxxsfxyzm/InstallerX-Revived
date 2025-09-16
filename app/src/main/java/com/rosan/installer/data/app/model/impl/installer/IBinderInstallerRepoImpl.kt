@@ -185,20 +185,22 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
     ) {
-        // Blacklisted package names
-        if (managedBlacklistPackages.contains(packageName)) {
-            Timber.w("Installation blocked for $packageName because it is in the blacklist.")
-            throw InstallFailedBlacklistedPackageException("Installation blocked for $packageName because it is in the blacklist.")
-        }
+        if (!config.bypassBlacklistInstallSetByUser) {
+            // Blacklisted package names
+            if (managedBlacklistPackages.contains(packageName)) {
+                Timber.w("Installation blocked for $packageName because it is in the blacklist.")
+                throw InstallFailedBlacklistedPackageException("Installation blocked for $packageName because it is in the blacklist.")
+            }
 
-        // Blacklisted SharedUserID
-        // We can simply take the first entity's sharedUserId because they are all the same.
-        val sharedUid = entities.firstOrNull()?.sharedUserId
+            // Blacklisted SharedUserID
+            // We can simply take the first entity's sharedUserId because they are all the same.
+            val sharedUid = entities.firstOrNull()?.sharedUserId
 
-        if (sharedUid != null) {
-            if (sharedUserIdBlacklist.contains(sharedUid) && !sharedUserIdExemption.contains(packageName)) {
-                Timber.w("Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted.")
-                throw InstallFailedBlacklistedPackageException("Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted.")
+            if (sharedUid != null) {
+                if (sharedUserIdBlacklist.contains(sharedUid) && !sharedUserIdExemption.contains(packageName)) {
+                    Timber.w("Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted.")
+                    throw InstallFailedBlacklistedPackageException("Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted.")
+                }
             }
         }
 
