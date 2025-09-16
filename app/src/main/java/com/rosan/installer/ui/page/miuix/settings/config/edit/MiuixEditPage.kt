@@ -38,6 +38,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDataForAllUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataManualDexoptWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataNameWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixDataUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySdkWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
 import com.rosan.installer.ui.theme.none
@@ -170,6 +171,7 @@ fun MiuixEditPage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 6.dp)
                 ) {
+                    MiuixDataUserWidget(viewModel = viewModel)
                     MiuixDataDeclareInstallerWidget(viewModel = viewModel)
                     MiuixDataManualDexoptWidget(viewModel)
                     MiuixDataAutoDeleteWidget(viewModel = viewModel)

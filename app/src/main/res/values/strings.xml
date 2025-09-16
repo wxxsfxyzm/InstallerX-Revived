@@ -89,6 +89,7 @@
     <string name="more">More</string>
     <string name="edit">Edit</string>
     <string name="apply">Apply</string>
+
     <string name="delete">Delete</string>
     <string name="restore">Undo</string>
 
@@ -101,6 +102,7 @@
 
     <string name="config_name">Profile name</string>
     <string name="config_info">Info</string>
+    <string name="config_scope">Scope</string>
     <string name="config_description">Profile description</string>
     <string name="config_authorizer">Authorizer</string>
     <string name="config_authorizer_global">Global</string>
@@ -463,4 +465,5 @@
     <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
     <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
     <string name="suggestion_bypass_low_target_sdk">Temporarily allow bypassing restrictions and retry</string>
+    <string name="suggestion_bypass_blacklist_set_by_user">Allow install once</string>
 </resources>

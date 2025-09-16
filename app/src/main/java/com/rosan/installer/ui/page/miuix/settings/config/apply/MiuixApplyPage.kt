@@ -110,7 +110,7 @@ fun MiuixApplyPage(
             Column {
                 TopAppBar(
                     scrollBehavior = scrollBehavior,
-                    title = stringResource(R.string.app),
+                    title = stringResource(R.string.config_scope),
                     navigationIcon = {
                         MiuixBackButton(
                             modifier = Modifier.padding(start = 16.dp),

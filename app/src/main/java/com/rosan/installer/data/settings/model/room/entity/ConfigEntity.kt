@@ -86,6 +86,9 @@ data class ConfigEntity(
     var installFlags: Int = 0
 
     @Ignore
+    var bypassBlacklistInstallSetByUser: Boolean = false
+
+    @Ignore
     var uninstallFlags: Int = 0
 
     val isCustomizeAuthorizer: Boolean

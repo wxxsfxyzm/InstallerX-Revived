@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Speed
 import androidx.compose.material.icons.twotone.Terminal
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -233,17 +232,16 @@ fun MiuixDataDeclareInstallerWidget(viewModel: EditViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MiuixDataInstallerWidget(viewModel: EditViewModel) {
     val stateData = viewModel.state.data
     val managedPackages = viewModel.state.managedInstallerPackages
     val currentInstaller = stateData.installer
 
-    // Keep logic for calculating supporting text content.
-    val matchingPackage = remember(currentInstaller, managedPackages) {
-        managedPackages.find { it.packageName == currentInstaller }
-    }
+    /*    // Keep logic for calculating supporting text content.
+        val matchingPackage = remember(currentInstaller, managedPackages) {
+            managedPackages.find { it.packageName == currentInstaller }
+        }*/
 
     AnimatedVisibility(
         visible = stateData.declareInstaller,
@@ -269,14 +267,98 @@ fun MiuixDataInstallerWidget(viewModel: EditViewModel) {
     }
 }
 
+@Composable
+fun MiuixDataUserWidget(viewModel: EditViewModel) {
+    // Retrieve all necessary states from the ViewModel.
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+    val enableCustomizeUser = viewModel.state.data.enableCustomizeUser
+    val targetUserId = viewModel.state.data.targetUserId
+    val availableUsers = viewModel.state.availableUsers
+
+    // Determine if the effective authorizer is Dhizuku to disable the widget.
+    val isDhizuku = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.Dhizuku -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
+        else -> false
+    }
+
+    // Determine the description text based on whether Dhizuku is active.
+    val description =
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_user_desc)
+        else stringResource(id = R.string.config_customize_user_desc)
+
+    Column {
+        // This switch controls the visibility of the user selection spinner.
+        MiuixSwitchWidget(
+            icon = AppIcons.InstallUser,
+            title = stringResource(id = R.string.config_customize_user),
+            description = description,
+            checked = enableCustomizeUser,
+            enabled = !isDhizuku, // The switch is disabled if Dhizuku is the effective authorizer.
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataCustomizeUser(it))
+            }
+        )
+
+        // The user selection spinner is only visible when the switch is enabled.
+        AnimatedVisibility(
+            visible = enableCustomizeUser,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            // Convert the Map of available users into a List<SpinnerEntry> for the spinner.
+            val spinnerEntries = remember(availableUsers) {
+                availableUsers.values.map { userName -> SpinnerEntry(title = userName) }
+            }
+
+            // Find the index of the currently selected user ID.
+            val selectedIndex = remember(targetUserId, availableUsers) {
+                availableUsers.keys.toList().indexOf(targetUserId).coerceAtLeast(0)
+            }
+
+            // Get the display name for the currently selected user, with a fallback.
+            val summary = availableUsers[targetUserId] ?: stringResource(R.string.config_user_not_found)
+
+            // This spinner allows the user to select the target user for installation.
+            SuperSpinner(
+                mode = SpinnerMode.AlwaysOnRight,
+                title = stringResource(R.string.config_target_user),
+                summary = summary,
+                items = spinnerEntries,
+                selectedIndex = selectedIndex,
+                onSelectedIndexChange = { newIndex ->
+                    // When a new user is selected, find the corresponding user ID and dispatch an action.
+                    availableUsers.keys.elementAtOrNull(newIndex)?.let { userId ->
+                        viewModel.dispatch(EditViewAction.ChangeDataTargetUserId(userId))
+                    }
+                }
+            )
+        }
+    }
+}
 
 @Composable
 fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+
+    val isDhizuku = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.Dhizuku -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
+        else -> false
+    }
+
+    val description =
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
+        else stringResource(R.string.config_manual_dexopt_desc)
+
     MiuixSwitchWidget(
         icon = Icons.TwoTone.Speed,
         title = stringResource(id = R.string.config_manual_dexopt),
-        description = stringResource(id = R.string.config_manual_dexopt_desc),
+        description = description,
         checked = viewModel.state.data.enableManualDexopt,
+        enabled = !isDhizuku,
         onCheckedChange = {
             viewModel.dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))
         }

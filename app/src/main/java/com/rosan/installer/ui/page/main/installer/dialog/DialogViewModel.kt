@@ -26,7 +26,7 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.util.ConfigUtil.Companion.getGlobalAuthorizer
+import com.rosan.installer.data.settings.util.ConfigUtil.Companion.readGlobal
 import com.rosan.installer.ui.page.main.installer.dialog.inner.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -172,8 +172,6 @@ class DialogViewModel(
             appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
                 _managedInstallerPackages.value = packages
             }
-            // Load available users for target user selection.
-            _availableUsers.value = paRepo.getUsers(repo.config.authorizer.getAuthorizer())
         }
     }
 
@@ -220,15 +218,9 @@ class DialogViewModel(
 
     private fun collectRepo(repo: InstallerRepo) {
         this.repo = repo
-        // Load available users for target user selection.
-        viewModelScope.launch {
-            // Switch to the IO dispatcher for the blocking call
-            val users = withContext(Dispatchers.IO) {
-                paRepo.getUsers(repo.config.authorizer.getAuthorizer())
-            }
-            // The code below this line will execute back on the Main dispatcher
-            _availableUsers.value = users
-        }
+        // Load/reload available users based on the new repo's config
+        if (repo.config.enableCustomizeUser)
+            loadAvailableUsers(repo.config.authorizer)
         // initialize install flags based on repo.config
         _installFlags.value = listOfNotNull(
             repo.config.allowTestOnly.takeIf { it }
@@ -403,16 +395,10 @@ class DialogViewModel(
         }
     }
 
-    private suspend fun ConfigEntity.Authorizer.getAuthorizer() =
-        if (this == ConfigEntity.Authorizer.Global)
-            getGlobalAuthorizer()
-        else
-            this
-
     /**
-     * 切换（启用/禁用）一个安装标志位
-     * @param flag 要操作的标志位 (来自 InstallOption.value)
-     * @param enable true 表示添加该标志位, false 表示移除该标志位
+     * Toggle (enable/disable) an installation flag
+     * @param flag The flag to operate on (from InstallOption.value)
+     * @param enable true to add the flag, false to remove the flag
      */
     fun toggleInstallFlag(flag: Int, enable: Boolean) {
         val currentFlags = _installFlags.value
@@ -426,6 +412,10 @@ class DialogViewModel(
         repo.config.installFlags = _installFlags.value // 同步到 repo.config
     }
 
+    fun toggleBypassBlacklist(enable: Boolean) {
+        repo.config.bypassBlacklistInstallSetByUser = enable
+    }
+
     private fun selectInstaller(packageName: String?) {
         repo.config.installer = packageName // Update the repository
         _selectedInstaller.value = packageName // Update the StateFlow
@@ -434,6 +424,47 @@ class DialogViewModel(
     private fun selectTargetUser(userId: Int) {
         repo.config.targetUserId = userId
         _selectedUserId.value = userId
+    }
+
+    /**
+     * Loads available users for the selected authorizer.
+     * @param authorizer The authorizer to use for the check.
+     */
+    private fun loadAvailableUsers(authorizer: ConfigEntity.Authorizer) {
+        viewModelScope.launch {
+            // getAuthorizer() is a suspend function that correctly resolves 'Global' to the actual authorizer.
+            val effectiveAuthorizer = authorizer.readGlobal()
+
+            // If the effective authorizer is Dhizuku, disable the feature and do not proceed.
+            if (effectiveAuthorizer == ConfigEntity.Authorizer.Dhizuku) {
+                _availableUsers.value = emptyMap()
+                if (_selectedUserId.value != 0) {
+                    selectTargetUser(0)
+                }
+                return@launch
+            }
+
+            // Proceed with fetching users for other authorizers.
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    paRepo.getUsers(effectiveAuthorizer)
+                }
+            }.onSuccess { users ->
+                _availableUsers.value = users
+                // Validate if the currently selected user still exists.
+                if (!users.containsKey(_selectedUserId.value)) {
+                    selectTargetUser(0)
+                }
+            }.onFailure { error ->
+                Timber.e(error, "Failed to load available users.")
+                toast(error.message ?: "Failed to load users")
+                _availableUsers.value = emptyMap()
+                // Also reset selected user on failure.
+                if (_selectedUserId.value != 0) {
+                    selectTargetUser(0)
+                }
+            }
+        }
     }
 
     /**
@@ -517,9 +548,7 @@ class DialogViewModel(
 
     private fun installChoice() {
         autoInstallJob?.cancel()
-        //fetchPreInstallInfoJob?.cancel()
         if (_currentPackageName.value != null) _currentPackageName.value = null
-        //if (_preInstallAppInfo.value != null) _preInstallAppInfo.value = null
         state = DialogViewState.InstallChoice
     }
 

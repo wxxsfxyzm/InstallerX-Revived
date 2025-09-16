@@ -342,7 +342,7 @@ private fun DataItemWidget(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         modifier = Modifier.padding(end = 3.dp),
-                        text = "作用域",
+                        text = stringResource(R.string.config_scope),
                         color = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
                         fontWeight = FontWeight.Medium,
                         fontSize = 15.sp
