@@ -204,20 +204,7 @@ fun MiuixApplyPage(
                         val dropdownItems = orderOptions.map { stringResource(it.labelResId) }
                         val selectedIndex = orderOptions.indexOfFirst { it.type == viewModel.state.orderType }.coerceAtLeast(0)
 
-                        // Miuix Searchbar
-                        InputField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                            query = viewModel.state.search,
-                            onQueryChange = { viewModel.dispatch(ApplyViewAction.Search(it)) },
-                            label = stringResource(R.string.search),
-                            expanded = false,
-                            onExpandedChange = {},
-                            onSearch = {}
-                        )
-
-                        // Use miuixDropdown instead of SmallTitle.
+                        // Use the StandaloneDropdown instead of SmallTitle.
                         MiuixDropdown(
                             items = dropdownItems,
                             selectedIndex = selectedIndex,
