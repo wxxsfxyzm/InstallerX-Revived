@@ -20,6 +20,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -284,7 +285,12 @@ private fun SelectableSubCard(item: SelectInstallEntity, isRadio: Boolean, onCli
             } else {
                 Checkbox(checked = item.selected, onCheckedChange = { onClick() })
             }
-            ItemContent(app = item.app)
+            if (isRadio)
+                (item.app as? AppEntity.BaseEntity)?.let { baseEntity ->
+                    MultiApkItemContent(app = baseEntity)
+                }
+            else
+                ItemContent(app = item.app)
         }
     }
 }
@@ -341,9 +347,38 @@ private fun ItemContent(app: AppEntity) {
                         .basicMarquee()
                 )
             }
-
-            is AppEntity.CollectionEntity -> { /* Should not happen */
-            }
+            // Should never happen!
+            else -> null
         }
+    }
+}
+
+/**
+ * A composable for displaying an item in a multi-APK selection list.
+ * Shows version information and the source file name.
+ */
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun MultiApkItemContent(app: AppEntity.BaseEntity) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(end = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        // Version information (styled as a title)
+        Text(
+            text = stringResource(R.string.installer_version, app.versionName, app.versionCode),
+            style = MaterialTheme.typography.titleSmallEmphasized,
+            fontWeight = FontWeight.Bold
+        )
+        // Filename (styled as a smaller body text with marquee)
+        Text(
+            text = app.data.getSourceTop().toString().removeSuffix("/").substringAfterLast('/'), // The original filename
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier
+                .alpha(0.7f)
+                .basicMarquee()
+        )
     }
 }
