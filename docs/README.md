@@ -17,16 +17,18 @@ Looking for a better app installer? Try **InstallerX**!
 
 Many customized Chinese ROMs come with subpar default installers. You can replace them with **InstallerX**.
 
-Compared to stock installers, **InstallerX** offers more installation options:
+Compared to stock installers, **InstallerX** offers more installation features:
 - Rich installation types: APK, APKS, APKM, XAPK, APKs inside ZIP, and batch APKs.
 - Dialog-based installation
 - Notification-based installation
 - Automatic installation
 - Installer declaration
 - Setting install flags (can inherit Profile settings)
+- Install For specific user / all users
 - Dex2oat after success installation
-- Block installation of specific apps
+- Block installation of specific apps or by sharedUID
 - Auto-delete APK after installation
+- No shell commands, native api call only
 
 ## Supported Versions
 
@@ -35,23 +37,22 @@ Compared to stock installers, **InstallerX** offers more installation options:
 
 ## Key Changes and Features
 
-- **UI Options:** [Testing] Switchable between the classic interface and a new UI design based on Material 3 Expressive.
+- **UI Options:** Switchable between a new UI design based on Material 3 Expressive and Miuix(Experimental) which is like HyperOS.
 - **More Customization:** More customizable interface settings.
 - **Bug fixes:** Resolved APK deletion issues from the original project on certain systems.
 - **Performance:** Optimized parsing speed, improved parsing of various package types.
-- **Multilingual support:** English, Traditional Chinese, and Spanish. Contributions for more languages are welcome via PR!
+- **Multilingual support:** More languages supported. Contributions for more languages are welcome!
 - **Dialog optimization:** Improved installation dialog display.
-- **System Icons:** Support for displaying system icon packs during installation (method from [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt)).
+- **System Icons:** Support for displaying system icon packs during installation.
 - **Version Comparison:** Support for displaying version number comparison in single-line or multi-line format.
 - **SDK Information:** Installation dialogs show targetSDK and minSDK in single-line or multi-line format.
-- **Bypass Interceptions:** Shizuku/Root can bypass custom UI chain-start restrictions when opening an App after installation.
-    - Implemented using native APIs, not shell commands.
+- **Bypass Interceptions:** Shizuku/Root can bypass custom OS chain-start restrictions when opening an App after installation.
     - Currently only works for dialog installation.
     - Dhizuku cannot invoke permissions, so a customizable countdown option was added to reserve time for the app opening action.
 - **Extended Menu:** For dialog installation (enable in settings):
     - Displays permissions requested by the application.
-    - InstallFlags configuration (can inherit global Profile settings). Partially based on code from [zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions/blob/main/app/src/main/java/dev/zwander/installwithoptions/data/InstallOption.kt).
-      - **Important Note:** Setting InstallFlags **does not guarantee** they will always work. Some options might pose security risks, depending on the system.
+    - InstallFlags configuration (can inherit global Profile settings).
+      - **Important** Setting InstallFlags **does not guarantee** they will always work. Some options might pose security risks, depending on the system.
 - **Preset Sources:** Support for pre-configuring installation source package names in settings, allowing quick selection in profiles and the dialog installation menu.
 - **Install from ZIP:** Support for installing APK files inside ZIP archives (dialog installation only).
     - No quantity limit.
@@ -64,20 +65,28 @@ Compared to stock installers, **InstallerX** offers more installation options:
     - No quantity limit.
     - APK files only.
     - Supports automatic handling of multiple versions of the same package (deduplication and intelligent selection).
-- **APKS/APKM/XAPK Files:** Support for automatic selection of the best split. Partially based on ideas and code from [vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller/tree/master/app).
+- **APKS/APKM/XAPK Files:** Support for automatic selection of the best split.
     - Supports both notification and dialog installation.
         - Clicking "Install" in the notification chooses the best option.
         - In the dialog, the best option is selected by default, but can be chosen manually.
     - The split selection interface shows user-friendly descriptions.
-- [Testing] **Architecture Support:** Allows installing armeabi-v7a packages on arm64-v8a only systems. Actual functionality depends on the system providing runtime translation.
-- [Testing] **Downgrade with/without Data:** Support for performing app downgrades with or without data preservation on some OEM Android 15 systems.
-    - This feature only supports Android 14 and above. On Android 14, try the `Allow downgrade` option in the installation settings first, and if it fails, use this suggestion.
-    - The feature is available in the smart suggestions of the dialog installation. To use it, first enable the `Show intelligent suggestions (Experimental)` option.
-    - **Use this feature with extreme caution on system apps!** Loss of system app data could render the device unusable.
-    - Not compatible with OneUI 7.0, RealmeUI, and some ColorOS versions (OEM restrictions). If you only see the downgrade option *without* data preservation, it means your system does not support downgrade *with* data.
-- [Testing] **Blacklist:** Support for configuring a list of banned package names for installation in the settings.
-    - Under development. Currently only allows manual additions. A default list based on device model will be provided in the future (useful to prevent incorrect installation of system software from other models on HyperOS).
-- [Testing] **DexOpt:** After successful installation, the app can automatically perform dex2oat on the installed applications according to the configured Profile settings.
+- **Architecture Support:** Allows installing armeabi-v7a packages on arm64-v8a only systems. Actual functionality depends on the system providing runtime translation.
+- **Downgrade with/without Data:** Support for performing app downgrades with or without data preservation on some OEM Android 15/16 systems.
+    - This feature only supports Android 15 and above. On Android 14 or below, try the `Allow downgrade` option in the install options.
+    - The feature is available in the smart suggestions of the dialog installation. To use it, first enable the `Show smart suggestions` option.
+    - **Use this feature with extreme caution on system apps!** Loss of system app data could let your device unusable.
+    - Not compatible with OneUI 7.0, RealmeUI, and some ColorOS versions (AOSP restrictions). If you only see the downgrade option *without* data preservation, it means your system does not support downgrade *with* data.
+- **Blacklist:** Support for configuring a list of banned package names for installation in the settings.
+    - Support blacklist by packageName / sharedUID with exemptions
+    - Blacklist sharedUID 1000/1001 by default, if you don't want this, remove it from the blacklist.
+    - `Allow once` in smart suggestions
+- **DexOpt:** After successful installation, the app can automatically perform dex2oat on the installed applications according to the configured Profile settings.
+    - Not support Dhizuku
+- **Signature Verification：** Verify the signature of the installed app and apk to install, and give a warning if they do not match.
+- **Select Target User:** Support installing apps to a specific user.
+    - Not support Dhizuku
+    - Can be overridden by `Install For All Users` install option
+- [Testing] **Declare as Uninstaller:** Accept Uninstall intent on certain OS, custom OS may not be supported.
 - [Testing] **Directly Install From Download Link:** The online version supports directly sharing the download link of an APK file to InstallerX for installation. Currently, the APK is not kept locally, but an option to retain the installation package will be added in the future.
 
 ## FAQ
@@ -105,15 +114,15 @@ Compared to stock installers, **InstallerX** offers more installation options:
 
 - **HyperOS reinstalls the default installer / locking fails**
     - HyperOS may reset the default installer after the user installs an APK-handling app.
-    - On some HyperOS versions, locking failure is normal.
+    - On some HyperOS versions, locking failure is expected.
     - HyperOS intercepts USB installation requests (ADB/Shizuku) with a dialog. If the user rejects the installation of a new app, the system will revoke the installer setting and force the default one. If this happens, lock InstallerX again.
 
-- **Notification progress bar freezes on HyperOS**
-    - HyperOS has very strict background app controls. Set "No background restrictions" for the app.
-    - The app is optimized: it ends all background services and closes 0.5 seconds after completing the installation task (when the user clicks "Done" or clears the notification). You can enable the foreground service notification to monitor.
+- **Notification progress bar freezes**
+    - Some custom OS has very strict background app controls. Set "No background restrictions" for the app if you encounter this.
+    - The app is optimized: it ends all background services and closes 1 seconds after completing the installation task (when the user clicks "Done" or clears the notification). You can enable the foreground service notification to monitor.
 
 - **Problems on Oppo/Vivo/Lenovo/... systems?**
-    - We do not have devices from these brands for testing. You can discuss it in [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions).
+    - We do not have devices from these brands for testing. You can discuss it in [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions), or report through our [Telegram Channel](https://t.me/installerx_revived).
     - To lock the installer on Oppo/Vivo, use the lock tool (Lock Tool).
 
 ## About Releases
@@ -157,3 +166,12 @@ Copyright © [iamr0s](https://github.com/iamr0s) and [contributors](https://gith
 InstallerX is currently released under [**GNU General Public License v3 (GPL-3)**](http://www.gnu.org/licenses/gpl-3.0), though this commitment may change in the future. Maintainers reserve the right to modify license terms or the open-source status of the project.
 
 If you base your development on InstallerX, you must comply with the terms of the open-source license of the specific version of the source code you use as a base, regardless of future changes made to the main project.
+
+## Acknowledgements
+
+This project uses code from, or is based on the implementation of, the following projects:
+
+- [iamr0s/InstallerX](https://github.com/iamr0s/InstallerX)
+- [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku)
+- [zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions)
+- [vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller)
