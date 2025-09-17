@@ -336,8 +336,8 @@
     <string name="dhizuku_cannot_set_user_desc">Dhizuku模式下不支持设置用户！</string>
     <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku模式下不支持设置DexOpt！</string>
     <string name="grant_permission_after_install">点击以在安装完成后授予权限</string>
-    <string name="show_intelligent_suggestion">显示智能建议（实验性）</string>
-    <string name="show_intelligent_suggestion_desc">当安装失败时显示智能建议</string>
+    <string name="show_intelligent_suggestion">显示智能建议</string>
+    <string name="show_intelligent_suggestion_desc">安装失败时显示智能建议</string>
     <string name="permission_list">权限列表</string>
     <string name="permission_list_desc">正在安装的软件包请求的权限列表</string>
     <!--  InstallOptions Start  -->
