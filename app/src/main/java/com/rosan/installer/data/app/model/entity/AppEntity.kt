@@ -16,7 +16,7 @@ sealed class AppEntity {
 
     // each app entity may have a container type, such as a split APK or a collection
     abstract val containerType: DataType?
-
+ 
     data class BaseEntity(
         override val packageName: String,
         val sharedUserId: String?,
@@ -33,6 +33,7 @@ sealed class AppEntity {
         // Get from AndroidManifest.xml
         val permissions: List<String>? = null,
         val signatureHash: String? = null,
+        val fileHash: String? = null
     ) : AppEntity()
 
     data class SplitEntity(
