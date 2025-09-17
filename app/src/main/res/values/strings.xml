@@ -1,15 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">InstallerX Revived</string>
-
     <string name="agreement_title">Policy</string>
-    <string name="agreement_text">Here is our user policy, Please read and agree to it. &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/terms&quot;&gt;User Policy&lt;/a&gt;, &lt;a href=&quot;https://iamr0s.github.io/InstallerXDocs/privacy&quot;&gt;Privacy Policy&lt;/a&gt; This message won\'t show up again after you agree.</string>
-
+    <string name="agreement_text">Here is our user policy, Please read and agree to it. &lt;a href="https://iamr0s.github.io/InstallerXDocs/terms"&gt;User Policy&lt;/a&gt;, &lt;a href="https://iamr0s.github.io/InstallerXDocs/privacy"&gt;Privacy Policy&lt;/a&gt; This message won\'t show up again after you agree.</string>
     <string name="user_terms">User policy</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="agree">Agree</string>
     <string name="warning">Warning</string>
     <string name="open_source_license">Open Source License</string>
-
     <string name="back">Back</string>
     <string name="home">Home</string>
     <string name="config">Profiles</string>
@@ -23,23 +21,18 @@
     <string name="about_detail">About InstallerX Revived</string>
     <string name="get_update">Get update</string>
     <string name="get_update_detail">Check for software updates and new features.</string>
-
     <string name="internet_access_enabled">Online</string>
     <string name="internet_access_disabled">Offline</string>
-
     <string name="stable">Stable</string>
     <string name="preview">Preview</string>
     <string name="unstable">Unstable</string>
-
     <string name="enable_notification_hint">Please enable notification permission to install!</string>
     <string name="enable_storage_permission_hint">Please enable All Files Access to install!</string>
-
     <string name="discuss">Chat &amp; Feedback &amp; Update</string>
     <string name="telegram_group">Telegram group</string>
     <string name="telegram_group_desc">Join the group!</string>
     <string name="telegram_channel">Telegram Channel</string>
     <string name="telegram_channel_desc">Join the channel to receive news and updates!</string>
-
     <string name="theme_settings">Theme Settings</string>
     <string name="theme_settings_ui_style">UI Style</string>
     <string name="theme_settings_desc">Change the theme of the app</string>
@@ -61,7 +54,6 @@
     <string name="installer_settings_global_installer">Global</string>
     <string name="installer_settings_dialog_mode_options">Options for Dialog</string>
     <string name="installer_settings_notification_mode_options">Options for Notification</string>
-
     <string name="basic">Basic</string>
     <string name="disable_adb_install_verify">Disable ADB Verify</string>
     <string name="disable_adb_install_verify_desc">Disable ADB install verification, useful on some systems where a installation will trigger an scan (Play Protect)</string>
@@ -80,26 +72,20 @@
     <string name="unlock_default_installer_failed">Couldn\'t unset as default installer</string>
     <string name="clear_cache">Clear cache</string>
     <string name="success">Success</string>
-
     <string name="details">Details</string>
-
     <string name="add">Add</string>
     <string name="update">Update</string>
     <string name="save">Save</string>
     <string name="more">More</string>
     <string name="edit">Edit</string>
     <string name="apply">Apply</string>
-
     <string name="delete">Delete</string>
     <string name="restore">Undo</string>
-
     <string name="delete_success">Successfully deleted</string>
-
     <string name="loading">Loading…</string>
     <string name="empty_configs">No profiles, add one below</string>
     <string name="filter">Filter</string>
     <string name="order">Sort</string>
-
     <string name="config_name">Profile name</string>
     <string name="config_info">Info</string>
     <string name="config_scope">Scope</string>
@@ -167,11 +153,9 @@
     <string name="config_confirm_deletion_desc">Do you want to delete \'%1$s\'? This cannot be undone.</string>
     <string name="config_installer_matches">Match: %1$s</string>
     <string name="config_no_managed_packages_to_suggest">Nothing to suggest</string>
-
     <string name="config_error_name">Name can\'t be empty</string>
     <string name="config_error_customize_authorizer">Custom authorizer can\'t be empty</string>
     <string name="config_error_installer">Installer source can\'t be empty</string>
-
     <string name="discard">Discard Changes</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
@@ -189,7 +173,6 @@
     <string name="select">Select</string>
     <string name="clear">Clear</string>
     <string name="global">Global</string>
-
     <string name="pull_to_refresh_hint1">Pull down to refresh</string>
     <string name="pull_to_refresh_hint2">Release to refresh</string>
     <string name="pull_to_refresh_hint3">Refreshing…</string>
@@ -203,7 +186,6 @@
     <string name="sort_by_selected_first">Selected go first</string>
     <string name="sort_by_show_system_app">Display system app</string>
     <string name="sort_by_show_package_name">Display package name</string>
-
     <string name="installer_ready">Ready</string>
     <string name="installer_resolving">Checking…</string>
     <string name="installer_resolve_failed">Resolve failed</string>
@@ -239,7 +221,6 @@
     <string name="uninstall_all_users">For All Users</string>
     <string name="uninstall_delete_system_app">Delete SystemApp</string>
     <string name="uninstall_success_message">Uninstall Success</string>
-
     <string name="permission_read_external_storage">Read external storage</string>
     <string name="permission_write_external_storage">Write external storage</string>
     <string name="permission_access_fine_location">Access fine location</string>
@@ -291,9 +272,7 @@
     <string name="permission_access_mock_location">Access mock location</string>
     <string name="permission_dhizuku">Use Dhizuku</string>
     <string name="permission_unknown">Unknown permission</string>
-
     <string name="installer_running">InstallerX running</string>
-
     <string name="installer_version_short">" Ver. %1$s (%2$s)"</string>
     <string name="installer_version">Version: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
@@ -304,7 +283,6 @@
     <string name="installer_package_min_sdk_label_short" translatable="false">Min: %1$s</string>
     <string name="installer_package_target_sdk_label_short" translatable="false">Target: %1$s</string>
     <string name="installer_file_path">Path: %1$s</string>
-
     <string name="exception_install_failed_unknown">Unknown error</string>
     <string name="exception_resolve_failed">Resolve URI failed</string>
     <string name="exception_resolve_failed_no_internet_access">This version cannot access Internet, to use this feature, reinstall another version.</string>
@@ -352,7 +330,6 @@
     <string name="upgrade_version_prefix">Upgrade</string>
     <string name="downgrade_version_prefix">Downgrade</string>
     <string name="install_choice">Select Package</string>
-
     <string name="show_dialog_when_pressing_notification">Show Dialog when pressing Notification</string>
     <string name="change_notification_touch_behavior">Change Notification touch behavior</string>
     <string name="version_compare_in_single_line">Show version compare in single line</string>
@@ -370,11 +347,10 @@
     <string name="dhizuku_cannot_set_user_desc">Dhizuku mode does not support setting target user!</string>
     <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku mode does not support setting dexopt!</string>
     <string name="grant_permission_after_install">Click to grant permission after installation</string>
-    <string name="show_intelligent_suggestion">Show Intelligent Suggestions (Experimental)</string>
-    <string name="show_intelligent_suggestion_desc">Show intelligent suggestions when installation fails</string>
+    <string name="show_intelligent_suggestion">Show Smart Suggestions</string>
+    <string name="show_intelligent_suggestion_desc">Show smart suggestions on install failure</string>
     <string name="permission_list">Permission List</string>
     <string name="permission_list_desc">List of permissions requested by the package being installed</string>
-
     <!--  InstallOptions Start  -->
     <string name="config_allow_test">Allow Test</string>
     <string name="config_allow_test_desc">If the package being installed is a test-only app, allow it to be installed.</string>
@@ -423,7 +399,6 @@
     <string name="dry_run_desc">Verify the package, but don\'t install it.</string>
     <string name="config_request_update_ownership">Request Update Ownership</string>
     <string name="config_request_update_ownership_desc">Set this installer as the source for future updates.</string>
-
     <string name="unarchive">Unarchive</string>
     <string name="unarchive_desc">Unarchive an existing package.</string>
     <string name="replace_existing">Replace Existing</string>
