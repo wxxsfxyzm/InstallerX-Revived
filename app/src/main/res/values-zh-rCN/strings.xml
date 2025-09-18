@@ -18,6 +18,8 @@
     <string name="other">其它</string>
     <string name="about_detail">关于 InstallerX Revived</string>
     <string name="get_update_detail">检查软件更新和新功能</string>
+    <string name="get_source_code">查看源代码</string>
+    <string name="get_source_code_detail">在 GitHub 上查看源代码</string>
     <string name="internet_access_enabled">联网</string>
     <string name="internet_access_disabled">离线</string>
     <string name="stable">正式版</string>
@@ -105,6 +107,14 @@
     <string name="config_install_mode_notification">通知栏</string>
     <string name="config_install_mode_auto_notification">通知栏自动</string>
     <string name="config_install_mode_ignore">忽略</string>
+    <string name="config_customize_package_source">自定义软件包来源</string>
+    <string name="config_customize_package_source_desc">指定软件包的来源，例如应用商店或本地文件。</string>
+    <string name="config_package_source">软件包来源</string>
+    <string name="config_package_source_unspecified">未指定</string>
+    <string name="config_package_source_other">其他</string>
+    <string name="config_package_source_store">应用商店</string>
+    <string name="config_package_source_local_file">本地文件</string>
+    <string name="config_package_source_downloaded_file">已下载的文件</string>
     <string name="config_declare_installer">声明安装者（安装来源）</string>
     <string name="config_installer">安装者（包名）</string>
     <string name="config_customize_user">设定用户</string>
@@ -333,6 +343,7 @@
     <string name="close_notification_immediately_on_dialog_dismiss">关闭对话框将静默退出</string>
     <string name="set_countdown">设定倒计时</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku安装成功后自动关闭的倒计时</string>
+    <string name="dhizuku_cannot_set_package_source_desc">Dhizuku 模式不支持自定义软件包来源！</string>
     <string name="dhizuku_cannot_set_installer_desc">Dhizuku模式下不支持设置安装器！</string>
     <string name="dhizuku_cannot_set_user_desc">Dhizuku模式下不支持设置用户！</string>
     <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku模式下不支持设置DexOpt！</string>

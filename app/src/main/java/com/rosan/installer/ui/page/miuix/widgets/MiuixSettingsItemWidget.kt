@@ -129,7 +129,7 @@ fun MiuixDataAuthorizerWidget(
         modifier = modifier,
         mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.config_authorizer),
-        summary = spinnerEntries[selectedIndex].title,
+        // summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
@@ -203,7 +203,7 @@ fun MiuixDataInstallModeWidget(
         modifier = modifier,
         mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.config_install_mode),
-        summary = spinnerEntries[selectedIndex].title,
+        // summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
@@ -339,7 +339,7 @@ fun MiuixSettingsAboutItemWidget(
  */
 @Composable
 fun MiuixSettingsNavigationItemWidget(
-    icon: ImageVector,
+    icon: ImageVector? = null,
     title: String,
     description: String,
     onClick: () -> Unit
@@ -850,7 +850,7 @@ fun MiuixThemeEngineWidget(
         modifier = modifier,
         mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.theme_settings_ui_engine),
-        summary = spinnerEntries[selectedIndex].title,
+        // summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->

@@ -85,6 +85,8 @@ class EditViewModel(
                     is EditViewAction.ChangeDataAuthorizer -> changeDataAuthorizer(action.authorizer)
                     is EditViewAction.ChangeDataCustomizeAuthorizer -> changeDataCustomizeAuthorizer(action.customizeAuthorizer)
                     is EditViewAction.ChangeDataInstallMode -> changeDataInstallMode(action.installMode)
+                    is EditViewAction.ChangeDataEnableCustomizePackageSource -> changeDataEnableCustomPackageSource(action.enable)
+                    is EditViewAction.ChangeDataPackageSource -> changeDataPackageSource(action.packageSource)
                     is EditViewAction.ChangeDataDeclareInstaller -> changeDataDeclareInstaller(action.declareInstaller)
                     is EditViewAction.ChangeDataInstaller -> changeDataInstaller(action.installer)
                     is EditViewAction.ChangeDataCustomizeUser -> changeDataCustomizeUser(action.enable)
@@ -165,6 +167,7 @@ class EditViewModel(
         // If the effective authorizer is Dhizuku, force disable the customize user feature.
         if (effectiveAuthorizer == ConfigEntity.Authorizer.Dhizuku) {
             updatedData = updatedData.copy(
+                enableCustomizePackageSource = false,
                 declareInstaller = false,
                 enableCustomizeUser = false,
                 enableManualDexopt = false
@@ -201,6 +204,22 @@ class EditViewModel(
         state = state.copy(
             data = state.data.copy(
                 installMode = installMode
+            )
+        )
+    }
+
+    private fun changeDataEnableCustomPackageSource(enable: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                enableCustomizePackageSource = enable
+            )
+        )
+    }
+
+    private fun changeDataPackageSource(packageSource: ConfigEntity.PackageSource) {
+        state = state.copy(
+            data = state.data.copy(
+                packageSource = packageSource
             )
         )
     }

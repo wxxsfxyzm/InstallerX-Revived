@@ -52,6 +52,7 @@ import androidx.compose.material.icons.twotone.Search
 import androidx.compose.material.icons.twotone.Security
 import androidx.compose.material.icons.twotone.SecurityUpdateWarning
 import androidx.compose.material.icons.twotone.SettingsSuggest
+import androidx.compose.material.icons.twotone.Source
 import androidx.compose.material.icons.twotone.SystemUpdate
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material.icons.twotone.TipsAndUpdates
@@ -117,6 +118,7 @@ object AppIcons {
 
     // --- Profile pkg 图标集合 ---
     val InstallUser = Icons.TwoTone.AccountCircle
+    val InstallPackageSource = Icons.TwoTone.Source
     val InstallSource = Icons.TwoTone.Face
     val InstallSourceInput = Icons.TwoTone.Badge
     val InstallForAllUsers = Icons.TwoTone.People

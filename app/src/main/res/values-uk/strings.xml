@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="agreement_title">Політика</string>
-    <string name="agreement_text">Ось наша політика користувача. Прочитайте та погодьтеся з нею. &lt;a href=https://iamr0s.github.io/InstallerXDocs/terms&gt;Політика користувача&lt;/a&gt;, &lt;a href=https://iamr0s.github.io/InstallerXDocs/privacy&gt;Політика приватності&lt;/a&gt; Це повідомлення більше не з’явиться після вашої згоди.</string>
     <string name="user_terms">Політика користувача</string>
     <string name="privacy_policy">Політика приватності</string>
     <string name="agree">Погодитися</string>
@@ -18,7 +17,7 @@
     <string name="other">Інше</string>
     <string name="about_detail">Про InstallerX Revived</string>
     <string name="get_update">Отримувати оновлення</string>
-    <string name="get_update_detail">Перевіряти наявність оновлень ПЗ та нових функцій.</string>
+    <string name="get_update_detail">Перевіряти наявність оновлень ПЗ та нових функцій</string>
     <string name="internet_access_enabled">У мережі</string>
     <string name="internet_access_disabled">Поза мережею</string>
     <string name="stable">Стабільна</string>

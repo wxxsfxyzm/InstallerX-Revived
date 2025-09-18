@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="agreement_title">Política</string>
-    <string name="agreement_text">Está é a nossa política de uso. Por gentileza leia e se concordar prossiga. &lt;a href=https://iamr0s.github.io/InstallerXDocs/terms&gt;Política de Uso&lt;/a&gt;, &lt;a href=https://iamr0s.github.io/InstallerXDocs/privacy&gt;Privacy Policy&lt;/a&gt; Está mensagem não será novamente exibida se você concordar.</string>
     <string name="user_terms">Política de uso</string>
     <string name="privacy_policy">Política de privacidade</string>
     <string name="agree">De acordo</string>

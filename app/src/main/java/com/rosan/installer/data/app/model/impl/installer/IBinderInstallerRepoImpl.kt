@@ -245,6 +245,16 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                 }
             )
         params.setAppPackageName(packageName)
+        // --- Customize PackageSource ---
+        // Only available on Android 13+, Dhizuku need test
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && config.authorizer != ConfigEntity.Authorizer.Dhizuku) {
+            Timber.d("Setting packageSource to ${config.packageSource.name} (${config.packageSource.value})")
+            if (config.enableCustomizePackageSource)
+                params.setPackageSource(config.packageSource.value)
+            else
+                params.setPackageSource(ConfigEntity.PackageSource.UNSPECIFIED.value)
+        }
+        // --- PackageSource End ---
         params.installFlags = config.installFlags or
                 if (context.packageManager.isPackageArchivedCompat(packageName)) {
                     Timber.d("Package $packageName is archived, using unarchive option.")

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="agreement_title">Richtlinie</string>
-    <string name="agreement_text">Hier ist unsere Benutzerrichtlinie, Bitte lesen Sie sie und akzeptieren Sie sie. &lt;a href=https://iamr0s.github.io/InstallerXDocs/terms&gt;Benutzerrichtlinie&lt;/a&gt;, &lt;a href=https://iamr0s.github.io/InstallerXDocs/privacy&gt;Datenschutzrichtlinie&lt;/a&gt;</string>
     <string name="user_terms">Benutzer-Richtlinie</string>
     <string name="privacy_policy">Datenschutzrichtlinie</string>
     <string name="agree">Zustimmen</string>

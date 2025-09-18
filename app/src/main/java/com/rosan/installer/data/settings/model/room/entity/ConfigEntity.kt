@@ -11,7 +11,7 @@ import org.koin.core.component.KoinComponent
     indices = [
     ]
 )
-data class ConfigEntity(
+data class ConfigEntity constructor(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     var id: Long = 0L,
@@ -20,6 +20,12 @@ data class ConfigEntity(
     @ColumnInfo(name = "authorizer") var authorizer: Authorizer,
     @ColumnInfo(name = "customize_authorizer") var customizeAuthorizer: String,
     @ColumnInfo(name = "install_mode") var installMode: InstallMode,
+    @ColumnInfo(name = "enable_customize_package_source", defaultValue = "0")
+    var enableCustomizePackageSource: Boolean = false,
+    @ColumnInfo(
+        name = "package_source",
+        defaultValue = "1" // Corresponds to PACKAGE_SOURCE_OTHER
+    ) var packageSource: PackageSource = PackageSource.OTHER,
     @ColumnInfo(name = "installer") var installer: String?,
     @ColumnInfo(name = "enable_customize_user", defaultValue = "0") var enableCustomizeUser: Boolean = false,
     @ColumnInfo(name = "target_user_id", defaultValue = "0") var targetUserId: Int = 0,
@@ -46,6 +52,8 @@ data class ConfigEntity(
             authorizer = Authorizer.Global,
             customizeAuthorizer = "",
             installMode = InstallMode.Global,
+            enableCustomizePackageSource = false,
+            packageSource = PackageSource.OTHER,
             installer = null,
             enableCustomizeUser = false,
             targetUserId = 0,
@@ -66,6 +74,8 @@ data class ConfigEntity(
             authorizer = Authorizer.Global,
             customizeAuthorizer = "",
             installMode = InstallMode.Global,
+            enableCustomizePackageSource = false,
+            packageSource = PackageSource.OTHER,
             installer = "com.miui.packageinstaller",
             enableCustomizeUser = false,
             targetUserId = 0,
@@ -119,8 +129,15 @@ data class ConfigEntity(
         Everything("everything");
     }
 
-    enum class Analyser(val value: String) {
-        R0s("r0s"),
-        System("system");
+    enum class PackageSource(val value: Int) {
+        UNSPECIFIED(0),     // Corresponds to PACKAGE_SOURCE_UNSPECIFIED
+        OTHER(1),           // Corresponds to PACKAGE_SOURCE_OTHER
+        STORE(2),           // Corresponds to PACKAGE_SOURCE_STORE
+        LOCAL_FILE(3),      // Corresponds to PACKAGE_SOURCE_LOCAL_FILE
+        DOWNLOADED_FILE(4); // Corresponds to PACKAGE_SOURCE_DOWNLOADED_FILE
+
+        companion object {
+            fun fromInt(value: Int) = entries.find { it.value == value } ?: OTHER
+        }
     }
 }

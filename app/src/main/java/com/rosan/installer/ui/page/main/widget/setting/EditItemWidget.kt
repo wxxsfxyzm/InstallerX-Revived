@@ -181,6 +181,67 @@ fun DataInstallModeWidget(viewModel: EditViewModel) {
 }
 
 @Composable
+fun DataPackageSourceWidget(viewModel: EditViewModel) {
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+    val enableCustomizePackageSource = viewModel.state.data.enableCustomizePackageSource
+    val currentSource = viewModel.state.data.packageSource
+
+    // Determine if the Dhizuku authorizer is active, which disables this feature.
+    val isDhizuku = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.Dhizuku -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
+        else -> false
+    }
+
+    // Display a different description when the feature is disabled by Dhizuku.
+    val description =
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
+        else stringResource(id = R.string.config_customize_package_source_desc)
+
+    Column {
+        SwitchWidget(
+            icon = AppIcons.InstallPackageSource,
+            title = stringResource(id = R.string.config_customize_package_source),
+            description = description,
+            checked = enableCustomizePackageSource,
+            enabled = !isDhizuku,
+            isError = isDhizuku,
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
+            }
+        )
+
+        AnimatedVisibility(
+            visible = enableCustomizePackageSource,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            // A map to associate the enum values with their human-readable string resources.
+            val data = mapOf(
+                ConfigEntity.PackageSource.UNSPECIFIED to stringResource(R.string.config_package_source_unspecified),
+                ConfigEntity.PackageSource.OTHER to stringResource(R.string.config_package_source_other),
+                ConfigEntity.PackageSource.STORE to stringResource(R.string.config_package_source_store),
+                ConfigEntity.PackageSource.LOCAL_FILE to stringResource(R.string.config_package_source_local_file),
+                ConfigEntity.PackageSource.DOWNLOADED_FILE to stringResource(R.string.config_package_source_downloaded_file),
+
+                )
+            DropDownMenuWidget(
+                title = stringResource(R.string.config_package_source),
+                description = data[currentSource],
+                choice = data.keys.toList().indexOf(currentSource),
+                data = data.values.toList(),
+            ) { index ->
+                // Dispatch the action to the ViewModel when a new source is selected.
+                data.keys.toList().getOrNull(index)?.let { source ->
+                    viewModel.dispatch(EditViewAction.ChangeDataPackageSource(source))
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun DataDeclareInstallerWidget(viewModel: EditViewModel) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer

@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -41,14 +40,12 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewState
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBottomSheetContent
 import com.rosan.installer.ui.page.miuix.widgets.MiuixClearCache
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDefaultInstaller
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisableAdbVerify
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationSetting
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsNavigationItemWidget
-import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -85,7 +82,6 @@ fun MiuixPreferredPage(
     val scrollBehavior = MiuixScrollBehavior()
     val snackBarHostState = remember { SnackbarHostState() }
     var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowErrorDialog?>(null) }
-    var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
@@ -217,12 +213,6 @@ fun MiuixPreferredPage(
                                 supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
                                 onClick = { navController.navigate(MiuixSettingsScreen.MiuixAbout.route) }
                             )
-                            MiuixSettingsAboutItemWidget(
-                                imageVector = AppIcons.Update,
-                                headlineContentText = stringResource(R.string.get_update),
-                                supportingContentText = stringResource(R.string.get_update_detail),
-                                onClick = { showBottomSheet = true }
-                            )
                         }
                     }
                 }
@@ -239,13 +229,5 @@ fun MiuixPreferredPage(
             },
             title = dialogInfo.title
         )
-    }
-    // ModalBottomSheet is kept from Material3 as there is no direct Miuix replacement
-    if (showBottomSheet) InstallerMaterialExpressiveTheme {
-        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-            MiuixBottomSheetContent(
-                title = stringResource(R.string.get_update)
-            )
-        }
     }
 }

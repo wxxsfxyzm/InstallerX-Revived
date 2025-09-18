@@ -118,7 +118,6 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                 scaleOut(targetScale = 0.9f) + fadeOut()
             }
         ) {
-            // 这里直接使用 HomePage，它之前是 AboutPageActivity 的内容
             MiuixHomePage(navController)
         }
         composable(

@@ -1,9 +1,11 @@
 package com.rosan.installer.ui.page.miuix.settings.config.edit
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +40,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDataForAllUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataManualDexoptWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataNameWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixDataPackageSourceWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySdkWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
@@ -117,6 +120,7 @@ fun MiuixEditPage(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets.none,
         topBar = {
@@ -175,6 +179,7 @@ fun MiuixEditPage(
                         .padding(bottom = 6.dp)
                 ) {
                     MiuixDataUserWidget(viewModel = viewModel)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) MiuixDataPackageSourceWidget(viewModel = viewModel)
                     MiuixDataDeclareInstallerWidget(viewModel = viewModel)
                     MiuixDataManualDexoptWidget(viewModel)
                     MiuixDataAutoDeleteWidget(viewModel = viewModel)
