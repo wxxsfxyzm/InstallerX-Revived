@@ -24,7 +24,7 @@ import top.yukonga.miuix.kmp.extra.SuperDialog
  * A dialog to confirm an action, dynamically showing specific errors or a generic message.
  * Refactored to use SuperDialog.
  *
- * @param show Controls the visibility of the dialog.
+ * @param showState A MutableState controlling the visibility of the dialog.
  * @param onDismiss Request to close the dialog.
  * @param onConfirm Request to perform the confirm action (e.g., discard and exit).
  * @param errorMessages A list of specific error messages to display. If empty, a generic message is shown.

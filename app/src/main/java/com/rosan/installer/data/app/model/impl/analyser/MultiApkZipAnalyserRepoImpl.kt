@@ -48,7 +48,7 @@ object MultiApkZipAnalyserRepoImpl : FileAnalyserRepo {
 
                 // Core logic: only process files ending with .apk (case-insensitive).
                 Timber.tag("MultiApkZipAnalyser")
-                    .d("Found APK entry: ${entry.name} in ${zipDataEntity}")
+                    .d("Found APK entry: ${entry.name} in $zipDataEntity")
 
                 // Create a temporary DataEntity for the APK entry within the ZIP.
                 val entryDataEntity = DataEntity.ZipFileEntity(entry.name, fileEntity)

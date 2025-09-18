@@ -84,7 +84,6 @@ fun NewPreferredPage(
     val snackBarHostState = remember { SnackbarHostState() }
     var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowErrorDialog?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->

@@ -550,9 +550,9 @@ fun MiuixManagedPackagesWidget(
  * It is stateless and relies on callbacks to handle data modifications.
  *
  * @param noContentTitle The title if no packages are available.
- * @param packages The list of NamedPackage items to display.
- * @param onAddPackage A callback invoked when a new package should be added.
- * @param onRemovePackage A callback invoked when an existing package should be removed.
+ * @param uids The list of SharedUid items to display.
+ * @param onAddUid A callback invoked when a new package should be added.
+ * @param onRemoveUid A callback invoked when an existing package should be removed.
  * @param modifier The modifier to be applied to the widget's container.
  */
 @Composable

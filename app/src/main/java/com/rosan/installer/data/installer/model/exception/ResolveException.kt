@@ -7,5 +7,4 @@ data class ResolveException(
     val uris: List<Uri>,
 ) : Exception(
     "action: $action, uri: $uris"
-) {
-}
+)

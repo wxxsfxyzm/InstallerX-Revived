@@ -15,7 +15,7 @@ import org.koin.core.component.inject
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * The default implementation of [AppIconRepository].
+ * The default implementation of [AppIconRepo].
  * It handles the logic for loading icons from the installed package (for upgrades)
  * or from the APK entity (for new installs) and caches the results.
  */

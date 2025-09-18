@@ -235,7 +235,7 @@ fun MiuixDataDeclareInstallerWidget(viewModel: EditViewModel) {
 @Composable
 fun MiuixDataInstallerWidget(viewModel: EditViewModel) {
     val stateData = viewModel.state.data
-    val managedPackages = viewModel.state.managedInstallerPackages
+    viewModel.state.managedInstallerPackages
     val currentInstaller = stateData.installer
 
     /*    // Keep logic for calculating supporting text content.

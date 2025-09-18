@@ -64,7 +64,7 @@ object PackageManagerUtil {
      * needs to happen for all users); instead, just mark the app as uninstalled for
      * the current user.
      */
-    const val DELETE_SYSTEM_APP = 0x00000004;
+    const val DELETE_SYSTEM_APP = 0x00000004
 
     const val INSTALL_FAILED_ALREADY_EXISTS = -1
     const val INSTALL_FAILED_INVALID_APK = -2

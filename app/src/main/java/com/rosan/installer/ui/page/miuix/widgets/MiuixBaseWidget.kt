@@ -38,7 +38,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param enabled Controls the enabled state of the component. When false, it becomes non-clickable and visually disabled.
  * @param isError If true, the summary text will be displayed in the error color.
  * @param onClick The callback to be invoked when this widget is clicked.
- * @param hapticFeedbackType The type of haptic feedback to perform on click.
  */
 @Composable
 fun MiuixBaseWidget(

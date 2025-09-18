@@ -365,7 +365,7 @@ private fun VersionCompareMultiLine(
                 stringResource(R.string.upgrade_version_prefix) + stringResource(
                     R.string.installer_version_short,
                     entityToInstall.versionName,
-                    entityToInstall.versionCode.toLong()
+                    entityToInstall.versionCode
                 ) else stringResource(R.string.downgrade_version_prefix) + stringResource(
                 R.string.installer_version_short,
                 entityToInstall.versionName,

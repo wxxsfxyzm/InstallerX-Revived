@@ -5,10 +5,8 @@
     <string name="add">เพิ่ม</string>
     <string name="allocate_aggressive">จัดสรรอย่างเข้มข้น</string>
     <string name="allocate_aggressive_desc">ระบุว่าแพ็คเกจเป็น ส่วนสำคัญต่อสุขภาพหรือความปลอดภัยของระบบ และจะลบไฟล์ที่ล้างได้มากขึ้นเพื่อเพิ่มพื้นที่หากจำเป็น</string>
-    <string name="apex">APEX</string>
     <string name="apex_desc">ระบุว่าแพ็คเกจที่กำลังติดตั้งคือแพ็คเกจ APEX</string>
     <string name="app">แอป</string>
-    <string name="app_name">InstallerX</string>
     <string name="apply">ใช้</string>
     <string name="back">ย้อนกลับ</string>
     <string name="basic">พื้นฐาน</string>
@@ -48,10 +46,6 @@
     <string name="config_declare_installer">ตั้งค่าแหล่งที่มาการติดตั้ง</string>
     <string name="config_description">คำอธิบายโปรไฟล์</string>
     <string name="config_dexopt_mode">โหมดการเพิ่มประสิทธิภาพ</string>
-    <string name="config_dexopt_mode_everything">ทุกอย่าง</string>
-    <string name="config_dexopt_mode_speed">ความเร็ว</string>
-    <string name="config_dexopt_mode_speed_profile">โปรไฟล์ความเร็ว</string>
-    <string name="config_dexopt_mode_verify">ยืนยัน</string>
     <string name="config_dialog_message_unsaved_changes">ออกจากโปรแกรมโดยไม่บันทึก?</string>
     <string name="config_dialog_title_invalid">ข้อมูลที่ป้อนไม่ถูกต้อง</string>
     <string name="config_dialog_title_unsaved_changes">มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก</string>
@@ -194,12 +188,7 @@
     <string name="installer_installing">กำลังติดตั้ง…</string>
     <string name="installer_multi_apk_description">โปรดเลือกแอปพลิเคชันที่คุณต้องการติดตั้ง</string>
     <string name="installer_multi_apk_zip_description">ไฟล์นี้มีแอปพลิเคชันแยกหลายรายการ โปรดเลือกแอปพลิเคชันที่คุณต้องการติดตั้ง</string>
-    <string name="installer_package_min_sdk_label">ขั้นต่ำ:</string>
-    <string name="installer_package_min_sdk_label_short">ขั้นต่ำ: %1$s</string>
     <string name="installer_package_name">แพ็คเกจ: %1$s</string>
-    <string name="installer_package_sdk_value">%1$s(Android%2$s)</string>
-    <string name="installer_package_target_sdk_label">เป้าหมาย:</string>
-    <string name="installer_package_target_sdk_label_short">เป้าหมาย: %1$s</string>
     <string name="installer_prepare_install">ก่อนการติดตั้ง</string>
     <string name="installer_prepare_install_empty">โปรดเลือกแพ็คเกจอย่างน้อยหนึ่งแพ็คเกจ</string>
     <string name="installer_prepare_install_too_many">โปรดเลือก base.apk เพียงหนึ่งไฟล์เท่านั้น</string>

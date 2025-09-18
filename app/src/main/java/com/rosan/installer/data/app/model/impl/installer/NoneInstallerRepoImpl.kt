@@ -8,7 +8,7 @@ import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 object NoneInstallerRepoImpl : IBinderInstallerRepoImpl() {
-    private val newProcess = NewProcessImpl();
+    private val newProcess = NewProcessImpl()
 
     override suspend fun doInstallWork(
         config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity, blacklist: List<String>,

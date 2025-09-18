@@ -98,10 +98,6 @@
     <string name="config_dexopt_mode">وضع التحسين</string>
     <string name="config_force_dexopt">فرض التحسين</string>
     <string name="config_force_dexopt_desc">فرض إعادة الترجمة حتى لو اعتبرها النظام غير ضرورية</string>
-    <string name="config_dexopt_mode_verify" translatable="false">Verify</string>
-    <string name="config_dexopt_mode_speed_profile" translatable="false">Speed Profile</string>
-    <string name="config_dexopt_mode_speed" translatable="false">Speed</string>
-    <string name="config_dexopt_mode_everything" translatable="false">Everything</string>
     <string name="config_auto_delete">الحذف التلقائي</string>
     <string name="config_auto_delete_dsp">حذف ملف APK تلقائياً بعد تثبيته</string>
     <string name="config_display_sdk_version">عرض معلومات SDK</string>
@@ -240,11 +236,6 @@
     <string name="installer_version">الإصدار: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">الحزمة: %1$s</string>
-    <string name="installer_package_min_sdk_label" translatable="false">Min: </string>
-    <string name="installer_package_target_sdk_label" translatable="false">Target: </string>
-    <string name="installer_package_sdk_value" translatable="false">%1$s(Android%2$s)</string>
-    <string name="installer_package_min_sdk_label_short" translatable="false">Min: %1$s</string>
-    <string name="installer_package_target_sdk_label_short" translatable="false">Target: %1$s</string>
     <string name="installer_file_path">المسار: %1$s</string>
     <string name="exception_install_failed_unknown">خطأ غير معروف</string>
     <string name="exception_resolve_failed">فشل في تحليل URI</string>
@@ -339,7 +330,6 @@
     <string name="allocate_aggressive_desc">يشير إلى أن الحزمة "حيوية لصحة النظام أو أمانه" وستقوم بحذف الملفات القابلة للمسح بقوة أكبر لتوفير مساحة إذا لزم الأمر.</string>
     <string name="virtual_preload">تحميل مسبق افتراضي</string>
     <string name="virtual_preload_desc">يشير إلى أن الحزمة هي تحميل مسبق افتراضي.</string>
-    <string name="apex" translatable="false">APEX</string>
     <string name="apex_desc">يشير إلى أن الحزمة التي يتم تثبيتها هي حزمة APEX</string>
     <string name="enable_rollback">تمكين التراجع</string>
     <string name="enable_rollback_desc">السماح بعمليات التراجع المستقبلية لهذه الحزمة.</string>
