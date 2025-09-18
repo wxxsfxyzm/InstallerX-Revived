@@ -106,7 +106,7 @@ fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
     SuperSpinner(
         mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(R.string.config_authorizer),
-        summary = data[stateAuthorizer], // Display current selection text
+        // summary = data[stateAuthorizer], // Display current selection text
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
@@ -180,7 +180,7 @@ fun MiuixDataInstallModeWidget(viewModel: EditViewModel) {
     SuperSpinner(
         mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(R.string.config_install_mode),
-        summary = data[stateInstallMode], // Display current selection text
+        // summary = data[stateInstallMode], // Display current selection text
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
