@@ -110,7 +110,7 @@
     <string name="config_install_mode_auto_notification">Auto notification</string>
     <string name="config_install_mode_ignore">Ignore</string>
     <string name="config_customize_package_source">Customize Package Source</string>
-    <string name="config_customize_package_source_desc">Specify the source of the package, such as Store or Local File</string>
+    <string name="config_customize_package_source_desc">Specify the source of the package, Local File or Download File will face more restrictions</string>
     <string name="config_package_source">Package Source</string>
     <string name="config_package_source_unspecified">Unspecified</string>
     <string name="config_package_source_other">Other</string>

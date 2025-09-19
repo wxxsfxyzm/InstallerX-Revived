@@ -108,7 +108,7 @@
     <string name="config_install_mode_auto_notification">通知栏自动</string>
     <string name="config_install_mode_ignore">忽略</string>
     <string name="config_customize_package_source">自定义软件包来源</string>
-    <string name="config_customize_package_source_desc">指定软件包的来源，例如应用商店或本地文件。</string>
+    <string name="config_customize_package_source_desc">指定软件包的来源，本地文件或下载文件会面临更多限制</string>
     <string name="config_package_source">软件包来源</string>
     <string name="config_package_source_unspecified">未指定</string>
     <string name="config_package_source_other">其他</string>
