@@ -17,8 +17,8 @@
     <string name="about">Sobre</string>
     <string name="other">Outro</string>
     <string name="about_detail">Sobre o InstallerX Revived</string>
-    <string name="get_update">Atualizar</string>
-    <string name="get_update_detail">Verificar por novas atualizações e funcionalidades.</string>
+    <string name="get_update">Obter atualização</string>
+    <string name="get_update_detail">Verifique se há atualizações de software e novos recursos</string>
     <string name="internet_access_enabled">Online</string>
     <string name="internet_access_disabled">Offline</string>
     <string name="stable">Estável</string>
@@ -273,7 +273,7 @@
     <string name="exception_install_failed_invalid_uri">URI inválida</string>
     <string name="exception_install_failed_insufficient_storage">Armazenamento cheio, tente liberar espaço</string>
     <string name="exception_install_failed_duplicate_package">Assinatura do pacote alterada, certifique-se de que seu pacote é seguro e desinstale o aplicativo, depois tente novamente</string>
-    <string name="exception_install_failed_no_shared_user">Não foi possível encontrar o base.apk com o UID correspondente. Baixe-o e tente novamente.</string>
+    <string name="exception_install_failed_no_shared_user">Não foi possível encontrar o base.apk com o UID correspondente. Baixe-o e tente novamente</string>
     <string name="exception_install_failed_update_incompatible">Atualização incomparável, por gentileza desinstale e tente novamente</string>
     <string name="exception_install_failed_shared_user_incompatible">Assinaturas do pacote não correspondem</string>
     <string name="exception_install_failed_missing_shared_library">Faltando biblioteca compartilhada</string>
@@ -296,7 +296,7 @@
     <string name="exception_install_failed_version_downgrade">Falha de downgrade, por gentileza desinstale o aplicativo e tente novamente</string>
     <string name="exception_install_failed_deprecated_sdk_version">targetSDK muito baixo, para prosseguir, habilite o sinalizador correspondente</string>
     <string name="exception_install_failed_rejected_by_build_type">Rejeitado pelo tipo de construção do sistema</string>
-    <string name="exception_install_failed_hyperos_isolation_violation">Adicione uma fonte de instalação válida para instalar o aplicativo do sistema</string>
+    <string name="exception_install_failed_hyperos_isolation_violation">Adicione uma fonte de instalação válida para instalar o aplicativo Mi System</string>
     <string name="exception_install_failed_duplicate_permission">O pacote está tentando redeclarar a permissão já declarada por outro aplicativo!</string>
     <string name="exception_install_failed_user_restricted">Há uma restrição do sistema de Instalação via USB, por gentileza ative-a.</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOs não permite desinstalar aqui.</string>
@@ -408,4 +408,28 @@
     <string name="suggestion_mi_isolation">Adicionar temporariamente um instalador válido e tentar novamente</string>
     <string name="suggestion_user_restricted">Ir para as opções do desenvolvedor e habilitar a instalação USB</string>
     <string name="suggestion_bypass_low_target_sdk">Permitir temporariamente ignorar restrições e tentar novamente</string>
+    <string name="pull_to_refresh_hint4">Atualizado com sucesso</string>
+    <string name="pull_to_refresh_hint3">Atualizando…</string>
+    <string name="pull_to_refresh_hint2">Libere para atualizar</string>
+    <string name="pull_to_refresh_hint1">Puxe para baixo para atualizar</string>
+    <string name="get_source_code">Verifique o código -fonte</string>
+    <string name="get_source_code_detail">Verifique o código fonte no GitHub</string>
+    <string name="config_scope">Escopo</string>
+    <string name="config_customize_package_source">Personalizar a fonte do pacote</string>
+    <string name="config_customize_package_source_desc">Especifique a fonte do pacote, como armazenamento ou arquivo local</string>
+    <string name="config_package_source">Origem do Pacote</string>
+    <string name="config_package_source_unspecified">Não especificado</string>
+    <string name="config_package_source_other">Outro</string>
+    <string name="config_package_source_store">Loja</string>
+    <string name="config_package_source_local_file">Arquivo Local</string>
+    <string name="config_package_source_downloaded_file">Arquivo baixado</string>
+    <string name="config_customize_user">Definir o usuário para instalar</string>
+    <string name="config_customize_user_desc">Definir manualmente o usuário que você deseja instalar o aplicativo</string>
+    <string name="config_user_not_found">Usuário não encontrado</string>
+    <string name="config_target_user">Usuário destino</string>
+    <string name="exception_install_failed_origin_os_blacklist">Adicione uma fonte de instalação válida para instalar o aplicativo Vivo System</string>
+    <string name="dhizuku_cannot_set_package_source_desc">O modo Dhizuku não suporta a personalização da fonte do pacote!</string>
+    <string name="dhizuku_cannot_set_user_desc">O modo Dhizuku não suporta a configuração do usuário de destino!</string>
+    <string name="dhizuku_cannot_set_dexopt_desc">O modo dhizuku não suporta a configuração de Dexopt!</string>
+    <string name="suggestion_bypass_blacklist_set_by_user">Permitir instalar uma vez</string>
 </resources>
