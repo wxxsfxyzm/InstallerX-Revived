@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.config.edit
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -54,6 +55,7 @@ import com.rosan.installer.ui.page.main.widget.setting.DataForAllUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataPackageSourceWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
@@ -216,6 +218,7 @@ fun EditPage(
             item { DataInstallModeWidget(viewModel = viewModel) }
             item { LabelWidget(label = stringResource(R.string.config_label_installer_settings)) }
             item { DataUserWidget(viewModel) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) item { DataPackageSourceWidget(viewModel) }
             item { DataDeclareInstallerWidget(viewModel = viewModel) }
             item { DataManualDexoptWidget(viewModel) }
             item { DataAutoDeleteWidget(viewModel = viewModel) }

@@ -18,6 +18,8 @@
     <string name="other">其他</string>
     <string name="about_detail">關於 InstallerX Revived</string>
     <string name="get_update_detail">檢查軟體更新和新功能</string>
+    <string name="get_source_code">檢視原始碼</string>
+    <string name="get_source_code_detail">在 GitHub 上檢視原始碼</string>
     <string name="stable">正式版</string>
     <string name="preview">預覽版</string>
     <string name="unstable">測試版</string>
@@ -101,6 +103,14 @@
     <string name="config_install_mode_notification">通知欄</string>
     <string name="config_install_mode_auto_notification">通知欄自動</string>
     <string name="config_install_mode_ignore">忽略</string>
+    <string name="config_customize_package_source">自訂軟體包來源</string>
+    <string name="config_customize_package_source_desc">指定軟體包的來源，本機檔案或下載檔案會面臨更多限制</string>
+    <string name="config_package_source">軟體包來源</string>
+    <string name="config_package_source_unspecified">未指定</string>
+    <string name="config_package_source_other">其他</string>
+    <string name="config_package_source_store">應用程式商店</string>
+    <string name="config_package_source_local_file">本機檔案</string>
+    <string name="config_package_source_downloaded_file">已下載的檔案</string>
     <string name="config_declare_installer">聲明安裝者（安裝來源）</string>
     <string name="config_installer">安裝者（包名）</string>
     <string name="config_customize_user">設定使用者帳號</string>
@@ -300,6 +310,7 @@
     <string name="downgrade_version_prefix">降級</string>
     <string name="install_choice">安裝包選擇</string>
     <string name="installer_error_reason">錯誤原因</string>
+    <string name="exception_install_failed_origin_os_blacklist">Vivo 安裝系統應用程式需要聲明有效的安裝者！</string>
     <string name="exception_install_failed_hyperos_isolation_violation">HyperOS 安裝系統應用程式需要聲明有效的安裝者！</string>
     <string name="get_update">取得更新</string>
     <string name="show_dialog_when_pressing_notification">點擊通知時顯示對話框</string>
@@ -316,6 +327,7 @@
     <string name="set_countdown">設定倒數計時</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku安裝成功後自動關閉的倒數計時</string>
     <string name="dhizuku_cannot_set_installer_desc">Dhizuku 模式下不支援設定安裝器！</string>
+    <string name="dhizuku_cannot_set_package_source_desc">Dhizuku 模式不支援自訂軟體包來源！</string>
     <string name="dhizuku_cannot_set_user_desc">Dhizuku 模式不支援設定目標使用者！</string>
     <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku 模式不支援設定 dexopt！</string>
     <string name="grant_permission_after_install">點擊以在安裝完成後授予權限</string>

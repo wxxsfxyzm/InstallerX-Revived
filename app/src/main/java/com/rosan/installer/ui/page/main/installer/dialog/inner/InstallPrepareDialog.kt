@@ -279,23 +279,27 @@ fun installPrepareDialog( // 小写开头
             buildList {
                 // Install button is shown if the entity's minSdk is compatible
                 val canInstall = entityToInstall?.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true
-                if (canInstall) {
-                    add(DialogButton(stringResource(buttonTextId)) {
-                        viewModel.dispatch(DialogViewAction.Install)
-                    })
-                }
                 // only when the entity is a split APK, XAPK, or APKM
-                if (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM) {
-                    add(DialogButton(stringResource(R.string.install_choice), 2f) {
+                if (canInstall && viewModel.showExtendedMenu && (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM)) {
+                    add(DialogButton(stringResource(R.string.install_choice), 1f) {
                         viewModel.dispatch(DialogViewAction.InstallChoice)
                     })
                 }
+                if (canInstall) {
+                    add(DialogButton(stringResource(buttonTextId), 1f) {
+                        viewModel.dispatch(DialogViewAction.Install)
+                    })
+                }
                 // else if app can be installed and extended menu is shown
-                else if (canInstall && viewModel.showExtendedMenu) {
+                if (canInstall && viewModel.showExtendedMenu) {
                     add(DialogButton(stringResource(R.string.menu), 2f) {
                         viewModel.dispatch(DialogViewAction.InstallExtendedMenu)
                     })
                 }
+                if (canInstall && !viewModel.showExtendedMenu)
+                    add(DialogButton(stringResource(R.string.install_choice), 1f) {
+                        viewModel.dispatch(DialogViewAction.InstallChoice)
+                    })
                 // Cancel button always shown
                 add(DialogButton(stringResource(R.string.cancel), 1f) {
                     viewModel.dispatch(DialogViewAction.Close)

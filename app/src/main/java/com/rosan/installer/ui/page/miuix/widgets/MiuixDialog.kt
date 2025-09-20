@@ -6,25 +6,34 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.util.openUrl
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardColors
+import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
  * A dialog to confirm an action, dynamically showing specific errors or a generic message.
  * Refactored to use SuperDialog.
  *
- * @param show Controls the visibility of the dialog.
+ * @param showState A MutableState controlling the visibility of the dialog.
  * @param onDismiss Request to close the dialog.
  * @param onConfirm Request to perform the confirm action (e.g., discard and exit).
  * @param errorMessages A list of specific error messages to display. If empty, a generic message is shown.
@@ -137,6 +146,63 @@ fun MiuixHideLauncherIconWarningDialog(
                         colors = ButtonDefaults.textButtonColorsPrimary() // Apply primary color style
                     )
                 }
+            }
+        }
+    )
+}
+
+@Composable
+fun MiuixUpdateDialog(
+    showState: MutableState<Boolean>,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+
+    SuperDialog(
+        show = showState,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.get_update),
+        content = {
+            Column {
+                Card(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    colors = CardColors(
+                        color = MiuixTheme.colorScheme.secondaryVariant,
+                        contentColor = MiuixTheme.colorScheme.onSurface
+                    )
+                ) {
+                    BasicComponent(
+                        title = "GitHub",
+                        onClick = {
+                            context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
+                            onDismiss()
+                        },
+                        rightActions = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_link_icon),
+                                contentDescription = null
+                            )
+                        }
+                    )
+                    BasicComponent(
+                        title = "Telegram",
+                        onClick = {
+                            context.openUrl("https://t.me/installerx_revived")
+                            onDismiss()
+                        },
+                        rightActions = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_link_icon),
+                                contentDescription = null
+                            )
+                        }
+                    )
+                }
+                TextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onDismiss,
+                    text = stringResource(R.string.cancel)
+                )
             }
         }
     )

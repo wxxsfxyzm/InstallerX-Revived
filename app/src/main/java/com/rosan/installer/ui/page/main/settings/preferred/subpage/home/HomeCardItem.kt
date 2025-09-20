@@ -7,5 +7,4 @@ data class HomeCardItem(
     val label: String,
     val content: String? = null,
     val onClick: (() -> Unit)? = null
-) {
-}
+)

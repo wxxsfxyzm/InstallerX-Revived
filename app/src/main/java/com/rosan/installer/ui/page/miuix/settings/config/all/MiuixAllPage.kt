@@ -154,6 +154,7 @@ fun MiuixAllPage(
                 ) {
                     Icon(
                         imageVector = AppIcons.Add,
+                        modifier = Modifier.size(40.dp),
                         contentDescription = stringResource(id = R.string.add),
                         tint = MiuixTheme.colorScheme.primary
                     )

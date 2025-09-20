@@ -21,10 +21,10 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
-import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAuthorizerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixIntNumberPickerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -80,8 +80,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                 enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
                                 exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
                             ) {
-                                IntNumberPickerWidget(
-                                    icon = AppIcons.Working,
+                                MiuixIntNumberPickerWidget(
                                     title = stringResource(R.string.set_countdown),
                                     description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
                                     value = state.dhizukuAutoCloseCountDown,
@@ -146,7 +145,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                 icon = AppIcons.Suggestion,
                                 title = stringResource(id = R.string.show_intelligent_suggestion),
                                 description = stringResource(id = R.string.show_intelligent_suggestion_desc),
-                                checked = viewModel.state.showIntelligentSuggestion,
+                                checked = viewModel.state.showSmartSuggestion,
                                 onCheckedChange = {
                                     viewModel.dispatch(
                                         PreferredViewAction.ChangeShowSuggestion(it)

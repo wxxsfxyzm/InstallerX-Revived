@@ -9,6 +9,8 @@ sealed class EditViewAction {
     data class ChangeDataAuthorizer(val authorizer: ConfigEntity.Authorizer) : EditViewAction()
     data class ChangeDataCustomizeAuthorizer(val customizeAuthorizer: String) : EditViewAction()
     data class ChangeDataInstallMode(val installMode: ConfigEntity.InstallMode) : EditViewAction()
+    data class ChangeDataEnableCustomizePackageSource(val enable: Boolean) : EditViewAction()
+    data class ChangeDataPackageSource(val packageSource: ConfigEntity.PackageSource) : EditViewAction()
     data class ChangeDataDeclareInstaller(val declareInstaller: Boolean) : EditViewAction()
     data class ChangeDataInstaller(val installer: String) : EditViewAction()
     data class ChangeDataCustomizeUser(val enable: Boolean) : EditViewAction()

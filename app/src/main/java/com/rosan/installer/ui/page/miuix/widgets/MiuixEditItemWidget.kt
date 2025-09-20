@@ -106,7 +106,7 @@ fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
     SuperSpinner(
         mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(R.string.config_authorizer),
-        summary = data[stateAuthorizer], // Display current selection text
+        // summary = data[stateAuthorizer], // Display current selection text
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
@@ -180,7 +180,7 @@ fun MiuixDataInstallModeWidget(viewModel: EditViewModel) {
     SuperSpinner(
         mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(R.string.config_install_mode),
-        summary = data[stateInstallMode], // Display current selection text
+        // summary = data[stateInstallMode], // Display current selection text
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
@@ -190,6 +190,82 @@ fun MiuixDataInstallModeWidget(viewModel: EditViewModel) {
             }
         }
     )
+}
+
+@Composable
+fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+    val enableCustomizePackageSource = viewModel.state.data.enableCustomizePackageSource
+    val currentSource = viewModel.state.data.packageSource
+
+    // Determine if the Dhizuku authorizer is active, which disables this feature.
+    val isDhizuku = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.Dhizuku -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
+        else -> false
+    }
+
+    // Display a different description when the feature is disabled by Dhizuku.
+    val description =
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
+        else stringResource(id = R.string.config_customize_package_source_desc)
+
+    Column {
+        MiuixSwitchWidget(
+            icon = AppIcons.InstallPackageSource,
+            title = stringResource(id = R.string.config_customize_package_source),
+            description = description,
+            checked = enableCustomizePackageSource,
+            enabled = !isDhizuku,
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
+            }
+        )
+
+        AnimatedVisibility(
+            visible = enableCustomizePackageSource,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            // A map to associate the enum values with their human-readable string resources.
+            val data = mapOf(
+                ConfigEntity.PackageSource.UNSPECIFIED to stringResource(R.string.config_package_source_unspecified),
+                ConfigEntity.PackageSource.OTHER to stringResource(R.string.config_package_source_other),
+                ConfigEntity.PackageSource.STORE to stringResource(R.string.config_package_source_store),
+                ConfigEntity.PackageSource.LOCAL_FILE to stringResource(R.string.config_package_source_local_file),
+                ConfigEntity.PackageSource.DOWNLOADED_FILE to stringResource(R.string.config_package_source_downloaded_file),
+            )
+
+            // Convert the data Map to the List<SpinnerEntry> required by SuperSpinner.
+            val spinnerEntries = remember(data) {
+                data.values.map { sourceName -> SpinnerEntry(title = sourceName) }
+            }
+
+            // Find the index of the currently selected package source.
+            val selectedIndex = remember(currentSource, data) {
+                data.keys.toList().indexOf(currentSource).coerceAtLeast(0)
+            }
+
+            // Get the display name for the currently selected source, with a fallback.
+            // val summary = data[currentSource]
+
+            // This spinner allows the user to select the package source.
+            SuperSpinner(
+                mode = SpinnerMode.AlwaysOnRight,
+                title = stringResource(R.string.config_package_source),
+                // summary = summary,
+                items = spinnerEntries,
+                selectedIndex = selectedIndex,
+                onSelectedIndexChange = { newIndex ->
+                    // When a new source is selected, find the corresponding enum and dispatch an action.
+                    data.keys.elementAtOrNull(newIndex)?.let { source ->
+                        viewModel.dispatch(EditViewAction.ChangeDataPackageSource(source))
+                    }
+                }
+            )
+        }
+    }
 }
 
 @Composable
@@ -235,7 +311,7 @@ fun MiuixDataDeclareInstallerWidget(viewModel: EditViewModel) {
 @Composable
 fun MiuixDataInstallerWidget(viewModel: EditViewModel) {
     val stateData = viewModel.state.data
-    val managedPackages = viewModel.state.managedInstallerPackages
+    viewModel.state.managedInstallerPackages
     val currentInstaller = stateData.installer
 
     /*    // Keep logic for calculating supporting text content.
@@ -318,13 +394,13 @@ fun MiuixDataUserWidget(viewModel: EditViewModel) {
             }
 
             // Get the display name for the currently selected user, with a fallback.
-            val summary = availableUsers[targetUserId] ?: stringResource(R.string.config_user_not_found)
+            // val summary = availableUsers[targetUserId] ?: stringResource(R.string.config_user_not_found)
 
             // This spinner allows the user to select the target user for installation.
             SuperSpinner(
                 mode = SpinnerMode.AlwaysOnRight,
                 title = stringResource(R.string.config_target_user),
-                summary = summary,
+                // summary = summary,
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,
                 onSelectedIndexChange = { newIndex ->
@@ -406,7 +482,7 @@ fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
                 mode = SpinnerMode.AlwaysOnRight,
                 title = stringResource(R.string.config_dexopt_mode),
                 // Display the currently selected mode name as summary.
-                summary = data[currentMode] ?: spinnerEntries.firstOrNull()?.title ?: "",
+                // summary = data[currentMode] ?: spinnerEntries.firstOrNull()?.title ?: "",
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,
                 onSelectedIndexChange = { newIndex ->

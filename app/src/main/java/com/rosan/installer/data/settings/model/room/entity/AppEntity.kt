@@ -29,5 +29,4 @@ data class AppEntity(
     @ColumnInfo(name = "config_id") var configId: Long,
     @ColumnInfo(name = "created_at") var createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "modified_at") var modifiedAt: Long = System.currentTimeMillis(),
-) {
-}
+)

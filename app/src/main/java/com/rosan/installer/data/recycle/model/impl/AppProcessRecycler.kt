@@ -12,9 +12,9 @@ class AppProcessRecycler(private val shell: String) : Recycler<AppProcess>() {
             val st = StringTokenizer(shell)
             val cmdList = mutableListOf<String>()
             while (st.hasMoreTokens()) {
-                cmdList.add(st.nextToken());
+                cmdList.add(st.nextToken())
             }
-            return cmdList;
+            return cmdList
         }
     }
 

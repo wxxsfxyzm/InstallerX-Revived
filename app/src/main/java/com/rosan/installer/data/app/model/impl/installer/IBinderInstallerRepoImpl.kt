@@ -245,16 +245,35 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                 }
             )
         params.setAppPackageName(packageName)
-        params.installFlags = config.installFlags or
-                if (context.packageManager.isPackageArchivedCompat(packageName)) {
-                    Timber.d("Package $packageName is archived, using unarchive option.")
-                    // It's an unarchive operation. Set the specific flag.
-                    InstallOption.UnArchive.value or InstallOption.ReplaceExisting.value
-                } else {
-                    // It's a new install or a regular update. Use replace existing.
-                    Timber.d("Package $packageName is not archived, using replace existing option.")
-                    InstallOption.ReplaceExisting.value
-                }
+        // --- Customize PackageSource ---
+        // Only available on Android 13+, Dhizuku need test
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && config.authorizer != ConfigEntity.Authorizer.Dhizuku) {
+            Timber.d("Setting packageSource to ${config.packageSource.name} (${config.packageSource.value})")
+            if (config.enableCustomizePackageSource)
+                params.setPackageSource(config.packageSource.value)
+            else
+                params.setPackageSource(ConfigEntity.PackageSource.UNSPECIFIED.value)
+        }
+        // --- PackageSource End ---
+
+        // --- InstallFlags Start ---
+        Timber.tag("InstallFlags").d("Initial install flags: ${params.installFlags}")
+        Timber.tag("InstallFlags").d("Install flags from config: ${config.installFlags}")
+        // Start with the base flags from params and config
+        var newFlags = params.installFlags or config.installFlags
+        // Force-enable the 'ReplaceExisting' flag as a baseline
+        newFlags = newFlags or InstallOption.ReplaceExisting.value
+        Timber.tag("InstallFlags").d("After adding baseline flags: $newFlags")
+        // Conditionally add the 'UnArchive' flag
+        if (context.packageManager.isPackageArchivedCompat(packageName)) {
+            Timber.tag("InstallFlags").d("Package $packageName is archived, adding unarchive option.")
+            newFlags = newFlags or InstallOption.UnArchive.value
+        } else {
+            Timber.tag("InstallFlags").d("Package $packageName is not archived.")
+        }
+        params.installFlags = newFlags
+        Timber.tag("InstallFlags").d("Install flags after customization: ${params.installFlags}")
+        // --- InstallFlags End ---
 
         // --- Disable Dhizuku not supported stuff ---
         if (config.authorizer == ConfigEntity.Authorizer.Dhizuku)

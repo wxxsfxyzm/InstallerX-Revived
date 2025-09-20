@@ -26,6 +26,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedMissingSharedLi
 import com.rosan.installer.data.app.model.exception.InstallFailedNewerSDKException
 import com.rosan.installer.data.app.model.exception.InstallFailedNoSharedUserException
 import com.rosan.installer.data.app.model.exception.InstallFailedOlderSdkException
+import com.rosan.installer.data.app.model.exception.InstallFailedOriginOSBlacklistException
 import com.rosan.installer.data.app.model.exception.InstallFailedPackageChangedException
 import com.rosan.installer.data.app.model.exception.InstallFailedRejectedByBuildTypeException
 import com.rosan.installer.data.app.model.exception.InstallFailedReplaceCouldntDeleteException
@@ -89,6 +90,7 @@ private fun Throwable.getStringResourceId() =
         is InstallFailedVersionDowngradeException -> R.string.exception_install_failed_version_downgrade
         is InstallFailedDeprecatedSdkVersion -> R.string.exception_install_failed_deprecated_sdk_version
         is InstallFailedRejectedByBuildTypeException -> R.string.exception_install_failed_rejected_by_build_type
+        is InstallFailedOriginOSBlacklistException -> R.string.exception_install_failed_origin_os_blacklist
         is InstallFailedHyperOSIsolationViolationException -> R.string.exception_install_failed_hyperos_isolation_violation
         is InstallFailedUserRestrictedException -> R.string.exception_install_failed_user_restricted
         is ShizukuNotWorkException -> R.string.exception_shizuku_not_work

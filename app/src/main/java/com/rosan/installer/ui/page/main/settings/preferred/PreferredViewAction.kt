@@ -11,7 +11,7 @@ sealed class PreferredViewAction {
     data class ChangeGlobalCustomizeAuthorizer(val customizeAuthorizer: String) : PreferredViewAction()
     data class ChangeGlobalInstallMode(val installMode: ConfigEntity.InstallMode) : PreferredViewAction()
     data class ChangeShowDialogInstallExtendedMenu(val showMenu: Boolean) : PreferredViewAction()
-    data class ChangeShowSuggestion(val showIntelligentSuggestion: Boolean) : PreferredViewAction()
+    data class ChangeShowSuggestion(val showSuggestion: Boolean) : PreferredViewAction()
     data class ChangeShowDisableNotification(val showDisableNotification: Boolean) : PreferredViewAction()
     data class ChangeShowDialogWhenPressingNotification(val showDialog: Boolean) : PreferredViewAction()
     data class ChangeDhizukuAutoCloseCountDown(val countDown: Int) : PreferredViewAction()

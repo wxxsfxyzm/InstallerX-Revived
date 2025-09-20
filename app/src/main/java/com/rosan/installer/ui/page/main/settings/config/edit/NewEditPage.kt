@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.config.edit
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -62,6 +63,7 @@ import com.rosan.installer.ui.page.main.widget.setting.DataForAllUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataPackageSourceWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
@@ -264,6 +266,7 @@ fun NewEditPage(
                     title = stringResource(R.string.config_label_installer_settings),
                     content = buildList {
                         add { DataUserWidget(viewModel) }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add { DataPackageSourceWidget(viewModel) }
                         add { DataDeclareInstallerWidget(viewModel) }
                         add { DataManualDexoptWidget(viewModel) }
                         add { DataAutoDeleteWidget(viewModel) }

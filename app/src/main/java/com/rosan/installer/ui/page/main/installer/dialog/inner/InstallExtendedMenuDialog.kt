@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.PermDeviceInformation
@@ -37,6 +38,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -44,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.util.rememberInstallOptions
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.model.entity.ExtendedMenuEntity
@@ -64,6 +67,9 @@ import com.rosan.installer.util.getBestPermissionLabel
 fun installExtendedMenuDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
+    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val containerType =
+        installer.analysisResults.find { it.packageName == currentPackageName }?.appEntities?.first()?.app?.containerType
     val installOptions = rememberInstallOptions(installer.config.authorizer)
     val installFlags by viewModel.installFlags.collectAsState()
     val managedPackages by viewModel.managedInstallerPackages.collectAsState()
@@ -78,18 +84,19 @@ fun installExtendedMenuDialog(
     val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, availableUsers) {
         buildList {
             // Permission List
-            add(
-                ExtendedMenuEntity(
-                    action = InstallExtendedMenuAction.PermissionList,
-                    subMenuId = InstallExtendedSubMenuId.PermissionList,
-                    menuItem = ExtendedMenuItemEntity(
-                        nameResourceId = R.string.permission_list,
-                        descriptionResourceId = R.string.permission_list_desc,
-                        icon = AppIcons.Permission,
-                        action = null
+            if (containerType == DataType.APK)
+                add(
+                    ExtendedMenuEntity(
+                        action = InstallExtendedMenuAction.PermissionList,
+                        subMenuId = InstallExtendedSubMenuId.PermissionList,
+                        menuItem = ExtendedMenuItemEntity(
+                            nameResourceId = R.string.permission_list,
+                            descriptionResourceId = R.string.permission_list_desc,
+                            icon = AppIcons.Permission,
+                            action = null
+                        )
                     )
                 )
-            )
 
             // Installer selection
             if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
@@ -183,13 +190,44 @@ fun MenuItemWidget(
 ) {
     val haptic = LocalHapticFeedback.current
     val defaultInstallerFromSettings by viewmodel.defaultInstallerFromSettings.collectAsState()
+
+    // Define shapes for different positions
+    val cornerRadius = 16.dp
+    val connectionRadius = 5.dp
+    val topShape = RoundedCornerShape(
+        topStart = cornerRadius,
+        topEnd = cornerRadius,
+        bottomStart = connectionRadius,
+        bottomEnd = connectionRadius
+    )
+    val middleShape = RoundedCornerShape(connectionRadius)
+    val bottomShape = RoundedCornerShape(
+        topStart = connectionRadius,
+        topEnd = connectionRadius,
+        bottomStart = cornerRadius,
+        bottomEnd = cornerRadius
+    )
+    val singleShape = RoundedCornerShape(cornerRadius)
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp), // 卡片之间的间距
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .heightIn(max = 325.dp),
+            .heightIn(max = 325.dp)
+            .clip(
+                // Clip the whole column to ensure content stays within the rounded bounds.
+                if (entities.size == 1) singleShape else RoundedCornerShape(cornerRadius)
+            ),
     ) {
-        itemsIndexed(entities) { _, item ->
+        itemsIndexed(entities, key = { _, item -> item.menuItem.nameResourceId }) { index, item ->
+            // Determine the shape based on the item's position.
+            val shape = when {
+                entities.size == 1 -> singleShape
+                index == 0 -> topShape
+                index == entities.size - 1 -> bottomShape
+                else -> middleShape
+            }
+
             when (item.action) {
                 is InstallExtendedMenuAction.CustomizeInstaller -> {
                     var expanded by remember { mutableStateOf(false) }
@@ -203,6 +241,7 @@ fun MenuItemWidget(
                                 .fillMaxWidth()
                                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable), // This is important for the dropdown position
                             onClick = { /* Card itself is not clickable, dropdown handles it */ },
+                            shape = shape,
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                         ) {
@@ -280,6 +319,7 @@ fun MenuItemWidget(
                                 .fillMaxWidth()
                                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                             onClick = { /* No-op */ },
+                            shape = shape,
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                         ) {
@@ -345,6 +385,7 @@ fun MenuItemWidget(
                     // 使用 Card 作为可点击区域和背景
                     Card(
                         modifier = Modifier.fillMaxWidth(),
+                        shape = shape,
                         onClick = {
                             when (item.action) {
                                 is InstallExtendedMenuAction.PermissionList ->

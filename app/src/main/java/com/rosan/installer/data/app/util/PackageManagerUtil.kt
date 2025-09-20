@@ -24,6 +24,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedMissingSharedLi
 import com.rosan.installer.data.app.model.exception.InstallFailedNewerSDKException
 import com.rosan.installer.data.app.model.exception.InstallFailedNoSharedUserException
 import com.rosan.installer.data.app.model.exception.InstallFailedOlderSdkException
+import com.rosan.installer.data.app.model.exception.InstallFailedOriginOSBlacklistException
 import com.rosan.installer.data.app.model.exception.InstallFailedPackageChangedException
 import com.rosan.installer.data.app.model.exception.InstallFailedRejectedByBuildTypeException
 import com.rosan.installer.data.app.model.exception.InstallFailedReplaceCouldntDeleteException
@@ -63,7 +64,7 @@ object PackageManagerUtil {
      * needs to happen for all users); instead, just mark the app as uninstalled for
      * the current user.
      */
-    const val DELETE_SYSTEM_APP = 0x00000004;
+    const val DELETE_SYSTEM_APP = 0x00000004
 
     const val INSTALL_FAILED_ALREADY_EXISTS = -1
     const val INSTALL_FAILED_INVALID_APK = -2
@@ -96,8 +97,9 @@ object PackageManagerUtil {
     const val INSTALL_FAILED_DUPLICATE_PERMISSION = -112
     const val INSTALL_FAILED_NO_MATCHING_ABIS = -113
     const val INSTALL_FAILED_ABORTED = -115
-    const val INSTALL_FAILED_REJECTED_BY_BUILDTYPE = -3001
+    const val INSTALL_BLACK_LIST = -903
     const val INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION = -1000
+    const val INSTALL_FAILED_REJECTED_BY_BUILDTYPE = -3001
 
     const val DELETE_FAILED_INTERNAL_ERROR = -1
     const val DELETE_FAILED_DEVICE_POLICY_MANAGER = -2
@@ -158,8 +160,9 @@ object PackageManagerUtil {
             INSTALL_FAILED_UID_CHANGED -> InstallFailedUidChangedException(ecpMsg)
             INSTALL_FAILED_VERSION_DOWNGRADE -> InstallFailedVersionDowngradeException(ecpMsg)
             INSTALL_FAILED_DEPRECATED_SDK_VERSION -> InstallFailedDeprecatedSdkVersion(ecpMsg)
-            INSTALL_FAILED_REJECTED_BY_BUILDTYPE -> InstallFailedRejectedByBuildTypeException(ecpMsg)
+            INSTALL_BLACK_LIST -> InstallFailedOriginOSBlacklistException(ecpMsg)
             INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION -> InstallFailedHyperOSIsolationViolationException(ecpMsg)
+            INSTALL_FAILED_REJECTED_BY_BUILDTYPE -> InstallFailedRejectedByBuildTypeException(ecpMsg)
             INSTALL_FAILED_USER_RESTRICTED -> InstallFailedUserRestrictedException(ecpMsg)
             else -> IllegalStateException(ecpMsg)
         }

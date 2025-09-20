@@ -86,7 +86,7 @@ fun installFailedDialog( // 小写开头
                 ErrorTextBlock(
                     installer.error,
                     suggestions = {
-                        if (viewModel.showIntelligentSuggestion)
+                        if (viewModel.showSmartSuggestion)
                             ErrorSuggestions(
                                 error = installer.error,
                                 viewModel = viewModel,

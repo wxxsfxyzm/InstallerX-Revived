@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.repo.PARepo
@@ -62,7 +63,7 @@ class DialogViewModel(
     var showExtendedMenu by mutableStateOf(false)
         private set
 
-    var showIntelligentSuggestion by mutableStateOf(true)
+    var showSmartSuggestion by mutableStateOf(true)
         private set
 
     var disableNotificationOnDismiss by mutableStateOf(false)
@@ -162,7 +163,7 @@ class DialogViewModel(
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first()
             showExtendedMenu =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false).first()
-            showIntelligentSuggestion =
+            showSmartSuggestion =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true).first()
             disableNotificationOnDismiss =
                 appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first()
@@ -274,7 +275,18 @@ class DialogViewModel(
                             originalAnalysisResults = repo.analysisResults
                         }
                         val analysisResults = repo.analysisResults
-                        val isMultiAppMode = analysisResults.size > 1
+
+                        // The decision to show the choice screen should not only depend on the number of packages,
+                        // but also on the container type determined by the analyser.
+                        // If the analyser found a ZIP with multiple APKs for the SAME package,
+                        // analysisResults.size would be 1, but we still need to show the choice screen.
+                        val containerType = analysisResults.firstOrNull()
+                            ?.appEntities?.firstOrNull()
+                            ?.app?.containerType
+
+                        val isMultiAppMode = analysisResults.size > 1 ||
+                                containerType == DataType.MULTI_APK ||
+                                containerType == DataType.MULTI_APK_ZIP
 
                         if (isMultiAppMode) {
                             // If the backend (ActionHandler) determined it's a multi-app scenario,
