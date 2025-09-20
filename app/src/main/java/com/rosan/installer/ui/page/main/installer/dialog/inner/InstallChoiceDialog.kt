@@ -15,7 +15,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -102,32 +104,71 @@ private fun ChoiceContent(
     viewModel: DialogViewModel,
     isMultiApk: Boolean
 ) {
+    // Define shapes for different positions
+    val cornerRadius = 16.dp
+    val connectionRadius = 5.dp
+    val topShape = RoundedCornerShape(
+        topStart = cornerRadius,
+        topEnd = cornerRadius,
+        bottomStart = connectionRadius,
+        bottomEnd = connectionRadius
+    )
+    val middleShape = RoundedCornerShape(connectionRadius)
+    val bottomShape = RoundedCornerShape(
+        topStart = connectionRadius,
+        topEnd = connectionRadius,
+        bottomStart = cornerRadius,
+        bottomEnd = cornerRadius
+    )
+    val singleShape = RoundedCornerShape(cornerRadius)
+
     // A much cleaner implementation using contentPadding for consistent spacing.
     if (isMultiApk) {
         // --- Multi-APK Mode ---
+        val listSize = analysisResults.size
+        if (listSize == 0) return
+
         LazyColumn(
             modifier = Modifier.heightIn(max = 325.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            items(analysisResults, key = { it.packageName }) { packageResult ->
+            itemsIndexed(analysisResults, key = { _, it -> it.packageName }) { index, packageResult ->
+                val shape = when {
+                    listSize == 1 -> singleShape
+                    index == 0 -> topShape
+                    index == listSize - 1 -> bottomShape
+                    else -> middleShape
+                }
                 MultiApkGroupCard(
                     packageResult = packageResult,
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    shape = shape
                 )
             }
         }
     } else {
         // --- Single-Package Split Mode ---
         val entities = analysisResults.firstOrNull()?.appEntities ?: emptyList()
+        val listSize = entities.size
+        if (listSize == 0) return
+
         LazyColumn(
             modifier = Modifier.heightIn(max = 325.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            items(entities, key = { it.app.name + it.app.packageName }) { item ->
+            itemsIndexed(entities, key = { _, it -> it.app.name + it.app.packageName }) { index, item ->
+                val shape = when {
+                    listSize == 1 -> singleShape
+                    index == 0 -> topShape
+                    index == listSize - 1 -> bottomShape
+                    else -> middleShape
+                }
+
                 SingleItemCard(
                     item = item,
+                    shape = shape,
                     onClick = {
                         viewModel.dispatch(
                             DialogViewAction.ToggleSelection(
@@ -147,7 +188,8 @@ private fun ChoiceContent(
 @Composable
 private fun MultiApkGroupCard(
     packageResult: PackageAnalysisResult,
-    viewModel: DialogViewModel
+    viewModel: DialogViewModel,
+    shape: Shape
 ) {
     val itemsInGroup = packageResult.appEntities
     val isSingleItemInGroup = itemsInGroup.size == 1
@@ -161,6 +203,7 @@ private fun MultiApkGroupCard(
         val item = itemsInGroup.first()
         SingleItemCard(
             item = item,
+            shape = shape,
             onClick = {
                 viewModel.dispatch(
                     DialogViewAction.ToggleSelection(
@@ -175,6 +218,7 @@ private fun MultiApkGroupCard(
         val rotation by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f, label = "arrowRotation")
         Card(
             modifier = Modifier.fillMaxWidth(),
+            shape = shape,
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Row(
@@ -232,7 +276,11 @@ private fun MultiApkGroupCard(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun SingleItemCard(item: SelectInstallEntity, onClick: () -> Unit) {
+private fun SingleItemCard(
+    item: SelectInstallEntity,
+    shape: Shape,
+    onClick: () -> Unit
+) {
     val haptic = LocalHapticFeedback.current
     Card(
         // Padding is now handled by the parent LazyColumn's contentPadding.
@@ -241,6 +289,7 @@ private fun SingleItemCard(item: SelectInstallEntity, onClick: () -> Unit) {
             haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
             onClick()
         },
+        shape = shape,
         colors = CardDefaults.cardColors(containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp/*defaultElevation = if (pkg.selected) 2.dp else 1.dp*/)
     ) {
