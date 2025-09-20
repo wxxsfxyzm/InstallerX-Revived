@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.util.rememberInstallOptions
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.model.entity.ExtendedMenuEntity
@@ -64,6 +65,9 @@ import com.rosan.installer.util.getBestPermissionLabel
 fun installExtendedMenuDialog(
     installer: InstallerRepo, viewModel: DialogViewModel
 ): DialogParams {
+    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val containerType =
+        installer.analysisResults.find { it.packageName == currentPackageName }?.appEntities?.first()?.app?.containerType
     val installOptions = rememberInstallOptions(installer.config.authorizer)
     val installFlags by viewModel.installFlags.collectAsState()
     val managedPackages by viewModel.managedInstallerPackages.collectAsState()
@@ -78,18 +82,19 @@ fun installExtendedMenuDialog(
     val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, availableUsers) {
         buildList {
             // Permission List
-            add(
-                ExtendedMenuEntity(
-                    action = InstallExtendedMenuAction.PermissionList,
-                    subMenuId = InstallExtendedSubMenuId.PermissionList,
-                    menuItem = ExtendedMenuItemEntity(
-                        nameResourceId = R.string.permission_list,
-                        descriptionResourceId = R.string.permission_list_desc,
-                        icon = AppIcons.Permission,
-                        action = null
+            if (containerType == DataType.APK)
+                add(
+                    ExtendedMenuEntity(
+                        action = InstallExtendedMenuAction.PermissionList,
+                        subMenuId = InstallExtendedSubMenuId.PermissionList,
+                        menuItem = ExtendedMenuItemEntity(
+                            nameResourceId = R.string.permission_list,
+                            descriptionResourceId = R.string.permission_list_desc,
+                            icon = AppIcons.Permission,
+                            action = null
+                        )
                     )
                 )
-            )
 
             // Installer selection
             if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||

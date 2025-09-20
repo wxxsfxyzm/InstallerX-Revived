@@ -12,7 +12,7 @@ data class PreferredViewState(
     val adbVerifyEnabled: Boolean = true,
     val isIgnoringBatteryOptimizations: Boolean = false,
     val showDialogInstallExtendedMenu: Boolean = false,
-    val showIntelligentSuggestion: Boolean = false,
+    val showSmartSuggestion: Boolean = false,
     val disableNotificationForDialogInstall: Boolean = false,
     val showDialogWhenPressingNotification: Boolean = true,
     val dhizukuAutoCloseCountDown: Int = 3,

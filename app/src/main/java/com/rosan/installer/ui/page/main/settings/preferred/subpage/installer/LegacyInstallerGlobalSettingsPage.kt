@@ -136,7 +136,7 @@ fun LegacyInstallerGlobalSettingsPage(
                             icon = AppIcons.Suggestion,
                             title = stringResource(id = R.string.show_intelligent_suggestion),
                             description = stringResource(id = R.string.show_intelligent_suggestion_desc),
-                            checked = viewModel.state.showIntelligentSuggestion,
+                            checked = viewModel.state.showSmartSuggestion,
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeShowSuggestion(it)

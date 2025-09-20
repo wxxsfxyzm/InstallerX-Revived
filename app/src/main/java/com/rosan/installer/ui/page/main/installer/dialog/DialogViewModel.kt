@@ -63,7 +63,7 @@ class DialogViewModel(
     var showExtendedMenu by mutableStateOf(false)
         private set
 
-    var showIntelligentSuggestion by mutableStateOf(true)
+    var showSmartSuggestion by mutableStateOf(true)
         private set
 
     var disableNotificationOnDismiss by mutableStateOf(false)
@@ -163,7 +163,7 @@ class DialogViewModel(
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first()
             showExtendedMenu =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false).first()
-            showIntelligentSuggestion =
+            showSmartSuggestion =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true).first()
             disableNotificationOnDismiss =
                 appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first()

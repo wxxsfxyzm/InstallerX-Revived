@@ -169,7 +169,7 @@ fun NewInstallerGlobalSettingsPage(
                                     icon = AppIcons.Suggestion,
                                     title = stringResource(id = R.string.show_intelligent_suggestion),
                                     description = stringResource(id = R.string.show_intelligent_suggestion_desc),
-                                    checked = state.showIntelligentSuggestion,
+                                    checked = state.showSmartSuggestion,
                                     onCheckedChange = {
                                         viewModel.dispatch(PreferredViewAction.ChangeShowSuggestion(it))
                                     }

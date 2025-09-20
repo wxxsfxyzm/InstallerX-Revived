@@ -65,7 +65,7 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeGlobalCustomizeAuthorizer -> changeGlobalCustomizeAuthorizer(action.customizeAuthorizer)
             is PreferredViewAction.ChangeGlobalInstallMode -> changeGlobalInstallMode(action.installMode)
             is PreferredViewAction.ChangeShowDialogInstallExtendedMenu -> changeShowDialogInstallExtendedMenu(action.showMenu)
-            is PreferredViewAction.ChangeShowSuggestion -> changeShowSuggestionState(action.showIntelligentSuggestion)
+            is PreferredViewAction.ChangeShowSuggestion -> changeShowSuggestionState(action.showSuggestion)
             is PreferredViewAction.ChangeShowDisableNotification -> changeDisableNotificationState(action.showDisableNotification)
             is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialog(action.showDialog)
             is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(action.countDown)
@@ -193,7 +193,7 @@ class PreferredViewModel(
                 val customize = values[1] as String
                 val installMode = values[2] as ConfigEntity.InstallMode
                 val showMenu = values[3] as Boolean
-                val showIntelligentSuggestion = values[4] as Boolean
+                val showSuggestion = values[4] as Boolean
                 val showNotification = values[5] as Boolean
                 val showDialog = values[6] as Boolean
                 val countDown = values[7] as Int
@@ -215,7 +215,7 @@ class PreferredViewModel(
                     customizeAuthorizer = customizeAuthorizer,
                     installMode = installMode,
                     showDialogInstallExtendedMenu = showMenu,
-                    showIntelligentSuggestion = showIntelligentSuggestion,
+                    showSmartSuggestion = showSuggestion,
                     disableNotificationForDialogInstall = showNotification,
                     showDialogWhenPressingNotification = showDialog,
                     dhizukuAutoCloseCountDown = countDown,
