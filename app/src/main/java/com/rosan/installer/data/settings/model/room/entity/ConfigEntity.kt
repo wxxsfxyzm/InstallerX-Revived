@@ -64,8 +64,8 @@ data class ConfigEntity constructor(
             forAllUser = false,
             allowTestOnly = false,
             allowDowngrade = false,
-            allowRestrictedPermissions = true,
-            bypassLowTargetSdk = true,
+            allowRestrictedPermissions = false,
+            bypassLowTargetSdk = false,
             allowAllRequestedPermissions = false,
         )
 
@@ -86,8 +86,8 @@ data class ConfigEntity constructor(
             forAllUser = false,
             allowTestOnly = false,
             allowDowngrade = false,
-            allowRestrictedPermissions = true,
-            bypassLowTargetSdk = true,
+            allowRestrictedPermissions = false,
+            bypassLowTargetSdk = false,
             allowAllRequestedPermissions = false,
         )
     }
