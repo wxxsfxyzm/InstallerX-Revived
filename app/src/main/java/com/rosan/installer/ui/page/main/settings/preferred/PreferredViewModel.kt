@@ -62,17 +62,36 @@ class PreferredViewModel(
         when (action) {
             is PreferredViewAction.Init -> init()
             is PreferredViewAction.ChangeGlobalAuthorizer -> changeGlobalAuthorizer(action.authorizer)
-            is PreferredViewAction.ChangeGlobalCustomizeAuthorizer -> changeGlobalCustomizeAuthorizer(action.customizeAuthorizer)
+            is PreferredViewAction.ChangeGlobalCustomizeAuthorizer -> changeGlobalCustomizeAuthorizer(
+                action.customizeAuthorizer
+            )
+
             is PreferredViewAction.ChangeGlobalInstallMode -> changeGlobalInstallMode(action.installMode)
-            is PreferredViewAction.ChangeShowDialogInstallExtendedMenu -> changeShowDialogInstallExtendedMenu(action.showMenu)
+            is PreferredViewAction.ChangeShowDialogInstallExtendedMenu -> changeShowDialogInstallExtendedMenu(
+                action.showMenu
+            )
+
             is PreferredViewAction.ChangeShowSuggestion -> changeShowSuggestionState(action.showSuggestion)
-            is PreferredViewAction.ChangeShowDisableNotification -> changeDisableNotificationState(action.showDisableNotification)
-            is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialog(action.showDialog)
-            is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(action.countDown)
+            is PreferredViewAction.ChangeShowDisableNotification -> changeDisableNotificationState(
+                action.showDisableNotification
+            )
+
+            is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialog(
+                action.showDialog
+            )
+
+            is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(
+                action.countDown
+            )
+
             is PreferredViewAction.ChangeShowExpressiveUI -> changeUseExpressiveUI(action.showRefreshedUI)
+            is PreferredViewAction.ChangeShowLiveActivity -> changeUseLiveActivity(action.showLiveActivity)
             is PreferredViewAction.ChangeUseMiuix -> changeUseMiuix(action.useMiuix)
             is PreferredViewAction.ChangeShowLauncherIcon -> changeShowLauncherIcon(action.showLauncherIcon)
-            is PreferredViewAction.ChangeVersionCompareInSingleLine -> changeVersionCompareInSingleLine(action.versionCompareInSingleLine)
+            is PreferredViewAction.ChangeVersionCompareInSingleLine -> changeVersionCompareInSingleLine(
+                action.versionCompareInSingleLine
+            )
+
             is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
                 state.managedInstallerPackages,
                 AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST,
@@ -97,8 +116,14 @@ class PreferredViewModel(
                 action.pkg
             )
 
-            is PreferredViewAction.AddManagedSharedUserIdBlacklist -> addSharedUserIdToBlacklist(action.uid)
-            is PreferredViewAction.RemoveManagedSharedUserIdBlacklist -> removeSharedUserIdFromBlacklist(action.uid)
+            is PreferredViewAction.AddManagedSharedUserIdBlacklist -> addSharedUserIdToBlacklist(
+                action.uid
+            )
+
+            is PreferredViewAction.RemoveManagedSharedUserIdBlacklist -> removeSharedUserIdFromBlacklist(
+                action.uid
+            )
+
             is PreferredViewAction.AddManagedSharedUserIdExemptedPackages -> addManagedPackage(
                 state.managedSharedUserIdExemptedPackages,
                 AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST,
@@ -132,9 +157,11 @@ class PreferredViewModel(
         if (initialized) return
         initialized = true
         viewModelScope.launch {
-            val authorizerFlow = appDataStore.getString(AppDataStore.AUTHORIZER).map { AuthorizerConverter.revert(it) }
+            val authorizerFlow = appDataStore.getString(AppDataStore.AUTHORIZER)
+                .map { AuthorizerConverter.revert(it) }
             val customizeAuthorizerFlow = appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER)
-            val installModeFlow = appDataStore.getString(AppDataStore.INSTALL_MODE).map { InstallModeConverter.revert(it) }
+            val installModeFlow = appDataStore.getString(AppDataStore.INSTALL_MODE)
+                .map { InstallModeConverter.revert(it) }
             val showDialogInstallExtendedMenuFlow =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU)
             val showIntelligentSuggestionFlow =
@@ -147,9 +174,13 @@ class PreferredViewModel(
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
             val versionCompareInSingleLineFlow =
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
-            val showExpressiveUIFlow = appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
+            val showExpressiveUIFlow =
+                appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
+            val showLiveActivityFlow =
+                appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false)
             val showMiuixUIFlow = appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
-            val showLauncherIconFlow = appDataStore.getBoolean(AppDataStore.SHOW_LAUNCHER_ICON, true)
+            val showLauncherIconFlow =
+                appDataStore.getBoolean(AppDataStore.SHOW_LAUNCHER_ICON, true)
             val managedInstallerPackagesFlow =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST)
             val managedBlacklistPackagesFlow =
@@ -180,6 +211,7 @@ class PreferredViewModel(
                 dhizukuAutoCloseCountDownFlow,
                 versionCompareInSingleLineFlow,
                 showExpressiveUIFlow,
+                showLiveActivityFlow,
                 showMiuixUIFlow,
                 showLauncherIconFlow,
                 managedInstallerPackagesFlow,
@@ -199,14 +231,19 @@ class PreferredViewModel(
                 val countDown = values[7] as Int
                 val versionCompareInSingleLine = values[8] as Boolean
                 val showExpressiveUI = values[9] as Boolean
-                val showMiuixUI = values[10] as Boolean
-                val showLauncherIcon = values[11] as Boolean
-                val managedInstallerPackages = (values[12] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedBlacklistPackages = (values[13] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedSharedUserIdBlacklist = (values[14] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
-                val managedSharedUserIdExemptPkg = (values[15] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[16] as Boolean
-                val isIgnoringBatteryOptimizations = values[17] as Boolean
+                val showLiveActivity = values[10] as Boolean
+                val showMiuixUI = values[11] as Boolean
+                val showLauncherIcon = values[12] as Boolean
+                val managedInstallerPackages =
+                    (values[13] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedBlacklistPackages =
+                    (values[14] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedSharedUserIdBlacklist =
+                    (values[15] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
+                val managedSharedUserIdExemptPkg =
+                    (values[16] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[17] as Boolean
+                val isIgnoringBatteryOptimizations = values[18] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -221,6 +258,7 @@ class PreferredViewModel(
                     dhizukuAutoCloseCountDown = countDown,
                     versionCompareInSingleLine = versionCompareInSingleLine,
                     showExpressiveUI = showExpressiveUI,
+                    showLiveActivity = showLiveActivity,
                     showMiuixUI = showMiuixUI,
                     showLauncherIcon = showLauncherIcon,
                     managedInstallerPackages = managedInstallerPackages,
@@ -250,7 +288,10 @@ class PreferredViewModel(
 
     private fun changeGlobalInstallMode(installMode: ConfigEntity.InstallMode) =
         viewModelScope.launch {
-            appDataStore.putString(AppDataStore.INSTALL_MODE, InstallModeConverter.convert(installMode))
+            appDataStore.putString(
+                AppDataStore.INSTALL_MODE,
+                InstallModeConverter.convert(installMode)
+            )
         }
 
     private fun changeShowDialogInstallExtendedMenu(installExtendedMenu: Boolean) =
@@ -260,12 +301,18 @@ class PreferredViewModel(
 
     private fun changeShowSuggestionState(showIntelligentSuggestion: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, showIntelligentSuggestion)
+            appDataStore.putBoolean(
+                AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION,
+                showIntelligentSuggestion
+            )
         }
 
     private fun changeDisableNotificationState(showDisableNotification: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, showDisableNotification)
+            appDataStore.putBoolean(
+                AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS,
+                showDisableNotification
+            )
         }
 
     private fun changeShowDialog(showDialog: Boolean) =
@@ -284,6 +331,11 @@ class PreferredViewModel(
     private fun changeUseExpressiveUI(showRefreshedUI: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, showRefreshedUI)
+        }
+
+    private fun changeUseLiveActivity(showLiveActivity: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, showLiveActivity)
         }
 
     private fun changeUseMiuix(useMiuix: Boolean) =
@@ -312,7 +364,11 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, singleLine)
         }
 
-    private fun addManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, pkg: NamedPackage) =
+    private fun addManagedPackage(
+        list: List<NamedPackage>,
+        key: Preferences.Key<String>,
+        pkg: NamedPackage
+    ) =
         viewModelScope.launch {
             // Create a new list from the current state
             val currentList = list.toMutableList()
@@ -324,7 +380,11 @@ class PreferredViewModel(
             }
         }
 
-    private fun removeManagedPackage(list: List<NamedPackage>, key: Preferences.Key<String>, pkg: NamedPackage) =
+    private fun removeManagedPackage(
+        list: List<NamedPackage>,
+        key: Preferences.Key<String>,
+        pkg: NamedPackage
+    ) =
         viewModelScope.launch {
             // Create a new list from the current state
             val currentList = list.toMutableList()
@@ -358,7 +418,11 @@ class PreferredViewModel(
      * A reusable helper function to get a Settings.Global integer value as a Flow,
      * ensuring the blocking call is always on a background thread.
      */
-    private fun getSettingsGlobalIntAsFlow(cr: ContentResolver, name: String, defaultValue: Int): Flow<Int> = flow {
+    private fun getSettingsGlobalIntAsFlow(
+        cr: ContentResolver,
+        name: String,
+        defaultValue: Int
+    ): Flow<Int> = flow {
         emit(Settings.Global.getInt(cr, name, defaultValue))
     }.flowOn(Dispatchers.IO)
 
@@ -420,7 +484,11 @@ class PreferredViewModel(
                 }
 
                 // This need android.permission.WRITE_SECURE_SETTINGS, thus cannot be called directly
-                Settings.Global.putInt(context.contentResolver, "verifier_verify_adb_installs", if (enabled) 1 else 0)
+                Settings.Global.putInt(
+                    context.contentResolver,
+                    "verifier_verify_adb_installs",
+                    if (enabled) 1 else 0
+                )
                 state = state.copy(adbVerifyEnabled = enabled)
             }
         )

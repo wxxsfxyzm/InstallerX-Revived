@@ -43,6 +43,8 @@
     <string name="theme_settings_use_expressive_ui">使用M3 Expressive外观</string>
     <string name="theme_settings_use_expressive_ui_desc">使用全新Material 3 Expressive设计风格</string>
     <string name="theme_settings_google_ui_style">Google UI 风格</string>
+    <string name="theme_settings_use_live_activity">创建实时更新通知</string>
+    <string name="theme_settings_use_live_activity_desc">使用原生实时通知API，在定制ROM上可能无法正常工作</string>
     <string name="theme_settings_launcher_icons">桌面图标</string>
     <string name="theme_settings_hide_launcher_icon">隐藏桌面图标</string>
     <string name="theme_settings_hide_launcher_icon_desc">通过 *#*#46789#*#* 来访问设置</string>

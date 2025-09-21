@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
+import android.os.Build
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
@@ -126,16 +127,34 @@ fun NewThemeSettingsPage(
                 item {
                     SplicedColumnGroup(
                         title = stringResource(R.string.theme_settings_google_ui),
-                        content = listOf {
-                            SwitchWidget(
-                                icon = AppIcons.Theme,
-                                title = stringResource(R.string.theme_settings_use_expressive_ui),
-                                description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
-                                checked = state.showExpressiveUI,
-                                onCheckedChange = {
-                                    viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))
+                        content = buildList {
+                            add {
+                                SwitchWidget(
+                                    icon = AppIcons.Theme,
+                                    title = stringResource(R.string.theme_settings_use_expressive_ui),
+                                    description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
+                                    checked = state.showExpressiveUI,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.ChangeShowExpressiveUI(it)
+                                        )
+                                    }
+                                )
+                            }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                                add {
+                                    SwitchWidget(
+                                        icon = AppIcons.BugReport,
+                                        title = stringResource(R.string.theme_settings_use_live_activity),
+                                        description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                        checked = state.showLiveActivity,
+                                        onCheckedChange = {
+                                            viewModel.dispatch(
+                                                PreferredViewAction.ChangeShowLiveActivity(it)
+                                            )
+                                        }
+                                    )
                                 }
-                            )
                         }
                     )
                 }
@@ -153,7 +172,11 @@ fun NewThemeSettingsPage(
                                 if (newCheckedState) {
                                     showHideLauncherIconDialog = true
                                 } else {
-                                    viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeShowLauncherIcon(
+                                            true
+                                        )
+                                    )
                                 }
                             }
                         )
