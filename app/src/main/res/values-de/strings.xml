@@ -180,7 +180,7 @@
     <string name="installer_resolve_failed">Öffnen fehlgeschlagen</string>
     <string name="installer_resolve_success">Auflösen erfolgreich</string>
     <string name="installer_preparing">Vorbereiten</string>
-    <string name="installer_preparing_desc">Dateien werden vorbereitet, bitte warten…</string>
+    <string name="installer_preparing_desc">Dateien werden vorbereitet, bitte warten.</string>
     <string name="installer_analysing">Analysiere…</string>
     <string name="installer_analyse_failed">Analyse fehlgeschlagen</string>
     <string name="installer_select_install">Apps zum installieren auswählen</string>
