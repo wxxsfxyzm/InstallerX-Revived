@@ -246,27 +246,29 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                 ?: throw NoSuchMethodException("asInterface method not found")
             val userManagerInstance = asInterfaceMethod.invoke(null, userManagerBinder)
 
-            val getUsersMethod = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                reflect.getMethod(
-                    userManagerInstance::class.java,
-                    "getUsers",
-                    Boolean::class.java,
-                    Boolean::class.java,
-                    Boolean::class.java
-                )
-            } else {
-                reflect.getMethod(
-                    userManagerInstance::class.java,
-                    "getUsers",
-                    Boolean::class.java
-                )
-            } ?: throw NoSuchMethodException("getUsers method not found")
+            val getUsersMethod =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT_FULL <= Build.VERSION_CODES_FULL.BAKLAVA) {
+                    reflect.getMethod(
+                        userManagerInstance::class.java,
+                        "getUsers",
+                        Boolean::class.java,
+                        Boolean::class.java,
+                        Boolean::class.java
+                    )
+                } else {
+                    reflect.getMethod(
+                        userManagerInstance::class.java,
+                        "getUsers",
+                        Boolean::class.java
+                    )
+                } ?: throw NoSuchMethodException("getUsers method not found")
 
-            val usersList = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                getUsersMethod.invoke(userManagerInstance, false, false, false)
-            } else {
-                getUsersMethod.invoke(userManagerInstance, false)
-            }) as? List<*>
+            val usersList =
+                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT_FULL <= Build.VERSION_CODES_FULL.BAKLAVA) {
+                    getUsersMethod.invoke(userManagerInstance, false, false, false)
+                } else {
+                    getUsersMethod.invoke(userManagerInstance, false)
+                }) as? List<*>
 
             if (usersList == null) {
                 Log.e("PrivilegedService", "Failed to get user list, method returned null.")

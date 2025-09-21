@@ -18,6 +18,7 @@ data class PreferredViewState(
     val dhizukuAutoCloseCountDown: Int = 3,
     val versionCompareInSingleLine: Boolean = false,
     val showExpressiveUI: Boolean = true,
+    val showLiveActivity: Boolean = false,
     val showMiuixUI: Boolean = false,
     val showLauncherIcon: Boolean = true,
     val managedInstallerPackages: List<NamedPackage> = emptyList(),

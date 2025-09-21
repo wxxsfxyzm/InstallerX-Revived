@@ -22,6 +22,9 @@ class AppDataStore(
         val UI_EXPRESSIVE_SWITCH = booleanPreferencesKey("ui_fresh_switch")
         val UI_USE_MIUIX = booleanPreferencesKey("ui_use_miui_x")
 
+        // Show Live Activity
+        val SHOW_LIVE_ACTIVITY = booleanPreferencesKey("show_live_activity")
+
         // Show Launcher Icon
         val SHOW_LAUNCHER_ICON = booleanPreferencesKey("show_launcher_icon")
 
@@ -41,17 +44,22 @@ class AppDataStore(
         val APPLY_SHOW_PACKAGE_NAME = booleanPreferencesKey("apply_show_package_name")
 
         // DialogViewModel
-        val DIALOG_VERSION_COMPARE_SINGLE_LINE = booleanPreferencesKey("show_dialog_version_compare_single_line")
-        val DIALOG_AUTO_CLOSE_COUNTDOWN = intPreferencesKey("show_dhizuku_auto_close_count_down_menu")
+        val DIALOG_VERSION_COMPARE_SINGLE_LINE =
+            booleanPreferencesKey("show_dialog_version_compare_single_line")
+        val DIALOG_AUTO_CLOSE_COUNTDOWN =
+            intPreferencesKey("show_dhizuku_auto_close_count_down_menu")
         val DIALOG_SHOW_EXTENDED_MENU = booleanPreferencesKey("show_dialog_install_extended_menu")
-        val DIALOG_SHOW_INTELLIGENT_SUGGESTION = booleanPreferencesKey("show_dialog_install_intelligent_suggestion")
+        val DIALOG_SHOW_INTELLIGENT_SUGGESTION =
+            booleanPreferencesKey("show_dialog_install_intelligent_suggestion")
         val DIALOG_DISABLE_NOTIFICATION_ON_DISMISS =
             booleanPreferencesKey("show_disable_notification_for_dialog_install")
 
         // Customize Installer
         val MANAGED_INSTALLER_PACKAGES_LIST = stringPreferencesKey("managed_packages_list")
-        val MANAGED_BLACKLIST_PACKAGES_LIST = stringPreferencesKey("managed_blacklist_packages_list")
-        val MANAGED_SHARED_USER_ID_BLACKLIST = stringPreferencesKey("managed_shared_user_id_blacklist")
+        val MANAGED_BLACKLIST_PACKAGES_LIST =
+            stringPreferencesKey("managed_blacklist_packages_list")
+        val MANAGED_SHARED_USER_ID_BLACKLIST =
+            stringPreferencesKey("managed_shared_user_id_blacklist")
         val MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST =
             stringPreferencesKey("managed_shared_user_id_blacklist_exempted_packages_list")
 
@@ -108,14 +116,20 @@ class AppDataStore(
      * @param default The default list of packages to return if no data is found.
      * @return A Flow emitting the list of packages. Returns an empty list if no data or on error.
      */
-    fun getNamedPackageList(key: Preferences.Key<String>, default: List<NamedPackage> = emptyList()): Flow<List<NamedPackage>> =
+    fun getNamedPackageList(
+        key: Preferences.Key<String>,
+        default: List<NamedPackage> = emptyList()
+    ): Flow<List<NamedPackage>> =
         getString(key, json.encodeToString(default)).map { jsonString ->
             try {
                 // Use json.decodeFromString to deserialize the string back into a list
                 json.decodeFromString<List<NamedPackage>>(jsonString)
             } catch (e: Exception) {
                 // In case of a parsing error, return an empty list
-                Timber.e(e, "Failed to decode NamedPackage list from DataStore. Returning empty list.")
+                Timber.e(
+                    e,
+                    "Failed to decode NamedPackage list from DataStore. Returning empty list."
+                )
                 emptyList()
             }
         }
