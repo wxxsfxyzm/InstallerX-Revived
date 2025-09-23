@@ -119,6 +119,11 @@
     <string name="config_customize_user_desc">手動指定為目標使用者帳號安裝應用程式</string>
     <string name="config_user_not_found">取得使用者帳號失敗</string>
     <string name="config_target_user">目標安裝使用者帳號</string>
+    <string name="config_manual_dexopt">手動 Dex 優化</string>
+    <string name="config_manual_dexopt_desc">在安裝後手動觸發 dex2oat 進程</string>
+    <string name="config_dexopt_mode">優化模式</string>
+    <string name="config_force_dexopt">強制優化</string>
+    <string name="config_force_dexopt_desc">即使系統認為沒有必要，也強制重新編譯</string>
     <string name="config_auto_delete">自動刪除</string>
     <string name="config_auto_delete_dsp">安裝成功後自動刪除安裝包</string>
     <string name="config_display_sdk_version">顯示SDK資訊</string>
@@ -213,6 +218,10 @@
     <string name="installer_channel_name">安裝通知</string>
     <string name="installer_progress_channel_name">安裝過程通知</string>
     <string name="installer_background_channel_name">後臺通知</string>
+    <string name="uninstall_keep_data">保留資料</string>
+    <string name="uninstall_all_users">為所有用戶卸載</string>
+    <string name="uninstall_delete_system_app">允許卸載系統應用</string>
+    <string name="uninstall_success_message">卸載成功</string>
     <string name="permission_read_external_storage">读取外部存储</string>
     <string name="permission_write_external_storage">写入外部存储</string>
     <string name="permission_access_fine_location">精确位置</string>
@@ -271,6 +280,8 @@
     <string name="installer_package_name">包名：%1$s</string>
     <string name="installer_file_path">路徑：%1$s</string>
     <string name="exception_install_failed_unknown">未知錯誤</string>
+    <string name="exception_resolve_failed">URI 解析失敗</string>
+    <string name="exception_resolve_failed_no_internet_access">該版本無法存取網際網路，要使用此功能，請安裝支援連網的版本</string>
     <string name="exception_analyse_failed_all_files_unsupported">不支援的檔案格式</string>
     <string name="exception_install_failed_already_exists">應用已安裝（包名相同、版本相同），請先解除安裝然後重試</string>
     <string name="exception_install_failed_blacklisted_package">你不允許安裝此應用程式！</string>
@@ -288,7 +299,8 @@
     <string name="exception_install_failed_conflicting_provider">存在同名的ContentProvider</string>
     <string name="exception_install_failed_newer_sdk">系统版本過新，安裝包不支援當前系统</string>
     <string name="exception_install_failed_test_only">用於測試的安裝包，請打開允許測試包</string>
-    <string name="exception_install_failed_cpu_abi_incompatible">CPU不受支持，請下載支援目前CPU的安裝包</string>
+    <string name="exception_install_failed_cpu_abi_incompatible">CPU不受支援，請下載支援目前CPU的安裝包</string>
+    <string name="exception_install_failed_aborted">安裝因錯誤中止</string>
     <string name="exception_install_failed_missing_feature">安裝包使用了一個無效特性</string>
     <string name="exception_install_failed_container_error">SD卡存取失敗</string>
     <string name="exception_install_failed_invalid_install_location">無效的安裝路徑</string>
@@ -382,6 +394,8 @@
     <string name="config_bypass_low_target_sdk_desc">允許安裝目標SDK版本較低的應用程式。</string>
     <string name="dry_run">空執行</string>
     <string name="dry_run_desc">驗證套件，但不安裝它。</string>
+    <string name="config_request_update_ownership">請求更新所有權</string>
+    <string name="config_request_update_ownership_desc">請求更新應用所有權</string>
     <string name="unarchive">取消歸檔</string>
     <string name="unarchive_desc">取消一個現有安裝的歸檔</string>
     <string name="replace_existing">取代現有</string>

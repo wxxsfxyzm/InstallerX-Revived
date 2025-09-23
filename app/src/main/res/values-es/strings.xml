@@ -315,7 +315,6 @@
     <string name="allocate_aggressive_desc">Elimina archivos para liberar espacio si es necesario</string>
     <string name="virtual_preload">Precarga virtual</string>
     <string name="virtual_preload_desc">Indica que el paquete es una precarga virtual</string>
-    <string name="apex" translatable="false">APEX</string>
     <string name="apex_desc">Indica que el paquete es APEX</string>
     <string name="enable_rollback">Habilitar reversión</string>
     <string name="enable_rollback_desc">Permitir reversiones futuras</string>
