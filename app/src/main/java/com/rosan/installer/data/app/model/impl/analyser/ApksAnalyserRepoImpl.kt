@@ -33,13 +33,27 @@ object ApksAnalyserRepoImpl : FileAnalyserRepo {
     ): List<AppEntity> {
         val apps = mutableListOf<AppEntity>()
         ZipFile(data.path).use { zipFile ->
-            // Find and prioritize base.apk.
-            val baseEntry = zipFile.getEntry("base.apk")
-                ?: throw IllegalStateException("APKS file does not contain a base.apk")
+            // Single iteration and categorization using partition.
+            val (baseEntries, splitEntries) = zipFile.entries().asSequence()
+                .filterNot { it.isDirectory } // Filter out directories
+                .filter { it.name.endsWith(".apk", ignoreCase = true) }
+                .filterNot { File(it.name).name.matches(Regex("base-master_\\d+\\.apk")) }
+                .partition { entry ->
+                    // The predicate to identify base APKs.
+                    val entryName = File(entry.name).name
+                    entryName == "base.apk" || entryName == "base-master.apk"
+                }
 
-            // Extract and analyze ONLY base.apk.
-            var baseEntity = zipFile.getInputStream(baseEntry).use { inputStream ->
-                // This helper still extracts the single base.apk to a temp file for ApkAnalyserRepoImpl.
+            // Determine the primary base APK.
+            val baseEntry = baseEntries.firstOrNull()
+                ?: throw IllegalStateException("APKS file does not contain a recognizable base APK.")
+
+            // Consolidate all other APKs to be treated as splits.
+            // This includes other APKs AND any extra base APKs (like base-master_2.apk).
+            val allSplitEntries = splitEntries + baseEntries.drop(1)
+
+            // Parse the primary base APK to get its info.
+            val baseEntity = zipFile.getInputStream(baseEntry).use { inputStream ->
                 analyseSingleApkStream(
                     config,
                     DataEntity.ZipFileEntity(baseEntry.name, data),
@@ -47,33 +61,26 @@ object ApksAnalyserRepoImpl : FileAnalyserRepo {
                     extra
                 )
             }.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-                ?: throw IllegalStateException("Failed to parse base.apk from APKS.")
+                ?: throw IllegalStateException("Failed to parse base APK '${baseEntry.name}' from APKS.")
 
-            baseEntity = baseEntity.copy(containerType = extra.dataType)
-            apps.add(baseEntity)
+            val finalBaseEntity = baseEntity.copy(containerType = extra.dataType)
 
-            // Iterate through all other entries and create lightweight entities for splits.
-            val entries = zipFile.entries().toList()
-            for (entry in entries) {
-                val entryName = entry.name
-                if (entryName == "base.apk" || !entryName.endsWith(".apk", ignoreCase = true)) {
-                    continue // Skip base.apk and non-apk files.
-                }
-
-                // Create a lightweight SplitEntity without extracting or parsing the file.
-                val splitEntity = AppEntity.SplitEntity(
-                    packageName = baseEntity.packageName, // Reuse info from base
-                    data = DataEntity.ZipFileEntity(entryName, data), // Point to the entry within the original zip
-                    splitName = getSplitNameFromEntry(entry), // Parse split name from filename
-                    targetSdk = baseEntity.targetSdk, // Reuse info from base
-                    minSdk = baseEntity.minSdk, // Reuse info from base
+            // Create all SplitEntity objects in a single pass over the consolidated list.
+            val finalSplitEntities = allSplitEntries.map { entry ->
+                AppEntity.SplitEntity(
+                    packageName = finalBaseEntity.packageName,
+                    data = DataEntity.ZipFileEntity(entry.name, data),
+                    splitName = getSplitNameFromEntry(entry),
+                    targetSdk = finalBaseEntity.targetSdk,
+                    minSdk = finalBaseEntity.minSdk,
                     arch = null,
                     containerType = extra.dataType
                 )
-                apps.add(splitEntity)
             }
+
+            // Return the final combined list.
+            return listOf(finalBaseEntity) + finalSplitEntities
         }
-        return apps
     }
 
     /**

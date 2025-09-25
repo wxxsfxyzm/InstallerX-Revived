@@ -21,12 +21,14 @@ import com.rosan.installer.data.app.util.calculateSHA256
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.convertLegacyLanguageCode
+import com.rosan.installer.util.isLanguageCode
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
+import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
@@ -250,18 +252,17 @@ object AnalyserRepoImpl : AnalyserRepo {
                 var hasSplitApk = false
                 val entries = zipFile.entries().toList()
                 for (entry in entries) {
-                    if (entry.isDirectory) continue
+                    if (entry.isDirectory || !entry.name.endsWith(".apk", ignoreCase = true)) continue
                     // Check only the filename, ignoring the path.
                     val entryName = File(entry.name).name
-                    if (entryName == "base.apk") {
+                    // The base APK could be base.apk, base-master.apk, etc.
+                    if (entryName == "base.apk" || entryName.startsWith("base-master"))
                         hasBaseApk = true
-                    } else if ((entryName.startsWith("split_") ||
-                                entryName.startsWith("config")) &&
-                        entryName.endsWith(".apk")
-                    ) {
+                    else
+                    // Any other APK file found alongside a base APK implies it's a split.
                         hasSplitApk = true
-                    }
-                    // Optimization: exit early if both conditions are met.
+
+                    // Exit early if both conditions are met.
                     if (hasBaseApk && hasSplitApk) break
                 }
 
@@ -395,7 +396,9 @@ object AnalyserRepoImpl : AnalyserRepo {
         val nameWithoutApk = this.splitName.removeSuffix(".apk")
 
         // Remove the standard split_ prefix
-        val strippedPrefix = nameWithoutApk.removePrefix("split_")
+        val strippedPrefix = nameWithoutApk
+            .removePrefix("split_")
+            .removePrefix("base-")
 
         // Extract the actual config value. This is the crucial part.
         // If ".config." exists, take the part after the last occurrence.
@@ -425,7 +428,7 @@ object AnalyserRepoImpl : AnalyserRepo {
 
         Timber.d("--- Begin findOptimalSplits for ${splits.size} splits ---")
 
-        val isoLanguages = java.util.Locale.getISOLanguages().toSet()
+        val isoLanguages = Locale.getISOLanguages().toSet()
 
         // Parse and categorize all splits
         val parsedSplits = splits.mapNotNull { split ->
@@ -438,7 +441,7 @@ object AnalyserRepoImpl : AnalyserRepo {
             val category = when {
                 Architecture.fromArchString(rawConfigValue) != Architecture.UNKNOWN -> SplitCategory.ABI
                 Density.fromDensityString(rawConfigValue) != Density.UNKNOWN -> SplitCategory.DENSITY
-                isoLanguages.contains(
+                isLanguageCode(
                     rawConfigValue.convertLegacyLanguageCode().substringBefore('-')
                 ) -> SplitCategory.LANGUAGE
 
