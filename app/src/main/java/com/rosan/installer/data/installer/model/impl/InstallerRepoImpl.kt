@@ -27,66 +27,62 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         @Volatile
         private var impls = mutableMapOf<String, InstallerRepoImpl>()
 
-        @Volatile
-        private var anonymousInstance: InstallerRepoImpl? = null
-
         private val context by inject<Context>()
 
         fun getOrCreate(id: String? = null): InstallerRepo {
-            Timber.d("getOrCreate called with id: ${id ?: "null (anonymous)"}")
+            Timber.d("getOrCreate called with id: ${id ?: "null (new instance requested)"}")
 
-            // Logic for named instances remains the same.
+            // If an ID is provided, retrieve the existing instance or create a new one with that ID.
             if (id != null) {
-                return impls[id] ?: synchronized(this) {
+                return synchronized(this) { // Synchronize to ensure thread-safe access to the map
                     impls.getOrPut(id) {
+                        // The 'create' function handles the actual instantiation and service start.
                         create(id) as InstallerRepoImpl
                     }
                 }
             }
 
-            // Use Double-Checked Locking for efficient and thread-safe singleton creation.
-            anonymousInstance?.let { return it }
-
-            return synchronized(this) {
-                anonymousInstance?.let { return it }
-
-                val newId = UUID.randomUUID().toString()
-                Timber.d("Creating new anonymous instance with new id: $newId")
-                val newInstance = create(newId) as InstallerRepoImpl
-                anonymousInstance = newInstance
-                Timber.d("New anonymous instance created and tracked. Returning it.")
-                newInstance
-            }
+            // If no ID is provided, this signifies a request for a new, independent installation session.
+            // Always create a new instance with a unique ID to allow for parallel installations.
+            val newId = UUID.randomUUID().toString()
+            Timber.d("No ID provided. Creating a new instance with generated ID: $newId")
+            return create(newId)
         }
 
         fun get(id: String): InstallerRepo? {
-            val instance = impls[id]
-            Timber.d("get() called for id: $id. Found: ${instance != null}")
-            return instance
+            return synchronized(this) {
+                val instance = impls[id]
+                Timber.d("get() called for id: $id. Found: ${instance != null}")
+                instance
+            }
         }
 
         private fun create(id: String): InstallerRepo {
-            Timber.d("create() called for id: $id")
-            val impl = InstallerRepoImpl(id)
-            // Do not add anonymous instances to the map, they are handled by the singleton field.
-            if (anonymousInstance?.id != id) {
+            // This function is now the single, synchronized point of creation and registration.
+            return synchronized(this) {
+                // Double-check if another thread created it in the meantime before creating a new one.
+                impls[id]?.let {
+                    Timber.w("Instance with id $id already exists. Returning it.")
+                    return@synchronized it
+                }
+
+                Timber.d("create() called for id: $id")
+                val impl = InstallerRepoImpl(id)
+                // Every new instance, regardless of how it was created, is now tracked in the map.
                 impls[id] = impl
+                Timber.d("Instance for id: $id created. Starting InstallerService.")
+                val intent = Intent(InstallerService.Action.Ready.value)
+                intent.component = ComponentName(context, InstallerService::class.java)
+                intent.putExtra(InstallerService.EXTRA_ID, impl.id)
+                context.startService(intent)
+                impl
             }
-            Timber.d("Instance for id: $id created. Starting InstallerService.")
-            val intent = Intent(InstallerService.Action.Ready.value)
-            intent.component = ComponentName(context, InstallerService::class.java)
-            intent.putExtra(InstallerService.EXTRA_ID, impl.id)
-            context.startService(intent)
-            return impl
         }
 
         fun remove(id: String) {
             synchronized(this) {
                 Timber.d("remove() called for id: $id")
-                if (id == anonymousInstance?.id) {
-                    Timber.d("The removed id matches the anonymous instance. Clearing anonymousInstance.")
-                    anonymousInstance = null
-                }
+                // REMOVED: No more special handling for the anonymous instance.
                 impls.remove(id)
             }
         }
