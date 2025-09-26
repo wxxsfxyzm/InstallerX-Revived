@@ -14,11 +14,20 @@
 > A modern and functional Android app installer. (You know some birds are not meant to be caged,
 > their feathers are just too bright.)
 
-一款应用安装程序，为什么不试试【InstallerX】？
+一款应用安装程序，为什么不试试**InstallerX**？
 
-在国产系统的魔改下，许多系统的自带安装程序体验并不是很好，你可以使用【InstallerX】替换掉系统默认安装程序。
+在国产系统的魔改下，许多系统的自带安装程序体验并不是很好，你可以使用**InstallerX**替换掉系统默认安装程序。
 
-当然，相对于原生系统，【InstallerX】也带来了更多的安装类型：apk apks apkm xapk zip包内任意数量的apk，批量传入的apk，以及丰富的可选项：对话框安装、通知栏安装、自动安装、声明安装者、设定安装选项、dex2oat优化、禁止安装指定应用、安装后自动删除安装包等等。
+当然，相对于原生系统，**InstallerX**也带来了更多功能：
+- 丰富的安装类型：apk apks apkm xapk zip包内任意数量的apk，批量传入的apk
+- 对话框安装、通知栏安装、自动安装
+- 声明安装者
+- 设定安装选项（可配置，可在安装前修改）
+- dex2oat优化
+- 为指定用户ID安装/为所有用户安装
+- 按照包名/SharedUID禁止安装指定应用
+- 安装后自动删除安装包
+- 不使用shell命令，全部使用原生API调用实现
 
 ## 支持版本
 
@@ -28,22 +37,21 @@
 
 ## 功能变化
 
-- [测试中] 可切换经典界面/基于Material 3 Expressive设计的新UI界面
+- 可切换经典界面/基于Material 3 Expressive设计的新UI界面/类HyperOS的Miuix界面
 - 更多可自定义化的界面设置
 - 修复了原仓库项目在某些系统上无法正确删除安装包的问题
 - 优化解析速度，优化各种安装包类型的解析
-- 文本调整，支持英文，繁体中文，西班牙语。更多语言欢迎提交PR
+- 文本调整，支持更多语言。更多语言欢迎参与贡献
 - 优化对话框安装的显示效果
-- 支持安装时显示系统图标包，方法来自[RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt)
+- 支持安装时显示系统图标包
 - 支持单行/多行显示版本号对比
 - 安装对话框支持显示targetSDK与minSDK，点击可切换单行/多行
 - Shizuku/Root安装完成打开App时可以绕过定制UI的链式启动拦截
-    - 使用原生api实现，不使用shell命令
     - 目前仅实现了对话框安装
     - Dhizuku无法调用权限，因此加了一个倒计时自定义选项，给打开app的操作预留一定时间
 - 为对话框安装提供一个扩展菜单，可以在设置中启用
     - 支持查看应用申明的权限
-    - 支持设定InstallFlags（可以继承全局Profile设置）部分实现来自[zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions/blob/main/app/src/main/java/dev/zwander/installwithoptions/data/InstallOption.kt)
+    - 支持设定InstallFlags（可以继承全局Profile设置）
        - **注意**：设定InstallFlags并不能保证一定生效，部分选项有可能带来安全风险，具体取决于系统
 - 支持在设置中预设安装来源的包名，并可以在配置文件和对话框安装菜单中快速选择
 - 支持安装zip压缩包内的apk文件，用 InstallerX 打开zip压缩包即可 
@@ -59,21 +67,27 @@
     - 支持自动处理相同包名的多版本
        - 支持去重
        - 支持智能地选择最佳安装包
-- APKS/APKM/XAPK文件支持自动选择最佳分包 部分思路和代码来自[vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller/tree/master/app)
+- APKS/APKM/XAPK文件支持自动选择最佳分包
     - 同时支持状态栏通知安装&对话框安装
         - 通知栏点击安装即是最优选择
         - 对话框默认选中最优选择，仍可以通过菜单自由选择分包
     - 分包选择界面支持用户友好描述 
 - 支持在arm64-v8a/X86_64 only的系统中安装armeabi-v7a,armeabi/X86架构的安装包（实际能否运行取决于系统是否提供运行时转译器）
-- [测试中] 支持在部分oem的Android15系统上保留数据降级安装/不保留数据降级安装
-    - 该功能仅支持Android14以上，Android14请优先尝试安装选项中的`允许降级安装`，失败后再点击建议尝试该功能
-    - 该功能在对话框安装的智能建议中，需要体验请先打开`显示智能建议（实验性）`选项
+- 支持在部分oem（开启系统优化的HyperOS）的Android15/16系统上保留数据降级安装/不保留数据降级安装
+    - 该功能仅支持Android15以上，Android14请尝试安装选项中的`允许降级安装`。
+    - 该功能在对话框安装的智能建议中，需要体验请先打开`显示智能建议`选项
     - 该功能禁止/请谨慎用于系统app，误操作导致系统应用数据丢失可能会导致系统无法正常使用
-    - 不适用于OneUI7.0、RealmeUI、部分ColorOS（oem限制），已经针对性屏蔽。如果只看见不保留数据降级安装选项，说明你的系统不支持保留数据降级安装
-- [测试中] 支持在设置中设定禁止安装的包名列表，设定在列表中的应用将被拒绝安装
-    - 开发中，目前只能手动添加，以后会根据机型出一个默认阻止安装的列表（这在HyperOS阻止错误地安装不同机型的系统软件时格外有用） 
-- [测试中] 申明自身为卸载工具，可以接受并执行系统卸载请求（绝大多数系统写死卸载器，仅给需要的人使用） 
-- [测试中] 在安装完后可以自动根据配置设定对安装应用进行dex2oat
+    - 不适用于OneUI7.0、RealmeUI、部分ColorOS（AOSP已经修复），已经针对性屏蔽。如果只看见不保留数据降级安装选项，说明你的系统不支持保留数据降级安装
+- 支持在设置中设定禁止安装的包名列表，设定在列表中的应用将被拒绝安装
+    - 支持禁止安装指定包名app
+    - 支持按照sharedUid禁止安装，支持在此模式下设定排除项，也允许通过智能建议临时绕过一次（这在HyperOS阻止错误地安装不同机型的系统软件时格外有用） 
+- 在安装完后可以自动根据配置设定对安装应用进行dex2oat
+    - 不支持Dhizuku
+- 支持在安装前验证签名，若不匹配会给出警告
+- 支持为指定用户安装应用
+    - 不支持Dhizuku
+    - 可以被 `为所有用户安装` 安装选项覆盖
+- [测试中] 申明自身为卸载工具，可以接受并执行系统卸载请求（绝大多数系统写死卸载器，仅给需要的人使用）
 - [测试中] 联网版本支持直接分享安装包文件的下载直链到InstallerX进行安装，目前使用单线程下载，安装包不会保留在本地，以后会加入保留安装包选项
 
 ## 常见问题
@@ -94,8 +108,8 @@
 - 分析阶段报错`No Content Provider`或`reading provider`报错`Permission Denial`
     - 你启用了`隐藏应用列表`或类似功能，请配置白名单
 
-- HyperOS更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
-    - 系统安全限制，需要在配置中声明安装者为系统app，推荐 `com.android.fileexplorer` 或 `com.android.vending`
+- HyperOS/Vivo更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
+    - 系统安全限制，需要在配置中声明安装者为系统app，HyperOS推荐 `com.android.fileexplorer` 或 `com.android.vending`，Vivo推荐应用商店
     - Shizuku/Root有效，Dhizuku不支持
     - 本应用在HyperOS上启动时会自动添加配置，默认为`com.miui.packageinstaller`，如果需要更改请在设置中修改
 
@@ -104,12 +118,12 @@
     - 某些HyperOS版本无法锁定是正常的
     - HyperOS会以对话框形式拦截USB安装请求(adb/shizuku)，若用户在全新安装一款应用时点击拒绝安装，系统会撤销其安装器设定并强行改回默认安装器，若出现这种情况请重新锁定
     
-- HyperOS使用通知安装的时候，通知进度条卡住怎么办
-    - HyperOS对应用后台管控非常严格，如果遇到这种情况请设置后台无限制
-    - 应用已经对后台管理做了优化，在完成安装任务（用户点击完成或清理通知）后延时0.5秒自动清理所有后台服务并退出，因此可以放心启用无限制后台，不会造成额外耗电，前台服务通知可以保留，以便观察服务运行状态
+- 使用通知安装的时候，通知进度条卡住怎么办
+    - 一些定制系统对应用后台管控非常严格，如果遇到这种情况请设置后台无限制
+    - 应用已经对后台管理做了优化，在完成安装任务（用户点击完成或清理通知）后延时1秒自动清理所有后台服务并退出，因此可以放心启用无限制后台，不会造成额外耗电，前台服务通知可以保留，以便观察服务运行状态
 
 - Oppo/Vivo/联想/...的系统用不了了怎么办
-    - 手头没有这些品牌的手机，可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)进行讨论
+    - 手头没有这些品牌的手机以供测试，遇到问题可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)或[Telegram 频道](https://t.me/installerx_revived)进行讨论
     - Oppo，Vivo锁定安装器请使用锁定器
 
 ## 关于版本发布
@@ -128,7 +142,7 @@
 
 ## 关于本地化
 
-欢迎参与贡献翻译，请前往：https://hosted.weblate.org/projects/installerx-revived/
+欢迎参与贡献翻译，请前往：https://hosted.weblate.org/engage/installerx-revived/
 
 ### 本地化状态
 
@@ -139,11 +153,13 @@
 | 简体中文      | [![Translation status for Simplified Chinese](https://hosted.weblate.org/widget/installerx-revived/strings/zh_Hans/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/zh_Hans/)  |
 | 繁體中文      | [![Translation status for Traditional Chinese](https://hosted.weblate.org/widget/installerx-revived/strings/zh_Hant/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/zh_Hant/) |
 | 阿拉伯语      | [![Translation status for Arabic](https://hosted.weblate.org/widget/installerx-revived/strings/ar/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/ar/)                        |
+| 法语        | [![Translation status for French](https://hosted.weblate.org/widget/installerx-revived/strings/fr/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/fr/)                        |
 | 德语        | [![Translation status for German](https://hosted.weblate.org/widget/installerx-revived/strings/de/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/de/)                        |
 | 葡萄牙语 (巴西) | [![Translation status for Portuguese (Brazil)](https://hosted.weblate.org/widget/installerx-revived/strings/pt_BR/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/pt_BR/)     |
 | 俄语        | [![Translation status for Russian](https://hosted.weblate.org/widget/installerx-revived/strings/ru/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/ru/)                       |
 | 西班牙语      | [![Translation status for Spanish](https://hosted.weblate.org/widget/installerx-revived/strings/es/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/es/)                       |
 | 泰语        | [![Translation status for Thai](https://hosted.weblate.org/widget/installerx-revived/strings/th/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/th/)                          |
+| 土耳其语      | [![Translation status for Turkish](https://hosted.weblate.org/widget/installerx-revived/strings/tr/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/tr/)                       |
 | 乌克兰语      | [![Translation status for Ukrainian](https://hosted.weblate.org/widget/installerx-revived/strings/uk/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/uk/)                     |
 
 ## 开源协议
@@ -154,3 +170,12 @@ InstallerX目前基于 [**GNU General Public License v3 (GPL-3)**](http://www.gn
 开源，但不保证未来依然继续遵循此协议或开源，有权更改开源协议或开源状态。
 
 当您选择基于InstallerX进行开发时，需遵循所当前依赖的上游源码所规定的开源协议，不受新上游源码的开源协议影响。
+
+## 致谢
+
+本项目使用了以下项目的代码或参考其实现：
+
+- [iamr0s/InstallerX](https://github.com/iamr0s/InstallerX)
+- [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku)
+- [zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions)
+- [vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller)
