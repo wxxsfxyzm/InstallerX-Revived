@@ -142,7 +142,7 @@
 
 ## 关于本地化
 
-欢迎参与贡献翻译，请前往：https://hosted.weblate.org/projects/installerx-revived/
+欢迎参与贡献翻译，请前往：https://hosted.weblate.org/engage/installerx-revived/
 
 ### 本地化状态
 
@@ -159,6 +159,7 @@
 | 俄语        | [![Translation status for Russian](https://hosted.weblate.org/widget/installerx-revived/strings/ru/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/ru/)                       |
 | 西班牙语      | [![Translation status for Spanish](https://hosted.weblate.org/widget/installerx-revived/strings/es/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/es/)                       |
 | 泰语        | [![Translation status for Thai](https://hosted.weblate.org/widget/installerx-revived/strings/th/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/th/)                          |
+| 土耳其语      | [![Translation status for Turkish](https://hosted.weblate.org/widget/installerx-revived/strings/tr/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/tr/)                       |
 | 乌克兰语      | [![Translation status for Ukrainian](https://hosted.weblate.org/widget/installerx-revived/strings/uk/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/uk/)                     |
 
 ## 开源协议
