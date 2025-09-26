@@ -5,7 +5,6 @@
     <string name="add">Добавить</string>
     <string name="allocate_aggressive">Выделять Агрессивные</string>
     <string name="allocate_aggressive_desc">Указывает, что пакет "критически важен для работоспособности или безопасности системы" и при необходимости будет более агрессивно удалять доступные для очистки файлы, чтобы освободить место.</string>
-    <string name="apex">APEX</string>
     <string name="apex_desc">Указывает, что устанавливаемый пакет является пакетом APEX</string>
     <string name="app">Приложение</string>
     <string name="apply">Применить</string>

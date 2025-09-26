@@ -7,6 +7,8 @@ import com.rosan.installer.R
 import com.rosan.installer.build.Architecture
 import java.util.Locale
 
+const val BASE_PREFIX = "base-"
+const val SPLIT_PREFIX = "split-"
 private const val SPLIT_CONFIG_PREFIX = "split_config."
 private const val CONFIG_PREFIX = "config."
 
@@ -22,36 +24,36 @@ private const val CONFIG_PREFIX = "config."
  */
 @Composable
 fun String.asUserReadableSplitName(): String {
-    // 移除通用的前缀，提取核心名称，如 "zh", "armeabi-v7a"
-    val coreName = this.removePrefix(SPLIT_CONFIG_PREFIX).removePrefix(CONFIG_PREFIX)
+    // Extract the actual configuration qualifier by stripping all known prefixes.
+    val qualifier = this
+        .removePrefix(BASE_PREFIX)
+        .removePrefix(SPLIT_CONFIG_PREFIX)
+        .removePrefix(CONFIG_PREFIX)
 
-    // --- 尝试解析为语言 ---
-    val languageDisplayName = getLanguageDisplayName(coreName)
+    // --- Try to parse as CPU Architecture (ABI) ---
+    val architecture = Architecture.fromArchString(qualifier)
+    if (architecture != Architecture.UNKNOWN) {
+        return stringResource(R.string.split_name_architecture, architecture.displayName)
+    }
+
+    // --- Try to parse as Screen Density (DPI) ---
+    val dpiResId = getDpiStringResourceId(qualifier)
+    if (dpiResId != null) {
+        return stringResource(R.string.split_name_density, stringResource(dpiResId))
+    }
+    // Handle numeric DPI formats like "480dpi"
+    if (qualifier.endsWith("dpi") && qualifier.removeSuffix("dpi").all { it.isDigit() }) {
+        return stringResource(R.string.split_name_density, qualifier)
+    }
+
+    // --- Try to parse as Language (less specific, so checked last) ---
+    val languageDisplayName = getLanguageDisplayName(qualifier)
     if (languageDisplayName != null) {
         return stringResource(R.string.split_name_language, languageDisplayName)
     }
 
-    // --- 尝试解析为CPU架构 (ABI) ---
-    // Call the static-like helper function from the enum's companion object.
-    val architecture = Architecture.fromArchString(coreName)
-    // Check if the returned enum is not the default 'UNKNOWN' value.
-    if (architecture != Architecture.UNKNOWN) {
-        // If the string was recognized, use the 'displayName' property from the enum constant.
-        return stringResource(R.string.split_name_architecture, architecture.displayName)
-    }
-
-    // --- 尝试解析为屏幕密度 (DPI) ---
-    val dpiResId = getDpiStringResourceId(coreName)
-    if (dpiResId != null) {
-        // 使用格式化字符串，将本地化的DPI描述填入
-        return stringResource(R.string.split_name_density, stringResource(dpiResId))
-    }
-    // 特别处理 "480dpi" 这种数字格式，它们本身具有可读性
-    if (coreName.endsWith("dpi") && coreName.removeSuffix("dpi").all { it.isDigit() }) {
-        return stringResource(R.string.split_name_density, coreName)
-    }
-
-    // 如果无法识别，则返回原始的 splitName
+    // If it's none of the above, it's likely a feature split or unknown.
+    // Returning the original, full splitName is a sensible fallback.
     return this
 }
 

@@ -141,7 +141,7 @@ Compared to stock installers, **InstallerX** offers more installation features:
 
 ## About Localization
 
-Help us translate this project! You can contribute at: https://hosted.weblate.org/projects/installerx-revived/
+Help us translate this project! You can contribute at: https://hosted.weblate.org/engage/installerx-revived/
 
 ### Localization Status
 
@@ -158,6 +158,7 @@ Help us translate this project! You can contribute at: https://hosted.weblate.or
 | Russian             | [![Translation status for Russian](https://hosted.weblate.org/widget/installerx-revived/strings/ru/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/ru/)                       |
 | Spanish             | [![Translation status for Spanish](https://hosted.weblate.org/widget/installerx-revived/strings/es/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/es/)                       |
 | Thai                | [![Translation status for Thai](https://hosted.weblate.org/widget/installerx-revived/strings/th/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/th/)                          |
+| Turkish             | [![Translation status for Turkish](https://hosted.weblate.org/widget/installerx-revived/strings/tr/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/tr/)                       |
 | Ukrainian           | [![Translation status for Ukrainian](https://hosted.weblate.org/widget/installerx-revived/strings/uk/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/uk/)                     |
 
 ## License
