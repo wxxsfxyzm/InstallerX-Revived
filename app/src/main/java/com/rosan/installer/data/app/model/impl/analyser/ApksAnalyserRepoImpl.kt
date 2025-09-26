@@ -31,7 +31,6 @@ object ApksAnalyserRepoImpl : FileAnalyserRepo {
     private suspend fun doFileWork(
         config: ConfigEntity, data: DataEntity.FileEntity, extra: AnalyseExtraEntity
     ): List<AppEntity> {
-        val apps = mutableListOf<AppEntity>()
         ZipFile(data.path).use { zipFile ->
             // Single iteration and categorization using partition.
             val (baseEntries, splitEntries) = zipFile.entries().asSequence()
