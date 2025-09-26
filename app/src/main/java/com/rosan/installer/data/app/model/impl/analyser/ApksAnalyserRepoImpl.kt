@@ -48,10 +48,6 @@ object ApksAnalyserRepoImpl : FileAnalyserRepo {
             val baseEntry = baseEntries.firstOrNull()
                 ?: throw IllegalStateException("APKS file does not contain a recognizable base APK.")
 
-            // Consolidate all other APKs to be treated as splits.
-            // This includes other APKs AND any extra base APKs (like base-master_2.apk).
-            val allSplitEntries = splitEntries + baseEntries.drop(1)
-
             // Parse the primary base APK to get its info.
             val baseEntity = zipFile.getInputStream(baseEntry).use { inputStream ->
                 analyseSingleApkStream(
@@ -66,17 +62,19 @@ object ApksAnalyserRepoImpl : FileAnalyserRepo {
             val finalBaseEntity = baseEntity.copy(containerType = extra.dataType)
 
             // Create all SplitEntity objects in a single pass over the consolidated list.
-            val finalSplitEntities = allSplitEntries.map { entry ->
-                AppEntity.SplitEntity(
-                    packageName = finalBaseEntity.packageName,
-                    data = DataEntity.ZipFileEntity(entry.name, data),
-                    splitName = getSplitNameFromEntry(entry),
-                    targetSdk = finalBaseEntity.targetSdk,
-                    minSdk = finalBaseEntity.minSdk,
-                    arch = null,
-                    containerType = extra.dataType
-                )
-            }
+            val finalSplitEntities = splitEntries
+                .filterNot { File(it.name).name.matches(Regex("base-.*_2\\.apk")) }
+                .map { entry ->
+                    AppEntity.SplitEntity(
+                        packageName = finalBaseEntity.packageName,
+                        data = DataEntity.ZipFileEntity(entry.name, data),
+                        splitName = getSplitNameFromEntry(entry),
+                        targetSdk = finalBaseEntity.targetSdk,
+                        minSdk = finalBaseEntity.minSdk,
+                        arch = null,
+                        containerType = extra.dataType
+                    )
+                }
 
             // Return the final combined list.
             return listOf(finalBaseEntity) + finalSplitEntities
