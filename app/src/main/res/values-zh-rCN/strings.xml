@@ -339,6 +339,8 @@
     <string name="change_notification_touch_behavior">更改通知触摸行为</string>
     <string name="version_compare_in_single_line">单行显示版本对比</string>
     <string name="version_compare_in_single_line_desc">在对话框安装时将版本对比展示为一行</string>
+    <string name="sdk_compare_in_multi_line">多行展示SDK对比</string>
+    <string name="sdk_compare_in_multi_line_desc">在对话框安装时将SDK对比展示为多行</string>
     <string name="show_dialog_install_extended_menu">显示扩展菜单</string>
     <string name="show_dialog_install_extended_menu_desc">在安装对话框中显示更多操作选项</string>
     <string name="extended_menu">扩展菜单</string>

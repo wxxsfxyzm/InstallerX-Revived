@@ -72,6 +72,9 @@ class DialogViewModel(
     var versionCompareInSingleLine by mutableStateOf(false)
         private set
 
+    var sdkCompareInMultiLine by mutableStateOf(false)
+        private set
+
     // Text to show in the progress bar
     private val _installProgressText = MutableStateFlow<UiText?>(null)
     val installProgressText: StateFlow<UiText?> = _installProgressText.asStateFlow()
@@ -169,6 +172,9 @@ class DialogViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first()
             versionCompareInSingleLine =
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false).first()
+            sdkCompareInMultiLine =
+                appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false).first()
+
             // Load managed packages for installer selection.
             appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
                 _managedInstallerPackages.value = packages

@@ -17,6 +17,7 @@ data class PreferredViewState(
     val showDialogWhenPressingNotification: Boolean = true,
     val dhizukuAutoCloseCountDown: Int = 3,
     val versionCompareInSingleLine: Boolean = false,
+    val sdkCompareInMultiLine: Boolean = false,
     val showExpressiveUI: Boolean = true,
     val showLiveActivity: Boolean = false,
     val showMiuixUI: Boolean = false,

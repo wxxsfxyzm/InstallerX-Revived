@@ -124,6 +124,15 @@ fun MiuixInstallerGlobalSettingsPage(
                                     viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it))
                                 }
                             )
+                            MiuixSwitchWidget(
+                                icon = AppIcons.MultiLineSettingIcon,
+                                title = stringResource(id = R.string.sdk_compare_in_multi_line),
+                                description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
+                                checked = state.sdkCompareInMultiLine,
+                                onCheckedChange = {
+                                    viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it))
+                                }
+                            )
                             AnimatedVisibility(
                                 visible = state.installMode == ConfigEntity.InstallMode.Dialog,
                                 enter = fadeIn(),

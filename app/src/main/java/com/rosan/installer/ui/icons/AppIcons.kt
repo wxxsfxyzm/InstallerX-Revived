@@ -36,6 +36,7 @@ import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.icons.twotone.Expand
 import androidx.compose.material.icons.twotone.Face
 import androidx.compose.material.icons.twotone.Favorite
 import androidx.compose.material.icons.twotone.FavoriteBorder
@@ -112,6 +113,7 @@ object AppIcons {
     // --- 设置图标集合 ---
     val Authorizer = Icons.TwoTone.Memory
     val SingleLineSettingIcon = Icons.TwoTone.Compress
+    val MultiLineSettingIcon = Icons.TwoTone.Expand
     val DisableAdbVerify = Icons.TwoTone.Security
     val InstallMode = Icons.TwoTone.Downloading
     val BatteryOptimization = Icons.TwoTone.BatterySaver

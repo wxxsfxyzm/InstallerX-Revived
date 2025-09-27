@@ -236,7 +236,7 @@ fun installInfoDialog(
                     }
                 }
                 // --- SDK Information Showcase ---
-                val defaultSdkSingleLine = true
+                val defaultSdkSingleLine = !viewModel.sdkCompareInMultiLine
                 var sdkContentState by remember { mutableStateOf(Pair(defaultSdkSingleLine, false)) }
 
                 AnimatedVisibility(visible = installer.config.displaySdk) {
