@@ -346,6 +346,7 @@
     <string name="exception_install_failed_package_changed">The calling program expects the wrapper of the call to change</string>
     <string name="exception_install_failed_uid_changed">The UID has changed, please uninstall and try again</string>
     <string name="exception_install_failed_version_downgrade">Downgrade failed, please uninstall the app and try again</string>
+    <string name="exception_install_failed_missing_split">Missing required split package(s)</string>
     <string name="exception_install_failed_deprecated_sdk_version">targetSDK too low, to proceed, enable corresponding flag</string>
     <string name="exception_install_failed_rejected_by_build_type">Rejected by system build type</string>
     <string name="exception_install_failed_origin_os_blacklist">Please add a valid install source for installing vivo system app</string>

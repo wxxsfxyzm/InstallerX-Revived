@@ -24,6 +24,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedMediaUnavailabl
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingFeatureException
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingInstallPermissionException
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingSharedLibraryException
+import com.rosan.installer.data.app.model.exception.InstallFailedMissingSplitException
 import com.rosan.installer.data.app.model.exception.InstallFailedNewerSDKException
 import com.rosan.installer.data.app.model.exception.InstallFailedNoSharedUserException
 import com.rosan.installer.data.app.model.exception.InstallFailedOlderSdkException
@@ -90,6 +91,7 @@ private fun Throwable.getStringResourceId() =
         is InstallFailedPackageChangedException -> R.string.exception_install_failed_package_changed
         is InstallFailedUidChangedException -> R.string.exception_install_failed_uid_changed
         is InstallFailedVersionDowngradeException -> R.string.exception_install_failed_version_downgrade
+        is InstallFailedMissingSplitException -> R.string.exception_install_failed_missing_split
         is InstallFailedDeprecatedSdkVersion -> R.string.exception_install_failed_deprecated_sdk_version
         is InstallFailedRejectedByBuildTypeException -> R.string.exception_install_failed_rejected_by_build_type
         is InstallFailedOriginOSBlacklistException -> R.string.exception_install_failed_origin_os_blacklist

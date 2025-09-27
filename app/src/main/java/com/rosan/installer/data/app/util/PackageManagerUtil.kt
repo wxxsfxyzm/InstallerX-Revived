@@ -21,6 +21,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedInvalidURIExcep
 import com.rosan.installer.data.app.model.exception.InstallFailedMediaUnavailableException
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingFeatureException
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingSharedLibraryException
+import com.rosan.installer.data.app.model.exception.InstallFailedMissingSplitException
 import com.rosan.installer.data.app.model.exception.InstallFailedNewerSDKException
 import com.rosan.installer.data.app.model.exception.InstallFailedNoSharedUserException
 import com.rosan.installer.data.app.model.exception.InstallFailedOlderSdkException
@@ -91,6 +92,7 @@ object PackageManagerUtil {
     const val INSTALL_FAILED_PACKAGE_CHANGED = -23
     const val INSTALL_FAILED_UID_CHANGED = -24
     const val INSTALL_FAILED_VERSION_DOWNGRADE = -25
+    const val INSTALL_FAILED_MISSING_SPLIT = -28
     const val INSTALL_FAILED_DEPRECATED_SDK_VERSION = -29
     const val INSTALL_FAILED_INTERNAL_ERROR = -110
     const val INSTALL_FAILED_USER_RESTRICTED = -111
@@ -159,6 +161,7 @@ object PackageManagerUtil {
             INSTALL_FAILED_PACKAGE_CHANGED -> InstallFailedPackageChangedException(ecpMsg)
             INSTALL_FAILED_UID_CHANGED -> InstallFailedUidChangedException(ecpMsg)
             INSTALL_FAILED_VERSION_DOWNGRADE -> InstallFailedVersionDowngradeException(ecpMsg)
+            INSTALL_FAILED_MISSING_SPLIT -> InstallFailedMissingSplitException(ecpMsg)
             INSTALL_FAILED_DEPRECATED_SDK_VERSION -> InstallFailedDeprecatedSdkVersion(ecpMsg)
             INSTALL_BLACK_LIST -> InstallFailedOriginOSBlacklistException(ecpMsg)
             INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION -> InstallFailedHyperOSIsolationViolationException(ecpMsg)
