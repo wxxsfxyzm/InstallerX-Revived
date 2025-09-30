@@ -159,7 +159,10 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         val receiver = LocalIntentReceiver()
         val flags = config.uninstallFlags
         val versionedPackage = VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST)
-        val callerPackageName = context.packageName
+        val callerPackageName = when (config.authorizer) {
+            ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName() ?: context.packageName
+            else -> context.packageName
+        }
 
         Timber.d("Directly calling IPackageInstaller.uninstall with flags: $flags")
 
