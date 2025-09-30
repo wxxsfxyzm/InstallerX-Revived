@@ -296,7 +296,7 @@ fun installPrepareDialog( // 小写开头
                         viewModel.dispatch(DialogViewAction.InstallExtendedMenu)
                     })
                 }
-                if (canInstall && !viewModel.showExtendedMenu)
+                if (canInstall && !viewModel.showExtendedMenu && (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM))
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
                         viewModel.dispatch(DialogViewAction.InstallChoice)
                     })
