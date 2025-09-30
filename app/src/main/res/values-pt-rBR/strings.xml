@@ -412,7 +412,7 @@
     <string name="pull_to_refresh_hint3">Atualizando…</string>
     <string name="pull_to_refresh_hint2">Libere para atualizar</string>
     <string name="pull_to_refresh_hint1">Puxe para baixo para atualizar</string>
-    <string name="get_source_code">Verifique o código -fonte</string>
+    <string name="get_source_code">Verifique o código-fonte</string>
     <string name="get_source_code_detail">Verifique o código fonte no GitHub</string>
     <string name="config_scope">Escopo</string>
     <string name="config_customize_package_source">Personalizar a fonte do pacote</string>
@@ -432,4 +432,7 @@
     <string name="dhizuku_cannot_set_user_desc">O modo Dhizuku não suporta a configuração do usuário de destino!</string>
     <string name="dhizuku_cannot_set_dexopt_desc">O modo dhizuku não suporta a configuração de Dexopt!</string>
     <string name="suggestion_bypass_blacklist_set_by_user">Permitir instalar uma vez</string>
+    <string name="theme_settings_use_live_activity">Atividade ao vivo</string>
+    <string name="theme_settings_use_live_activity_desc">Use atividades ao vivo em vez de notificações, não pode ser suportado em ROMs personalizados</string>
+    <string name="installer_live_channel_name">Progresso da Instalação</string>
 </resources>
