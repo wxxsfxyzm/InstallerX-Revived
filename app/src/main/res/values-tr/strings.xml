@@ -354,4 +354,7 @@
     <string name="show_intelligent_suggestion_desc">Yükleme başarısız olduğunda akıllı öneriler göster</string>
     <string name="permission_list">İzin Listesi</string>
     <string name="permission_list_desc">Yüklenen paketin talep ettiği izinlerin listesi</string>
+    <string name="theme_settings_package_icons">Paket resim kaynağı</string>
+    <string name="theme_settings_prefer_system_icon">Kurulacak uygulama için sistem resmini tercih et</string>
+    <string name="theme_settings_prefer_system_icon_desc">Sistemden uygulama resmini almaya çalış. İkon paketleri için kullanışlıdır. Kurulum paketindeki resim için bunu kapatın</string>
 </resources>
