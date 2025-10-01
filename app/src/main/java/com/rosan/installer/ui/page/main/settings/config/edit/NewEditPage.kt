@@ -283,8 +283,10 @@ fun NewEditPage(
                         add { DataForAllUserWidget(viewModel) }
                         add { DataAllowTestOnlyWidget(viewModel) }
                         add { DataAllowDowngradeWidget(viewModel) }
-                        add { DataBypassLowTargetSdkWidget(viewModel) }
-                        add { DataAllowRestrictedPermissionsWidget(viewModel) }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                            add { DataBypassLowTargetSdkWidget(viewModel) }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                            add { DataAllowRestrictedPermissionsWidget(viewModel) }
                         add { DataAllowAllRequestedPermissionsWidget(viewModel) }
                     }
                 )

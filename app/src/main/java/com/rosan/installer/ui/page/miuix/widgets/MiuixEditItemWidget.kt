@@ -12,10 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Speed
-import androidx.compose.material.icons.twotone.Terminal
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -127,16 +123,12 @@ fun MiuixDataCustomizeAuthorizerWidget(viewModel: EditViewModel) {
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 16.dp)
             .focusable(),
-        leadingIcon = {
-            Icon(imageVector = Icons.TwoTone.Terminal, contentDescription = null)
-        },
-        label = {
-            Text(text = stringResource(R.string.config_customize_authorizer))
-        },
         value = customizeAuthorizer,
         onValueChange = { viewModel.dispatch(EditViewAction.ChangeDataCustomizeAuthorizer(it)) },
-        maxLines = 8,
-        isError = viewModel.state.data.errorCustomizeAuthorizer
+        label = stringResource(id = R.string.config_customize_authorizer),
+        useLabelAsPlaceholder = true,
+        singleLine = false,
+        maxLines = 8
     )
 }
 
@@ -311,7 +303,7 @@ fun MiuixDataDeclareInstallerWidget(viewModel: EditViewModel) {
 @Composable
 fun MiuixDataInstallerWidget(viewModel: EditViewModel) {
     val stateData = viewModel.state.data
-    viewModel.state.managedInstallerPackages
+    /*    viewModel.state.managedInstallerPackages*/
     val currentInstaller = stateData.installer
 
     /*    // Keep logic for calculating supporting text content.
@@ -333,10 +325,9 @@ fun MiuixDataInstallerWidget(viewModel: EditViewModel) {
                     .padding(vertical = 8.dp, horizontal = 16.dp)
                     .focusable(),
                 value = currentInstaller,
-                onValueChange = {
-                    viewModel.dispatch(EditViewAction.ChangeDataInstaller(it))
-                },
+                onValueChange = { viewModel.dispatch(EditViewAction.ChangeDataInstaller(it)) },
                 label = stringResource(id = R.string.config_installer),
+                useLabelAsPlaceholder = true,
                 singleLine = true
             )
         }

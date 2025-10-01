@@ -227,8 +227,10 @@ fun EditPage(
             item { DataForAllUserWidget(viewModel = viewModel) }
             item { DataAllowTestOnlyWidget(viewModel = viewModel) }
             item { DataAllowDowngradeWidget(viewModel = viewModel) }
-            item { DataBypassLowTargetSdkWidget(viewModel = viewModel) }
-            item { DataAllowRestrictedPermissionsWidget(viewModel = viewModel) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                item { DataBypassLowTargetSdkWidget(viewModel = viewModel) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                item { DataAllowRestrictedPermissionsWidget(viewModel = viewModel) }
             item { DataAllowAllRequestedPermissionsWidget(viewModel = viewModel) }
         }
     }

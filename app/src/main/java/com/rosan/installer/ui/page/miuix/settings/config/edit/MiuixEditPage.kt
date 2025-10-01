@@ -196,8 +196,10 @@ fun MiuixEditPage(
                     MiuixDataForAllUserWidget(viewModel = viewModel)
                     MiuixDataAllowTestOnlyWidget(viewModel = viewModel)
                     MiuixDataAllowDowngradeWidget(viewModel = viewModel)
-                    MiuixDataBypassLowTargetSdkWidget(viewModel = viewModel)
-                    MiuixDataAllowRestrictedPermissionsWidget(viewModel = viewModel)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                        MiuixDataBypassLowTargetSdkWidget(viewModel = viewModel)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                        MiuixDataAllowRestrictedPermissionsWidget(viewModel = viewModel)
                     MiuixDataAllowAllRequestedPermissionsWidget(viewModel = viewModel)
                 }
             }
