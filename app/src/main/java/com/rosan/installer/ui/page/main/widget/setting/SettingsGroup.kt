@@ -13,12 +13,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
 /**
- * 一个设置分组容器，它将多个设置项在视觉上“拼接”在一起。
- * 能够根据子项的位置（顶部、中间、底部）自动应用不同的圆角形状和分割线。
+ * Settings Group Container
  *
- * @param title 分组的标题，显示在内容上方。
- * @param content 一个 Composable 函数的列表，列表中的每一项都是一个设置项。
- * @param modifier Modifier 会被应用到整个分组。
+ * @param title the title of the group
+ * @param content a list of composable that will be displayed in the group
+ * @param modifier Modifier
  */
 @Composable
 fun SplicedColumnGroup(

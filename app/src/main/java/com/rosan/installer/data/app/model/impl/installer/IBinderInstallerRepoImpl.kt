@@ -159,7 +159,10 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         val receiver = LocalIntentReceiver()
         val flags = config.uninstallFlags
         val versionedPackage = VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST)
-        val callerPackageName = context.packageName
+        val callerPackageName = when (config.authorizer) {
+            ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName() ?: context.packageName
+            else -> context.packageName
+        }
 
         Timber.d("Directly calling IPackageInstaller.uninstall with flags: $flags")
 
@@ -414,7 +417,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             }
 
             // Never Delete Multi-APK-ZIP files automatically
-            // Enable autoDelete only when the containerType is not MULTI_APK_ZIP_ZIP
+            // Enable autoDelete only when the containerType is not MULTI_APK_ZIP
             if (config.autoDelete && entities.first().containerType != DataType.MULTI_APK_ZIP) {
                 Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
                 coroutineScope.launch {

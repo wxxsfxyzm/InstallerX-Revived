@@ -45,6 +45,9 @@
     <string name="theme_settings_google_ui_style">Google UI 风格</string>
     <string name="theme_settings_use_live_activity">创建实时更新通知</string>
     <string name="theme_settings_use_live_activity_desc">使用原生实时通知API，在定制ROM上可能无法正常工作</string>
+    <string name="theme_settings_package_icons">安装包图标来源</string>
+    <string name="theme_settings_prefer_system_icon">为安装应用获取系统图标</string>
+    <string name="theme_settings_prefer_system_icon_desc">尝试从系统获取图标包，取消选中可以获取安装包内的最新图标</string>
     <string name="theme_settings_launcher_icons">桌面图标</string>
     <string name="theme_settings_hide_launcher_icon">隐藏桌面图标</string>
     <string name="theme_settings_hide_launcher_icon_desc">通过 *#*#46789#*#* 来访问设置</string>
@@ -336,6 +339,8 @@
     <string name="change_notification_touch_behavior">更改通知触摸行为</string>
     <string name="version_compare_in_single_line">单行显示版本对比</string>
     <string name="version_compare_in_single_line_desc">在对话框安装时将版本对比展示为一行</string>
+    <string name="sdk_compare_in_multi_line">多行展示SDK对比</string>
+    <string name="sdk_compare_in_multi_line_desc">在对话框安装时将SDK对比展示为多行</string>
     <string name="show_dialog_install_extended_menu">显示扩展菜单</string>
     <string name="show_dialog_install_extended_menu_desc">在安装对话框中显示更多操作选项</string>
     <string name="extended_menu">扩展菜单</string>

@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.automirrored.twotone.Rule
+import androidx.compose.material.icons.automirrored.twotone.Send
 import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.twotone.Android
 import androidx.compose.material.icons.twotone.ArrowBackIosNew
 import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.ArrowUpward
+import androidx.compose.material.icons.twotone.AutoAwesome
 import androidx.compose.material.icons.twotone.AutoFixHigh
 import androidx.compose.material.icons.twotone.Badge
 import androidx.compose.material.icons.twotone.BatterySaver
@@ -34,6 +36,7 @@ import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.icons.twotone.Expand
 import androidx.compose.material.icons.twotone.Face
 import androidx.compose.material.icons.twotone.Favorite
 import androidx.compose.material.icons.twotone.FavoriteBorder
@@ -46,6 +49,7 @@ import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.PermDeviceInformation
+import androidx.compose.material.icons.twotone.RocketLaunch
 import androidx.compose.material.icons.twotone.RoomPreferences
 import androidx.compose.material.icons.twotone.Save
 import androidx.compose.material.icons.twotone.Search
@@ -55,7 +59,7 @@ import androidx.compose.material.icons.twotone.SettingsSuggest
 import androidx.compose.material.icons.twotone.Source
 import androidx.compose.material.icons.twotone.SystemUpdate
 import androidx.compose.material.icons.twotone.Terminal
-import androidx.compose.material.icons.twotone.TipsAndUpdates
+import androidx.compose.material.icons.twotone.Widgets
 
 /**
  * 将图标统一管理在一个对象中
@@ -72,8 +76,9 @@ object AppIcons {
     val Save = Icons.TwoTone.Save
     val BugReport = Icons.TwoTone.BugReport
     val Terminal = Icons.TwoTone.Terminal
+    val Launcher = Icons.TwoTone.RocketLaunch
     val History = Icons.TwoTone.History
-    val Suggestion = Icons.TwoTone.TipsAndUpdates
+    val Suggestion = Icons.TwoTone.AutoAwesome
     val Update = Icons.TwoTone.SystemUpdate
     val Rule = Icons.AutoMirrored.TwoTone.Rule
     val Search = Icons.TwoTone.Search
@@ -108,12 +113,15 @@ object AppIcons {
     // --- 设置图标集合 ---
     val Authorizer = Icons.TwoTone.Memory
     val SingleLineSettingIcon = Icons.TwoTone.Compress
+    val MultiLineSettingIcon = Icons.TwoTone.Expand
     val DisableAdbVerify = Icons.TwoTone.Security
     val InstallMode = Icons.TwoTone.Downloading
     val BatteryOptimization = Icons.TwoTone.BatterySaver
     val LockDefault = Icons.TwoTone.Favorite
     val UnlockDefault = Icons.TwoTone.FavoriteBorder
     val ClearAll = Icons.TwoTone.ClearAll
+    val LiveActivity = Icons.AutoMirrored.TwoTone.Send
+    val IconPack = Icons.TwoTone.Widgets
     // --- 设置图标结束 ---
 
     // --- Profile pkg 图标集合 ---

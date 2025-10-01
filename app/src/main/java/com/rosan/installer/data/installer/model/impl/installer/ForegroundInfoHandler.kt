@@ -60,8 +60,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 installer.progress,
                 installer.background,
                 appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true),
-                appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false)
-            ) { progress, background, showDialog, showLiveActivity ->
+                appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false),
+                appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false)
+            ) { progress, background, showDialog, showLiveActivity, preferSystemIcon ->
 
                 Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=$showDialog")
 
@@ -79,9 +80,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     // This is the main branching point. It decides which notification style to use.
                     val notification =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && showLiveActivity) {
-                            buildModernNotification(progress, showDialog)
+                            buildModernNotification(progress, showDialog, preferSystemIcon)
                         } else {
-                            buildLegacyNotification(progress, true, showDialog)
+                            buildLegacyNotification(progress, true, showDialog, preferSystemIcon)
                         }
                     setNotification(notification)
 
@@ -123,12 +124,13 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     private suspend fun buildModernNotification(
         progress: ProgressEntity,
-        showDialog: Boolean
+        showDialog: Boolean,
+        preferSystemIcon: Boolean = false
     ): Notification? {
         if (progress is ProgressEntity.Finish || progress is ProgressEntity.Error || progress is ProgressEntity.InstallAnalysedUnsupported) {
             return null
         }
-        val builder = newModernNotificationBuilder(progress, showDialog)
+        val builder = newModernNotificationBuilder(progress, showDialog, preferSystemIcon)
 
         // Finalize notification content for terminal states, which might require async operations.
         return when (progress) {
@@ -144,7 +146,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     private suspend fun newModernNotificationBuilder(
         progress: ProgressEntity,
-        showDialog: Boolean
+        showDialog: Boolean,
+        preferSystemIcon: Boolean = false
     ): NotificationCompat.Builder {
         val channel = NotificationChannelCompat.Builder(
             Channel.InstallerLiveChannel.value,
@@ -215,7 +218,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     .setShortCriticalText("Pending Install")
                     .addAction(0, getString(R.string.install), installIntent)
                     .addAction(0, getString(R.string.cancel), finishIntent)
-                    .setLargeIcon(getLargeIconBitmap())
+                    .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
             }
 
             ProgressEntity.Installing -> {
@@ -230,7 +233,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 val formattedTime = formatElapsedTime(elapsedTime)
                 contentTitle = getString(R.string.installer_install_success)
                 baseBuilder.setOnlyAlertOnce(false)
-                    .setLargeIcon(getLargeIconBitmap())
+                    .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
                     .setShortCriticalText(formattedTime)
                     .setUsesChronometer(false)
             }
@@ -320,7 +323,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     /**
      * Gets the large icon for notifications as a Bitmap by fetching it from the AppIconRepository.
      */
-    private suspend fun getLargeIconBitmap(): Bitmap? {
+    private suspend fun getLargeIconBitmap(preferSystemIcon: Boolean): Bitmap? {
         val entities = installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }
@@ -335,9 +338,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         // Get the drawable from the central repository
         val drawable = appIconRepo.getIcon(
+            sessionId = installer.id,
             packageName = entityToInstall.packageName,
             entityToInstall = entityToInstall,
-            iconSizePx = iconSizePx
+            iconSizePx = iconSizePx,
+            preferSystemIcon = preferSystemIcon
         )
 
         // Convert the drawable to a bitmap of the correct size
@@ -351,7 +356,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun buildLegacyNotification(
         progress: ProgressEntity,
         background: Boolean,
-        showDialog: Boolean
+        showDialog: Boolean,
+        preferSystemIcon: Boolean = false
     ): Notification? {
         val builder = newLegacyNotificationBuilder(progress, background, showDialog)
         return when (progress) {
@@ -362,8 +368,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallPreparing -> onPreparing(builder, progress)
             is ProgressEntity.InstallAnalysing -> onAnalysing(builder)
             is ProgressEntity.InstallAnalysedFailed -> onAnalysedFailed(builder)
-            is ProgressEntity.InstallAnalysedSuccess -> onAnalysedSuccess(builder)
-            is ProgressEntity.Installing -> onInstalling(builder)
+            is ProgressEntity.InstallAnalysedSuccess -> onAnalysedSuccess(builder, preferSystemIcon)
+            is ProgressEntity.Installing -> onInstalling(builder, preferSystemIcon)
             is ProgressEntity.InstallFailed -> onInstallFailed(builder).build()
             is ProgressEntity.InstallSuccess -> onInstallSuccess(builder).build()
             is ProgressEntity.Finish, is ProgressEntity.Error, is ProgressEntity.InstallAnalysedUnsupported -> null
@@ -469,7 +475,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .addAction(0, getString(R.string.retry), analyseIntent)
             .addAction(0, getString(R.string.cancel), finishIntent).build()
 
-    private suspend fun onAnalysedSuccess(builder: NotificationCompat.Builder): Notification {
+    private suspend fun onAnalysedSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): Notification {
         val selectedEntities = installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }
@@ -482,13 +488,13 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             val info = selectedApps.getInfo(context)
             builder.setContentTitle(info.title)
                 .setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
-                .setLargeIcon(getLargeIconBitmap())
+                .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
                 .addAction(0, getString(R.string.install), installIntent)
                 .addAction(0, getString(R.string.cancel), finishIntent)
         }).build()
     }
 
-    private suspend fun onInstalling(builder: NotificationCompat.Builder): Notification {
+    private suspend fun onInstalling(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): Notification {
         val info = installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }
@@ -496,7 +502,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .getInfo(context)
         return builder.setContentTitle(info.title)
             .setContentText(getString(R.string.installer_installing))
-            .setLargeIcon(getLargeIconBitmap())
+            .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
             .addAction(0, getString(R.string.cancel), finishIntent).build()
     }
 

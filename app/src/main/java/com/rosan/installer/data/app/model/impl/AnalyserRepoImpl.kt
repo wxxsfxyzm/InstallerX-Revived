@@ -463,8 +463,9 @@ object AnalyserRepoImpl : AnalyserRepo {
             Timber.d("Device ABIs (priority order): $deviceAbis")
             Timber.d("Available ABI splits: ${abiSplitsGroups.keys}")
 
+            val normalizedDeviceAbis = deviceAbis.map { it.replace('_', '-') }
             // Find the single best ABI that is available
-            val bestAbi = deviceAbis.firstOrNull { abi -> abiSplitsGroups.containsKey(abi) }
+            val bestAbi = normalizedDeviceAbis.firstOrNull { abi -> abiSplitsGroups.containsKey(abi) }
 
             if (bestAbi != null) {
                 Timber.d("   -> Best ABI match is '$bestAbi'. Selecting all splits for this ABI.")

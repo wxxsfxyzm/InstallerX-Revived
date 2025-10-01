@@ -61,36 +61,22 @@ class PreferredViewModel(
     fun dispatch(action: PreferredViewAction) =
         when (action) {
             is PreferredViewAction.Init -> init()
+
             is PreferredViewAction.ChangeGlobalAuthorizer -> changeGlobalAuthorizer(action.authorizer)
-            is PreferredViewAction.ChangeGlobalCustomizeAuthorizer -> changeGlobalCustomizeAuthorizer(
-                action.customizeAuthorizer
-            )
-
+            is PreferredViewAction.ChangeGlobalCustomizeAuthorizer -> changeGlobalCustomizeAuthorizer(action.customizeAuthorizer)
             is PreferredViewAction.ChangeGlobalInstallMode -> changeGlobalInstallMode(action.installMode)
-            is PreferredViewAction.ChangeShowDialogInstallExtendedMenu -> changeShowDialogInstallExtendedMenu(
-                action.showMenu
-            )
-
+            is PreferredViewAction.ChangeShowDialogInstallExtendedMenu -> changeShowDialogInstallExtendedMenu(action.showMenu)
             is PreferredViewAction.ChangeShowSuggestion -> changeShowSuggestionState(action.showSuggestion)
-            is PreferredViewAction.ChangeShowDisableNotification -> changeDisableNotificationState(
-                action.showDisableNotification
-            )
-
-            is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialog(
-                action.showDialog
-            )
-
-            is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(
-                action.countDown
-            )
-
+            is PreferredViewAction.ChangeShowDisableNotification -> changeDisableNotificationState(action.showDisableNotification)
+            is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialog(action.showDialog)
+            is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(action.countDown)
             is PreferredViewAction.ChangeShowExpressiveUI -> changeUseExpressiveUI(action.showRefreshedUI)
             is PreferredViewAction.ChangeShowLiveActivity -> changeUseLiveActivity(action.showLiveActivity)
             is PreferredViewAction.ChangeUseMiuix -> changeUseMiuix(action.useMiuix)
+            is PreferredViewAction.ChangePreferSystemIcon -> changePreferSystemIcon(action.preferSystemIcon)
             is PreferredViewAction.ChangeShowLauncherIcon -> changeShowLauncherIcon(action.showLauncherIcon)
-            is PreferredViewAction.ChangeVersionCompareInSingleLine -> changeVersionCompareInSingleLine(
-                action.versionCompareInSingleLine
-            )
+            is PreferredViewAction.ChangeVersionCompareInSingleLine -> changeVersionCompareInSingleLine(action.versionCompareInSingleLine)
+            is PreferredViewAction.ChangeSdkCompareInMultiLine -> changeSdkCompareInMultiLine(action.sdkCompareInMultiLine)
 
             is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
                 state.managedInstallerPackages,
@@ -174,11 +160,15 @@ class PreferredViewModel(
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
             val versionCompareInSingleLineFlow =
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
+            val sdkCompareInSingleLineFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false)
             val showExpressiveUIFlow =
                 appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
             val showLiveActivityFlow =
                 appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false)
             val showMiuixUIFlow = appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
+            val preferSystemIconFlow =
+                appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false)
             val showLauncherIconFlow =
                 appDataStore.getBoolean(AppDataStore.SHOW_LAUNCHER_ICON, true)
             val managedInstallerPackagesFlow =
@@ -210,9 +200,11 @@ class PreferredViewModel(
                 showDialogWhenPressingNotificationFlow,
                 dhizukuAutoCloseCountDownFlow,
                 versionCompareInSingleLineFlow,
+                sdkCompareInSingleLineFlow,
                 showExpressiveUIFlow,
                 showLiveActivityFlow,
                 showMiuixUIFlow,
+                preferSystemIconFlow,
                 showLauncherIconFlow,
                 managedInstallerPackagesFlow,
                 managedBlacklistPackagesFlow,
@@ -229,21 +221,23 @@ class PreferredViewModel(
                 val showNotification = values[5] as Boolean
                 val showDialog = values[6] as Boolean
                 val countDown = values[7] as Int
-                val versionCompareInSingleLine = values[8] as Boolean
-                val showExpressiveUI = values[9] as Boolean
-                val showLiveActivity = values[10] as Boolean
-                val showMiuixUI = values[11] as Boolean
-                val showLauncherIcon = values[12] as Boolean
+                val versionCompareInMultiLine = values[8] as Boolean
+                val sdkCompareInSingleLine = values[9] as Boolean
+                val showExpressiveUI = values[10] as Boolean
+                val showLiveActivity = values[11] as Boolean
+                val showMiuixUI = values[12] as Boolean
+                val preferSystemIcon = values[13] as Boolean
+                val showLauncherIcon = values[14] as Boolean
                 val managedInstallerPackages =
-                    (values[13] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                    (values[15] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
                 val managedBlacklistPackages =
-                    (values[14] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedSharedUserIdBlacklist =
-                    (values[15] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
-                val managedSharedUserIdExemptPkg =
                     (values[16] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[17] as Boolean
-                val isIgnoringBatteryOptimizations = values[18] as Boolean
+                val managedSharedUserIdBlacklist =
+                    (values[17] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
+                val managedSharedUserIdExemptPkg =
+                    (values[18] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[19] as Boolean
+                val isIgnoringBatteryOptimizations = values[20] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -256,10 +250,12 @@ class PreferredViewModel(
                     disableNotificationForDialogInstall = showNotification,
                     showDialogWhenPressingNotification = showDialog,
                     dhizukuAutoCloseCountDown = countDown,
-                    versionCompareInSingleLine = versionCompareInSingleLine,
+                    versionCompareInSingleLine = versionCompareInMultiLine,
+                    sdkCompareInMultiLine = sdkCompareInSingleLine,
                     showExpressiveUI = showExpressiveUI,
                     showLiveActivity = showLiveActivity,
                     showMiuixUI = showMiuixUI,
+                    preferSystemIcon = preferSystemIcon,
                     showLauncherIcon = showLauncherIcon,
                     managedInstallerPackages = managedInstallerPackages,
                     managedBlacklistPackages = managedBlacklistPackages,
@@ -343,6 +339,11 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.UI_USE_MIUIX, useMiuix)
         }
 
+    private fun changePreferSystemIcon(preferSystemIcon: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, preferSystemIcon)
+        }
+
     private fun changeShowLauncherIcon(show: Boolean) = viewModelScope.launch {
         appDataStore.putBoolean(AppDataStore.SHOW_LAUNCHER_ICON, show)
         val componentName = ComponentName(context, "com.rosan.installer.ui.activity.LauncherAlias")
@@ -364,37 +365,41 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, singleLine)
         }
 
+    private fun changeSdkCompareInMultiLine(singleLine: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, singleLine)
+        }
+
+
     private fun addManagedPackage(
         list: List<NamedPackage>,
         key: Preferences.Key<String>,
         pkg: NamedPackage
-    ) =
-        viewModelScope.launch {
-            // Create a new list from the current state
-            val currentList = list.toMutableList()
-            // Add the new pkg if it's not already in the list
-            if (!currentList.contains(pkg)) {
-                currentList.add(pkg)
-                // Save the updated list back to DataStore
-                appDataStore.putNamedPackageList(key, currentList)
-            }
+    ) = viewModelScope.launch {
+        // Create a new list from the current state
+        val currentList = list.toMutableList()
+        // Add the new pkg if it's not already in the list
+        if (!currentList.contains(pkg)) {
+            currentList.add(pkg)
+            // Save the updated list back to DataStore
+            appDataStore.putNamedPackageList(key, currentList)
         }
+    }
 
     private fun removeManagedPackage(
         list: List<NamedPackage>,
         key: Preferences.Key<String>,
         pkg: NamedPackage
-    ) =
-        viewModelScope.launch {
-            // Create a new list from the current state
-            val currentList = list.toMutableList()
-            // Remove the pkg
-            currentList.remove(pkg)
-            // Save the updated list back to DataStore
-            appDataStore.putNamedPackageList(key, currentList)
-        }
+    ) = viewModelScope.launch {
+        // Create a new list from the current state
+        val currentList = list.toMutableList()
+        // Remove the pkg
+        currentList.remove(pkg)
+        // Save the updated list back to DataStore
+        appDataStore.putNamedPackageList(key, currentList)
+    }
 
-    private fun addSharedUserIdToBlacklist(uid: SharedUid) {
+    private fun addSharedUserIdToBlacklist(uid: SharedUid) =
         viewModelScope.launch {
             val currentList = state.managedSharedUserIdBlacklist
             if (uid in currentList) return@launch
@@ -402,9 +407,9 @@ class PreferredViewModel(
             val newList = currentList + uid
             appDataStore.putSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST, newList)
         }
-    }
 
-    private fun removeSharedUserIdFromBlacklist(uid: SharedUid) {
+
+    private fun removeSharedUserIdFromBlacklist(uid: SharedUid) =
         viewModelScope.launch {
             val currentList = state.managedSharedUserIdBlacklist
             if (uid !in currentList) return@launch
@@ -412,7 +417,7 @@ class PreferredViewModel(
             val newList = currentList.toMutableList().apply { remove(uid) }
             appDataStore.putSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST, newList)
         }
-    }
+
 
     /**
      * A reusable helper function to get a Settings.Global integer value as a Flow,

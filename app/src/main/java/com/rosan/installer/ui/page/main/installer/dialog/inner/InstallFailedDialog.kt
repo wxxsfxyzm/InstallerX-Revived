@@ -2,7 +2,6 @@ package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
@@ -67,13 +66,13 @@ fun installFailedDialog( // 小写开头
         installer = installer,
         viewModel = viewModel,
         onTitleExtraClick = {
-            if (packageName.isNotEmpty()) {
-                context.startActivity(
-                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        .setData(Uri.fromParts("package", packageName, null))
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                )
-            }
+            /* if (packageName.isNotEmpty()) {
+                 context.startActivity(
+                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                         .setData(Uri.fromParts("package", packageName, null))
+                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                 )
+             }*/
         }
     )
 

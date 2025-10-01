@@ -48,6 +48,9 @@
     <string name="theme_settings_google_ui_style">Google UI style</string>
     <string name="theme_settings_use_live_activity">Live Activity</string>
     <string name="theme_settings_use_live_activity_desc">Use Live Activity instead of notifications, may not be supported on custom ROMs</string>
+    <string name="theme_settings_package_icons">Package icon source</string>
+    <string name="theme_settings_prefer_system_icon">Prefer system icon for app to install</string>
+    <string name="theme_settings_prefer_system_icon_desc">Attempt to get icon from system, useful when using icon packs. Disable to show icon from installation package</string>
     <string name="theme_settings_launcher_icons">Launcher icon</string>
     <string name="theme_settings_hide_launcher_icon">Hide launcher icon</string>
     <string name="theme_settings_hide_launcher_icon_desc">Dial *#*#46789#*#* to open settings</string>
@@ -348,6 +351,8 @@
     <string name="change_notification_touch_behavior">Change Notification touch behavior</string>
     <string name="version_compare_in_single_line">Show version compare in single line</string>
     <string name="version_compare_in_single_line_desc">Show version compare in single line in install dialog</string>
+    <string name="sdk_compare_in_multi_line">Show SDK compare in multi lines</string>
+    <string name="sdk_compare_in_multi_line_desc">Show SDK compare in multi lines in install dialog</string>
     <string name="show_dialog_install_extended_menu">Show extended menu</string>
     <string name="show_dialog_install_extended_menu_desc">Show more options in the install dialog</string>
     <string name="extended_menu">Extended Menu</string>

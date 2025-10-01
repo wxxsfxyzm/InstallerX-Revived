@@ -144,7 +144,7 @@ fun NewThemeSettingsPage(
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
                                 add {
                                     SwitchWidget(
-                                        icon = AppIcons.BugReport,
+                                        icon = AppIcons.LiveActivity,
                                         title = stringResource(R.string.theme_settings_use_live_activity),
                                         description = stringResource(R.string.theme_settings_use_live_activity_desc),
                                         checked = state.showLiveActivity,
@@ -161,10 +161,29 @@ fun NewThemeSettingsPage(
             }
             item {
                 SplicedColumnGroup(
+                    title = stringResource(R.string.theme_settings_package_icons),
+                    content = listOf {
+                        SwitchWidget(
+                            icon = AppIcons.IconPack,
+                            title = stringResource(R.string.theme_settings_prefer_system_icon),
+                            description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
+                            checked = state.preferSystemIcon,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangePreferSystemIcon(it)
+                                )
+                            }
+                        )
+                    }
+
+                )
+            }
+            item {
+                SplicedColumnGroup(
                     title = stringResource(R.string.theme_settings_launcher_icons),
                     content = listOf {
                         SwitchWidget(
-                            icon = AppIcons.BugReport,
+                            icon = AppIcons.Launcher,
                             title = stringResource(R.string.theme_settings_hide_launcher_icon),
                             description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
                             checked = !state.showLauncherIcon,

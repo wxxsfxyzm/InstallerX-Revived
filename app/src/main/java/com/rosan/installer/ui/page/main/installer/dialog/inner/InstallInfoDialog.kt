@@ -5,9 +5,12 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -20,11 +23,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -57,6 +60,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.DialogViewState
 import com.rosan.installer.ui.util.toAndroidVersionName
 
 
@@ -129,30 +133,48 @@ fun installInfoDialog(
             }
         },
         title = DialogInnerParams(uniqueContentKey) {
-            Box {
+            // Use a Row with centered arrangement.
+            // This will automatically center its visible children as a group.
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.animateContentSize()
+            ) {
                 Text(
                     text = displayLabel,
                     modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .absolutePadding(right = 32.dp)
                         .basicMarquee()
                 )
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .size(24.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    onClick = onTitleExtraClick
+                // Use AnimatedVisibility to show the button with an animation.
+                // When it becomes invisible, it will not take up any space,
+                // and the Row will re-center the Text automatically.
+                AnimatedVisibility(
+                    visible = viewModel.state == DialogViewState.InstallPrepare || viewModel.state == DialogViewState.InstallSuccess,
+                    enter = fadeIn() + slideInHorizontally { it }, // Slide in from the right
+                    exit = fadeOut() + slideOutHorizontally { it }  // Slide out to the right
                 ) {
-                    Icon(
-                        imageVector = AppIcons.AutoFixHigh,
-                        contentDescription = null,
-                        modifier = Modifier.padding(4.dp)
-                    )
+                    // This inner Row groups the spacer and button so they animate as one unit.
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Add a small spacer between the text and the button.
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        IconButton(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primaryContainer)
+                                .size(24.dp),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            onClick = onTitleExtraClick
+                        ) {
+                            Icon(
+                                imageVector = AppIcons.AutoFixHigh,
+                                contentDescription = null,
+                                modifier = Modifier.padding(4.dp)
+                            )
+                        }
+                    }
                 }
             }
         },
@@ -236,7 +258,7 @@ fun installInfoDialog(
                     }
                 }
                 // --- SDK Information Showcase ---
-                val defaultSdkSingleLine = true
+                val defaultSdkSingleLine = !viewModel.sdkCompareInMultiLine
                 var sdkContentState by remember { mutableStateOf(Pair(defaultSdkSingleLine, false)) }
 
                 AnimatedVisibility(visible = installer.config.displaySdk) {

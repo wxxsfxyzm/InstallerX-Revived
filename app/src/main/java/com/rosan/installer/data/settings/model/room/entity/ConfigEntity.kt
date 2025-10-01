@@ -11,7 +11,7 @@ import org.koin.core.component.KoinComponent
     indices = [
     ]
 )
-data class ConfigEntity constructor(
+data class ConfigEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     var id: Long = 0L,

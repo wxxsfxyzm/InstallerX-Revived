@@ -107,12 +107,21 @@ fun LegacyInstallerGlobalSettingsPage(
                     Column(modifier = Modifier.animateContentSize()) {
                         LabelWidget(label = stringResource(id = R.string.installer_settings_dialog_mode_options))
                         SwitchWidget(
-                            icon = AppIcons.SingleLineSettingIcon,
+                            icon = AppIcons.MultiLineSettingIcon,
                             title = stringResource(id = R.string.version_compare_in_single_line),
                             description = stringResource(id = R.string.version_compare_in_single_line_desc),
                             checked = state.versionCompareInSingleLine,
                             onCheckedChange = {
                                 viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it))
+                            }
+                        )
+                        SwitchWidget(
+                            icon = AppIcons.SingleLineSettingIcon,
+                            title = stringResource(id = R.string.sdk_compare_in_multi_line),
+                            description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
+                            checked = state.sdkCompareInMultiLine,
+                            onCheckedChange = {
+                                viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it))
                             }
                         )
                         AnimatedVisibility(

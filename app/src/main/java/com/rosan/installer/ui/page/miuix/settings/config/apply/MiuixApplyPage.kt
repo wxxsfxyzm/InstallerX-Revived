@@ -97,7 +97,6 @@ fun MiuixApplyPage(
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val scrollBehavior = MiuixScrollBehavior()
-    var showBottomSheet by remember { mutableStateOf(false) }
     val showFloating by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex > 0 || lazyListState.firstVisibleItemScrollOffset > 0
