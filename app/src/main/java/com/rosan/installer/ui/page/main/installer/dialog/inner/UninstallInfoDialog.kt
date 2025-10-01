@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -76,13 +77,13 @@ fun uninstallInfoDialog(
             // Use a Row with centered arrangement.
             // This will automatically center its visible children as a group.
             Row(
+                modifier = Modifier.animateContentSize(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = appInfo.appLabel ?: "Unknown Package",
-                    modifier = Modifier
-                        .basicMarquee()
+                    modifier = Modifier.basicMarquee()
                 )
                 // Use AnimatedVisibility to show the button with an animation.
                 // When it becomes invisible, it will not take up any space,
