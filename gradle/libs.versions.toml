@@ -91,10 +91,6 @@ accompanist-drawablepainter = { group = "com.google.accompanist", name = "accomp
 rikka-shizuku-api = { group = "dev.rikka.shizuku", name = "api", version.ref = "rikka-shizuku" }
 rikka-shizuku-provider = { group = "dev.rikka.shizuku", name = "provider", version.ref = "rikka-shizuku" }
 
-# Coil: An image loader for Compose
-# https://coil-kt.github.io/coil/compose/
-compose-coil = { group = "io.coil-kt.coil3", name = "coil-compose", version = "3.3.0" }
-
 # AppIconLoader
 appiconloader = { module = "me.zhanghai.android.appiconloader:appiconloader", version.ref = "appiconloader" }
 

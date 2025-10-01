@@ -79,6 +79,25 @@ fun MiuixThemeSettingsPage(
                     )
                 }
             }
+            item { SmallTitle(stringResource(R.string.theme_settings_package_icons)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 6.dp)
+                ) {
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.theme_settings_prefer_system_icon),
+                        description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
+                        checked = state.preferSystemIcon,
+                        onCheckedChange = {
+                            viewModel.dispatch(
+                                PreferredViewAction.ChangePreferSystemIcon(it)
+                            )
+                        }
+                    )
+                }
+            }
             item { SmallTitle(stringResource(R.string.theme_settings_launcher_icons)) }
             item {
                 Card(

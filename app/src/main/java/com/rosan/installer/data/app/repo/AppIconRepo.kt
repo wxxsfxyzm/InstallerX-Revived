@@ -11,15 +11,19 @@ interface AppIconRepo {
     /**
      * Gets the application icon, utilizing a caching mechanism.
      *
+     * @param sessionId The session ID.
      * @param packageName The package name of the app.
      * @param entityToInstall The AppEntity, used as a fallback for new installs.
      * @param iconSizePx The desired icon size in pixels.
+     * @param preferSystemIcon Whether to prefer system icons.
      * @return The loaded Drawable, or null if it fails.
      */
     suspend fun getIcon(
+        sessionId: String,
         packageName: String,
         entityToInstall: AppEntity?,
-        iconSizePx: Int
+        iconSizePx: Int,
+        preferSystemIcon: Boolean
     ): Drawable?
 
     /**

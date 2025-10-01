@@ -48,6 +48,9 @@
     <string name="theme_settings_google_ui_style">Google UI style</string>
     <string name="theme_settings_use_live_activity">Live Activity</string>
     <string name="theme_settings_use_live_activity_desc">Use Live Activity instead of notifications, may not be supported on custom ROMs</string>
+    <string name="theme_settings_package_icons">Package icon source</string>
+    <string name="theme_settings_prefer_system_icon">Prefer system icon for app to install</string>
+    <string name="theme_settings_prefer_system_icon_desc">Attempt to get icon from system, useful when using icon packs. Disable to show icon from installation package</string>
     <string name="theme_settings_launcher_icons">Launcher icon</string>
     <string name="theme_settings_hide_launcher_icon">Hide launcher icon</string>
     <string name="theme_settings_hide_launcher_icon_desc">Dial *#*#46789#*#* to open settings</string>

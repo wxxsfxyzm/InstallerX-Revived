@@ -104,8 +104,11 @@ class DialogViewModel(
     private val _displayIcons = MutableStateFlow<Map<String, Drawable?>>(emptyMap())
     val displayIcons: StateFlow<Map<String, Drawable?>> = _displayIcons.asStateFlow()
 
-    // 新增一个 StateFlow 来管理安装标志位 (install flags)
-    // 它的值是一个整数，通过位运算来组合所有选项
+    var preferSystemIconForUpdates by mutableStateOf(false)
+        private set
+
+    // StateFlow to manage `install flags`
+    // An Int value formed by combining all options using bitwise operations.
     private val _installFlags = MutableStateFlow(0) // 默认值为0，表示没有开启任何选项
     val installFlags: StateFlow<Int> = _installFlags.asStateFlow()
 
@@ -128,11 +131,6 @@ class DialogViewModel(
     // StateFlow to hold the currently selected user ID.
     private val _selectedUserId = MutableStateFlow(0)
     val selectedUserId: StateFlow<Int> = _selectedUserId.asStateFlow()
-
-    /**
-     * Holds information about the app to be uninstalled.
-     */
-    val uninstallInfo: StateFlow<UninstallInfo?> = repo.uninstallInfo
 
     /**
      * Holds information about the app being uninstalled for UI display.
@@ -159,6 +157,8 @@ class DialogViewModel(
 
     init {
         viewModelScope.launch {
+            preferSystemIconForUpdates =
+                appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first()
             autoCloseCountDown =
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first()
             showExtendedMenu =
@@ -512,10 +512,13 @@ class DialogViewModel(
             val iconSizePx = 256 // A reasonably high resolution
 
             val loadedIcon = try {
+                Timber.d("Prefer system icon: $preferSystemIconForUpdates")
                 appIconRepo.getIcon(
+                    sessionId = repo.id,
                     packageName = packageName,
                     entityToInstall = entityToInstall,
-                    iconSizePx = iconSizePx
+                    iconSizePx = iconSizePx,
+                    preferSystemIcon = preferSystemIconForUpdates
                 )
             } catch (e: Exception) {
                 // Log the error and return null if icon loading fails

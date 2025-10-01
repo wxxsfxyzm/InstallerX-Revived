@@ -41,6 +41,9 @@
     <string name="theme_settings_google_ui_style">Google UI 風格</string>
     <string name="theme_settings_use_live_activity">建立即時更新通知</string>
     <string name="theme_settings_use_live_activity_desc">使用原生實時通知API，在定制ROM上可能無法正常工作</string>
+    <string name="theme_settings_package_icons">安裝包圖標來源</string>
+    <string name="theme_settings_prefer_system_icon">為安裝應用程式取得系統圖標</string>
+    <string name="theme_settings_prefer_system_icon_desc">嘗試從系統取得圖標包，取消勾選可以取得安裝包內的最新圖標</string>
     <string name="theme_settings_launcher_icons">桌面圖標</string>
     <string name="theme_settings_hide_launcher_icon">隱藏桌面圖標</string>
     <string name="theme_settings_hide_launcher_icon_desc">透過 *#*#46789#*#* 訪問設定</string>

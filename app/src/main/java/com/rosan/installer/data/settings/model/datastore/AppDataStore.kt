@@ -28,6 +28,9 @@ class AppDataStore(
         // Show Launcher Icon
         val SHOW_LAUNCHER_ICON = booleanPreferencesKey("show_launcher_icon")
 
+        // Show System Icon for Packages
+        val PREFER_SYSTEM_ICON_FOR_INSTALL = booleanPreferencesKey("prefer_system_icon_for_updates")
+
         // ForegroundInfoHandler
         val SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION = booleanPreferencesKey("show_dialog_when_pressing_notification")
 

@@ -417,7 +417,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             }
 
             // Never Delete Multi-APK-ZIP files automatically
-            // Enable autoDelete only when the containerType is not MULTI_APK_ZIP_ZIP
+            // Enable autoDelete only when the containerType is not MULTI_APK_ZIP
             if (config.autoDelete && entities.first().containerType != DataType.MULTI_APK_ZIP) {
                 Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
                 coroutineScope.launch {
