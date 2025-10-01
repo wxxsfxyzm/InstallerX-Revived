@@ -43,7 +43,7 @@
 - 优化解析速度，优化各种安装包类型的解析
 - 文本调整，支持更多语言。更多语言欢迎参与贡献
 - 优化对话框安装的显示效果
-- 支持安装时显示系统图标包
+- 支持安装时显示系统图标包，支持通过开关在安装包图标/系统图标包之间切换
 - 支持单行/多行显示版本号对比
 - 安装对话框支持显示targetSDK与minSDK，点击可切换单行/多行
 - Shizuku/Root安装完成打开App时可以绕过定制UI的链式启动拦截
@@ -87,8 +87,8 @@
 - 支持为指定用户安装应用
     - 不支持Dhizuku
     - 可以被 `为所有用户安装` 安装选项覆盖
-- [测试中] 申明自身为卸载工具，可以接受并执行系统卸载请求（绝大多数系统写死卸载器，仅给需要的人使用）
-- [测试中] 联网版本支持直接分享安装包文件的下载直链到InstallerX进行安装，目前使用单线程下载，安装包不会保留在本地，以后会加入保留安装包选项
+- 申明自身为卸载工具，可以接受并执行系统卸载请求（绝大多数系统写死卸载器，仅给需要的人使用）
+- [实验性] 联网版本支持直接分享安装包文件的下载直链到InstallerX进行安装，目前使用单线程下载，安装包不会保留在本地，以后会加入保留安装包选项
 
 ## 常见问题
 
@@ -102,8 +102,10 @@
     - 国产ROM遇到偶发性报错一般是Dhizuku被系统限制了后台，请优先重启Dhizuku应用后再试
     - Dhizuku的权限不够大，很多操作无法完成，例如绕过系统intent拦截，指定安装来源等，有条件建议使用Shizuku
 
-- 锁定器无法锁定怎么办
-    - 由于包名改变，需要使用本仓库的修改版锁定器[InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
+- 没法锁定安装器怎么办
+    - 部分系统严格限制安装器，需要使用LSP模块拦截intent并转发给安装器
+    - 首选推荐使用[Chimioo/InxLocker](https://github.com/Chimioo/InxLocker)也能一并锁定卸载器
+    - 使用原版锁定器请注意，由于包名改变，需要使用本仓库的修改版锁定器[InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk)
 
 - 分析阶段报错`No Content Provider`或`reading provider`报错`Permission Denial`
     - 你启用了`隐藏应用列表`或类似功能，请配置白名单

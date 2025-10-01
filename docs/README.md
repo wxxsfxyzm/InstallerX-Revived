@@ -43,7 +43,7 @@ Compared to stock installers, **InstallerX** offers more installation features:
 - **Performance:** Optimized parsing speed, improved parsing of various package types.
 - **Multilingual support:** More languages supported. Contributions for more languages are welcome!
 - **Dialog optimization:** Improved installation dialog display.
-- **System Icons:** Support for displaying system icon packs during installation.
+- **System Icons:** Support for displaying system icon packs during installation. Allows switching between APK icons and system icon packs through a toggle.
 - **Version Comparison:** Support for displaying version number comparison in single-line or multi-line format.
 - **SDK Information:** Installation dialogs show targetSDK and minSDK in single-line or multi-line format.
 - **Bypass Interceptions:** Shizuku/Root can bypass custom OS chain-start restrictions when opening an App after installation.
@@ -86,8 +86,8 @@ Compared to stock installers, **InstallerX** offers more installation features:
 - **Select Target User:** Support installing apps to a specific user.
     - Not support Dhizuku
     - Can be overridden by `Install For All Users` install option
-- [Testing] **Declare as Uninstaller:** Accept Uninstall intent on certain OS, custom OS may not be supported.
-- [Testing] **Directly Install From Download Link:** The online version supports directly sharing the download link of an APK file to InstallerX for installation. Currently, the APK is not kept locally, but an option to retain the installation package will be added in the future.
+- **Declare as Uninstaller:** Accept Uninstall intent on certain OS, custom OS may not be supported.
+- [Experimental] **Directly Install From Download Link:** The online version supports directly sharing the download link of an APK file to InstallerX for installation. Currently, the APK is not kept locally, but an option to retain the installation package will be added in the future.
 
 ## FAQ
 
@@ -101,8 +101,10 @@ Compared to stock installers, **InstallerX** offers more installation features:
     - On Chinese ROMs, occasional errors are usually due to the system restricting Dhizuku's background operation. It is recommended to restart the Dhizuku app first.
     - Dhizuku has limited permissions. Many operations are not possible (like bypassing system intent interceptors or specifying the installation source). Using Shizuku is recommended if possible.
 
-- **Lock tool not working?**
-    - Due to the package name change, use the modified [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk) from this repository.
+- **Unable to lock InstallerX as default installer?**
+    - Some Systems have very strict policy on Package Installers. You must use a LSPosed module to intercept the intent and forward it to the installer in this case.
+    - Strongly recommended: [Chimioo/InxLocker](https://github.com/Chimioo/InxLocker) which can also lock uninstaller.
+    - If you want to use locker from original InstallerX, please note that due to package name change, use the modified [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk) from this repository.
 
 - An error occurred in the resolving phase: `No Content Provider` or `reading provider` reported `Permission Denial`?
     - You have enabled Hide app list or similar functions, please configure the whitelist.
