@@ -150,6 +150,7 @@ fun MiuixAllPage(
                 FloatingActionButton(
                     modifier = Modifier.padding(end = 16.dp),
                     containerColor = MiuixTheme.colorScheme.surface,
+                    shadowElevation = 2.dp,
                     onClick = { navController.navigate(MiuixSettingsScreen.Builder.MiuixEditConfig(null).route) }
                 ) {
                     Icon(
