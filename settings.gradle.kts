@@ -4,15 +4,15 @@ pluginManagement {
         maven { setUrl("https://jitpack.io") }
 
         // SCIJava Maven Repository
-//        maven { setUrl("https://maven.scijava.org/content/repositories/public/") }
+        maven { setUrl("https://maven.scijava.org/content/repositories/public/") }
 
         // Aliyun Maven Repository
-        maven { setUrl("https://maven.aliyun.com/repository/public/") }
-        maven { setUrl("https://maven.aliyun.com/repository/google/") }
-        maven { setUrl("https://maven.aliyun.com/repository/gradle-plugin/") }
+//        maven { setUrl("https://maven.aliyun.com/repository/public/") }
+//        maven { setUrl("https://maven.aliyun.com/repository/google/") }
+//        maven { setUrl("https://maven.aliyun.com/repository/gradle-plugin/") }
 
         // Huawei Maven Repository
-        maven { setUrl("https://repo.huaweicloud.com/repository/maven/") }
+//        maven { setUrl("https://repo.huaweicloud.com/repository/maven/") }
 
         mavenLocal()
         mavenCentral()
@@ -28,14 +28,14 @@ dependencyResolutionManagement {
         maven { setUrl("https://jitpack.io") }
 
         // SCIJava Maven Repository
-//        maven { setUrl("https://maven.scijava.org/content/repositories/public/") }
+        maven { setUrl("https://maven.scijava.org/content/repositories/public/") }
 
         // Aliyun Maven Repository
-        maven { setUrl("https://maven.aliyun.com/repository/public/") }
-        maven { setUrl("https://maven.aliyun.com/repository/gradle-plugin/") }
+//        maven { setUrl("https://maven.aliyun.com/repository/public/") }
+//        maven { setUrl("https://maven.aliyun.com/repository/gradle-plugin/") }
 
         // Huawei Maven Repository
-        maven { setUrl("https://repo.huaweicloud.com/repository/maven/") }
+//        maven { setUrl("https://repo.huaweicloud.com/repository/maven/") }
 
         mavenLocal()
         mavenCentral()

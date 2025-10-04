@@ -80,13 +80,12 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
         Timber.d("doFileWork: ${data.path}, extra: $extra")
         val path = data.path
         val bestArch = analyseAndSelectBestArchitecture(path, RsConfig.supportedArchitectures)
-        var apkResources: Resources
 
         return useResources { resources ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val apkResources = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 try {
                     setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
-                    apkResources = resources
+                    resources
                 } catch (e: IOException) {
                     Timber.e(e, "Failed to load APK assets from path: $path")
                     throw AnalyseFailedAllFilesUnsupportedException("Failed to load APK assets. Maybe the file is corrupted or not supported?")
@@ -106,7 +105,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
                     throw AnalyseFailedAllFilesUnsupportedException("Failed to load APK assets. Maybe the file is corrupted or not supported?")
                 }
 
-                apkResources = Resources(
+                Resources(
                     assets,
                     resources.displayMetrics,
                     resources.configuration
