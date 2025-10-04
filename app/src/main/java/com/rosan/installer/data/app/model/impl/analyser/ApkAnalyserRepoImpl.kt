@@ -1,10 +1,12 @@
 package com.rosan.installer.data.app.model.impl.analyser
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ApkAssets
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
+import android.os.Build
 import androidx.core.content.res.ResourcesCompat
 import com.rosan.installer.build.Architecture
 import com.rosan.installer.build.RsConfig
@@ -69,6 +71,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
      * @param extra Additional analysis parameters.
      * @return A list of AppEntity representing the analyzed APK.
      */
+    @SuppressLint("DiscouragedPrivateApi")
     private fun doFileWork(
         config: ConfigEntity,
         data: DataEntity.FileEntity,
@@ -77,14 +80,46 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
         Timber.d("doFileWork: ${data.path}, extra: $extra")
         val path = data.path
         val bestArch = analyseAndSelectBestArchitecture(path, RsConfig.supportedArchitectures)
+        var apkResources: Resources
+
         return useResources { resources ->
-            try {
-                setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
-            } catch (e: IOException) {
-                Timber.e(e, "Failed to load APK assets from path: $path")
-                throw AnalyseFailedAllFilesUnsupportedException("Failed to load APK assets. Maybe the file is corrupted or not supported?")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                try {
+                    setAssetPath(resources.assets, arrayOf(ApkAssets.loadFromPath(path)))
+                    apkResources = resources
+                } catch (e: IOException) {
+                    Timber.e(e, "Failed to load APK assets from path: $path")
+                    throw AnalyseFailedAllFilesUnsupportedException("Failed to load APK assets. Maybe the file is corrupted or not supported?")
+                }
+            } else {
+                val assets = AssetManager::class.java
+                    .getDeclaredConstructor()
+                    .newInstance() as AssetManager
+
+                val addAssetPath = assets.javaClass.getDeclaredMethod(
+                    "addAssetPath", String::class.java
+                ).apply { isAccessible = true }
+
+                val asset = addAssetPath.invoke(assets, path) as Int
+                if (asset == 0) {
+                    Timber.e("Failed to load APK assets from path: $path, because addAssetPath returned 0")
+                    throw AnalyseFailedAllFilesUnsupportedException("Failed to load APK assets. Maybe the file is corrupted or not supported?")
+                }
+
+                apkResources = Resources(
+                    assets,
+                    resources.displayMetrics,
+                    resources.configuration
+                )
             }
-            listOf(loadAppEntity(resources, resources.newTheme(), data, extra, bestArch ?: Architecture.UNKNOWN))
+
+            listOf(loadAppEntity(
+                apkResources,
+                apkResources.newTheme(),
+                data,
+                extra,
+                bestArch ?: Architecture.UNKNOWN
+            ))
         }
     }
 
