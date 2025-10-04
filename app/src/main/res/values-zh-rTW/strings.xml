@@ -447,4 +447,5 @@
     <string name="suggestion_user_restricted">前往開發者選項啟用USB安裝</string>
     <string name="suggestion_bypass_low_target_sdk">臨時允許繞過限制並重試</string>
     <string name="suggestion_bypass_blacklist_set_by_user">本次允許安裝</string>
+    <string name="internet_access_enabled">在線</string>
 </resources>
