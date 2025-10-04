@@ -388,4 +388,6 @@
     <string name="suggestion_mi_isolation">إضافة مُثبِّت صالح مؤقتًا وإعادة المحاولة</string>
     <string name="suggestion_user_restricted">اذهب إلى خيارات المطور لتمكين التثبيت عبر USB</string>
     <string name="suggestion_bypass_low_target_sdk">السماح مؤقتًا بتجاوز القيود وإعادة المحاولة</string>
+    <string name="warning">تحذير</string>
+    <string name="telegram_channel">قناة تيلجرام</string>
 </resources>
