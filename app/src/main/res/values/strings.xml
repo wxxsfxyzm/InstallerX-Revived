@@ -78,6 +78,9 @@
     <string name="unlock_default_installer_success">Successfully unset as default installer</string>
     <string name="unlock_default_installer_failed">Couldn\'t unset as default installer</string>
     <string name="clear_cache">Clear cache</string>
+    <string name="no_cache">No cache</string>
+    <string name="clearing_cache">Clearing cache…</string>
+    <string name="cache_size">Cache size: %1$s</string>
     <string name="success">Success</string>
     <string name="details">Details</string>
     <string name="add">Add</string>
