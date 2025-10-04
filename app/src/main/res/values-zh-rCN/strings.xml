@@ -75,6 +75,9 @@
     <string name="unlock_default_installer_success">清除成功</string>
     <string name="unlock_default_installer_failed">清除失败</string>
     <string name="clear_cache">清理缓存</string>
+    <string name="no_cache">无缓存</string>
+    <string name="clearing_cache">正在清理缓存…</string>
+    <string name="cache_size">缓存大小：%1$s</string>
     <string name="success">成功</string>
     <string name="details">详情</string>
     <string name="add">新增</string>

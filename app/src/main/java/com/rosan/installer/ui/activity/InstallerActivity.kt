@@ -13,6 +13,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.rosan.installer.R
+import com.rosan.installer.build.Level
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.InstallerPage
@@ -103,7 +105,14 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     override fun onNewIntent(intent: Intent) {
         Timber.d("onNewIntent: Received new intent.")
-        logIntentDetails("onNewIntent", intent)
+        if (RsConfig.isDebug && RsConfig.LEVEL == Level.UNSTABLE)
+            logIntentDetails("onNewIntent", intent)
+        // Fix for Microsoft Edge
+        if (this.installer != null) {
+            Timber.w("onNewIntent was called, but an installer instance already exists. Ignoring re-initialization.")
+            super.onNewIntent(intent) // Call super, but do not proceed further.
+            return
+        }
         if (intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK == 0)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         this.intent = intent

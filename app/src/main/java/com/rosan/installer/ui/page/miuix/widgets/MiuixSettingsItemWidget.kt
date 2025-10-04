@@ -32,7 +32,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,9 +57,14 @@ import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.util.MIN_FEEDBACK_DURATION_MS
+import com.rosan.installer.ui.util.formatSize
+import com.rosan.installer.ui.util.getDirectorySize
 import com.rosan.installer.util.openUrl
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
 import top.yukonga.miuix.kmp.extra.SpinnerMode
@@ -279,31 +287,64 @@ fun MiuixClearCache() {
     var inProgress by remember {
         mutableStateOf(false)
     }
+    var cacheSize by remember { mutableLongStateOf(0L) }
+    // A trigger to recalculate the cache size
+    var calculationTrigger by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(calculationTrigger) {
+        withContext(Dispatchers.IO) {
+            val internalCache = context.cacheDir?.getDirectorySize() ?: 0L
+            val externalCache = context.externalCacheDir?.getDirectorySize() ?: 0L
+            cacheSize = internalCache + externalCache
+        }
+    }
+
     BasicComponent(
-        // The 'enabled' parameter directly implements your original logic to prevent clicks.
         enabled = !inProgress,
         title = stringResource(id = R.string.clear_cache),
+        summary = if (inProgress) stringResource(R.string.clearing_cache)
+        else if (cacheSize == 0L) stringResource(R.string.no_cache)
+        else stringResource(
+            R.string.cache_size,
+            cacheSize.formatSize()
+        ),
         onClick = {
-            // The core logic here is identical to your original code.
-            // The 'if (inProgress)' check is now handled by the 'enabled' parameter above.
-            inProgress = true
-            scope.launch(Dispatchers.IO) {
-                val paths = listOfNotNull(
-                    context.externalCacheDir?.absolutePath
-                )
+            if (inProgress) return@BasicComponent
 
-                fun clearFile(file: File) {
-                    if (!file.exists()) return
-                    if (file.isDirectory) file.listFiles()?.forEach {
-                        clearFile(it)
+            scope.launch {
+                inProgress = true
+                val startTime = System.currentTimeMillis()
+
+                // Perform the actual clearing operation on the IO dispatcher
+                withContext(Dispatchers.IO) {
+                    val paths = listOfNotNull(
+                        context.cacheDir,
+                        context.externalCacheDir
+                    )
+
+                    fun clearFile(file: File) {
+                        if (!file.exists()) return
+                        if (file.isDirectory) {
+                            file.listFiles()?.forEach {
+                                clearFile(it)
+                            }
+                        }
+                        file.delete()
                     }
-                    file.delete()
+                    paths.forEach { clearFile(it) }
                 }
 
-                paths.forEach {
-                    clearFile(File(it))
+                val elapsedTime = System.currentTimeMillis() - startTime
+
+                // If the operation was too fast, wait for the remaining time
+                if (elapsedTime < MIN_FEEDBACK_DURATION_MS) {
+                    delay(MIN_FEEDBACK_DURATION_MS - elapsedTime)
                 }
+
+                cacheSize = 0L
                 inProgress = false
+                // Trigger a recalculation of the cache size
+                calculationTrigger++
             }
         }
     )
