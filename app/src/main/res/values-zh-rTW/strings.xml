@@ -463,5 +463,4 @@
     <string name="telegram_channel">Telegram頻道</string>
     <string name="telegram_channel_desc">加入頻道以取得最新更新與動態！</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS 不允許在此處解除安裝該程式</string>
-    <string name="installer_live_channel_name">安裝進度</string>
 </resources>
