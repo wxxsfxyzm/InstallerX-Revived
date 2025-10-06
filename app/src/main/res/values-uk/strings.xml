@@ -109,7 +109,7 @@
     <string name="config_managed_installer_packages_title">Встановити вихідні передустановки</string>
     <string name="config_managed_blacklist_by_package_name_title">Застосунки, заборонені для встановлення за назвою пакета</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">Застосунки, заборонені для встановлення за допомогою SharedUID</string>
-    <string name="config_no_managed_installer_packages">Немає пакетів, заборонених для встановлення за назвою пакета</string>
+    <string name="config_no_preset_install_sources">Немає попередньо визначених джерел встановлення</string>
     <string name="config_no_managed_blacklist">Введіть назви пакетів заблокованих застосунків тут</string>
     <string name="config_no_managed_shared_user_id_blacklist">Немає застосунків, заборонених для встановлення спільним ідентифікатором користувача</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Винятки, які стосуються лише SharedUID; якщо це заборонено назвою пакета, його все одно неможливо встановити.</string>

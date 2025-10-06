@@ -134,7 +134,7 @@
     <string name="config_managed_installer_packages_title">Kaynak Ön Ayarlarını Yükle</string>
     <string name="config_managed_blacklist_by_package_name_title">Paket adına göre kurulumu yasaklanan uygulamalar</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">SharedUID tarafından kurulumu yasaklanan uygulamalar</string>
-    <string name="config_no_managed_installer_packages">Paket adına göre kurulumu yasaklanmış paket yok</string>
+    <string name="config_no_preset_install_sources">Önceden ayarlanmış kurulum kaynağı yok</string>
     <string name="config_no_managed_blacklist">Engellenen uygulamaların paket adlarını buraya girin</string>
     <string name="config_no_managed_shared_user_id_blacklist">Paylaşılan kullanıcı kimliğiyle kurulumu yasaklanmış uygulama yok</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Yalnızca SharedUID\'yi hedefleyen muafiyetler; paket adı tarafından yasaklanmışsa, yine de yüklenemez.</string>

@@ -8,6 +8,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
@@ -171,7 +173,12 @@ fun NewEditPage(
         topBar = {
             TopAppBar(
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                title = { Text(text = stringResource(id = if (id == null) R.string.add else R.string.update)) },
+                title = {
+                    Row {
+                        Spacer(modifier = Modifier.size(16.dp))
+                        Text(text = stringResource(id = if (id == null) R.string.add else R.string.update))
+                    }
+                },
                 navigationIcon = {
                     AppBackButton(
                         onClick = { navController.navigateUp() },

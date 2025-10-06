@@ -154,7 +154,7 @@
     <string name="config_managed_installer_packages_title">Install Source Presets</string>
     <string name="config_managed_blacklist_by_package_name_title">Apps prohibited from installation by package name</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">Apps prohibited from installation by SharedUID</string>
-    <string name="config_no_managed_installer_packages">No packages prohibited from installation by package name</string>
+    <string name="config_no_preset_install_sources">No preset install sources</string>
     <string name="config_no_managed_blacklist">Fill in the package names of blocked apps here</string>
     <string name="config_no_managed_shared_user_id_blacklist">No apps prohibited from installation by shared user ID</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Exemptions that only target SharedUID; if it is forbidden by package name, it still cannot be installed.</string>
@@ -191,6 +191,8 @@
     <string name="select">Select</string>
     <string name="clear">Clear</string>
     <string name="global">Global</string>
+    <string name="scope_tips">The first profile is the default. New profile can be set to specific apps for installations they initiate.</string>
+    <string name="got_it">Got it</string>
     <string name="pull_to_refresh_hint1">Pull down to refresh</string>
     <string name="pull_to_refresh_hint2">Release to refresh</string>
     <string name="pull_to_refresh_hint3">Refreshing…</string>
@@ -205,7 +207,6 @@
     <string name="sort_by_show_system_app">Display system app</string>
     <string name="sort_by_show_package_name">Display package name</string>
 
-    <string name="installer_live_channel_name">Install Progress</string>
     <string name="installer_ready">Ready</string>
     <string name="installer_resolving">Checking…</string>
     <string name="installer_resolve_failed">Resolve failed</string>
@@ -237,6 +238,15 @@
     <string name="installer_channel_name">Install Notification</string>
     <string name="installer_progress_channel_name">Install Process Notification</string>
     <string name="installer_background_channel_name">Background Notification</string>
+    <string name="installer_live_channel_name">Install Progress Live Update</string>
+    <string name="installer_live_channel_short_text_resolving">Resolving</string>
+    <string name="installer_live_channel_short_text_preparing">Preparing</string>
+    <string name="installer_live_channel_short_text_analysing">Analysing</string>
+    <string name="installer_live_channel_short_text_pending">Pending</string>
+    <string name="installer_live_channel_short_text_installing">Installing</string>
+    <string name="installer_live_channel_short_text_success">Success</string>
+    <string name="installer_live_channel_short_text_resolve_failed">Failed</string>
+    <string name="installer_live_channel_short_text_install_failed">Failed</string>
     <string name="uninstall_keep_data">Keep Data</string>
     <string name="uninstall_all_users">For All Users</string>
     <string name="uninstall_delete_system_app">Delete SystemApp</string>

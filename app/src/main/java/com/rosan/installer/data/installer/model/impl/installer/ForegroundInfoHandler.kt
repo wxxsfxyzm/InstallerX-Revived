@@ -117,6 +117,21 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         job?.cancel()
     }
 
+    // A data class to hold information about each installation stage.
+    private data class InstallStageInfo(
+        val progressClass: kotlin.reflect.KClass<out ProgressEntity>,
+        val weight: Float // Represents the relative length of this stage's segment.
+    )
+
+    private val installStages = listOf(
+        InstallStageInfo(ProgressEntity.InstallResolving::class, 1f),    // Short
+        InstallStageInfo(ProgressEntity.InstallPreparing::class, 4f),    // Long, with sub-progress
+        InstallStageInfo(ProgressEntity.InstallAnalysing::class, 1f),     // Short
+        InstallStageInfo(ProgressEntity.Installing::class, 4f)         // Long
+    )
+
+    private val totalProgressWeight = installStages.sumOf { it.weight.toDouble() }.toFloat()
+
     /**
      * Builds and returns a Notification for Android 15+ devices.
      * This is the entry point for the modern notification logic.
@@ -141,7 +156,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     /**
-     * Creates and configures a NotificationCompat.Builder using Android 15's rich ProgressStyle.
+     * Creates and configures a NotificationCompat.Builder using rich ProgressStyle.
      */
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     private suspend fun newModernNotificationBuilder(
@@ -152,110 +167,139 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val channel = NotificationChannelCompat.Builder(
             Channel.InstallerLiveChannel.value,
             NotificationManagerCompat.IMPORTANCE_MAX
-        )
-            .setName(getString(R.string.installer_live_channel_name))
-            .build()
+        ).setName(getString(R.string.installer_live_channel_name)).build()
         notificationManager.createNotificationChannel(channel)
-
         val contentIntent = when (installer.config.installMode) {
             ConfigEntity.InstallMode.Notification,
             ConfigEntity.InstallMode.AutoNotification -> if (showDialog) openIntent else null
 
             else -> openIntent
         }
-
         val baseBuilder = NotificationCompat.Builder(context, channel.id)
-            .setSmallIcon(Icon.Working.resId)
+            .setSmallIcon(Icon.LOGO.resId)
             .setContentIntent(contentIntent)
             .setDeleteIntent(finishIntent)
             .setOnlyAlertOnce(true)
             .setOngoing(true)
             .setRequestPromotedOngoing(true)
-            .setUsesChronometer(true) // Start a stopwatch in the status bar chip
-            .setWhen(sessionStartTime)
 
-        // --- Define Progress Point ---
+        // --- New Weighted & Dynamic Progress Logic ---
+        // Find the current stage's information.
+        val currentStageIndex = installStages.indexOfFirst { it.progressClass.isInstance(progress) }
+        // Create the raw, uncolored segments with correct lengths.
+        val segments = createInstallSegments(installStages)
+        // Create the ProgressStyle.
         val progressStyle = NotificationCompat.ProgressStyle()
-            .setProgressPoints(
-                listOf(
-                    NotificationCompat.ProgressStyle.Point(20),
-                    NotificationCompat.ProgressStyle.Point(40),
-                    NotificationCompat.ProgressStyle.Point(100)
-                )
-            )
-
-        var progressValue = 0
-        var contentTitle = getString(R.string.installer_ready)
+            .setProgressSegments(segments)
+            .setStyledByProgress(true)
+        // Calculate the precise progress value.
+        var contentTitle: String
+        var shortText: String? = null
+        // Calculate the total weight of all stages *before* the current one.
+        val previousStagesWeight = if (currentStageIndex > 0) {
+            installStages.subList(0, currentStageIndex).sumOf { it.weight.toDouble() }.toFloat()
+        } else {
+            0f
+        }
 
         when (progress) {
-            ProgressEntity.InstallResolving,
-            ProgressEntity.InstallResolveSuccess -> {
-                progressValue = 20
+            is ProgressEntity.InstallResolving, is ProgressEntity.InstallResolveSuccess -> {
                 contentTitle = getString(R.string.installer_resolving)
-                /*progressStyle.setProgressTrackerIcon(
-                    IconCompat.createWithResource(
-                        context,
-                        R.drawable.round_hourglass_empty_black_24
-                    )
-                )*/
-                baseBuilder.addAction(0, getString(R.string.cancel), finishIntent)
+                shortText = getString(R.string.installer_live_channel_short_text_resolving)
+                // Progress is half of the current (first) segment's weight.
+                val progressValue = previousStagesWeight + (installStages[0].weight / 2f)
+                progressStyle.setProgress(progressValue.toInt())
             }
 
-            ProgressEntity.InstallAnalysing -> {
-                progressValue = 40
+            is ProgressEntity.InstallPreparing -> {
+                contentTitle = getString(R.string.installer_preparing)
+                shortText = getString(R.string.installer_live_channel_short_text_preparing)
+                // Real-time progress within this segment.
+                val progressInCurrentSegment = installStages[1].weight * progress.progress
+                val progressValue = previousStagesWeight + progressInCurrentSegment
+                progressStyle.setProgress(progressValue.toInt())
+            }
+
+            is ProgressEntity.InstallResolvedFailed -> {
+                contentTitle = getString(R.string.installer_resolve_failed)
+                shortText = getString(R.string.installer_live_channel_short_text_resolve_failed)
+
+                baseBuilder.setContentText(installer.error.getErrorMessage(context)).setOnlyAlertOnce(false)
+                    .addAction(0, getString(R.string.cancel), finishIntent)
+            }
+
+            is ProgressEntity.InstallAnalysing -> {
                 contentTitle = getString(R.string.installer_analysing)
-                baseBuilder.addAction(0, getString(R.string.cancel), finishIntent)
+                shortText = getString(R.string.installer_live_channel_short_text_analysing)
+                // Progress is the sum of previous segments + half of the current one.
+                val progressValue = previousStagesWeight + (installStages[2].weight / 2f)
+                progressStyle.setProgress(progressValue.toInt())
             }
 
-            ProgressEntity.InstallAnalysedSuccess -> {
-                val selectedEntities = installer.analysisResults
-                    .flatMap { it.appEntities }
-                    .filter { it.selected }
-                val selectedApps = selectedEntities.map { it.app }
-                progressValue = 40
-                contentTitle = selectedApps.getInfo(context).title
+            is ProgressEntity.InstallAnalysedSuccess -> {
+                contentTitle = installer.analysisResults.flatMap { it.appEntities }
+                    .filter { it.selected }.map { it.app }.getInfo(context).title
+                shortText = getString(R.string.installer_live_channel_short_text_pending)
+                // Progress is now at the end of the Analysing stage.
+                val progressValue = installStages.subList(0, 3).sumOf { it.weight.toDouble() }.toFloat()
+                progressStyle.setProgress(progressValue.toInt())
                 baseBuilder.setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
-                    .setShortCriticalText("Pending Install")
                     .addAction(0, getString(R.string.install), installIntent)
                     .addAction(0, getString(R.string.cancel), finishIntent)
                     .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
             }
 
-            ProgressEntity.Installing -> {
-                progressValue = 80
-                contentTitle = getString(R.string.installer_installing)
-                baseBuilder.addAction(0, getString(R.string.cancel), finishIntent)
+            is ProgressEntity.Installing -> {
+                contentTitle = installer.analysisResults.flatMap { it.appEntities }
+                    .filter { it.selected }.map { it.app }.getInfo(context).title
+                shortText = getString(R.string.installer_live_channel_short_text_installing)
+                // Progress is the sum of previous segments + half of the current one.
+                val progressValue = previousStagesWeight + (installStages[3].weight / 2f)
+                progressStyle.setProgress(progressValue.toInt())
+                baseBuilder.setContentText(getString(R.string.installer_installing))
             }
 
             is ProgressEntity.InstallSuccess -> {
-                progressValue = 100
-                val elapsedTime = System.currentTimeMillis() - sessionStartTime
-                val formattedTime = formatElapsedTime(elapsedTime)
                 contentTitle = getString(R.string.installer_install_success)
-                baseBuilder.setOnlyAlertOnce(false)
-                    .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
-                    .setShortCriticalText(formattedTime)
-                    .setUsesChronometer(false)
+                shortText = getString(R.string.installer_live_channel_short_text_success)
+                progressStyle.setProgress(totalProgressWeight.toInt())
+                baseBuilder.setOnlyAlertOnce(false).setLargeIcon(getLargeIconBitmap(preferSystemIcon))
             }
 
             is ProgressEntity.InstallFailed -> {
                 contentTitle = getString(R.string.installer_install_failed)
-                baseBuilder.setOnlyAlertOnce(false)
+                shortText = getString(R.string.installer_live_channel_short_text_install_failed)
+                progressStyle.setProgress(previousStagesWeight.toInt())
+                baseBuilder.setContentText(installer.error.getErrorMessage(context)).setOnlyAlertOnce(false)
             }
 
-            else -> { /* ignore */
+            else -> {
+                contentTitle = getString(R.string.installer_ready)
+                progressStyle.setProgress(0)
             }
         }
 
         baseBuilder.setContentTitle(contentTitle)
-
-        // Apply Progress Style
-        progressStyle.setProgress(progressValue)
+        shortText?.let { baseBuilder.setShortCriticalText(it) }
         baseBuilder.setStyle(progressStyle)
 
         return baseBuilder
     }
 
+    /**
+     * Creates a list of styled segments for the notification progress bar based on the current install stage.
+     * @param stages The ordered list of installation stages.
+     * @return A list of NotificationCompat.ProgressStyle.Segment objects.
+     */
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    private fun createInstallSegments(
+        stages: List<InstallStageInfo>
+    ): List<NotificationCompat.ProgressStyle.Segment> {
+        return stages.map { stageInfo ->
+            // The length of each segment is now its defined weight.
+            NotificationCompat.ProgressStyle.Segment(stageInfo.weight.toInt())
+        }
+    }
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun setNotification(notification: Notification? = null) {
@@ -276,6 +320,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     enum class Icon(@param:DrawableRes val resId: Int) {
+        LOGO(R.drawable.ic_notification_logo),
         Working(R.drawable.round_hourglass_empty_black_24),
         Pausing(R.drawable.round_hourglass_disabled_black_24)
     }
@@ -447,8 +492,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .addAction(0, getString(R.string.cancel), finishIntent).build()
 
     private fun onResolving(builder: NotificationCompat.Builder) =
-        builder.setContentTitle(getString(R.string.installer_resolving))
-            .addAction(0, getString(R.string.cancel), finishIntent).build()
+        builder.setContentTitle(getString(R.string.installer_resolving)).build()
 
     private fun onPreparing(
         builder: NotificationCompat.Builder,
@@ -456,7 +500,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     ) =
         builder.setContentTitle(getString(R.string.installer_prepare_install))
             .setProgress(100, (progress.progress * 100).toInt(), progress.progress < 0)
-            .addAction(0, getString(R.string.cancel), finishIntent).build()
+            .build()
 
     private fun onResolvedFailed(builder: NotificationCompat.Builder) =
         builder.setContentTitle(getString(R.string.installer_resolve_failed))
@@ -467,8 +511,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .addAction(0, getString(R.string.cancel), finishIntent).build()
 
     private fun onAnalysing(builder: NotificationCompat.Builder) =
-        builder.setContentTitle(getString(R.string.installer_analysing))
-            .addAction(0, getString(R.string.cancel), finishIntent).build()
+        builder.setContentTitle(getString(R.string.installer_analysing)).build()
 
     private fun onAnalysedFailed(builder: NotificationCompat.Builder) =
         builder.setContentTitle(getString(R.string.installer_analyse_failed))
@@ -502,8 +545,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .getInfo(context)
         return builder.setContentTitle(info.title)
             .setContentText(getString(R.string.installer_installing))
-            .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
-            .addAction(0, getString(R.string.cancel), finishIntent).build()
+            .setLargeIcon(getLargeIconBitmap(preferSystemIcon)).build()
     }
 
     private fun onInstallFailed(
@@ -519,9 +561,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val bigTextStyle = NotificationCompat.BigTextStyle()
             .setBigContentTitle(info.title)
             .bigText(
-                "$contentText\n" +
-                        getString(R.string.installer_error_reason) +
-                        ": $reason"
+                "$contentText\n" + reason
             )
         return builder.setContentTitle(info.title) // Return builder directly
             .setContentText(contentText)
@@ -548,12 +588,5 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             newBuilder.addAction(0, getString(R.string.open), launchPendingIntent)
         return newBuilder // Return builder directly
             .addAction(0, getString(R.string.finish), finishIntent)
-    }
-
-    private fun formatElapsedTime(millis: Long): String {
-        val seconds = (millis / 1000) % 60
-        val minutes = (millis / (1000 * 60)) % 60
-        // Returns a string in MM:SS format
-        return String.format("%02d:%02d", minutes, seconds)
     }
 }

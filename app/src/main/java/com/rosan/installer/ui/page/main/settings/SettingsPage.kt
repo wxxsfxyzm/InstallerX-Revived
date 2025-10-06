@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyPage
+import com.rosan.installer.ui.page.main.settings.config.apply.NewApplyPage
 import com.rosan.installer.ui.page.main.settings.config.edit.EditPage
 import com.rosan.installer.ui.page.main.settings.config.edit.NewEditPage
 import com.rosan.installer.ui.page.main.settings.main.MainPage
@@ -107,10 +108,16 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             }
         ) {
             val id = it.arguments?.getLong("id")!!
-            ApplyPage(
-                navController = navController,
-                id = id
-            )
+            if (preferredViewModel.state.showExpressiveUI)
+                NewApplyPage(
+                    navController = navController,
+                    id = id
+                )
+            else
+                ApplyPage(
+                    navController = navController,
+                    id = id
+                )
         }
         composable(
             route = SettingsScreen.About.route, // 使用新路由

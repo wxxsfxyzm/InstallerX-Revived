@@ -144,7 +144,7 @@
     <string name="config_managed_installer_packages_title">安裝來源預設</string>
     <string name="config_managed_blacklist_by_package_name_title">按包名禁止安裝應用程式</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">按SharedUID禁止安裝應用程式</string>
-    <string name="config_no_managed_installer_packages">沒有記錄的安裝者應用</string>
+    <string name="config_no_preset_install_sources">沒有預設的安裝來源</string>
     <string name="config_no_managed_blacklist">在這裡填寫需要禁止安裝的應用程式</string>
     <string name="config_no_managed_shared_user_id_blacklist">沒有透過共用使用者 ID 禁止安裝的應用程式</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">排除僅針對SharedUID，如果按包名禁止則依然不能安裝</string>
@@ -181,6 +181,8 @@
     <string name="select">選擇</string>
     <string name="clear">清除</string>
     <string name="global">全局</string>
+    <string name="scope_tips">第一個配置是預設配置。新配置可以關聯特定應用，以便在該應用發起安裝時自動生效。</string>
+    <string name="got_it">知道了</string>
     <string name="pull_to_refresh_hint1">下拉觸發刷新</string>
     <string name="pull_to_refresh_hint2">釋放即可刷新</string>
     <string name="pull_to_refresh_hint3">正在刷新…</string>
@@ -224,6 +226,15 @@
     <string name="installer_channel_name">安裝通知</string>
     <string name="installer_progress_channel_name">安裝過程通知</string>
     <string name="installer_background_channel_name">後臺通知</string>
+    <string name="installer_live_channel_name">安裝進度即時通知</string>
+    <string name="installer_live_channel_short_text_resolving">解析中</string>
+    <string name="installer_live_channel_short_text_preparing">準備中</string>
+    <string name="installer_live_channel_short_text_analysing">分析中</string>
+    <string name="installer_live_channel_short_text_pending">等待中</string>
+    <string name="installer_live_channel_short_text_installing">安裝中</string>
+    <string name="installer_live_channel_short_text_success">已安裝</string>
+    <string name="installer_live_channel_short_text_resolve_failed">解析失敗</string>
+    <string name="installer_live_channel_short_text_install_failed">安裝失敗</string>
     <string name="uninstall_keep_data">保留資料</string>
     <string name="uninstall_all_users">為所有用戶卸載</string>
     <string name="uninstall_delete_system_app">允許卸載系統應用</string>

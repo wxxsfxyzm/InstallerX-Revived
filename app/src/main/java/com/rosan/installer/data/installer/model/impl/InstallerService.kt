@@ -54,7 +54,7 @@ class InstallerService : Service() {
         val channelId = "installer_background_channel"
         val channel = NotificationChannelCompat.Builder(
             channelId,
-            NotificationManagerCompat.IMPORTANCE_DEFAULT
+            NotificationManagerCompat.IMPORTANCE_LOW
         ).setName(getString(R.string.installer_background_channel_name)).build()
         val manager = NotificationManagerCompat.from(this)
         manager.createNotificationChannel(channel)
@@ -94,7 +94,6 @@ class InstallerService : Service() {
                 runCatching {
                     installer.close()
                 }.onFailure { throwable ->
-                    // （可选）在这里记录下被忽略的异常，以便调试
                     Timber.w(throwable, "Ignoring exception while closing installer $id during onDestroy.")
                 }
             }

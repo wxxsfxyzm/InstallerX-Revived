@@ -125,7 +125,7 @@
     <string name="config_managed_installer_packages_title">Voreinstellungen für die Installationsquelle</string>
     <string name="config_managed_blacklist_by_package_name_title">Apps, deren Installation aufgrund des Paketnamens untersagt ist</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">Von SharedUID verbotene Apps</string>
-    <string name="config_no_managed_installer_packages">Keine Pakete, deren Installation durch den Paketnamen verboten ist</string>
+    <string name="config_no_preset_install_sources">Keine voreingestellten Installationsquellen</string>
     <string name="config_no_managed_blacklist">Geben Sie hier die Paketnamen der blockierten Apps ein</string>
     <string name="config_no_managed_shared_user_id_blacklist">Keine Apps, deren Installation durch gemeinsame Benutzer-ID verhindert wird</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Ausnahmen, die nur auf SharedUID abzielen; wenn es durch den Paketnamen verboten ist, kann es trotzdem nicht installiert werden.</string>

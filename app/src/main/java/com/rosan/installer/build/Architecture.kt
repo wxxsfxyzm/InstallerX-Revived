@@ -3,11 +3,11 @@ package com.rosan.installer.build
 // Enum for representing CPU architectures with their ABI string and a display name.
 enum class Architecture(val arch: String, val displayName: String) {
     // Each constant now holds its technical ABI name and a user-friendly display name.
-    ARMEABI("armeabi", "ARMEABI (32-bit)"),
-    ARM("armeabi-v7a", "ARMv7a (32-bit)"),
-    ARM64("arm64-v8a", "ARMv8a (64-bit)"),
-    X86("x86", "x86 (32-bit)"),
-    X86_64("x86_64", "x86 (64-bit)"),
+    ARMEABI("armeabi", "ARMEABI"),
+    ARM("armeabi-v7a", "ARMv7a"),
+    ARM64("arm64-v8a", "ARMv8a"),
+    X86("x86", "x86"),
+    X86_64("x86_64", "x86_64"),
     MIPS("mips", "MIPS (32-bit)"),
     MIPS64("mips64", "MIPS (64-bit)"),
     UNKNOWN("unknown", "Unknown"),

@@ -40,6 +40,7 @@ class AppDataStore(
         val INSTALL_MODE = stringPreferencesKey("install_mode")
 
         // ApplyViewModel
+        val USER_READ_SCOPE_TIPS = booleanPreferencesKey("user_read_scope_tips")
         val APPLY_ORDER_TYPE = stringPreferencesKey("apply_order_type")
         val APPLY_ORDER_IN_REVERSE = booleanPreferencesKey("apply_order_in_reverse")
         val APPLY_SELECTED_FIRST = booleanPreferencesKey("apply_selected_first")

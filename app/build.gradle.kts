@@ -94,6 +94,7 @@ android {
             dimension = "connectivity"
             // Set the build config field for this flavor.
             buildConfigField("boolean", "INTERNET_ACCESS_ENABLED", "true")
+            isDefault = true
         }
 
         create("offline") {
