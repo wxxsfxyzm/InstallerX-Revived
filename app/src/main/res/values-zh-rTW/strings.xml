@@ -206,8 +206,8 @@
     <string name="installer_analyse_failed">解析失敗</string>
     <string name="installer_select_install">選擇安裝</string>
     <string name="installer_prepare_install">準備安裝</string>
-    <string name="installer_prepare_install_empty">請至少選擇一個安裝包！</string>
-    <string name="installer_prepare_install_too_many">請至多選擇一個主包（base.apk）！</string>
+    <string name="installer_prepare_install_empty">請至少選擇一個安裝包</string>
+    <string name="installer_prepare_install_too_many">請至多選擇一個主包（base.apk）</string>
     <string name="installer_prepare_sdk_incompatible">系統 SDK 不符合應用程式要求</string>
     <string name="installer_prepare_type_new_install">準備安裝新應用程式</string>
     <string name="installer_prepare_type_upgrade">準備升級應用程式</string>
@@ -341,8 +341,8 @@
     <string name="downgrade_version_prefix">降級</string>
     <string name="install_choice">安裝包選擇</string>
     <string name="installer_error_reason">錯誤原因</string>
-    <string name="exception_install_failed_origin_os_blacklist">Vivo 安裝系統應用程式需要聲明有效的安裝者！</string>
-    <string name="exception_install_failed_hyperos_isolation_violation">HyperOS 安裝系統應用程式需要聲明有效的安裝者！</string>
+    <string name="exception_install_failed_origin_os_blacklist">Vivo 安裝系統應用程式需要聲明有效的安裝者</string>
+    <string name="exception_install_failed_hyperos_isolation_violation">HyperOS 安裝系統應用程式需要聲明有效的安裝者</string>
     <string name="get_update">取得更新</string>
     <string name="show_dialog_when_pressing_notification">點擊通知時顯示對話框</string>
     <string name="change_notification_touch_behavior">更改通知觸控行為</string>
@@ -364,8 +364,8 @@
     <string name="dhizuku_cannot_set_user_desc">Dhizuku 模式不支援設定目標使用者！</string>
     <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku 模式不支援設定 dexopt！</string>
     <string name="grant_permission_after_install">點擊以在安裝完成後授予權限</string>
-    <string name="show_intelligent_suggestion">顯示智能建議（實驗性）</string>
-    <string name="show_intelligent_suggestion_desc">當安裝失敗時顯示智能建議</string>
+    <string name="show_intelligent_suggestion">顯示智能建議</string>
+    <string name="show_intelligent_suggestion_desc">安裝失敗時顯示智能建議</string>
     <string name="permission_list">查看應用的權限列表</string>
     <string name="permission_list_desc">正在安裝的軟體包請求的權限列表</string>
     <!--  InstallOptions Start  -->
@@ -458,4 +458,10 @@
     <string name="suggestion_user_restricted">前往開發者選項啟用USB安裝</string>
     <string name="suggestion_bypass_low_target_sdk">臨時允許繞過限制並重試</string>
     <string name="suggestion_bypass_blacklist_set_by_user">本次允許安裝</string>
+    <string name="internet_access_enabled">在線</string>
+    <string name="internet_access_disabled">離線</string>
+    <string name="telegram_channel">Telegram頻道</string>
+    <string name="telegram_channel_desc">加入頻道以取得最新更新與動態！</string>
+    <string name="exception_uninstall_failed_hyperos_system_app">HyperOS 不允許在此處解除安裝該程式</string>
+    <string name="installer_live_channel_name">安裝進度</string>
 </resources>
