@@ -5,6 +5,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,7 +60,12 @@ fun NewInstallerGlobalSettingsPage(
         topBar = {
             TopAppBar(
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                title = { Text(stringResource(R.string.installer_settings)) },
+                title = {
+                    Row {
+                        Spacer(modifier = Modifier.size(16.dp))
+                        Text(stringResource(R.string.installer_settings))
+                    }
+                },
                 navigationIcon = {
                     AppBackButton(
                         onClick = { navController.navigateUp() },
@@ -253,7 +260,7 @@ fun NewInstallerGlobalSettingsPage(
                     title = stringResource(R.string.config_managed_installer_packages_title),
                     content = listOf {
                         ManagedPackagesWidget(
-                            noContentTitle = stringResource(R.string.config_no_managed_installer_packages),
+                            noContentTitle = stringResource(R.string.config_no_preset_install_sources),
                             packages = state.managedInstallerPackages,
                             onAddPackage = {
                                 viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it))

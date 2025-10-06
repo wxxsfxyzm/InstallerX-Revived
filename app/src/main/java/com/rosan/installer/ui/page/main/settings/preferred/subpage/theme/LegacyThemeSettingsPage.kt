@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
 import android.os.Build
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
@@ -66,28 +68,29 @@ fun LegacyThemeSettingsPage(
                 LabelWidget(label = stringResource(R.string.theme_settings_ui_style))
             }
             item {
-                SelectableSettingItem(
-                    title = stringResource(R.string.theme_settings_google_ui),
-                    description = stringResource(R.string.theme_settings_google_ui_desc),
-                    selected = !state.showMiuixUI,
-                    onClick = {
-                        if (state.showMiuixUI) { // Only dispatch if changing state
-                            viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(false))
+                Column(modifier = Modifier.padding(start = 36.dp, end = 12.dp)){
+                    SelectableSettingItem(
+                        title = stringResource(R.string.theme_settings_google_ui),
+                        description = stringResource(R.string.theme_settings_google_ui_desc),
+                        selected = !state.showMiuixUI,
+                        onClick = {
+                            if (state.showMiuixUI) { // Only dispatch if changing state
+                                viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(false))
+                            }
                         }
-                    }
-                )
-            }
-            item {
-                SelectableSettingItem(
-                    title = stringResource(R.string.theme_settings_miuix_ui),
-                    description = stringResource(R.string.theme_settings_miuix_ui_desc),
-                    selected = state.showMiuixUI,
-                    onClick = {
-                        if (!state.showMiuixUI) { // Only dispatch if changing state
-                            viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(true))
+                    )
+
+                    SelectableSettingItem(
+                        title = stringResource(R.string.theme_settings_miuix_ui),
+                        description = stringResource(R.string.theme_settings_miuix_ui_desc),
+                        selected = state.showMiuixUI,
+                        onClick = {
+                            if (!state.showMiuixUI) { // Only dispatch if changing state
+                                viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(true))
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
             item { LabelWidget(stringResource(R.string.theme_settings_google_ui)) }
             item {

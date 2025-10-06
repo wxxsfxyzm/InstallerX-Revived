@@ -104,7 +104,7 @@
     <string name="config_follow_settings">Seguir Perfil</string>
     <string name="config_managed_installer_packages_title">Preajustes de Fuente de Instalación</string>
     <string name="config_managed_blacklist_by_package_name_title">Apps prohibidas de instalación</string>
-    <string name="config_no_managed_installer_packages">Sin paquetes de instalador gestionados</string>
+    <string name="config_no_preset_install_sources">No hay fuentes de instalación preestablecidas</string>
     <string name="config_no_managed_blacklist">Ingresa aquí los nombres de paquete de las apps bloqueadas</string>
     <string name="config_managed_packages_desc">Agregar o eliminar paquetes gestionados</string>
     <string name="config_add_one_to_get_started">Haz clic en \'Agregar\' abajo para comenzar</string>

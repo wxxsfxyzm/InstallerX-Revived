@@ -209,7 +209,7 @@ fun LegacyInstallerGlobalSettingsPage(
             item { LabelWidget(label = stringResource(id = R.string.config_managed_installer_packages_title)) }
             item {
                 ManagedPackagesWidget(
-                    noContentTitle = stringResource(R.string.config_no_managed_installer_packages),
+                    noContentTitle = stringResource(R.string.config_no_preset_install_sources),
                     packages = state.managedInstallerPackages,
                     onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
                     onRemovePackage = {

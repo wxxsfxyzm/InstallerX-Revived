@@ -1,6 +1,8 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
 import android.os.Build
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,7 +66,12 @@ fun NewThemeSettingsPage(
         topBar = {
             TopAppBar(
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                title = { Text(stringResource(R.string.theme_settings)) },
+                title = {
+                    Row {
+                        Spacer(modifier = Modifier.size(16.dp))
+                        Text(stringResource(R.string.theme_settings))
+                    }
+                },
                 navigationIcon = {
                     AppBackButton(
                         onClick = { navController.navigateUp() },

@@ -9,6 +9,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -20,24 +21,27 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Sort
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Shield
 import androidx.compose.material.icons.twotone.Visibility
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
@@ -45,7 +49,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonShapes
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -78,6 +81,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -104,10 +108,9 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ApplyPage(
+fun NewApplyPage(
     navController: NavController,
     id: Long,
     viewModel: ApplyViewModel = koinViewModel {
@@ -131,13 +134,19 @@ fun ApplyPage(
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets.none,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             var searchBarActivated by remember { mutableStateOf(false) }
             TopAppBar(
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 scrollBehavior = scrollBehavior,
                 title = {
                     AnimatedContent(targetState = searchBarActivated) {
-                        if (!it) Text(stringResource(R.string.config_scope))
+                        if (!it)
+                            Row {
+                                Spacer(modifier = Modifier.size(16.dp))
+                                Text(stringResource(R.string.config_scope))
+                            }
                         else {
                             val focusRequester = remember { FocusRequester() }
                             OutlinedTextField(
@@ -176,7 +185,12 @@ fun ApplyPage(
                     }
                 },
                 navigationIcon = {
-                    AppBackButton(onClick = { navController.navigateUp() })
+                    AppBackButton(
+                        onClick = { navController.navigateUp() },
+                        icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                        modifier = Modifier.size(36.dp),
+                        containerColor = MaterialTheme.colorScheme.surfaceBright
+                    )
                 },
                 actions = {
                     AnimatedVisibility(visible = !searchBarActivated) {
@@ -194,7 +208,12 @@ fun ApplyPage(
                             contentDescription = stringResource(R.string.menu)
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                )
             )
         },
         floatingActionButton = {
@@ -212,19 +231,22 @@ fun ApplyPage(
                     Icon(imageVector = AppIcons.ArrowUp, contentDescription = null)
                 }
             }
-        }) {
-        Box(modifier = Modifier.padding(it)) {
+        }) { contentPadding ->
+        Box(modifier = Modifier.padding(contentPadding)) {
             when {
                 viewModel.state.apps.progress is ViewContent.Progress.Loading && viewModel.state.apps.data.isEmpty() -> {
+                    // 使用 Box 将加载指示器和文本居中
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
+                        // 使用 Column 将指示器和文本垂直排列
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            LoadingIndicator()
+                            //  M3E 风格的加载指示器
+                            ContainedLoadingIndicator()
                             Text(
                                 text = stringResource(id = R.string.loading),
                                 style = MaterialTheme.typography.titleLarge
@@ -236,13 +258,14 @@ fun ApplyPage(
                 else -> {
                     val refreshing = viewModel.state.apps.progress is ViewContent.Progress.Loading
                     val pullToRefreshState = rememberPullToRefreshState()
-                    // 使用 PullToRefreshBox 作为根容器
+
                     PullToRefreshBox(
                         state = pullToRefreshState,
                         isRefreshing = refreshing,
                         onRefresh = { viewModel.dispatch(ApplyViewAction.LoadApps) },
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize(), // 将修饰符应用在这里
                         indicator = {
+                            //  将 Indicator 替换为 LoadingIndicator
                             PullToRefreshDefaults.LoadingIndicator(
                                 modifier = Modifier.align(Alignment.TopCenter),
                                 state = pullToRefreshState,
@@ -280,13 +303,40 @@ private fun ItemsWidget(
     viewModel: ApplyViewModel,
     lazyListState: LazyListState,
 ) {
+    // Define the shapes, same as in SplicedColumnGroup
+    val cornerRadius = 16.dp
+    val connectionRadius = 5.dp
+    val topShape = RoundedCornerShape(
+        topStart = cornerRadius,
+        topEnd = cornerRadius,
+        bottomStart = connectionRadius,
+        bottomEnd = connectionRadius
+    )
+    val middleShape = RoundedCornerShape(connectionRadius)
+    val bottomShape = RoundedCornerShape(
+        topStart = connectionRadius,
+        topEnd = connectionRadius,
+        bottomStart = cornerRadius,
+        bottomEnd = cornerRadius
+    )
+    val singleShape = RoundedCornerShape(cornerRadius)
+
     LazyColumn(
         modifier = modifier,
         state = lazyListState,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(8.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        items(viewModel.state.checkedApps, key = { it.packageName }) {
+        val apps = viewModel.state.checkedApps
+        itemsIndexed(apps, key = { _, app -> app.packageName }) { index, app ->
+            // Determine the shape based on the item's position in the list.
+            val shape = when {
+                apps.size == 1 -> singleShape
+                index == 0 -> topShape
+                index == apps.lastIndex -> bottomShape
+                else -> middleShape
+            }
+
             var alpha by remember {
                 mutableFloatStateOf(0f)
             }
@@ -305,7 +355,8 @@ private fun ItemsWidget(
                         ).value
                     ),
                 viewModel = viewModel,
-                app = it
+                app = app,
+                shape = shape
             )
             SideEffect {
                 alpha = 1f
@@ -314,83 +365,73 @@ private fun ItemsWidget(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ItemWidget(
     modifier: Modifier = Modifier,
     viewModel: ApplyViewModel,
     app: ApplyViewApp,
+    shape: Shape
 ) {
-    val applied =
-        viewModel.state.appEntities.data.find { it.packageName == app.packageName } != null
-    Box(
+    val applied = viewModel.state.appEntities.data.find { it.packageName == app.packageName } != null
+
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp)),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(
-                    onClick = {
-                        viewModel.dispatch(
-                            ApplyViewAction.ApplyPackageName(
-                                app.packageName, !applied
-                            )
-                        )
-                    },
-                    interactionSource = remember {
-                        MutableInteractionSource()
-                    },
-                    indication = ripple(
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                )
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            val packageManager = LocalContext.current.packageManager
-            val scope = rememberCoroutineScope()
-            var icon by remember {
-                mutableStateOf(viewModel.defaultIcon)
-            }
-            SideEffect {
-                scope.launch(Dispatchers.IO) {
-                    icon = packageManager.getApplicationIcon(app.packageName)
-                }
-            }
-            Image(
-                painter = rememberDrawablePainter(icon),
-                modifier = Modifier
-                    .size(40.dp)
-                    .align(Alignment.CenterVertically),
-                contentDescription = null
-            )
-            Column(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(1f)
-            ) {
-                Text(
-                    text = app.label ?: app.packageName,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                AnimatedVisibility(viewModel.state.showPackageName) {
-                    Text(
-                        app.packageName, style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-            Switch(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                checked = applied,
-                onCheckedChange = {
+            .background(MaterialTheme.colorScheme.surfaceBright, shape)
+            .clip(shape)
+            .clickable(
+                onClick = {
                     viewModel.dispatch(
                         ApplyViewAction.ApplyPackageName(
-                            app.packageName, it
+                            app.packageName, !applied
                         )
                     )
-                })
+                },
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(color = MaterialTheme.colorScheme.primary)
+            )
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val packageManager = LocalContext.current.packageManager
+        val scope = rememberCoroutineScope()
+        var icon by remember { mutableStateOf(viewModel.defaultIcon) }
+
+        SideEffect {
+            scope.launch(Dispatchers.IO) {
+                icon = packageManager.getApplicationIcon(app.packageName)
+            }
         }
+        Image(
+            painter = rememberDrawablePainter(icon),
+            modifier = Modifier
+                .size(40.dp),
+            contentDescription = null
+        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+        ) {
+            Text(
+                text = app.label ?: app.packageName,
+                style = MaterialTheme.typography.titleMediumEmphasized
+            )
+            AnimatedVisibility(viewModel.state.showPackageName) {
+                Text(
+                    app.packageName, style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+        Switch(
+            checked = applied,
+            onCheckedChange = {
+                viewModel.dispatch(
+                    ApplyViewAction.ApplyPackageName(app.packageName, it)
+                )
+            }
+        )
     }
 }
 

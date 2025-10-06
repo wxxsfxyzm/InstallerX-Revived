@@ -75,7 +75,7 @@
     <string name="config_managed_packages_desc">Добавление или удаление управляемых пакетов</string>
     <string name="config_name">Имя профиля</string>
     <string name="config_no_managed_blacklist">Введите здесь названия заблокированных приложений</string>
-    <string name="config_no_managed_installer_packages">Нет управляемых установочных пакетов</string>
+    <string name="config_no_preset_install_sources">Нет предустановленных источников установки</string>
     <string name="config_no_managed_packages_to_suggest">Ничего не могу предложить</string>
     <string name="config_package_name">Имя пакета</string>
     <string name="confirm">Подтвердить</string>

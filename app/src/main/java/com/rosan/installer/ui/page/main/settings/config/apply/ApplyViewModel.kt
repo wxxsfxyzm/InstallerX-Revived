@@ -49,6 +49,7 @@ class ApplyViewModel(
                 action.packageName, action.applied
             )
 
+            is ApplyViewAction.UserReadScopeTips -> userReadTips()
             is ApplyViewAction.Order -> order(action.type)
             is ApplyViewAction.OrderInReverse -> orderInReverse(action.enabled)
             is ApplyViewAction.SelectedFirst -> selectedFirst(action.enabled)
@@ -141,31 +142,35 @@ class ApplyViewModel(
 
     private fun loadAndObserveSettings() {
         viewModelScope.launch {
-            // 加载初始值
             val initialState = ApplyViewState(
-                // DataStore 是异步的，我们用 .first() 来获取一次当前的存储值
+                userReadScopeTips = appDataStore.getBoolean(AppDataStore.USER_READ_SCOPE_TIPS, default = false).first(),
                 orderType = appDataStore.getString(AppDataStore.APPLY_ORDER_TYPE)
                     .first()
                     .let { name ->
-                        // 安全地将存储的字符串转换为 Enum
                         runCatching { ApplyViewState.OrderType.valueOf(name) }
                             .getOrDefault(ApplyViewState.OrderType.Label)
                     },
                 orderInReverse = appDataStore.getBoolean(AppDataStore.APPLY_ORDER_IN_REVERSE).first(),
-                selectedFirst = appDataStore.getBoolean(AppDataStore.APPLY_SELECTED_FIRST, default = true)
-                    .first(), // 默认值为true
+                selectedFirst = appDataStore.getBoolean(AppDataStore.APPLY_SELECTED_FIRST, default = true).first(),
                 showSystemApp = appDataStore.getBoolean(AppDataStore.APPLY_SHOW_SYSTEM_APP).first(),
-                showPackageName = appDataStore.getBoolean(AppDataStore.APPLY_SHOW_PACKAGE_NAME, default = true)
-                    .first() // 默认值为true
+                showPackageName = appDataStore.getBoolean(AppDataStore.APPLY_SHOW_PACKAGE_NAME, default = false).first()
             )
-            // 用加载到的值更新 state
+
             state = state.copy(
+                userReadScopeTips = initialState.userReadScopeTips,
                 orderType = initialState.orderType,
                 orderInReverse = initialState.orderInReverse,
                 selectedFirst = initialState.selectedFirst,
                 showSystemApp = initialState.showSystemApp,
                 showPackageName = initialState.showPackageName
             )
+        }
+    }
+
+    private fun userReadTips() {
+        state = state.copy(userReadScopeTips = true)
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.USER_READ_SCOPE_TIPS, true)
         }
     }
 

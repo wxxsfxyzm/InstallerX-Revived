@@ -185,7 +185,10 @@ fun RowNavigation(
                                     exit = scaleOut() + fadeOut(),
                                     label = "badge"
                                 ) {
-                                    Badge { Text(configCount.toString()) }
+                                    Badge(
+                                        containerColor = MaterialTheme.colorScheme.secondary,
+                                        contentColor = MaterialTheme.colorScheme.onSecondary
+                                    ) { Text(configCount.toString()) }
                                 }
                             }
                         ) {
