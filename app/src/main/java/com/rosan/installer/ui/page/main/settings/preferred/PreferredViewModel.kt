@@ -16,8 +16,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
-import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.repo.PrivilegedActionRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
@@ -178,10 +176,7 @@ class PreferredViewModel(
             val managedSharedUserIdBlacklistFlow =
                 appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
             val managedSharedUserIdExemptPkgFlow =
-                appDataStore.getNamedPackageList(
-                    AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST,
-                    if (RsConfig.currentManufacturer == Manufacturer.XIAOMI) AppDataStore.defaultSharedUidExemptedPackagesForXiaoMi else emptyList()
-                )
+                appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
 
             val adbVerifyEnabledFlow = getSettingsGlobalIntAsFlow(
                 context.contentResolver,

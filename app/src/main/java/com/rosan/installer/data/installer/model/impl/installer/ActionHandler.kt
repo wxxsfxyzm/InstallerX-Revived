@@ -15,7 +15,6 @@ import android.provider.OpenableColumns
 import android.system.Os
 import androidx.core.net.toUri
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
@@ -249,10 +248,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             // Load the whitelist by UID from AppDataStore.
             Timber.d("[id=${installer.id}] install: Loading SharedUID whitelist from AppDataStore.")
             val sharedUserIdExemption = appDataStore
-                .getNamedPackageList(
-                    key = AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST,
-                    default = if (RsConfig.currentManufacturer == Manufacturer.XIAOMI) AppDataStore.defaultSharedUidExemptedPackagesForXiaoMi else emptyList()
-                )
+                .getNamedPackageList(key = AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
                 .first()
                 .map { it.packageName } // Extract the package names to compare
             Timber.d("[id=${installer.id}] install: SharedUID whitelist loaded with ${sharedUserIdExemption.size} entries.")
