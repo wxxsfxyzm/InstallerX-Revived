@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.RoomPreferences
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -11,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -22,8 +24,6 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Settings
 
 @Composable
 fun MiuixMainPage(navController: NavController, preferredViewModel: PreferredViewModel) {
@@ -36,13 +36,13 @@ fun MiuixMainPage(navController: NavController, preferredViewModel: PreferredVie
 
     val pages = arrayOf(
         NavigationData(
-            icon = AppIcons.RoomPreferences,
+            icon = Icons.Rounded.RoomPreferences,
             label = stringResource(R.string.config)
         ) {
             MiuixAllPage(navController, allViewModel)
         },
         NavigationData(
-            icon = MiuixIcons.Useful.Settings,
+            icon = Icons.Rounded.Settings,
             label = stringResource(R.string.preferred)
         ) {
             MiuixPreferredPage(navController, preferredViewModel)

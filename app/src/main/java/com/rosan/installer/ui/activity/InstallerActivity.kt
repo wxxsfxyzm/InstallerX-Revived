@@ -12,40 +12,70 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
 import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.ui.page.main.installer.InstallerPage
+import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
+import com.rosan.installer.ui.theme.InstallerMiuixTheme
 import com.rosan.installer.ui.util.PermissionDenialReason
 import com.rosan.installer.ui.util.PermissionManager
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
+import top.yukonga.miuix.kmp.basic.Surface
 
 class InstallerActivity : ComponentActivity(), KoinComponent {
     companion object {
         const val KEY_ID = "installer_id"
     }
 
+    private val appDataStore: AppDataStore by inject()
+
     private var installer by mutableStateOf<InstallerRepo?>(null)
     private var job: Job? = null
     private lateinit var permissionManager: PermissionManager
 
+    private enum class InstallerTheme {
+        MATERIAL,
+        MIUIX
+    }
+
+    // + Define a data class for the UI state
+    private data class InstallerUiState(
+        val theme: InstallerTheme = InstallerTheme.MATERIAL, // Default theme
+        val isThemeLoaded: Boolean = false // Flag to check if loading is complete
+    )
+
+    private var uiState by mutableStateOf(InstallerUiState())
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        logIntentDetails("onNewIntent", intent)
+        if (RsConfig.isDebug && RsConfig.LEVEL == Level.UNSTABLE)
+            logIntentDetails("onNewIntent", intent)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         Timber.d("onCreate. SavedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}")
+
+        lifecycleScope.launch {
+            val useMiuix = appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false).first()
+            uiState = uiState.copy(
+                theme = if (useMiuix) InstallerTheme.MIUIX else InstallerTheme.MATERIAL,
+                isThemeLoaded = true
+            )
+        }
 
         permissionManager = PermissionManager(this)
         restoreInstaller(savedInstanceState)
@@ -170,6 +200,8 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     private fun showContent() {
         setContent {
+            if (!uiState.isThemeLoaded) return@setContent
+
             val installer = installer ?: return@setContent
             val background by installer.background.collectAsState(false)
             val progress by installer.progress.collectAsState(ProgressEntity.Ready)
@@ -178,9 +210,21 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             // Return@setContent to show nothing, logs will explain why.
                 return@setContent
 
-            InstallerMaterialExpressiveTheme {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    InstallerPage(installer)
+            when (uiState.theme) {
+                InstallerTheme.MATERIAL -> {
+                    InstallerMaterialExpressiveTheme {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            InstallerPage(installer)
+                        }
+                    }
+                }
+
+                InstallerTheme.MIUIX -> {
+                    InstallerMiuixTheme {
+                        Surface(modifier = Modifier.fillMaxSize()) {
+                            MiuixInstallerPage(installer)
+                        }
+                    }
                 }
             }
         }
