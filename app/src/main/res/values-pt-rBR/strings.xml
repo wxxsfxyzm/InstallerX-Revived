@@ -435,4 +435,24 @@
     <string name="theme_settings_use_live_activity">Atividade ao vivo</string>
     <string name="theme_settings_use_live_activity_desc">Use atividades ao vivo em vez de notificações, não pode ser suportado em ROMs personalizados</string>
     <string name="installer_live_channel_name">Progresso da Instalação</string>
+    <string name="cache_size">Tamanho do Cache: %1$s</string>
+    <string name="theme_settings_package_icons">Fonte do ícone do pacote</string>
+    <string name="theme_settings_prefer_system_icon">Prefira o ícone do sistema para instalação do aplicativo</string>
+    <string name="theme_settings_prefer_system_icon_desc">Tente obter o ícone do sistema, útil ao usar pacotes de ícones. Desative para mostrar o ícone do pacote de instalação</string>
+    <string name="no_cache">Sem cache</string>
+    <string name="clearing_cache">Limpando o cache…</string>
+    <string name="config_authorizer_none_tips">Ao usar o instalador do sistema, a maioria das opções aqui é inválida.</string>
+    <string name="scope_tips">O primeiro perfil é o padrão. O novo perfil pode ser definido como aplicativos específicos para instalações que eles iniciam.</string>
+    <string name="got_it">Entendi</string>
+    <string name="installer_live_channel_short_text_resolving">Resolvendo</string>
+    <string name="installer_live_channel_short_text_preparing">Preparando</string>
+    <string name="installer_live_channel_short_text_analysing">Analisando</string>
+    <string name="installer_live_channel_short_text_pending">Pendente</string>
+    <string name="installer_live_channel_short_text_installing">Instalando</string>
+    <string name="installer_live_channel_short_text_success">Sucesso</string>
+    <string name="installer_live_channel_short_text_resolve_failed">Falhou</string>
+    <string name="installer_live_channel_short_text_install_failed">Falhou</string>
+    <string name="exception_install_failed_missing_install_permission">Por favor, conceda a permissão de instalação de aplicativo desconhecido e tente novamente</string>
+    <string name="sdk_compare_in_multi_line">Mostrar comparação SDK em várias linhas</string>
+    <string name="sdk_compare_in_multi_line_desc">Mostrar comparação SDK em várias linhas na caixa de diálogo de instalação</string>
 </resources>
