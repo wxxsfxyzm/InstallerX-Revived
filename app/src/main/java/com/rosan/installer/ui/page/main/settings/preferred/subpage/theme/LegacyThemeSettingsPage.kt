@@ -68,7 +68,7 @@ fun LegacyThemeSettingsPage(
                 LabelWidget(label = stringResource(R.string.theme_settings_ui_style))
             }
             item {
-                Column(modifier = Modifier.padding(start = 36.dp, end = 12.dp)){
+                Column(modifier = Modifier.padding(start = 36.dp, end = 12.dp)) {
                     SelectableSettingItem(
                         title = stringResource(R.string.theme_settings_google_ui),
                         description = stringResource(R.string.theme_settings_google_ui_desc),
@@ -99,6 +99,7 @@ fun LegacyThemeSettingsPage(
                     title = stringResource(R.string.theme_settings_use_expressive_ui),
                     description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
                     checked = state.showExpressiveUI,
+                    isM3E = false,
                     onCheckedChange = {
                         viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))
                     }
@@ -111,6 +112,7 @@ fun LegacyThemeSettingsPage(
                         title = stringResource(R.string.theme_settings_use_live_activity),
                         description = stringResource(R.string.theme_settings_use_live_activity_desc),
                         checked = state.showLiveActivity,
+                        isM3E = false,
                         onCheckedChange = {
                             viewModel.dispatch(
                                 PreferredViewAction.ChangeShowLiveActivity(it)
@@ -125,6 +127,7 @@ fun LegacyThemeSettingsPage(
                     title = stringResource(R.string.theme_settings_prefer_system_icon),
                     description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
                     checked = state.preferSystemIcon,
+                    isM3E = false,
                     onCheckedChange = {
                         viewModel.dispatch(
                             PreferredViewAction.ChangePreferSystemIcon(it)
@@ -139,6 +142,7 @@ fun LegacyThemeSettingsPage(
                     title = stringResource(R.string.theme_settings_hide_launcher_icon),
                     description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
                     checked = !state.showLauncherIcon,
+                    isM3E = false,
                     onCheckedChange = { newCheckedState ->
                         if (newCheckedState) {
                             showHideLauncherIconDialog = true

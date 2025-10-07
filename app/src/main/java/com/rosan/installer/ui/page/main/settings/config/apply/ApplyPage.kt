@@ -94,7 +94,7 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.widget.card.TipCard
+import com.rosan.installer.ui.page.main.widget.card.ScopeTipCard
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
@@ -254,7 +254,7 @@ fun ApplyPage(
                     ) {
                         Column(modifier = Modifier.fillMaxSize()) {
                             if (!viewModel.state.userReadScopeTips) {
-                                TipCard(viewModel = viewModel)
+                                ScopeTipCard(viewModel = viewModel)
                                 Spacer(modifier = Modifier.size(8.dp))
                             }
                             ItemsWidget(

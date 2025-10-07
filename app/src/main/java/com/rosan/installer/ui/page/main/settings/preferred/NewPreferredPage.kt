@@ -43,6 +43,7 @@ import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
+import com.rosan.installer.ui.page.main.widget.card.NoneInstallerTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.page.main.widget.setting.ClearCache
@@ -187,6 +188,8 @@ fun NewPreferredPage(
                             )
                         )
                     }
+
+                    if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) item { NoneInstallerTipCard() }
 
                     // --- Basic Settings Group ---
                     item {

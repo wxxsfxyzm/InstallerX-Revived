@@ -53,6 +53,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -93,24 +95,25 @@ fun MiuixDataAuthorizerWidget(
 
     // The data source remains unchanged.
     val authorizerOptions = remember {
-        mapOf(
-            /*ConfigEntity.Authorizer.None to AuthorizerInfo(
-                R.string.config_authorizer_none,
-                AppIcons.None
-            ),*/
-            ConfigEntity.Authorizer.Root to AuthorizerInfo(
-                R.string.config_authorizer_root,
-                AppIcons.Root
-            ),
-            ConfigEntity.Authorizer.Shizuku to AuthorizerInfo(
-                R.string.config_authorizer_shizuku,
-                shizukuIcon
-            ),
-            ConfigEntity.Authorizer.Dhizuku to AuthorizerInfo(
-                R.string.config_authorizer_dhizuku,
-                AppIcons.InstallAllowRestrictedPermissions
-            ),
-        )
+        buildMap {
+            if (RsConfig.currentManufacturer != Manufacturer.XIAOMI)
+                put(
+                    ConfigEntity.Authorizer.None,
+                    AuthorizerInfo(R.string.config_authorizer_none, AppIcons.None)
+                )
+            put(
+                ConfigEntity.Authorizer.Root,
+                AuthorizerInfo(R.string.config_authorizer_root, AppIcons.Root)
+            )
+            put(
+                ConfigEntity.Authorizer.Shizuku,
+                AuthorizerInfo(R.string.config_authorizer_shizuku, shizukuIcon)
+            )
+            put(
+                ConfigEntity.Authorizer.Dhizuku,
+                AuthorizerInfo(R.string.config_authorizer_dhizuku, AppIcons.InstallAllowRestrictedPermissions)
+            )
+        }
     }
 
     //    Convert the authorizerOptions Map into a List<SpinnerEntry>

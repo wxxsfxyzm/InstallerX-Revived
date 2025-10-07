@@ -48,7 +48,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.widget.card.NoneInstallerTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowAllRequestedPermissionsWidget
@@ -94,6 +96,15 @@ fun NewEditPage(
     val snackBarHostState = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showUnsavedDialog by remember { mutableStateOf(false) }
+
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+
+    val isNone = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.None -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.None
+        else -> false
+    }
 
     LaunchedEffect(listState) {
         var previousIndex = listState.firstVisibleItemIndex
@@ -266,6 +277,8 @@ fun NewEditPage(
                     }
                 )
             }
+
+            if (isNone) item { NoneInstallerTipCard() }
 
             // --- Group 2: Installer Settings ---
             item {
