@@ -62,6 +62,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -168,7 +170,10 @@ fun DataAuthorizerWidget(
                 // 遍历 Map 来动态创建 InputChip
                 authorizerOptions.forEach { (authorizerType, authorizerInfo) ->
                     InputChip(
-                        enabled = authorizerType != ConfigEntity.Authorizer.None,
+                        enabled = when (authorizerType) {
+                            ConfigEntity.Authorizer.None -> RsConfig.currentManufacturer != Manufacturer.XIAOMI
+                            else -> true
+                        },
                         selected = currentAuthorizer == authorizerType,
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -332,6 +337,7 @@ fun DisableAdbVerify(
     checked: Boolean,
     isError: Boolean,
     enabled: Boolean,
+    isM3E: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
     SwitchWidget(
@@ -342,6 +348,7 @@ fun DisableAdbVerify(
         isError = isError,
         checked = checked,
         enabled = enabled,
+        isM3E = isM3E,
         onCheckedChange = onCheckedChange
     )
 }
@@ -356,6 +363,7 @@ fun DisableAdbVerify(
 fun IgnoreBatteryOptimizationSetting(
     checked: Boolean,
     enabled: Boolean,
+    isM3E: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
     SwitchWidget(
@@ -365,6 +373,7 @@ fun IgnoreBatteryOptimizationSetting(
         else stringResource(R.string.ignore_battery_optimizations_desc_disabled),
         checked = checked,
         enabled = enabled,
+        isM3E = isM3E,
         onCheckedChange = onCheckedChange
     )
 }

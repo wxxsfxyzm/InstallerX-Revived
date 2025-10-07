@@ -186,6 +186,7 @@ fun PreferredPage(
                             checked = !state.adbVerifyEnabled,
                             isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
                             enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku,
+                            isM3E = false,
                             onCheckedChange = { isDisabled ->
                                 viewModel.dispatch(
                                     PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
@@ -197,6 +198,7 @@ fun PreferredPage(
                         IgnoreBatteryOptimizationSetting(
                             checked = state.isIgnoringBatteryOptimizations,
                             enabled = !state.isIgnoringBatteryOptimizations,
+                            isM3E = false,
                         ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
                     }
                     item { DefaultInstaller(true) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) } }

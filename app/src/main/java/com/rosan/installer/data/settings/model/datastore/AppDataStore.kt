@@ -68,16 +68,6 @@ class AppDataStore(
             stringPreferencesKey("managed_shared_user_id_blacklist")
         val MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST =
             stringPreferencesKey("managed_shared_user_id_blacklist_exempted_packages_list")
-
-        val defaultSharedUidBlacklist = listOf(
-            SharedUid(uidName = "android.uid.system", uidValue = 1000),
-            SharedUid(uidName = "android.uid.phone", uidValue = 1001)
-        )
-        val defaultSharedUidExemptedPackagesForXiaoMi = listOf(
-            NamedPackage(name = "安全服务", packageName = "com.miui.securitycenter"),
-            NamedPackage(name = "Joyose", packageName = "com.xiaomi.joyose"),
-            NamedPackage(name = "弹幕通知", packageName = "com.xiaomi.barrage")
-        )
     }
 
     suspend fun putString(key: Preferences.Key<String>, value: String) {
@@ -155,8 +145,11 @@ class AppDataStore(
      * @param key The Preferences.Key<String> to read from DataStore.
      * @return A Flow emitting the list of packages. Returns an empty list if no data or on error.
      */
-    fun getSharedUidList(key: Preferences.Key<String>): Flow<List<SharedUid>> =
-        getString(key, json.encodeToString(defaultSharedUidBlacklist)).map { jsonString ->
+    fun getSharedUidList(
+        key: Preferences.Key<String>,
+        default: List<SharedUid> = emptyList()
+    ): Flow<List<SharedUid>> =
+        getString(key, json.encodeToString(default)).map { jsonString ->
             try {
                 json.decodeFromString<List<SharedUid>>(jsonString)
             } catch (e: Exception) {

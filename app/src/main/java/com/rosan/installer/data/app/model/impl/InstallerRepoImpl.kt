@@ -3,6 +3,7 @@ package com.rosan.installer.data.app.model.impl
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.impl.installer.DhizukuInstallerRepoImpl
+import com.rosan.installer.data.app.model.impl.installer.NoneInstallerRepoImpl
 import com.rosan.installer.data.app.model.impl.installer.ProcessInstallerRepoImpl
 import com.rosan.installer.data.app.model.impl.installer.ShizukuInstallerRepoImpl
 import com.rosan.installer.data.app.repo.InstallerRepo
@@ -20,6 +21,7 @@ object InstallerRepoImpl : InstallerRepo {
         val repo = when (config.authorizer) {
             ConfigEntity.Authorizer.Shizuku -> ShizukuInstallerRepoImpl
             ConfigEntity.Authorizer.Dhizuku -> DhizukuInstallerRepoImpl
+            ConfigEntity.Authorizer.None -> NoneInstallerRepoImpl
             else -> ProcessInstallerRepoImpl
         }
         repo.doInstallWork(config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)

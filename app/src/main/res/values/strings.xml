@@ -104,6 +104,7 @@
     <string name="config_authorizer_global">Global</string>
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">None</string>
+    <string name="config_authorizer_none_tips">When using system installer, most of the options here are invalid.</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku</string>
@@ -327,6 +328,7 @@
     <string name="exception_install_failed_update_incompatible">Update incompatible, please uninstall and try again</string>
     <string name="exception_install_failed_shared_user_incompatible">Package signatures don\'t match</string>
     <string name="exception_install_failed_missing_shared_library">Missing shared library</string>
+    <string name="exception_install_failed_missing_install_permission">Please grant install unknown apps permission and try again</string>
     <string name="exception_install_failed_replace_couldnt_delete">Invalid shared library</string>
     <string name="exception_install_failed_dexopt">Couldn\'t optimize DEX</string>
     <string name="exception_install_failed_older_sdk">The system version is too old, please upgrade the system</string>

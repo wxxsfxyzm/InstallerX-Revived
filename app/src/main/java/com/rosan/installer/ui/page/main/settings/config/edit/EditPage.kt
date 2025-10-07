@@ -38,7 +38,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.widget.card.NoneInstallerTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowAllRequestedPermissionsWidget
@@ -84,6 +86,14 @@ fun EditPage(
     val snackBarHostState = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showUnsavedDialog by remember { mutableStateOf(false) }
+
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+    val isNone = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.None -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.None
+        else -> false
+    }
 
     LaunchedEffect(listState) {
         var previousIndex = listState.firstVisibleItemIndex
@@ -216,22 +226,23 @@ fun EditPage(
             item { DataAuthorizerWidget(viewModel = viewModel) }
             item { DataCustomizeAuthorizerWidget(viewModel = viewModel) }
             item { DataInstallModeWidget(viewModel = viewModel) }
+            if (isNone) item { NoneInstallerTipCard() }
             item { LabelWidget(label = stringResource(R.string.config_label_installer_settings)) }
-            item { DataUserWidget(viewModel) }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) item { DataPackageSourceWidget(viewModel) }
-            item { DataDeclareInstallerWidget(viewModel = viewModel) }
-            item { DataManualDexoptWidget(viewModel) }
-            item { DataAutoDeleteWidget(viewModel = viewModel) }
-            item { DisplaySdkWidget(viewModel = viewModel) }
+            item { DataUserWidget(viewModel = viewModel, isM3E = false) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) item { DataPackageSourceWidget(viewModel, isM3E = false) }
+            item { DataDeclareInstallerWidget(viewModel = viewModel, isM3E = false) }
+            item { DataManualDexoptWidget(viewModel, isM3E = false) }
+            item { DataAutoDeleteWidget(viewModel = viewModel, isM3E = false) }
+            item { DisplaySdkWidget(viewModel = viewModel, isM3E = false) }
             item { LabelWidget(label = stringResource(R.string.config_label_install_options)) }
-            item { DataForAllUserWidget(viewModel = viewModel) }
-            item { DataAllowTestOnlyWidget(viewModel = viewModel) }
-            item { DataAllowDowngradeWidget(viewModel = viewModel) }
+            item { DataForAllUserWidget(viewModel = viewModel, isM3E = false) }
+            item { DataAllowTestOnlyWidget(viewModel = viewModel, isM3E = false) }
+            item { DataAllowDowngradeWidget(viewModel = viewModel, isM3E = false) }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-                item { DataBypassLowTargetSdkWidget(viewModel = viewModel) }
+                item { DataBypassLowTargetSdkWidget(viewModel = viewModel, isM3E = false) }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                item { DataAllowRestrictedPermissionsWidget(viewModel = viewModel) }
-            item { DataAllowAllRequestedPermissionsWidget(viewModel = viewModel) }
+                item { DataAllowRestrictedPermissionsWidget(viewModel = viewModel, isM3E = false) }
+            item { DataAllowAllRequestedPermissionsWidget(viewModel = viewModel, isM3E = false) }
         }
     }
 }

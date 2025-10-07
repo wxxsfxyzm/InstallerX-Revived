@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
@@ -68,24 +70,27 @@ fun MiuixDataDescriptionWidget(viewModel: EditViewModel) {
 fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
-    val data = mapOf(
-        ConfigEntity.Authorizer.Global to stringResource(
-            R.string.config_authorizer_global_desc,
-            when (globalAuthorizer) {
-                // ConfigEntity.Authorizer.None -> stringResource(R.string.config_authorizer_none)
-                ConfigEntity.Authorizer.Root -> stringResource(R.string.config_authorizer_root)
-                ConfigEntity.Authorizer.Shizuku -> stringResource(R.string.config_authorizer_shizuku)
-                ConfigEntity.Authorizer.Dhizuku -> stringResource(R.string.config_authorizer_dhizuku)
-                ConfigEntity.Authorizer.Customize -> stringResource(R.string.config_authorizer_customize)
-                else -> stringResource(R.string.config_authorizer_global)
-            }
-        ),
-        // ConfigEntity.Authorizer.None to stringResource(R.string.config_authorizer_none),
-        ConfigEntity.Authorizer.Root to stringResource(R.string.config_authorizer_root),
-        ConfigEntity.Authorizer.Shizuku to stringResource(R.string.config_authorizer_shizuku),
-        ConfigEntity.Authorizer.Dhizuku to stringResource(R.string.config_authorizer_dhizuku),
-        ConfigEntity.Authorizer.Customize to stringResource(R.string.config_authorizer_customize)
-    )
+    val data = buildMap {
+        put(
+            ConfigEntity.Authorizer.Global, stringResource(
+                R.string.config_authorizer_global_desc,
+                when (globalAuthorizer) {
+                    ConfigEntity.Authorizer.None -> stringResource(R.string.config_authorizer_none)
+                    ConfigEntity.Authorizer.Root -> stringResource(R.string.config_authorizer_root)
+                    ConfigEntity.Authorizer.Shizuku -> stringResource(R.string.config_authorizer_shizuku)
+                    ConfigEntity.Authorizer.Dhizuku -> stringResource(R.string.config_authorizer_dhizuku)
+                    ConfigEntity.Authorizer.Customize -> stringResource(R.string.config_authorizer_customize)
+                    else -> stringResource(R.string.config_authorizer_global)
+                }
+            )
+        )
+        if (RsConfig.currentManufacturer != Manufacturer.XIAOMI)
+            put(ConfigEntity.Authorizer.None, stringResource(R.string.config_authorizer_none))
+        put(ConfigEntity.Authorizer.Root, stringResource(R.string.config_authorizer_root))
+        put(ConfigEntity.Authorizer.Shizuku, stringResource(R.string.config_authorizer_shizuku))
+        put(ConfigEntity.Authorizer.Dhizuku, stringResource(R.string.config_authorizer_dhizuku))
+        put(ConfigEntity.Authorizer.Customize, stringResource(R.string.config_authorizer_customize))
+    }
     // Convert data Map to List<SpinnerEntry> required by SuperSpinner.
     val spinnerEntries = remember(data) {
         data.values.map { authorizerName ->
