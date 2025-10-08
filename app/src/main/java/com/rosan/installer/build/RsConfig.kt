@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.os.Build
 import android.text.TextUtils
 import com.rosan.installer.BuildConfig
+import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.convertLegacyLanguageCode
 
 object RsConfig {
@@ -90,6 +91,9 @@ object RsConfig {
             Architecture.X86_64, Architecture.X86 -> true
             else -> false
         }
+
+    val isMiui: Boolean
+        get() = OSUtils.isMIUI() || OSUtils.isHyperOS()
 
     /**
      * Gets a prioritized list of screen densities for the device.
