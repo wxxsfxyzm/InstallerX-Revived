@@ -453,4 +453,6 @@
     <string name="installer_live_channel_short_text_success">Succès</string>
     <string name="installer_live_channel_short_text_resolve_failed">Échec</string>
     <string name="installer_live_channel_short_text_install_failed">Échec</string>
+    <string name="config_authorizer_none_tips">La majorité de ces options ne sont pas compatibles avec l\'installateur système.</string>
+    <string name="exception_install_failed_missing_install_permission">Veuillez accorder l\'autorisation d\'installer des applications inconnues et réessayer</string>
 </resources>
