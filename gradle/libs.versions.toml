@@ -19,7 +19,7 @@ room = "2.8.1"
 ktx-serialization = "1.9.0"
 accompanist = "0.37.3"
 rikka-shizuku = "13.1.5"
-lottie = "6.6.9"
+lottie = "6.6.10"
 koin-bom = "4.1.1"
 materialVersion = "1.13.0"
 datastoreCoreAndroid = "1.2.0-alpha02"
@@ -113,4 +113,4 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.28.0" }
 
 # miuix
-miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version = "0.5.1" }
+miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version = "0.5.2" }

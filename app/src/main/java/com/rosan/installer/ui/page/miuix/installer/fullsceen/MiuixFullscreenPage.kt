@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,29 +14,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rosan.installer.R
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.theme.InstallerMiuixTheme
-import top.yukonga.miuix.kmp.basic.Button
+import com.rosan.installer.data.installer.repo.InstallerRepo
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
-import top.yukonga.miuix.kmp.icon.icons.useful.Back
-import top.yukonga.miuix.kmp.icon.icons.useful.Settings
 
 @Composable
-fun MiuixFullscreenPage(/*installer: InstallerRepo*/) {
+fun MiuixFullscreenPage(installer: InstallerRepo) {
     val scrollBehavior = MiuixScrollBehavior()
+    /*val showBottomSheet = remember { mutableStateOf(true) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -49,13 +39,13 @@ fun MiuixFullscreenPage(/*installer: InstallerRepo*/) {
                     MiuixBackButton(
                         modifier = Modifier.padding(start = 16.dp),
                         icon = MiuixIcons.Useful.Back,
-                        onClick = { /*navController.navigateUp()*/ }
+                        onClick = { *//*navController.navigateUp()*//* }
                     )
                 },
                 actions = {
                     IconButton(
                         modifier = Modifier.padding(end = 16.dp),
-                        onClick = { /*viewModel.dispatch(EditViewAction.SaveData)*/ },
+                        onClick = { *//*viewModel.dispatch(EditViewAction.SaveData)*//* },
                     ) {
                         Icon(
                             imageVector = MiuixIcons.Useful.Settings,
@@ -76,61 +66,69 @@ fun MiuixFullscreenPage(/*installer: InstallerRepo*/) {
             ) {
                 // "Cancel Update" button
                 Button(
-                    onClick = {},/*onCancelClick*/
+                    onClick = { installer.close() },*//*onCancelClick*//*
                     modifier = Modifier.weight(1f),
-                    /*colors = ButtonDefaults.buttonColors(
+                    *//*colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                    )*/
+                    )*//*
                 ) {
                     Text("取消更新")
                 }
                 // "Continue Update" button
                 Button(
-                    onClick = {}/*onContinueClick*/,
+                    onClick = { showBottomSheet.value = true }*//*onContinueClick*//*,
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("继续更新")
                 }
             }
         }
-    ) { innerPadding ->
-        val extraFeaturesList = listOf<@Composable () -> Unit>({ PermissionItem() })
-        // --- Main content area ---
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+    ) { innerPadding ->*/
+    val extraFeaturesList = listOf<@Composable () -> Unit>({ PermissionItem() })
+    // --- Main content area ---
+    Column(
+        modifier = Modifier
+            //.padding(innerPadding)
+            //.fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // --- Slot 1: App Info (Icon, Name, Package) ---
+        AppInfoSlot()
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- Slot 2: Update Info Card ---
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            //shape = MaterialTheme.shapes.large
         ) {
-            // --- Slot 1: App Info (Icon, Name, Package) ---
-            AppInfoSlot()
+            // The content of the card is provided by the slot
+            UpdateInfoCardSlot()
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-            // --- Slot 2: Update Info Card ---
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                //shape = MaterialTheme.shapes.large
-            ) {
-                // The content of the card is provided by the slot
-                UpdateInfoCardSlot()
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // --- Slot 3: List of Extra Features ---
-            // Using a simple Column as the list is expected to be short.
-            // For a long or dynamic list, LazyColumn would be more appropriate.
-            Column(modifier = Modifier.fillMaxWidth()) {
-                extraFeaturesList.forEach { featureItem ->
-                    featureItem()
-                }
+        // --- Slot 3: List of Extra Features ---
+        // Using a simple Column as the list is expected to be short.
+        // For a long or dynamic list, LazyColumn would be more appropriate.
+        Column(modifier = Modifier.fillMaxWidth()) {
+            extraFeaturesList.forEach { featureItem ->
+                featureItem()
             }
         }
     }
 }
+/*    SuperBottomSheet(
+        show = showBottomSheet, // Always true as long as this page is composed.
+        onDismissRequest = {
+            showBottomSheet.value = !showBottomSheet.value
+        } // When user taps outside or presses back, call the lambda.
+    ) {
+        Text("123")
+    }*/
+
 
 // --- Example Usage and Preview ---
 
@@ -207,10 +205,11 @@ private fun PermissionItem() {
 }
 
 
+/*
 @Preview(showBackground = true)
 @Composable
-fun AppUpdateScreenFramePreview() {
+fun AppUpdateScreenFramePreview(installer:InstallerRepo) {
     InstallerMiuixTheme {
-        MiuixFullscreenPage()
+        MiuixFullscreenPage(installer = installer)
     }
-}
+}*/
