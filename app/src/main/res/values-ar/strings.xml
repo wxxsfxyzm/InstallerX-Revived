@@ -390,4 +390,7 @@
     <string name="suggestion_bypass_low_target_sdk">السماح مؤقتًا بتجاوز القيود وإعادة المحاولة</string>
     <string name="warning">تحذير</string>
     <string name="telegram_channel">قناة تيلجرام</string>
+    <string name="get_source_code">التحقق من مصدر الكود</string>
+    <string name="get_source_code_detail">التحقق من مصدر الكود على - GitHub</string>
+    <string name="telegram_channel_desc">انضم للقناة لمتابعة آخر الإخبار والتحديثات!</string>
 </resources>
