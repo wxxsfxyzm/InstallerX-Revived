@@ -82,7 +82,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         val installerPackageName = when (config.authorizer) {
             ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName()
             ConfigEntity.Authorizer.None -> BuildConfig.APPLICATION_ID
-            else -> config.installer
+            else -> config.installer ?: BuildConfig.APPLICATION_ID
         }
 
         return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
