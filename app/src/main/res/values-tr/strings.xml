@@ -37,7 +37,7 @@
     <string name="theme_settings_ui_style">Kullanıcı Arayüzü Stili</string>
     <string name="theme_settings_desc">Uygulamanın temasını değiştirin</string>
     <string name="theme_settings_miuix_ui">Miuix</string>
-    <string name="theme_settings_miuix_ui_desc">Hyperos\'e benzer</string>
+    <string name="theme_settings_miuix_ui_desc">HyperOS\'e benzer</string>
     <string name="theme_settings_google_ui_desc">Standart Materyal Tasarım Kullanıcı Arayüzü</string>
     <string name="theme_settings_google_ui">Google Materyal 3</string>
     <string name="theme_settings_ui_engine">Kullanıcı Arayüzü Motoru</string>
@@ -179,8 +179,8 @@
     <string name="sort_by_label">Etiket</string>
     <string name="sort_by_package_name">Paket Adı</string>
     <string name="sort_by_install_time">Yükleme Zamanı</string>
-    <string name="sort_by_reverse_order">Ters sıra</string>
-    <string name="sort_by_selected_first">Seçilen ilk</string>
+    <string name="sort_by_reverse_order">Azalan</string>
+    <string name="sort_by_selected_first">Artan</string>
     <string name="sort_by_show_system_app">Sistem uygulamalarını göster</string>
     <string name="sort_by_show_package_name">Paket adlarını göster</string>
     <string name="installer_live_channel_name">Yükleme İlerlemesi</string>
@@ -340,7 +340,7 @@
     <string name="show_dialog_install_extended_menu_desc">Yükleme diyaloğunda daha fazla seçenek göster</string>
     <string name="extended_menu">Genişletilmiş Menü</string>
     <string name="disable_notification">Bildirim olmadan ön planda yükleme</string>
-    <string name="close_immediately_on_dialog_dismiss">Yükleme sırasında diyalog ön planda kalıyor, boş alana tıklandığında sessizce çıkılıyor</string>
+    <string name="close_immediately_on_dialog_dismiss">Yükleme sırasında diyalog ön planda kalır, boş alana tıklandığında sessizce çıkılır</string>
     <string name="disable_notification_on_dismiss">Diyaloğu Kapat</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Kapatma Diyaloğu sessizce kapanacaktır</string>
     <string name="set_countdown">Geri sayım ayarla</string>
@@ -354,7 +354,10 @@
     <string name="show_intelligent_suggestion_desc">Yükleme başarısız olduğunda akıllı öneriler göster</string>
     <string name="permission_list">İzin Listesi</string>
     <string name="permission_list_desc">Yüklenen paketin talep ettiği izinlerin listesi</string>
-    <string name="theme_settings_package_icons">Paket resim kaynağı</string>
-    <string name="theme_settings_prefer_system_icon">Kurulacak uygulama için sistem resmini tercih et</string>
-    <string name="theme_settings_prefer_system_icon_desc">Sistemden uygulama resmini almaya çalış. İkon paketleri için kullanışlıdır. Kurulum paketindeki resim için bunu kapatın</string>
+    <string name="theme_settings_package_icons">Paket simgesi kaynağı</string>
+    <string name="theme_settings_prefer_system_icon">Kurulacak uygulama için sistem simgesini tercih et</string>
+    <string name="theme_settings_prefer_system_icon_desc">Sistemden uygulama simgesini almaya çalış. Simge paketleri için kullanışlıdır. Kurulum paketindeki simgeler için bunu kapatın</string>
+    <string name="no_cache">Önbellek yok</string>
+    <string name="clearing_cache">Önbellek temizleniyor…</string>
+    <string name="cache_size">Önbellek boyutu: %1$s</string>
 </resources>
