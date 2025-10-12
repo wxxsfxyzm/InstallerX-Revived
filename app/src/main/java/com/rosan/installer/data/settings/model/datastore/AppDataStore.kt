@@ -59,6 +59,7 @@ class AppDataStore(
             booleanPreferencesKey("show_dialog_install_intelligent_suggestion")
         val DIALOG_DISABLE_NOTIFICATION_ON_DISMISS =
             booleanPreferencesKey("show_disable_notification_for_dialog_install")
+        val DIALOG_SHOW_OPPO_SPECIAL = booleanPreferencesKey("show_oppo_special")
 
         // Customize Installer
         val MANAGED_INSTALLER_PACKAGES_LIST = stringPreferencesKey("managed_packages_list")

@@ -192,7 +192,7 @@
     <string name="select">Select</string>
     <string name="clear">Clear</string>
     <string name="global">Global</string>
-    <string name="scope_tips">The first profile is the default. New profile can be set to specific apps for installations they initiate.</string>
+    <string name="scope_tips">The first profile is the default, no manual selection needed. New profile can be set to specific apps for installations they initiate.</string>
     <string name="got_it">Got it</string>
     <string name="pull_to_refresh_hint1">Pull down to refresh</string>
     <string name="pull_to_refresh_hint2">Release to refresh</string>
@@ -313,6 +313,7 @@
     <string name="installer_package_sdk_value" translatable="false">%1$s(Android%2$s)</string>
     <string name="installer_package_min_sdk_label_short" translatable="false">Min: %1$s</string>
     <string name="installer_package_target_sdk_label_short" translatable="false">Target: %1$s</string>
+    <string name="installer_package_minOsdkVersion" translatable="false">MinOsdkVersion: %1$s</string>
     <string name="installer_file_path">Path: %1$s</string>
     <string name="exception_install_failed_unknown">Unknown error</string>
     <string name="exception_resolve_failed">Resolve URI failed</string>
@@ -387,6 +388,9 @@
     <string name="show_intelligent_suggestion_desc">Show smart suggestions on install failure</string>
     <string name="permission_list">Permission List</string>
     <string name="permission_list_desc">List of permissions requested by the package being installed</string>
+    <string name="installer_oppo_related">OPPO related</string>
+    <string name="installer_show_oem_special">Show OEM extra info</string>
+    <string name="installer_show_oem_special_desc">Analyse and show some specific value for oem apk(s) on install dialog</string>
     <!--  InstallOptions Start  -->
     <string name="config_allow_test">Allow Test</string>
     <string name="config_allow_test_desc">If the package being installed is a test-only app, allow it to be installed.</string>

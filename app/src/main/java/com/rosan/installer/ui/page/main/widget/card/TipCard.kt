@@ -53,15 +53,15 @@ fun TipCard(
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 0.dp)
         ) {
-            // Slot for the tip content
             tipContent()
-
-            // Slot for the action content (e.g., a button)
-            // The ColumnScope is provided to this lambda,
-            // so consumers can use `Modifier.align(Alignment.End)`.
-            actionContent()
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                content = actionContent
+            )
         }
     }
 }

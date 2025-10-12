@@ -59,7 +59,6 @@ class PreferredViewModel(
     fun dispatch(action: PreferredViewAction) =
         when (action) {
             is PreferredViewAction.Init -> init()
-
             is PreferredViewAction.ChangeGlobalAuthorizer -> changeGlobalAuthorizer(action.authorizer)
             is PreferredViewAction.ChangeGlobalCustomizeAuthorizer -> changeGlobalCustomizeAuthorizer(action.customizeAuthorizer)
             is PreferredViewAction.ChangeGlobalInstallMode -> changeGlobalInstallMode(action.installMode)
@@ -75,6 +74,7 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeShowLauncherIcon -> changeShowLauncherIcon(action.showLauncherIcon)
             is PreferredViewAction.ChangeVersionCompareInSingleLine -> changeVersionCompareInSingleLine(action.versionCompareInSingleLine)
             is PreferredViewAction.ChangeSdkCompareInMultiLine -> changeSdkCompareInMultiLine(action.sdkCompareInMultiLine)
+            is PreferredViewAction.ChangeShowOPPOSpecial -> changeShowOPPOSpecial(action.showOPPOSpecial)
 
             is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
                 state.managedInstallerPackages,
@@ -160,6 +160,8 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
             val sdkCompareInSingleLineFlow =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false)
+            val showOPPOSpecialFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false)
             val showExpressiveUIFlow =
                 appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
             val showLiveActivityFlow =
@@ -196,6 +198,7 @@ class PreferredViewModel(
                 dhizukuAutoCloseCountDownFlow,
                 versionCompareInSingleLineFlow,
                 sdkCompareInSingleLineFlow,
+                showOPPOSpecialFlow,
                 showExpressiveUIFlow,
                 showLiveActivityFlow,
                 showMiuixUIFlow,
@@ -218,21 +221,22 @@ class PreferredViewModel(
                 val countDown = values[7] as Int
                 val versionCompareInMultiLine = values[8] as Boolean
                 val sdkCompareInSingleLine = values[9] as Boolean
-                val showExpressiveUI = values[10] as Boolean
-                val showLiveActivity = values[11] as Boolean
-                val showMiuixUI = values[12] as Boolean
-                val preferSystemIcon = values[13] as Boolean
-                val showLauncherIcon = values[14] as Boolean
+                val showOPPOSpecial = values[10] as Boolean
+                val showExpressiveUI = values[11] as Boolean
+                val showLiveActivity = values[12] as Boolean
+                val showMiuixUI = values[13] as Boolean
+                val preferSystemIcon = values[14] as Boolean
+                val showLauncherIcon = values[15] as Boolean
                 val managedInstallerPackages =
-                    (values[15] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedBlacklistPackages =
                     (values[16] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedBlacklistPackages =
+                    (values[17] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
                 val managedSharedUserIdBlacklist =
-                    (values[17] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
+                    (values[18] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
                 val managedSharedUserIdExemptPkg =
-                    (values[18] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[19] as Boolean
-                val isIgnoringBatteryOptimizations = values[20] as Boolean
+                    (values[19] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[20] as Boolean
+                val isIgnoringBatteryOptimizations = values[21] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -247,6 +251,7 @@ class PreferredViewModel(
                     dhizukuAutoCloseCountDown = countDown,
                     versionCompareInSingleLine = versionCompareInMultiLine,
                     sdkCompareInMultiLine = sdkCompareInSingleLine,
+                    showOPPOSpecial = showOPPOSpecial,
                     showExpressiveUI = showExpressiveUI,
                     showLiveActivity = showLiveActivity,
                     showMiuixUI = showMiuixUI,
@@ -270,19 +275,15 @@ class PreferredViewModel(
 
     private fun changeGlobalCustomizeAuthorizer(customizeAuthorizer: String) =
         viewModelScope.launch {
-            if (state.authorizerCustomize) {
+            if (state.authorizerCustomize)
                 appDataStore.putString(AppDataStore.CUSTOMIZE_AUTHORIZER, customizeAuthorizer)
-            } else {
+            else
                 appDataStore.putString(AppDataStore.CUSTOMIZE_AUTHORIZER, "")
-            }
         }
 
     private fun changeGlobalInstallMode(installMode: ConfigEntity.InstallMode) =
         viewModelScope.launch {
-            appDataStore.putString(
-                AppDataStore.INSTALL_MODE,
-                InstallModeConverter.convert(installMode)
-            )
+            appDataStore.putString(AppDataStore.INSTALL_MODE, InstallModeConverter.convert(installMode))
         }
 
     private fun changeShowDialogInstallExtendedMenu(installExtendedMenu: Boolean) =
@@ -290,20 +291,14 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, installExtendedMenu)
         }
 
-    private fun changeShowSuggestionState(showIntelligentSuggestion: Boolean) =
+    private fun changeShowSuggestionState(showSmartSuggestion: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(
-                AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION,
-                showIntelligentSuggestion
-            )
+            appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, showSmartSuggestion)
         }
 
     private fun changeDisableNotificationState(showDisableNotification: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(
-                AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS,
-                showDisableNotification
-            )
+            appDataStore.putBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, showDisableNotification)
         }
 
     private fun changeShowDialog(showDialog: Boolean) =
@@ -339,21 +334,21 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, preferSystemIcon)
         }
 
-    private fun changeShowLauncherIcon(show: Boolean) = viewModelScope.launch {
-        appDataStore.putBoolean(AppDataStore.SHOW_LAUNCHER_ICON, show)
-        val componentName = ComponentName(context, "com.rosan.installer.ui.activity.LauncherAlias")
-        val newState = if (show) {
-            PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-        } else {
-            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+    private fun changeShowLauncherIcon(show: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.SHOW_LAUNCHER_ICON, show)
+            val componentName = ComponentName(context, "com.rosan.installer.ui.activity.LauncherAlias")
+            val newState = if (show) {
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            } else {
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            }
+            context.packageManager.setComponentEnabledSetting(
+                componentName,
+                newState,
+                PackageManager.DONT_KILL_APP
+            )
         }
-        context.packageManager.setComponentEnabledSetting(
-            componentName,
-            newState,
-            PackageManager.DONT_KILL_APP
-        )
-        state = state.copy(showLauncherIcon = show)
-    }
 
     private fun changeVersionCompareInSingleLine(singleLine: Boolean) =
         viewModelScope.launch {
@@ -365,6 +360,10 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, singleLine)
         }
 
+    private fun changeShowOPPOSpecial(show: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, show)
+        }
 
     private fun addManagedPackage(
         list: List<NamedPackage>,

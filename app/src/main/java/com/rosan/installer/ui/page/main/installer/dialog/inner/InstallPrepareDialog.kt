@@ -26,6 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
@@ -128,6 +130,7 @@ fun installPrepareDialog( // 小写开头
     var showChips by remember { mutableStateOf(false) }
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
+    var showOPPOSpecial by remember { mutableStateOf(viewModel.showOPPOSpecial) }
 
     LaunchedEffect(autoDelete, displaySdk) {
         val currentConfig = installer.config
@@ -265,6 +268,17 @@ fun installPrepareDialog( // 小写开头
                                 label = stringResource(id = R.string.config_display_sdk_version),
                                 icon = AppIcons.Info
                             )
+                            if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
+                                Chip(
+                                    selected = showOPPOSpecial,
+                                    onClick = {
+                                        val newValue = !showOPPOSpecial
+                                        showOPPOSpecial = newValue
+                                        viewModel.showOPPOSpecial = newValue
+                                    },
+                                    label = stringResource(id = R.string.installer_show_oem_special),
+                                    icon = AppIcons.OEMSpecial
+                                )
                         }
                     }
                 }
