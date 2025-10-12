@@ -186,7 +186,7 @@
     <string name="select">选择</string>
     <string name="clear">清除</string>
     <string name="global">全局</string>
-    <string name="scope_tips">第一个配置是默认配置。新配置可以关联特定应用，以便在该应用发起安装时自动生效。</string>
+    <string name="scope_tips">第一个配置是默认配置，无需手动选择。新配置可以关联特定应用，以便在该应用发起安装时自动生效。</string>
     <string name="got_it">已读</string>
     <string name="pull_to_refresh_hint1">下拉触发刷新</string>
     <string name="pull_to_refresh_hint2">释放即可刷新</string>
@@ -333,6 +333,7 @@
     <string name="exception_install_failed_package_changed">调用程序预期调用的包装改变了</string>
     <string name="exception_install_failed_uid_changed">UID发生改变，请先卸载后再安装</string>
     <string name="exception_install_failed_version_downgrade">应用降级失败，请先卸载后再安装</string>
+    <string name="exception_install_failed_missing_split">缺少必需的分包</string>
     <string name="exception_install_failed_deprecated_sdk_version">目标targetSDK过低，若要安装，请启用对应标志位</string>
     <string name="exception_install_failed_rejected_by_build_type">系统禁止跨区安装</string>
     <string name="exception_install_failed_duplicate_permission">包正在尝试重新声明其他安装包已声明的权限</string>
@@ -375,6 +376,9 @@
     <string name="show_intelligent_suggestion_desc">安装失败时显示智能建议</string>
     <string name="permission_list">权限列表</string>
     <string name="permission_list_desc">正在安装的软件包请求的权限列表</string>
+    <string name="installer_oppo_related">OPPO 相关</string>
+    <string name="installer_show_oem_special">展示OEM附加信息</string>
+    <string name="installer_show_oem_special_desc">分析并在安装对话框展示OEM的apk附加信息</string>
     <!--  InstallOptions Start  -->
     <string name="config_allow_test">允许测试包</string>
     <string name="config_allow_test_desc">允许安装带TestOnly标签的安装包</string>

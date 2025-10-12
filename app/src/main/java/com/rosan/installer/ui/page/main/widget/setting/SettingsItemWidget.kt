@@ -62,7 +62,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
@@ -171,7 +170,7 @@ fun DataAuthorizerWidget(
                 authorizerOptions.forEach { (authorizerType, authorizerInfo) ->
                     InputChip(
                         enabled = when (authorizerType) {
-                            ConfigEntity.Authorizer.None -> RsConfig.currentManufacturer != Manufacturer.XIAOMI
+                            ConfigEntity.Authorizer.None -> !RsConfig.isMiui
                             else -> true
                         },
                         selected = currentAuthorizer == authorizerType,

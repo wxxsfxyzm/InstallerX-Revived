@@ -41,6 +41,7 @@ import androidx.compose.material.icons.twotone.Expand
 import androidx.compose.material.icons.twotone.Face
 import androidx.compose.material.icons.twotone.Favorite
 import androidx.compose.material.icons.twotone.FavoriteBorder
+import androidx.compose.material.icons.twotone.FindInPage
 import androidx.compose.material.icons.twotone.History
 import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
@@ -126,6 +127,7 @@ object AppIcons {
     val ClearAll = Icons.TwoTone.ClearAll
     val LiveActivity = Icons.AutoMirrored.TwoTone.Send
     val IconPack = Icons.TwoTone.Widgets
+    val OEMSpecial = Icons.TwoTone.FindInPage
     // --- 设置图标结束 ---
 
     // --- Profile pkg 图标集合 ---

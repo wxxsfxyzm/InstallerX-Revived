@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
@@ -84,7 +83,7 @@ fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
                 }
             )
         )
-        if (RsConfig.currentManufacturer != Manufacturer.XIAOMI)
+        if (!RsConfig.isMiui)
             put(ConfigEntity.Authorizer.None, stringResource(R.string.config_authorizer_none))
         put(ConfigEntity.Authorizer.Root, stringResource(R.string.config_authorizer_root))
         put(ConfigEntity.Authorizer.Shizuku, stringResource(R.string.config_authorizer_shizuku))

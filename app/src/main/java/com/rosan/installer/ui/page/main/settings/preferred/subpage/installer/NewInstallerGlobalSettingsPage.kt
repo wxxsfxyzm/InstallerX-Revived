@@ -28,6 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -255,6 +257,21 @@ fun NewInstallerGlobalSettingsPage(
                     )
                 }
             }
+            if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
+                item {
+                    SplicedColumnGroup(
+                        title = stringResource(R.string.installer_oppo_related),
+                        content = listOf {
+                            SwitchWidget(
+                                icon = AppIcons.OEMSpecial,
+                                title = stringResource(id = R.string.installer_show_oem_special),
+                                description = stringResource(id = R.string.installer_show_oem_special_desc),
+                                checked = state.showOPPOSpecial,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowOPPOSpecial(it)) }
+                            )
+                        }
+                    )
+                }
             item {
                 SplicedColumnGroup(
                     title = stringResource(R.string.config_managed_installer_packages_title),

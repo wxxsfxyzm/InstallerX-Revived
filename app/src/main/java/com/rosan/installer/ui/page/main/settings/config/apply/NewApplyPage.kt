@@ -36,6 +36,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Sort
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Shield
 import androidx.compose.material.icons.twotone.Visibility
@@ -56,6 +58,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
@@ -263,9 +266,8 @@ fun NewApplyPage(
                         state = pullToRefreshState,
                         isRefreshing = refreshing,
                         onRefresh = { viewModel.dispatch(ApplyViewAction.LoadApps) },
-                        modifier = Modifier.fillMaxSize(), // 将修饰符应用在这里
+                        modifier = Modifier.fillMaxSize(),
                         indicator = {
-                            //  将 Indicator 替换为 LoadingIndicator
                             PullToRefreshDefaults.LoadingIndicator(
                                 modifier = Modifier.align(Alignment.TopCenter),
                                 state = pullToRefreshState,
@@ -426,6 +428,24 @@ private fun ItemWidget(
         }
         Switch(
             checked = applied,
+            thumbContent =
+                if (applied) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(SwitchDefaults.IconSize),
+                        )
+                    }
+                } else {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = null,
+                            modifier = Modifier.size(SwitchDefaults.IconSize),
+                        )
+                    }
+                },
             onCheckedChange = {
                 viewModel.dispatch(
                     ApplyViewAction.ApplyPackageName(app.packageName, it)

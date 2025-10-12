@@ -20,8 +20,9 @@ sealed class PreferredViewAction {
     data class ChangeUseMiuix(val useMiuix: Boolean) : PreferredViewAction()
     data class ChangePreferSystemIcon(val preferSystemIcon: Boolean) : PreferredViewAction()
     data class ChangeShowLauncherIcon(val showLauncherIcon: Boolean) : PreferredViewAction()
-    data class ChangeVersionCompareInSingleLine(val versionCompareInSingleLine: Boolean) :PreferredViewAction()
+    data class ChangeVersionCompareInSingleLine(val versionCompareInSingleLine: Boolean) : PreferredViewAction()
     data class ChangeSdkCompareInMultiLine(val sdkCompareInMultiLine: Boolean) : PreferredViewAction()
+    data class ChangeShowOPPOSpecial(val showOPPOSpecial: Boolean) : PreferredViewAction()
 
     data class AddManagedInstallerPackage(val pkg: NamedPackage) : PreferredViewAction()
     data class RemoveManagedInstallerPackage(val pkg: NamedPackage) : PreferredViewAction()

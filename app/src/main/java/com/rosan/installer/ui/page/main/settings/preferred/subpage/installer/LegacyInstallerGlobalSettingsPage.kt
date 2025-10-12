@@ -21,6 +21,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -211,6 +213,18 @@ fun LegacyInstallerGlobalSettingsPage(
                             )
                         }
                     }
+                }
+            }
+            if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
+                item { LabelWidget(stringResource(R.string.installer_oppo_related)) }
+                item {
+                    SwitchWidget(
+                        icon = AppIcons.OEMSpecial,
+                        title = stringResource(id = R.string.installer_show_oem_special),
+                        description = stringResource(id = R.string.installer_show_oem_special_desc),
+                        checked = state.showOPPOSpecial,
+                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowOPPOSpecial(it)) }
+                    )
                 }
             }
             item { LabelWidget(label = stringResource(id = R.string.config_managed_installer_packages_title)) }

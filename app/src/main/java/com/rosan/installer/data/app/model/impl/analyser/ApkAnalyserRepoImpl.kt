@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.core.content.res.ResourcesCompat
 import com.rosan.installer.build.Architecture
+import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
@@ -112,13 +113,15 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
                 )
             }
 
-            listOf(loadAppEntity(
-                apkResources,
-                apkResources.newTheme(),
-                data,
-                extra,
-                bestArch ?: Architecture.UNKNOWN
-            ))
+            listOf(
+                loadAppEntity(
+                    apkResources,
+                    apkResources.newTheme(),
+                    data,
+                    extra,
+                    bestArch ?: Architecture.UNKNOWN
+                )
+            )
         }
     }
 
@@ -141,6 +144,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
         var splitName: String? = null
         var versionCode: Long = -1
         var versionName = ""
+        var minOsdkVersion: String? = null
         var label: String? = null
         var icon: Drawable? = null
         var roundIcon: Drawable? = null
@@ -235,6 +239,17 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
                     }
                 }
             }
+            .register("/manifest/application/meta-data") {
+                if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
+                    // Get the 'name' attribute from the 'android' namespace
+                    val metaName = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")
+                    // Check if this is the meta-data tag we are looking for
+                    if ("minOsdkVersion" == metaName) {
+                        // If it is, get the 'value' attribute
+                        minOsdkVersion = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "value")
+                    }
+                }
+            }
             .register("/manifest/uses-permission") {
                 val permissionName = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")
                 if (!permissionName.isNullOrBlank()) {
@@ -253,6 +268,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
             icon = roundIcon ?: icon,
             targetSdk = targetSdk,
             minSdk = minSdk,
+            minOsdkVersion = minOsdkVersion,
             arch = arch,
             permissions = permissions,
             containerType = extra.dataType,
