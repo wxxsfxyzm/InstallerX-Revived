@@ -275,7 +275,7 @@
     <string name="exception_install_failed_hyperos_isolation_violation">Veuillez ajouter une source d\'installation valide pour l\'installation d\'applis système Mi</string>
     <string name="exception_install_failed_duplicate_permission">Le package tente de redéclarer une autorisation déjà déclarée par une autre appli !</string>
     <string name="exception_install_failed_user_restricted">Le système bloque l\'installation via USB, veuillez l\'activer.</string>
-    <string name="exception_uninstall_failed_hyperos_system_app">HyperOS ne permet pas la désinstallation ici.</string>
+    <string name="exception_uninstall_failed_hyperos_system_app">HyperOS ne permet pas la désinstallation de cette appli!</string>
     <string name="exception_shizuku_not_work">Merci d\'activer Sui ou Shizuku et de donner l\'autorisation</string>
     <string name="exception_dhizuku_not_work">Merci d\'activer Dhizuku et de donner l\'autorisation</string>
     <string name="exception_root_not_work">Échec de l\'accès au root</string>
@@ -443,7 +443,7 @@
     <string name="suggestion_user_restricted">Accédez aux options pour développeur et activez l\'installation USB</string>
     <string name="suggestion_bypass_low_target_sdk">Autoriser temporairement le contournement des restrictions et réessayer</string>
     <string name="suggestion_bypass_blacklist_set_by_user">Autoriser l\'installation une fois</string>
-    <string name="scope_tips">Le premier profil est le profil par défaut. De nouveaux profils peuvent être associées à des applis spécifiques afin qu\'ils prennent automatiquement effet lors de l\'installation.</string>
+    <string name="scope_tips">Le premier profil est le profil par défaut est sera sélectionné automatiquement. De nouveaux profils peuvent être associées à des applis spécifiques afin qu\'ils prennent automatiquement effet lors de l\'installation.</string>
     <string name="got_it">Compris</string>
     <string name="installer_live_channel_short_text_resolving">Résolution</string>
     <string name="installer_live_channel_short_text_preparing">Préparation</string>
