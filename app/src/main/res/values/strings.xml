@@ -317,7 +317,7 @@
     <string name="installer_file_path">Path: %1$s</string>
     <string name="exception_install_failed_unknown">Unknown error</string>
     <string name="exception_resolve_failed">Resolve URI failed</string>
-    <string name="exception_resolve_failed_no_internet_access">This version cannot access Internet, to use this feature, reinstall another version.</string>
+    <string name="exception_resolve_failed_no_internet_access">This version cannot access Internet, to use this feature, reinstall another version</string>
     <string name="exception_analyse_failed_all_files_unsupported">File not supported</string>
     <string name="exception_install_failed_already_exists">This app version is already installed, please uninstall and try again</string>
     <string name="exception_install_failed_blacklisted_package">You don\'t allow installation of the app!</string>
@@ -353,8 +353,8 @@
     <string name="exception_install_failed_origin_os_blacklist">Please add a valid install source for installing vivo system app</string>
     <string name="exception_install_failed_hyperos_isolation_violation">Please add a valid install source for installing mi system app</string>
     <string name="exception_install_failed_duplicate_permission">The package is trying to redeclare permission already declared by another app!</string>
-    <string name="exception_install_failed_user_restricted">System restricted install through USB, please enable it.</string>
-    <string name="exception_uninstall_failed_hyperos_system_app">HyperOS does not allow uninstall here.</string>
+    <string name="exception_install_failed_user_restricted">System restricted install through USB, please enable it</string>
+    <string name="exception_uninstall_failed_hyperos_system_app">HyperOS does not allow uninstalling this app!</string>
     <string name="exception_shizuku_not_work">Please activate Sui or Shizuku and grant permission</string>
     <string name="exception_dhizuku_not_work">Please activate Dhizuku and grant permission</string>
     <string name="exception_root_not_work">Couldn\'t access root</string>
@@ -393,11 +393,11 @@
     <string name="installer_show_oem_special_desc">Analyse and show some specific value for oem apk(s) on install dialog</string>
     <!--  InstallOptions Start  -->
     <string name="config_allow_test">Allow Test</string>
-    <string name="config_allow_test_desc">If the package being installed is a test-only app, allow it to be installed.</string>
+    <string name="config_allow_test_desc">If the package being installed is a test-only app, allow it to be installed</string>
     <string name="internal">Internal Storage</string>
-    <string name="internal_desc">Force the package to be installed to internal storage.</string>
+    <string name="internal_desc">Force the package to be installed to internal storage</string>
     <string name="external">External Storage</string>
-    <string name="external_desc">Force the package to be installed to external storage.</string>
+    <string name="external_desc">Force the package to be installed to external storage</string>
     <string name="from_adb">Install request from ADB</string>
     <string name="from_adb_desc">Tells the system that the install request was made by ADB</string>
     <string name="config_all_users">Install For All Users</string>
@@ -406,43 +406,43 @@
     <string name="config_allow_downgrade_blocked_desc">Not supported for Android 15+ without ROOT!</string>
     <string name="config_allow_downgrade_desc">Attempts to downgrade the currently-installed version of the package to the one being installed (may not work on all ROMs)</string>
     <string name="config_grant_all_permissions">Grant All Requested Permissions</string>
-    <string name="config_grant_all_permissions_desc">Automatically grant all permissions the package is requesting. Note that this only applies to runtime permissions. Special permissions like All Files Access or Accessibility won\'t be automatically granted.</string>
+    <string name="config_grant_all_permissions_desc">Automatically grant all permissions the package is requesting. Note that this only applies to runtime permissions. Special permissions like All Files Access or Accessibility won\'t be automatically granted</string>
     <string name="force_volume_uuid">Force Volume UUID</string>
-    <string name="force_volume_uuid_desc">Allows specifying a volume UUID to install the package to.</string>
+    <string name="force_volume_uuid_desc">Allows specifying a volume UUID to install the package to</string>
     <string name="force_permission_prompt">Force Permission Prompt</string>
-    <string name="force_permission_prompt_desc">Forces even system installers to show the install confirmation prompt.</string>
+    <string name="force_permission_prompt_desc">Forces even system installers to show the install confirmation prompt</string>
     <string name="instant_app">Instant App</string>
-    <string name="instant_app_desc">Install the package as an instant app.</string>
+    <string name="instant_app_desc">Install the package as an instant app</string>
     <string name="dont_kill_app">Don\'t Kill App</string>
-    <string name="dont_kill_app_desc">Used when installing a feature for a split app to prevent the main app from being killed during install.</string>
+    <string name="dont_kill_app_desc">Used when installing a feature for a split app to prevent the main app from being killed during install</string>
     <string name="full_app">Full App</string>
-    <string name="full_app_desc">Indicates that the package being installed is a full app. Can be used to upgrade instant apps to full apps.</string>
+    <string name="full_app_desc">Indicates that the package being installed is a full app, can be used to upgrade instant apps to full apps</string>
     <string name="allocate_aggressive">Allocate Aggressive</string>
-    <string name="allocate_aggressive_desc">Indicates that the package is \"critical to system health or security\" and will more aggressively delete clearable files to make space if needed.</string>
+    <string name="allocate_aggressive_desc">Indicates that the package is \"critical to system health or security\" and will more aggressively delete clearable files to make space if needed</string>
     <string name="virtual_preload">Virtual Preload</string>
-    <string name="virtual_preload_desc">Indicates that the package is a virtual preload.</string>
+    <string name="virtual_preload_desc">Indicates that the package is a virtual preload</string>
     <string name="apex" translatable="false">APEX</string>
     <string name="apex_desc">Indicates that the package being installed is an APEX package</string>
     <string name="enable_rollback">Enable Rollback</string>
-    <string name="enable_rollback_desc">Allow future rollbacks of this package.</string>
+    <string name="enable_rollback_desc">Allow future rollbacks of this package</string>
     <string name="disable_verification">Disable Verification</string>
-    <string name="disable_verification_desc">Disables package verification during install. This is not signature verification.</string>
+    <string name="disable_verification_desc">Disables package verification during install. This is not signature verification</string>
     <string name="staged">Staged</string>
-    <string name="staged_desc">Indicates this package is being installed as part of a staged install.</string>
+    <string name="staged_desc">Indicates this package is being installed as part of a staged install</string>
     <string name="config_all_whitelist_restricted_permissions">Allow Restricted Permissions</string>
-    <string name="config_all_whitelist_restricted_permissions_desc">Allow restricted permissions to be granted for the package being installed.</string>
+    <string name="config_all_whitelist_restricted_permissions_desc">Allow restricted permissions to be granted for the package being installed</string>
     <string name="disable_allowed_apex_update_check">Disable Allowed APEX Update Check</string>
-    <string name="disable_allowed_apex_update_check_desc">Don\'t check whether the installed APEX can be updated.</string>
+    <string name="disable_allowed_apex_update_check_desc">Don\'t check whether the installed APEX can be updated</string>
     <string name="config_bypass_low_target_sdk">Bypass Low Target SDK Block</string>
-    <string name="config_bypass_low_target_sdk_desc">Allows apps targeting old SDK versions to be installed.</string>
+    <string name="config_bypass_low_target_sdk_desc">Allows apps targeting old SDK versions to be installed</string>
     <string name="dry_run">Dry Run</string>
-    <string name="dry_run_desc">Verify the package, but don\'t install it.</string>
+    <string name="dry_run_desc">Verify the package, but don\'t install it</string>
     <string name="config_request_update_ownership">Request Update Ownership</string>
-    <string name="config_request_update_ownership_desc">Set this installer as the source for future updates.</string>
+    <string name="config_request_update_ownership_desc">Set this installer as the source for future updates</string>
     <string name="unarchive">Unarchive</string>
-    <string name="unarchive_desc">Unarchive an existing package.</string>
+    <string name="unarchive_desc">Unarchive an existing package</string>
     <string name="replace_existing">Replace Existing</string>
-    <string name="replace_existing_desc">If the package being installed already exists, replace/upgrade it.</string>
+    <string name="replace_existing_desc">If the package being installed already exists, replace/upgrade it</string>
     <!--  InstallOptions End  -->
 
     <!-- MultiApkZip Installer -->
