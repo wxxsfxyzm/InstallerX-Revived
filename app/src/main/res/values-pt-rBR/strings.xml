@@ -455,4 +455,8 @@
     <string name="exception_install_failed_missing_install_permission">Por favor, conceda a permissão de instalação de aplicativo desconhecido e tente novamente</string>
     <string name="sdk_compare_in_multi_line">Mostrar comparação SDK em várias linhas</string>
     <string name="sdk_compare_in_multi_line_desc">Mostrar comparação SDK em várias linhas na caixa de diálogo de instalação</string>
+    <string name="exception_install_failed_missing_split">Pacote(s) dividido(s) necessário(s) ausente(s)</string>
+    <string name="installer_oppo_related">Relacionado ao OPPO</string>
+    <string name="installer_show_oem_special">Mostrar informações extras do OEM</string>
+    <string name="installer_show_oem_special_desc">Analise e mostre algum valor específico para apks OEM na caixa de diálogo de instalação</string>
 </resources>
