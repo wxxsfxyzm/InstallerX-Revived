@@ -87,7 +87,7 @@
     <string name="empty_configs">Profil yok, aşağıdan bir tane ekleyin</string>
     <string name="filter">Filtrele</string>
     <string name="order">Sırala</string>
-    <string name="config_name">Profil name</string>
+    <string name="config_name">Profil ismi</string>
     <string name="config_info">Bilgi</string>
     <string name="config_scope">Kapsam</string>
     <string name="config_description">Profil açıklaması</string>
