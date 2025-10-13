@@ -56,19 +56,21 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
 
-    private fun getField(any: Class<*>, name: String, clazz: Class<*>): Field? {
-        var field = reflect.getDeclaredField(any, name)
-        field?.isAccessible = true
-        if (field?.type != clazz) {
-            val fields = reflect.getDeclaredFields(any)
-            for (item in fields) {
-                if (item.type != clazz) continue
-                field = item
-                break
-            }
+    private fun getField(targetClass: Class<*>, name: String, expectedType: Class<*>): Field? {
+        // Try to find the field directly by name
+        val directField = reflect.getDeclaredField(targetClass, name)?.apply {
+            isAccessible = true
         }
-        field?.isAccessible = true
-        return field
+        // If found and the type matches, return it
+        if (directField != null && directField.type == expectedType) {
+            return directField
+        }
+        // Otherwise, search for the first field that matches the expected type
+        val matchedField = reflect.getDeclaredFields(targetClass)
+            .firstOrNull { it.type == expectedType }
+            ?.apply { isAccessible = true }
+        // Return the found field or null if none matched
+        return matchedField
     }
 
     private suspend fun getPackageInstaller(

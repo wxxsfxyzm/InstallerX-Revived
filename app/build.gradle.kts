@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.aboutLibraries)
+    alias(libs.plugins.aboutLibraries.android)
 }
 
 android {

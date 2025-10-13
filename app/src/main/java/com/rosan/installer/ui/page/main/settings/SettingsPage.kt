@@ -18,6 +18,7 @@ import com.rosan.installer.ui.page.main.settings.config.edit.NewEditPage
 import com.rosan.installer.ui.page.main.settings.main.MainPage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.HomePage
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.NewHomePage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.LegacyInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.NewInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.LegacyThemeSettingsPage
@@ -68,8 +69,6 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             },
             // --- EditPage 的 popExitTransition ---
             popExitTransition = {
-                // 当从 EditPage 返回时，EditPage 的退出动画
-                // 它会随着手势逐渐缩小和淡出
                 scaleOut(targetScale = 0.9f) + fadeOut()
             }
         ) {
@@ -109,38 +108,34 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
         ) {
             val id = it.arguments?.getLong("id")!!
             if (preferredViewModel.state.showExpressiveUI)
-                NewApplyPage(
-                    navController = navController,
-                    id = id
-                )
+                NewApplyPage(navController = navController, id = id)
             else
-                ApplyPage(
-                    navController = navController,
-                    id = id
-                )
+                ApplyPage(navController = navController, id = id)
         }
         composable(
-            route = SettingsScreen.About.route, // 使用新路由
-            enterTransition = { // 使用统一的进入动画
+            route = SettingsScreen.About.route,
+            enterTransition = {
                 slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth })
             },
-            exitTransition = { // 占位，当从 About 再导航到别的页面时使用
+            exitTransition = {
                 slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth })
             },
-            popEnterTransition = { // 占位，当从其他页面返回 About 时使用
+            popEnterTransition = {
                 slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth })
             },
-            popExitTransition = { // 当从 About 返回时，使用的退出动画
+            popExitTransition = {
                 scaleOut(targetScale = 0.9f) + fadeOut()
             }
         ) {
-            // 这里直接使用 HomePage，它之前是 AboutPageActivity 的内容
-            HomePage(navController)
+            if (preferredViewModel.state.showExpressiveUI)
+                NewHomePage(navController = navController)
+            else
+                HomePage(navController)
         }
         composable(
             route = SettingsScreen.Theme.route,
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
-            popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() } // Your predictive back animation
+            popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
         ) {
             if (preferredViewModel.state.showExpressiveUI) {
                 NewThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
@@ -151,7 +146,7 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
         composable(
             route = SettingsScreen.InstallerGlobal.route,
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
-            popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() } // Your predictive back animation
+            popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
         ) {
             if (preferredViewModel.state.showExpressiveUI) {
                 NewInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)

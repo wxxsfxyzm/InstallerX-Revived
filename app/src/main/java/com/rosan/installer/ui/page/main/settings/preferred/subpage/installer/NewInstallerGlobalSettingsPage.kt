@@ -16,12 +16,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -44,14 +47,19 @@ import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.none
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewInstallerGlobalSettingsPage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
     val state = viewModel.state
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+
+    LaunchedEffect(Unit) {
+        topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
+    }
 
     Scaffold(
         modifier = Modifier
@@ -60,26 +68,25 @@ fun NewInstallerGlobalSettingsPage(
         contentWindowInsets = WindowInsets.none,
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
-            TopAppBar(
+            LargeFlexibleTopAppBar(
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = {
-                    Row {
-                        Spacer(modifier = Modifier.size(16.dp))
-                        Text(stringResource(R.string.installer_settings))
-                    }
+                    Text(stringResource(R.string.installer_settings))
                 },
                 navigationIcon = {
-                    AppBackButton(
-                        onClick = { navController.navigateUp() },
-                        icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                        modifier = Modifier.size(36.dp),
-                        containerColor = MaterialTheme.colorScheme.surfaceBright
-                    )
+                    Row {
+                        AppBackButton(
+                            onClick = { navController.navigateUp() },
+                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                            modifier = Modifier.size(36.dp),
+                            containerColor = MaterialTheme.colorScheme.surfaceBright
+                        )
+                        Spacer(modifier = Modifier.size(16.dp))
+                    }
                 },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
                 ),
             )

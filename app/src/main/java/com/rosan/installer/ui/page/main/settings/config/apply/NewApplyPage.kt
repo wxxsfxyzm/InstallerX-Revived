@@ -146,10 +146,7 @@ fun NewApplyPage(
                 title = {
                     AnimatedContent(targetState = searchBarActivated) {
                         if (!it)
-                            Row {
-                                Spacer(modifier = Modifier.size(16.dp))
-                                Text(stringResource(R.string.config_scope))
-                            }
+                            Text(stringResource(R.string.config_scope))
                         else {
                             val focusRequester = remember { FocusRequester() }
                             OutlinedTextField(
@@ -188,12 +185,15 @@ fun NewApplyPage(
                     }
                 },
                 navigationIcon = {
-                    AppBackButton(
-                        onClick = { navController.navigateUp() },
-                        icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                        modifier = Modifier.size(36.dp),
-                        containerColor = MaterialTheme.colorScheme.surfaceBright
-                    )
+                    Row {
+                        AppBackButton(
+                            onClick = { navController.navigateUp() },
+                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                            modifier = Modifier.size(36.dp),
+                            containerColor = MaterialTheme.colorScheme.surfaceBright
+                        )
+                        Spacer(modifier = Modifier.size(16.dp))
+                    }
                 },
                 actions = {
                     AnimatedVisibility(visible = !searchBarActivated) {
@@ -214,7 +214,6 @@ fun NewApplyPage(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
                 )
             )

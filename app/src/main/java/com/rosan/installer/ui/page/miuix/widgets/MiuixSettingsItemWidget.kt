@@ -92,7 +92,6 @@ fun MiuixDataAuthorizerWidget(
     val context = LocalContext.current
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
-    // The data source remains unchanged.
     val authorizerOptions = remember {
         buildMap {
             if (!RsConfig.isMiui)
@@ -121,20 +120,18 @@ fun MiuixDataAuthorizerWidget(
     val spinnerEntries = remember(authorizerOptions) {
         authorizerOptions.values.map { authorizerInfo ->
             SpinnerEntry(
-                //icon = { Icon(imageVector = authorizerInfo.icon, contentDescription = null) },
+                // icon = { Icon(imageVector = authorizerInfo.icon, contentDescription = null) },
                 title = context.getString(authorizerInfo.labelResId)
             )
         }
     }
 
-    // 2. SuperSpinner requires an integer index for the selected item.
+    //    SuperSpinner requires an integer index for the selected item.
     //    Find the index of the currentAuthorizer from the map's keys.
     val selectedIndex = remember(currentAuthorizer, authorizerOptions) {
         authorizerOptions.keys.indexOf(currentAuthorizer).coerceAtLeast(0)
     }
 
-    // Use SuperSpinner directly, as shown in your TextComponent.kt example.
-    // This single component replaces the entire ListItem + FlowRow + InputChip structure.
     SuperSpinner(
         modifier = modifier,
         mode = SpinnerMode.AlwaysOnRight,
@@ -147,9 +144,7 @@ fun MiuixDataAuthorizerWidget(
             if (currentAuthorizer != newAuthorizer) {
                 changeAuthorizer(newAuthorizer)
             }
-        },
-        // SuperSpinner has a disabled state, so we disable the "None" option by checking its index.
-        enabled = selectedIndex != authorizerOptions.keys.indexOf(ConfigEntity.Authorizer.None)
+        }
     )
     trailingContent()
 }
@@ -171,7 +166,6 @@ fun MiuixDataInstallModeWidget(
 ) {
     val context = LocalContext.current
 
-    // The data source definition remains the same.
     val installModeOptions = remember {
         mapOf(
             ConfigEntity.InstallMode.Dialog to InstallModeInfo(
@@ -222,9 +216,6 @@ fun MiuixDataInstallModeWidget(
                 changeInstallMode(newMode)
             }
         }
-        // The `onClick` parameter from the function signature is not used here,
-        // because SuperSpinner handles its own interaction logic. This matches
-        // the behavior of your original code where the outer ListItem was not clickable.
     )
 }
 
