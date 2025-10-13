@@ -326,7 +326,7 @@
     <string name="full_app">تطبيق كامل</string>
     <string name="full_app_desc">يشير إلى أن الحزمة التي يتم تثبيتها هي تطبيق كامل. يمكن استخدامه لترقية التطبيقات الفورية إلى تطبيقات كاملة.</string>
     <string name="allocate_aggressive">تخصيص عنيف للمساحة</string>
-    <string name="allocate_aggressive_desc">يشير إلى أن الحزمة "حيوية لصحة النظام أو أمانه" وستقوم بحذف الملفات القابلة للمسح بقوة أكبر لتوفير مساحة إذا لزم الأمر.</string>
+    <string name="allocate_aggressive_desc">يشير إلى أن الحزمة حيوية لصحة النظام أو أمانه وستقوم بحذف الملفات القابلة للمسح بقوة أكبر لتوفير مساحة إذا لزم الأمر.</string>
     <string name="virtual_preload">تحميل مسبق افتراضي</string>
     <string name="virtual_preload_desc">يشير إلى أن الحزمة هي تحميل مسبق افتراضي.</string>
     <string name="apex_desc">يشير إلى أن الحزمة التي يتم تثبيتها هي حزمة APEX</string>
