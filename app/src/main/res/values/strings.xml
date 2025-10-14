@@ -96,6 +96,7 @@
     <string name="empty_configs">No profiles, add one below</string>
     <string name="filter">Filter</string>
     <string name="order">Sort</string>
+    <string name="config_global_default">Global Default</string>
     <string name="config_name">Profile name</string>
     <string name="config_info">Info</string>
     <string name="config_scope">Scope</string>

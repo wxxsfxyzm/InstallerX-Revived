@@ -44,6 +44,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixClearCache
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDefaultInstaller
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisableAdbVerify
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationSetting
+import com.rosan.installer.ui.page.miuix.widgets.MiuixNoneInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsNavigationItemWidget
 import org.koin.androidx.compose.koinViewModel
@@ -174,6 +175,7 @@ fun MiuixPreferredPage(
                             )
                         }
                     }
+                    if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) item { MiuixNoneInstallerTipCard() }
                     item { SmallTitle(stringResource(R.string.basic)) }
                     item {
                         Card(

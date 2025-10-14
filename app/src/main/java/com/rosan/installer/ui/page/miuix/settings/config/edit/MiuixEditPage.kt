@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewEvent
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
@@ -43,6 +44,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDataNameWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataPackageSourceWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySdkWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixNoneInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
 import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
@@ -98,6 +100,15 @@ fun MiuixEditPage(
     // Use this new combined condition for the BackHandler.
     BackHandler(enabled = shouldInterceptBackPress) {
         showUnsavedDialogState.value = true
+    }
+
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+
+    val isNone = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.None -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.None
+        else -> false
     }
 
     LaunchedEffect(Unit) {
@@ -171,6 +182,7 @@ fun MiuixEditPage(
                     MiuixDataInstallModeWidget(viewModel = viewModel)
                 }
             }
+            if (isNone) item { MiuixNoneInstallerTipCard() }
             item { SmallTitle(stringResource(R.string.config_label_installer_settings)) }
             item {
                 Card(

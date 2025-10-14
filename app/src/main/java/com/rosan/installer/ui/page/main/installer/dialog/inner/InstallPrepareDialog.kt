@@ -292,9 +292,11 @@ fun installPrepareDialog( // 小写开头
             // Use buildList to create a list of buttons
             buildList {
                 // Install button is shown if the entity's minSdk is compatible
-                val canInstall = entityToInstall?.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true
+                val canInstall =
+                    entityToInstall != null && entityToInstall.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true
+
                 // only when the entity is a split APK, XAPK, or APKM
-                if (canInstall && viewModel.showExtendedMenu && (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM)) {
+                if (canInstall && viewModel.showExtendedMenu && (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK)) {
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
                         viewModel.dispatch(DialogViewAction.InstallChoice)
                     })
@@ -310,7 +312,7 @@ fun installPrepareDialog( // 小写开头
                         viewModel.dispatch(DialogViewAction.InstallExtendedMenu)
                     })
                 }
-                if (canInstall && !viewModel.showExtendedMenu && (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM))
+                if (canInstall && !viewModel.showExtendedMenu && (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK))
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
                         viewModel.dispatch(DialogViewAction.InstallChoice)
                     })

@@ -190,20 +190,13 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             val am = IActivityManager.Stub.asInterface(amBinder)
 
             val userId = AndroidProcess.myUid() / 100000
-
-            // By setting the calling package to "com.android.shell",
-            // we leverage the permissions granted to the shell user,
-            // bypassing many standard security checks.
+            
             val callerPackage = "com.android.shell"
             val resolvedType = intent.resolveType(context.contentResolver)
 
-            // Call the new, non-deprecated API 'startActivityAsUserWithFeature'.
-            // The 'callingFeatureId' is passed as null, which mimics the behavior
-            // of the old 'startActivityAsUser' method.
-            val result = am.startActivityAsUserWithFeature(
+            val result = am.startActivityAsUser(
                 null as IApplicationThread?,
                 callerPackage,
-                null as String?, // This is the new 'callingFeatureId' parameter.
                 intent,
                 resolvedType,
                 null as IBinder?,

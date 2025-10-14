@@ -93,6 +93,7 @@
     <string name="empty_configs">没有配置</string>
     <string name="filter">过滤</string>
     <string name="order">排序</string>
+    <string name="config_global_default">全局默认</string>
     <string name="config_name">名称</string>
     <string name="config_info">信息</string>
     <string name="config_scope">作用域</string>

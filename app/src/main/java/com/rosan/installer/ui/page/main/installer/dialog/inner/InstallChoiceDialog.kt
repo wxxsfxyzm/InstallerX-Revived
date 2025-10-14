@@ -53,7 +53,10 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
+import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.util.asUserReadableSplitName
+import timber.log.Timber
 
 @Composable
 fun installChoiceDialog(
@@ -63,6 +66,7 @@ fun installChoiceDialog(
     val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
 
     val isMultiApk = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
+    val isModuleApk = containerType == DataType.MIXED_MODULE_APK
 
     val titleRes = if (isMultiApk) R.string.installer_select_from_zip else R.string.installer_select_install
     val primaryButtonText = if (isMultiApk) R.string.install else R.string.next
@@ -77,6 +81,7 @@ fun installChoiceDialog(
         title = DialogInnerParams(DialogParamsType.InstallChoice.id) { Text(stringResource(titleRes)) },
         subtitle = DialogInnerParams(DialogParamsType.InstallChoice.id) {
             when (containerType) {
+                DataType.MIXED_MODULE_APK -> Text("请选择安装类型")
                 DataType.MULTI_APK_ZIP -> Text(stringResource(R.string.installer_multi_apk_zip_description))
                 DataType.MULTI_APK -> Text(stringResource(R.string.installer_multi_apk_description))
                 else -> null
@@ -86,14 +91,16 @@ fun installChoiceDialog(
             ChoiceContent(
                 analysisResults = analysisResults,
                 viewModel = viewModel,
+                isModuleApk = isModuleApk,
                 isMultiApk = isMultiApk
             )
         },
         buttons = DialogButtons(DialogParamsType.InstallChoice.id) {
-            listOf(
-                DialogButton(stringResource(primaryButtonText), onClick = primaryButtonAction),
-                DialogButton(stringResource(R.string.cancel)) { viewModel.dispatch(DialogViewAction.Close) }
-            )
+            buildList {
+                if (!isModuleApk)
+                    add(DialogButton(stringResource(primaryButtonText), onClick = primaryButtonAction))
+                add(DialogButton(stringResource(R.string.cancel)) { viewModel.dispatch(DialogViewAction.Close) })
+            }
         }
     )
 }
@@ -102,6 +109,7 @@ fun installChoiceDialog(
 private fun ChoiceContent(
     analysisResults: List<PackageAnalysisResult>,
     viewModel: DialogViewModel,
+    isModuleApk: Boolean = false,
     isMultiApk: Boolean
 ) {
     // Define shapes for different positions
@@ -122,8 +130,70 @@ private fun ChoiceContent(
     )
     val singleShape = RoundedCornerShape(cornerRadius)
 
-    // A much cleaner implementation using contentPadding for consistent spacing.
-    if (isMultiApk) {
+    val allAppEntities = analysisResults.flatMap { it.appEntities }.map { it.app }
+    val baseEntityInfo = allAppEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+    val moduleEntityInfo = allAppEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
+
+    Timber.tag("InstallChoice").d("baseEntityInfo: $baseEntityInfo")
+    Timber.tag("InstallChoice").d("moduleEntityInfo: $moduleEntityInfo")
+
+    if (isModuleApk) {
+        val allSelectableEntities = analysisResults.flatMap { it.appEntities }
+        val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
+        val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }
+
+        SplicedColumnGroup(
+            content = buildList {
+                if (baseSelectableEntity != null) {
+                    val baseEntityInfo = baseSelectableEntity.app as AppEntity.BaseEntity
+                    add {
+                        SettingsNavigationItemWidget(
+                            iconPlaceholder = false,
+                            title = baseEntityInfo.label ?: "N/A",
+                            description = "Package: ${baseEntityInfo.packageName}",
+                            onClick = {
+                                // The initial state of baseSelectableEntity.selected is false.
+                                // Toggling it will set its 'selected' state to true.
+                                // The isMultiSelect=false flag ensures the other entity remains false.
+                                viewModel.dispatch(
+                                    DialogViewAction.ToggleSelection(
+                                        packageName = baseSelectableEntity.app.packageName,
+                                        entity = baseSelectableEntity,
+                                        isMultiSelect = false
+                                    )
+                                )
+                                // After updating the selection state, immediately proceed to the prepare screen.
+                                viewModel.dispatch(DialogViewAction.InstallPrepare)
+                            }
+                        )
+                    }
+                }
+                if (moduleSelectableEntity != null) {
+                    val moduleEntityInfo = moduleSelectableEntity.app as AppEntity.ModuleEntity
+                    add {
+                        SettingsNavigationItemWidget(
+                            iconPlaceholder = false,
+                            title = moduleEntityInfo.name,
+                            description = "Module ID: ${moduleEntityInfo.id}",
+                            onClick = {
+                                // The initial state of moduleSelectableEntity.selected is false.
+                                // Toggling it will set its 'selected' state to true.
+                                viewModel.dispatch(
+                                    DialogViewAction.ToggleSelection(
+                                        packageName = moduleSelectableEntity.app.packageName,
+                                        entity = moduleSelectableEntity,
+                                        isMultiSelect = false
+                                    )
+                                )
+                                // After updating the selection state, immediately proceed to the prepare screen.
+                                viewModel.dispatch(DialogViewAction.InstallPrepare)
+                            }
+                        )
+                    }
+                }
+            }
+        )
+    } else if (isMultiApk) {
         // --- Multi-APK Mode ---
         val listSize = analysisResults.size
         if (listSize == 0) return

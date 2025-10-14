@@ -5,7 +5,8 @@ import com.rosan.installer.data.settings.util.ConfigOrder
 import com.rosan.installer.data.settings.util.OrderType
 
 data class AllViewState(
-    val data: Data = Data()
+    val data: Data = Data(),
+    val userReadScopeTips: Boolean = false,
 ) {
     data class Data(
         val configs: List<ConfigEntity> = emptyList(),
