@@ -373,8 +373,7 @@
     <string name="permission_access_mock_location">Accéder à la localisation fictive</string>
     <string name="sdk_compare_in_multi_line">Afficher les SDK sur plusieurs lignes</string>
     <string name="sdk_compare_in_multi_line_desc">Afficher la comparaison des SDK sur plusieurs lignes dans le dialogue d\'installation</string>
-    <string name="config_allow_downgrade_blocked_desc">Non pris en charge pour Android 15+ sans Root !</string>
-    <string name="config_allow_downgrade_desc">Tente de rétrograder la version actuellement installée du package vers celle en cours d\'installation (peut ne pas fonctionner sur toutes les ROMs)</string>
+    <string name="config_allow_downgrade_desc">Tente de rétrograder la version actuellement installée du package vers celle en cours d\'installation (Android 15+ nécessite les droits ROOT)</string>
     <string name="config_grant_all_permissions">Accorder toutes les autorisations demandées</string>
     <string name="config_grant_all_permissions_desc">Accorder automatiquement toutes les autorisations demandées par le package. Notez que cela ne s\'applique qu\'aux autorisations d\'exécution. Les autorisations spéciales comme l\'accès à tous les fichiers ou l\'accessibilité ne seront pas accordées automatiquement.</string>
     <string name="force_volume_uuid">Forcer l\'UUID du volume</string>

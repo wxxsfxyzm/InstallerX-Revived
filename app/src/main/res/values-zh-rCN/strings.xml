@@ -391,8 +391,7 @@
     <string name="config_all_users">为所有用户安装</string>
     <string name="config_all_users_desc">为系统上的所有用户安装软件包，而不仅仅是指定或默认用户</string>
     <string name="config_allow_downgrade">允许降级安装</string>
-    <string name="config_allow_downgrade_blocked_desc">Android 15+ 仅允许 ROOT 使用该功能！</string>
-    <string name="config_allow_downgrade_desc">允许降级安装低版本的安装包（部分系统禁止此方法，请参考核心破解）</string>
+    <string name="config_allow_downgrade_desc">允许降级安装低版本的安装包（Android 15+需要ROOT权限）</string>
     <string name="config_grant_all_permissions">授予所有请求权限</string>
     <string name="config_grant_all_permissions_desc">自动授予包请求的所有权限。请注意只适用于运行时权限，特殊权限如所有文件访问或无障碍不会自动授予</string>
     <string name="force_volume_uuid">指定卷UUID</string>

@@ -385,8 +385,7 @@
     <string name="config_all_users">Tüm Kullanıcılar İçin Yükle</string>
     <string name="config_all_users_desc">Paketi yalnızca belirtilen veya varsayılan kullanıcı için değil, sistemdeki tüm kullanıcılar için yükleyin</string>
     <string name="config_allow_downgrade">Düşürmeye İzin Ver</string>
-    <string name="config_allow_downgrade_blocked_desc">ROOT olmadan Android 15+ için desteklenmez!</string>
-    <string name="config_allow_downgrade_desc">Paketin şu anda yüklü olan sürümünü, yüklenmek istenen sürüme düşürme girişimi (tüm ROM\'larda çalışmayabilir)</string>
+    <string name="config_allow_downgrade_desc">Paketin şu anda yüklü olan sürümünü, yüklenmek istenen sürüme düşürme girişimi (Android 15+ için ROOT izni gerekir)</string>
     <string name="config_grant_all_permissions">İstenen Tüm İzinleri Verin</string>
     <string name="config_grant_all_permissions_desc">Paketin talep ettiği tüm izinleri otomatik olarak verin. Bunun yalnızca çalışma zamanı izinleri için geçerli olduğunu unutmayın. Tüm Dosyalara Erişim veya Erişilebilirlik gibi özel izinler otomatik olarak verilmeyecektir.</string>
     <string name="force_volume_uuid">Ses UUID\'sini Zorla</string>

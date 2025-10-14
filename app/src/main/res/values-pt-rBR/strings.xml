@@ -339,8 +339,7 @@
     <string name="config_all_users">Instalar para todos os usuários</string>
     <string name="config_all_users_desc">Instalar o pacote para todos os usuários do sistema, ao invés de apenas para o usuário especificado ou padrão</string>
     <string name="config_allow_downgrade">Permitir Downgrade</string>
-    <string name="config_allow_downgrade_blocked_desc">Não suportado por Android 15+ sem ROOT!</string>
-    <string name="config_allow_downgrade_desc">Tenta fazer o downgrade da versão atualmente instalada do pacote para a que está sendo instalada (pode não funcionar em todas as ROMs)</string>
+    <string name="config_allow_downgrade_desc">Tenta fazer o downgrade da versão atualmente instalada do pacote para a que está sendo instalada (Android 15+ requer permissão ROOT)</string>
     <string name="config_grant_all_permissions">Garantir todas as permissões solicitadas</string>
     <string name="config_grant_all_permissions_desc">Conceda automaticamente todas as permissões solicitadas pelo pacote. Observe que isso se aplica apenas às permissões de tempo de execução. Permissões especiais, como \"Acesso a Todos os Arquivos\" ou \"Acessibilidade\", não serão concedidas automaticamente.</string>
     <string name="force_volume_uuid">Forçar Volume UUID</string>

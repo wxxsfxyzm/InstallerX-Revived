@@ -387,8 +387,7 @@
     <string name="config_all_users">為所有使用者安裝</string>
     <string name="config_all_users_desc">為系統上的所有使用者安裝套件，而不僅僅是指定或預設使用者</string>
     <string name="config_allow_downgrade">允許降級</string>
-    <string name="config_allow_downgrade_blocked_desc">未取得 ROOT，Android 15 以上版本不支援！</string>
-    <string name="config_allow_downgrade_desc">嘗試將目前安裝的套件版本降級到正在安裝的版本（可能並非適用於所有ROM）</string>
+    <string name="config_allow_downgrade_desc">嘗試將目前安裝的套件版本降級到正在安裝的版本（Android 15+需要ROOT權限）</string>
     <string name="config_grant_all_permissions">授予所有請求的權限</string>
     <string name="config_grant_all_permissions_desc">自動授予套件請求的所有權限。請注意，這僅適用於執行時權限。像「所有檔案存取」或「輔助功能」這樣的特殊權限不會自動授予。</string>
     <string name="force_volume_uuid">強制磁碟區UUID</string>

@@ -403,8 +403,7 @@
     <string name="config_all_users">Install For All Users</string>
     <string name="config_all_users_desc">Install the package for all users on the system, instead of just the specified or default user</string>
     <string name="config_allow_downgrade">Allow Downgrade</string>
-    <string name="config_allow_downgrade_blocked_desc">Not supported for Android 15+ without ROOT!</string>
-    <string name="config_allow_downgrade_desc">Attempts to downgrade the currently-installed version of the package to the one being installed (may not work on all ROMs)</string>
+    <string name="config_allow_downgrade_desc">Attempts to downgrade the currently-installed version of the package (Android 15+ need ROOT)</string>
     <string name="config_grant_all_permissions">Grant All Requested Permissions</string>
     <string name="config_grant_all_permissions_desc">Automatically grant all permissions the package is requesting. Note that this only applies to runtime permissions. Special permissions like All Files Access or Accessibility won\'t be automatically granted</string>
     <string name="force_volume_uuid">Force Volume UUID</string>
