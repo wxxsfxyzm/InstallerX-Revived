@@ -455,4 +455,8 @@
     <string name="installer_live_channel_short_text_install_failed">Échec</string>
     <string name="config_authorizer_none_tips">La majorité de ces options ne sont pas compatibles avec l\'installateur système.</string>
     <string name="exception_install_failed_missing_install_permission">Veuillez accorder l\'autorisation d\'installer des applications inconnues et réessayer</string>
+    <string name="exception_install_failed_missing_split">Packages partagés requis manquants</string>
+    <string name="installer_oppo_related">Lié à OPPO</string>
+    <string name="installer_show_oem_special">Afficher les infos d\'OEM</string>
+    <string name="installer_show_oem_special_desc">Analyser et afficher des infos spécifiques aux APK de certains OEM dans le dialogue d\'installation</string>
 </resources>

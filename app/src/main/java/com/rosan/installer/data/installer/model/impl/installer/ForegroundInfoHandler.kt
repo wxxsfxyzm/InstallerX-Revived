@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Build
 import android.widget.Toast
@@ -11,6 +12,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -24,6 +26,8 @@ import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.theme.primaryDark
+import com.rosan.installer.ui.theme.primaryLight
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -175,8 +179,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             else -> openIntent
         }
+        val isDarkTheme = context.resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        val brandColor = if (isDarkTheme) primaryDark else primaryLight
         val baseBuilder = NotificationCompat.Builder(context, channel.id)
             .setSmallIcon(Icon.LOGO.resId)
+            .setColor(brandColor.toArgb())
             .setContentIntent(contentIntent)
             .setDeleteIntent(finishIntent)
             .setOnlyAlertOnce(true)

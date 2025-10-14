@@ -23,7 +23,7 @@ lottie = "6.6.10"
 koin-bom = "4.1.1"
 materialVersion = "1.13.0"
 datastoreCoreAndroid = "1.2.0-alpha02"
-aboutLibraries = "12.2.4"
+aboutLibraries = "13.0.0"
 appiconloader = "1.5.0"
 timber = "5.0.1"
 
@@ -37,6 +37,7 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
+aboutLibraries-android = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutLibraries" }
 
 [libraries]
 androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.17.0" }
