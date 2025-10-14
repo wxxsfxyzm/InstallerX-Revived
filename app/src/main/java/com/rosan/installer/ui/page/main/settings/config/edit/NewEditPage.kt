@@ -8,6 +8,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,14 +26,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonShapes
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,7 +49,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.widget.card.NoneInstallerTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowAllRequestedPermissionsWidget
@@ -90,8 +95,22 @@ fun NewEditPage(
     val showFloating by showFloatingState
     val listState = rememberLazyListState()
     val snackBarHostState = remember { SnackbarHostState() }
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     var showUnsavedDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
+    }
+
+    val stateAuthorizer = viewModel.state.data.authorizer
+    val globalAuthorizer = viewModel.globalAuthorizer
+
+    val isNone = when (stateAuthorizer) {
+        ConfigEntity.Authorizer.None -> true
+        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.None
+        else -> false
+    }
 
     LaunchedEffect(listState) {
         var previousIndex = listState.firstVisibleItemIndex
@@ -169,21 +188,27 @@ fun NewEditPage(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentWindowInsets = WindowInsets.none,
         topBar = {
-            TopAppBar(
+            LargeFlexibleTopAppBar(
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                title = { Text(text = stringResource(id = if (id == null) R.string.add else R.string.update)) },
+                title = {
+                    Row {
+                        Text(text = stringResource(id = if (id == null) R.string.add else R.string.update))
+                    }
+                },
                 navigationIcon = {
-                    AppBackButton(
-                        onClick = { navController.navigateUp() },
-                        icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                        modifier = Modifier.size(36.dp),
-                        containerColor = MaterialTheme.colorScheme.surfaceBright
-                    )
+                    Row {
+                        AppBackButton(
+                            onClick = { navController.navigateUp() },
+                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                            modifier = Modifier.size(36.dp),
+                            containerColor = MaterialTheme.colorScheme.surfaceBright
+                        )
+                        Spacer(modifier = Modifier.size(16.dp))
+                    }
                 },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
                 ),
                 actions = {
@@ -259,6 +284,8 @@ fun NewEditPage(
                     }
                 )
             }
+
+            if (isNone) item { NoneInstallerTipCard() }
 
             // --- Group 2: Installer Settings ---
             item {

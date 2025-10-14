@@ -125,7 +125,7 @@
     <string name="config_managed_installer_packages_title">Voreinstellungen für die Installationsquelle</string>
     <string name="config_managed_blacklist_by_package_name_title">Apps, deren Installation aufgrund des Paketnamens untersagt ist</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">Von SharedUID verbotene Apps</string>
-    <string name="config_no_managed_installer_packages">Keine Pakete, deren Installation durch den Paketnamen verboten ist</string>
+    <string name="config_no_preset_install_sources">Keine voreingestellten Installationsquellen</string>
     <string name="config_no_managed_blacklist">Geben Sie hier die Paketnamen der blockierten Apps ein</string>
     <string name="config_no_managed_shared_user_id_blacklist">Keine Apps, deren Installation durch gemeinsame Benutzer-ID verhindert wird</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Ausnahmen, die nur auf SharedUID abzielen; wenn es durch den Paketnamen verboten ist, kann es trotzdem nicht installiert werden.</string>
@@ -343,8 +343,7 @@
     <string name="config_all_users">Für alle Nutzer installieren</string>
     <string name="config_all_users_desc">Paket für alle Nutzer auf dem System, statt auf dem angegebenen oder Standard benutzer</string>
     <string name="config_allow_downgrade">Downgrade zulassen</string>
-    <string name="config_allow_downgrade_blocked_desc">Diese Funktion wird ab Android 15 ohne ROOT nicht mehr unterstützt!</string>
-    <string name="config_allow_downgrade_desc">Versucht, die aktuell installierte Version des Pakets auf die gewählte Version down zu Graden (funktioniert möglicherweise nicht auf allen ROMs)</string>
+    <string name="config_allow_downgrade_desc">Versucht, die aktuell installierte Version des Pakets auf die gewählte Version down zu Graden (Android 15+ erfordert ROOT-Rechte)</string>
     <string name="config_grant_all_permissions">alle angefragten Berechtigungen erlauben</string>
     <string name="config_grant_all_permissions_desc">Gewährt alle vom Paket angeforderten Berechtigungen. Beachten Sie, dass dies nur für Laufzeitberechtigungen gilt. Spezielle Berechtigungen wie „Zugriff auf alle Dateien“ oder „Barrierefreiheit“ werden nicht automatisch gewährt.</string>
     <string name="force_volume_uuid">Volume UUID erzwingen</string>

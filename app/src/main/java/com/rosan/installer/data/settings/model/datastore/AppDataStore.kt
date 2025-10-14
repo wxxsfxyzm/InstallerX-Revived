@@ -40,6 +40,7 @@ class AppDataStore(
         val INSTALL_MODE = stringPreferencesKey("install_mode")
 
         // ApplyViewModel
+        val USER_READ_SCOPE_TIPS = booleanPreferencesKey("user_read_scope_tips")
         val APPLY_ORDER_TYPE = stringPreferencesKey("apply_order_type")
         val APPLY_ORDER_IN_REVERSE = booleanPreferencesKey("apply_order_in_reverse")
         val APPLY_SELECTED_FIRST = booleanPreferencesKey("apply_selected_first")
@@ -58,6 +59,7 @@ class AppDataStore(
             booleanPreferencesKey("show_dialog_install_intelligent_suggestion")
         val DIALOG_DISABLE_NOTIFICATION_ON_DISMISS =
             booleanPreferencesKey("show_disable_notification_for_dialog_install")
+        val DIALOG_SHOW_OPPO_SPECIAL = booleanPreferencesKey("show_oppo_special")
 
         // Customize Installer
         val MANAGED_INSTALLER_PACKAGES_LIST = stringPreferencesKey("managed_packages_list")
@@ -67,16 +69,6 @@ class AppDataStore(
             stringPreferencesKey("managed_shared_user_id_blacklist")
         val MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST =
             stringPreferencesKey("managed_shared_user_id_blacklist_exempted_packages_list")
-
-        val defaultSharedUidBlacklist = listOf(
-            SharedUid(uidName = "android.uid.system", uidValue = 1000),
-            SharedUid(uidName = "android.uid.phone", uidValue = 1001)
-        )
-        val defaultSharedUidExemptedPackagesForXiaoMi = listOf(
-            NamedPackage(name = "安全服务", packageName = "com.miui.securitycenter"),
-            NamedPackage(name = "Joyose", packageName = "com.xiaomi.joyose"),
-            NamedPackage(name = "弹幕通知", packageName = "com.xiaomi.barrage")
-        )
     }
 
     suspend fun putString(key: Preferences.Key<String>, value: String) {
@@ -154,8 +146,11 @@ class AppDataStore(
      * @param key The Preferences.Key<String> to read from DataStore.
      * @return A Flow emitting the list of packages. Returns an empty list if no data or on error.
      */
-    fun getSharedUidList(key: Preferences.Key<String>): Flow<List<SharedUid>> =
-        getString(key, json.encodeToString(defaultSharedUidBlacklist)).map { jsonString ->
+    fun getSharedUidList(
+        key: Preferences.Key<String>,
+        default: List<SharedUid> = emptyList()
+    ): Flow<List<SharedUid>> =
+        getString(key, json.encodeToString(default)).map { jsonString ->
             try {
                 json.decodeFromString<List<SharedUid>>(jsonString)
             } catch (e: Exception) {

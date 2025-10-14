@@ -21,6 +21,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -111,6 +113,7 @@ fun LegacyInstallerGlobalSettingsPage(
                             title = stringResource(id = R.string.version_compare_in_single_line),
                             description = stringResource(id = R.string.version_compare_in_single_line_desc),
                             checked = state.versionCompareInSingleLine,
+                            isM3E = false,
                             onCheckedChange = {
                                 viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it))
                             }
@@ -120,6 +123,7 @@ fun LegacyInstallerGlobalSettingsPage(
                             title = stringResource(id = R.string.sdk_compare_in_multi_line),
                             description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
                             checked = state.sdkCompareInMultiLine,
+                            isM3E = false,
                             onCheckedChange = {
                                 viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it))
                             }
@@ -134,6 +138,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 title = stringResource(id = R.string.show_dialog_install_extended_menu),
                                 description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
                                 checked = viewModel.state.showDialogInstallExtendedMenu,
+                                isM3E = false,
                                 onCheckedChange = {
                                     viewModel.dispatch(
                                         PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
@@ -146,6 +151,7 @@ fun LegacyInstallerGlobalSettingsPage(
                             title = stringResource(id = R.string.show_intelligent_suggestion),
                             description = stringResource(id = R.string.show_intelligent_suggestion_desc),
                             checked = viewModel.state.showSmartSuggestion,
+                            isM3E = false,
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeShowSuggestion(it)
@@ -157,6 +163,7 @@ fun LegacyInstallerGlobalSettingsPage(
                             title = stringResource(id = R.string.disable_notification),
                             description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
                             checked = viewModel.state.disableNotificationForDialogInstall,
+                            isM3E = false,
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeShowDisableNotification(it)
@@ -180,6 +187,7 @@ fun LegacyInstallerGlobalSettingsPage(
                             title = stringResource(id = R.string.show_dialog_when_pressing_notification),
                             description = stringResource(id = R.string.change_notification_touch_behavior),
                             checked = viewModel.state.showDialogWhenPressingNotification,
+                            isM3E = false,
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
@@ -196,6 +204,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 title = stringResource(id = R.string.disable_notification_on_dismiss),
                                 description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
                                 checked = viewModel.state.disableNotificationForDialogInstall,
+                                isM3E = false,
                                 onCheckedChange = {
                                     viewModel.dispatch(
                                         PreferredViewAction.ChangeShowDisableNotification(it)
@@ -206,10 +215,22 @@ fun LegacyInstallerGlobalSettingsPage(
                     }
                 }
             }
+            if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
+                item { LabelWidget(stringResource(R.string.installer_oppo_related)) }
+                item {
+                    SwitchWidget(
+                        icon = AppIcons.OEMSpecial,
+                        title = stringResource(id = R.string.installer_show_oem_special),
+                        description = stringResource(id = R.string.installer_show_oem_special_desc),
+                        checked = state.showOPPOSpecial,
+                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowOPPOSpecial(it)) }
+                    )
+                }
+            }
             item { LabelWidget(label = stringResource(id = R.string.config_managed_installer_packages_title)) }
             item {
                 ManagedPackagesWidget(
-                    noContentTitle = stringResource(R.string.config_no_managed_installer_packages),
+                    noContentTitle = stringResource(R.string.config_no_preset_install_sources),
                     packages = state.managedInstallerPackages,
                     onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
                     onRemovePackage = {

@@ -125,7 +125,7 @@
     <string name="config_managed_installer_packages_title">Instalar predefinições de origem</string>
     <string name="config_managed_blacklist_by_package_name_title">Aplicativos proibidos de instalação pelo nome do pacote</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">Aplicativos proibidos de instalação pelo SharedUID</string>
-    <string name="config_no_managed_installer_packages">Nenhum pacote proibido de instalação pelo nome do pacote</string>
+    <string name="config_no_preset_install_sources">Nenhuma fonte de instalação predefinida</string>
     <string name="config_no_managed_blacklist">Preencha aqui os nomes dos pacotes dos aplicativos bloqueados</string>
     <string name="config_no_managed_shared_user_id_blacklist">Nenhum aplicativo proibido de instalação por ID de usuário compartilhado</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Exceções que têm como alvo apenas o SharedUID; se for proibido pelo nome do pacote, ele ainda não poderá ser instalado.</string>
@@ -339,8 +339,7 @@
     <string name="config_all_users">Instalar para todos os usuários</string>
     <string name="config_all_users_desc">Instalar o pacote para todos os usuários do sistema, ao invés de apenas para o usuário especificado ou padrão</string>
     <string name="config_allow_downgrade">Permitir Downgrade</string>
-    <string name="config_allow_downgrade_blocked_desc">Não suportado por Android 15+ sem ROOT!</string>
-    <string name="config_allow_downgrade_desc">Tenta fazer o downgrade da versão atualmente instalada do pacote para a que está sendo instalada (pode não funcionar em todas as ROMs)</string>
+    <string name="config_allow_downgrade_desc">Tenta fazer o downgrade da versão atualmente instalada do pacote para a que está sendo instalada (Android 15+ requer permissão ROOT)</string>
     <string name="config_grant_all_permissions">Garantir todas as permissões solicitadas</string>
     <string name="config_grant_all_permissions_desc">Conceda automaticamente todas as permissões solicitadas pelo pacote. Observe que isso se aplica apenas às permissões de tempo de execução. Permissões especiais, como \"Acesso a Todos os Arquivos\" ou \"Acessibilidade\", não serão concedidas automaticamente.</string>
     <string name="force_volume_uuid">Forçar Volume UUID</string>
@@ -435,4 +434,28 @@
     <string name="theme_settings_use_live_activity">Atividade ao vivo</string>
     <string name="theme_settings_use_live_activity_desc">Use atividades ao vivo em vez de notificações, não pode ser suportado em ROMs personalizados</string>
     <string name="installer_live_channel_name">Progresso da Instalação</string>
+    <string name="cache_size">Tamanho do Cache: %1$s</string>
+    <string name="theme_settings_package_icons">Fonte do ícone do pacote</string>
+    <string name="theme_settings_prefer_system_icon">Prefira o ícone do sistema para instalação do aplicativo</string>
+    <string name="theme_settings_prefer_system_icon_desc">Tente obter o ícone do sistema, útil ao usar pacotes de ícones. Desative para mostrar o ícone do pacote de instalação</string>
+    <string name="no_cache">Sem cache</string>
+    <string name="clearing_cache">Limpando o cache…</string>
+    <string name="config_authorizer_none_tips">Ao usar o instalador do sistema, a maioria das opções aqui é inválida.</string>
+    <string name="scope_tips">O primeiro perfil é o padrão. O novo perfil pode ser definido como aplicativos específicos para instalações que eles iniciam.</string>
+    <string name="got_it">Entendi</string>
+    <string name="installer_live_channel_short_text_resolving">Resolvendo</string>
+    <string name="installer_live_channel_short_text_preparing">Preparando</string>
+    <string name="installer_live_channel_short_text_analysing">Analisando</string>
+    <string name="installer_live_channel_short_text_pending">Pendente</string>
+    <string name="installer_live_channel_short_text_installing">Instalando</string>
+    <string name="installer_live_channel_short_text_success">Sucesso</string>
+    <string name="installer_live_channel_short_text_resolve_failed">Falhou</string>
+    <string name="installer_live_channel_short_text_install_failed">Falhou</string>
+    <string name="exception_install_failed_missing_install_permission">Por favor, conceda a permissão de instalação de aplicativo desconhecido e tente novamente</string>
+    <string name="sdk_compare_in_multi_line">Mostrar comparação SDK em várias linhas</string>
+    <string name="sdk_compare_in_multi_line_desc">Mostrar comparação SDK em várias linhas na caixa de diálogo de instalação</string>
+    <string name="exception_install_failed_missing_split">Pacote(s) dividido(s) necessário(s) ausente(s)</string>
+    <string name="installer_oppo_related">Relacionado ao OPPO</string>
+    <string name="installer_show_oem_special">Mostrar informações extras do OEM</string>
+    <string name="installer_show_oem_special_desc">Analise e mostre algum valor específico para apks OEM na caixa de diálogo de instalação</string>
 </resources>

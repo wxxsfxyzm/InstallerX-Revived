@@ -10,6 +10,7 @@ data class ApplyViewState(
     val appEntities: ViewContent<List<AppEntity>> = ViewContent(
         data = emptyList(), progress = ViewContent.Progress.Loading
     ),
+    val userReadScopeTips: Boolean = false,
     val orderType: OrderType = OrderType.Label,
     val orderInReverse: Boolean = false,
     val selectedFirst: Boolean = true,

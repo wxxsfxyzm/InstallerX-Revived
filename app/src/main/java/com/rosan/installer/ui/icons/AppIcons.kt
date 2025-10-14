@@ -6,6 +6,7 @@ import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.automirrored.twotone.Rule
 import androidx.compose.material.icons.automirrored.twotone.Send
 import androidx.compose.material.icons.automirrored.twotone.TrendingDown
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.NotInterested
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.twotone.Expand
 import androidx.compose.material.icons.twotone.Face
 import androidx.compose.material.icons.twotone.Favorite
 import androidx.compose.material.icons.twotone.FavoriteBorder
+import androidx.compose.material.icons.twotone.FindInPage
 import androidx.compose.material.icons.twotone.History
 import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
@@ -49,6 +51,7 @@ import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.PermDeviceInformation
+import androidx.compose.material.icons.twotone.Refresh
 import androidx.compose.material.icons.twotone.RocketLaunch
 import androidx.compose.material.icons.twotone.RoomPreferences
 import androidx.compose.material.icons.twotone.Save
@@ -73,12 +76,14 @@ object AppIcons {
     val Add = Icons.TwoTone.Add
     val Edit = Icons.TwoTone.Edit
     val Delete = Icons.TwoTone.Delete
+    val Retry = Icons.TwoTone.Refresh
     val Save = Icons.TwoTone.Save
     val BugReport = Icons.TwoTone.BugReport
     val Terminal = Icons.TwoTone.Terminal
     val Launcher = Icons.TwoTone.RocketLaunch
     val History = Icons.TwoTone.History
     val Suggestion = Icons.TwoTone.AutoAwesome
+    val Tip = Icons.Filled.Lightbulb
     val Update = Icons.TwoTone.SystemUpdate
     val Rule = Icons.AutoMirrored.TwoTone.Rule
     val Search = Icons.TwoTone.Search
@@ -122,6 +127,7 @@ object AppIcons {
     val ClearAll = Icons.TwoTone.ClearAll
     val LiveActivity = Icons.AutoMirrored.TwoTone.Send
     val IconPack = Icons.TwoTone.Widgets
+    val OEMSpecial = Icons.TwoTone.FindInPage
     // --- 设置图标结束 ---
 
     // --- Profile pkg 图标集合 ---

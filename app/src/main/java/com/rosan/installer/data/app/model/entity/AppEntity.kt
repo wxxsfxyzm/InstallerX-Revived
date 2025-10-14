@@ -16,7 +16,7 @@ sealed class AppEntity {
 
     // each app entity may have a container type, such as a split APK or a collection
     abstract val containerType: DataType?
- 
+
     data class BaseEntity(
         override val packageName: String,
         val sharedUserId: String?,
@@ -28,6 +28,8 @@ sealed class AppEntity {
         override val name: String = "base.apk",
         override val targetSdk: String?,
         override val minSdk: String?,
+        // Only available for oppo apk
+        val minOsdkVersion: String? = null,
         override val arch: Architecture? = null,
         override val containerType: DataType? = null,
         // Get from AndroidManifest.xml

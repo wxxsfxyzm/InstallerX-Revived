@@ -22,7 +22,9 @@ import com.rosan.installer.data.app.model.exception.InstallFailedInvalidInstallL
 import com.rosan.installer.data.app.model.exception.InstallFailedInvalidURIException
 import com.rosan.installer.data.app.model.exception.InstallFailedMediaUnavailableException
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingFeatureException
+import com.rosan.installer.data.app.model.exception.InstallFailedMissingInstallPermissionException
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingSharedLibraryException
+import com.rosan.installer.data.app.model.exception.InstallFailedMissingSplitException
 import com.rosan.installer.data.app.model.exception.InstallFailedNewerSDKException
 import com.rosan.installer.data.app.model.exception.InstallFailedNoSharedUserException
 import com.rosan.installer.data.app.model.exception.InstallFailedOlderSdkException
@@ -71,6 +73,7 @@ private fun Throwable.getStringResourceId() =
         is InstallFailedUpdateIncompatibleException -> R.string.exception_install_failed_update_incompatible
         is InstallFailedSharedUserIncompatibleException -> R.string.exception_install_failed_shared_user_incompatible
         is InstallFailedMissingSharedLibraryException -> R.string.exception_install_failed_missing_shared_library
+        is InstallFailedMissingInstallPermissionException -> R.string.exception_install_failed_missing_install_permission
         is InstallFailedReplaceCouldntDeleteException -> R.string.exception_install_failed_replace_couldnt_delete
         is InstallFailedDexOptException -> R.string.exception_install_failed_dexopt
         is InstallFailedOlderSdkException -> R.string.exception_install_failed_older_sdk
@@ -88,6 +91,7 @@ private fun Throwable.getStringResourceId() =
         is InstallFailedPackageChangedException -> R.string.exception_install_failed_package_changed
         is InstallFailedUidChangedException -> R.string.exception_install_failed_uid_changed
         is InstallFailedVersionDowngradeException -> R.string.exception_install_failed_version_downgrade
+        is InstallFailedMissingSplitException -> R.string.exception_install_failed_missing_split
         is InstallFailedDeprecatedSdkVersion -> R.string.exception_install_failed_deprecated_sdk_version
         is InstallFailedRejectedByBuildTypeException -> R.string.exception_install_failed_rejected_by_build_type
         is InstallFailedOriginOSBlacklistException -> R.string.exception_install_failed_origin_os_blacklist

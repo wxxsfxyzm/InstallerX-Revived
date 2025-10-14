@@ -15,7 +15,6 @@ import android.provider.OpenableColumns
 import android.system.Os
 import androidx.core.net.toUri
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
@@ -249,10 +248,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             // Load the whitelist by UID from AppDataStore.
             Timber.d("[id=${installer.id}] install: Loading SharedUID whitelist from AppDataStore.")
             val sharedUserIdExemption = appDataStore
-                .getNamedPackageList(
-                    key = AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST,
-                    default = if (RsConfig.currentManufacturer == Manufacturer.XIAOMI) AppDataStore.defaultSharedUidExemptedPackagesForXiaoMi else emptyList()
-                )
+                .getNamedPackageList(key = AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
                 .first()
                 .map { it.packageName } // Extract the package names to compare
             Timber.d("[id=${installer.id}] install: SharedUID whitelist loaded with ${sharedUserIdExemption.size} entries.")
@@ -388,15 +384,78 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.Finish)
     }
 
+    private val SYSTEM_URI_AUTHORITIES = setOf(
+        "media", // Common MediaStore authority
+        "com.android.providers.media.module", // Media provider on modern Android
+        "com.android.providers.downloads", // Legacy download manager
+        "com.android.externalstorage.documents" // External storage provider
+        // Add any other generic authorities users might encounter
+    )
+
     private suspend fun resolveConfig(activity: Activity): ConfigEntity {
-        val packageName = activity.callingPackage
-            ?: (activity.referrer?.host)
-        var config = ConfigUtil.getByPackageName(packageName)
-        if (config.installer == null) config = config.copy(
-            installer = packageName
-        )
+        Timber.tag("InstallSource").d("[id=${installer.id}] resolveConfig: Starting.")
+
+        // --- Method 1: The original attempt (fast but often null) ---
+        val callingPackage = activity.callingPackage
+        Timber.tag("InstallSource").d("activity.callingPackage: $callingPackage")
+        if (callingPackage != null) {
+            return getConfigForPackage(callingPackage)
+        }
+
+        // --- Method 2: Check the referrer (with scheme validation) ---
+        val referrer = activity.referrer
+        Timber.tag("InstallSource").d("activity.referrer: $referrer")
+        if (referrer?.scheme == "android-app" && referrer.host != null) {
+            val referrerPackage = referrer.host
+            Timber.tag("InstallSource").d("Valid app referrer found: $referrerPackage")
+            return getConfigForPackage(referrerPackage)
+        } else if (referrer != null) {
+            Timber.tag("InstallSource").w("Ignoring referrer with non-app scheme: ${referrer.scheme}")
+        }
+
+        // --- Method 3: The most robust fallback - Inspect the Intent's data URI authority ---
+        val intent = activity.intent
+        val authority = intent.data?.authority ?: intent.clipData?.getItemAt(0)?.uri?.authority
+        Timber.tag("InstallSource").d("URI authority: $authority")
+
+        if (authority != null) {
+            // FINAL CHECK: If the authority is a generic system provider, treat it as unknown.
+            // Otherwise, we can trust it as the source app's provider.
+            if (authority in SYSTEM_URI_AUTHORITIES) {
+                Timber.tag("InstallSource").w("Authority '$authority' is a generic system provider. Using default config.")
+                return getConfigForPackage(null) // Use default/global config
+            } else {
+                // This is a specific app's FileProvider, extract the package name.
+                val authorityPackage = extractPackageFromAuthority(authority)
+                Timber.tag("InstallSource").d("Package from app-specific authority: $authorityPackage")
+                return getConfigForPackage(authorityPackage)
+            }
+        }
+
+        // --- Fallback: If all methods fail, return a default config ---
+        Timber.tag("InstallSource").w("Could not determine calling package. Using default config.")
+        return getConfigForPackage(null) // Or your preferred default behavior
+    }
+
+    /**
+     * A helper function to create the config.
+     * Passing null will result in the global default config.
+     */
+    private suspend fun getConfigForPackage(packageName: String?): ConfigEntity {
+        // getByPackageName should be designed to return the default config if packageName is null.
+        val config = ConfigUtil.getByPackageName(packageName)
+        Timber.tag("InstallSource").d("Resolved config for '${packageName ?: "default"}': $config")
         return config
     }
+
+    /**
+     * Extracts the base package name from a FileProvider authority.
+     */
+    private fun extractPackageFromAuthority(authority: String): String {
+        return authority.removeSuffix(".FileProvider")
+            .removeSuffix(".provider")
+    }
+
 
     /**
      * New function that combines resolving and stabilizing (caching) data in one step.

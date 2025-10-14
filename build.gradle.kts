@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.compose.compiler) apply false
     alias(libs.plugins.aboutLibraries) apply false
+    alias(libs.plugins.aboutLibraries.android) apply false
+
 }
 
 tasks.register("Delete", Delete::class) {

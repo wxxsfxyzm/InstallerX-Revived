@@ -36,8 +36,8 @@ fun MiuixMainPage(navController: NavController, preferredViewModel: PreferredVie
 
     val pages = arrayOf(
         NavigationData(
-            icon = Icons.Rounded.RoomPreferences,
-            label = stringResource(R.string.config)
+        icon = Icons.Rounded.RoomPreferences,
+        label = stringResource(R.string.config)
         ) {
             MiuixAllPage(navController, allViewModel)
         },

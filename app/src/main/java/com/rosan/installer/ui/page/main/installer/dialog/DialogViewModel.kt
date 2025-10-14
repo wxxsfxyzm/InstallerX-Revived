@@ -75,6 +75,8 @@ class DialogViewModel(
     var sdkCompareInMultiLine by mutableStateOf(false)
         private set
 
+    var showOPPOSpecial by mutableStateOf(false)
+
     // Text to show in the progress bar
     private val _installProgressText = MutableStateFlow<UiText?>(null)
     val installProgressText: StateFlow<UiText?> = _installProgressText.asStateFlow()
@@ -175,6 +177,8 @@ class DialogViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false).first()
             sdkCompareInMultiLine =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false).first()
+            showOPPOSpecial =
+                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false).first()
 
             // Load managed packages for installer selection.
             appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->

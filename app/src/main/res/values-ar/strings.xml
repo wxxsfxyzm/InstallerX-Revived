@@ -110,7 +110,7 @@
     <string name="config_follow_settings">اتباع الملف الشخصي</string>
     <string name="config_managed_installer_packages_title">مصادر التثبيت المعينة مسبقًا</string>
     <string name="config_managed_blacklist_by_package_name_title">التطبيقات المحظور تثبيتها</string>
-    <string name="config_no_managed_installer_packages">لا توجد حزم تثبيت مُدارة</string>
+    <string name="config_no_preset_install_sources">لا توجد مصادر تثبيت مُعدة مسبقًا</string>
     <string name="config_no_managed_blacklist">أدخل أسماء حزم التطبيقات المحظورة هنا</string>
     <string name="config_managed_packages_desc">إضافة أو إزالة الحزم المُدارة</string>
     <string name="config_add_one_to_get_started">انقر على "إضافة" أدناه للبدء</string>
@@ -326,7 +326,7 @@
     <string name="full_app">تطبيق كامل</string>
     <string name="full_app_desc">يشير إلى أن الحزمة التي يتم تثبيتها هي تطبيق كامل. يمكن استخدامه لترقية التطبيقات الفورية إلى تطبيقات كاملة.</string>
     <string name="allocate_aggressive">تخصيص عنيف للمساحة</string>
-    <string name="allocate_aggressive_desc">يشير إلى أن الحزمة "حيوية لصحة النظام أو أمانه" وستقوم بحذف الملفات القابلة للمسح بقوة أكبر لتوفير مساحة إذا لزم الأمر.</string>
+    <string name="allocate_aggressive_desc">يشير إلى أن الحزمة حيوية لصحة النظام أو أمانه وستقوم بحذف الملفات القابلة للمسح بقوة أكبر لتوفير مساحة إذا لزم الأمر.</string>
     <string name="virtual_preload">تحميل مسبق افتراضي</string>
     <string name="virtual_preload_desc">يشير إلى أن الحزمة هي تحميل مسبق افتراضي.</string>
     <string name="apex_desc">يشير إلى أن الحزمة التي يتم تثبيتها هي حزمة APEX</string>
@@ -388,4 +388,9 @@
     <string name="suggestion_mi_isolation">إضافة مُثبِّت صالح مؤقتًا وإعادة المحاولة</string>
     <string name="suggestion_user_restricted">اذهب إلى خيارات المطور لتمكين التثبيت عبر USB</string>
     <string name="suggestion_bypass_low_target_sdk">السماح مؤقتًا بتجاوز القيود وإعادة المحاولة</string>
+    <string name="warning">تحذير</string>
+    <string name="telegram_channel">قناة تيلجرام</string>
+    <string name="get_source_code">التحقق من مصدر الكود</string>
+    <string name="get_source_code_detail">التحقق من مصدر الكود على - GitHub</string>
+    <string name="telegram_channel_desc">انضم للقناة لمتابعة آخر الإخبار والتحديثات!</string>
 </resources>

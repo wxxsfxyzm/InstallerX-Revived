@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.core.content.res.ResourcesCompat
 import com.rosan.installer.build.Architecture
+import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
@@ -112,13 +113,15 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
                 )
             }
 
-            listOf(loadAppEntity(
-                apkResources,
-                apkResources.newTheme(),
-                data,
-                extra,
-                bestArch ?: Architecture.UNKNOWN
-            ))
+            listOf(
+                loadAppEntity(
+                    apkResources,
+                    apkResources.newTheme(),
+                    data,
+                    extra,
+                    bestArch ?: Architecture.UNKNOWN
+                )
+            )
         }
     }
 
@@ -141,6 +144,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
         var splitName: String? = null
         var versionCode: Long = -1
         var versionName = ""
+        var minOsdkVersion: String? = null
         var label: String? = null
         var icon: Drawable? = null
         var roundIcon: Drawable? = null
@@ -235,6 +239,27 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
                     }
                 }
             }
+            .register("/manifest/application/meta-data") {
+                if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
+                    val metaName = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")
+                    if ("minOsdkVersion" == metaName) {
+                        minOsdkVersion =
+                            when (val resId = getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "value", -1)) {
+                                -1 -> getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "value")
+                                0 -> null
+
+                                else -> {
+                                    try {
+                                        resources.getString(resId)
+                                    } catch (e: Resources.NotFoundException) {
+                                        Timber.w(e, "Could not resolve minOsdkVersion resource ID: %x.", resId)
+                                        getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "value")
+                                    }
+                                }
+                            }
+                    }
+                }
+            }
             .register("/manifest/uses-permission") {
                 val permissionName = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")
                 if (!permissionName.isNullOrBlank()) {
@@ -253,6 +278,7 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
             icon = roundIcon ?: icon,
             targetSdk = targetSdk,
             minSdk = minSdk,
+            minOsdkVersion = minOsdkVersion,
             arch = arch,
             permissions = permissions,
             containerType = extra.dataType,

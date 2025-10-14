@@ -29,6 +29,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPack
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
 import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolationException
+import com.rosan.installer.data.app.model.exception.InstallFailedMissingInstallPermissionException
 import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
 import com.rosan.installer.data.app.model.exception.InstallFailedUpdateIncompatibleException
 import com.rosan.installer.data.app.model.exception.InstallFailedUserRestrictedException
@@ -244,6 +245,15 @@ private fun ErrorSuggestions(
                     },
                     labelRes = R.string.suggestion_bypass_blacklist_set_by_user,
                     icon = AppIcons.BugReport
+                )
+            )
+            add(
+                SuggestionChipInfo(
+                    InstallFailedMissingInstallPermissionException::class,
+                    selected = { true },
+                    onClick = { viewModel.dispatch(DialogViewAction.Install) },
+                    labelRes = R.string.retry,
+                    icon = AppIcons.Retry
                 )
             )
         }

@@ -53,6 +53,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -91,26 +92,26 @@ fun MiuixDataAuthorizerWidget(
     val context = LocalContext.current
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
-    // The data source remains unchanged.
     val authorizerOptions = remember {
-        mapOf(
-            /*ConfigEntity.Authorizer.None to AuthorizerInfo(
-                R.string.config_authorizer_none,
-                AppIcons.None
-            ),*/
-            ConfigEntity.Authorizer.Root to AuthorizerInfo(
-                R.string.config_authorizer_root,
-                AppIcons.Root
-            ),
-            ConfigEntity.Authorizer.Shizuku to AuthorizerInfo(
-                R.string.config_authorizer_shizuku,
-                shizukuIcon
-            ),
-            ConfigEntity.Authorizer.Dhizuku to AuthorizerInfo(
-                R.string.config_authorizer_dhizuku,
-                AppIcons.InstallAllowRestrictedPermissions
-            ),
-        )
+        buildMap {
+            if (!RsConfig.isMiui)
+                put(
+                    ConfigEntity.Authorizer.None,
+                    AuthorizerInfo(R.string.config_authorizer_none, AppIcons.None)
+                )
+            put(
+                ConfigEntity.Authorizer.Root,
+                AuthorizerInfo(R.string.config_authorizer_root, AppIcons.Root)
+            )
+            put(
+                ConfigEntity.Authorizer.Shizuku,
+                AuthorizerInfo(R.string.config_authorizer_shizuku, shizukuIcon)
+            )
+            put(
+                ConfigEntity.Authorizer.Dhizuku,
+                AuthorizerInfo(R.string.config_authorizer_dhizuku, AppIcons.InstallAllowRestrictedPermissions)
+            )
+        }
     }
 
     //    Convert the authorizerOptions Map into a List<SpinnerEntry>
@@ -119,20 +120,18 @@ fun MiuixDataAuthorizerWidget(
     val spinnerEntries = remember(authorizerOptions) {
         authorizerOptions.values.map { authorizerInfo ->
             SpinnerEntry(
-                //icon = { Icon(imageVector = authorizerInfo.icon, contentDescription = null) },
+                // icon = { Icon(imageVector = authorizerInfo.icon, contentDescription = null) },
                 title = context.getString(authorizerInfo.labelResId)
             )
         }
     }
 
-    // 2. SuperSpinner requires an integer index for the selected item.
+    //    SuperSpinner requires an integer index for the selected item.
     //    Find the index of the currentAuthorizer from the map's keys.
     val selectedIndex = remember(currentAuthorizer, authorizerOptions) {
         authorizerOptions.keys.indexOf(currentAuthorizer).coerceAtLeast(0)
     }
 
-    // Use SuperSpinner directly, as shown in your TextComponent.kt example.
-    // This single component replaces the entire ListItem + FlowRow + InputChip structure.
     SuperSpinner(
         modifier = modifier,
         mode = SpinnerMode.AlwaysOnRight,
@@ -145,9 +144,7 @@ fun MiuixDataAuthorizerWidget(
             if (currentAuthorizer != newAuthorizer) {
                 changeAuthorizer(newAuthorizer)
             }
-        },
-        // SuperSpinner has a disabled state, so we disable the "None" option by checking its index.
-        enabled = selectedIndex != authorizerOptions.keys.indexOf(ConfigEntity.Authorizer.None)
+        }
     )
     trailingContent()
 }
@@ -169,7 +166,6 @@ fun MiuixDataInstallModeWidget(
 ) {
     val context = LocalContext.current
 
-    // The data source definition remains the same.
     val installModeOptions = remember {
         mapOf(
             ConfigEntity.InstallMode.Dialog to InstallModeInfo(
@@ -220,9 +216,6 @@ fun MiuixDataInstallModeWidget(
                 changeInstallMode(newMode)
             }
         }
-        // The `onClick` parameter from the function signature is not used here,
-        // because SuperSpinner handles its own interaction logic. This matches
-        // the behavior of your original code where the outer ListItem was not clickable.
     )
 }
 

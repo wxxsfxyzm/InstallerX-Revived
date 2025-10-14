@@ -79,7 +79,7 @@
     <string name="config_manual_dexopt_desc">เรียกใช้กระบวนการ dex2oat ด้วยตนเองหลังจากการติดตั้ง</string>
     <string name="config_name">ชื่อโปรไฟล์</string>
     <string name="config_no_managed_blacklist">กรอกชื่อแพ็คเกจของแอปที่ถูกบล็อกที่นี่</string>
-    <string name="config_no_managed_installer_packages">ไม่มีแพ็คเกจตัวติดตั้งที่จัดการ</string>
+    <string name="config_no_preset_install_sources">ไม่มีแหล่งติดตั้งที่ตั้งค่าไว้ล่วงหน้า</string>
     <string name="config_no_managed_packages_to_suggest">ไม่มีอะไรจะแนะนำ</string>
     <string name="config_package_name">ชื่อแพ็คเกจ</string>
     <string name="config_request_update_ownership">ร้องขอความเป็นเจ้าของในการอัปเดต</string>
