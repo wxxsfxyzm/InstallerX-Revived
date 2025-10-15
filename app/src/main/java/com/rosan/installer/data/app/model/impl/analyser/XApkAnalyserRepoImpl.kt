@@ -5,6 +5,7 @@ import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.repo.FileAnalyserRepo
+import com.rosan.installer.data.app.util.FlexibleXapkVersionCodeSerializer
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
@@ -117,12 +118,12 @@ object XApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
     @Serializable
     private data class Manifest(
         @SerialName("package_name") val packageName: String,
-        @SerialName("version_code") val versionCodeStr: String,
+        @SerialName("version_code") @Serializable(with = FlexibleXapkVersionCodeSerializer::class) val versionCodeStr: String,
         @SerialName("version_name") val versionNameStr: String?,
         @SerialName("name") val label: String?,
         @SerialName("split_apks") val splits: List<Split>,
-        @SerialName("min_sdk_version") val minSdk: String?,
-        @SerialName("target_sdk_version") val targetSdk: String?,
+        @SerialName("min_sdk_version") val minSdk: String? = null,
+        @SerialName("target_sdk_version") val targetSdk: String? = null,
     ) {
         val versionCode: Long = versionCodeStr.toLong()
         val versionName: String = versionNameStr ?: ""
