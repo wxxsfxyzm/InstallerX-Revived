@@ -67,6 +67,12 @@ jobs:
       # 7. 构建 APK
       - name: Build Dev Release APK
         run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease
+        
+      - name: Create Module
+        run: |
+          cp ${{ steps.rename_apks.outputs.online_apk }} module/priv-app/com.android.packageinstaller/com.android.packageinstaller.apk
+          zip -r module.zip module/*
+      
 
       # 8. 上传 APK 作为 Artifact
       #    将所有构建产物打包到一个ZIP文件中
@@ -79,5 +85,6 @@ jobs:
           path: |
             app/build/outputs/apk/onlineUnstable/release/*.apk
             app/build/outputs/apk/offlineUnstable/release/*.apk
+            module.zip
           # 设置产物的保留天数
           retention-days: 15
