@@ -1,4 +1,4 @@
-package top.yukonga.miuix.kmp.extra
+package top.yukonga.miuix.kmp.extra.patched
 
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0

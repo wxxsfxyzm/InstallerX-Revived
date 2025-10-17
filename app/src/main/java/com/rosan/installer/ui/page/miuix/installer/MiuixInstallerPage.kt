@@ -11,14 +11,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
 import com.rosan.installer.ui.page.miuix.installer.sheet.MiuixSheetContent
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
+import top.yukonga.miuix.kmp.extra.patched.SuperBottomSheet
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Settings
@@ -31,7 +35,7 @@ fun MiuixInstallerPage(
     val scope = rememberCoroutineScope()
     val showBottomSheet = remember { mutableStateOf(true) }
 
-    // val viewModel: DialogViewModel = koinViewModel { parametersOf(installer) }
+    val viewModel: DialogViewModel = koinViewModel { parametersOf(installer) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -65,12 +69,16 @@ fun MiuixInstallerPage(
             showBottomSheet.value = !showBottomSheet.value
             scope.launch {
                 delay(100L) // Wait for 100 milliseconds (the 'L' is for Long)
-                onDismiss() // Execute this after the delay
+                if (viewModel.isDismissible) {
+                    if (viewModel.disableNotificationOnDismiss) {
+                        viewModel.dispatch(DialogViewAction.Close)
+                    } else {
+                        viewModel.dispatch(DialogViewAction.Background)
+                    }
+                }
             }
-        } // When user taps outside or presses back, call the lambda.
+        }
     ) {
-        MiuixSheetContent(installer = installer/*, viewModel = viewModel*/)
+        MiuixSheetContent(installer = installer, viewModel = viewModel)
     }
-
-    //
 }
