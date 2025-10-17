@@ -288,15 +288,16 @@ fun installPrepareDialog( // 小写开头
         buttons = DialogButtons(
             DialogParamsType.InstallerPrepareInstall.id
         ) {
-            // --- NEW LOGIC: Use buildList to dynamically create buttons ---
-            // Use buildList to create a list of buttons
+            // --- Use buildList to dynamically create buttons ---
             buildList {
                 // Install button is shown if the entity's minSdk is compatible
                 val canInstall =
                     entityToInstall != null && entityToInstall.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true
+                val isAPK =
+                    containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK
 
                 // only when the entity is a split APK, XAPK, or APKM
-                if (canInstall && viewModel.showExtendedMenu && (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK)) {
+                if (canInstall && viewModel.showExtendedMenu && isAPK) {
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
                         viewModel.dispatch(DialogViewAction.InstallChoice)
                     })
@@ -312,7 +313,7 @@ fun installPrepareDialog( // 小写开头
                         viewModel.dispatch(DialogViewAction.InstallExtendedMenu)
                     })
                 }
-                if (canInstall && !viewModel.showExtendedMenu && (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK))
+                if (canInstall && !viewModel.showExtendedMenu && isAPK)
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
                         viewModel.dispatch(DialogViewAction.InstallChoice)
                     })
@@ -321,7 +322,7 @@ fun installPrepareDialog( // 小写开头
                     viewModel.dispatch(DialogViewAction.Close)
                 })
             }
-            // --- LOGIC END ---
+            // --- BuildList END ---
         }
     )
 }

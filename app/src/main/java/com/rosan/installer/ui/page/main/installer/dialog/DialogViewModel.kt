@@ -29,6 +29,7 @@ import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil.Companion.readGlobal
 import com.rosan.installer.ui.page.main.installer.dialog.inner.UiText
+import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -501,7 +502,7 @@ class DialogViewModel(
                 }
             }.onFailure { error ->
                 Timber.e(error, "Failed to load available users.")
-                toast(error.message ?: "Failed to load users")
+                toast(error.getErrorMessage(context))
                 _availableUsers.value = emptyMap()
                 // Also reset selected user on failure.
                 if (_selectedUserId.value != 0) {
