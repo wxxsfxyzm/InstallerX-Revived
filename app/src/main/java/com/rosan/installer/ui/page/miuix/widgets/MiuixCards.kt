@@ -29,7 +29,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * - The bottom section displays detailed error information, which is the full
  * stack trace in debug builds or the error message in release builds.
  *
- * This component uses the error container colors with transparency as previously discussed.
  *
  * @param error The throwable error to display.
  * @param modifier Modifier for the root Card.
@@ -39,22 +38,18 @@ fun MiuixErrorTextBlock(
     error: Throwable,
     modifier: Modifier = Modifier
 ) {
-    // Determine the background and content colors based on the theme.
-    // These are the colors with 80% transparency we finalized previously.
     val isDark = isSystemInDarkTheme()
     val cardBackgroundColor = if (isDark) Color(0xCC8C2323) else Color(0xCCFBEAEA)
-    // Choose a high-contrast text color for readability on the error background.
-    val contentColor = if (isDark) Color.White else Color(0xFF601A15)
+    val errorColor = if (isDark) Color.White else Color(0xFF601A15)
 
     Card(
         modifier = modifier,
         colors = CardColors(
             color = cardBackgroundColor,
-            contentColor = contentColor // Set the default content color for the card
+            contentColor = errorColor
         )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // 1. Top Section: User-friendly error message
             Text(
                 text = error.help(),
                 fontWeight = FontWeight.Bold,
@@ -64,22 +59,18 @@ fun MiuixErrorTextBlock(
                     .padding(16.dp, 16.dp, 16.dp, 8.dp)
             )
 
-            // 2. Middle Section: Divider
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
 
-            // 3. Bottom Section: Detailed error information
-            // TODO change debug state
-            val textToShow = if (!RsConfig.isDebug) {
+            val textToShow = if (RsConfig.isDebug) {
                 error.stackTraceToString()
             } else {
-                error.message ?: "An unknown error occurred." // Fallback message
+                error.message ?: "An unknown error occurred."
             }.trim()
 
-            // Use BasicTextField in a scrollable Box for selectable text
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -89,7 +80,7 @@ fun MiuixErrorTextBlock(
                     value = textToShow,
                     onValueChange = {},
                     readOnly = true,
-                    textStyle = LocalTextStyle.current.copy(color = contentColor),
+                    textStyle = LocalTextStyle.current.copy(color = errorColor),
                     modifier = Modifier
                         .fillMaxWidth()
                         // Allow vertical scrolling for long stack traces

@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.icons
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.automirrored.twotone.Rule
@@ -153,6 +154,7 @@ object AppIcons {
     // val ArrowDropUp = Icons.TwoTone.KeyboardArrowUp
 
     val ArrowUp = Icons.TwoTone.ArrowUpward
+    val ArrowIndicator = Icons.AutoMirrored.Rounded.ArrowForward
     // --- 箭头结束 ---
 
     // --- 沙漏图标集合 ---

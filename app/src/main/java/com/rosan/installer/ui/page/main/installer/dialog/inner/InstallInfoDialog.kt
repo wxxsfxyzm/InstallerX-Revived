@@ -325,7 +325,7 @@ fun installInfoDialog(
                                 ) {
                                     entityToInstall.minSdk?.let { newMinSdk ->
                                         SdkInfoExpanded(
-                                            labelPrefixResId = R.string.installer_package_min_sdk_label,
+                                            labelPrefixResId = R.string.installer_package_min_label,
                                             newSdk = newMinSdk,
                                             oldSdk = preInstallAppInfo?.minSdk?.toString(),
                                             isArchived = preInstallAppInfo?.isArchived ?: false,
@@ -334,7 +334,7 @@ fun installInfoDialog(
                                     }
                                     entityToInstall.targetSdk?.let { newTargetSdk ->
                                         SdkInfoExpanded(
-                                            labelPrefixResId = R.string.installer_package_target_sdk_label,
+                                            labelPrefixResId = R.string.installer_package_target_label,
                                             newSdk = newTargetSdk,
                                             oldSdk = preInstallAppInfo?.targetSdk?.toString(),
                                             isArchived = preInstallAppInfo?.isArchived ?: false,
