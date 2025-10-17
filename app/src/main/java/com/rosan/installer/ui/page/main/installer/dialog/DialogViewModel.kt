@@ -480,6 +480,11 @@ class DialogViewModel(
                     selectTargetUser(0)
                 }
             }.onFailure { error ->
+                // Check if the error is caused by coroutine cancellation.
+                if (error is kotlinx.coroutines.CancellationException) {
+                    Timber.d("User loading job was cancelled as expected.")
+                    throw error
+                }
                 Timber.e(error, "Failed to load available users.")
                 toast(error.message ?: "Failed to load users")
                 _availableUsers.value = emptyMap()
