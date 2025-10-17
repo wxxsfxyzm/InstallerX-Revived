@@ -31,6 +31,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.Archive
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -92,8 +94,10 @@ fun installInfoDialog(
     val selectedApps = selectableEntities.filter { it.selected }.map { it.app }
     // If no apps are selected, return empty DialogParams
     val entityToInstall = selectedApps.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+        ?: selectedApps.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
         ?: selectedApps.sortedBest().firstOrNull()
         ?: return DialogParams()
+    val isModule = entityToInstall is AppEntity.ModuleEntity
 
     // 为当前应用的所有 UI 部件创建一个唯一的 ID
     // 确保 AnimatedContent 能够检测到内容变化
@@ -102,6 +106,7 @@ fun installInfoDialog(
     val displayLabel: String =
         (if (entityToInstall is AppEntity.BaseEntity) entityToInstall.label else preInstallAppInfo?.label)
             ?: when (entityToInstall) {
+                is AppEntity.ModuleEntity -> entityToInstall.name
                 is AppEntity.SplitEntity -> entityToInstall.splitName
                 is AppEntity.DexMetadataEntity -> entityToInstall.dmName
                 else -> entityToInstall.packageName
@@ -125,7 +130,6 @@ fun installInfoDialog(
                     modifier = Modifier.size(64.dp),
                     contentAlignment = Alignment.Center
                 ) {
-
                     Image(
                         modifier = Modifier
                             .fillMaxSize()
@@ -172,11 +176,18 @@ fun installInfoDialog(
                             ),
                             onClick = onTitleExtraClick
                         ) {
-                            Icon(
-                                imageVector = AppIcons.AutoFixHigh,
-                                contentDescription = null,
-                                modifier = Modifier.padding(4.dp)
-                            )
+                            if (isModule)
+                                Icon(
+                                    imageVector = Icons.TwoTone.Archive,
+                                    contentDescription = null,
+                                    modifier = Modifier.padding(4.dp)
+                                )
+                            else
+                                Icon(
+                                    imageVector = AppIcons.Android,
+                                    contentDescription = null,
+                                    modifier = Modifier.padding(4.dp)
+                                )
                         }
                     }
                 }
@@ -198,74 +209,92 @@ fun installInfoDialog(
                 Spacer(modifier = Modifier.size(8.dp))
 
                 // --- Version Info Display ---
-                if (entityToInstall is AppEntity.BaseEntity) {
-                    if (preInstallAppInfo == null) {
-                        // 首次安装或无法获取旧信息: 只显示新版本，不带前缀
+                when (entityToInstall) {
+                    is AppEntity.BaseEntity -> {
+                        if (preInstallAppInfo == null) {
+                            // 首次安装或无法获取旧信息: 只显示新版本，不带前缀
+                            Text(
+                                text = stringResource(
+                                    R.string.installer_version, // Use base version string
+                                    entityToInstall.versionName,
+                                    entityToInstall.versionCode
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.basicMarquee()
+                            )
+                        } else {
+                            //
+                            // true = singleLine, false = multiLine
+                            val defaultIsSingleLine = viewModel.versionCompareInSingleLine
+
+                            // Pair(first = isSingleLine, second = shouldAnimate)
+                            var contentState by remember {
+                                mutableStateOf(Pair(defaultIsSingleLine, false)) // Initial state, don't animate
+                            }
+
+                            // Sync with ViewModel default value without animation
+                            LaunchedEffect(defaultIsSingleLine) {
+                                if (contentState.first != defaultIsSingleLine) {
+                                    contentState =
+                                        Pair(defaultIsSingleLine, false) // Sync state, but flag for no animation
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier.clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    // On every click, toggle the line mode and ALWAYS enable animation
+                                    contentState = Pair(!contentState.first, true)
+                                }
+                            ) {
+                                AnimatedContent(
+                                    targetState = contentState,
+                                    transitionSpec = {
+                                        // Check the 'shouldAnimate' flag from our state Pair
+                                        if (targetState.second) {
+                                            // Animate: This is for user clicks
+                                            fadeIn(tween(200)) togetherWith fadeOut(tween(200)) using
+                                                    SizeTransform { _, _ -> tween(250) }
+                                        } else {
+                                            // No animation: This is for initial composition or programmatic changes
+                                            fadeIn(tween(0)) togetherWith fadeOut(tween(0))
+                                        }
+                                    },
+                                    label = "VersionViewAnimation"
+                                ) { state ->
+                                    // state is the Pair(isSingleLine, shouldAnimate)
+                                    if (state.first) {
+                                        VersionCompareSingleLine(preInstallAppInfo, entityToInstall)
+                                    } else {
+                                        VersionCompareMultiLine(preInstallAppInfo, entityToInstall)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    is AppEntity.ModuleEntity -> {
+                        // For modules, just show the current info without comparison.
                         Text(
                             text = stringResource(
-                                R.string.installer_version, // Use base version string
-                                entityToInstall.versionName,
+                                R.string.installer_version,
+                                entityToInstall.version,
                                 entityToInstall.versionCode
                             ),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.basicMarquee()
                         )
-                    } else {
-                        //
-                        // true = singleLine, false = multiLine
-                        val defaultIsSingleLine = viewModel.versionCompareInSingleLine
-
-                        // Pair(first = isSingleLine, second = shouldAnimate)
-                        var contentState by remember {
-                            mutableStateOf(Pair(defaultIsSingleLine, false)) // Initial state, don't animate
-                        }
-
-                        // Sync with ViewModel default value without animation
-                        LaunchedEffect(defaultIsSingleLine) {
-                            if (contentState.first != defaultIsSingleLine) {
-                                contentState = Pair(defaultIsSingleLine, false) // Sync state, but flag for no animation
-                            }
-                        }
-
-                        Box(
-                            modifier = Modifier.clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                // On every click, toggle the line mode and ALWAYS enable animation
-                                contentState = Pair(!contentState.first, true)
-                            }
-                        ) {
-                            AnimatedContent(
-                                targetState = contentState,
-                                transitionSpec = {
-                                    // Check the 'shouldAnimate' flag from our state Pair
-                                    if (targetState.second) {
-                                        // Animate: This is for user clicks
-                                        fadeIn(tween(200)) togetherWith fadeOut(tween(200)) using
-                                                SizeTransform { _, _ -> tween(250) }
-                                    } else {
-                                        // No animation: This is for initial composition or programmatic changes
-                                        fadeIn(tween(0)) togetherWith fadeOut(tween(0))
-                                    }
-                                },
-                                label = "VersionViewAnimation"
-                            ) { state ->
-                                // state is the Pair(isSingleLine, shouldAnimate)
-                                if (state.first) {
-                                    VersionCompareSingleLine(preInstallAppInfo, entityToInstall)
-                                } else {
-                                    VersionCompareMultiLine(preInstallAppInfo, entityToInstall)
-                                }
-                            }
-                        }
                     }
+
+                    else -> {}
                 }
                 // --- SDK Information Showcase ---
                 val defaultSdkSingleLine = !viewModel.sdkCompareInMultiLine
                 var sdkContentState by remember { mutableStateOf(Pair(defaultSdkSingleLine, false)) }
 
-                AnimatedVisibility(visible = installer.config.displaySdk) {
+                AnimatedVisibility(visible = installer.config.displaySdk && entityToInstall.containerType != DataType.MODULE_ZIP) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()

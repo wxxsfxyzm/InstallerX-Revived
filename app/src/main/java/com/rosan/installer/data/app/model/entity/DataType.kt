@@ -11,5 +11,6 @@ enum class DataType {
     MULTI_APK,
     MULTI_APK_ZIP,
     MODULE_ZIP,
+    MIXED_MODULE_APK,
     NONE
 }

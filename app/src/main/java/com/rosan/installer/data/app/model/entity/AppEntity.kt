@@ -75,4 +75,21 @@ sealed class AppEntity {
     ) : AppEntity() {
         override val name: String = "collection.zip" // 使用一个通用的名称
     }
+
+    data class ModuleEntity(
+        val id: String,
+        override val name: String,
+        val version: String,
+        val versionCode: Long,
+        val author: String,
+        val description: String,
+        val data: DataEntity,
+        override val containerType: DataType? = null
+    ) : AppEntity() {
+        override val packageName: String
+            get() = id
+        override val targetSdk: String? = null
+        override val minSdk: String? = null
+        override val arch: Architecture? = null
+    }
 }

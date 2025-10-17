@@ -99,8 +99,8 @@ fun PositionDialog(
                         val animatedButtonHeight by animateDpAsState(
                             targetValue = buttonHeight,
                             animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessMedium
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessMediumLow
                             ),
                             label = "button_height"
                         )

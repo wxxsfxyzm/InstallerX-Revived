@@ -6,12 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.materialIcon
-import androidx.compose.material.icons.materialPath
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +24,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BaseWidget(
     icon: ImageVector? = null,
+    iconPlaceholder: Boolean = true,
     title: String,
     description: String? = null,
     enabled: Boolean = true,
@@ -50,18 +49,20 @@ fun BaseWidget(
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Icon(
-            modifier = Modifier
-                .size(24.dp)
-                .align(Alignment.CenterVertically),
-            imageVector = icon ?: materialIcon("") { materialPath {} },
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (icon != null)
+            Icon(
+                modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.CenterVertically),
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        if (icon == null && iconPlaceholder)
+            Spacer(modifier = Modifier.size(24.dp))
         Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight()
                 .align(Alignment.CenterVertically)
         ) {
             Column {

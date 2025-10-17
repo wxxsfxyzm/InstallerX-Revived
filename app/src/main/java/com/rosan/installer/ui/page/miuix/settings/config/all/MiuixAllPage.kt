@@ -22,8 +22,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -41,11 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
@@ -53,9 +47,12 @@ import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewState
+import com.rosan.installer.ui.page.main.settings.config.all.LottieWidget
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
+import com.rosan.installer.ui.page.miuix.widgets.MiuixScopeTipCard
 import kotlinx.coroutines.flow.collectLatest
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
@@ -196,46 +193,18 @@ fun MiuixAllPage(
                 }
 
                 else -> {
-                    ShowDataWidget(
-                        viewModel = viewModel,
-                        listState = listState
-                    )
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        if (!viewModel.state.userReadScopeTips) {
+                            MiuixScopeTipCard(viewModel = viewModel)
+                            Spacer(modifier = Modifier.size(8.dp))
+                        }
+                        ShowDataWidget(
+                            viewModel = viewModel,
+                            listState = listState
+                        )
+                    }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun LottieWidget(
-    spec: LottieCompositionSpec,
-    text: String
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val composition by rememberLottieComposition(spec)
-            val progress by animateLottieCompositionAsState(
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-            )
-            LottieAnimation(
-                modifier = Modifier.size(200.dp),
-                composition = composition,
-                progress = { progress }
-            )
-            Text(
-                text = text,
-                style = MiuixTheme.textStyles.main
-            )
         }
     }
 }
@@ -246,6 +215,9 @@ private fun ShowDataWidget(
     viewModel: AllViewModel,
     listState: LazyStaggeredGridState = rememberLazyStaggeredGridState()
 ) {
+    val configs = viewModel.state.data.configs
+    val minId = configs.minByOrNull { it.id }?.id
+
     LazyVerticalStaggeredGrid(
         modifier = Modifier
             .fillMaxSize()
@@ -258,7 +230,7 @@ private fun ShowDataWidget(
         state = listState,
     ) {
         items(viewModel.state.data.configs) {
-            DataItemWidget(viewModel, it)
+            DataItemWidget(viewModel, it, it.id == minId)
         }
     }
 }
@@ -266,9 +238,9 @@ private fun ShowDataWidget(
 @Composable
 private fun DataItemWidget(
     viewModel: AllViewModel,
-    entity: ConfigEntity
+    entity: ConfigEntity,
+    isDefault: Boolean
 ) {
-    // Use Miuix Card
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -277,10 +249,35 @@ private fun DataItemWidget(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Column {
-                Text(
-                    text = entity.name,
-                    style = MiuixTheme.textStyles.headline1
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = entity.name,
+                        style = MiuixTheme.textStyles.title4,
+                        fontWeight = FontWeight.Medium
+                    )
+                    if (isDefault) {
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Card(
+                            colors = CardDefaults.defaultColors(
+                                color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+                                contentColor = MiuixTheme.colorScheme.onSurface
+                            )
+                        ) {
+                            Box(modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)) {
+                                Text(
+                                    text = stringResource(R.string.config_global_default),
+                                    color = MiuixTheme.colorScheme.primary,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.size(4.dp))
                 if (entity.description.isNotEmpty()) {
                     Text(
                         text = entity.description,
@@ -314,18 +311,19 @@ private fun DataItemWidget(
                     contentDescription = stringResource(id = R.string.edit)
                 )
             }
-            IconButton(
-                minHeight = 35.dp,
-                minWidth = 35.dp,
-                backgroundColor = MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
-                onClick = { viewModel.dispatch(AllViewAction.DeleteDataConfig(entity)) }) {
-                Icon(
-                    modifier = Modifier.size(20.dp),
-                    imageVector = MiuixIcons.Useful.Delete,
-                    tint = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
-                    contentDescription = stringResource(id = R.string.delete)
-                )
-            }
+            if (!isDefault)
+                IconButton(
+                    minHeight = 35.dp,
+                    minWidth = 35.dp,
+                    backgroundColor = MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
+                    onClick = { viewModel.dispatch(AllViewAction.DeleteDataConfig(entity)) }) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = MiuixIcons.Useful.Delete,
+                        tint = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
+                        contentDescription = stringResource(id = R.string.delete)
+                    )
+                }
             Spacer(modifier = Modifier.weight(1f))
             IconButton(
                 minHeight = 35.dp,
@@ -337,7 +335,8 @@ private fun DataItemWidget(
                     modifier = Modifier
                         .fillMaxHeight()
                         .padding(horizontal = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         modifier = Modifier.size(20.dp),
@@ -350,7 +349,7 @@ private fun DataItemWidget(
                         modifier = Modifier.padding(end = 3.dp),
                         text = stringResource(R.string.config_scope),
                         color = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.SemiBold,
                         fontSize = 15.sp
                     )
                 }

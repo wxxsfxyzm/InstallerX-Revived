@@ -20,7 +20,7 @@ val viewModelModule = module {
     }
 
     viewModel { (navController: NavController) ->
-        AllViewModel(navController, get())
+        AllViewModel(navController, get(), get())
     }
 
     viewModel { (id: Long?) ->

@@ -24,8 +24,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewAction
-import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
+import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
+import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 
 /**
  * A general-purpose card for displaying tips or important information.
@@ -38,8 +38,9 @@ import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun TipCard(
+private fun TipCard(
     modifier: Modifier = Modifier,
+    cardShape: RoundedCornerShape = RoundedCornerShape(16.dp),
     tipContent: @Composable () -> Unit,
     actionContent: @Composable ColumnScope.() -> Unit
 ) {
@@ -50,7 +51,7 @@ fun TipCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f)
         ),
-        shape = RoundedCornerShape(16.dp)
+        shape = cardShape
     ) {
         Column(
             modifier = Modifier
@@ -68,8 +69,12 @@ fun TipCard(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ScopeTipCard(viewModel: ApplyViewModel) {
+fun ScopeTipCard(
+    viewModel: AllViewModel,
+    cardShape: RoundedCornerShape = RoundedCornerShape(12.dp),
+) {
     TipCard(
+        cardShape = cardShape,
         tipContent = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -89,8 +94,10 @@ fun ScopeTipCard(viewModel: ApplyViewModel) {
         }
     ) {
         TextButton(
-            onClick = { viewModel.dispatch(ApplyViewAction.UserReadScopeTips) },
-            modifier = Modifier.align(Alignment.End),
+            onClick = { viewModel.dispatch(AllViewAction.UserReadScopeTips) },
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(bottom = 2.dp),
             colors = ButtonDefaults.textButtonColors(
                 contentColor = MaterialTheme.colorScheme.onTertiary
             )

@@ -49,7 +49,6 @@ class ApplyViewModel(
                 action.packageName, action.applied
             )
 
-            is ApplyViewAction.UserReadScopeTips -> userReadTips()
             is ApplyViewAction.Order -> order(action.type)
             is ApplyViewAction.OrderInReverse -> orderInReverse(action.enabled)
             is ApplyViewAction.SelectedFirst -> selectedFirst(action.enabled)
@@ -143,7 +142,6 @@ class ApplyViewModel(
     private fun loadAndObserveSettings() {
         viewModelScope.launch {
             val initialState = ApplyViewState(
-                userReadScopeTips = appDataStore.getBoolean(AppDataStore.USER_READ_SCOPE_TIPS, default = false).first(),
                 orderType = appDataStore.getString(AppDataStore.APPLY_ORDER_TYPE)
                     .first()
                     .let { name ->
@@ -157,20 +155,12 @@ class ApplyViewModel(
             )
 
             state = state.copy(
-                userReadScopeTips = initialState.userReadScopeTips,
                 orderType = initialState.orderType,
                 orderInReverse = initialState.orderInReverse,
                 selectedFirst = initialState.selectedFirst,
                 showSystemApp = initialState.showSystemApp,
                 showPackageName = initialState.showPackageName
             )
-        }
-    }
-
-    private fun userReadTips() {
-        state = state.copy(userReadScopeTips = true)
-        viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.USER_READ_SCOPE_TIPS, true)
         }
     }
 

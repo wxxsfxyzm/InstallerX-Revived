@@ -490,7 +490,8 @@ fun SettingsAboutItemWidget(
  */
 @Composable
 fun SettingsNavigationItemWidget(
-    icon: ImageVector,
+    icon: ImageVector? = null,
+    iconPlaceholder: Boolean = true,
     title: String,
     description: String,
     onClick: () -> Unit
@@ -498,6 +499,7 @@ fun SettingsNavigationItemWidget(
     // Call the BaseWidget and pass the parameters accordingly.
     BaseWidget(
         icon = icon,
+        iconPlaceholder = iconPlaceholder,
         title = title,
         description = description,
         onClick = onClick

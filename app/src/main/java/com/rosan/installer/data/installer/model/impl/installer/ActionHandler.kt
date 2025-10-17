@@ -268,6 +268,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                             is AppEntity.SplitEntity -> app.data
                             is AppEntity.DexMetadataEntity -> app.data
                             is AppEntity.CollectionEntity -> app.data
+                            is AppEntity.ModuleEntity -> app.data
                         },
                         containerType = it.app.containerType!!
                     )

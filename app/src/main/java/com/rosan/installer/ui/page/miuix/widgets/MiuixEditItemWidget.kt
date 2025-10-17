@@ -41,7 +41,7 @@ fun MiuixDataNameWidget(
         labelText = stringResource(id = R.string.config_name),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp)
+            .padding(vertical = 8.dp, horizontal = 12.dp)
             .focusable()
     )
 
@@ -59,7 +59,7 @@ fun MiuixDataDescriptionWidget(viewModel: EditViewModel) {
         labelText = stringResource(id = R.string.config_description),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp)
+            .padding(vertical = 8.dp, horizontal = 12.dp)
             .focusable()
     )
 }

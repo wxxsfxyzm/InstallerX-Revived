@@ -29,6 +29,7 @@ import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil.Companion.readGlobal
 import com.rosan.installer.ui.page.main.installer.dialog.inner.UiText
+import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -97,7 +98,8 @@ class DialogViewModel(
     val isDismissible
         get() = when (state) {
             is DialogViewState.Analysing,
-            is DialogViewState.Resolving -> false
+            is DialogViewState.Resolving,
+            is DialogViewState.InstallChoice -> false
 
             is DialogViewState.Installing -> !disableNotificationOnDismiss
             else -> true
@@ -156,6 +158,7 @@ class DialogViewModel(
      */
     private var isRetryingInstall = false
 
+    private var loadingStateJob: Job? = null
     private val iconJobs = mutableMapOf<String, Job>()
     private var autoInstallJob: Job? = null
     private var collectRepoJob: Job? = null
@@ -262,6 +265,29 @@ class DialogViewModel(
                     handleMultiInstallProgress(progress)
                     return@collect
                 }
+                if (progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallAnalysedFailed) {
+                    loadingStateJob?.cancel()
+                    loadingStateJob = null
+                }
+                when (progress) {
+                    is ProgressEntity.InstallResolving,
+                    is ProgressEntity.InstallPreparing,
+                    is ProgressEntity.InstallAnalysing -> {
+                        if (loadingStateJob == null || loadingStateJob?.isActive == false) {
+                            loadingStateJob = viewModelScope.launch {
+                                delay(200L)
+                                state = if (progress is ProgressEntity.InstallPreparing) {
+                                    DialogViewState.Preparing(progress.progress)
+                                } else {
+                                    DialogViewState.Analysing
+                                }
+                            }
+                        }
+                        return@collect
+                    }
+
+                    else -> {}
+                }
 
                 val previousState = state
                 var newState: DialogViewState
@@ -273,10 +299,7 @@ class DialogViewModel(
                         newPackageNameFromProgress = null
                     }
 
-                    is ProgressEntity.InstallPreparing -> newState = DialogViewState.Preparing(progress.progress)
-                    is ProgressEntity.InstallResolving -> newState = DialogViewState.Resolving
                     is ProgressEntity.InstallResolvedFailed -> newState = DialogViewState.ResolveFailed
-                    is ProgressEntity.InstallAnalysing -> newState = DialogViewState.Analysing
                     is ProgressEntity.InstallAnalysedFailed -> newState = DialogViewState.AnalyseFailed
                     is ProgressEntity.InstallAnalysedSuccess -> {
                         // When analysis is successful, this is the first moment we have the full, original list.
@@ -479,7 +502,7 @@ class DialogViewModel(
                 }
             }.onFailure { error ->
                 Timber.e(error, "Failed to load available users.")
-                toast(error.message ?: "Failed to load users")
+                toast(error.getErrorMessage(context))
                 _availableUsers.value = emptyMap()
                 // Also reset selected user on failure.
                 if (_selectedUserId.value != 0) {
@@ -574,6 +597,18 @@ class DialogViewModel(
     private fun installChoice() {
         autoInstallJob?.cancel()
         if (_currentPackageName.value != null) _currentPackageName.value = null
+        val containerType = repo.analysisResults.firstOrNull()
+            ?.appEntities?.firstOrNull()
+            ?.app?.containerType
+
+        if (containerType == DataType.MIXED_MODULE_APK) {
+            val currentResults = repo.analysisResults.toMutableList()
+            val updatedResults = currentResults.map { packageResult ->
+                val deselectedEntities = packageResult.appEntities.map { it.copy(selected = false) }
+                packageResult.copy(appEntities = deselectedEntities)
+            }
+            repo.analysisResults = updatedResults
+        }
         state = DialogViewState.InstallChoice
     }
 

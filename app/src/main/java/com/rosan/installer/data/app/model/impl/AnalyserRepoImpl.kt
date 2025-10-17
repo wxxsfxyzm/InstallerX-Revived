@@ -13,6 +13,8 @@ import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
 import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
+import com.rosan.installer.data.app.model.impl.analyser.MixedModuleApkAnalyserRepoImpl
+import com.rosan.installer.data.app.model.impl.analyser.ModuleZipAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.MultiApkZipAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.XApkAnalyserRepoImpl
 import com.rosan.installer.data.app.repo.AnalyserRepo
@@ -48,7 +50,9 @@ object AnalyserRepoImpl : AnalyserRepo {
             DataType.APKS to ApksAnalyserRepoImpl,
             DataType.APKM to ApkMAnalyserRepoImpl,
             DataType.XAPK to XApkAnalyserRepoImpl,
-            DataType.MULTI_APK_ZIP to MultiApkZipAnalyserRepoImpl
+            DataType.MULTI_APK_ZIP to MultiApkZipAnalyserRepoImpl,
+            DataType.MODULE_ZIP to ModuleZipAnalyserRepoImpl,
+            DataType.MIXED_MODULE_APK to MixedModuleApkAnalyserRepoImpl
         )
         // This loop processes every file/data source provided by the user.
         for (dataEntity in data) {
@@ -81,13 +85,14 @@ object AnalyserRepoImpl : AnalyserRepo {
             return emptyList()
         }
 
-        val baseEntityCount = rawAppsWithoutHash.count { it is AppEntity.BaseEntity }
-        val packageCount = rawAppsWithoutHash.distinctBy { it.packageName }.size
-        val needsDeDuplication = baseEntityCount > 1 || packageCount > 1
+        val needsDeDuplication = rawAppsWithoutHash
+            .filterIsInstance<AppEntity.BaseEntity>()
+            .groupBy { it.packageName }
+            .any { it.value.size > 1 }
 
         // Calculate hash values for all entities if needed.
         val rawApps = if (needsDeDuplication) {
-            Timber.d("Multiple entities detected (base count: $baseEntityCount, package count: $packageCount). Calculating file hashes for de-duplication.")
+            Timber.d("Multiple base entities for the same package detected. Calculating file hashes for de-duplication.")
             rawAppsWithoutHash.map { entity ->
                 if (entity is AppEntity.BaseEntity) {
                     val path = (entity.data as? DataEntity.FileEntity)?.path
@@ -111,9 +116,25 @@ object AnalyserRepoImpl : AnalyserRepo {
 
         // A multi-app session is defined by having multiple packages, OR having multiple
         // base APKs within a single package (e.g., different versions of the same app).
+        // However, a single MIXED_MODULE_APK can also produce multiple packages, but should be treated as a single session.
         val isMultiPackage = groupedByPackage.size > 1
         val hasMultipleBasesInSinglePackage = !isMultiPackage && rawApps.count { it is AppEntity.BaseEntity } > 1
-        val isMultiAppSession = isMultiPackage || hasMultipleBasesInSinglePackage
+        val isFromSingleFile = rawApps.map { entity ->
+            when (entity) {
+                is AppEntity.BaseEntity -> entity.data.getSourceTop()
+                is AppEntity.SplitEntity -> entity.data.getSourceTop()
+                is AppEntity.DexMetadataEntity -> entity.data.getSourceTop()
+                is AppEntity.CollectionEntity -> entity.data.getSourceTop()
+                is AppEntity.ModuleEntity -> entity.data.getSourceTop()
+            }
+        }.distinct().size == 1
+        val originalContainerType = rawApps.firstOrNull()?.containerType
+
+        val isMultiAppSession = if (isFromSingleFile && originalContainerType == DataType.MIXED_MODULE_APK) {
+            false // SPECIAL CASE: A single mixed module/apk file is NOT a multi-app session.
+        } else {
+            isMultiPackage || hasMultipleBasesInSinglePackage // Use original logic for all other cases
+        }
 
         val sessionContainerType = if (isMultiAppSession) {
             // This is a multi-app install scenario.
@@ -189,6 +210,7 @@ object AnalyserRepoImpl : AnalyserRepo {
                     is AppEntity.SplitEntity -> correctedEntity.copy(containerType = sessionContainerType)
                     is AppEntity.DexMetadataEntity -> correctedEntity.copy(containerType = sessionContainerType)
                     is AppEntity.CollectionEntity -> correctedEntity.copy(containerType = sessionContainerType)
+                    is AppEntity.ModuleEntity -> correctedEntity.copy(containerType = sessionContainerType)
                 }
 
                 // Correct the targetSdk for splits and metadata if a base entity exists.
@@ -228,9 +250,20 @@ object AnalyserRepoImpl : AnalyserRepo {
 
         return try {
             ZipFile(fileEntity.path).use { zipFile ->
-                // First, check for standard manifest files at the root.
+                val hasModuleProp = zipFile.getEntry("module.prop") != null || zipFile.getEntry("common/module.prop") != null
+                val hasAndroidManifest = zipFile.getEntry("AndroidManifest.xml") != null
+                // Give module detection the highest priority.
+                if (hasModuleProp) {
+                    return@use if (hasAndroidManifest) {
+                        Timber.d("Found module.prop and AndroidManifest.xml, it's a MIXED_MODULE_APK.")
+                        DataType.MIXED_MODULE_APK
+                    } else {
+                        Timber.d("Found module.prop, it's a MODULE_ZIP.")
+                        DataType.MODULE_ZIP
+                    }
+                }
                 when {
-                    zipFile.getEntry("AndroidManifest.xml") != null -> {
+                    hasAndroidManifest -> {
                         Timber.d("Found AndroidManifest.xml at root, it's an APK.")
                         return@use DataType.APK
                     }
@@ -330,7 +363,10 @@ object AnalyserRepoImpl : AnalyserRepo {
     ): List<SelectInstallEntity> {
         val finalSelectEntities = mutableListOf<SelectInstallEntity>()
         val isMultiAppMode = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
-
+        if (containerType == DataType.MIXED_MODULE_APK) {
+            Timber.d("Mixed Module/APK detected. Setting all entities to be de-selected by default.")
+            return entities.map { SelectInstallEntity(it, selected = false) }
+        }
         if (isMultiAppMode) {
             // --- Multi App Mode Logic ---
             val allBaseEntities = entities.filterIsInstance<AppEntity.BaseEntity>()
@@ -365,6 +401,7 @@ object AnalyserRepoImpl : AnalyserRepo {
 
                     is AppEntity.SplitEntity -> entity in optimalSplits
                     is AppEntity.CollectionEntity -> false
+                    is AppEntity.ModuleEntity -> true
                 }
                 SelectInstallEntity(app = entity, selected = isSelected)
             }

@@ -1,14 +1,7 @@
 package com.rosan.installer.ui.page.main.installer.dialog
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.widget.dialog.PositionDialog
 import org.koin.compose.viewmodel.koinViewModel
@@ -23,19 +16,9 @@ fun DialogPage(
     LaunchedEffect(installer.id) {
         viewModel.dispatch(DialogViewAction.CollectRepo(installer))
     }
-    val params = dialogGenerateParams(installer, viewModel)
-    val alpha by animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "dialog_alpha"
-    )
+    if (viewModel.state !is DialogViewState.Ready) {
+        val params = dialogGenerateParams(installer, viewModel)
 
-    Box(
-        modifier = Modifier.alpha(alpha)
-    ) {
         PositionDialog(
             onDismissRequest = {
                 if (viewModel.isDismissible) {
@@ -57,4 +40,5 @@ fun DialogPage(
             centerButton = dialogInnerWidget(installer, params.buttons)
         )
     }
+
 }

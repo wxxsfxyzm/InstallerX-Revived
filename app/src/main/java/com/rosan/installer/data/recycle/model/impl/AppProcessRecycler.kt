@@ -21,8 +21,9 @@ class AppProcessRecycler(private val shell: String) : Recycler<AppProcess>() {
     override fun onMake(): AppProcess {
         return CustomizeAppProcess(shell).apply {
             if (init()) return@apply
-            if (shell == "su") throw RootNotWorkException()
-            else throw AppProcessNotWorkException()
+            val command = shell.trim().split(' ').firstOrNull()
+            if (command == "su") throw RootNotWorkException("Cannot access su command")
+            else throw AppProcessNotWorkException("Cannot access command $command")
         }
     }
 }
