@@ -164,6 +164,7 @@ class DialogViewModel(
     private var collectRepoJob: Job? = null
 
     init {
+        Timber.d("DialogViewModel init")
         viewModelScope.launch {
             preferSystemIconForUpdates =
                 appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first()
@@ -434,6 +435,7 @@ class DialogViewModel(
                 }
 
                 if (newState != state) {
+                    Timber.d("State transition: ${state::class.simpleName} -> ${newState::class.simpleName}")
                     state = newState
                 }
             }

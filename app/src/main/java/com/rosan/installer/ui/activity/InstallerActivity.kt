@@ -12,22 +12,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
 import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.ui.page.main.installer.InstallerPage
+import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
+import com.rosan.installer.ui.theme.InstallerMiuixTheme
 import com.rosan.installer.ui.util.PermissionDenialReason
 import com.rosan.installer.ui.util.PermissionManager
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
@@ -36,16 +42,39 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         const val KEY_ID = "installer_id"
     }
 
+    private val appDataStore: AppDataStore by inject()
+
     private var installer by mutableStateOf<InstallerRepo?>(null)
     private var job: Job? = null
     private lateinit var permissionManager: PermissionManager
 
+    private enum class InstallerTheme {
+        MATERIAL,
+        MIUIX
+    }
+
+    // + Define a data class for the UI state
+    private data class InstallerUiState(
+        val theme: InstallerTheme = InstallerTheme.MATERIAL, // Default theme
+        val isThemeLoaded: Boolean = false // Flag to check if loading is complete
+    )
+
+    private var uiState by mutableStateOf(InstallerUiState())
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        logIntentDetails("onNewIntent", intent)
+        if (RsConfig.isDebug && RsConfig.LEVEL == Level.UNSTABLE)
+            logIntentDetails("onNewIntent", intent)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         Timber.d("onCreate. SavedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}")
+
+        lifecycleScope.launch {
+            val useMiuix = appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false).first()
+            uiState = uiState.copy(
+                theme = if (useMiuix) InstallerTheme.MIUIX else InstallerTheme.MATERIAL,
+                isThemeLoaded = true
+            )
+        }
 
         permissionManager = PermissionManager(this)
         restoreInstaller(savedInstanceState)
@@ -170,6 +199,8 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     private fun showContent() {
         setContent {
+            if (!uiState.isThemeLoaded) return@setContent
+
             val installer = installer ?: return@setContent
             val background by installer.background.collectAsState(false)
             val progress by installer.progress.collectAsState(ProgressEntity.Ready)
@@ -177,10 +208,46 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.Finish)
             // Return@setContent to show nothing, logs will explain why.
                 return@setContent
+            /* Box(
+                 modifier = Modifier
+                     .fillMaxSize()
+                     // 2. 模拟背景：设置一个半透明的背景色，这就实现了“变暗”效果
+                     .background(Color.Black.copy(alpha = 0.6f))
+                     // 3. 模拟外部点击：为背景添加点击手势，点击时关闭 Activity
+                     .pointerInput(Unit) {
+                         detectTapGestures {
+                             finish() // 点击背景任意位置，关闭这个安装界面
+                         }
+                     }
+             ) {
+                 // 4. 放置您的 BottomSheet：
+                 //    - 将其放在前景，这样它就不会被背景遮挡
+                 //    - 使用 align 将其定位在您期望的位置（例如底部）
+                 //    - 添加一个空的 pointerInput 来消费点击事件，防止点击 BottomSheet 时触发背景的关闭事件
+                 Box(
+                     modifier = Modifier
+                         .align(Alignment.BottomCenter) // 或 Alignment.Center，取决于您希望它如何展示
+                         .pointerInput(Unit) {
+                             detectTapGestures { *//* 消费点击，防止穿透 *//* }
+                        }
+                ) {*/
+            // 这里的代码和您原来的一模一样，完全不需要改动
+            when (uiState.theme) {
+                InstallerTheme.MATERIAL -> {
+                    InstallerMaterialExpressiveTheme {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            InstallerPage(installer)
+                        }
+                    }
+                }
 
-            InstallerMaterialExpressiveTheme {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    InstallerPage(installer)
+                InstallerTheme.MIUIX -> {
+                    InstallerMiuixTheme {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            // 您的 MiuixInstallerPage 在这里可以完美工作
+                            MiuixInstallerPage(installer)
+                        }
+                    }
                 }
             }
         }
