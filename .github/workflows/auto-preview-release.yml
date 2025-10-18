@@ -159,11 +159,6 @@ jobs:
           echo "--- Generated Changelog for Release Body ---"
           echo -e "${CHANGELOG_BODY_OUTPUT}${CHANGELOG_LINK_OUTPUT}"
 
-      - name: Create Module
-        run: |
-          cp ${{ steps.rename_apks.outputs.online_apk }} module/priv-app/com.android.packageinstaller/com.android.packageinstaller.apk
-          zip -r module.zip module/*
-      
       # Step 11: Create Latest Alpha Pre-Release with two APKs
       - name: Create Latest Alpha Pre-Release
         uses: softprops/action-gh-release@v2
@@ -186,7 +181,6 @@ jobs:
           files: |
             ${{ steps.rename_apks.outputs.online_apk }}
             ${{ steps.rename_apks.outputs.offline_apk }}
-            module.zip
       
 
       # Step 12: Upload the APK to Telegram
