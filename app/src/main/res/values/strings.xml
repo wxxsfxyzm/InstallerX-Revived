@@ -142,9 +142,9 @@
     <string name="config_dexopt_mode_speed" translatable="false">Speed</string>
     <string name="config_dexopt_mode_everything" translatable="false">Everything</string>
     <string name="config_auto_delete">Auto deletion</string>
-    <string name="config_auto_delete_dsp">Automatically delete the apk after it\'s been installed</string>
+    <string name="config_auto_delete_desc">Automatically delete the apk after it\'s been installed</string>
     <string name="config_display_sdk_version">Display SDK information</string>
-    <string name="config_display_sdk_version_sdp">Show target and min information on the installation interface</string>
+    <string name="config_display_sdk_version_desc">Show target and min information on the installation interface</string>
     <string name="config_label_main_settings">Main Settings</string>
     <string name="config_label_installer_settings">Installer Settings</string>
     <string name="config_label_install_options">Install Options</string>

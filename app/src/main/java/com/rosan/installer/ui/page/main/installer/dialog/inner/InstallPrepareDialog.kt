@@ -37,8 +37,8 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import timber.log.Timber
 
@@ -46,7 +46,7 @@ import timber.log.Timber
 
 @Composable
 private fun installPrepareEmptyDialog(
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(
@@ -63,16 +63,16 @@ private fun installPrepareEmptyDialog(
             DialogParamsType.ButtonsCancel.id
         ) {
             listOf(DialogButton(stringResource(R.string.previous)) {
-                viewModel.dispatch(DialogViewAction.InstallChoice)
+                viewModel.dispatch(InstallerViewAction.InstallChoice)
             }, DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(DialogViewAction.Close)
+                viewModel.dispatch(InstallerViewAction.Close)
             })
         })
 }
 
 @Composable
 private fun installPrepareTooManyDialog(
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(
@@ -89,9 +89,9 @@ private fun installPrepareTooManyDialog(
             DialogParamsType.ButtonsCancel.id
         ) {
             listOf(DialogButton(stringResource(R.string.previous)) {
-                viewModel.dispatch(DialogViewAction.InstallChoice)
+                viewModel.dispatch(InstallerViewAction.InstallChoice)
             }, DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(DialogViewAction.Close)
+                viewModel.dispatch(InstallerViewAction.Close)
             })
         })
 }
@@ -101,7 +101,7 @@ private fun installPrepareTooManyDialog(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun installPrepareDialog( // 小写开头
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     val context = LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
@@ -296,27 +296,27 @@ fun installPrepareDialog( // 小写开头
                 // only when the entity is a split APK, XAPK, or APKM
                 if (canInstall && viewModel.showExtendedMenu && (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM)) {
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
-                        viewModel.dispatch(DialogViewAction.InstallChoice)
+                        viewModel.dispatch(InstallerViewAction.InstallChoice)
                     })
                 }
                 if (canInstall) {
                     add(DialogButton(stringResource(buttonTextId), 1f) {
-                        viewModel.dispatch(DialogViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install)
                     })
                 }
                 // else if app can be installed and extended menu is shown
                 if (canInstall && viewModel.showExtendedMenu) {
                     add(DialogButton(stringResource(R.string.menu), 2f) {
-                        viewModel.dispatch(DialogViewAction.InstallExtendedMenu)
+                        viewModel.dispatch(InstallerViewAction.InstallExtendedMenu)
                     })
                 }
                 if (canInstall && !viewModel.showExtendedMenu && (containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM))
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
-                        viewModel.dispatch(DialogViewAction.InstallChoice)
+                        viewModel.dispatch(InstallerViewAction.InstallChoice)
                     })
                 // Cancel button always shown
                 add(DialogButton(stringResource(R.string.cancel), 1f) {
-                    viewModel.dispatch(DialogViewAction.Close)
+                    viewModel.dispatch(InstallerViewAction.Close)
                 })
             }
             // --- LOGIC END ---

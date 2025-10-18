@@ -37,7 +37,7 @@
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_auto_delete">ลบอัตโนมัติ</string>
-    <string name="config_auto_delete_dsp">ลบ apk โดยอัตโนมัติหลังจากติดตั้งแล้ว</string>
+    <string name="config_auto_delete_desc">ลบ apk โดยอัตโนมัติหลังจากติดตั้งแล้ว</string>
     <string name="config_bypass_low_target_sdk">ข้ามการบล็อก SDK เป้าหมายต่ำ</string>
     <string name="config_bypass_low_target_sdk_desc">อนุญาตให้แอปที่กำหนดเป้าหมาย SDK เวอร์ชันเก่าสามารถติดตั้งได้</string>
     <string name="config_confirm_deletion">ยืนยันการลบ</string>
@@ -50,7 +50,7 @@
     <string name="config_dialog_title_invalid">ข้อมูลที่ป้อนไม่ถูกต้อง</string>
     <string name="config_dialog_title_unsaved_changes">มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก</string>
     <string name="config_display_sdk_version">แสดงข้อมูล SDK</string>
-    <string name="config_display_sdk_version_sdp">แสดงข้อมูลเป้าหมายและข้อมูลขั้นต่ำบนอินเทอร์เฟซการติดตั้ง</string>
+    <string name="config_display_sdk_version_desc">แสดงข้อมูลเป้าหมายและข้อมูลขั้นต่ำบนอินเทอร์เฟซการติดตั้ง</string>
     <string name="config_error_customize_authorizer">ผู้ให้สิทธิ์แบบกำหนดเองต้องไม่ว่างเปล่า</string>
     <string name="config_error_installer">แหล่งที่มาของตัวติดตั้งต้องไม่ว่างเปล่า</string>
     <string name="config_error_name">ชื่อต้องไม่ว่างเปล่า</string>

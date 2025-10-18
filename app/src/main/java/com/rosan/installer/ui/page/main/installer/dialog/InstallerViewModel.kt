@@ -43,7 +43,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 
-class DialogViewModel(
+class InstallerViewModel(
     private var repo: InstallerRepo,
     private val appDataStore: AppDataStore,
     private val appIconRepo: AppIconRepo,
@@ -51,11 +51,14 @@ class DialogViewModel(
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
-    var state by mutableStateOf<DialogViewState>(DialogViewState.Ready)
+    var state by mutableStateOf<InstallerViewState>(InstallerViewState.Ready)
         private set
 
     // Hold the original, complete analysis results for multi-install scenarios.
     private var originalAnalysisResults: List<PackageAnalysisResult> = emptyList()
+
+    var showMiuixSheetRightActionSettings by mutableStateOf(false)
+        private set
 
     var autoCloseCountDown by mutableIntStateOf(3)
         private set
@@ -96,10 +99,10 @@ class DialogViewModel(
      */
     val isDismissible
         get() = when (state) {
-            is DialogViewState.Analysing,
-            is DialogViewState.Resolving -> false
+            is InstallerViewState.Analysing,
+            is InstallerViewState.Resolving -> false
 
-            is DialogViewState.Installing -> !disableNotificationOnDismiss
+            is InstallerViewState.Installing -> !disableNotificationOnDismiss
             else -> true
         }
 
@@ -187,31 +190,34 @@ class DialogViewModel(
         }
     }
 
-    fun dispatch(action: DialogViewAction) {
+    fun dispatch(action: InstallerViewAction) {
         when (action) {
-            is DialogViewAction.CollectRepo -> collectRepo(action.repo)
-            is DialogViewAction.Close -> close()
-            is DialogViewAction.Analyse -> analyse()
-            is DialogViewAction.InstallChoice -> installChoice()
-            is DialogViewAction.InstallPrepare -> installPrepare()
-            is DialogViewAction.InstallExtendedMenu -> installExtendedMenu()
-            is DialogViewAction.InstallExtendedSubMenu -> installExtendedSubMenu()
-            is DialogViewAction.InstallMultiple -> installMultiple()
-            is DialogViewAction.Install -> install()
-            is DialogViewAction.Background -> background()
-            is DialogViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData)
-            is DialogViewAction.Uninstall -> {
+            is InstallerViewAction.CollectRepo -> collectRepo(action.repo)
+            is InstallerViewAction.Close -> close()
+            is InstallerViewAction.Analyse -> analyse()
+            is InstallerViewAction.InstallChoice -> installChoice()
+            is InstallerViewAction.InstallPrepare -> installPrepare()
+            is InstallerViewAction.InstallExtendedMenu -> installExtendedMenu()
+            is InstallerViewAction.InstallExtendedSubMenu -> installExtendedSubMenu()
+            is InstallerViewAction.InstallMultiple -> installMultiple()
+            is InstallerViewAction.Install -> install()
+            is InstallerViewAction.Background -> background()
+            is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData)
+            is InstallerViewAction.Uninstall -> {
                 // Trigger uninstall using the package name from the collected info
                 repo.uninstallInfo.value?.packageName?.let { repo.uninstall(it) }
             }
 
-            is DialogViewAction.ToggleSelection -> toggleSelection(
+            is InstallerViewAction.ShowMiuixSheetRightActionSettings -> showMiuixSheetRightActionSettings = true
+            is InstallerViewAction.HideMiuixSheetRightActionSettings -> showMiuixSheetRightActionSettings = false
+
+            is InstallerViewAction.ToggleSelection -> toggleSelection(
                 action.packageName,
                 action.entity,
                 action.isMultiSelect
             )
 
-            is DialogViewAction.ToggleUninstallFlag -> {
+            is InstallerViewAction.ToggleUninstallFlag -> {
                 // Update the uninstall flags bitmask
                 val currentFlags = _uninstallFlags.value
                 _uninstallFlags.value = if (action.enable) {
@@ -223,8 +229,8 @@ class DialogViewModel(
                 repo.config.uninstallFlags = _uninstallFlags.value
             }
 
-            is DialogViewAction.SetInstaller -> selectInstaller(action.installer)
-            is DialogViewAction.SetTargetUser -> selectTargetUser(action.userId)
+            is InstallerViewAction.SetInstaller -> selectInstaller(action.installer)
+            is InstallerViewAction.SetTargetUser -> selectTargetUser(action.userId)
         }
     }
 
@@ -265,20 +271,20 @@ class DialogViewModel(
                 }
 
                 val previousState = state
-                var newState: DialogViewState
+                var newState: InstallerViewState
                 var newPackageNameFromProgress: String? = _currentPackageName.value
 
                 when (progress) {
                     is ProgressEntity.Ready -> {
-                        newState = DialogViewState.Ready
+                        newState = InstallerViewState.Ready
                         newPackageNameFromProgress = null
                     }
 
-                    is ProgressEntity.InstallPreparing -> newState = DialogViewState.Preparing(progress.progress)
-                    is ProgressEntity.InstallResolving -> newState = DialogViewState.Resolving
-                    is ProgressEntity.InstallResolvedFailed -> newState = DialogViewState.ResolveFailed
-                    is ProgressEntity.InstallAnalysing -> newState = DialogViewState.Analysing
-                    is ProgressEntity.InstallAnalysedFailed -> newState = DialogViewState.AnalyseFailed
+                    is ProgressEntity.InstallPreparing -> newState = InstallerViewState.Preparing(progress.progress)
+                    is ProgressEntity.InstallResolving -> newState = InstallerViewState.Resolving
+                    is ProgressEntity.InstallResolvedFailed -> newState = InstallerViewState.ResolveFailed
+                    is ProgressEntity.InstallAnalysing -> newState = InstallerViewState.Analysing
+                    is ProgressEntity.InstallAnalysedFailed -> newState = InstallerViewState.AnalyseFailed
                     is ProgressEntity.InstallAnalysedSuccess -> {
                         // When analysis is successful, this is the first moment we have the full, original list.
                         // This is the correct time to back it up.
@@ -303,7 +309,7 @@ class DialogViewModel(
                             // If the backend (ActionHandler) determined it's a multi-app scenario,
                             // ALWAYS go to the choice screen, regardless of package names.
                             Timber.d("ViewModel: Multi-app mode detected. Forcing InstallChoice state.")
-                            newState = DialogViewState.InstallChoice
+                            newState = InstallerViewState.InstallChoice
                             newPackageNameFromProgress = null // No single package is the focus.
 
                             // Trigger icon loading for all apps in the list.
@@ -314,13 +320,13 @@ class DialogViewModel(
                             // If it's not a multi-app scenario (e.g., single APK with splits),
                             // it's safe to proceed directly to the prepare screen for the single app.
                             Timber.d("ViewModel: Single-app mode detected. Proceeding to InstallPrepare.")
-                            newState = DialogViewState.InstallPrepare
+                            newState = InstallerViewState.InstallPrepare
                             newPackageNameFromProgress = analysisResults.firstOrNull()?.packageName
                         }
                     }
 
                     is ProgressEntity.Installing -> {
-                        newState = DialogViewState.Installing
+                        newState = InstallerViewState.Installing
                         autoInstallJob?.cancel()
                         if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
                             newPackageNameFromProgress = repo.analysisResults.first().packageName
@@ -328,7 +334,7 @@ class DialogViewModel(
                     }
 
                     is ProgressEntity.InstallFailed -> {
-                        newState = DialogViewState.InstallFailed
+                        newState = InstallerViewState.InstallFailed
                         autoInstallJob?.cancel()
                         if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
                             newPackageNameFromProgress = repo.analysisResults.first().packageName
@@ -336,7 +342,7 @@ class DialogViewModel(
                     }
 
                     is ProgressEntity.InstallSuccess -> {
-                        newState = DialogViewState.InstallSuccess
+                        newState = InstallerViewState.InstallSuccess
                         autoInstallJob?.cancel()
                         if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
                             newPackageNameFromProgress = repo.analysisResults.first().packageName
@@ -346,9 +352,9 @@ class DialogViewModel(
                     is ProgressEntity.Uninstalling -> {
                         newState = if (isRetryingInstall) {
                             //isRetryingInstall = false
-                            DialogViewState.InstallRetryDowngradeUsingUninstall
+                            InstallerViewState.InstallRetryDowngradeUsingUninstall
                         } else {
-                            DialogViewState.Uninstalling
+                            InstallerViewState.Uninstalling
                         }
                     }
 
@@ -356,9 +362,9 @@ class DialogViewModel(
                         // If uninstall fails during retry, revert to install failed state
                         if (isRetryingInstall) {
                             isRetryingInstall = false
-                            newState = DialogViewState.InstallFailed
+                            newState = InstallerViewState.InstallFailed
                         } else {
-                            newState = DialogViewState.UninstallFailed
+                            newState = InstallerViewState.UninstallFailed
                         }
                     }
 
@@ -368,10 +374,10 @@ class DialogViewModel(
                             isRetryingInstall = false
                             repo.install()
                             // Stay in a transitional state until Install starts
-                            newState = DialogViewState.InstallRetryDowngradeUsingUninstall
+                            newState = InstallerViewState.InstallRetryDowngradeUsingUninstall
                         } else {
                             // now it has a meaning of normal uninstall success
-                            newState = DialogViewState.UninstallSuccess
+                            newState = InstallerViewState.UninstallSuccess
                         }
                     }
 
@@ -379,10 +385,10 @@ class DialogViewModel(
                         _uiUninstallInfo.value = repo.uninstallInfo.value
                         _uninstallFlags.value = 0 // Reset flags for new session
                         repo.config.uninstallFlags = 0
-                        newState = DialogViewState.UninstallReady
+                        newState = InstallerViewState.UninstallReady
                     }
 
-                    else -> newState = DialogViewState.Ready
+                    else -> newState = InstallerViewState.Ready
                 }
 
                 // Simplified package name handling. No more fetching is required.
@@ -395,16 +401,16 @@ class DialogViewModel(
                     if (_currentPackageName.value != null) _currentPackageName.value = null
                 }
 
-                if (newState !is DialogViewState.InstallPrepare && autoInstallJob?.isActive == true) {
+                if (newState !is InstallerViewState.InstallPrepare && autoInstallJob?.isActive == true) {
                     autoInstallJob?.cancel()
                 }
 
-                if (newState is DialogViewState.InstallPrepare && previousState !is DialogViewState.InstallPrepare) {
+                if (newState is InstallerViewState.InstallPrepare && previousState !is InstallerViewState.InstallPrepare) {
                     if (repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
                         autoInstallJob?.cancel()
                         autoInstallJob = viewModelScope.launch {
                             delay(500)
-                            if (state is DialogViewState.InstallPrepare && repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
+                            if (state is InstallerViewState.InstallPrepare && repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
                                 install()
                             }
                         }
@@ -571,7 +577,7 @@ class DialogViewModel(
         iconJobs.values.forEach { it.cancel() }
         iconJobs.clear()
         repo.close()
-        state = DialogViewState.Ready
+        state = InstallerViewState.Ready
     }
 
     private fun analyse() {
@@ -581,7 +587,7 @@ class DialogViewModel(
     private fun installChoice() {
         autoInstallJob?.cancel()
         if (_currentPackageName.value != null) _currentPackageName.value = null
-        state = DialogViewState.InstallChoice
+        state = InstallerViewState.InstallChoice
     }
 
     private fun installPrepare() {
@@ -591,19 +597,19 @@ class DialogViewModel(
         if (uniquePackages.size == 1) {
             val targetPackageName = selectedEntities.first().app.packageName
             _currentPackageName.value = targetPackageName
-            state = DialogViewState.InstallPrepare
+            state = InstallerViewState.InstallPrepare
         } else {
             // Handle case where multiple packages are selected, maybe go back to choice.
-            state = DialogViewState.InstallChoice
+            state = InstallerViewState.InstallChoice
         }
     }
 
     private fun installExtendedMenu() {
         when (state) {
-            is DialogViewState.InstallPrepare,
-            DialogViewState.InstallExtendedSubMenu,
-            DialogViewState.InstallFailed -> {
-                state = DialogViewState.InstallExtendedMenu
+            is InstallerViewState.InstallPrepare,
+            InstallerViewState.InstallExtendedSubMenu,
+            InstallerViewState.InstallFailed -> {
+                state = InstallerViewState.InstallExtendedMenu
             }
 
             else -> {
@@ -613,8 +619,8 @@ class DialogViewModel(
     }
 
     private fun installExtendedSubMenu() {
-        if (state is DialogViewState.InstallExtendedMenu) {
-            state = DialogViewState.InstallExtendedSubMenu
+        if (state is InstallerViewState.InstallExtendedMenu) {
+            state = InstallerViewState.InstallExtendedSubMenu
         } else {
             toast("dialog_install_extended_sub_menu_not_available"/*R.string.dialog_install_extended_sub_menu_not_available*/)
         }
@@ -768,13 +774,13 @@ class DialogViewModel(
             _installProgress.value = currentMultiInstallIndex.toFloat() / multiInstallQueue.size.toFloat()
 
             // Switch to the 'Installing' state
-            state = DialogViewState.Installing
+            state = InstallerViewState.Installing
 
             // Call the repo's install method. It will now operate on the temporary state we just set.
             repo.install()
         } else {
             // All installation tasks are complete.
-            state = DialogViewState.InstallCompleted(multiInstallResults.toList())
+            state = InstallerViewState.InstallCompleted(multiInstallResults.toList())
 
             // Clean up and restore the original state.
             multiInstallQueue = emptyList()

@@ -121,9 +121,9 @@
     <string name="config_force_dexopt">Optimizasyonu Zorla</string>
     <string name="config_force_dexopt_desc">Sistem gereksiz görse bile yeniden derlemeyi zorla</string>
     <string name="config_auto_delete">Otomatik silme</string>
-    <string name="config_auto_delete_dsp">Uygulama yüklendikten sonra APK otomatik olarak silinir</string>
+    <string name="config_auto_delete_desc">Uygulama yüklendikten sonra APK otomatik olarak silinir</string>
     <string name="config_display_sdk_version">SDK bilgilerini görüntüle</string>
-    <string name="config_display_sdk_version_sdp">Yükleme arayüzünde hedef ve minimum bilgilerini göster</string>
+    <string name="config_display_sdk_version_desc">Yükleme arayüzünde hedef ve minimum bilgilerini göster</string>
     <string name="config_label_main_settings">Ana Ayarlar</string>
     <string name="config_label_installer_settings">Yükleyici Ayarları</string>
     <string name="config_label_install_options">Yükleme Seçenekleri</string>

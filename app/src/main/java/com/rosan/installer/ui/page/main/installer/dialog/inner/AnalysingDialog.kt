@@ -8,11 +8,11 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 
 @Composable
 fun analysingDialog(
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(

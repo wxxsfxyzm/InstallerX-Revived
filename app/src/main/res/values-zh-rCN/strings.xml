@@ -136,9 +136,9 @@
     <string name="config_force_dexopt">强制优化</string>
     <string name="config_force_dexopt_desc">即使系统认为没有必要，也强制重新编译</string>
     <string name="config_auto_delete">自动删除</string>
-    <string name="config_auto_delete_dsp">安装成功后自动删除安装包</string>
+    <string name="config_auto_delete_desc">安装成功后自动删除安装包</string>
     <string name="config_display_sdk_version">显示SDK信息</string>
-    <string name="config_display_sdk_version_sdp">在安装界面显示target与min信息</string>
+    <string name="config_display_sdk_version_desc">在安装界面显示target与min信息</string>
     <string name="config_label_main_settings">主要设置</string>
     <string name="config_label_installer_settings">安装器设置</string>
     <string name="config_label_install_options">安装选项</string>
