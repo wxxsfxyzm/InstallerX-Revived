@@ -30,7 +30,7 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Settings
 @Composable
 fun MiuixInstallerPage(
     installer: InstallerRepo,
-    onDismiss: () -> Unit = { installer.close() } // Add a dismiss callback parameter.
+    onDismiss: () -> Unit = { installer.close() }
 ) {
     val scope = rememberCoroutineScope()
     val showBottomSheet = remember { mutableStateOf(true) }
@@ -68,7 +68,7 @@ fun MiuixInstallerPage(
         onDismissRequest = {
             showBottomSheet.value = !showBottomSheet.value
             scope.launch {
-                delay(100L) // Wait for 100 milliseconds (the 'L' is for Long)
+                delay(100L) // Wait for sheet animation
                 if (viewModel.isDismissible) {
                     if (viewModel.disableNotificationOnDismiss) {
                         viewModel.dispatch(DialogViewAction.Close)
