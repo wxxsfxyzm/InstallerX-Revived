@@ -163,7 +163,7 @@ jobs:
         run: |
           mkdir -p temp
           unzip ${{ steps.rename_apks.outputs.online_apk }} -d temp
-          cp -r temp/libmodule/priv-app/com.android.packageinstaller/
+          cp -r temp/lib module/priv-app/com.android.packageinstaller/
           cp ${{ steps.rename_apks.outputs.online_apk }} apk module/priv-app/com.android.packageinstaller/com.android.packageinstaller.apk
           zip -r module.zip module/*
       
