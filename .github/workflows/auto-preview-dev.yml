@@ -70,9 +70,11 @@ jobs:
         
       - name: Create Module
         run: |
+          mkdir -p temp
+          unzip app/build/outputs/apk/onlineUnstable/release/*.apk -d temp
+          cp -r temp/libmodule/priv-app/com.android.packageinstaller/
           cp app/build/outputs/apk/onlineUnstable/release/*.apk module/priv-app/com.android.packageinstaller/com.android.packageinstaller.apk
           zip -r module.zip module/*
-      
 
       # 8. 上传 APK 作为 Artifact
       #    将所有构建产物打包到一个ZIP文件中
