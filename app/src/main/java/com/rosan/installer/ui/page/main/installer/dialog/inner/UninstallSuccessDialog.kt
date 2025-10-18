@@ -8,8 +8,8 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 
 /**
  * Displays a confirmation dialog after a successful uninstallation.
@@ -19,7 +19,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
  */
 @Composable
 fun uninstallSuccessDialog(
-    viewModel: DialogViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     // Use the shared uninstallInfoDialog to get the base layout with the app's icon, title, and subtitle.
     // Since the app has been uninstalled, there's no target for onTitleExtraClick, so we leave it empty.
@@ -48,7 +48,7 @@ fun uninstallSuccessDialog(
             // The button list contains only a "Finish" button to close the dialog.
             listOf(
                 DialogButton(stringResource(R.string.finish)) {
-                    viewModel.dispatch(DialogViewAction.Close)
+                    viewModel.dispatch(InstallerViewAction.Close)
                 }
             )
         }

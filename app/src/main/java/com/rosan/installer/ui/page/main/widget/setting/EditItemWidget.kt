@@ -488,7 +488,7 @@ fun DataAutoDeleteWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.Delete,
         title = stringResource(id = R.string.config_auto_delete),
-        description = stringResource(id = R.string.config_auto_delete_dsp),
+        description = stringResource(id = R.string.config_auto_delete_desc),
         checked = viewModel.state.data.autoDelete,
         isM3E = isM3E,
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAutoDelete(it)) }
@@ -500,7 +500,7 @@ fun DisplaySdkWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.Info,
         title = stringResource(id = R.string.config_display_sdk_version),
-        description = stringResource(id = R.string.config_display_sdk_version_sdp),
+        description = stringResource(id = R.string.config_display_sdk_version_desc),
         checked = viewModel.state.data.displaySdk,
         isM3E = isM3E,
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDisplaySdk(it)) }

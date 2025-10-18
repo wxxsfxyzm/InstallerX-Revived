@@ -96,9 +96,9 @@
     <string name="config_force_dexopt">Примусова оптимізація</string>
     <string name="config_force_dexopt_desc">Примусова перекомпіляція, навіть якщо система вважає це непотрібним</string>
     <string name="config_auto_delete">Автовидалення</string>
-    <string name="config_auto_delete_dsp">Автоматично видаляти apk після встановлення</string>
+    <string name="config_auto_delete_desc">Автоматично видаляти apk після встановлення</string>
     <string name="config_display_sdk_version">Показ інформації про SDK</string>
-    <string name="config_display_sdk_version_sdp">Показувати цільову та мінімальну інформацію в інтерфейсі встановлення</string>
+    <string name="config_display_sdk_version_desc">Показувати цільову та мінімальну інформацію в інтерфейсі встановлення</string>
     <string name="config_label_main_settings">Головні налаштування</string>
     <string name="config_label_installer_settings">Налаштування встановлювача</string>
     <string name="config_label_install_options">Параметри встановлення</string>

@@ -92,9 +92,9 @@
     <string name="config_declare_installer">Establecer fuente de instalación</string>
     <string name="config_installer">instalado por (nombre del paquete)</string>
     <string name="config_auto_delete">Eliminación automática</string>
-    <string name="config_auto_delete_dsp">Elimina automáticamente el APK después de instalarlo</string>
+    <string name="config_auto_delete_desc">Elimina automáticamente el APK después de instalarlo</string>
     <string name="config_display_sdk_version">Mostrar información del SDK</string>
-    <string name="config_display_sdk_version_sdp">Mostrar información de destino y mínima en la interfaz de instalación</string>
+    <string name="config_display_sdk_version_desc">Mostrar información de destino y mínima en la interfaz de instalación</string>
     <string name="config_label_main_settings">Configuración Principal</string>
     <string name="config_label_installer_settings">Configuración del instalador</string>
     <string name="config_label_install_options">Opciones de instalación</string>

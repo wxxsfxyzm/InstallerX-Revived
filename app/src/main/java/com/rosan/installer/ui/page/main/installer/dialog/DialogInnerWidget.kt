@@ -42,34 +42,34 @@ fun dialogInnerWidget(
 
 @Composable
 fun dialogGenerateParams(
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams =
     when (viewModel.state) {
-        is DialogViewState.Ready -> readyDialog(viewModel)
-        is DialogViewState.Resolving -> resolvingDialog(installer, viewModel)
-        is DialogViewState.ResolveFailed -> resolveFailedDialog(installer, viewModel)
-        is DialogViewState.Preparing -> preparingDialog(installer, viewModel)
-        is DialogViewState.Analysing -> analysingDialog(installer, viewModel)
-        is DialogViewState.AnalyseFailed -> analyseFailedDialog(installer, viewModel)
-        is DialogViewState.InstallChoice -> installChoiceDialog(installer, viewModel)
-        is DialogViewState.InstallPrepare -> installPrepareDialog(installer, viewModel)
-        is DialogViewState.InstallExtendedMenu -> installExtendedMenuDialog(installer, viewModel)
-        is DialogViewState.InstallExtendedSubMenu -> installExtendedMenuSubMenuDialog(installer, viewModel)
-        is DialogViewState.Installing -> installingDialog(installer, viewModel)
-        is DialogViewState.InstallSuccess -> installSuccessDialog(installer, viewModel)
-        is DialogViewState.InstallFailed -> installFailedDialog(installer, viewModel)
-        is DialogViewState.InstallCompleted -> installCompletedDialog(
+        is InstallerViewState.Ready -> readyDialog(viewModel)
+        is InstallerViewState.Resolving -> resolvingDialog(installer, viewModel)
+        is InstallerViewState.ResolveFailed -> resolveFailedDialog(installer, viewModel)
+        is InstallerViewState.Preparing -> preparingDialog(installer, viewModel)
+        is InstallerViewState.Analysing -> analysingDialog(installer, viewModel)
+        is InstallerViewState.AnalyseFailed -> analyseFailedDialog(installer, viewModel)
+        is InstallerViewState.InstallChoice -> installChoiceDialog(installer, viewModel)
+        is InstallerViewState.InstallPrepare -> installPrepareDialog(installer, viewModel)
+        is InstallerViewState.InstallExtendedMenu -> installExtendedMenuDialog(installer, viewModel)
+        is InstallerViewState.InstallExtendedSubMenu -> installExtendedMenuSubMenuDialog(installer, viewModel)
+        is InstallerViewState.Installing -> installingDialog(installer, viewModel)
+        is InstallerViewState.InstallSuccess -> installSuccessDialog(installer, viewModel)
+        is InstallerViewState.InstallFailed -> installFailedDialog(installer, viewModel)
+        is InstallerViewState.InstallCompleted -> installCompletedDialog(
             installer,
             viewModel,
-            (viewModel.state as DialogViewState.InstallCompleted).results
+            (viewModel.state as InstallerViewState.InstallCompleted).results
         )
 
-        is DialogViewState.InstallRetryDowngradeUsingUninstall -> installingDialog(installer, viewModel)
-        is DialogViewState.UninstallReady -> uninstallReadyDialog(viewModel)
-        is DialogViewState.UninstallSuccess -> uninstallSuccessDialog(viewModel)
-        is DialogViewState.UninstallFailed -> uninstallFailedDialog(installer, viewModel)
-        is DialogViewState.Uninstalling -> uninstallingDialog(installer, viewModel)
-        is DialogViewState.UninstallResolveFailed -> uninstallFailedDialog(installer, viewModel)
+        is InstallerViewState.InstallRetryDowngradeUsingUninstall -> installingDialog(installer, viewModel)
+        is InstallerViewState.UninstallReady -> uninstallReadyDialog(viewModel)
+        is InstallerViewState.UninstallSuccess -> uninstallSuccessDialog(viewModel)
+        is InstallerViewState.UninstallFailed -> uninstallFailedDialog(installer, viewModel)
+        is InstallerViewState.Uninstalling -> uninstallingDialog(installer, viewModel)
+        is InstallerViewState.UninstallResolveFailed -> uninstallFailedDialog(installer, viewModel)
         // when is exhaustive, so no need to handle the else case
         // else -> readyDialog(installer, viewModel)
     }

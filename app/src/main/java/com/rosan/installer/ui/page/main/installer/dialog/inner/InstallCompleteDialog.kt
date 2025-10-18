@@ -33,13 +33,13 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 
 @Composable
 fun installCompletedDialog(
     installer: InstallerRepo,
-    viewModel: DialogViewModel,
+    viewModel: InstallerViewModel,
     results: List<InstallResult>
 ): DialogParams {
     val successCount = results.count { it.success }
@@ -83,7 +83,7 @@ fun installCompletedDialog(
         buttons = DialogButtons(DialogParamsType.InstallerInstallCompleted.id) {
             listOf(
                 DialogButton(stringResource(R.string.finish)) {
-                    viewModel.dispatch(DialogViewAction.Close)
+                    viewModel.dispatch(InstallerViewAction.Close)
                 }
             )
         }

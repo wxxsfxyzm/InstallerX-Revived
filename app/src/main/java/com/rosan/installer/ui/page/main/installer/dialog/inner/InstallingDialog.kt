@@ -21,13 +21,13 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun installingDialog(
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     val progressTextResource by viewModel.installProgressText.collectAsState()
     val progress by viewModel.installProgress.collectAsState()
@@ -89,7 +89,7 @@ fun installingDialog(
             // Provides a button to move to background
             listOf(
                 DialogButton(stringResource(R.string.installer_silent_install)) {
-                    viewModel.dispatch(DialogViewAction.Background)
+                    viewModel.dispatch(InstallerViewAction.Background)
                 }
             )
         }

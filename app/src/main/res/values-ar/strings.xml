@@ -98,9 +98,9 @@
     <string name="config_force_dexopt">فرض التحسين</string>
     <string name="config_force_dexopt_desc">فرض إعادة الترجمة حتى لو اعتبرها النظام غير ضرورية</string>
     <string name="config_auto_delete">الحذف التلقائي</string>
-    <string name="config_auto_delete_dsp">حذف ملف APK تلقائياً بعد تثبيته</string>
+    <string name="config_auto_delete_desc">حذف ملف APK تلقائياً بعد تثبيته</string>
     <string name="config_display_sdk_version">عرض معلومات SDK</string>
-    <string name="config_display_sdk_version_sdp">عرض معلومات SDK المستهدف والأدنى في واجهة التثبيت</string>
+    <string name="config_display_sdk_version_desc">عرض معلومات SDK المستهدف والأدنى في واجهة التثبيت</string>
     <string name="config_label_main_settings">الإعدادات الرئيسية</string>
     <string name="config_label_installer_settings">إعدادات المُثبِّت</string>
     <string name="config_label_install_options">خيارات التثبيت</string>

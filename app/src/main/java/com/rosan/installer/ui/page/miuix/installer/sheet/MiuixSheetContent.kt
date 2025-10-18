@@ -24,7 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,10 +40,11 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.util.openAppPrivileged
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewState
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -52,18 +56,20 @@ import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.BackHandler
 
 @Composable
 fun MiuixSheetContent(
     installer: InstallerRepo,
-    viewModel: DialogViewModel = koinViewModel {
+    viewModel: InstallerViewModel = koinViewModel {
         parametersOf(installer)
     }
 ) {
     LaunchedEffect(installer.id) {
-        viewModel.dispatch(DialogViewAction.CollectRepo(installer))
+        viewModel.dispatch(InstallerViewAction.CollectRepo(installer))
     }
 
+    val showSettings = viewModel.showMiuixSheetRightActionSettings
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
     val displayIcons by viewModel.displayIcons.collectAsState()
@@ -74,6 +80,13 @@ fun MiuixSheetContent(
         if (currentPackageName != null) installer.analysisResults.find { it.packageName == currentPackageName } else null
     val baseEntity = analysisResult?.appEntities?.map { it.app }?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
     val appIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
+
+    BackHandler(
+        enabled = showSettings,
+        onBack = {
+            viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
+        }
+    )
 
     AnimatedContent(
         targetState = viewModel.state,
@@ -89,16 +102,28 @@ fun MiuixSheetContent(
         }
     ) { targetState ->
         when (targetState) {
-            is DialogViewState.InstallPrepare -> {
-                InstallPrepareContent(
-                    baseEntity = baseEntity,
-                    appIcon = appIcon,
-                    onCancel = { viewModel.dispatch(DialogViewAction.Close) },
-                    onInstall = { viewModel.dispatch(DialogViewAction.Install) }
-                )
+            is InstallerViewState.InstallPrepare -> {
+                AnimatedContent(
+                    targetState = showSettings,
+                    label = "PrepareContentVsSettings"
+                ) { isShowingSettings ->
+                    if (isShowingSettings) {
+                        // 显示设置内容
+                        PrepareSettingsContent(installer, viewModel)
+                    } else {
+                        // 显示原来的准备内容
+                        InstallPrepareContent(
+                            baseEntity = baseEntity,
+                            appIcon = appIcon,
+                            installer = installer,
+                            onCancel = { viewModel.dispatch(InstallerViewAction.Close) },
+                            onInstall = { viewModel.dispatch(InstallerViewAction.Install) }
+                        )
+                    }
+                }
             }
 
-            is DialogViewState.Installing -> {
+            is InstallerViewState.Installing -> {
                 // Show a progress indicator during installation.
                 InstallingContent(
                     baseEntity = baseEntity,
@@ -108,36 +133,36 @@ fun MiuixSheetContent(
                 )
             }
 
-            is DialogViewState.InstallSuccess -> {
+            is InstallerViewState.InstallSuccess -> {
                 InstallSuccessContent(
                     baseEntity = baseEntity,
                     installer = installer,
                     packageName = packageName,
                     appIcon = appIcon,
                     dhizukuAutoClose = viewModel.autoCloseCountDown,
-                    onClose = { viewModel.dispatch(DialogViewAction.Close) }
+                    onClose = { viewModel.dispatch(InstallerViewAction.Close) }
                 )
             }
 
-            is DialogViewState.InstallFailed -> {
+            is InstallerViewState.InstallFailed -> {
                 InstallFailureContent(
                     baseEntity = baseEntity,
                     appIcon = appIcon,
                     error = installer.error,
-                    onClose = { viewModel.dispatch(DialogViewAction.Close) }
+                    onClose = { viewModel.dispatch(InstallerViewAction.Close) }
                 )
             }
 
-            is DialogViewState.AnalyseFailed, is DialogViewState.ResolveFailed -> {
+            is InstallerViewState.AnalyseFailed, is InstallerViewState.ResolveFailed -> {
                 NonInstallFailureContent(
                     error = installer.error,
-                    onClose = { viewModel.dispatch(DialogViewAction.Close) }
+                    onClose = { viewModel.dispatch(InstallerViewAction.Close) }
                 )
             }
 
-            is DialogViewState.Resolving, is DialogViewState.Analysing -> {
+            is InstallerViewState.Resolving, is InstallerViewState.Analysing -> {
                 LoadingContent(
-                    statusText = if (targetState is DialogViewState.Resolving) stringResource(R.string.installer_resolving)
+                    statusText = if (targetState is InstallerViewState.Resolving) stringResource(R.string.installer_resolving)
                     else stringResource(R.string.installer_analysing)
                 )
             }
@@ -153,6 +178,7 @@ fun MiuixSheetContent(
 private fun InstallPrepareContent(
     baseEntity: AppEntity.BaseEntity?,
     appIcon: Drawable?,
+    installer: InstallerRepo,
     onCancel: () -> Unit,
     onInstall: () -> Unit
 ) {
@@ -189,6 +215,7 @@ private fun InstallPrepareContent(
                 UpdateInfoCardSlot(
                     versionName = baseEntity?.versionName ?: "N/A",
                     versionCode = baseEntity?.versionCode?.toString() ?: "N/A",
+                    displaySdk = installer.config.displaySdk,
                     sdkVersion = "${baseEntity?.minSdk ?: "N/A"} - ${baseEntity?.targetSdk ?: "N/A"}"
                 )
             }
@@ -203,7 +230,51 @@ private fun InstallPrepareContent(
             )
         }
     }
+}
 
+@Composable
+private fun PrepareSettingsContent(installer: InstallerRepo, viewModel: InstallerViewModel) {
+    var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
+    var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
+
+    LaunchedEffect(autoDelete, displaySdk) {
+        val currentConfig = installer.config
+        if (currentConfig.autoDelete != autoDelete) installer.config.autoDelete = autoDelete
+        if (currentConfig.displaySdk != displaySdk) installer.config.displaySdk = displaySdk
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Card(
+            modifier = Modifier.padding(bottom = 6.dp)
+        ) {
+            MiuixSwitchWidget(
+                title = stringResource(R.string.config_display_sdk_version),
+                description = stringResource(R.string.config_display_sdk_version_desc),
+                checked = displaySdk,
+                onCheckedChange = {
+                    val newValue = !displaySdk
+                    displaySdk = newValue
+                    installer.config.displaySdk = newValue
+                }
+            )
+            MiuixSwitchWidget(
+                title = stringResource(R.string.config_auto_delete),
+                description = stringResource(R.string.config_auto_delete_desc),
+                checked = installer.config.autoDelete,
+                onCheckedChange = {
+                    val newValue = !autoDelete
+                    autoDelete = newValue
+                    installer.config.autoDelete = newValue
+                }
+            )
+        }
+        Spacer(Modifier.height(24.dp))
+    }
 }
 
 @Composable
@@ -429,7 +500,11 @@ private fun ActionButtons(
 }
 
 @Composable
-private fun AppInfoSlot(icon: Drawable?, label: String, packageName: String) {
+private fun AppInfoSlot(
+    icon: Drawable?,
+    label: String,
+    packageName: String
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -445,7 +520,12 @@ private fun AppInfoSlot(icon: Drawable?, label: String, packageName: String) {
 }
 
 @Composable
-private fun UpdateInfoCardSlot(versionName: String, versionCode: String, sdkVersion: String) {
+private fun UpdateInfoCardSlot(
+    versionName: String,
+    versionCode: String,
+    displaySdk: Boolean,
+    sdkVersion: String
+) {
     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
 
         @Composable
@@ -464,6 +544,7 @@ private fun UpdateInfoCardSlot(versionName: String, versionCode: String, sdkVers
 
         InfoRow(label = "版本名称:", value = versionName)
         InfoRow(label = "版本代码:", value = versionCode)
-        InfoRow(label = "支持SDK:", value = sdkVersion)
+        if (displaySdk)
+            InfoRow(label = "支持SDK:", value = sdkVersion)
     }
 }

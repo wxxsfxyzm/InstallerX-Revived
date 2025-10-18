@@ -63,8 +63,8 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewState
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
 import com.rosan.installer.ui.util.toAndroidVersionName
 
 
@@ -76,7 +76,7 @@ import com.rosan.installer.ui.util.toAndroidVersionName
 @Composable
 fun installInfoDialog(
     installer: InstallerRepo,
-    viewModel: DialogViewModel,
+    viewModel: InstallerViewModel,
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
     val iconMap by viewModel.displayIcons.collectAsState()
@@ -153,7 +153,7 @@ fun installInfoDialog(
                 // When it becomes invisible, it will not take up any space,
                 // and the Row will re-center the Text automatically.
                 AnimatedVisibility(
-                    visible = viewModel.state == DialogViewState.InstallPrepare || viewModel.state == DialogViewState.InstallSuccess,
+                    visible = viewModel.state == InstallerViewState.InstallPrepare || viewModel.state == InstallerViewState.InstallSuccess,
                     enter = fadeIn() + slideInHorizontally { it }, // Slide in from the right
                     exit = fadeOut() + slideOutHorizontally { it }  // Slide out to the right
                 ) {

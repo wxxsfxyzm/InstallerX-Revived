@@ -112,9 +112,9 @@
     <string name="config_force_dexopt">Optimierung erzwingen</string>
     <string name="config_force_dexopt_desc">Erzwingen einer Neukompilierung, auch wenn das System dies für unnötig hält</string>
     <string name="config_auto_delete">APK automatisch Löschen</string>
-    <string name="config_auto_delete_dsp">Automatisches Löschen APK, nachdem sie installiert wurde</string>
+    <string name="config_auto_delete_desc">Automatisches Löschen APK, nachdem sie installiert wurde</string>
     <string name="config_display_sdk_version">SDK information anzeigen</string>
-    <string name="config_display_sdk_version_sdp">Ziel- und Mindest-SDK-Version auf dem Installationsdialog anzeigen</string>
+    <string name="config_display_sdk_version_desc">Ziel- und Mindest-SDK-Version auf dem Installationsdialog anzeigen</string>
     <string name="config_label_main_settings">Haupteinstellungen</string>
     <string name="config_label_installer_settings">Installer-Einstellungen</string>
     <string name="config_label_install_options">Installationsoptionen</string>

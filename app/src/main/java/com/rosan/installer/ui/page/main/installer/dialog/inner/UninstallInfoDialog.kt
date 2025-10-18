@@ -38,8 +38,8 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewState
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
 
 /**
  * Provides a base dialog structure for the uninstall process.
@@ -49,7 +49,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogViewState
  */
 @Composable
 fun uninstallInfoDialog(
-    viewModel: DialogViewModel,
+    viewModel: InstallerViewModel,
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
     // Collect the UninstallInfo state from the ViewModel.
@@ -89,7 +89,7 @@ fun uninstallInfoDialog(
                 // When it becomes invisible, it will not take up any space,
                 // and the Row will re-center the Text automatically.
                 AnimatedVisibility(
-                    visible = viewModel.state == DialogViewState.UninstallReady,
+                    visible = viewModel.state == InstallerViewState.UninstallReady,
                     enter = fadeIn() + slideInHorizontally { it }, // Slide in from the right
                     exit = fadeOut() + slideOutHorizontally { it }  // Slide out to the right
                 ) {

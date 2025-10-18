@@ -7,8 +7,8 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 
 /**
  * Displays an error dialog when an uninstallation fails.
@@ -19,7 +19,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
 @Composable
 fun uninstallFailedDialog(
     installer: InstallerRepo,
-    viewModel: DialogViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     // Use the shared uninstallInfoDialog to get the base layout.
     // Provide a click handler to open the app's system settings page,
@@ -44,7 +44,7 @@ fun uninstallFailedDialog(
             listOf(
                 // A "Close" button dismisses the dialog.
                 DialogButton(stringResource(R.string.close)) {
-                    viewModel.dispatch(DialogViewAction.Close)
+                    viewModel.dispatch(InstallerViewAction.Close)
                 }
             )
         }

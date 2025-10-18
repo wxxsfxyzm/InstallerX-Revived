@@ -41,8 +41,8 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.chip.SuggestionChipInfo
 import com.rosan.installer.ui.page.main.widget.dialog.UninstallConfirmationDialog
@@ -53,7 +53,7 @@ import timber.log.Timber
 
 @Composable
 fun installFailedDialog( // 小写开头
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     val context = LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
@@ -104,7 +104,7 @@ fun installFailedDialog( // 小写开头
                     viewModel.dispatch(DialogViewAction.InstallPrepare)
                 },*/
                 DialogButton(stringResource(R.string.close)) {
-                    viewModel.dispatch(DialogViewAction.Close)
+                    viewModel.dispatch(InstallerViewAction.Close)
                 }
             )
         }
@@ -115,7 +115,7 @@ fun installFailedDialog( // 小写开头
 @Composable
 private fun ErrorSuggestions(
     error: Throwable,
-    viewModel: DialogViewModel,
+    viewModel: InstallerViewModel,
     installer: InstallerRepo
 ) {
     val context = LocalContext.current
@@ -130,7 +130,7 @@ private fun ErrorSuggestions(
                     selected = { true },
                     onClick = {
                         viewModel.toggleInstallFlag(InstallOption.AllowTest.value, true)
-                        viewModel.dispatch(DialogViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install)
                     },
                     labelRes = R.string.suggestion_allow_test_app,
                     icon = AppIcons.BugReport
@@ -182,7 +182,7 @@ private fun ErrorSuggestions(
                         selected = { true }, // This is an action, not a state toggle.
                         onClick = {
                             viewModel.toggleInstallFlag(InstallOption.AllowDowngrade.value, true)
-                            viewModel.dispatch(DialogViewAction.Install)
+                            viewModel.dispatch(InstallerViewAction.Install)
                         },
                         labelRes = R.string.suggestion_allow_downgrade,
                         icon = AppIcons.Delete
@@ -196,7 +196,7 @@ private fun ErrorSuggestions(
                     onClick = {
                         installer.config.installer = "com.miui.packageinstaller"
                         viewModel.toast("可在设置中配置一个有效的安装来源")
-                        viewModel.dispatch(DialogViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install)
                     },
                     labelRes = R.string.suggestion_mi_isolation,
                     icon = AppIcons.InstallSource
@@ -212,7 +212,7 @@ private fun ErrorSuggestions(
                             // Add this flag because we are starting an activity from a non-activity context.
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             context.startActivity(intent)
-                            viewModel.dispatch(DialogViewAction.Close)
+                            viewModel.dispatch(InstallerViewAction.Close)
                         } catch (e: ActivityNotFoundException) {
                             // In case the activity is not found on some strange devices,
                             // show a toast to the user.
@@ -229,7 +229,7 @@ private fun ErrorSuggestions(
                     selected = { true }, // This is an action, not a state toggle.
                     onClick = {
                         viewModel.toggleInstallFlag(InstallOption.BypassLowTargetSdkBlock.value, true)
-                        viewModel.dispatch(DialogViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install)
                     },
                     labelRes = R.string.suggestion_bypass_low_target_sdk,
                     icon = AppIcons.InstallBypassLowTargetSdk
@@ -241,7 +241,7 @@ private fun ErrorSuggestions(
                     selected = { true }, // This is an action, not a state toggle.
                     onClick = {
                         viewModel.toggleBypassBlacklist(true)
-                        viewModel.dispatch(DialogViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install)
                     },
                     labelRes = R.string.suggestion_bypass_blacklist_set_by_user,
                     icon = AppIcons.BugReport
@@ -251,7 +251,7 @@ private fun ErrorSuggestions(
                 SuggestionChipInfo(
                     InstallFailedMissingInstallPermissionException::class,
                     selected = { true },
-                    onClick = { viewModel.dispatch(DialogViewAction.Install) },
+                    onClick = { viewModel.dispatch(InstallerViewAction.Install) },
                     labelRes = R.string.retry,
                     icon = AppIcons.Retry
                 )
@@ -304,7 +304,7 @@ private fun ErrorSuggestions(
             onDismiss = { showUninstallConfirmDialog = false },
             onConfirm = {
                 // When the user confirms, we dispatch the action to the ViewModel.
-                viewModel.dispatch(DialogViewAction.UninstallAndRetryInstall(keepData = confirmKeepData))
+                viewModel.dispatch(InstallerViewAction.UninstallAndRetryInstall(keepData = confirmKeepData))
             },
             keepData = confirmKeepData
         )

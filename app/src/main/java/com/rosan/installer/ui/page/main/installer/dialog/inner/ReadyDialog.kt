@@ -4,11 +4,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.installer.dialog.*
+import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
+import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
+import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 
 @Composable
 fun readyDialog(
-    viewModel: DialogViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(
@@ -21,7 +25,7 @@ fun readyDialog(
             DialogParamsType.ButtonsCancel.id
         ) {
             listOf(DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(DialogViewAction.Close)
+                viewModel.dispatch(InstallerViewAction.Close)
             })
         })
 }

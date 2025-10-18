@@ -127,9 +127,9 @@
     <string name="config_force_dexopt">Forcer l\'optimisation</string>
     <string name="config_force_dexopt_desc">Forcer la recompilation même si le système la juge inutile</string>
     <string name="config_auto_delete">Surpression auto</string>
-    <string name="config_auto_delete_dsp">Supprimer automatiquement l\'apk après l\'installation</string>
+    <string name="config_auto_delete_desc">Supprimer automatiquement l\'apk après l\'installation</string>
     <string name="config_display_sdk_version">Afficher les infos du SDK</string>
-    <string name="config_display_sdk_version_sdp">Afficher les versions cible et minimale sur l\'interface d\'installation</string>
+    <string name="config_display_sdk_version_desc">Afficher les versions cible et minimale sur l\'interface d\'installation</string>
     <string name="config_label_main_settings">Paramètres principaux</string>
     <string name="config_label_installer_settings">Paramètres de l\'installateur</string>
     <string name="config_label_install_options">Options d\'installation</string>
