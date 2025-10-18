@@ -72,7 +72,7 @@ jobs:
         run: |
           mkdir -p temp
           unzip app/build/outputs/apk/onlineUnstable/release/*.apk -d temp
-          cp -r temp/libmodule/priv-app/com.android.packageinstaller/
+          cp -r temp/lib module/priv-app/com.android.packageinstaller/
           cp app/build/outputs/apk/onlineUnstable/release/*.apk module/priv-app/com.android.packageinstaller/com.android.packageinstaller.apk
           zip -r module.zip module/*
 
