@@ -503,6 +503,11 @@ class DialogViewModel(
                     selectTargetUser(0)
                 }
             }.onFailure { error ->
+                // Check if the error is caused by coroutine cancellation.
+                if (error is kotlinx.coroutines.CancellationException) {
+                    Timber.d("User loading job was cancelled as expected.")
+                    throw error
+                }
                 Timber.e(error, "Failed to load available users.")
                 toast(error.getErrorMessage(context))
                 _availableUsers.value = emptyMap()
@@ -755,10 +760,7 @@ class DialogViewModel(
         if (currentMultiInstallIndex < multiInstallQueue.size) {
             val entityToInstall = multiInstallQueue[currentMultiInstallIndex]
 
-            // --- MODIFIED LOGIC TO PREPARE REPO STATE ---
-            // Instead of modifying 'repo.entities', we now temporarily modify 'repo.analysisResults'.
-
-            // 1. Find the original PackageAnalysisResult that the current entity belongs to.
+            //   Find the original PackageAnalysisResult that the current entity belongs to.
             //    We search in 'originalAnalysisResults' which holds the complete, unmodified analysis.
             val originalPackageResult =
                 originalAnalysisResults.find { it.packageName == entityToInstall.app.packageName }
@@ -778,13 +780,13 @@ class DialogViewModel(
                 return
             }
 
-            // 2. Create a new, temporary PackageAnalysisResult containing ONLY the current entity to be installed.
+            //    Create a new, temporary PackageAnalysisResult containing ONLY the current entity to be installed.
             //    We ensure it's marked as 'selected = true'.
             val tempPackageResult = originalPackageResult.copy(
                 appEntities = listOf(entityToInstall.copy(selected = true))
             )
 
-            // 3. Set the repository's state to this temporary, single-pkg state.
+            //    Set the repository's state to this temporary, single-pkg state.
             //    The 'ActionHandler.install()' method will read this state.
             repo.analysisResults = listOf(tempPackageResult)
 
@@ -814,7 +816,7 @@ class DialogViewModel(
             _installProgressText.value = null
             _currentPackageName.value = null
 
-            // MODIFICATION: Restore the repo's original, full analysis results.
+            // Restore the repo's original, full analysis results.
             repo.analysisResults = originalAnalysisResults
             originalAnalysisResults = emptyList()
         }
