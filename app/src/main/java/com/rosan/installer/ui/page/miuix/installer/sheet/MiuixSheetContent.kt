@@ -1,7 +1,5 @@
 package com.rosan.installer.ui.page.miuix.installer.sheet
 
-import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
@@ -20,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,19 +36,14 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.recycle.util.useUserService
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.recycle.util.openAppPrivileged
 import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogViewState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import timber.log.Timber
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -66,8 +60,6 @@ fun MiuixSheetContent(
         parametersOf(installer)
     }
 ) {
-    val context = LocalContext.current
-
     LaunchedEffect(installer.id) {
         viewModel.dispatch(DialogViewAction.CollectRepo(installer))
     }
@@ -119,7 +111,6 @@ fun MiuixSheetContent(
             is DialogViewState.InstallSuccess -> {
                 InstallSuccessContent(
                     baseEntity = baseEntity,
-                    context = context,
                     installer = installer,
                     packageName = packageName,
                     appIcon = appIcon,
@@ -222,9 +213,7 @@ private fun InstallingContent(
     progressText: String?
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(32.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -234,12 +223,21 @@ private fun InstallingContent(
             packageName = baseEntity?.packageName ?: "unknown.package"
         )
         Spacer(modifier = Modifier.height(32.dp))
-        InfiniteProgressIndicator()
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = progressText ?: stringResource(R.string.installer_installing),
-            style = MiuixTheme.textStyles.body1
-        )
+        Button(
+            enabled = false,
+            onClick = {},
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp),
+        ) {
+            Row {
+                InfiniteProgressIndicator()
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = progressText ?: stringResource(R.string.installer_installing)
+                )
+            }
+        }
     }
 }
 
@@ -279,7 +277,6 @@ private fun NonInstallFailureContent(
 @Composable
 private fun InstallSuccessContent(
     baseEntity: AppEntity.BaseEntity?,
-    context: Context,
     installer: InstallerRepo,
     appIcon: Drawable?,
     packageName: String,
@@ -316,6 +313,7 @@ private fun InstallSuccessContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val context = LocalContext.current
             val intent =
                 if (packageName.isNotEmpty()) context.packageManager.getLaunchIntentForPackage(
                     packageName
@@ -331,44 +329,14 @@ private fun InstallSuccessContent(
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                     onClick = {
-                        coroutineScope.launch(Dispatchers.IO) {
-                            Timber.tag("HybridStart").i("Attempting privileged API start for $packageName...")
-                            var forceStartSuccess = false
-
-                            if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                                installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+                        coroutineScope.launch {
+                            openAppPrivileged(
+                                context = context,
+                                config = installer.config,
+                                packageName = packageName,
+                                dhizukuAutoCloseSeconds = dhizukuAutoClose,
+                                onSuccess = onClose
                             )
-                                useUserService(installer.config) { userService ->
-                                    try {
-                                        forceStartSuccess = userService.privileged.startActivityPrivileged(intent)
-                                        Timber.tag("HybridStart")
-                                            .d("privileged.startActivityPrivileged returned: $forceStartSuccess")
-                                    } catch (e: Exception) {
-                                        Timber.tag("HybridStart").e(e, "Call to privileged.startActivityPrivileged failed.")
-                                        forceStartSuccess = false
-                                    }
-                                }
-
-                            if (forceStartSuccess) {
-                                Timber.tag("HybridStart")
-                                    .i("Privileged API start succeeded for $packageName. Closing dialog.")
-                                onClose()
-                            } else {
-                                Timber.tag("HybridStart")
-                                    .w("Privileged API start failed. Falling back to standard Android intent.")
-                                withContext(Dispatchers.Main) {
-                                    context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                                    coroutineScope.launch {
-                                        if (installer.config.authorizer == ConfigEntity.Authorizer.Dhizuku) {
-                                            delay(dhizukuAutoClose * 1000L)
-                                            Timber.tag("InstallSuccessDialog").d(
-                                                "App $packageName not detected in foreground after $dhizukuAutoClose seconds. Dialog will close itself."
-                                            )
-                                            onClose()
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
                 )
