@@ -6,7 +6,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
 
 @Composable
 fun readyDialog(
-    viewModel: DialogViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     return DialogParams(
         /*        icon = DialogInnerParams(

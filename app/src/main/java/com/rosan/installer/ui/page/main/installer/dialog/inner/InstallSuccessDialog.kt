@@ -15,14 +15,14 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.util.openAppPrivileged
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun installSuccessDialog( // 小写开头
     installer: InstallerRepo,
-    viewModel: DialogViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     val context = LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
@@ -46,7 +46,7 @@ fun installSuccessDialog( // 小写开头
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 )
             }
-            viewModel.dispatch(DialogViewAction.Background)
+            viewModel.dispatch(InstallerViewAction.Background)
         }
     )
 
@@ -69,7 +69,7 @@ fun installSuccessDialog( // 小写开头
                             config = installer.config,
                             packageName = packageName,
                             dhizukuAutoCloseSeconds = viewModel.autoCloseCountDown,
-                            onSuccess = { viewModel.dispatch(DialogViewAction.Close) }
+                            onSuccess = { viewModel.dispatch(InstallerViewAction.Close) }
                         )
                     }
                 })
@@ -79,7 +79,7 @@ fun installSuccessDialog( // 小写开头
                     viewModel.dispatch(DialogViewAction.InstallPrepare)
                 },*/
                 DialogButton(stringResource(R.string.finish)) {
-                    viewModel.dispatch(DialogViewAction.Close)
+                    viewModel.dispatch(InstallerViewAction.Close)
                 }
             )
             return@DialogButtons list

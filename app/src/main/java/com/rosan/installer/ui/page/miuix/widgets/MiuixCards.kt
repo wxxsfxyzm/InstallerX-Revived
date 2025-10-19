@@ -40,13 +40,13 @@ fun MiuixErrorTextBlock(
 ) {
     val isDark = isSystemInDarkTheme()
     val cardBackgroundColor = if (isDark) Color(0xCC8C2323) else Color(0xCCFBEAEA)
-    val contentColor = if (isDark) Color.White else Color(0xFF601A15)
+    val errorColor = if (isDark) Color.White else Color(0xFF601A15)
 
     Card(
         modifier = modifier,
         colors = CardColors(
             color = cardBackgroundColor,
-            contentColor = contentColor
+            contentColor = errorColor
         )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -80,7 +80,7 @@ fun MiuixErrorTextBlock(
                     value = textToShow,
                     onValueChange = {},
                     readOnly = true,
-                    textStyle = LocalTextStyle.current.copy(color = contentColor),
+                    textStyle = LocalTextStyle.current.copy(color = errorColor),
                     modifier = Modifier
                         .fillMaxWidth()
                         // Allow vertical scrolling for long stack traces

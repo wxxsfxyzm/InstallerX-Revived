@@ -9,12 +9,12 @@ import org.koin.core.parameter.parametersOf
 
 @Composable
 fun DialogPage(
-    installer: InstallerRepo, viewModel: DialogViewModel = koinViewModel {
+    installer: InstallerRepo, viewModel: InstallerViewModel = koinViewModel {
         parametersOf(installer)
     }
 ) {
     LaunchedEffect(installer.id) {
-        viewModel.dispatch(DialogViewAction.CollectRepo(installer))
+        viewModel.dispatch(InstallerViewAction.CollectRepo(installer))
     }
     if (viewModel.state !is DialogViewState.Ready) {
         val params = dialogGenerateParams(installer, viewModel)
@@ -26,9 +26,9 @@ fun DialogPage(
                     // If the setting is enabled, close the dialog directly.
                     // Otherwise, send it to the background (which shows a notification).
                     if (viewModel.disableNotificationOnDismiss) {
-                        viewModel.dispatch(DialogViewAction.Close)
+                        viewModel.dispatch(InstallerViewAction.Close)
                     } else {
-                        viewModel.dispatch(DialogViewAction.Background)
+                        viewModel.dispatch(InstallerViewAction.Background)
                     }
                 }
             },

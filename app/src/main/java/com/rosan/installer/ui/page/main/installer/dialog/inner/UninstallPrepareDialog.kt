@@ -22,8 +22,8 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 
 /**
@@ -33,7 +33,7 @@ import com.rosan.installer.ui.page.main.widget.chip.Chip
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun uninstallReadyDialog(
-    viewModel: DialogViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     // State to control the visibility of the animated chip.
     var showChips by remember { mutableStateOf(false) }
@@ -73,7 +73,7 @@ fun uninstallReadyDialog(
                         onClick = {
                             // Dispatch the action to toggle the flag in the ViewModel.
                             viewModel.dispatch(
-                                DialogViewAction.ToggleUninstallFlag(
+                                InstallerViewAction.ToggleUninstallFlag(
                                     flag = PackageManagerUtil.DELETE_KEEP_DATA,
                                     enable = !deleteKeepData
                                 )
@@ -87,7 +87,7 @@ fun uninstallReadyDialog(
                         onClick = {
                             // Dispatch the action to toggle the flag in the ViewModel.
                             viewModel.dispatch(
-                                DialogViewAction.ToggleUninstallFlag(
+                                InstallerViewAction.ToggleUninstallFlag(
                                     flag = PackageManagerUtil.DELETE_ALL_USERS,
                                     enable = !deleteAllUsers
                                 )
@@ -101,7 +101,7 @@ fun uninstallReadyDialog(
                         onClick = {
                             // Dispatch the action to toggle the flag in the ViewModel.
                             viewModel.dispatch(
-                                DialogViewAction.ToggleUninstallFlag(
+                                InstallerViewAction.ToggleUninstallFlag(
                                     flag = PackageManagerUtil.DELETE_SYSTEM_APP,
                                     enable = !deleteSystemApp
                                 )
@@ -117,11 +117,11 @@ fun uninstallReadyDialog(
             listOf(
                 // Uninstall button triggers the uninstall action.
                 DialogButton(stringResource(R.string.uninstall)) {
-                    viewModel.dispatch(DialogViewAction.Uninstall)
+                    viewModel.dispatch(InstallerViewAction.Uninstall)
                 },
                 // Cancel button closes the dialog.
                 DialogButton(stringResource(R.string.cancel)) {
-                    viewModel.dispatch(DialogViewAction.Close)
+                    viewModel.dispatch(InstallerViewAction.Close)
                 }
             )
         }

@@ -1,11 +1,16 @@
 package com.rosan.installer.ui.page.miuix.installer.sheet
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
+import android.os.Build
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -24,23 +29,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.entity.InstalledAppInfo
+import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
+import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.util.openAppPrivileged
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewState
+import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -48,22 +64,25 @@ import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
+import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.BackHandler
 
 @Composable
 fun MiuixSheetContent(
     installer: InstallerRepo,
-    viewModel: DialogViewModel = koinViewModel {
+    viewModel: InstallerViewModel = koinViewModel {
         parametersOf(installer)
     }
 ) {
     LaunchedEffect(installer.id) {
-        viewModel.dispatch(DialogViewAction.CollectRepo(installer))
+        viewModel.dispatch(InstallerViewAction.CollectRepo(installer))
     }
 
+    val showSettings = viewModel.showMiuixSheetRightActionSettings
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
     val displayIcons by viewModel.displayIcons.collectAsState()
@@ -75,69 +94,89 @@ fun MiuixSheetContent(
     val baseEntity = analysisResult?.appEntities?.map { it.app }?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
     val appIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
 
+    BackHandler(
+        enabled = showSettings,
+        onBack = {
+            viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
+        }
+    )
+
+    @SuppressLint("UnusedContentLambdaTargetStateParameter")
     AnimatedContent(
-        targetState = viewModel.state,
+        targetState = viewModel.state::class,
         label = "MiuixSheetContentAnimation",
         transitionSpec = {
-            // Define the animation.
-            // fadeIn/fadeOut controls how the content itself appears/disappears.
-            // SizeTransform handles the container size animation.
-            fadeIn() togetherWith fadeOut() using SizeTransform(
-                // Set clip to false to prevent content from being cut off during size change.
-                clip = false
-            )
+            fadeIn(animationSpec = tween(durationMillis = 150)) togetherWith
+                    fadeOut(animationSpec = tween(durationMillis = 150))
         }
-    ) { targetState ->
-        when (targetState) {
-            is DialogViewState.InstallPrepare -> {
-                InstallPrepareContent(
-                    baseEntity = baseEntity,
-                    appIcon = appIcon,
-                    onCancel = { viewModel.dispatch(DialogViewAction.Close) },
-                    onInstall = { viewModel.dispatch(DialogViewAction.Install) }
-                )
+    ) { _ ->
+        when (viewModel.state) {
+            is InstallerViewState.Preparing -> {
+                LoadingContent(statusText = stringResource(R.string.installer_preparing))
             }
 
-            is DialogViewState.Installing -> {
+            is InstallerViewState.InstallPrepare -> {
+                AnimatedContent(
+                    targetState = showSettings,
+                    label = "PrepareContentVsSettings",
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(durationMillis = 150)) togetherWith
+                                fadeOut(animationSpec = tween(durationMillis = 150))
+                    }
+                ) { isShowingSettings ->
+                    if (isShowingSettings) {
+                        PrepareSettingsContent(installer, viewModel)
+                    } else {
+                        InstallPrepareContent(
+                            installer = installer,
+                            viewModel = viewModel,
+                            onCancel = { viewModel.dispatch(InstallerViewAction.Close) },
+                            onInstall = { viewModel.dispatch(InstallerViewAction.Install) }
+                        )
+                    }
+                }
+            }
+
+            is InstallerViewState.Installing -> {
                 // Show a progress indicator during installation.
                 InstallingContent(
                     baseEntity = baseEntity,
                     appIcon = appIcon,
-                    //progress = installProgress,
+                    // progress = installProgress,
                     progressText = installProgressText?.toString()
                 )
             }
 
-            is DialogViewState.InstallSuccess -> {
+            is InstallerViewState.InstallSuccess -> {
                 InstallSuccessContent(
                     baseEntity = baseEntity,
                     installer = installer,
                     packageName = packageName,
                     appIcon = appIcon,
                     dhizukuAutoClose = viewModel.autoCloseCountDown,
-                    onClose = { viewModel.dispatch(DialogViewAction.Close) }
+                    onClose = { viewModel.dispatch(InstallerViewAction.Close) }
                 )
             }
 
-            is DialogViewState.InstallFailed -> {
+            is InstallerViewState.InstallFailed -> {
                 InstallFailureContent(
                     baseEntity = baseEntity,
                     appIcon = appIcon,
                     error = installer.error,
-                    onClose = { viewModel.dispatch(DialogViewAction.Close) }
+                    onClose = { viewModel.dispatch(InstallerViewAction.Close) }
                 )
             }
 
-            is DialogViewState.AnalyseFailed, is DialogViewState.ResolveFailed -> {
+            is InstallerViewState.AnalyseFailed, is InstallerViewState.ResolveFailed -> {
                 NonInstallFailureContent(
                     error = installer.error,
-                    onClose = { viewModel.dispatch(DialogViewAction.Close) }
+                    onClose = { viewModel.dispatch(InstallerViewAction.Close) }
                 )
             }
 
-            is DialogViewState.Resolving, is DialogViewState.Analysing -> {
+            is InstallerViewState.Resolving, is InstallerViewState.Analysing -> {
                 LoadingContent(
-                    statusText = if (targetState is DialogViewState.Resolving) stringResource(R.string.installer_resolving)
+                    statusText = if (viewModel.state is InstallerViewState.Resolving) stringResource(R.string.installer_resolving)
                     else stringResource(R.string.installer_analysing)
                 )
             }
@@ -149,61 +188,409 @@ fun MiuixSheetContent(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun InstallPrepareContent(
-    baseEntity: AppEntity.BaseEntity?,
-    appIcon: Drawable?,
+    installer: InstallerRepo,
+    viewModel: InstallerViewModel,
     onCancel: () -> Unit,
     onInstall: () -> Unit
 ) {
-    val cardColor = if (isSystemInDarkTheme()) Color(0xFF434343) else Color(0xFFFFFFFF)
+    val context = LocalContext.current
+    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
+    val displayIcons by viewModel.displayIcons.collectAsState()
+
+    if (currentPackage == null) {
+        LoadingContent(statusText = stringResource(id = R.string.loading))
+        return
+    }
+
+    val selectedEntities = currentPackage.appEntities.filter { it.selected }.map { it.app }.sortedBest()
+    if (selectedEntities.isEmpty()) {
+        LoadingContent(statusText = "No apps selected")
+        return
+    }
+
+    val primaryEntity = selectedEntities.first()
+    val entityToInstall = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+    val displayIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
+
+    val errorColor = MaterialTheme.colorScheme.error
+    val tertiaryColor = MiuixTheme.colorScheme.primary
+
+    val (warningMessages, buttonTextId) = remember(currentPackage, entityToInstall) {
+        val newEntity = entityToInstall
+        val oldInfo = currentPackage.installedAppInfo
+        val signatureStatus = currentPackage.signatureMatchStatus
+        val warnings = mutableListOf<Pair<String, Color>>()
+        var finalButtonTextId = R.string.install
+        if (newEntity != null) {
+            if (oldInfo == null) {
+                finalButtonTextId = R.string.install
+            } else {
+                when {
+                    newEntity.versionCode > oldInfo.versionCode -> finalButtonTextId = R.string.upgrade
+                    newEntity.versionCode < oldInfo.versionCode -> {
+                        warnings.add(context.getString(R.string.installer_prepare_type_downgrade) to errorColor)
+                        finalButtonTextId = R.string.install_anyway
+                    }
+
+                    oldInfo.isArchived -> finalButtonTextId = R.string.unarchive
+                    else -> finalButtonTextId = R.string.reinstall
+                }
+            }
+        }
+        if (primaryEntity.containerType == DataType.APK || primaryEntity.containerType == DataType.APKS)
+            when (signatureStatus) {
+                SignatureMatchStatus.MISMATCH -> {
+                    warnings.add(0, context.getString(R.string.installer_prepare_signature_mismatch) to errorColor)
+                    finalButtonTextId = R.string.install_anyway
+                }
+
+                SignatureMatchStatus.UNKNOWN_ERROR -> {
+                    warnings.add(0, context.getString(R.string.installer_prepare_signature_unknown) to tertiaryColor)
+                }
+
+                else -> {}
+            }
+        val newMinSdk = newEntity?.minSdk?.toIntOrNull()
+        if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
+            warnings.add(0, context.getString(R.string.installer_prepare_sdk_incompatible) to errorColor)
+        }
+        Pair(warnings, finalButtonTextId)
+    }
 
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                AppInfoSlot(
-                    icon = appIcon,
-                    label = baseEntity?.label ?: "Unknown App",
-                    packageName = baseEntity?.packageName ?: "unknown.package"
-                )
-            }
+            AppInfoSlot(
+                icon = displayIcon,
+                label = (primaryEntity as? AppEntity.BaseEntity)?.label ?: primaryEntity.packageName,
+                packageName = primaryEntity.packageName
+            )
+            Spacer(modifier = Modifier.height(16.dp))
         }
-        item { Spacer(modifier = Modifier.height(20.dp)) }
+
+        item {
+            WarningTextBlock(warnings = warningMessages)
+        }
+
         item {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
                 colors = CardColors(
-                    color = cardColor,
+                    color = if (isSystemInDarkTheme()) Color(0xFF434343) else Color.White,
                     contentColor = MiuixTheme.colorScheme.onSurface
                 )
             ) {
-                UpdateInfoCardSlot(
-                    versionName = baseEntity?.versionName ?: "N/A",
-                    versionCode = baseEntity?.versionCode?.toString() ?: "N/A",
-                    sdkVersion = "${baseEntity?.minSdk ?: "N/A"} - ${baseEntity?.targetSdk ?: "N/A"}"
+                Column(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (primaryEntity is AppEntity.BaseEntity) {
+                        AdaptiveInfoRow(
+                            labelResId = R.string.installer_version_name_label,
+                            newValue = primaryEntity.versionName,
+                            oldValue = currentPackage.installedAppInfo?.versionName,
+                            isArchived = currentPackage.installedAppInfo?.isArchived ?: false
+                        )
+                        AdaptiveInfoRow(
+                            labelResId = R.string.installer_version_code_label,
+                            newValue = primaryEntity.versionCode.toString(),
+                            oldValue = currentPackage.installedAppInfo?.versionCode?.toString(),
+                            isDowngrade = if (currentPackage.installedAppInfo != null) primaryEntity.versionCode < currentPackage.installedAppInfo.versionCode else false,
+                            isArchived = currentPackage.installedAppInfo?.isArchived ?: false
+                        )
+                        SDKComparison(
+                            entityToInstall = primaryEntity,
+                            preInstallAppInfo = currentPackage.installedAppInfo,
+                            installer = installer,
+                            viewModel = viewModel
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            val canInstall = entityToInstall?.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = onCancel,
+                    text = stringResource(R.string.cancel),
+                    modifier = Modifier.weight(1f),
+                )
+                if (canInstall) {
+                    TextButton(
+                        onClick = onInstall,
+                        text = stringResource(buttonTextId),
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+private val InfoRowSpacing = 8.dp
+
+@Composable
+private fun AdaptiveInfoRow(
+    @StringRes labelResId: Int,
+    newValue: String,
+    oldValue: String?,
+    isDowngrade: Boolean = false,
+    isArchived: Boolean
+) {
+    val showComparison = oldValue != null && newValue != oldValue
+    val oldTextContent = if (isArchived) stringResource(R.string.old_version_archived) else oldValue.orEmpty()
+    val oldValueText = @Composable { Text(oldTextContent, style = MiuixTheme.textStyles.body2) }
+
+    SubcomposeLayout { constraints ->
+        val label = @Composable {
+            Text(
+                text = stringResource(labelResId),
+                style = MiuixTheme.textStyles.body2,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        val arrow = @Composable {
+            Icon(
+                imageVector = AppIcons.ArrowIndicator,
+                contentDescription = "to",
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .size(16.dp)
+            )
+        }
+        val newValueText = @Composable { Text(newValue, style = MiuixTheme.textStyles.body2) }
+        val singleValueText = @Composable { Text(newValue, style = MiuixTheme.textStyles.body2) }
+
+        val labelPlaceable = subcompose("label", label).first().measure(constraints)
+        val oldTextPlaceable = subcompose("oldText", oldValueText).first().measure(constraints)
+
+        val shouldWrap = showComparison && (oldTextPlaceable.width > constraints.maxWidth / 2)
+
+        if (shouldWrap) {
+            val arrowPlaceable = subcompose("arrow", arrow).first().measure(constraints)
+            val newTextPlaceable = subcompose("newText", newValueText).first().measure(constraints)
+
+            val firstRowHeight = maxOf(labelPlaceable.height, oldTextPlaceable.height)
+            val secondRowHeight = maxOf(arrowPlaceable.height, newTextPlaceable.height)
+            val totalHeight = firstRowHeight + InfoRowSpacing.roundToPx() + secondRowHeight
+
+            layout(constraints.maxWidth, totalHeight) {
+                val labelY = (firstRowHeight - labelPlaceable.height) / 2
+                labelPlaceable.placeRelative(0, labelY)
+
+                val oldTextY = (firstRowHeight - oldTextPlaceable.height) / 2
+                oldTextPlaceable.placeRelative(constraints.maxWidth - oldTextPlaceable.width, oldTextY)
+
+                val secondRowYOffset = firstRowHeight + InfoRowSpacing.roundToPx()
+
+                val secondRowContentWidth = arrowPlaceable.width + newTextPlaceable.width
+                val newTextY = secondRowYOffset + (secondRowHeight - newTextPlaceable.height) / 2
+                newTextPlaceable.placeRelative(constraints.maxWidth - newTextPlaceable.width, newTextY)
+
+                val arrowY = secondRowYOffset + (secondRowHeight - arrowPlaceable.height) / 2
+                arrowPlaceable.placeRelative(constraints.maxWidth - secondRowContentWidth, arrowY)
+            }
+        } else {
+            val valueContent = @Composable {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (showComparison) {
+                        oldValueText()
+                        arrow()
+                        newValueText()
+                    } else {
+                        singleValueText()
+                    }
+                }
+            }
+            val valuePlaceable = subcompose("value", valueContent).first().measure(constraints)
+            val height = maxOf(labelPlaceable.height, valuePlaceable.height)
+
+            layout(constraints.maxWidth, height) {
+                val labelY = (height - labelPlaceable.height) / 2
+                labelPlaceable.placeRelative(0, labelY)
+
+                val valueY = (height - valuePlaceable.height) / 2
+                valuePlaceable.placeRelative(constraints.maxWidth - valuePlaceable.width, valueY)
+            }
+        }
+    }
+}
+
+@Composable
+private fun WarningTextBlock(warnings: List<Pair<String, Color>>) {
+    AnimatedVisibility(visible = warnings.isNotEmpty()) {
+        Column(
+            modifier = Modifier.padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            warnings.forEach { (text, color) ->
+                Text(
+                    text = text,
+                    color = color,
+                    style = MiuixTheme.textStyles.body2,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
-        item { Spacer(modifier = Modifier.height(20.dp)) }
-        item {
-            ActionButtons(
-                cancelText = stringResource(R.string.cancel),
-                confirmText = stringResource(R.string.install),
-                onCancel = onCancel,
-                onConfirm = onInstall
-            )
+    }
+}
+
+@Composable
+private fun SDKComparison(
+    entityToInstall: AppEntity,
+    preInstallAppInfo: InstalledAppInfo?,
+    viewModel: InstallerViewModel,
+    installer: InstallerRepo
+) {
+    AnimatedVisibility(visible = installer.config.displaySdk) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Target SDK
+            entityToInstall.targetSdk?.let { newTargetSdk ->
+                SdkInfoRow(
+                    labelResId = R.string.installer_package_target_sdk_label,
+                    newSdk = newTargetSdk,
+                    oldSdk = preInstallAppInfo?.targetSdk?.toString(),
+                    isArchived = preInstallAppInfo?.isArchived ?: false,
+                    type = "target"
+                )
+            }
+            // Min SDK
+            entityToInstall.minSdk?.let { newMinSdk ->
+                SdkInfoRow(
+                    labelResId = R.string.installer_package_min_sdk_label,
+                    newSdk = newMinSdk,
+                    oldSdk = preInstallAppInfo?.minSdk?.toString(),
+                    isArchived = preInstallAppInfo?.isArchived ?: false,
+                    type = "min"
+                )
+            }
         }
     }
+}
 
+@Composable
+private fun SdkInfoRow(
+    @StringRes labelResId: Int,
+    newSdk: String,
+    oldSdk: String?,
+    isArchived: Boolean,
+    type: String // "min" or "target"
+) {
+    val newSdkInt = newSdk.toIntOrNull()
+    val oldSdkInt = oldSdk?.toIntOrNull()
+    val showComparison = oldSdkInt != null && newSdkInt != null && newSdkInt != oldSdkInt
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Label to the left.
+        Text(
+            text = stringResource(labelResId),
+            style = MiuixTheme.textStyles.body2,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        // Label to the right.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (showComparison) {
+                val isDowngrade = newSdkInt < oldSdkInt
+                val isIncompatible = type == "min" && newSdkInt > Build.VERSION.SDK_INT
+                // val color = if (isDowngrade || isIncompatible) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+
+                val oldText = if (isArchived) stringResource(R.string.old_version_archived) else oldSdk.toString()
+
+                Text(text = oldText, style = MiuixTheme.textStyles.body2)
+
+                Icon(
+                    imageVector = AppIcons.ArrowIndicator,
+                    contentDescription = "to",
+                    // tint = color,
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .size(16.dp)
+                )
+
+                Text(text = newSdk/*, color = color*/, style = MiuixTheme.textStyles.body2)
+            } else {
+                val isIncompatible = type == "min" && newSdkInt != null && newSdkInt > Build.VERSION.SDK_INT
+                val color = if (isIncompatible) MaterialTheme.colorScheme.error else Color.Unspecified
+
+                Text(text = newSdk, color = color, style = MiuixTheme.textStyles.body2)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PrepareSettingsContent(installer: InstallerRepo, viewModel: InstallerViewModel) {
+    var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
+    var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
+
+    LaunchedEffect(autoDelete, displaySdk) {
+        val currentConfig = installer.config
+        if (currentConfig.autoDelete != autoDelete) installer.config.autoDelete = autoDelete
+        if (currentConfig.displaySdk != displaySdk) installer.config.displaySdk = displaySdk
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Card(
+            modifier = Modifier.padding(bottom = 6.dp),
+            colors = CardColors(
+                color = if (isSystemInDarkTheme()) Color(0xFF434343) else Color.White,
+                contentColor = MiuixTheme.colorScheme.onSurface
+            )
+        ) {
+            MiuixSwitchWidget(
+                title = stringResource(R.string.config_display_sdk_version),
+                description = stringResource(R.string.config_display_sdk_version_desc),
+                checked = displaySdk,
+                onCheckedChange = {
+                    val newValue = !displaySdk
+                    displaySdk = newValue
+                    installer.config.displaySdk = newValue
+                }
+            )
+            MiuixSwitchWidget(
+                title = stringResource(R.string.config_auto_delete),
+                description = stringResource(R.string.config_auto_delete_desc),
+                checked = installer.config.autoDelete,
+                onCheckedChange = {
+                    val newValue = !autoDelete
+                    autoDelete = newValue
+                    installer.config.autoDelete = newValue
+                }
+            )
+        }
+        Spacer(Modifier.height(24.dp))
+    }
 }
 
 @Composable
@@ -429,7 +816,11 @@ private fun ActionButtons(
 }
 
 @Composable
-private fun AppInfoSlot(icon: Drawable?, label: String, packageName: String) {
+private fun AppInfoSlot(
+    icon: Drawable?,
+    label: String,
+    packageName: String
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -441,29 +832,5 @@ private fun AppInfoSlot(icon: Drawable?, label: String, packageName: String) {
         )
         Text(label, style = MiuixTheme.textStyles.title2)
         Text(packageName, style = MiuixTheme.textStyles.subtitle)
-    }
-}
-
-@Composable
-private fun UpdateInfoCardSlot(versionName: String, versionCode: String, sdkVersion: String) {
-    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-
-        @Composable
-        fun InfoRow(label: String, value: String) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Text(label, style = MiuixTheme.textStyles.body2, fontWeight = FontWeight.SemiBold)
-                Text(value, style = MiuixTheme.textStyles.body2)
-            }
-        }
-
-        InfoRow(label = "版本名称:", value = versionName)
-        InfoRow(label = "版本代码:", value = versionCode)
-        InfoRow(label = "支持SDK:", value = sdkVersion)
     }
 }

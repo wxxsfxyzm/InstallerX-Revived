@@ -51,8 +51,8 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.util.asUserReadableSplitName
@@ -60,7 +60,7 @@ import timber.log.Timber
 
 @Composable
 fun installChoiceDialog(
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     val analysisResults = installer.analysisResults
     val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
@@ -71,9 +71,9 @@ fun installChoiceDialog(
     val titleRes = if (isMultiApk) R.string.installer_select_from_zip else R.string.installer_select_install
     val primaryButtonText = if (isMultiApk) R.string.install else R.string.next
     val primaryButtonAction = if (isMultiApk) {
-        { viewModel.dispatch(DialogViewAction.InstallMultiple) }
+        { viewModel.dispatch(InstallerViewAction.InstallMultiple) }
     } else {
-        { viewModel.dispatch(DialogViewAction.InstallPrepare) }
+        { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
     }
 
     return DialogParams(
@@ -99,7 +99,7 @@ fun installChoiceDialog(
             buildList {
                 if (!isModuleApk)
                     add(DialogButton(stringResource(primaryButtonText), onClick = primaryButtonAction))
-                add(DialogButton(stringResource(R.string.cancel)) { viewModel.dispatch(DialogViewAction.Close) })
+                add(DialogButton(stringResource(R.string.cancel)) { viewModel.dispatch(InstallerViewAction.Close) })
             }
         }
     )
@@ -108,7 +108,7 @@ fun installChoiceDialog(
 @Composable
 private fun ChoiceContent(
     analysisResults: List<PackageAnalysisResult>,
-    viewModel: DialogViewModel,
+    viewModel: InstallerViewModel,
     isModuleApk: Boolean = false,
     isMultiApk: Boolean
 ) {
@@ -241,7 +241,7 @@ private fun ChoiceContent(
                     shape = shape,
                     onClick = {
                         viewModel.dispatch(
-                            DialogViewAction.ToggleSelection(
+                            InstallerViewAction.ToggleSelection(
                                 packageName = item.app.packageName,
                                 entity = item,
                                 isMultiSelect = true
@@ -258,7 +258,7 @@ private fun ChoiceContent(
 @Composable
 private fun MultiApkGroupCard(
     packageResult: PackageAnalysisResult,
-    viewModel: DialogViewModel,
+    viewModel: InstallerViewModel,
     shape: Shape
 ) {
     val itemsInGroup = packageResult.appEntities
@@ -276,7 +276,7 @@ private fun MultiApkGroupCard(
             shape = shape,
             onClick = {
                 viewModel.dispatch(
-                    DialogViewAction.ToggleSelection(
+                    InstallerViewAction.ToggleSelection(
                         packageName = packageResult.packageName,
                         entity = item,
                         isMultiSelect = true
@@ -329,7 +329,7 @@ private fun MultiApkGroupCard(
                                 isRadio = true,
                                 onClick = {
                                     viewModel.dispatch(
-                                        DialogViewAction.ToggleSelection(
+                                        InstallerViewAction.ToggleSelection(
                                             packageName = packageResult.packageName,
                                             entity = item,
                                             isMultiSelect = false
