@@ -102,6 +102,7 @@ class InstallerViewModel(
         get() = when (state) {
             is InstallerViewState.Analysing,
             is InstallerViewState.Resolving -> false
+
             is InstallerViewState.InstallChoice -> false
 
             is InstallerViewState.Installing -> !disableNotificationOnDismiss
@@ -284,9 +285,9 @@ class InstallerViewModel(
                             loadingStateJob = viewModelScope.launch {
                                 delay(200L)
                                 state = if (progress is ProgressEntity.InstallPreparing) {
-                                    DialogViewState.Preparing(progress.progress)
+                                    InstallerViewState.Preparing(progress.progress)
                                 } else {
-                                    DialogViewState.Analysing
+                                    InstallerViewState.Analysing
                                 }
                             }
                         }

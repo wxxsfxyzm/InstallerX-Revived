@@ -156,14 +156,14 @@ private fun ChoiceContent(
                                 // Toggling it will set its 'selected' state to true.
                                 // The isMultiSelect=false flag ensures the other entity remains false.
                                 viewModel.dispatch(
-                                    DialogViewAction.ToggleSelection(
+                                    InstallerViewAction.ToggleSelection(
                                         packageName = baseSelectableEntity.app.packageName,
                                         entity = baseSelectableEntity,
                                         isMultiSelect = false
                                     )
                                 )
                                 // After updating the selection state, immediately proceed to the prepare screen.
-                                viewModel.dispatch(DialogViewAction.InstallPrepare)
+                                viewModel.dispatch(InstallerViewAction.InstallPrepare)
                             }
                         )
                     }
@@ -179,14 +179,14 @@ private fun ChoiceContent(
                                 // The initial state of moduleSelectableEntity.selected is false.
                                 // Toggling it will set its 'selected' state to true.
                                 viewModel.dispatch(
-                                    DialogViewAction.ToggleSelection(
+                                    InstallerViewAction.ToggleSelection(
                                         packageName = moduleSelectableEntity.app.packageName,
                                         entity = moduleSelectableEntity,
                                         isMultiSelect = false
                                     )
                                 )
                                 // After updating the selection state, immediately proceed to the prepare screen.
-                                viewModel.dispatch(DialogViewAction.InstallPrepare)
+                                viewModel.dispatch(InstallerViewAction.InstallPrepare)
                             }
                         )
                     }

@@ -16,7 +16,7 @@ fun DialogPage(
     LaunchedEffect(installer.id) {
         viewModel.dispatch(InstallerViewAction.CollectRepo(installer))
     }
-    if (viewModel.state !is DialogViewState.Ready) {
+    if (viewModel.state !is InstallerViewState.Ready) {
         val params = dialogGenerateParams(installer, viewModel)
 
         PositionDialog(

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
@@ -34,6 +35,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
     private lateinit var permissionManager: PermissionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         Timber.d("UninstallerActivity onCreate.")
 
