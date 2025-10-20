@@ -58,6 +58,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -717,7 +718,7 @@ private fun InstallSuccessContent(
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                     onClick = {
-                        coroutineScope.launch {
+                        coroutineScope.launch(Dispatchers.IO) {
                             openAppPrivileged(
                                 context = context,
                                 config = installer.config,

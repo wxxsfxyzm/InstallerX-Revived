@@ -86,8 +86,7 @@ suspend fun openAppPrivileged(
             useUserService(config) { userService ->
                 try {
                     forceStartSuccess = userService.privileged.startActivityPrivileged(intent)
-                    Timber.tag("HybridStart")
-                        .d("privileged.startActivityPrivileged returned: $forceStartSuccess")
+                    Timber.tag("HybridStart").d("privileged.startActivityPrivileged returned: $forceStartSuccess")
                 } catch (e: Exception) {
                     Timber.tag("HybridStart").e(e, "Call to privileged.startActivityPrivileged failed.")
                     forceStartSuccess = false // Ensure it's false on exception
@@ -118,9 +117,12 @@ suspend fun openAppPrivileged(
             if (config.authorizer == ConfigEntity.Authorizer.Dhizuku) {
                 // Wait for the auto-close countdown only for Dhizuku
                 delay(dhizukuAutoCloseSeconds * 1000L)
-                Timber.tag("InstallSuccessDialog").d(
+                Timber.tag("HybridStart").d(
                     "App $packageName not detected in foreground after $dhizukuAutoCloseSeconds seconds. Closing via success callback."
                 )
+            } else {
+                Timber.tag("HybridStart").d("Other Authorizer's fallback fixed to 2.5s")
+                delay(PRIVILEGED_START_TIMEOUT_MS)
             }
             onSuccess()
         }

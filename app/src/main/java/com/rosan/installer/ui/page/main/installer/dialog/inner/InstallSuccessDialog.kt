@@ -17,6 +17,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,7 +64,7 @@ fun installSuccessDialog( // 小写开头
                 ) else null
             if (intent != null) {
                 list.add(DialogButton(stringResource(R.string.open)) {
-                    coroutineScope.launch {
+                    coroutineScope.launch(Dispatchers.IO) {
                         openAppPrivileged(
                             context = context,
                             config = installer.config,
