@@ -13,7 +13,7 @@ class App : Application() {
     override fun onCreate() {
         CrashHandler.init()
         super.onCreate()
-        if (RsConfig.LEVEL == Level.PREVIEW || RsConfig.isDebug) {
+        if (RsConfig.LEVEL == Level.PREVIEW || RsConfig.LEVEL == Level.UNSTABLE || RsConfig.isDebug) {
             Timber.plant(Timber.DebugTree())
         }
         startKoin {
