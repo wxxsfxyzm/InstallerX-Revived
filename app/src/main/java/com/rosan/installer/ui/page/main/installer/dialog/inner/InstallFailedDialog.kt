@@ -151,6 +151,8 @@ private fun ErrorSuggestions(
                 )
             )
             if (
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA && // Must be lower than Android 16
+
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && // Must be Android 14 or higher
 
                 !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && // And is Android 15 or higher
