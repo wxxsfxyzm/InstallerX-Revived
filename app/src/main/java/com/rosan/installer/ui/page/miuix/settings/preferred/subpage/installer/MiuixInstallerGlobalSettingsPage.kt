@@ -115,7 +115,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                 .padding(horizontal = 12.dp)
                                 .padding(bottom = 6.dp)
                         ) {
-                            MiuixSwitchWidget(
+/*                            MiuixSwitchWidget(
                                 icon = AppIcons.SingleLineSettingIcon,
                                 title = stringResource(id = R.string.version_compare_in_single_line),
                                 description = stringResource(id = R.string.version_compare_in_single_line_desc),
@@ -132,7 +132,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                 onCheckedChange = {
                                     viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it))
                                 }
-                            )
+                            )*/
                             AnimatedVisibility(
                                 visible = state.installMode == ConfigEntity.InstallMode.Dialog,
                                 enter = fadeIn(),
@@ -150,7 +150,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                     }
                                 )
                             }
-                            MiuixSwitchWidget(
+                            /*MiuixSwitchWidget(
                                 icon = AppIcons.Suggestion,
                                 title = stringResource(id = R.string.show_intelligent_suggestion),
                                 description = stringResource(id = R.string.show_intelligent_suggestion_desc),
@@ -160,7 +160,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                         PreferredViewAction.ChangeShowSuggestion(it)
                                     )
                                 }
-                            )
+                            )*/
                             MiuixSwitchWidget(
                                 icon = AppIcons.NotificationDisabled,
                                 title = stringResource(id = R.string.disable_notification),
