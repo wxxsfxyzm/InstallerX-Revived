@@ -360,6 +360,7 @@
     <string name="exception_install_failed_duplicate_permission">The package is trying to redeclare permission already declared by another app!</string>
     <string name="exception_install_failed_user_restricted">System restricted install through USB, please enable it</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS does not allow uninstalling this app!</string>
+    <string name="exception_uninstall_failed_internal_error">Package Manager internal error</string>
     <string name="exception_shizuku_not_work">Please activate Sui or Shizuku and grant permission</string>
     <string name="exception_dhizuku_not_work">Please activate Dhizuku and grant permission</string>
     <string name="exception_root_not_work">Couldn\'t access root</string>

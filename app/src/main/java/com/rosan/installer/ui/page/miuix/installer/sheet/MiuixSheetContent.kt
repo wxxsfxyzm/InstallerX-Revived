@@ -357,7 +357,6 @@ private fun AdaptiveInfoRow(
 ) {
     val showComparison = oldValue != null && newValue != oldValue
     val oldTextContent = if (isArchived) stringResource(R.string.old_version_archived) else oldValue.orEmpty()
-    val oldValueText = @Composable { Text(oldTextContent, style = MiuixTheme.textStyles.body2) }
 
     SubcomposeLayout { constraints ->
         val label = @Composable {
@@ -368,68 +367,73 @@ private fun AdaptiveInfoRow(
             )
         }
 
-        val arrow = @Composable {
-            Icon(
-                imageVector = AppIcons.ArrowIndicator,
-                contentDescription = "to",
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .size(16.dp)
-            )
+        val valueContentSingleLine = @Composable {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showComparison) {
+                    Text(oldTextContent, style = MiuixTheme.textStyles.body2)
+                    Icon(
+                        imageVector = AppIcons.ArrowIndicator,
+                        contentDescription = "to",
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(16.dp)
+                    )
+                    Text(newValue, style = MiuixTheme.textStyles.body2)
+                } else {
+                    Text(newValue, style = MiuixTheme.textStyles.body2)
+                }
+            }
         }
-        val newValueText = @Composable { Text(newValue, style = MiuixTheme.textStyles.body2) }
-        val singleValueText = @Composable { Text(newValue, style = MiuixTheme.textStyles.body2) }
 
         val labelPlaceable = subcompose("label", label).first().measure(constraints)
-        val oldTextPlaceable = subcompose("oldText", oldValueText).first().measure(constraints)
+        val valuePlaceable = subcompose("valueContent", valueContentSingleLine).first().measure(constraints)
 
-        val shouldWrap = showComparison && (oldTextPlaceable.width > constraints.maxWidth / 2)
+        val totalWidth = labelPlaceable.width + InfoRowSpacing.roundToPx() + valuePlaceable.width
+        val shouldWrap = totalWidth > constraints.maxWidth
 
-        if (shouldWrap) {
-            val arrowPlaceable = subcompose("arrow", arrow).first().measure(constraints)
-            val newTextPlaceable = subcompose("newText", newValueText).first().measure(constraints)
+        if (shouldWrap && showComparison) {
+            val oldValueText = @Composable { Text(oldTextContent, style = MiuixTheme.textStyles.body2) }
+            val newValueTextWithArrow = @Composable {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = AppIcons.ArrowIndicator,
+                        contentDescription = "to",
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(16.dp)
+                    )
+                    Text(newValue, style = MiuixTheme.textStyles.body2)
+                }
+            }
+
+            val oldTextPlaceable = subcompose("oldTextWrap", oldValueText).first().measure(constraints)
+            val newTextWithArrowPlaceable = subcompose("newTextWrap", newValueTextWithArrow).first().measure(constraints)
 
             val firstRowHeight = maxOf(labelPlaceable.height, oldTextPlaceable.height)
-            val secondRowHeight = maxOf(arrowPlaceable.height, newTextPlaceable.height)
+            val secondRowHeight = newTextWithArrowPlaceable.height
             val totalHeight = firstRowHeight + InfoRowSpacing.roundToPx() + secondRowHeight
 
             layout(constraints.maxWidth, totalHeight) {
-                val labelY = (firstRowHeight - labelPlaceable.height) / 2
-                labelPlaceable.placeRelative(0, labelY)
-
-                val oldTextY = (firstRowHeight - oldTextPlaceable.height) / 2
-                oldTextPlaceable.placeRelative(constraints.maxWidth - oldTextPlaceable.width, oldTextY)
+                labelPlaceable.placeRelative(0, Alignment.CenterVertically.align(labelPlaceable.height, firstRowHeight))
+                oldTextPlaceable.placeRelative(
+                    constraints.maxWidth - oldTextPlaceable.width,
+                    Alignment.CenterVertically.align(oldTextPlaceable.height, firstRowHeight)
+                )
 
                 val secondRowYOffset = firstRowHeight + InfoRowSpacing.roundToPx()
-
-                val secondRowContentWidth = arrowPlaceable.width + newTextPlaceable.width
-                val newTextY = secondRowYOffset + (secondRowHeight - newTextPlaceable.height) / 2
-                newTextPlaceable.placeRelative(constraints.maxWidth - newTextPlaceable.width, newTextY)
-
-                val arrowY = secondRowYOffset + (secondRowHeight - arrowPlaceable.height) / 2
-                arrowPlaceable.placeRelative(constraints.maxWidth - secondRowContentWidth, arrowY)
+                newTextWithArrowPlaceable.placeRelative(
+                    constraints.maxWidth - newTextWithArrowPlaceable.width,
+                    secondRowYOffset + Alignment.CenterVertically.align(newTextWithArrowPlaceable.height, secondRowHeight)
+                )
             }
         } else {
-            val valueContent = @Composable {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (showComparison) {
-                        oldValueText()
-                        arrow()
-                        newValueText()
-                    } else {
-                        singleValueText()
-                    }
-                }
-            }
-            val valuePlaceable = subcompose("value", valueContent).first().measure(constraints)
             val height = maxOf(labelPlaceable.height, valuePlaceable.height)
-
             layout(constraints.maxWidth, height) {
-                val labelY = (height - labelPlaceable.height) / 2
-                labelPlaceable.placeRelative(0, labelY)
-
-                val valueY = (height - valuePlaceable.height) / 2
-                valuePlaceable.placeRelative(constraints.maxWidth - valuePlaceable.width, valueY)
+                labelPlaceable.placeRelative(0, Alignment.CenterVertically.align(labelPlaceable.height, height))
+                valuePlaceable.placeRelative(
+                    constraints.maxWidth - valuePlaceable.width,
+                    Alignment.CenterVertically.align(valuePlaceable.height, height)
+                )
             }
         }
     }
