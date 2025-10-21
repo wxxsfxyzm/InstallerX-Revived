@@ -372,4 +372,11 @@
     <string name="suggestion_mi_isolation">Añadir temporalmente un instalador válido y volver a intentarlo</string>
     <string name="suggestion_user_restricted">Ve a las opciones de desarrollador y activa la instalación USB</string>
     <string name="suggestion_bypass_low_target_sdk">Permite temporalmente omitir la restricción y vuelve a intentarlo</string>
+    <string name="warning">Advertencia</string>
+    <string name="get_source_code">Comprobar el código fuente</string>
+    <string name="get_source_code_detail">Busque el código fuente en GitHub</string>
+    <string name="internet_access_enabled">En línea</string>
+    <string name="internet_access_disabled">Desconectado</string>
+    <string name="telegram_channel">Canal de Telegram</string>
+    <string name="telegram_channel_desc">Únete al canal para recibir noticias y actualizaciones.</string>
 </resources>

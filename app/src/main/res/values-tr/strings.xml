@@ -21,8 +21,8 @@
     <string name="get_update_detail">Yazılım güncellemelerini ve yeni özellikleri kontrol edin</string>
     <string name="get_source_code">Kaynak kodunu kontrol edin</string>
     <string name="get_source_code_detail">GitHub\'da kaynak kodunu kontrol edin</string>
-    <string name="internet_access_enabled">Çevrimiçi</string>
-    <string name="internet_access_disabled">Çevrimdışı</string>
+    <string name="internet_access_enabled">Çevrimiçi&amp;nbsp;</string>
+    <string name="internet_access_disabled">Çevrimdışı&amp;nbsp;</string>
     <string name="stable">Stabil sürüm</string>
     <string name="preview">Önizleme sürümü</string>
     <string name="unstable">Stabil olmayan sürüm</string>
@@ -458,4 +458,9 @@
     <string name="suggestion_user_restricted">USB kurulumunu etkinleştirmek için Geliştirici seçeneklerine gidin</string>
     <string name="suggestion_bypass_low_target_sdk">Geçici olarak kısıtlamaları atlatmaya izin ver ve yeniden dene</string>
     <string name="suggestion_bypass_blacklist_set_by_user">Yüklemeye bir kez izin ver</string>
+    <string name="config_global_default">Global Varsayılan</string>
+    <string name="installer_version_name_label">Versiyan Adı:</string>
+    <string name="installer_version_code_label">Versiyon Kodu:</string>
+    <string name="installer_package_min_sdk_label">Min SDK:</string>
+    <string name="installer_package_target_sdk_label">Hedef SDK:</string>
 </resources>
