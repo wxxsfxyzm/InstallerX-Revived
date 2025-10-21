@@ -61,6 +61,9 @@ class InstallerViewModel(
     var showMiuixSheetRightActionSettings by mutableStateOf(false)
         private set
 
+    var navigatedFromPrepareToChoice by mutableStateOf(false)
+        private set
+
     var autoCloseCountDown by mutableIntStateOf(3)
         private set
 
@@ -103,6 +106,7 @@ class InstallerViewModel(
             is InstallerViewState.Analysing,
             is InstallerViewState.Resolving -> false
 
+            is InstallerViewState.InstallExtendedMenu,
             is InstallerViewState.InstallChoice -> false
 
             is InstallerViewState.Installing -> !disableNotificationOnDismiss
@@ -199,7 +203,12 @@ class InstallerViewModel(
             is InstallerViewAction.CollectRepo -> collectRepo(action.repo)
             is InstallerViewAction.Close -> close()
             is InstallerViewAction.Analyse -> analyse()
-            is InstallerViewAction.InstallChoice -> installChoice()
+            is InstallerViewAction.InstallChoice -> {
+                // Check if navigating from*InstallPrepare
+                navigatedFromPrepareToChoice = state is InstallerViewState.InstallPrepare
+                installChoice()
+            }
+
             is InstallerViewAction.InstallPrepare -> installPrepare()
             is InstallerViewAction.InstallExtendedMenu -> installExtendedMenu()
             is InstallerViewAction.InstallExtendedSubMenu -> installExtendedSubMenu()
@@ -307,10 +316,7 @@ class InstallerViewModel(
                         newPackageNameFromProgress = null
                     }
 
-                    is ProgressEntity.InstallPreparing -> newState = InstallerViewState.Preparing(progress.progress)
-                    is ProgressEntity.InstallResolving -> newState = InstallerViewState.Resolving
                     is ProgressEntity.InstallResolvedFailed -> newState = InstallerViewState.ResolveFailed
-                    is ProgressEntity.InstallAnalysing -> newState = InstallerViewState.Analysing
                     is ProgressEntity.InstallAnalysedFailed -> newState = InstallerViewState.AnalyseFailed
                     is ProgressEntity.InstallAnalysedSuccess -> {
                         // When analysis is successful, this is the first moment we have the full, original list.
@@ -460,10 +466,10 @@ class InstallerViewModel(
     fun toggleInstallFlag(flag: Int, enable: Boolean) {
         val currentFlags = _installFlags.value
         if (enable) {
-            // 使用位或运算 (or) 来添加一个 flag
+            // Add flag using bitwise OR
             _installFlags.value = currentFlags or flag
         } else {
-            // 使用位与 (and) 和 按位取反 (inv) 来移除一个 flag
+            // Remove flag using bitwise AND and bitwise NOT (inv)
             _installFlags.value = currentFlags and flag.inv()
         }
         repo.config.installFlags = _installFlags.value // 同步到 repo.config

@@ -40,13 +40,14 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewState
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
+import com.rosan.installer.ui.page.miuix.widgets.MiuixAutoLockInstaller
 import com.rosan.installer.ui.page.miuix.widgets.MiuixClearCache
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDefaultInstaller
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisableAdbVerify
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationSetting
+import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNoneInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsNavigationItemWidget
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -128,13 +129,11 @@ fun MiuixPreferredPage(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         ContainedLoadingIndicator(
-                            // Use MiuixTheme for colors
                             indicatorColor = MiuixTheme.colorScheme.primary,
                             containerColor = MiuixTheme.colorScheme.surfaceContainer
                         )
                         Text(
                             text = stringResource(id = R.string.loading),
-                            // Use MiuixTheme for typography
                             style = MiuixTheme.textStyles.main
                         )
                     }
@@ -157,7 +156,7 @@ fun MiuixPreferredPage(
                                 .padding(horizontal = 12.dp)
                                 .padding(bottom = 6.dp)
                         ) {
-                            MiuixSettingsNavigationItemWidget(
+                            MiuixNavigationItemWidget(
                                 icon = AppIcons.Theme,
                                 title = stringResource(R.string.theme_settings),
                                 description = stringResource(R.string.theme_settings_desc),
@@ -165,7 +164,7 @@ fun MiuixPreferredPage(
                                     navController.navigate(MiuixSettingsScreen.MiuixTheme.route)
                                 }
                             )
-                            MiuixSettingsNavigationItemWidget(
+                            MiuixNavigationItemWidget(
                                 icon = AppIcons.InstallMode,
                                 title = stringResource(R.string.installer_settings),
                                 description = stringResource(R.string.installer_settings_desc),
@@ -197,6 +196,10 @@ fun MiuixPreferredPage(
                                 checked = state.isIgnoringBatteryOptimizations,
                                 enabled = !state.isIgnoringBatteryOptimizations,
                             ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
+                            MiuixAutoLockInstaller(
+                                checked = state.autoLockInstaller,
+                                enabled = state.authorizer != ConfigEntity.Authorizer.None,
+                            ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
                             MiuixDefaultInstaller(true) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
                             MiuixDefaultInstaller(false) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
                             MiuixClearCache()

@@ -33,6 +33,7 @@ import com.rosan.installer.data.installer.model.impl.InstallerRepoImpl
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.installer.util.getRealPathFromUri
 import com.rosan.installer.data.installer.util.pathUnify
+import com.rosan.installer.data.recycle.util.setInstallerDefaultPrivileged
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
@@ -125,6 +126,18 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
         Timber.d("[id=${installer.id}] resolve: Config resolved. installMode=${installer.config.installMode}")
 
+        if (appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER).first()) runCatching {
+            Timber.d("[id=${installer.id}] resolve: Attempting to auto-lock default installer.")
+            setInstallerDefaultPrivileged(
+                context,
+                installer.config,
+                true
+            )
+            Timber.d("[id=${installer.id}] resolve: Auto-lock attempt finished successfully.")
+        }.onFailure {
+            Timber.w(it, "[id=${installer.id}] resolve: Failed to auto-lock default installer. This is non-fatal.")
+        }
+
         // Check for notification mode immediately after resolving config.
         val isNotificationInstall = installer.config.installMode == ConfigEntity.InstallMode.Notification ||
                 installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
@@ -141,15 +154,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             return
         }
 
-        /*        installer.data = try {
-                    resolveData(activity)
-                } catch (e: Exception) {
-                    Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve data.")
-                    installer.error = e
-                    installer.progress.emit(ProgressEntity.ResolvedFailed)
-                    return
-                }*/
-        // OPTIMIZATION: The caching logic is now integrated directly into the data resolution step.
         installer.data = try {
             resolveAndStabilizeData(activity)
         } catch (e: Exception) {
