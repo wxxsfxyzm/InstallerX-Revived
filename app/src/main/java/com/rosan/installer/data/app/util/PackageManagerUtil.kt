@@ -37,6 +37,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedUserRestrictedE
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationFailureException
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationTimeoutException
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
+import com.rosan.installer.data.app.model.exception.InstallParseFailedNoCertificatesException
 import com.rosan.installer.data.app.model.exception.UninstallFailedAbortedException
 import com.rosan.installer.data.app.model.exception.UninstallFailedDevicePolicyManagerException
 import com.rosan.installer.data.app.model.exception.UninstallFailedHyperOSSystemAppException
@@ -94,6 +95,7 @@ object PackageManagerUtil {
     const val INSTALL_FAILED_VERSION_DOWNGRADE = -25
     const val INSTALL_FAILED_MISSING_SPLIT = -28
     const val INSTALL_FAILED_DEPRECATED_SDK_VERSION = -29
+    const val INSTALL_PARSE_FAILED_NO_CERTFICATES = -103
     const val INSTALL_FAILED_INTERNAL_ERROR = -110
     const val INSTALL_FAILED_USER_RESTRICTED = -111
     const val INSTALL_FAILED_DUPLICATE_PERMISSION = -112
@@ -166,6 +168,7 @@ object PackageManagerUtil {
             INSTALL_BLACK_LIST -> InstallFailedOriginOSBlacklistException(ecpMsg)
             INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION -> InstallFailedHyperOSIsolationViolationException(ecpMsg)
             INSTALL_FAILED_REJECTED_BY_BUILDTYPE -> InstallFailedRejectedByBuildTypeException(ecpMsg)
+            INSTALL_PARSE_FAILED_NO_CERTFICATES -> InstallParseFailedNoCertificatesException(ecpMsg)
             INSTALL_FAILED_USER_RESTRICTED -> InstallFailedUserRestrictedException(ecpMsg)
             else -> IllegalStateException(ecpMsg)
         }

@@ -241,6 +241,4 @@ dependencies {
 
     // miuix
     implementation(libs.miuix)
-
-    implementation(libs.apache.commons.compress)
 }

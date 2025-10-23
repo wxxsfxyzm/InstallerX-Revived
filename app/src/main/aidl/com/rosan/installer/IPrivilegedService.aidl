@@ -77,4 +77,19 @@ interface IPrivilegedService {
      * @return A Map where the key is the integer user ID and the value is the user's name.
      */
     Map getUsers();
+
+    /**
+     * Retrieves detailed information about an installation session (app name, icon).
+     * @param sessionId The ID of the session to query.
+     * @return A Bundle containing "appLabel" (String) and "appIcon" (byte[]),
+     * or null if the session is invalid or the query fails.
+     */
+    Bundle getSessionDetails(int sessionId);
+
+    /**
+     * Approves or rejects an installation session.
+     * @param sessionId The ID of the session.
+     * @param granted true to approve, false to reject.
+     */
+    void approveSession(int sessionId, boolean granted);
 }

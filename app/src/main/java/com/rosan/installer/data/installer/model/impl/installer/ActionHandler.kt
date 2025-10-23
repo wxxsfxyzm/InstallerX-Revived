@@ -6,13 +6,19 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.res.AssetFileDescriptor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.system.Os
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
@@ -25,6 +31,7 @@ import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
+import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.model.exception.ResolveException
@@ -33,6 +40,8 @@ import com.rosan.installer.data.installer.model.impl.InstallerRepoImpl
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.installer.util.getRealPathFromUri
 import com.rosan.installer.data.installer.util.pathUnify
+import com.rosan.installer.data.recycle.util.useUserService
+import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
@@ -52,6 +61,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.RandomAccessFile
+import java.lang.reflect.Field
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.UUID
@@ -67,10 +77,14 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     override val installer: InstallerRepoImpl = super.installer as InstallerRepoImpl
     private var job: Job? = null
     private val context by inject<Context>()
+    private val reflect by inject<ReflectRepo>()
     private val appDataStore by inject<AppDataStore>()
     private val cacheParcelFileDescriptors = mutableListOf<ParcelFileDescriptor>()
     private val cacheDirectory = "${context.externalCacheDir?.absolutePath}/${installer.id}".apply {
         File(this).mkdirs()
+    }
+    private val isSystemInstaller: Boolean by lazy {
+        context.packageName == "com.android.packageinstaller"
     }
 
     override suspend fun onStart() {
@@ -88,6 +102,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     )
 
                     is InstallerRepoImpl.Action.Uninstall -> uninstall(action.packageName)
+                    is InstallerRepoImpl.Action.ResolveConfirmInstall -> resolveConfirmInstall(action.activity, action.sessionId)
+                    is InstallerRepoImpl.Action.ApproveSession -> approveSession(action.sessionId, action.granted)
                     is InstallerRepoImpl.Action.Finish -> finish()
                 }
             }
@@ -141,15 +157,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             return
         }
 
-        /*        installer.data = try {
-                    resolveData(activity)
-                } catch (e: Exception) {
-                    Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve data.")
-                    installer.error = e
-                    installer.progress.emit(ProgressEntity.ResolvedFailed)
-                    return
-                }*/
-        // OPTIMIZATION: The caching logic is now integrated directly into the data resolution step.
+        // The caching logic is now integrated directly into the data resolution step.
         installer.data = try {
             resolveAndStabilizeData(activity)
         } catch (e: Exception) {
@@ -378,6 +386,189 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         Timber.d("[id=${installer.id}] uninstall: Succeeded for $packageName. Emitting ProgressEntity.UninstallSuccess.")
         installer.progress.emit(ProgressEntity.UninstallSuccess)
+    }
+
+    private suspend fun resolveConfirmInstall(activity: Activity, sessionId: Int) {
+        Timber.d("[id=${installer.id}] resolveConfirmInstall: Starting for session $sessionId.")
+        installer.progress.emit(ProgressEntity.InstallResolving)
+
+        try {
+            installer.config = resolveConfig(activity)
+
+            // TODO implement Notification Confirmation
+            /* val isNotificationMode = installer.config.installMode == ConfigEntity.InstallMode.Notification ||
+                    installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
+
+            if (isNotificationMode) {
+                Timber.w("[id=${installer.id}] CONFIRM_INSTALL received in notification mode. This is unsupported. Rejecting and finishing.")
+                approveSession(sessionId, false) // Auto refuse
+                return
+            }*/
+
+            var finalLabel: CharSequence?
+            var finalIcon: Bitmap?
+
+            when {
+                // Use reflect directly when running as system
+                isSystemInstaller -> {
+                    Timber.d("[id=${installer.id}] Handling CONFIRM_INSTALL as system installer.")
+                    val (label, icon) = getSessionDetailsLocally(sessionId)
+                    finalLabel = label
+                    finalIcon = icon
+                }
+
+                // Use PrivilegedService for Root, Shizuku(Root), and Customize
+                installer.config.authorizer == ConfigEntity.Authorizer.Root ||
+                        installer.config.authorizer == ConfigEntity.Authorizer.Shizuku ||
+                        installer.config.authorizer == ConfigEntity.Authorizer.Customize -> {
+                    Timber.d("[id=${installer.id}] Handling CONFIRM_INSTALL using ${installer.config.authorizer} service.")
+                    var detailsBundle: Bundle? = null
+                    useUserService(installer.config) { userService ->
+                        detailsBundle = userService.privileged.getSessionDetails(sessionId)
+                    }
+
+                    if (detailsBundle == null) {
+                        Timber.e("[id=${installer.id}] getSessionDetails() failed via ${installer.config.authorizer}.")
+                        throw Exception("Failed to get session details from privileged service.")
+                    }
+
+                    finalLabel = detailsBundle.getCharSequence("appLabel")
+                    val iconBytes = detailsBundle.getByteArray("appIcon")
+                    finalIcon = iconBytes?.let { BitmapFactory.decodeByteArray(it, 0, it.size) }
+                }
+
+                // Directly close when authorizer is other than above
+                else -> {
+                    Timber.w("[id=${installer.id}] Received CONFIRM_INSTALL with unsupported authorizer (${installer.config.authorizer}). Finishing.")
+                    installer.progress.emit(ProgressEntity.Finish)
+                    return
+                }
+            }
+            // Update repo state
+            installer.confirmationDetails.value = ConfirmationDetails(
+                sessionId,
+                finalLabel ?: "N/A",
+                finalIcon
+            )
+            installer.progress.emit(ProgressEntity.InstallAnalysedSuccess)
+        } catch (e: Exception) {
+            Timber.e(e, "[id=${installer.id}] resolveConfirmInstall: Failed.")
+            installer.error = e
+            installer.progress.emit(ProgressEntity.InstallResolvedFailed)
+        }
+    }
+
+    private suspend fun approveSession(sessionId: Int, granted: Boolean) {
+        Timber.d("[id=${installer.id}] approveSession: $granted for session $sessionId")
+        try {
+            when {
+                isSystemInstaller -> {
+                    Timber.d("[id=${installer.id}] Approving session as system installer.")
+                    approveSessionLocally(sessionId, granted)
+                }
+
+                installer.config.authorizer == ConfigEntity.Authorizer.Root ||
+                        installer.config.authorizer == ConfigEntity.Authorizer.Shizuku ||
+                        installer.config.authorizer == ConfigEntity.Authorizer.Customize -> {
+                    Timber.d("[id=${installer.id}] Approving session using ${installer.config.authorizer} service.")
+                    useUserService(installer.config) { userService ->
+                        userService.privileged.approveSession(sessionId, granted)
+                    }
+                }
+
+                else -> {
+                    Timber.w("[id=${installer.id}] approveSession called with unsupported authorizer (${installer.config.authorizer}). Ignoring.")
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "[id=${installer.id}] approveSession: Failed.")
+            installer.error = e
+        } finally {
+            // Close whatever the result is
+            installer.progress.emit(ProgressEntity.Finish)
+        }
+    }
+
+    /**
+     * Execute session detail retrieval locally in the app process (only when acting as the system package manager).
+     */
+    private fun getSessionDetailsLocally(sessionId: Int): Pair<CharSequence, Bitmap?> {
+        val packageInstaller = context.packageManager.packageInstaller
+        val sessionInfo = packageInstaller.getSessionInfo(sessionId)
+            ?: throw Exception("Local getSessionInfo failed for id $sessionId")
+
+        var resolvedLabel: CharSequence? = null
+        var resolvedIcon: Bitmap? = null
+        var path: String? = null
+
+        try {
+            val resolvedField: Field? = reflect.getDeclaredField(
+                sessionInfo::class.java, "resolvedBaseCodePath"
+            )
+            if (resolvedField != null) {
+                resolvedField.isAccessible = true
+                path = resolvedField.get(sessionInfo) as? String
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Local reflection for 'resolvedBaseCodePath' failed")
+        }
+
+        if (!path.isNullOrEmpty()) {
+            try {
+                val pkgInfo = context.packageManager.getPackageArchiveInfo(
+                    path, PackageManager.GET_PERMISSIONS
+                )
+                val appInfo = pkgInfo?.applicationInfo
+                if (appInfo != null) {
+                    appInfo.publicSourceDir = path
+                    resolvedLabel = appInfo.loadLabel(context.packageManager)
+                    val drawableIcon = appInfo.loadIcon(context.packageManager)
+                    if (drawableIcon != null) {
+                        resolvedIcon = (drawableIcon as? BitmapDrawable)?.bitmap
+                            ?: drawableIcon.toBitmap(
+                                drawableIcon.intrinsicWidth.coerceAtLeast(1),
+                                drawableIcon.intrinsicHeight.coerceAtLeast(1)
+                            )
+                    }
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Local APK parsing failed")
+            }
+        }
+
+        val finalLabel = resolvedLabel ?: sessionInfo.appLabel ?: "N/A"
+        val finalIcon = resolvedIcon ?: sessionInfo.appIcon
+        return Pair(finalLabel, finalIcon)
+    }
+
+    /**
+     * Execute session approval locally in the app process (only when acting as the system package manager).
+     */
+    private fun approveSessionLocally(sessionId: Int, granted: Boolean) {
+        try {
+            val packageInstaller = context.packageManager.packageInstaller
+            val method = reflect.getMethod(
+                packageInstaller::class.java,
+                "setPermissionsResult",
+                Int::class.java,
+                Boolean::class.java
+            )
+
+            if (method != null) {
+                method.invoke(packageInstaller, sessionId, granted)
+            } else {
+                throw NoSuchMethodException("setPermissionsResult not found via ReflectRepo")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Local approveSession failed")
+            if (!granted) {
+                try {
+                    context.packageManager.packageInstaller.abandonSession(sessionId)
+                } catch (e2: Exception) {
+                    Timber.e(e2, "Local fallback abandonSession failed")
+                }
+            }
+        }
     }
 
     private suspend fun finish() {
@@ -792,7 +983,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
             read = read(buf)
         }
-
         if (totalSize > 0) onProgress(1f)
     }
 
@@ -803,7 +993,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
      * 3) ContentResolver.query(OpenableColumns.SIZE / DocumentsContract.Document.COLUMN_SIZE)
      * 4) Os.fstat(fd).st_size
      */
-    private fun guessContentLength(uri: Uri, afd: android.content.res.AssetFileDescriptor?): Long {
+    private fun guessContentLength(uri: Uri, afd: AssetFileDescriptor?): Long {
         // 1) AFD 的 declaredLength
         if (afd != null && afd.declaredLength > 0) return afd.declaredLength
 
@@ -845,8 +1035,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 if (st.st_size > 0) return st.st_size
             }
         }
-
         return -1L
     }
-
 }

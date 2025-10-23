@@ -23,7 +23,7 @@ lottie = "6.6.10"
 koin-bom = "4.1.1"
 materialVersion = "1.13.0"
 datastoreCoreAndroid = "1.2.0-alpha02"
-aboutLibraries = "13.0.0"
+aboutLibraries = "13.1.0"
 appiconloader = "1.5.0"
 timber = "5.0.1"
 
@@ -110,8 +110,6 @@ aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3",
 
 # log
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
-
-apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.28.0" }
 
 # miuix
 miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version = "0.5.2" }
