@@ -120,7 +120,7 @@
     <string name="config_dexopt_mode">Optimizasyon Modu</string>
     <string name="config_force_dexopt">Optimizasyonu Zorla</string>
     <string name="config_force_dexopt_desc">Sistem gereksiz görse bile yeniden derlemeyi zorla</string>
-    <string name="config_auto_delete">Otomatik silme</string>
+    <string name="config_auto_delete">Otomatik sil</string>
     <string name="config_auto_delete_desc">Uygulama yüklendikten sonra APK otomatik olarak silinir</string>
     <string name="config_display_sdk_version">SDK bilgilerini görüntüle</string>
     <string name="config_display_sdk_version_desc">Yükleme arayüzünde hedef ve minimum bilgilerini göster</string>
