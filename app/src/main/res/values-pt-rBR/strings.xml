@@ -150,7 +150,7 @@
     <string name="cancel">Cancelar</string>
     <string name="retry">Tentar novamente</string>
     <string name="install">Instalar</string>
-    <string name="upgrade">Atualizar</string>
+    <string name="upgrade">Atualização</string>
     <string name="reinstall">Reinstalar</string>
     <string name="install_anyway">Instalar assim mesmo</string>
     <string name="uninstall">Desinstalar</string>
@@ -267,14 +267,14 @@
     <string name="exception_resolve_failed">Falha ao resolver URI</string>
     <string name="exception_resolve_failed_no_internet_access">Esta versão não pode acessar a Internet, para usar esta funcionalidade, reinstale outra versão</string>
     <string name="exception_analyse_failed_all_files_unsupported">Arquivo não suportado</string>
-    <string name="exception_install_failed_already_exists">Está versão do aplicativo já está instalada, por gentileza desinstale e tente novamente</string>
+    <string name="exception_install_failed_already_exists">Esta versão do aplicativo já está instalada, por gentileza desinstale e tente novamente</string>
     <string name="exception_install_failed_blacklisted_package">Você não permitiu a instalação do aplicativo!</string>
-    <string name="exception_install_failed_invalid_apk">Está versão do aplicativo já está instalada, por gentileza desinstale e tente novamente</string>
+    <string name="exception_install_failed_invalid_apk">Esta versão do aplicativo já está instalada, por gentileza desinstale e tente novamente</string>
     <string name="exception_install_failed_invalid_uri">URI inválida</string>
     <string name="exception_install_failed_insufficient_storage">Armazenamento cheio, tente liberar espaço</string>
     <string name="exception_install_failed_duplicate_package">Assinatura do pacote alterada, certifique-se de que seu pacote é seguro e desinstale o aplicativo, depois tente novamente</string>
     <string name="exception_install_failed_no_shared_user">Não foi possível encontrar o base.apk com o UID correspondente. Baixe-o e tente novamente</string>
-    <string name="exception_install_failed_update_incompatible">Atualização incomparável, por gentileza desinstale e tente novamente</string>
+    <string name="exception_install_failed_update_incompatible">Atualização incompatível, por gentileza desinstale e tente novamente</string>
     <string name="exception_install_failed_shared_user_incompatible">Assinaturas do pacote não correspondem</string>
     <string name="exception_install_failed_missing_shared_library">Faltando biblioteca compartilhada</string>
     <string name="exception_install_failed_replace_couldnt_delete">Biblioteca compartilhada inválida</string>
@@ -304,7 +304,7 @@
     <string name="exception_dhizuku_not_work">Por gentileza ative Dhizuku e dê permissão</string>
     <string name="exception_root_not_work">Não foi possível o acesso Root</string>
     <string name="exception_app_process_not_work">Não foi possível conectar o autorizador</string>
-    <string name="old_version_prefix">Atual</string>
+    <string name="old_version_prefix">Instalada</string>
     <string name="old_version_archived">Arquivado</string>
     <string name="upgrade_version_prefix">Atualizar</string>
     <string name="downgrade_version_prefix">Downgrade</string>
@@ -357,7 +357,7 @@
     <string name="virtual_preload">Pré-carregamento virtual</string>
     <string name="virtual_preload_desc">Indica que o pacote é um carregamento antecipado virtual</string>
     <string name="apex_desc">Indica que o pacote sendo instalado é um pacote APEX</string>
-    <string name="enable_rollback">Habilitar reversão</string>
+    <string name="enable_rollback">Habilitar Reversão</string>
     <string name="enable_rollback_desc">Habilitar futura reversão deste pacote</string>
     <string name="disable_verification">Desabilitar Verificação</string>
     <string name="disable_verification_desc">Desabilitar verificação do pacote durante a instalação. Isto não é o mesmo que verificação de assinatura</string>
@@ -409,7 +409,7 @@
     <string name="suggestion_bypass_low_target_sdk">Permitir temporariamente ignorar restrições e tentar novamente</string>
     <string name="pull_to_refresh_hint4">Atualizado com sucesso</string>
     <string name="pull_to_refresh_hint3">Atualizando…</string>
-    <string name="pull_to_refresh_hint2">Libere para atualizar</string>
+    <string name="pull_to_refresh_hint2">Solte para atualizar</string>
     <string name="pull_to_refresh_hint1">Puxe para baixo para atualizar</string>
     <string name="get_source_code">Verifique o código-fonte</string>
     <string name="get_source_code_detail">Verifique o código fonte no GitHub</string>
