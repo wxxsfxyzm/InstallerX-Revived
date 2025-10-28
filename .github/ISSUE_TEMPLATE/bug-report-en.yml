@@ -10,7 +10,7 @@ body:
       label: |
         Describe the bug
       description: |
-        A clear and concise description of what the bug is.
+        Tell Us What Happened Before The Bug Show Up.
     validations:
       required: true
 
@@ -20,11 +20,11 @@ body:
       label: |
         To Reproduce
       description: |
-        Example of problem reproduction steps:
+        Example of Problem Reproduction Steps:
         1. Go to '...'
         2. Click on '....'
         3. Scroll down to '....'
-        4. See error
+        4. See Error
     validations:
       required: true
 
@@ -34,7 +34,7 @@ body:
       label: |
         Expected behavior
       description: |
-        A clear and concise description of what you expected to happen.
+        What Did You Expected To Happen ?
     validations:
       required: true
 
@@ -47,7 +47,7 @@ body:
         example:\
         Device: Xiaomi\
         OS: HyperOS 2.0.200, Android 15\
-        InstallerX Version: latest alpha/latest stable
+        InstallerX Version: Latest Alpha/Latest Stable
     validations:
       required: true
 
@@ -57,5 +57,5 @@ body:
       label: |
         Screenshots or ScreenCAP
       description: |
-        If applicable, add screenshots or ScreenCAP to help explain your problem.
+         Add Screenshots Or ScreenCAP To Help Explain Your Problem.
     validations:
