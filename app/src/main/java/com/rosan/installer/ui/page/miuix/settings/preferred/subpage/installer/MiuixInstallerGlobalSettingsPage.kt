@@ -17,6 +17,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.build.Manufacturer
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -77,8 +79,8 @@ fun MiuixInstallerGlobalSettingsPage(
                         trailingContent = {
                             AnimatedVisibility(
                                 visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                                enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
-                                exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically()
                             ) {
                                 MiuixIntNumberPickerWidget(
                                     title = stringResource(R.string.set_countdown),
@@ -115,7 +117,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                 .padding(horizontal = 12.dp)
                                 .padding(bottom = 6.dp)
                         ) {
-                            MiuixSwitchWidget(
+/*                            MiuixSwitchWidget(
                                 icon = AppIcons.SingleLineSettingIcon,
                                 title = stringResource(id = R.string.version_compare_in_single_line),
                                 description = stringResource(id = R.string.version_compare_in_single_line_desc),
@@ -132,7 +134,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                 onCheckedChange = {
                                     viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it))
                                 }
-                            )
+                            )*/
                             AnimatedVisibility(
                                 visible = state.installMode == ConfigEntity.InstallMode.Dialog,
                                 enter = fadeIn(),
@@ -150,7 +152,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                     }
                                 )
                             }
-                            MiuixSwitchWidget(
+                            /*MiuixSwitchWidget(
                                 icon = AppIcons.Suggestion,
                                 title = stringResource(id = R.string.show_intelligent_suggestion),
                                 description = stringResource(id = R.string.show_intelligent_suggestion_desc),
@@ -160,7 +162,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                         PreferredViewAction.ChangeShowSuggestion(it)
                                     )
                                 }
-                            )
+                            )*/
                             MiuixSwitchWidget(
                                 icon = AppIcons.NotificationDisabled,
                                 title = stringResource(id = R.string.disable_notification),
@@ -219,6 +221,23 @@ fun MiuixInstallerGlobalSettingsPage(
                                 )
                             }
                         }
+                    }
+                }
+            }
+            if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
+                item { SmallTitle(stringResource(R.string.installer_oppo_related)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 6.dp)
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(id = R.string.installer_show_oem_special),
+                            description = stringResource(id = R.string.installer_show_oem_special_desc),
+                            checked = state.showOPPOSpecial,
+                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowOPPOSpecial(it)) }
+                        )
                     }
                 }
             }

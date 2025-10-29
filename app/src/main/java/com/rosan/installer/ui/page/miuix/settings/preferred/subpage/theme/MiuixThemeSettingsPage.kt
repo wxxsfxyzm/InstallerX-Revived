@@ -80,9 +80,10 @@ fun MiuixThemeSettingsPage(
                     )
                 }
             }
-            item { SmallTitle(stringResource(R.string.theme_settings_google_ui)) }
-            item {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                item { SmallTitle(stringResource(R.string.theme_settings_google_ui)) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                item {
                     Card(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
@@ -99,7 +100,7 @@ fun MiuixThemeSettingsPage(
                             }
                         )
                     }
-            }
+                }
             item { SmallTitle(stringResource(R.string.theme_settings_package_icons)) }
             item {
                 Card(

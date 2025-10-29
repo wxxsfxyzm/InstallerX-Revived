@@ -92,9 +92,9 @@
     <string name="config_declare_installer">Establecer fuente de instalación</string>
     <string name="config_installer">instalado por (nombre del paquete)</string>
     <string name="config_auto_delete">Eliminación automática</string>
-    <string name="config_auto_delete_dsp">Elimina automáticamente el APK después de instalarlo</string>
+    <string name="config_auto_delete_desc">Elimina automáticamente el APK después de instalarlo</string>
     <string name="config_display_sdk_version">Mostrar información del SDK</string>
-    <string name="config_display_sdk_version_sdp">Mostrar información de destino y mínima en la interfaz de instalación</string>
+    <string name="config_display_sdk_version_desc">Mostrar información de destino y mínima en la interfaz de instalación</string>
     <string name="config_label_main_settings">Configuración Principal</string>
     <string name="config_label_installer_settings">Configuración del instalador</string>
     <string name="config_label_install_options">Opciones de instalación</string>
@@ -298,7 +298,7 @@
     <string name="config_all_users">Instalar para todos los usuarios</string>
     <string name="config_all_users_desc">Instalar el paquete para todos los usuarios del sistema</string>
     <string name="config_allow_downgrade">Permitir downgrade</string>
-    <string name="config_allow_downgrade_desc">Intentar instalar una versión anterior (puede no funcionar en todos los sistemas)</string>
+    <string name="config_allow_downgrade_desc">Intentar instalar una versión anterior (Android 15+ requiere permisos ROOT)</string>
     <string name="config_grant_all_permissions">Otorgar todos los permisos</string>
     <string name="config_grant_all_permissions_desc">Otorga automáticamente todos los permisos solicitados</string>
     <string name="force_volume_uuid">Forzar UUID de volumen</string>
@@ -372,4 +372,11 @@
     <string name="suggestion_mi_isolation">Añadir temporalmente un instalador válido y volver a intentarlo</string>
     <string name="suggestion_user_restricted">Ve a las opciones de desarrollador y activa la instalación USB</string>
     <string name="suggestion_bypass_low_target_sdk">Permite temporalmente omitir la restricción y vuelve a intentarlo</string>
+    <string name="warning">Advertencia</string>
+    <string name="get_source_code">Comprobar el código fuente</string>
+    <string name="get_source_code_detail">Busque el código fuente en GitHub</string>
+    <string name="internet_access_enabled">En línea</string>
+    <string name="internet_access_disabled">Desconectado</string>
+    <string name="telegram_channel">Canal de Telegram</string>
+    <string name="telegram_channel_desc">Únete al canal para recibir noticias y actualizaciones.</string>
 </resources>

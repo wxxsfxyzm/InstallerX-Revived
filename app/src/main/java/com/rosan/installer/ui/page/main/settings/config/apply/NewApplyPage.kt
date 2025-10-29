@@ -101,7 +101,6 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.widget.card.ScopeTipCard
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
@@ -237,12 +236,10 @@ fun NewApplyPage(
         Box(modifier = Modifier.padding(contentPadding)) {
             when {
                 viewModel.state.apps.progress is ViewContent.Progress.Loading && viewModel.state.apps.data.isEmpty() -> {
-                    // 使用 Box 将加载指示器和文本居中
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        // 使用 Column 将指示器和文本垂直排列
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -276,17 +273,11 @@ fun NewApplyPage(
                             )
                         }
                     ) {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            if (!viewModel.state.userReadScopeTips) {
-                                ScopeTipCard(viewModel = viewModel)
-                                Spacer(modifier = Modifier.size(8.dp))
-                            }
-                            ItemsWidget(
-                                modifier = Modifier.fillMaxSize(),
-                                viewModel = viewModel,
-                                lazyListState = lazyListState
-                            )
-                        }
+                        ItemsWidget(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = viewModel,
+                            lazyListState = lazyListState
+                        )
                     }
                 }
             }

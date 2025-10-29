@@ -98,9 +98,9 @@
     <string name="config_force_dexopt">فرض التحسين</string>
     <string name="config_force_dexopt_desc">فرض إعادة الترجمة حتى لو اعتبرها النظام غير ضرورية</string>
     <string name="config_auto_delete">الحذف التلقائي</string>
-    <string name="config_auto_delete_dsp">حذف ملف APK تلقائياً بعد تثبيته</string>
+    <string name="config_auto_delete_desc">حذف ملف APK تلقائياً بعد تثبيته</string>
     <string name="config_display_sdk_version">عرض معلومات SDK</string>
-    <string name="config_display_sdk_version_sdp">عرض معلومات SDK المستهدف والأدنى في واجهة التثبيت</string>
+    <string name="config_display_sdk_version_desc">عرض معلومات SDK المستهدف والأدنى في واجهة التثبيت</string>
     <string name="config_label_main_settings">الإعدادات الرئيسية</string>
     <string name="config_label_installer_settings">إعدادات المُثبِّت</string>
     <string name="config_label_install_options">خيارات التثبيت</string>
@@ -326,7 +326,7 @@
     <string name="full_app">تطبيق كامل</string>
     <string name="full_app_desc">يشير إلى أن الحزمة التي يتم تثبيتها هي تطبيق كامل. يمكن استخدامه لترقية التطبيقات الفورية إلى تطبيقات كاملة.</string>
     <string name="allocate_aggressive">تخصيص عنيف للمساحة</string>
-    <string name="allocate_aggressive_desc">يشير إلى أن الحزمة "حيوية لصحة النظام أو أمانه" وستقوم بحذف الملفات القابلة للمسح بقوة أكبر لتوفير مساحة إذا لزم الأمر.</string>
+    <string name="allocate_aggressive_desc">يشير إلى أن الحزمة حيوية لصحة النظام أو أمانه وستقوم بحذف الملفات القابلة للمسح بقوة أكبر لتوفير مساحة إذا لزم الأمر.</string>
     <string name="virtual_preload">تحميل مسبق افتراضي</string>
     <string name="virtual_preload_desc">يشير إلى أن الحزمة هي تحميل مسبق افتراضي.</string>
     <string name="apex_desc">يشير إلى أن الحزمة التي يتم تثبيتها هي حزمة APEX</string>
@@ -393,4 +393,17 @@
     <string name="get_source_code">التحقق من مصدر الكود</string>
     <string name="get_source_code_detail">التحقق من مصدر الكود على - GitHub</string>
     <string name="telegram_channel_desc">انضم للقناة لمتابعة آخر الإخبار والتحديثات!</string>
+    <string name="theme_settings_miuix_ui">واجهة شاومي Miuix</string>
+    <string name="theme_settings_miuix_ui_desc">مشابة لـ HyperOS</string>
+    <string name="theme_settings_google_ui">واجهة Google Material 3</string>
+    <string name="theme_settings_google_ui_desc">واجهة Meterial Design UI الإفتراضية</string>
+    <string name="theme_settings_ui_engine">محرك واجهة المستخدم</string>
+    <string name="theme_settings_google_ui_style">اسلوب Google UI</string>
+    <string name="theme_settings_use_live_activity">الفعاليات المباشرة</string>
+    <string name="theme_settings_use_live_activity_desc">استخدام الفعاليات المباشرة بدلاً من الإشعارات٫ قد يكون غير مدعوماً في الـ ROMs المعدلة</string>
+    <string name="theme_settings_package_icons">مصدر حزمة الايقونات</string>
+    <string name="theme_settings_prefer_system_icon">تفضيل ايقونة النظام لتنزيل التطبيق</string>
+    <string name="theme_settings_prefer_system_icon_desc">محاولة الحصول على ايقونة من النطام٫ مفيد عند استخدام حزمة ايقونات. تعطيل لعرض ايقونة من حزمة التنزيل</string>
+    <string name="theme_settings_launcher_icons">ايقونة الـ Launcher</string>
+    <string name="theme_settings_hide_launcher_icon">اخفاء ايقونة الـ launcher</string>
 </resources>

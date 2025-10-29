@@ -2,7 +2,9 @@ package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -20,17 +22,17 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewState
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun preparingDialog(
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     val currentState = viewModel.state
-    val progress = if (currentState is DialogViewState.Preparing) {
+    val progress = if (currentState is InstallerViewState.Preparing) {
         currentState.progress
     } else {
         -1f // Default to indeterminate if state is wrong
@@ -58,10 +60,14 @@ fun preparingDialog(
                         .padding(bottom = 8.dp)
                 )
 
+                Spacer(modifier = Modifier.height(12.dp))
+
                 if (progress < 0f) {
                     // Indeterminate progress
                     LinearWavyProgressIndicator(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                         amplitude = 0f // not wavy
                     )
                 } else {
@@ -73,7 +79,9 @@ fun preparingDialog(
                     )
                     LinearWavyProgressIndicator(
                         progress = { animatedProgress },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                         amplitude = { 0f }
                     )
                 }
@@ -82,9 +90,10 @@ fun preparingDialog(
         buttons = DialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
-            listOf(DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(DialogViewAction.Close)
-            })
+            /*listOf(DialogButton(stringResource(R.string.cancel)) {
+                viewModel.dispatch(InstallerViewAction.Close)
+            })*/
+            emptyList()
         }
     )
 }

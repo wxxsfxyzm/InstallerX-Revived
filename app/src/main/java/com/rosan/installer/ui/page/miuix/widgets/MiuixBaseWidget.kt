@@ -3,121 +3,164 @@ package com.rosan.installer.ui.page.miuix.widgets
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Checkbox
+import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
+@Composable
+fun MiuixSwitchWidget(
+    icon: ImageVector? = null,
+    title: String,
+    description: String? = null,
+    enabled: Boolean = true,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    val toggleAction = {
+        if (enabled) {
+            onCheckedChange(!checked)
+        }
+    }
+
+    BasicComponent(
+        title = title,
+        summary = description,
+        enabled = enabled,
+        onClick = toggleAction,
+        rightActions = {
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                enabled = enabled
+            )
+        }
+    )
+}
+
 /**
- * A base widget styled after MIUIX components.
+ * A BasicComponent variant that displays a Checkbox as its right action.
+ * The entire row is clickable to toggle the checked state.
  *
- * This component arranges content in a row, typically with optional content at the start,
- * a main title and summary section, and optional content at the end. It retains the
- * core functionalities like error state, overlay content, and haptic feedback from the original design.
- *
- * @param title The main text to be displayed.
- * @param summary Optional description text displayed below the title.
- * @param startContent Optional composable to be placed at the beginning of the widget.
- * @param endContent Optional composable to be placed at the end of the widget.
- * @param foreContent Optional composable that overlays the title and summary section.
- * @param enabled Controls the enabled state of the component. When false, it becomes non-clickable and visually disabled.
- * @param isError If true, the summary text will be displayed in the error color.
- * @param onClick The callback to be invoked when this widget is clicked.
+ * @param icon Optional icon for the component (Note: not passed to BasicComponent, matching MiuixSwitchWidget's provided structure).
+ * @param title The main text title.
+ * @param description The supporting text (summary).
+ * @param enabled Controls the enabled state of the component and the Checkbox.
+ * @param checked The current checked state of the Checkbox.
+ * @param onCheckedChange A lambda called when the checked state changes.
  */
 @Composable
-fun MiuixBaseWidget(
+fun MiuixCheckboxWidget(
+    icon: ImageVector? = null,
+    title: String? = null,
+    description: String? = null,
+    enabled: Boolean = true,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    val toggleAction = {
+        if (enabled) {
+            onCheckedChange(!checked)
+        }
+    }
+
+    BasicComponent(
+        title = title,
+        summary = description,
+        enabled = enabled,
+        onClick = toggleAction,
+        rightActions = {
+            Checkbox(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                enabled = enabled
+            )
+        }
+    )
+}
+
+@Composable
+fun MiuixMultiApkCheckboxWidget(
     title: String,
     summary: String? = null,
-    startContent: @Composable (() -> Unit)? = null,
-    endContent: @Composable (RowScope.() -> Unit)? = null,
-    foreContent: @Composable (BoxScope.() -> Unit) = {},
     enabled: Boolean = true,
-    isError: Boolean = false,
-    onClick: () -> Unit = {},
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
 ) {
-    // Set alpha for disabled state to apply to all children
-    val contentAlpha = if (enabled) 1f else 0.38f
+    val minHeight = 64.dp
+    val horizontalPadding = 16.dp
+    val verticalPadding = 16.dp
+    val textToCheckboxPadding = 16.dp
+    val textSpacing = 2.dp
+
+    val toggleAction = {
+        if (enabled) {
+            onCheckedChange(!checked)
+        }
+    }
+
+    val contentAlpha = if (enabled) 1f else 0.4f
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .sizeIn(minHeight = minHeight)
             .clickable(
                 enabled = enabled,
-                onClick = { onClick() }
+                onClick = toggleAction,
+                role = Role.Checkbox
             )
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(
+                start = horizontalPadding,
+                end = horizontalPadding,
+                top = verticalPadding,
+                bottom = verticalPadding
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Provide the alpha to all child composables
-        CompositionLocalProvider(LocalContentColor provides LocalContentColor.current.copy(alpha = contentAlpha)) {
-            // Start Content (e.g., Icon)
-            if (startContent != null) {
-                Box(modifier = Modifier.padding(end = 16.dp)) {
-                    startContent()
-                }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(textSpacing)
+        ) {
+            Text(
+                text = title,
+                style = MiuixTheme.textStyles.subtitle,
+                color = MiuixTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            summary?.let {
+                Text(
+                    text = it,
+                    style = MiuixTheme.textStyles.subtitle,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
+        }
 
-            // Middle Content (Title and Summary)
-            Box(
-                modifier = Modifier.weight(1f)
-            ) {
-                Column {
-                    // Title
-                    Text(
-                        text = title,
-                        color = MiuixTheme.colorScheme.onSurface,
-                        style = MiuixTheme.textStyles.title2,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.alpha(contentAlpha) // Apply alpha directly for clarity
-                    )
-
-                    // Summary
-                    summary?.let {
-                        Spacer(modifier = Modifier.height(2.dp))
-                        val summaryColor = when {
-                            isError -> MiuixTheme.colorScheme.disabledPrimary
-                            else -> MiuixTheme.colorScheme.onSurfaceVariantActions
-                        }
-                        Text(
-                            text = it,
-                            color = summaryColor,
-                            style = MiuixTheme.textStyles.body2,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.alpha(contentAlpha) // Apply alpha directly
-                        )
-                    }
-                }
-                // Foreground content that overlays title and summary
-                foreContent()
-            }
-
-            // End Content (e.g., Checkbox, Switch, Arrow)
-            if (endContent != null) {
-                Spacer(Modifier.width(16.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    endContent()
-                }
-            }
+        Box(
+            modifier = Modifier.padding(start = textToCheckboxPadding)
+        ) {
+            Checkbox(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                enabled = enabled
+            )
         }
     }
 }

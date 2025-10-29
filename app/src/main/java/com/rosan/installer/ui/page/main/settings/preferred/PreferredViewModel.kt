@@ -75,6 +75,7 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeVersionCompareInSingleLine -> changeVersionCompareInSingleLine(action.versionCompareInSingleLine)
             is PreferredViewAction.ChangeSdkCompareInMultiLine -> changeSdkCompareInMultiLine(action.sdkCompareInMultiLine)
             is PreferredViewAction.ChangeShowOPPOSpecial -> changeShowOPPOSpecial(action.showOPPOSpecial)
+            is PreferredViewAction.ChangeAutoLockInstaller -> changeAutoLockInstaller(action.autoLockInstaller)
 
             is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
                 state.managedInstallerPackages,
@@ -166,7 +167,10 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
             val showLiveActivityFlow =
                 appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false)
-            val showMiuixUIFlow = appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
+            val autoLockInstallerFlow =
+                appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER, false)
+            val showMiuixUIFlow =
+                appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
             val preferSystemIconFlow =
                 appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false)
             val showLauncherIconFlow =
@@ -201,6 +205,7 @@ class PreferredViewModel(
                 showOPPOSpecialFlow,
                 showExpressiveUIFlow,
                 showLiveActivityFlow,
+                autoLockInstallerFlow,
                 showMiuixUIFlow,
                 preferSystemIconFlow,
                 showLauncherIconFlow,
@@ -224,19 +229,20 @@ class PreferredViewModel(
                 val showOPPOSpecial = values[10] as Boolean
                 val showExpressiveUI = values[11] as Boolean
                 val showLiveActivity = values[12] as Boolean
-                val showMiuixUI = values[13] as Boolean
-                val preferSystemIcon = values[14] as Boolean
-                val showLauncherIcon = values[15] as Boolean
+                val autoLockInstaller = values[13] as Boolean
+                val showMiuixUI = values[14] as Boolean
+                val preferSystemIcon = values[15] as Boolean
+                val showLauncherIcon = values[16] as Boolean
                 val managedInstallerPackages =
-                    (values[16] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedBlacklistPackages =
                     (values[17] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedBlacklistPackages =
+                    (values[18] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
                 val managedSharedUserIdBlacklist =
-                    (values[18] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
+                    (values[19] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
                 val managedSharedUserIdExemptPkg =
-                    (values[19] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[20] as Boolean
-                val isIgnoringBatteryOptimizations = values[21] as Boolean
+                    (values[20] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[21] as Boolean
+                val isIgnoringBatteryOptimizations = values[22] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -254,6 +260,7 @@ class PreferredViewModel(
                     showOPPOSpecial = showOPPOSpecial,
                     showExpressiveUI = showExpressiveUI,
                     showLiveActivity = showLiveActivity,
+                    autoLockInstaller = autoLockInstaller,
                     showMiuixUI = showMiuixUI,
                     preferSystemIcon = preferSystemIcon,
                     showLauncherIcon = showLauncherIcon,
@@ -363,6 +370,11 @@ class PreferredViewModel(
     private fun changeShowOPPOSpecial(show: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, show)
+        }
+
+    private fun changeAutoLockInstaller(autoLockInstaller: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.AUTO_LOCK_INSTALLER, autoLockInstaller)
         }
 
     private fun addManagedPackage(
@@ -508,18 +520,17 @@ class PreferredViewModel(
         titleForError: String,
         successMessage: String?,
         block: suspend () -> Unit
-    ) =
-        runCatching {
-            withContext(Dispatchers.IO) { // Ensure privileged actions run on IO dispatcher
-                block()
-            }
-        }.onSuccess {
-            Timber.d("Privileged action succeeded")
-            if (successMessage != null)
-                _uiEvents.send(PreferredViewEvent.ShowSnackbar(successMessage))
-        }.onFailure { exception ->
-            Timber.e(exception, "Privileged action failed")
-            _uiEvents.send(PreferredViewEvent.ShowErrorDialog(titleForError, exception, action))
+    ) = runCatching {
+        withContext(Dispatchers.IO) { // Ensure privileged actions run on IO dispatcher
+            block()
         }
+    }.onSuccess {
+        Timber.d("Privileged action succeeded")
+        if (successMessage != null)
+            _uiEvents.send(PreferredViewEvent.ShowSnackbar(successMessage))
+    }.onFailure { exception ->
+        Timber.e(exception, "Privileged action failed")
+        _uiEvents.send(PreferredViewEvent.ShowErrorDialog(titleForError, exception, action))
+    }
 
 }

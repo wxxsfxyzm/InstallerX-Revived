@@ -1,9 +1,11 @@
 package com.rosan.installer.ui.activity
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
@@ -34,6 +36,10 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
     private lateinit var permissionManager: PermissionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
+        // Compat Navigation Bar color for Xiaomi Devices
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            window.isNavigationBarContrastEnforced = false
         super.onCreate(savedInstanceState)
         Timber.d("UninstallerActivity onCreate.")
 

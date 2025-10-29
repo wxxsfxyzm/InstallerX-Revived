@@ -2,7 +2,7 @@ package com.rosan.installer.di
 
 import androidx.navigation.NavController
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
@@ -12,7 +12,7 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
     viewModel { (installer: InstallerRepo) ->
-        DialogViewModel(installer, get(), get(), get())
+        InstallerViewModel(installer, get(), get(), get())
     }
 
     viewModel {
@@ -20,7 +20,7 @@ val viewModelModule = module {
     }
 
     viewModel { (navController: NavController) ->
-        AllViewModel(navController, get())
+        AllViewModel(navController, get(), get())
     }
 
     viewModel { (id: Long?) ->

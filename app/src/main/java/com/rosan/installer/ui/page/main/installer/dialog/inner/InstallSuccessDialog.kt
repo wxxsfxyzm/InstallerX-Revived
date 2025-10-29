@@ -12,22 +12,18 @@ import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.data.common.util.addAll
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.recycle.util.useUserService
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.recycle.util.openAppPrivileged
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 @Composable
 fun installSuccessDialog( // 小写开头
     installer: InstallerRepo,
-    viewModel: DialogViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     val context = LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
@@ -51,7 +47,7 @@ fun installSuccessDialog( // 小写开头
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 )
             }
-            viewModel.dispatch(DialogViewAction.Background)
+            viewModel.dispatch(InstallerViewAction.Background)
         }
     )
 
@@ -69,48 +65,13 @@ fun installSuccessDialog( // 小写开头
             if (intent != null) {
                 list.add(DialogButton(stringResource(R.string.open)) {
                     coroutineScope.launch(Dispatchers.IO) {
-                        Timber.tag("HybridStart").i("Attempting privileged API start for $packageName...")
-
-                        var forceStartSuccess = false
-                        // Use unified UserService to access privileged methods
-                        if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                            installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+                        openAppPrivileged(
+                            context = context,
+                            config = installer.config,
+                            packageName = packageName,
+                            dhizukuAutoCloseSeconds = viewModel.autoCloseCountDown,
+                            onSuccess = { viewModel.dispatch(InstallerViewAction.Close) }
                         )
-                            useUserService(installer.config) { userService ->
-                                try {
-                                    forceStartSuccess = userService.privileged.startActivityPrivileged(intent)
-                                    Timber.tag("HybridStart")
-                                        .d("privileged.startActivityPrivileged returned: $forceStartSuccess")
-                                } catch (e: Exception) {
-                                    Timber.tag("HybridStart").e(e, "Call to privileged.startActivityPrivileged failed.")
-                                    forceStartSuccess = false
-                                }
-                            }
-
-                        if (forceStartSuccess) {
-                            // API Method succeeded, close the dialog
-                            Timber.tag("HybridStart")
-                                .i("Privileged API start succeeded for $packageName. Closing dialog.")
-                            viewModel.dispatch(DialogViewAction.Close)
-                        } else {
-                            // Use standard Android intent as fallback
-                            Timber.tag("HybridStart")
-                                .w("Privileged API start failed. Falling back to standard Android intent.")
-                            // Switch to Main dispatcher for UI operations
-                            withContext(Dispatchers.Main) {
-                                context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                                coroutineScope.launch {
-                                    if (installer.config.authorizer == ConfigEntity.Authorizer.Dhizuku) {
-                                        // Wait for the auto-close countdown
-                                        delay(viewModel.autoCloseCountDown * 1000L)
-                                        Timber.tag("InstallSuccessDialog").d(
-                                            "App $packageName not detected in foreground after ${viewModel.autoCloseCountDown} seconds. Dialog will close itself."
-                                        )
-                                        viewModel.dispatch(DialogViewAction.Close)
-                                    }
-                                }
-                            }
-                        }
                     }
                 })
             }
@@ -119,7 +80,7 @@ fun installSuccessDialog( // 小写开头
                     viewModel.dispatch(DialogViewAction.InstallPrepare)
                 },*/
                 DialogButton(stringResource(R.string.finish)) {
-                    viewModel.dispatch(DialogViewAction.Close)
+                    viewModel.dispatch(InstallerViewAction.Close)
                 }
             )
             return@DialogButtons list

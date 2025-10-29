@@ -14,6 +14,7 @@ import com.rosan.installer.data.settings.repo.ConfigRepo
 import com.rosan.installer.data.settings.util.ConfigUtil.Companion.getGlobalAuthorizer
 import com.rosan.installer.data.settings.util.ConfigUtil.Companion.getGlobalInstallMode
 import com.rosan.installer.data.settings.util.ConfigUtil.Companion.readGlobal
+import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -359,7 +360,7 @@ class EditViewModel(
                 withContext(Dispatchers.IO) { paRepo.getUsers(authorizer) }
             }.getOrElse {
                 Timber.e(it, "Failed to load available users.")
-                _eventFlow.emit(EditViewEvent.SnackBar(message = it.message ?: "Failed to load users"))
+                _eventFlow.emit(EditViewEvent.SnackBar(message = it.getErrorMessage(context)))
                 emptyMap()
             }
 

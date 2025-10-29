@@ -58,14 +58,14 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.DialogViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.util.getBestPermissionLabel
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun installExtendedMenuDialog(
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val containerType =
@@ -172,9 +172,9 @@ fun installExtendedMenuDialog(
             DialogParamsType.InstallExtendedMenu.id
         ) {
             listOf(DialogButton(stringResource(R.string.next)) {
-                viewModel.dispatch(DialogViewAction.InstallPrepare)
+                viewModel.dispatch(InstallerViewAction.InstallPrepare)
             }, DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(DialogViewAction.Close)
+                viewModel.dispatch(InstallerViewAction.Close)
             })
         })
 }
@@ -183,7 +183,7 @@ fun installExtendedMenuDialog(
 @Composable
 fun MenuItemWidget(
     entities: SnapshotStateList<ExtendedMenuEntity>,
-    viewmodel: DialogViewModel,
+    viewmodel: InstallerViewModel,
     installFlags: Int, // flags from viewmodel
     managedPackages: List<NamedPackage>,
     availableUsers: Map<Int, String>
@@ -289,7 +289,7 @@ fun MenuItemWidget(
                             DropdownMenuItem(
                                 text = { Text(text = stringResource(id = R.string.config_follow_settings)) },
                                 onClick = {
-                                    viewmodel.dispatch(DialogViewAction.SetInstaller(defaultInstallerFromSettings))
+                                    viewmodel.dispatch(InstallerViewAction.SetInstaller(defaultInstallerFromSettings))
                                     expanded = false
                                 }
                             )
@@ -298,7 +298,7 @@ fun MenuItemWidget(
                                 DropdownMenuItem(
                                     text = { Text(text = pkg.name) },
                                     onClick = {
-                                        viewmodel.dispatch(DialogViewAction.SetInstaller(pkg.packageName))
+                                        viewmodel.dispatch(InstallerViewAction.SetInstaller(pkg.packageName))
                                         expanded = false
                                     }
                                 )
@@ -364,7 +364,7 @@ fun MenuItemWidget(
                                 DropdownMenuItem(
                                     text = { Text("$userName($userId)") },
                                     onClick = {
-                                        viewmodel.dispatch(DialogViewAction.SetTargetUser(userId))
+                                        viewmodel.dispatch(InstallerViewAction.SetTargetUser(userId))
                                         expanded = false
                                     }
                                 )
@@ -391,7 +391,7 @@ fun MenuItemWidget(
                                 is InstallExtendedMenuAction.PermissionList ->
                                     when (item.subMenuId) {
                                         InstallExtendedSubMenuId.PermissionList -> {
-                                            viewmodel.dispatch(DialogViewAction.InstallExtendedSubMenu)
+                                            viewmodel.dispatch(InstallerViewAction.InstallExtendedSubMenu)
                                         }
 
                                         else -> {}
@@ -487,7 +487,7 @@ fun MenuItemWidget(
 
 @Composable
 fun installExtendedMenuSubMenuDialog(
-    installer: InstallerRepo, viewModel: DialogViewModel
+    installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
@@ -531,7 +531,7 @@ fun installExtendedMenuSubMenuDialog(
             DialogParamsType.InstallExtendedSubMenu.id
         ) {
             listOf(DialogButton(stringResource(R.string.previous)) {
-                viewModel.dispatch(DialogViewAction.InstallExtendedMenu)
+                viewModel.dispatch(InstallerViewAction.InstallExtendedMenu)
             })
         })
 }

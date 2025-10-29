@@ -241,12 +241,22 @@ object ApkAnalyserRepoImpl : FileAnalyserRepo, KoinComponent {
             }
             .register("/manifest/application/meta-data") {
                 if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                    // Get the 'name' attribute from the 'android' namespace
                     val metaName = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")
-                    // Check if this is the meta-data tag we are looking for
                     if ("minOsdkVersion" == metaName) {
-                        // If it is, get the 'value' attribute
-                        minOsdkVersion = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "value")
+                        minOsdkVersion =
+                            when (val resId = getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "value", -1)) {
+                                -1 -> getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "value")
+                                0 -> null
+
+                                else -> {
+                                    try {
+                                        resources.getString(resId)
+                                    } catch (e: Resources.NotFoundException) {
+                                        Timber.w(e, "Could not resolve minOsdkVersion resource ID: %x.", resId)
+                                        getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "value")
+                                    }
+                                }
+                            }
                     }
                 }
             }

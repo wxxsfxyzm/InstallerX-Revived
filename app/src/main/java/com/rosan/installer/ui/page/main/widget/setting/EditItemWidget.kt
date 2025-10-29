@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.main.widget.setting
 
-import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -489,7 +488,7 @@ fun DataAutoDeleteWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.Delete,
         title = stringResource(id = R.string.config_auto_delete),
-        description = stringResource(id = R.string.config_auto_delete_dsp),
+        description = stringResource(id = R.string.config_auto_delete_desc),
         checked = viewModel.state.data.autoDelete,
         isM3E = isM3E,
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAutoDelete(it)) }
@@ -501,7 +500,7 @@ fun DisplaySdkWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.Info,
         title = stringResource(id = R.string.config_display_sdk_version),
-        description = stringResource(id = R.string.config_display_sdk_version_sdp),
+        description = stringResource(id = R.string.config_display_sdk_version_desc),
         checked = viewModel.state.data.displaySdk,
         isM3E = isM3E,
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDisplaySdk(it)) }
@@ -534,27 +533,11 @@ fun DataAllowTestOnlyWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
 
 @Composable
 fun DataAllowDowngradeWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
-
-    val isRoot = when (stateAuthorizer) {
-        ConfigEntity.Authorizer.Root -> true
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Root
-        else -> false
-    }
-    val isBlocked = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && !isRoot
-
-    val description =
-        if (isBlocked) stringResource(R.string.config_allow_downgrade_blocked_desc)
-        else stringResource(id = R.string.config_allow_downgrade_desc)
-
     SwitchWidget(
         icon = AppIcons.InstallAllowDowngrade,
         title = stringResource(id = R.string.config_allow_downgrade),
-        description = description,
+        description = stringResource(id = R.string.config_allow_downgrade_desc),
         checked = viewModel.state.data.allowDowngrade,
-        enabled = !isBlocked,
-        isError = isBlocked,
         isM3E = isM3E,
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowDowngrade(it)) }
     )

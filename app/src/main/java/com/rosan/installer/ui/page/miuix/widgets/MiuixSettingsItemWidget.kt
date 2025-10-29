@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -67,6 +68,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
 import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperArrow
@@ -227,7 +229,6 @@ fun MiuixDisableAdbVerify(
     onCheckedChange: (Boolean) -> Unit
 ) {
     MiuixSwitchWidget(
-        icon = AppIcons.DisableAdbVerify,
         title = stringResource(R.string.disable_adb_install_verify),
         description = if (!isError) stringResource(R.string.disable_adb_install_verify_desc)
         else stringResource(R.string.disable_adb_install_verify_not_support_dhizuku_desc),
@@ -250,10 +251,24 @@ fun MiuixIgnoreBatteryOptimizationSetting(
     onCheckedChange: (Boolean) -> Unit
 ) {
     MiuixSwitchWidget(
-        icon = AppIcons.BatteryOptimization, // You need to add this icon
         title = stringResource(R.string.ignore_battery_optimizations),
         description = if (enabled) stringResource(R.string.ignore_battery_optimizations_desc)
         else stringResource(R.string.ignore_battery_optimizations_desc_disabled),
+        checked = checked,
+        enabled = enabled,
+        onCheckedChange = onCheckedChange
+    )
+}
+
+@Composable
+fun MiuixAutoLockInstaller(
+    checked: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    MiuixSwitchWidget(
+        title = stringResource(R.string.auto_lock_default_installer),
+        description = stringResource(R.string.auto_lock_default_installer_desc),
         checked = checked,
         enabled = enabled,
         onCheckedChange = onCheckedChange
@@ -372,16 +387,18 @@ fun MiuixSettingsAboutItemWidget(
  * @param onClick The callback to be invoked when this pkg is clicked.
  */
 @Composable
-fun MiuixSettingsNavigationItemWidget(
+fun MiuixNavigationItemWidget(
     icon: ImageVector? = null,
     title: String,
     description: String,
+    insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: () -> Unit
 ) {
     // Call the BaseWidget and pass the parameters accordingly.
     SuperArrow(
         title = title,
         summary = description,
+        insideMargin = insideMargin,
         onClick = onClick
     )
 }

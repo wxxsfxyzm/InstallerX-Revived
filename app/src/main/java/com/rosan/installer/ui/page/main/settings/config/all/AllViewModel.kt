@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.repo.ConfigRepo
 import com.rosan.installer.data.settings.util.ConfigOrder
@@ -16,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -23,6 +25,7 @@ import org.koin.core.component.inject
 class AllViewModel(
     var navController: NavController,
     private val repo: ConfigRepo,
+    private val appDataStore: AppDataStore
 ) : ViewModel(), KoinComponent {
     val context by inject<Context>()
 
@@ -36,6 +39,7 @@ class AllViewModel(
         when (action) {
             is AllViewAction.Init -> init()
             is AllViewAction.LoadData -> loadData()
+            is AllViewAction.UserReadScopeTips -> userReadTips()
             is AllViewAction.ChangeDataConfigOrder -> changeDataConfigOrder(action.configOrder)
             is AllViewAction.DeleteDataConfig -> deleteDataConfig(action.configEntity)
             is AllViewAction.RestoreDataConfig -> restoreDataConfig(action.configEntity)
@@ -65,14 +69,25 @@ class AllViewModel(
             )
         )
         loadDataJob = viewModelScope.launch(Dispatchers.IO) {
+            val initialState = AllViewState(
+                userReadScopeTips = appDataStore.getBoolean(AppDataStore.USER_READ_SCOPE_TIPS, default = false).first(),
+            )
             repo.flowAll(state.data.configOrder).collect {
                 state = state.copy(
+                    userReadScopeTips = initialState.userReadScopeTips,
                     data = state.data.copy(
                         configs = it,
                         progress = AllViewState.Data.Progress.Loaded
                     )
                 )
             }
+        }
+    }
+
+    private fun userReadTips() {
+        state = state.copy(userReadScopeTips = true)
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.USER_READ_SCOPE_TIPS, true)
         }
     }
 

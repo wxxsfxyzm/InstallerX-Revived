@@ -112,9 +112,9 @@
     <string name="config_force_dexopt">Optimierung erzwingen</string>
     <string name="config_force_dexopt_desc">Erzwingen einer Neukompilierung, auch wenn das System dies für unnötig hält</string>
     <string name="config_auto_delete">APK automatisch Löschen</string>
-    <string name="config_auto_delete_dsp">Automatisches Löschen APK, nachdem sie installiert wurde</string>
+    <string name="config_auto_delete_desc">Automatisches Löschen APK, nachdem sie installiert wurde</string>
     <string name="config_display_sdk_version">SDK information anzeigen</string>
-    <string name="config_display_sdk_version_sdp">Ziel- und Mindest-SDK-Version auf dem Installationsdialog anzeigen</string>
+    <string name="config_display_sdk_version_desc">Ziel- und Mindest-SDK-Version auf dem Installationsdialog anzeigen</string>
     <string name="config_label_main_settings">Haupteinstellungen</string>
     <string name="config_label_installer_settings">Installer-Einstellungen</string>
     <string name="config_label_install_options">Installationsoptionen</string>
@@ -343,8 +343,7 @@
     <string name="config_all_users">Für alle Nutzer installieren</string>
     <string name="config_all_users_desc">Paket für alle Nutzer auf dem System, statt auf dem angegebenen oder Standard benutzer</string>
     <string name="config_allow_downgrade">Downgrade zulassen</string>
-    <string name="config_allow_downgrade_blocked_desc">Diese Funktion wird ab Android 15 ohne ROOT nicht mehr unterstützt!</string>
-    <string name="config_allow_downgrade_desc">Versucht, die aktuell installierte Version des Pakets auf die gewählte Version down zu Graden (funktioniert möglicherweise nicht auf allen ROMs)</string>
+    <string name="config_allow_downgrade_desc">Versucht, die aktuell installierte Version des Pakets auf die gewählte Version down zu Graden (Android 15+ erfordert ROOT-Rechte)</string>
     <string name="config_grant_all_permissions">alle angefragten Berechtigungen erlauben</string>
     <string name="config_grant_all_permissions_desc">Gewährt alle vom Paket angeforderten Berechtigungen. Beachten Sie, dass dies nur für Laufzeitberechtigungen gilt. Spezielle Berechtigungen wie „Zugriff auf alle Dateien“ oder „Barrierefreiheit“ werden nicht automatisch gewährt.</string>
     <string name="force_volume_uuid">Volume UUID erzwingen</string>

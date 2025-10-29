@@ -4,7 +4,7 @@
     <string name="about_detail">Об InstallerX Revived</string>
     <string name="add">Добавить</string>
     <string name="allocate_aggressive">Выделять Агрессивные</string>
-    <string name="allocate_aggressive_desc">Указывает, что пакет "критически важен для работоспособности или безопасности системы" и при необходимости будет более агрессивно удалять доступные для очистки файлы, чтобы освободить место.</string>
+    <string name="allocate_aggressive_desc">Указывает, что пакет критически важен для работоспособности или безопасности системы и при необходимости будет более агрессивно удалять доступные для очистки файлы, чтобы освободить место.</string>
     <string name="apex_desc">Указывает, что устанавливаемый пакет является пакетом APEX</string>
     <string name="app">Приложение</string>
     <string name="apply">Применить</string>
@@ -37,7 +37,7 @@
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_auto_delete">Автоматическое удаление</string>
-    <string name="config_auto_delete_dsp">Автоматическое удаление apk-файла после его установки</string>
+    <string name="config_auto_delete_desc">Автоматическое удаление apk-файла после его установки</string>
     <string name="config_bypass_low_target_sdk">Обход блока SDK с низким целевым значением</string>
     <string name="config_bypass_low_target_sdk_desc">Позволяет устанавливать приложения, ориентированные на старые версии SDK.</string>
     <string name="config_confirm_deletion">Подтвердите удаление</string>
@@ -49,7 +49,7 @@
     <string name="config_dialog_title_invalid">Неверный ввод</string>
     <string name="config_dialog_title_unsaved_changes">Несохраненные изменения</string>
     <string name="config_display_sdk_version">Отображение информации о SDK</string>
-    <string name="config_display_sdk_version_sdp">Отображение целевой и минимальной информации в интерфейсе установки</string>
+    <string name="config_display_sdk_version_desc">Отображение целевой и минимальной информации в интерфейсе установки</string>
     <string name="config_error_customize_authorizer">Пользовательский авторизатор не может быть пустым</string>
     <string name="config_error_installer">Исходный код установщика не может быть пустым</string>
     <string name="config_error_name">Имя не может быть пустым</string>
