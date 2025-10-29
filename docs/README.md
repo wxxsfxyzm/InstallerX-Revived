@@ -20,12 +20,12 @@ Many customized Chinese ROMs come with subpar default installers. You can replac
 Compared to stock installers, **InstallerX** offers more installation features:
 - Rich installation types: APK, APKS, APKM, XAPK, APKs inside ZIP, and batch APKs.
 - Dialog-based installation
-- Notification-based installation
+- Notification-based installation (Live Activity API supported)
 - Automatic installation
 - Installer declaration
 - Setting install flags (can inherit Profile settings)
 - Install For specific user / all users
-- Dex2oat after success installation
+- Dex2oat after successful installation
 - Block installation of specific apps or by sharedUID
 - Auto-delete APK after installation
 - No shell commands, native api call only
@@ -37,7 +37,7 @@ Compared to stock installers, **InstallerX** offers more installation features:
 
 ## Key Changes and Features
 
-- **UI Options:** Switchable between a new UI design based on Material 3 Expressive and Miuix(Experimental) which is like HyperOS.
+- **UI Options:** Switchable between a new UI design based on Material 3 Expressive and Miuix which is like HyperOS.
 - **More Customization:** More customizable interface settings.
 - **Bug fixes:** Resolved APK deletion issues from the original project on certain systems.
 - **Performance:** Optimized parsing speed, improved parsing of various package types.
@@ -126,6 +126,7 @@ Compared to stock installers, **InstallerX** offers more installation features:
 - **Problems on Oppo/Vivo/Lenovo/... systems?**
     - We do not have devices from these brands for testing. You can discuss it in [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions), or report through our [Telegram Channel](https://t.me/installerx_revived).
     - To lock the installer on Oppo/Vivo, use the lock tool (Lock Tool).
+    - To install apps through shizuku on Honor, disable `Monitor ADB install` in developer settings.    
 
 ## About Releases
 
@@ -133,10 +134,9 @@ Compared to stock installers, **InstallerX** offers more installation features:
 > Development versions may be unstable and features may change/be removed without any notice.
 > Switching build channels may require data wipe/reinstallation.
 
-- **`dev` branch:** Contains features under development. If you want to test them, look for the corresponding builds in [Pull Requests](https://github.com/wxxsfxyzm/InstallerX-Revived/pulls).
-  - Changes for each commit are detailed in the PRs (may be AI-generated).
+- **`dev` branch:** Contains features under development. If you want to test them, look for the corresponding CI builds in Github Actions.
 - **`main` branch:** When stable changes are merged from `dev`, the CI/CD system automatically builds and publishes a new alpha version.
-- **Stable releases:** Manually published when finishing a development phase and increasing the `versionCode`. CI/CD automatically publishes them as a release.
+- **Stable releases:** Manually published when finishing a development/testing phase. CI/CD automatically publishes them as a release.
 - **About network permission:** With feature expansion, some network-related functions have been introduced. However, many users prefer the installer to remain purely local without requiring network access. Therefore, two versions will be released: **online** and **offline**. Both versions share the same package name, version code, and signature, and can be installed side by side. Please download according to your needs.
   - **Online version**: Supports sharing direct download links to InstallerX for installation. More network-related utilities may be added in the future, but network permission will **never** be used for non-installation purposes. Safe to use.
   - **Offline version**: Requests no network permissions at all. When attempting to use online features, you will receive a clear error message. This version remains a purely local installer.
@@ -176,6 +176,8 @@ If you base your development on InstallerX, you must comply with the terms of th
 This project uses code from, or is based on the implementation of, the following projects:
 
 - [iamr0s/InstallerX](https://github.com/iamr0s/InstallerX)
+- [tiann/KernelSU](https://github.com/tiann/KernelSU)
 - [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku)
 - [zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions)
 - [vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller)
+- [compose-miuix-ui/miuix](https://github.com/compose-miuix-ui/miuix)

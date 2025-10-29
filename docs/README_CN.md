@@ -16,11 +16,11 @@
 
 一款应用安装程序，为什么不试试**InstallerX**？
 
-在国产系统的魔改下，许多系统的自带安装程序体验并不是很好，你可以使用**InstallerX**替换掉系统默认安装程序。
+在国产系统的魔改下，许多系统的自带安装程序体验并不是很好，你可以使用**InstallerX**来安装应用。
 
 当然，相对于原生系统，**InstallerX**也带来了更多功能：
-- 丰富的安装类型：apk apks apkm xapk zip包内任意数量的apk，批量传入的apk
-- 对话框安装、通知栏安装、自动安装
+- 丰富的安装类型：apk apks apkm xapk zip包内任意数量的apk，批量分享传入的apk
+- 对话框安装、通知栏安装（支持Live Activity）、自动安装
 - 声明安装者
 - 设定安装选项（可配置，可在安装前修改）
 - dex2oat优化
@@ -37,7 +37,7 @@
 
 ## 功能变化
 
-- 可切换经典界面/基于Material 3 Expressive设计的新UI界面/类HyperOS的Miuix界面
+- 可切换基于Material 3 Expressive设计的新UI界面/类HyperOS的Miuix界面
 - 更多可自定义化的界面设置
 - 修复了原仓库项目在某些系统上无法正确删除安装包的问题
 - 优化解析速度，优化各种安装包类型的解析
@@ -127,6 +127,7 @@
 - Oppo/Vivo/联想/...的系统用不了了怎么办
     - 手头没有这些品牌的手机以供测试，遇到问题可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)或[Telegram 频道](https://t.me/installerx_revived)进行讨论
     - Oppo，Vivo锁定安装器请使用锁定器
+    - 荣耀机型使用shizuku安装需要关闭开发者选项中的 `监控ADB安装应用`，否则安装会卡住
 
 ## 关于版本发布
 
@@ -134,10 +135,9 @@
 > 开发中的版本不对稳定性提供保障，可能会随时添加/删除功能。
 > 当切换构建频道的时候，可能会需要清除数据/卸载重新安装。
 
-- 开发中的功能将提交到`dev`分支，如有测试意愿可以前往[Pull Request](https://github.com/wxxsfxyzm/InstallerX-Revived/pulls)寻找相关的CI构建
-  - 每次commit的变更内容会在PR中提供，可能使用AI生成
+- 开发中的功能将提交到`dev`分支，如有测试意愿可以前往 Github Actions 寻找相关的CI构建
 - 开发完成的功能会合并到`main`分支，CI/CD会自动构建并发布为最新alpha版本
-- 稳定版会在一个阶段的开发结束，需要提高`versionCode`时手动触发构建并由CI/CD自动发布为release
+- 稳定版会在一个阶段的开发/测试结束时手动触发构建并由CI/CD自动发布为release
 - 关于联网权限：由于功能扩展，引入了联网相关功能，然而许多用户希望安装器保持纯粹的本地安装，不需要联网权限。因此发布时会打包成online和offline两个版本，两个版本的包名、版本号、签名完全相同，可以混装，请按需下载。
   - `online版` 支持分享下载直链到InstallerX进行安装，以后可能会添加更多联网相关的实用功能，**永远**不会将联网权限用于非安装用途，请放心使用
   - `offline版` 完全不申请联网权限，尝试online版功能时会得到明确的出错提示，做一个纯粹的本地安装器
@@ -178,6 +178,8 @@ InstallerX目前基于 [**GNU General Public License v3 (GPL-3)**](http://www.gn
 本项目使用了以下项目的代码或参考其实现：
 
 - [iamr0s/InstallerX](https://github.com/iamr0s/InstallerX)
+- [tiann/KernelSU](https://github.com/tiann/KernelSU)
 - [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku)
 - [zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions)
 - [vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller)
+- [compose-miuix-ui/miuix](https://github.com/compose-miuix-ui/miuix)
