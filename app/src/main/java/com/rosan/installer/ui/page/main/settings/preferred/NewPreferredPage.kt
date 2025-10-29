@@ -46,6 +46,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.NoneInstallerTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
+import com.rosan.installer.ui.page.main.widget.setting.AutoLockInstaller
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.page.main.widget.setting.ClearCache
 import com.rosan.installer.ui.page.main.widget.setting.DefaultInstaller
@@ -215,6 +216,12 @@ fun NewPreferredPage(
                                         checked = state.isIgnoringBatteryOptimizations,
                                         enabled = !state.isIgnoringBatteryOptimizations,
                                     ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
+                                },
+                                {
+                                    AutoLockInstaller(
+                                        checked = state.autoLockInstaller,
+                                        enabled = state.authorizer != ConfigEntity.Authorizer.None
+                                    ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
                                 },
                                 {
                                     DefaultInstaller(true) {

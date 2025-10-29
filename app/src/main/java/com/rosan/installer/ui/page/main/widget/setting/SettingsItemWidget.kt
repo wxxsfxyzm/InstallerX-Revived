@@ -117,15 +117,13 @@ data class AuthorizerInfo(
 @Composable
 fun DataAuthorizerWidget(
     modifier: Modifier = Modifier,
-    // 直接传入当前选中的授权者，而不是整个 ViewModel
     currentAuthorizer: ConfigEntity.Authorizer,
-    // 使用一个回调函数来处理变更
     changeAuthorizer: (ConfigEntity.Authorizer) -> Unit,
     trailingContent: @Composable () -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
-    // 数据源和原代码保持一致
+
     val authorizerOptions = mapOf(
         ConfigEntity.Authorizer.None to AuthorizerInfo(
             R.string.config_authorizer_none,
@@ -366,10 +364,28 @@ fun IgnoreBatteryOptimizationSetting(
     onCheckedChange: (Boolean) -> Unit
 ) {
     SwitchWidget(
-        icon = AppIcons.BatteryOptimization, // You need to add this icon
+        icon = AppIcons.BatteryOptimization,
         title = stringResource(R.string.ignore_battery_optimizations),
         description = if (enabled) stringResource(R.string.ignore_battery_optimizations_desc)
         else stringResource(R.string.ignore_battery_optimizations_desc_disabled),
+        checked = checked,
+        enabled = enabled,
+        isM3E = isM3E,
+        onCheckedChange = onCheckedChange
+    )
+}
+
+@Composable
+fun AutoLockInstaller(
+    checked: Boolean,
+    enabled: Boolean,
+    isM3E: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    SwitchWidget(
+        icon = AppIcons.BugReport,
+        title = stringResource(R.string.auto_lock_default_installer),
+        description = stringResource(R.string.auto_lock_default_installer_desc),
         checked = checked,
         enabled = enabled,
         isM3E = isM3E,

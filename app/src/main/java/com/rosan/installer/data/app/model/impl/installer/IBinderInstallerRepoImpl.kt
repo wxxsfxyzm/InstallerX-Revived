@@ -177,7 +177,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             extra.userId
         )
 
-        // Step 4: The result verification logic remains the same.
+        // The result verification logic remains the same.
         PackageManagerUtil.uninstallResultVerify(context, receiver)
     }
 
@@ -198,7 +198,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             }
 
             // Blacklisted SharedUserID
-            // We can simply take the first entity's sharedUserId because they are all the same.
+            // Simply take the first entity's sharedUserId because they are all the same.
             val sharedUid = entities.firstOrNull()?.sharedUserId
 
             if (sharedUid != null) {
@@ -223,7 +223,6 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             throw e
         } finally {
             // 无论成功与否，都应关闭会话以释放本地资源（存疑）
-            // runCatching 是 "quietly" close 的标准 Kotlin 写法
             session?.runCatching { close() }
         }
     }
@@ -249,6 +248,8 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                     else -> throw Exception("can't install multiple package name in single session")
                 }
             )
+        // TODO implement this if you want to see who started the install
+        // params.setOriginatingUid()
         params.setAppPackageName(packageName)
         // --- Customize PackageSource ---
         // Only available on Android 13+, Dhizuku need test

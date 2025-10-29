@@ -34,6 +34,9 @@ class AppDataStore(
         // ForegroundInfoHandler
         val SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION = booleanPreferencesKey("show_dialog_when_pressing_notification")
 
+        // Auto Lock Installer
+        val AUTO_LOCK_INSTALLER = booleanPreferencesKey("auto_lock_installer")
+
         // ConfigUtil
         val AUTHORIZER = stringPreferencesKey("authorizer")
         val CUSTOMIZE_AUTHORIZER = stringPreferencesKey("customize_authorizer")

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,9 +41,7 @@ private fun TipCard(
     actionContent: @Composable () -> Unit = {}
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.defaultColors(
             color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
             contentColor = MiuixTheme.colorScheme.onSurface
@@ -64,10 +61,10 @@ private fun TipCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MiuixScopeTipCard(viewModel: AllViewModel) {
     TipCard(
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         tipContent = {
             Text(
                 text = stringResource(R.string.scope_tips),
@@ -92,13 +89,28 @@ fun MiuixScopeTipCard(viewModel: AllViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MiuixNoneInstallerTipCard() {
     TipCard(
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         tipContent = {
             Text(
                 text = stringResource(R.string.config_authorizer_none_tips),
+                style = MiuixTheme.textStyles.body2,
+                color = MiuixTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    ) {}
+}
+
+@Composable
+fun MiuixInstallChoiceTipCard(text: String) {
+    TipCard(
+        modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp),
+        tipContent = {
+            Text(
+                text = text,
                 style = MiuixTheme.textStyles.body2,
                 color = MiuixTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold

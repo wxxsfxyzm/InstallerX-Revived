@@ -68,7 +68,12 @@ fun installChoiceDialog(
     val isMultiApk = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
     val isModuleApk = containerType == DataType.MIXED_MODULE_APK
 
-    val titleRes = if (isMultiApk) R.string.installer_select_from_zip else R.string.installer_select_install
+    val titleRes = when (containerType) {
+        DataType.MIXED_MODULE_APK -> R.string.installer_select_from_mixed_module_apk
+        DataType.MULTI_APK_ZIP -> R.string.installer_select_from_zip
+        DataType.MULTI_APK -> R.string.installer_select_multi_apk
+        else -> R.string.installer_select_install
+    }
     val primaryButtonText = if (isMultiApk) R.string.install else R.string.next
     val primaryButtonAction = if (isMultiApk) {
         { viewModel.dispatch(InstallerViewAction.InstallMultiple) }
@@ -81,7 +86,8 @@ fun installChoiceDialog(
         title = DialogInnerParams(DialogParamsType.InstallChoice.id) { Text(stringResource(titleRes)) },
         subtitle = DialogInnerParams(DialogParamsType.InstallChoice.id) {
             when (containerType) {
-                DataType.MIXED_MODULE_APK -> Text("请选择安装类型")
+                DataType.APKS, DataType.XAPK, DataType.APKM -> Text(stringResource(R.string.installer_select_split_desc))
+                DataType.MIXED_MODULE_APK -> Text(stringResource(R.string.installer_mixed_module_apk_description))
                 DataType.MULTI_APK_ZIP -> Text(stringResource(R.string.installer_multi_apk_zip_description))
                 DataType.MULTI_APK -> Text(stringResource(R.string.installer_multi_apk_description))
                 else -> null

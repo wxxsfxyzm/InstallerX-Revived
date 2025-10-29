@@ -54,7 +54,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         MIUIX
     }
 
-    // + Define a data class for the UI state
+    // Define a data class for the UI state
     private data class InstallerUiState(
         val theme: InstallerTheme = InstallerTheme.MATERIAL, // Default theme
         val isThemeLoaded: Boolean = false // Flag to check if loading is complete
@@ -212,30 +212,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.Finish)
             // Return@setContent to show nothing, logs will explain why.
                 return@setContent
-            /* Box(
-                 modifier = Modifier
-                     .fillMaxSize()
-                     // 2. 模拟背景：设置一个半透明的背景色，这就实现了“变暗”效果
-                     .background(Color.Black.copy(alpha = 0.6f))
-                     // 3. 模拟外部点击：为背景添加点击手势，点击时关闭 Activity
-                     .pointerInput(Unit) {
-                         detectTapGestures {
-                             finish() // 点击背景任意位置，关闭这个安装界面
-                         }
-                     }
-             ) {
-                 // 4. 放置您的 BottomSheet：
-                 //    - 将其放在前景，这样它就不会被背景遮挡
-                 //    - 使用 align 将其定位在您期望的位置（例如底部）
-                 //    - 添加一个空的 pointerInput 来消费点击事件，防止点击 BottomSheet 时触发背景的关闭事件
-                 Box(
-                     modifier = Modifier
-                         .align(Alignment.BottomCenter) // 或 Alignment.Center，取决于您希望它如何展示
-                         .pointerInput(Unit) {
-                             detectTapGestures { *//* 消费点击，防止穿透 *//* }
-                        }
-                ) {*/
-            // 这里的代码和您原来的一模一样，完全不需要改动
+
             when (uiState.theme) {
                 InstallerTheme.MATERIAL -> {
                     InstallerMaterialExpressiveTheme {
@@ -248,7 +225,6 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 InstallerTheme.MIUIX -> {
                     InstallerMiuixTheme {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            // 您的 MiuixInstallerPage 在这里可以完美工作
                             MiuixInstallerPage(installer)
                         }
                     }
@@ -272,7 +248,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         Timber.tag(tag).d("Type: ${intent.type}")
         Timber.tag(tag).d("Categories: ${intent.categories?.joinToString(", ")}")
         Timber.tag(tag).d("Flags (Decimal): $flags")
-        Timber.tag(tag).d("Flags (Hex): $hexFlags") // Flags 是关键！
+        Timber.tag(tag).d("Flags (Hex): $hexFlags")
         Timber.tag(tag).d("Component: ${intent.component}")
         Timber.tag(tag).d("Extras: ${intent.extras?.keySet()?.joinToString(", ")}")
         Timber.tag(tag).d("---------- Intent Details End ----------")

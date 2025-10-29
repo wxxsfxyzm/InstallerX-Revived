@@ -43,6 +43,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
+import com.rosan.installer.ui.page.main.widget.setting.AutoLockInstaller
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.page.main.widget.setting.ClearCache
 import com.rosan.installer.ui.page.main.widget.setting.DefaultInstaller
@@ -200,6 +201,13 @@ fun PreferredPage(
                             enabled = !state.isIgnoringBatteryOptimizations,
                             isM3E = false,
                         ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
+                    }
+                    item {
+                        AutoLockInstaller(
+                            checked = state.autoLockInstaller,
+                            enabled = state.authorizer != ConfigEntity.Authorizer.None,
+                            isM3E = false
+                        ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
                     }
                     item { DefaultInstaller(true) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) } }
                     item { DefaultInstaller(false) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) } }

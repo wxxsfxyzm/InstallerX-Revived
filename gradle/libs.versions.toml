@@ -111,7 +111,5 @@ aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3",
 # log
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
-apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.28.0" }
-
 # miuix
 miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version = "0.5.2" }

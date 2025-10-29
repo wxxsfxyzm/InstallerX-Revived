@@ -95,3 +95,58 @@ private fun getDpiStringResourceId(name: String): Int? {
         else -> null
     }
 }
+
+/**
+ * Defines the category of an application split.
+ */
+enum class SplitType {
+    ARCHITECTURE,
+    LANGUAGE,
+    DENSITY,
+    FEATURE
+}
+
+/**
+ * Analyzes the split name and returns its [SplitType].
+ *
+ * @return The categorized [SplitType].
+ */
+fun String.getSplitType(): SplitType {
+    val qualifier = this
+        .removePrefix(BASE_PREFIX)
+        .removePrefix(SPLIT_CONFIG_PREFIX)
+        .removePrefix(CONFIG_PREFIX)
+
+    // Check Arch
+    if (Architecture.fromArchString(qualifier) != Architecture.UNKNOWN) {
+        return SplitType.ARCHITECTURE
+    }
+
+    // Check DPI
+    if (getDpiStringResourceId(qualifier) != null) {
+        return SplitType.DENSITY
+    }
+    if (qualifier.endsWith("dpi") && qualifier.removeSuffix("dpi").all { it.isDigit() }) {
+        return SplitType.DENSITY
+    }
+
+    // Check Language
+    if (getLanguageDisplayName(qualifier) != null) {
+        return SplitType.LANGUAGE
+    }
+
+    return SplitType.FEATURE
+}
+
+/**
+ * Returns the localized display name for a [SplitType] group.
+ */
+@Composable
+fun SplitType.getDisplayName(): String {
+    return when (this) {
+        SplitType.ARCHITECTURE -> stringResource(R.string.split_name_architecture_group_title)
+        SplitType.LANGUAGE -> stringResource(R.string.split_name_language_group_title)
+        SplitType.DENSITY -> stringResource(R.string.split_name_density_group_title)
+        SplitType.FEATURE -> stringResource(R.string.split_name_feature_group_title)
+    }
+}

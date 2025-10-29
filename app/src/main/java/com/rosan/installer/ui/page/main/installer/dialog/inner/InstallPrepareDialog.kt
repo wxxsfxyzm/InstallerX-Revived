@@ -291,8 +291,8 @@ fun installPrepareDialog( // 小写开头
             // --- Use buildList to dynamically create buttons ---
             buildList {
                 // Install button is shown if the entity's minSdk is compatible
-                val canInstall =
-                    entityToInstall != null && entityToInstall.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true
+                val canInstall = entityToInstall != null &&
+                        (entityToInstall.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true)
                 val isAPK =
                     containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK
 

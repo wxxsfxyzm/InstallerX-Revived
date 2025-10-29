@@ -24,7 +24,7 @@ import com.rosan.installer.R
 import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsNavigationItemWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUpdateDialog
 import com.rosan.installer.util.openUrl
 import top.yukonga.miuix.kmp.basic.Card
@@ -111,12 +111,12 @@ fun MiuixHomePage(
                     .padding(horizontal = 12.dp)
                     .padding(bottom = 6.dp)
             ) {
-                MiuixSettingsNavigationItemWidget(
+                MiuixNavigationItemWidget(
                     title = stringResource(R.string.get_source_code),
                     description = stringResource(R.string.get_source_code_detail),
                     onClick = { context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived") }
                 )
-                MiuixSettingsNavigationItemWidget(
+                MiuixNavigationItemWidget(
                     title = stringResource(R.string.get_update),
                     description = stringResource(R.string.get_update_detail),
                     onClick = { showUpdateDialog.value = true }
