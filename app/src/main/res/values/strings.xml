@@ -25,6 +25,8 @@
     <string name="get_source_code_detail">Check for source code on GitHub</string>
     <string name="internet_access_enabled">Online</string>
     <string name="internet_access_disabled">Offline</string>
+    <string name="uninstall_title">Uninstall InstallerX Revived</string>
+    <string name="uninstall_content">After uninstalling this app, you will no longer be able to use InstallerX Revived to install apps.</string>
     <string name="stable">Stable</string>
     <string name="preview">Preview</string>
     <string name="unstable">Unstable</string>

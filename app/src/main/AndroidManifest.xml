@@ -152,6 +152,15 @@
         <meta-data
             android:name="ScopedStorage"
             android:value="true" />
+
+        <meta-data
+            android:name="app_description_title"
+            android:resource="@string/uninstall_title" />
+
+        <meta-data
+            android:name="app_description_content"
+            android:resource="@string/uninstall_content" />
+
     </application>
 
 </manifest>
