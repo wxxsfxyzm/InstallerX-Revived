@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
-import android.os.Build
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -157,20 +156,6 @@ fun NewThemeSettingsPage(
                                     }
                                 )
                             }
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                                add {
-                                    SwitchWidget(
-                                        icon = AppIcons.LiveActivity,
-                                        title = stringResource(R.string.theme_settings_use_live_activity),
-                                        description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                                        checked = state.showLiveActivity,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowLiveActivity(it)
-                                            )
-                                        }
-                                    )
-                                }
                         }
                     )
                 }

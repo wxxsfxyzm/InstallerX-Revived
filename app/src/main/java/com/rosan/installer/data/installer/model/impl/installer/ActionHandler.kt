@@ -126,16 +126,19 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
         Timber.d("[id=${installer.id}] resolve: Config resolved. installMode=${installer.config.installMode}")
 
-        if (appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER).first()) runCatching {
-            Timber.d("[id=${installer.id}] resolve: Attempting to auto-lock default installer.")
-            setInstallerDefaultPrivileged(
-                context,
-                installer.config,
-                true
-            )
-            Timber.d("[id=${installer.id}] resolve: Auto-lock attempt finished successfully.")
-        }.onFailure {
-            Timber.w(it, "[id=${installer.id}] resolve: Failed to auto-lock default installer. This is non-fatal.")
+        // Launch in a separate coroutine to avoid blocking the UI.
+        scope.launch {
+            if (appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER).first()) runCatching {
+                Timber.d("[id=${installer.id}] resolve: Attempting to auto-lock default installer.")
+                setInstallerDefaultPrivileged(
+                    context,
+                    installer.config,
+                    true
+                )
+                Timber.d("[id=${installer.id}] resolve: Auto-lock attempt finished successfully.")
+            }.onFailure {
+                Timber.w(it, "[id=${installer.id}] resolve: Failed to auto-lock default installer. This is non-fatal.")
+            }
         }
 
         // Check for notification mode immediately after resolving config.

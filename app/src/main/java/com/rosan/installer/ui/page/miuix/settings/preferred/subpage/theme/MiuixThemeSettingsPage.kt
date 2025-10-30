@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme
 
-import android.os.Build
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -80,27 +79,6 @@ fun MiuixThemeSettingsPage(
                     )
                 }
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                item { SmallTitle(stringResource(R.string.theme_settings_google_ui)) }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                item {
-                    Card(
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .padding(bottom = 6.dp)
-                    ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.theme_settings_use_live_activity),
-                            description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                            checked = state.showLiveActivity,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowLiveActivity(it)
-                                )
-                            }
-                        )
-                    }
-                }
             item { SmallTitle(stringResource(R.string.theme_settings_package_icons)) }
             item {
                 Card(

@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
@@ -163,6 +164,17 @@ fun MiuixInstallerGlobalSettingsPage(
                                     )
                                 }
                             )*/
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                                MiuixSwitchWidget(
+                                    title = stringResource(R.string.theme_settings_use_live_activity),
+                                    description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                    checked = state.showLiveActivity,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.ChangeShowLiveActivity(it)
+                                        )
+                                    }
+                                )
                             MiuixSwitchWidget(
                                 icon = AppIcons.NotificationDisabled,
                                 title = stringResource(id = R.string.disable_notification),
@@ -203,6 +215,17 @@ fun MiuixInstallerGlobalSettingsPage(
                                     )
                                 }
                             )
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                                MiuixSwitchWidget(
+                                    title = stringResource(R.string.theme_settings_use_live_activity),
+                                    description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                    checked = state.showLiveActivity,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.ChangeShowLiveActivity(it)
+                                        )
+                                    }
+                                )
                             AnimatedVisibility(
                                 visible = viewModel.state.showDialogWhenPressingNotification,
                                 enter = fadeIn(),

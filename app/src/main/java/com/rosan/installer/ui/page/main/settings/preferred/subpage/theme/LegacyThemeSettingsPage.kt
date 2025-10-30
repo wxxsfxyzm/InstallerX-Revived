@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
-import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -105,21 +104,6 @@ fun LegacyThemeSettingsPage(
                     }
                 )
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                item {
-                    SwitchWidget(
-                        icon = AppIcons.LiveActivity,
-                        title = stringResource(R.string.theme_settings_use_live_activity),
-                        description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                        checked = state.showLiveActivity,
-                        isM3E = false,
-                        onCheckedChange = {
-                            viewModel.dispatch(
-                                PreferredViewAction.ChangeShowLiveActivity(it)
-                            )
-                        }
-                    )
-                }
             item { LabelWidget(stringResource(R.string.theme_settings_package_icons)) }
             item {
                 SwitchWidget(
