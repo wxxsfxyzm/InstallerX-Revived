@@ -464,4 +464,21 @@
     <string name="installer_package_min_sdk_label">SDK Mín:</string>
     <string name="installer_package_target_sdk_label">SDK Alvo:</string>
     <string name="exception_uninstall_failed_internal_error">Erro interno do Gerenciador de Pacotes</string>
+    <string name="auto_lock_default_installer">Definir como padrão automaticamente</string>
+    <string name="auto_lock_default_installer_desc">Definir automaticamente este app como instalador ao iniciar uma nova instalação</string>
+    <string name="config_label_install_options_desc">Configurar os parâmetros de instalação, como origem, usuário</string>
+    <string name="expand">Expandir</string>
+    <string name="collapse">Recolher</string>
+    <string name="installer_select_split">Selecionar partes de APK</string>
+    <string name="installer_select_split_desc">Selecione novamente as partes do APK para instalar</string>
+    <string name="installer_install_app">Instalar App</string>
+    <string name="installer_module_author_label">Autor:</string>
+    <string name="installer_select_multi_apk">Instalação em lote</string>
+    <string name="installer_select_from_mixed_module_apk">Selecione o tipo de instalação</string>
+    <string name="installer_mixed_module_apk_description">Selecione o tipo de arquivo que deseja instalar</string>
+    <string name="split_name_base_group_title">Aplicativo Base</string>
+    <string name="split_name_architecture_group_title">Partes de Arquitetura</string>
+    <string name="split_name_language_group_title">Partes de Idioma</string>
+    <string name="split_name_density_group_title">Partes de Densidade de Tela</string>
+    <string name="split_name_feature_group_title">Partes de Funções</string>
 </resources>
