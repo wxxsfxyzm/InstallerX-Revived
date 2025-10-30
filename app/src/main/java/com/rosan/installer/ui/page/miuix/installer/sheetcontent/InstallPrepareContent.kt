@@ -44,6 +44,7 @@ import com.rosan.installer.data.app.model.entity.InstalledAppInfo
 import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
@@ -258,12 +259,15 @@ fun InstallPrepareContent(
                         )
 
                         // Install Options
-                        MiuixNavigationItemWidget(
-                            title = stringResource(R.string.config_label_install_options),
-                            description = stringResource(R.string.config_label_install_options_desc),
-                            insideMargin = PaddingValues(12.dp),
-                            onClick = { viewModel.dispatch(InstallerViewAction.InstallExtendedMenu) }
+                        if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku ||
+                            installer.config.authorizer != ConfigEntity.Authorizer.None
                         )
+                            MiuixNavigationItemWidget(
+                                title = stringResource(R.string.config_label_install_options),
+                                description = stringResource(R.string.config_label_install_options_desc),
+                                insideMargin = PaddingValues(12.dp),
+                                onClick = { viewModel.dispatch(InstallerViewAction.InstallExtendedMenu) }
+                            )
 
                         // Select Splits
                         val hasSplits = currentPackage.appEntities.size > 1
