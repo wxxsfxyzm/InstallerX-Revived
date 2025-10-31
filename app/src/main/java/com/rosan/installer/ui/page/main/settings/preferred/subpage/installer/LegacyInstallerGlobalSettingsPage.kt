@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.installer
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
@@ -158,6 +159,19 @@ fun LegacyInstallerGlobalSettingsPage(
                                 )
                             }
                         )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                            SwitchWidget(
+                                icon = AppIcons.LiveActivity,
+                                title = stringResource(R.string.theme_settings_use_live_activity),
+                                description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                checked = state.showLiveActivity,
+                                isM3E = false,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeShowLiveActivity(it)
+                                    )
+                                }
+                            )
                         SwitchWidget(
                             icon = AppIcons.NotificationDisabled,
                             title = stringResource(id = R.string.disable_notification),
@@ -194,6 +208,19 @@ fun LegacyInstallerGlobalSettingsPage(
                                 )
                             }
                         )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                            SwitchWidget(
+                                icon = AppIcons.LiveActivity,
+                                title = stringResource(R.string.theme_settings_use_live_activity),
+                                description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                checked = state.showLiveActivity,
+                                isM3E = false,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeShowLiveActivity(it)
+                                    )
+                                }
+                            )
                         AnimatedVisibility(
                             visible = viewModel.state.showDialogWhenPressingNotification,
                             enter = fadeIn(),

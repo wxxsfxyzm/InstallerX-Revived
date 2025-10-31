@@ -20,6 +20,13 @@
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="PackageVisibilityPolicy,QueryAllPackagesPermission" />
     <uses-permission
+        android:name="android.permission.INSTALL_PACKAGES"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.DELETE_PACKAGES"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-permission
         android:name="android.permission.REQUEST_INSTALL_PACKAGES"
         tools:ignore="RequestInstallPackagesPolicy" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
@@ -96,6 +103,11 @@
                 <data android:pathPattern=".*" />
                 <data android:mimeType="*/*" />
             </intent-filter>
+
+            <intent-filter android:priority="10">
+                <action android:name="android.content.pm.action.CONFIRM_INSTALL" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -152,6 +164,15 @@
         <meta-data
             android:name="ScopedStorage"
             android:value="true" />
+
+        <meta-data
+            android:name="app_description_title"
+            android:resource="@string/uninstall_title" />
+
+        <meta-data
+            android:name="app_description_content"
+            android:resource="@string/uninstall_content" />
+
     </application>
 
 </manifest>

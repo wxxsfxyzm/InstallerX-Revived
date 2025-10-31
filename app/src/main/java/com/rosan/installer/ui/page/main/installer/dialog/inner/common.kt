@@ -88,7 +88,7 @@ val permissionIcon: @Composable () -> Unit = {
  * @param suggestions A composable lambda for displaying suggestion chips below the error block.
  */
 @Composable
-fun ErrorTextBlock(
+internal fun ErrorTextBlock(
     error: Throwable,
     modifier: Modifier = Modifier,
     suggestions: @Composable () -> Unit = {}
@@ -135,7 +135,7 @@ fun ErrorTextBlock(
                     val textToShow = if (RsConfig.isDebug) {
                         error.stackTraceToString()
                     } else {
-                        error.message ?: "An unknown error occurred." // Fallback message
+                        error.message ?: "An unknown error occurred."
                     }.trim()
                     Column {
                         Spacer(modifier = Modifier.height(8.dp))
@@ -164,12 +164,11 @@ fun ErrorTextBlock(
  * A composable that displays a list of warnings in a styled block.
  * The style is similar to ErrorTextBlock but without title or icons.
  *
- * @param warnings A list of pairs, where each pair contains the text string
- * and the specific Color for that text.
+ * @param warnings A list of pairs, where each pair contains the text string and the specific Color for that text.
  * @param modifier Modifier for the root Column.
  */
 @Composable
-fun WarningTextBlock(
+internal fun WarningTextBlock(
     warnings: List<Pair<String, Color>>,
     modifier: Modifier = Modifier,
 ) {
@@ -182,17 +181,13 @@ fun WarningTextBlock(
                 .background(MaterialTheme.colorScheme.errorContainer)
                 .padding(12.dp)
         ) {
-            // Provide a default text color for the container.
             CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
                 warnings.forEachIndexed { index, (text, color) ->
-                    // Add a spacer between messages for readability.
                     if (index > 0) {
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     Text(
                         text = text,
-                        // Use the specific color provided for the text,
-                        // otherwise fallback to the container's default color.
                         color = if (color == Color.Unspecified) LocalContentColor.current else color,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()

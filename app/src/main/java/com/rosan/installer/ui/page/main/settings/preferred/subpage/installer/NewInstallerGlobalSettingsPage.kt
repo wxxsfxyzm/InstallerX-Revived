@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.installer
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -202,6 +203,20 @@ fun NewInstallerGlobalSettingsPage(
                                     }
                                 )
                             }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                                add {
+                                    SwitchWidget(
+                                        icon = AppIcons.LiveActivity,
+                                        title = stringResource(R.string.theme_settings_use_live_activity),
+                                        description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                        checked = state.showLiveActivity,
+                                        onCheckedChange = {
+                                            viewModel.dispatch(
+                                                PreferredViewAction.ChangeShowLiveActivity(it)
+                                            )
+                                        }
+                                    )
+                                }
                             add {
                                 SwitchWidget(
                                     icon = AppIcons.NotificationDisabled,
@@ -227,8 +242,8 @@ fun NewInstallerGlobalSettingsPage(
                 ) {
                     SplicedColumnGroup(
                         title = stringResource(R.string.installer_settings_notification_mode_options),
-                        content = listOf(
-                            {
+                        content = buildList {
+                            add {
                                 SwitchWidget(
                                     icon = AppIcons.Dialog,
                                     title = stringResource(id = R.string.show_dialog_when_pressing_notification),
@@ -242,8 +257,22 @@ fun NewInstallerGlobalSettingsPage(
                                         )
                                     }
                                 )
-                            },
-                            {
+                            }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                                add {
+                                    SwitchWidget(
+                                        icon = AppIcons.LiveActivity,
+                                        title = stringResource(R.string.theme_settings_use_live_activity),
+                                        description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                        checked = state.showLiveActivity,
+                                        onCheckedChange = {
+                                            viewModel.dispatch(
+                                                PreferredViewAction.ChangeShowLiveActivity(it)
+                                            )
+                                        }
+                                    )
+                                }
+                            add {
                                 AnimatedVisibility(visible = state.showDialogWhenPressingNotification) {
                                     SwitchWidget(
                                         icon = AppIcons.NotificationDisabled,
@@ -260,7 +289,7 @@ fun NewInstallerGlobalSettingsPage(
                                     )
                                 }
                             }
-                        )
+                        }
                     )
                 }
             }
