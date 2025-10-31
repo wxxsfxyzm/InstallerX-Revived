@@ -225,6 +225,13 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                 return null
             }
 
+            val originatingUid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                sessionInfo.originatingUid
+            } else {
+                -1 // Return -1 if SDK too low (Process.INVALID_UID)
+            }
+            Log.d("PrivilegedService", "Got originatingUid: $originatingUid")
+
             var resolvedLabel: CharSequence? = null
             var resolvedIcon: Bitmap? = null
             var path: String? = null
@@ -329,6 +336,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                 finalIcon.compress(Bitmap.CompressFormat.PNG, 100, stream)
                 bundle.putByteArray("appIcon", stream.toByteArray())
             }
+            bundle.putInt("originatingUid", originatingUid)
             return bundle
         } catch (e: Exception) {
             Log.e("PrivilegedService", "getSessionDetails failed", e)

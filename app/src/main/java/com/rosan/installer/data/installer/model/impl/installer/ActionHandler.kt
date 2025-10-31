@@ -409,7 +409,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.InstallResolving)
 
         try {
-            installer.config = resolveConfig(activity)
+            // Assure using the correct global authorizer
+            installer.config.authorizer = ConfigUtil.getGlobalAuthorizer()
 
             // TODO implement Notification Confirmation
             /* val isNotificationMode = installer.config.installMode == ConfigEntity.InstallMode.Notification ||
