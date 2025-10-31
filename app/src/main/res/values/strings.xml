@@ -370,6 +370,7 @@
     <string name="exception_install_failed_origin_os_blacklist">Please add a valid install source for installing vivo system app</string>
     <string name="exception_install_failed_hyperos_isolation_violation">Please add a valid install source for installing mi system app</string>
     <string name="exception_install_failed_duplicate_permission">The package is trying to redeclare permission already declared by another app!</string>
+    <string name="exception_install_parse_failed_no_certificates">Missing certificates</string>
     <string name="exception_install_failed_user_restricted">System restricted install through USB, please enable it</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS does not allow uninstalling this app!</string>
     <string name="exception_uninstall_failed_internal_error">Package Manager internal error</string>

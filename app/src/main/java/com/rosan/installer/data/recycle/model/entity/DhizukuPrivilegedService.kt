@@ -4,6 +4,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.deletePaths
@@ -130,5 +131,15 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
     override fun getUsers(): Map<Int, String> {
         // TODO temporarily not necessary for dhizuku
         return emptyMap()
+    }
+
+    override fun getSessionDetails(sessionId: Int): Bundle? {
+        // TODO
+        throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
+    }
+
+    override fun approveSession(sessionId: Int, granted: Boolean) {
+        // TODO
+        throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
     }
 }
