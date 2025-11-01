@@ -36,6 +36,7 @@ import com.rosan.installer.data.recycle.util.requireDhizukuPermissionGranted
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.util.isSystemInstaller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -81,9 +82,10 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         val iPackageInstaller =
             IPackageInstaller.Stub.asInterface(iBinderWrapper(iPackageManager.packageInstaller.asBinder()))
 
-        val installerPackageName = when (config.authorizer) {
-            ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName()
-            ConfigEntity.Authorizer.None -> BuildConfig.APPLICATION_ID
+        val installerPackageName = when {
+            context.isSystemInstaller() -> context.packageName
+            config.authorizer == ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName()
+            config.authorizer == ConfigEntity.Authorizer.None -> BuildConfig.APPLICATION_ID
             else -> config.installer ?: BuildConfig.APPLICATION_ID
         }
 

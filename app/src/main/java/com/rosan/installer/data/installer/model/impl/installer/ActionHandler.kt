@@ -46,6 +46,7 @@ import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.util.isSystemInstaller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -83,9 +84,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val cacheParcelFileDescriptors = mutableListOf<ParcelFileDescriptor>()
     private val cacheDirectory = "${context.externalCacheDir?.absolutePath}/${installer.id}".apply {
         File(this).mkdirs()
-    }
-    private val isSystemInstaller: Boolean by lazy {
-        context.packageName == "com.android.packageinstaller"
     }
 
     override suspend fun onStart() {
@@ -427,7 +425,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             when {
                 // Use reflect directly when running as system
-                isSystemInstaller -> {
+                context.isSystemInstaller() -> {
                     Timber.d("[id=${installer.id}] Handling CONFIRM_INSTALL as system installer.")
                     val (label, icon) = getSessionDetailsLocally(sessionId)
                     finalLabel = label
@@ -479,7 +477,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Timber.d("[id=${installer.id}] approveSession: $granted for session $sessionId")
         try {
             when {
-                isSystemInstaller -> {
+                context.isSystemInstaller() -> {
                     Timber.d("[id=${installer.id}] Approving session as system installer.")
                     approveSessionLocally(sessionId, granted)
                 }
