@@ -62,6 +62,7 @@ import androidx.compose.material.icons.twotone.SecurityUpdateWarning
 import androidx.compose.material.icons.twotone.SettingsSuggest
 import androidx.compose.material.icons.twotone.Source
 import androidx.compose.material.icons.twotone.SystemUpdate
+import androidx.compose.material.icons.twotone.TaskAlt
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material.icons.twotone.Widgets
 
@@ -123,6 +124,7 @@ object AppIcons {
     val DisableAdbVerify = Icons.TwoTone.Security
     val InstallMode = Icons.TwoTone.Downloading
     val BatteryOptimization = Icons.TwoTone.BatterySaver
+    val AutoLockDefault = Icons.TwoTone.TaskAlt
     val LockDefault = Icons.TwoTone.Favorite
     val UnlockDefault = Icons.TwoTone.FavoriteBorder
     val ClearAll = Icons.TwoTone.ClearAll

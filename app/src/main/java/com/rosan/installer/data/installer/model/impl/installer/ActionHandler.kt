@@ -46,6 +46,7 @@ import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.util.isSystemInstaller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -84,9 +85,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val cacheDirectory = "${context.externalCacheDir?.absolutePath}/${installer.id}".apply {
         File(this).mkdirs()
     }
-    private val isSystemInstaller: Boolean by lazy {
-        context.packageName == "com.android.packageinstaller"
-    }
 
     override suspend fun onStart() {
         Timber.d("[id=${installer.id}] onStart: Starting to collect actions.")
@@ -113,9 +111,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     override suspend fun onFinish() {
         Timber.d("[id=${installer.id}] onFinish: Cleaning up resources and cancelling job.")
-        cacheParcelFileDescriptors.forEach { it.runCatching { close() } }
-        cacheParcelFileDescriptors.clear()
-        File(cacheDirectory).deleteRecursively()
+        clearCacheDirectory()
         job?.cancel()
     }
 
@@ -326,6 +322,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
         Timber.d("[id=${installer.id}] install: Succeeded. Emitting ProgressEntity.InstallSuccess.")
         installer.progress.emit(ProgressEntity.InstallSuccess)
+        clearCacheDirectory()
     }
 
     /**
@@ -409,7 +406,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.InstallResolving)
 
         try {
-            installer.config = resolveConfig(activity)
+            // Assure using the correct global authorizer
+            installer.config.authorizer = ConfigUtil.getGlobalAuthorizer()
 
             // TODO implement Notification Confirmation
             /* val isNotificationMode = installer.config.installMode == ConfigEntity.InstallMode.Notification ||
@@ -426,7 +424,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             when {
                 // Use reflect directly when running as system
-                isSystemInstaller -> {
+                context.isSystemInstaller() -> {
                     Timber.d("[id=${installer.id}] Handling CONFIRM_INSTALL as system installer.")
                     val (label, icon) = getSessionDetailsLocally(sessionId)
                     finalLabel = label
@@ -478,7 +476,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Timber.d("[id=${installer.id}] approveSession: $granted for session $sessionId")
         try {
             when {
-                isSystemInstaller -> {
+                context.isSystemInstaller() -> {
                     Timber.d("[id=${installer.id}] Approving session as system installer.")
                     approveSessionLocally(sessionId, granted)
                 }
@@ -1052,5 +1050,29 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
         }
         return -1L
+    }
+
+    /**
+     * Clears all cached file descriptors and deletes the temporary cache directory.
+     * This method is idempotent and safe to call multiple times.
+     */
+    private fun clearCacheDirectory() {
+        Timber.d("[id=${installer.id}] clearCacheDirectory: Clearing cache...")
+
+        // Close and clear cached file descriptors
+        cacheParcelFileDescriptors.forEach { it.runCatching { close() } }
+        cacheParcelFileDescriptors.clear()
+
+        // Delete the cache directory recursively
+        File(cacheDirectory).runCatching {
+            if (exists()) {
+                val deleted = deleteRecursively()
+                Timber.d("[id=${installer.id}] Cache directory deleted ($cacheDirectory): $deleted")
+            } else {
+                Timber.d("[id=${installer.id}] Cache directory not found, already cleared: $cacheDirectory")
+            }
+        }.onFailure {
+            Timber.w(it, "[id=${installer.id}] Failed to delete cache directory: $cacheDirectory")
+        }
     }
 }
