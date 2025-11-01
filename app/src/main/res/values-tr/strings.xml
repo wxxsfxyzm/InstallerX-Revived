@@ -21,8 +21,8 @@
     <string name="get_update_detail">Yazılım güncellemelerini ve yeni özellikleri kontrol edin</string>
     <string name="get_source_code">Kaynak kodunu kontrol edin</string>
     <string name="get_source_code_detail">GitHub\'da kaynak kodunu kontrol edin</string>
-    <string name="internet_access_enabled">Çevrimiçi\\s</string>
-    <string name="internet_access_disabled">Çevrimdışı\\s</string>
+    <string name="internet_access_enabled">Çevrimiçi</string>
+    <string name="internet_access_disabled">Çevrimdışı</string>
     <string name="stable">Stabil sürüm</string>
     <string name="preview">Önizleme sürümü</string>
     <string name="unstable">Stabil olmayan sürüm</string>
@@ -206,7 +206,7 @@
     <string name="installer_prepare_type_unknown_confirm">Yüklemek istediğinize emin misiniz?</string>
     <string name="installer_prepare_signature_mismatch">İmza uyumsuzluğu! Kuruluma devam edilmesi veri kaybına veya güvenlik risklerine yol açabilir.</string>
     <string name="installer_prepare_signature_unknown">Uygulama imzası doğrulanamadı, lütfen dikkatli ilerleyin.</string>
-    <string name="installer_installing">Yükleniyor…</string>
+    <string name="installer_installing">İndiriliyor…</string>
     <string name="installer_install_failed">Yükleme başarısız oldu</string>
     <string name="installer_install_success">Yükleme başarılı</string>
     <string name="installer_silent_install">Sessiz Yükleme</string>
@@ -394,8 +394,8 @@
     <string name="force_permission_prompt_desc">Sistem yükleyicilerinin bile kurulum onay istemini göstermesini zorunlu kılar</string>
     <string name="instant_app">Anında Uygulama</string>
     <string name="instant_app_desc">Paketi anında uygulama olarak yükleyin</string>
-    <string name="dont_kill_app">Don\'t Kill App</string>
-    <string name="dont_kill_app_desc">Bölünmüş bir uygulamaya bir özellik yüklerken, ana uygulamanın yükleme sırasında sonlandırılmasını önlemek için kullanılır</string>
+    <string name="dont_kill_app">Uygulamayı Durdurma</string>
+    <string name="dont_kill_app_desc">Bölünmüş bir uygulamaya bir özellik yüklerken, ana uygulamanın yükleme sırasında durdurulmasını önlemek için kullanılır</string>
     <string name="full_app">Tam Uygulama</string>
     <string name="full_app_desc">Yüklenen paketin tam uygulama olduğunu belirtir, anlık uygulamaları tam uygulamalara yükseltmek için kullanılabilir</string>
     <string name="allocate_aggressive">Agresif Tahsis Et</string>
