@@ -180,7 +180,7 @@
     <string name="sort_by_package_name">Paket Adı</string>
     <string name="sort_by_install_time">Yükleme Zamanı</string>
     <string name="sort_by_reverse_order">Ters sıra</string>
-    <string name="sort_by_selected_first">Seçilen ilk</string>
+    <string name="sort_by_selected_first">Seçilen(ler) ilk</string>
     <string name="sort_by_show_system_app">Sistem uygulamalarını göster</string>
     <string name="sort_by_show_package_name">Paket adlarını göster</string>
     <string name="installer_live_channel_name">Canlı Yükleme İlerlemesi</string>
