@@ -483,4 +483,5 @@
     <string name="split_name_feature_group_title">Partes de Funções</string>
     <string name="uninstall_title">Desinstalar InstallerX Revived</string>
     <string name="uninstall_content">Após desinstalar este app, você não poderá mais usar o InstallerX Revived para instalar apps.</string>
+    <string name="exception_install_parse_failed_no_certificates">Certificados ausentes</string>
 </resources>
