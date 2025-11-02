@@ -62,7 +62,7 @@ fun MiuixInstallerGlobalSettingsPage(
                 .fillMaxSize()
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .padding(paddingValues),
+                .padding(top = paddingValues.calculateTopPadding() + 12.dp),
             overscrollEffect = null
         ) {
             item { SmallTitle(stringResource(R.string.installer_settings_global_installer)) }
@@ -70,7 +70,7 @@ fun MiuixInstallerGlobalSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     MiuixDataAuthorizerWidget(
                         currentAuthorizer = state.authorizer,
@@ -116,7 +116,7 @@ fun MiuixInstallerGlobalSettingsPage(
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
-                                .padding(bottom = 6.dp)
+                                .padding(bottom = 12.dp)
                         ) {
 /*                            MiuixSwitchWidget(
                                 icon = AppIcons.SingleLineSettingIcon,
@@ -202,7 +202,7 @@ fun MiuixInstallerGlobalSettingsPage(
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
-                                .padding(bottom = 6.dp)
+                                .padding(bottom = 12.dp)
                         ) {
                             MiuixSwitchWidget(
                                 icon = AppIcons.Dialog,
@@ -253,7 +253,7 @@ fun MiuixInstallerGlobalSettingsPage(
                     Card(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
-                            .padding(bottom = 6.dp)
+                            .padding(bottom = 12.dp)
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(id = R.string.installer_show_oem_special),

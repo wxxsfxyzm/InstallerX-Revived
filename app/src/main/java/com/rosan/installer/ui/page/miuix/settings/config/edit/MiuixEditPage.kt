@@ -2,14 +2,11 @@ package com.rosan.installer.ui.page.miuix.settings.config.edit
 
 import android.os.Build
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -63,10 +60,6 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-    ExperimentalMaterial3ExpressiveApi::class
-)
 @Composable
 fun MiuixEditPage(
     navController: NavController,
@@ -165,7 +158,8 @@ fun MiuixEditPage(
                 .fillMaxSize()
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .padding(it),
+                .padding(it)
+                .padding(top = 12.dp),
             overscrollEffect = null,
         ) {
             item { MiuixDataNameWidget(viewModel = viewModel) }
@@ -175,7 +169,7 @@ fun MiuixEditPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     MiuixDataAuthorizerWidget(viewModel = viewModel)
                     MiuixDataCustomizeAuthorizerWidget(viewModel = viewModel)
@@ -188,7 +182,7 @@ fun MiuixEditPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     MiuixDataUserWidget(viewModel = viewModel)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) MiuixDataPackageSourceWidget(viewModel = viewModel)
@@ -203,7 +197,7 @@ fun MiuixEditPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     MiuixDataForAllUserWidget(viewModel = viewModel)
                     MiuixDataAllowTestOnlyWidget(viewModel = viewModel)

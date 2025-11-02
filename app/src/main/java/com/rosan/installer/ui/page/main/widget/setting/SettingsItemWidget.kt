@@ -10,7 +10,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -113,12 +112,13 @@ data class AuthorizerInfo(
 /**
  * @author wxxsfxyzm
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DataAuthorizerWidget(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier, // modifier to be applied to FlowRow
     currentAuthorizer: ConfigEntity.Authorizer,
     changeAuthorizer: (ConfigEntity.Authorizer) -> Unit,
+    enabled: Boolean = true,
+    onClick: () -> Unit = {},
     trailingContent: @Composable () -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
@@ -141,67 +141,54 @@ fun DataAuthorizerWidget(
             R.string.config_authorizer_dhizuku,
             AppIcons.InstallAllowRestrictedPermissions
         ),
-        /*        ConfigEntity.Authorizer.Customize to AuthorizerInfo(
+        /* ConfigEntity.Authorizer.Customize to AuthorizerInfo(
                     R.string.config_authorizer_customize,
                     AppIcons.Customize
                 ),*/
     )
 
-    ListItem(
-        // 左侧图标，使用原代码的图标
-        leadingContent = {
-            Icon(
-                imageVector = AppIcons.Authorizer,
-                contentDescription = null
-            )
-        },
-        // 标题
-        headlineContent = { Text(stringResource(R.string.config_authorizer)) },
-        // 下方的 InputChip 区域
-        supportingContent = {
-            // 使用 FlowRow 可以让 Chip 自动换行，适应不同宽度的屏幕
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-                modifier = modifier
-            ) {
-                // 遍历 Map 来动态创建 InputChip
-                authorizerOptions.forEach { (authorizerType, authorizerInfo) ->
-                    InputChip(
-                        enabled = when (authorizerType) {
-                            ConfigEntity.Authorizer.None -> !RsConfig.isMiui
-                            else -> true
-                        },
-                        selected = currentAuthorizer == authorizerType,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                            if (currentAuthorizer != authorizerType) {
-                                changeAuthorizer(authorizerType)
-                            }
-                        },
-                        label = { Text(text = stringResource(authorizerInfo.labelResId)) },
-                        // 为每个 Chip 设置 leadingIcon
-                        leadingIcon = {
-                            Icon(
-                                imageVector = authorizerInfo.icon,
-                                contentDescription = null, // 装饰性图标
-                                modifier = Modifier.size(AssistChipDefaults.IconSize)
-                            )
-                        }
-                    )
-                }
-            }
-        },
-        colors = ListItemDefaults.colors(
-            containerColor = Color.Transparent
-        ),
-        /*        // 整个 ListItem 的点击事件
-                modifier = Modifier.clickable {
-                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                    onClick()
-                }*/
-    )
+    Column {
+        BaseWidget(
+            icon = AppIcons.Authorizer,
+            title = stringResource(R.string.config_authorizer),
+            description = stringResource(R.string.config_app_authorizer_desc),
+            enabled = enabled,
+            onClick = onClick,
+            content = { }
+        )
 
-    trailingContent()
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+            modifier = modifier
+                .padding(start = 56.dp, end = 16.dp, bottom = 16.dp)
+        ) {
+            authorizerOptions.forEach { (authorizerType, authorizerInfo) ->
+                InputChip(
+                    enabled = when (authorizerType) {
+                        ConfigEntity.Authorizer.None -> !RsConfig.isMiui
+                        else -> true
+                    } && enabled,
+                    selected = currentAuthorizer == authorizerType,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        if (currentAuthorizer != authorizerType) {
+                            changeAuthorizer(authorizerType)
+                        }
+                    },
+                    label = { Text(text = stringResource(authorizerInfo.labelResId)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = authorizerInfo.icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(AssistChipDefaults.IconSize)
+                        )
+                    }
+                )
+            }
+        }
+
+        trailingContent()
+    }
 }
 
 @Composable
@@ -259,17 +246,14 @@ data class InstallModeInfo(
 /**
  * @author wxxsfxyzm
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DataInstallModeWidget(
     modifier: Modifier = Modifier,
     currentInstallMode: ConfigEntity.InstallMode,
-    changeInstallMode: (ConfigEntity.InstallMode) -> Unit,
-    onClick: () -> Unit = {} // 提供一个默认的空实现
+    changeInstallMode: (ConfigEntity.InstallMode) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 
-    // 使用新的数据类来定义选项
     val installModeOptions = mapOf(
         ConfigEntity.InstallMode.Dialog to InstallModeInfo(
             R.string.config_install_mode_dialog,
@@ -289,44 +273,39 @@ fun DataInstallModeWidget(
         )
     )
 
-    ListItem(
-        leadingContent = {
-            Icon(
-                imageVector = AppIcons.InstallMode, // 来自原代码的图标
-                contentDescription = null
-            )
-        },
-        headlineContent = { Text(stringResource(R.string.config_install_mode)) }, // 来自原代码的标题
-        supportingContent = {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-                modifier = modifier
-            ) {
-                installModeOptions.forEach { (modeType, modeInfo) ->
-                    InputChip(
-                        selected = currentInstallMode == modeType,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                            if (currentInstallMode != modeType) {
-                                changeInstallMode(modeType)
-                            }
-                        },
-                        label = { Text(text = stringResource(modeInfo.labelResId)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = modeInfo.icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(AssistChipDefaults.IconSize)
-                            )
-                        }
-                    )
-                }
-            }
-        },
-        colors = ListItemDefaults.colors(
-            containerColor = Color.Transparent
+    Column {
+        BaseWidget(
+            icon = AppIcons.InstallMode,
+            title = stringResource(R.string.config_install_mode),
+            content = {}
         )
-    )
+
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+            modifier = modifier
+                .padding(start = 56.dp, end = 16.dp, bottom = 16.dp)
+        ) {
+            installModeOptions.forEach { (modeType, modeInfo) ->
+                InputChip(
+                    selected = currentInstallMode == modeType,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        if (currentInstallMode != modeType) {
+                            changeInstallMode(modeType)
+                        }
+                    },
+                    label = { Text(text = stringResource(modeInfo.labelResId)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = modeInfo.icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(AssistChipDefaults.IconSize)
+                        )
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Composable

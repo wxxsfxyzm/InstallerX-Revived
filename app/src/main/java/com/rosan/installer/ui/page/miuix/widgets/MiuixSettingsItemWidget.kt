@@ -116,9 +116,9 @@ fun MiuixDataAuthorizerWidget(
         }
     }
 
-    //    Convert the authorizerOptions Map into a List<SpinnerEntry>
-    //    which is required by the SuperSpinner component.
-    //    This is done once and remembered.
+    // Convert the authorizerOptions Map into a List<SpinnerEntry>
+    // which is required by the SuperSpinner component.
+    // This is done once and remembered.
     val spinnerEntries = remember(authorizerOptions) {
         authorizerOptions.values.map { authorizerInfo ->
             SpinnerEntry(
@@ -128,8 +128,8 @@ fun MiuixDataAuthorizerWidget(
         }
     }
 
-    //    SuperSpinner requires an integer index for the selected item.
-    //    Find the index of the currentAuthorizer from the map's keys.
+    // SuperSpinner requires an integer index for the selected item.
+    // Find the index of the currentAuthorizer from the map's keys.
     val selectedIndex = remember(currentAuthorizer, authorizerOptions) {
         authorizerOptions.keys.indexOf(currentAuthorizer).coerceAtLeast(0)
     }
@@ -138,7 +138,7 @@ fun MiuixDataAuthorizerWidget(
         modifier = modifier,
         mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.config_authorizer),
-        // summary = spinnerEntries[selectedIndex].title,
+        summary = stringResource(R.string.config_app_authorizer_desc),
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
@@ -276,7 +276,11 @@ fun MiuixAutoLockInstaller(
 }
 
 @Composable
-fun MiuixDefaultInstaller(lock: Boolean, onClick: () -> Unit) {
+fun MiuixDefaultInstaller(
+    lock: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
     BasicComponent(
         title = stringResource(
             if (lock) R.string.lock_default_installer else R.string.unlock_default_installer
@@ -284,6 +288,7 @@ fun MiuixDefaultInstaller(lock: Boolean, onClick: () -> Unit) {
         summary = stringResource(
             if (lock) R.string.lock_default_installer_desc else R.string.unlock_default_installer_desc
         ),
+        enabled = enabled,
         onClick = onClick
     )
 }

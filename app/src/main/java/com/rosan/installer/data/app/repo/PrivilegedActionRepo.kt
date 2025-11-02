@@ -15,12 +15,12 @@ interface PrivilegedActionRepo {
 
     /**
      * Sets or unsets our app as the default installer.
-     * @param config The current configuration which determines the authorization method.
+     * @param authorizer The authorizer to use for the check.
      * @param component The ComponentName of the installer activity.
      * @param enable True to set as default, false to clear.
      */
     suspend fun setDefaultInstaller(
-        config: ConfigEntity,
+        authorizer: ConfigEntity.Authorizer,
         component: ComponentName,
         enable: Boolean
     )

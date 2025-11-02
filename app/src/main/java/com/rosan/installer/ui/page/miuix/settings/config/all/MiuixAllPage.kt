@@ -39,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
@@ -47,7 +46,6 @@ import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewState
-import com.rosan.installer.ui.page.main.settings.config.all.LottieWidget
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.MiuixScopeTipCard
 import kotlinx.coroutines.flow.collectLatest
@@ -160,9 +158,9 @@ fun MiuixAllPage(
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-    ) { innerPadding ->
+    ) { paddingValues ->
         Box(
-            modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding() + 12.dp)
         ) {
             when {
                 viewModel.state.data.progress is AllViewState.Data.Progress.Loading
@@ -186,10 +184,9 @@ fun MiuixAllPage(
 
                 viewModel.state.data.progress is AllViewState.Data.Progress.Loaded
                         && viewModel.state.data.configs.isEmpty() -> {
-                    LottieWidget(
-                        spec = LottieCompositionSpec.RawRes(R.raw.empty_state),
-                        text = stringResource(id = R.string.empty_configs)
-                    )
+                    // TODO Add error handling
+                    // Since we don't allow removing default profile,
+                    // There is no need to handle an empty state.
                 }
 
                 else -> {

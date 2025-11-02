@@ -95,10 +95,9 @@ fun LegacyInstallerGlobalSettingsPage(
             item {
                 DataInstallModeWidget(
                     currentInstallMode = state.installMode,
-                    changeInstallMode = { newMode ->
-                        viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(newMode))
-                    },
-                    onClick = {}
+                    changeInstallMode = {
+                        viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(it))
+                    }
                 )
             }
             item {

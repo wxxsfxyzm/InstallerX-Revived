@@ -138,8 +138,7 @@ fun NewInstallerGlobalSettingsPage(
                                 currentInstallMode = state.installMode,
                                 changeInstallMode = {
                                     viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(it))
-                                },
-                                onClick = {}
+                                }
                             )
                         }
                     )

@@ -22,7 +22,6 @@ import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -497,13 +496,13 @@ class PreferredViewModel(
         }
 
     private suspend fun setDefaultInstaller(lock: Boolean, action: PreferredViewAction) {
-        val config = ConfigUtil.getByPackageName(null)
+        val authorizer = state.authorizer
         val component = ComponentName(context, InstallerActivity::class.java)
         runPrivilegedAction(
             action = action,
             titleForError = context.getString(if (lock) R.string.lock_default_installer_failed else R.string.unlock_default_installer_failed),
             successMessage = context.getString(if (lock) R.string.lock_default_installer_success else R.string.unlock_default_installer_success),
-            block = { paRepo.setDefaultInstaller(config, component, lock) }
+            block = { paRepo.setDefaultInstaller(authorizer, component, lock) }
         )
     }
 

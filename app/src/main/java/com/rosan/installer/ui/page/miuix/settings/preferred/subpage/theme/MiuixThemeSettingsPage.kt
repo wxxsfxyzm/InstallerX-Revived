@@ -61,7 +61,7 @@ fun MiuixThemeSettingsPage(
                 .fillMaxSize()
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .padding(top = paddingValues.calculateTopPadding()),
+                .padding(top = paddingValues.calculateTopPadding() + 12.dp),
             overscrollEffect = null
         ) {
             item { SmallTitle(stringResource(R.string.theme_settings_ui_style)) }
@@ -69,7 +69,7 @@ fun MiuixThemeSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     MiuixThemeEngineWidget(
                         currentThemeIsMiuix = state.showMiuixUI,
@@ -84,7 +84,7 @@ fun MiuixThemeSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     MiuixSwitchWidget(
                         title = stringResource(R.string.theme_settings_prefer_system_icon),
@@ -103,7 +103,7 @@ fun MiuixThemeSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     MiuixSwitchWidget(
                         title = stringResource(R.string.theme_settings_hide_launcher_icon),

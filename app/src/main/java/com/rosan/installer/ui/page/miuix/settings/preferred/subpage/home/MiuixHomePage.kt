@@ -78,7 +78,7 @@ fun MiuixHomePage(
                 .fillMaxWidth()
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .padding(top = innerPadding.calculateTopPadding()),
+                .padding(top = innerPadding.calculateTopPadding() + 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -109,7 +109,7 @@ fun MiuixHomePage(
             Card(
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 6.dp)
+                    .padding(bottom = 12.dp)
             ) {
                 MiuixNavigationItemWidget(
                     title = stringResource(R.string.get_source_code),
