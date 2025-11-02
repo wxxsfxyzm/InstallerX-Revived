@@ -94,14 +94,6 @@ fun InstallerMaterialExpressiveTheme(
         else -> LightColorScheme
     }
 
-    // TODO not needed since targetSDK 35
-    /*if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as ComponentActivity).window
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-        }
-    }*/
-
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
         motionScheme = MotionScheme.expressive(),

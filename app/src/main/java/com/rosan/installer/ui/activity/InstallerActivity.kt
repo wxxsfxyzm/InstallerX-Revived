@@ -31,7 +31,6 @@ import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
@@ -58,7 +57,6 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     private val appDataStore: AppDataStore by inject()
-    private val reflect: ReflectRepo by inject()
 
     private var installer by mutableStateOf<InstallerRepo?>(null)
     private var job: Job? = null
