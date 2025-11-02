@@ -468,4 +468,12 @@
     <string name="suggestion_user_restricted">前往開發人員選項啟用 USB 安裝</string>
     <string name="suggestion_bypass_low_target_sdk">暫時允許繞過限制並重試</string>
     <string name="suggestion_bypass_blacklist_set_by_user">本次允許安裝</string>
+    <string name="uninstall_title">卸載 InstallerX Revived</string>
+    <string name="uninstall_content">卸載本應用程式後，您將無法再使用 InstallerX Revived 安裝應用程式。</string>
+    <string name="auto_lock_default_installer">自動設為預設安裝程式</string>
+    <string name="auto_lock_default_installer_desc">在開始新安裝時自動將此應用程式設為安裝程式</string>
+    <string name="config_global_default">全域預設</string>
+    <string name="config_label_install_options_desc">配置安裝參數，例如來源、使用者</string>
+    <string name="expand">展開</string>
+    <string name="collapse">收合</string>
 </resources>
