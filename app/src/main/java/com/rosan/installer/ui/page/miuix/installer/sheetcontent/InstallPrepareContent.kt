@@ -49,6 +49,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
+import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
@@ -92,18 +93,17 @@ fun InstallPrepareContent(
     val tertiaryColor = MiuixTheme.colorScheme.primary
 
     val (warningMessages, buttonTextId) = remember(currentPackage, entityToInstall) {
-        val newEntity = entityToInstall
         val oldInfo = currentPackage.installedAppInfo
         val signatureStatus = currentPackage.signatureMatchStatus
         val warnings = mutableListOf<Pair<String, Color>>()
         var finalButtonTextId = R.string.install
-        if (newEntity != null) {
+        if (entityToInstall != null) {
             if (oldInfo == null) {
                 finalButtonTextId = R.string.install
             } else {
                 when {
-                    newEntity.versionCode > oldInfo.versionCode -> finalButtonTextId = R.string.upgrade
-                    newEntity.versionCode < oldInfo.versionCode -> {
+                    entityToInstall.versionCode > oldInfo.versionCode -> finalButtonTextId = R.string.upgrade
+                    entityToInstall.versionCode < oldInfo.versionCode -> {
                         warnings.add(context.getString(R.string.installer_prepare_type_downgrade) to errorColor)
                         finalButtonTextId = R.string.install_anyway
                     }
@@ -126,7 +126,7 @@ fun InstallPrepareContent(
 
                 else -> {}
             }
-        val newMinSdk = newEntity?.minSdk?.toIntOrNull()
+        val newMinSdk = entityToInstall?.minSdk?.toIntOrNull()
         if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
             warnings.add(0, context.getString(R.string.installer_prepare_sdk_incompatible) to errorColor)
         }
@@ -160,7 +160,7 @@ fun InstallPrepareContent(
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
                 colors = CardColors(
-                    color = if (isSystemInDarkTheme()) Color(0xFF434343) else Color.White,
+                    color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
                     contentColor = MiuixTheme.colorScheme.onSurface
                 )
             ) {
@@ -245,7 +245,7 @@ fun InstallPrepareContent(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     colors = CardColors(
-                        color = if (isSystemInDarkTheme()) Color(0xFF434343) else Color.White,
+                        color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
                         contentColor = MiuixTheme.colorScheme.onSurface
                     )
                 ) {

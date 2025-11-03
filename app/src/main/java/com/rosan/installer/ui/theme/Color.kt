@@ -218,9 +218,4 @@ val surfaceContainerDarkHighContrast = Color(0xFF2F312A)
 val surfaceContainerHighDarkHighContrast = Color(0xFF3A3C35)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF454840)
 
-
-
-
-
-
-
+val miuixSheetCardColorDark = Color(0xFF434343)

@@ -41,6 +41,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVerificationFai
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationTimeoutException
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
 import com.rosan.installer.data.app.model.exception.InstallParseFailedNoCertificatesException
+import com.rosan.installer.data.app.model.exception.InstallParseFailedUnexpectedException
 import com.rosan.installer.data.app.model.exception.UninstallFailedHyperOSSystemAppException
 import com.rosan.installer.data.app.model.exception.UninstallFailedInternalErrorException
 import com.rosan.installer.data.installer.model.exception.ResolveException
@@ -98,6 +99,7 @@ private fun Throwable.getStringResourceId() =
         is InstallFailedRejectedByBuildTypeException -> R.string.exception_install_failed_rejected_by_build_type
         is InstallFailedOriginOSBlacklistException -> R.string.exception_install_failed_origin_os_blacklist
         is InstallFailedHyperOSIsolationViolationException -> R.string.exception_install_failed_hyperos_isolation_violation
+        is InstallParseFailedUnexpectedException -> R.string.exception_install_parse_failed_unexpected_exception
         is InstallParseFailedNoCertificatesException -> R.string.exception_install_parse_failed_no_certificates
         is InstallFailedUserRestrictedException -> R.string.exception_install_failed_user_restricted
         is ShizukuNotWorkException -> R.string.exception_shizuku_not_work

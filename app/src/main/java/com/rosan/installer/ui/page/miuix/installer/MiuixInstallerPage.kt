@@ -44,6 +44,7 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.LoadingContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.NonInstallFailedContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.PrepareSettingsContent
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.util.getSupportTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -74,6 +75,7 @@ fun MiuixInstallerPage(
     val currentState = viewModel.state
     val showSettings = viewModel.showMiuixSheetRightActionSettings
 
+    val containerType = installer.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
     val displayIcons by viewModel.displayIcons.collectAsState()
@@ -97,18 +99,7 @@ fun MiuixInstallerPage(
 
     val sheetTitle = when (currentState) {
         is InstallerViewState.Preparing -> stringResource(R.string.installer_preparing)
-        is InstallerViewState.InstallChoice -> {
-            val containerType =
-                installer.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
-            val titleRes = when (containerType) {
-                DataType.MIXED_MODULE_APK -> R.string.installer_select_from_mixed_module_apk
-                DataType.MULTI_APK_ZIP -> R.string.installer_select_from_zip
-                DataType.MULTI_APK -> R.string.installer_select_multi_apk
-                else -> R.string.installer_select_install
-            }
-            stringResource(titleRes)
-        }
-
+        is InstallerViewState.InstallChoice -> stringResource(containerType.getSupportTitle())
         is InstallerViewState.InstallExtendedMenu -> stringResource(R.string.config_label_install_options)
         is InstallerViewState.InstallPrepare -> stringResource(R.string.installer_install_app)
         is InstallerViewState.Installing -> stringResource(R.string.installer_installing)

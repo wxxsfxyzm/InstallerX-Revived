@@ -229,6 +229,10 @@
     <string name="installer_select_install">Select apps to install</string>
     <string name="installer_select_split">Select APK splits</string>
     <string name="installer_select_split_desc">Re-select the APK splits to install</string>
+    <string name="installer_choice_install_as_module">Install as Module</string>
+    <string name="installer_module_id">Module ID: %1$s</string>
+    <string name="installer_choice_install_as_app">Install as Application(s)</string>
+    <string name="installer_choice_install_as_app_desc">Select which applications to install from the ZIP</string>
     <string name="installer_prepare_install">Before you install</string>
     <string name="installer_prepare_install_empty">Please select at least one package</string>
     <string name="installer_prepare_install_too_many">Please select only one base.apk</string>
@@ -372,6 +376,7 @@
     <string name="exception_install_failed_origin_os_blacklist">Please add a valid install source for installing vivo system app</string>
     <string name="exception_install_failed_hyperos_isolation_violation">Please add a valid install source for installing mi system app</string>
     <string name="exception_install_failed_duplicate_permission">The package is trying to redeclare permission already declared by another app!</string>
+    <string name="exception_install_parse_failed_unexpected_exception">Parse Failed</string>
     <string name="exception_install_parse_failed_no_certificates">Missing certificates</string>
     <string name="exception_install_failed_user_restricted">System restricted install through USB, please enable it</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS does not allow uninstalling this app!</string>
@@ -475,6 +480,7 @@
     <string name="installer_completed">Install complete</string>
     <string name="installer_completed_subtitle">Successful %1$s, failed %2$s</string>
     <string name="installer_current_install_mode_not_supported">Current mode does not support installing this type of file</string>
+    <string name="installer_mixed_module_zip_description">This file contains both a module and applications. Choose how to install</string>
     <!-- MultiApkZip End -->
 
     <!-- MixedModuleApk Installer -->

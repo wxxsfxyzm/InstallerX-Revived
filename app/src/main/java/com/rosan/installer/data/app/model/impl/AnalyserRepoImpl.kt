@@ -14,6 +14,7 @@ import com.rosan.installer.data.app.model.impl.analyser.ApkAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApkMAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ApksAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.MixedModuleApkAnalyserRepoImpl
+import com.rosan.installer.data.app.model.impl.analyser.MixedModuleZipAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.ModuleZipAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.MultiApkZipAnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.analyser.XApkAnalyserRepoImpl
@@ -30,7 +31,6 @@ import timber.log.Timber
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
-import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
@@ -52,7 +52,8 @@ object AnalyserRepoImpl : AnalyserRepo {
             DataType.XAPK to XApkAnalyserRepoImpl,
             DataType.MULTI_APK_ZIP to MultiApkZipAnalyserRepoImpl,
             DataType.MODULE_ZIP to ModuleZipAnalyserRepoImpl,
-            DataType.MIXED_MODULE_APK to MixedModuleApkAnalyserRepoImpl
+            DataType.MIXED_MODULE_APK to MixedModuleApkAnalyserRepoImpl,
+            DataType.MIXED_MODULE_ZIP to MixedModuleZipAnalyserRepoImpl
         )
         // This loop processes every file/data source provided by the user.
         for (dataEntity in data) {
@@ -60,7 +61,7 @@ object AnalyserRepoImpl : AnalyserRepo {
             val fileType = getDataType(config, dataEntity)
                 ?: continue // If type is null for any reason, just skip to the next file.
 
-            // --- FIX: Instead of throwing an exception, just skip the invalid file. ---
+            // Instead of throwing an exception, just skip the invalid file.
             if (fileType == DataType.NONE) {
                 Timber.w("Skipping unsupported file: ${dataEntity.getSourceTop()}")
                 continue // Continue to the next file in the loop.
@@ -130,7 +131,10 @@ object AnalyserRepoImpl : AnalyserRepo {
         }.distinct().size == 1
         val originalContainerType = rawApps.firstOrNull()?.containerType
 
-        val isMultiAppSession = if (isFromSingleFile && originalContainerType == DataType.MIXED_MODULE_APK) {
+        val isMultiAppSession = if (isFromSingleFile &&
+            originalContainerType == DataType.MIXED_MODULE_APK ||
+            originalContainerType == DataType.MIXED_MODULE_ZIP
+        ) {
             false // SPECIAL CASE: A single mixed module/apk file is NOT a multi-app session.
         } else {
             isMultiPackage || hasMultipleBasesInSinglePackage // Use original logic for all other cases
@@ -159,7 +163,6 @@ object AnalyserRepoImpl : AnalyserRepo {
 
         // Iterate over each package group to build the final result
         groupedByPackage.forEach { (packageName, entitiesInPackage) ->
-            // --- CORE REFACTORING LOGIC ---
             // Fetch information about the currently installed package.
             // This logic is now part of the backend analysis, not the ViewModel.
             val installedAppInfo = InstalledAppInfo.buildByPackageName(packageName)
@@ -223,7 +226,7 @@ object AnalyserRepoImpl : AnalyserRepo {
                 }
                 correctedEntities.add(correctedEntity)
             }
-            // --- End of correction logic ---
+
             val selectableEntities = determineDefaultSelections(correctedEntities, sessionContainerType)
             // Create the final result object for this package
             finalResults.add(
@@ -252,11 +255,17 @@ object AnalyserRepoImpl : AnalyserRepo {
             ZipFile(fileEntity.path).use { zipFile ->
                 val hasModuleProp = zipFile.getEntry("module.prop") != null || zipFile.getEntry("common/module.prop") != null
                 val hasAndroidManifest = zipFile.getEntry("AndroidManifest.xml") != null
+
+                val entries = zipFile.entries().toList()
+                val hasApksInside = entries.any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }
                 // Give module detection the highest priority.
                 if (hasModuleProp) {
                     return@use if (hasAndroidManifest) {
                         Timber.d("Found module.prop and AndroidManifest.xml, it's a MIXED_MODULE_APK.")
                         DataType.MIXED_MODULE_APK
+                    } else if (hasApksInside) {
+                        Timber.d("Found module.prop and internal APK(s), it's a MIXED_MODULE_ZIP.")
+                        DataType.MIXED_MODULE_ZIP
                     } else {
                         Timber.d("Found module.prop, it's a MODULE_ZIP.")
                         DataType.MODULE_ZIP
@@ -283,7 +292,6 @@ object AnalyserRepoImpl : AnalyserRepo {
                 // If no manifest file is found, check for APKS file structure.
                 var hasBaseApk = false
                 var hasSplitApk = false
-                val entries = zipFile.entries().toList()
                 for (entry in entries) {
                     if (entry.isDirectory || !entry.name.endsWith(".apk", ignoreCase = true)) continue
                     // Check only the filename, ignoring the path.
@@ -334,8 +342,8 @@ object AnalyserRepoImpl : AnalyserRepo {
      * @param entry ZipEntry (info.json) to check
      * @return true if the info.json is a genuine APKM info file.
      */
-    private fun isGenuineApkmInfo(zipFile: ZipFile, entry: ZipEntry): Boolean {
-        return try {
+    private fun isGenuineApkmInfo(zipFile: ZipFile, entry: ZipEntry): Boolean =
+        try {
             zipFile.getInputStream(entry).use { inputStream ->
                 val content = inputStream.bufferedReader().use(BufferedReader::readText)
 
@@ -351,7 +359,6 @@ object AnalyserRepoImpl : AnalyserRepo {
             Timber.e(e, "Failed to parse info.json as genuine APKM info.")
             false
         }
-    }
 
     /**
      * Determines the default selection state for a list of entities.
@@ -363,7 +370,7 @@ object AnalyserRepoImpl : AnalyserRepo {
     ): List<SelectInstallEntity> {
         val finalSelectEntities = mutableListOf<SelectInstallEntity>()
         val isMultiAppMode = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
-        if (containerType == DataType.MIXED_MODULE_APK) {
+        if (containerType == DataType.MIXED_MODULE_APK || containerType == DataType.MIXED_MODULE_ZIP) {
             Timber.d("Mixed Module/APK detected. Setting all entities to be de-selected by default.")
             return entities.map { SelectInstallEntity(it, selected = false) }
         }
@@ -464,8 +471,6 @@ object AnalyserRepoImpl : AnalyserRepo {
         if (splits.isEmpty()) return emptyList()
 
         Timber.d("--- Begin findOptimalSplits for ${splits.size} splits ---")
-
-        val isoLanguages = Locale.getISOLanguages().toSet()
 
         // Parse and categorize all splits
         val parsedSplits = splits.mapNotNull { split ->
