@@ -20,6 +20,8 @@ sealed class InstallerViewAction {
 
     data object ShowMiuixSheetRightActionSettings : InstallerViewAction()
     data object HideMiuixSheetRightActionSettings : InstallerViewAction()
+    data object ShowMiuixPermissionList : InstallerViewAction()
+    data object HideMiuixPermissionList : InstallerViewAction()
 
     /**
      * Toggles the selection state of the current app.

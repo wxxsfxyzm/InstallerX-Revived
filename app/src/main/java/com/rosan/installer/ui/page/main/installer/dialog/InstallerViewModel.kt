@@ -60,28 +60,22 @@ class InstallerViewModel(
 
     var showMiuixSheetRightActionSettings by mutableStateOf(false)
         private set
-
+    var showMiuixPermissionList by mutableStateOf(false)
+        private set
     var navigatedFromPrepareToChoice by mutableStateOf(false)
         private set
-
     var autoCloseCountDown by mutableIntStateOf(3)
         private set
-
     var showExtendedMenu by mutableStateOf(false)
         private set
-
     var showSmartSuggestion by mutableStateOf(true)
         private set
-
     var disableNotificationOnDismiss by mutableStateOf(false)
         private set
-
     var versionCompareInSingleLine by mutableStateOf(false)
         private set
-
     var sdkCompareInMultiLine by mutableStateOf(false)
         private set
-
     var showOPPOSpecial by mutableStateOf(false)
 
     // Text to show in the progress bar
@@ -104,11 +98,11 @@ class InstallerViewModel(
     val isDismissible
         get() = when (state) {
             is InstallerViewState.Analysing,
-            is InstallerViewState.Resolving -> false
-
+            is InstallerViewState.Resolving,
             is InstallerViewState.InstallExtendedMenu,
             is InstallerViewState.InstallChoice -> false
 
+            is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
             is InstallerViewState.Installing -> !disableNotificationOnDismiss
             else -> true
         }
@@ -223,6 +217,8 @@ class InstallerViewModel(
 
             is InstallerViewAction.ShowMiuixSheetRightActionSettings -> showMiuixSheetRightActionSettings = true
             is InstallerViewAction.HideMiuixSheetRightActionSettings -> showMiuixSheetRightActionSettings = false
+            is InstallerViewAction.ShowMiuixPermissionList -> showMiuixPermissionList = true
+            is InstallerViewAction.HideMiuixPermissionList -> showMiuixPermissionList = false
 
             is InstallerViewAction.ToggleSelection -> toggleSelection(
                 action.packageName,

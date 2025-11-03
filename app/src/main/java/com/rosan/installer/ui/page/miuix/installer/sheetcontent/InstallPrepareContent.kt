@@ -255,7 +255,7 @@ fun InstallPrepareContent(
                             title = stringResource(R.string.permission_list),
                             description = stringResource(R.string.permission_list_desc),
                             insideMargin = PaddingValues(12.dp),
-                            onClick = { viewModel.toast("To be implemented") },
+                            onClick = { viewModel.dispatch(InstallerViewAction.ShowMiuixPermissionList) },
                         )
 
                         // Install Options

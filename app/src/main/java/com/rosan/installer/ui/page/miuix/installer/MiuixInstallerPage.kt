@@ -38,6 +38,7 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallCompleted
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallExtendedMenuContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallFailedContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallPrepareContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallPreparePermissionContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallSuccessContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallingContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.LoadingContent
@@ -74,6 +75,7 @@ fun MiuixInstallerPage(
     val viewModel: InstallerViewModel = koinViewModel { parametersOf(installer) }
     val currentState = viewModel.state
     val showSettings = viewModel.showMiuixSheetRightActionSettings
+    val showPermissions = viewModel.showMiuixPermissionList
 
     val containerType = installer.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
     val currentPackageName by viewModel.currentPackageName.collectAsState()
@@ -91,9 +93,13 @@ fun MiuixInstallerPage(
     }
 
     BackHandler(
-        enabled = showSettings,
+        enabled = showSettings || showPermissions,
         onBack = {
-            viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
+            if (showSettings) {
+                viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
+            } else if (showPermissions) {
+                viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList)
+            }
         }
     )
 
@@ -101,7 +107,12 @@ fun MiuixInstallerPage(
         is InstallerViewState.Preparing -> stringResource(R.string.installer_preparing)
         is InstallerViewState.InstallChoice -> stringResource(containerType.getSupportTitle())
         is InstallerViewState.InstallExtendedMenu -> stringResource(R.string.config_label_install_options)
-        is InstallerViewState.InstallPrepare -> stringResource(R.string.installer_install_app)
+        is InstallerViewState.InstallPrepare -> when {
+            showSettings -> stringResource(R.string.installer_settings)
+            showPermissions -> stringResource(R.string.permission_list)
+            else -> stringResource(R.string.installer_install_app)
+        }
+
         is InstallerViewState.Installing -> stringResource(R.string.installer_installing)
         is InstallerViewState.InstallCompleted -> stringResource(R.string.installer_install_success)
         is InstallerViewState.InstallSuccess -> stringResource(R.string.installer_install_success)
@@ -168,10 +179,12 @@ fun MiuixInstallerPage(
 
                 is InstallerViewState.InstallPrepare -> {
                     MiuixBackButton(
-                        icon = if (showSettings) MiuixIcons.Useful.Back else MiuixIcons.Useful.Cancel,
+                        icon = if (showSettings || showPermissions) MiuixIcons.Useful.Back else MiuixIcons.Useful.Cancel,
                         onClick = {
                             if (showSettings) {
                                 viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
+                            } else if (showPermissions) {
+                                viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList)
                             } else {
                                 if (viewModel.isDismissible) {
                                     showBottomSheet.value = !showBottomSheet.value
@@ -198,7 +211,7 @@ fun MiuixInstallerPage(
         rightAction = {
             when (currentState) {
                 is InstallerViewState.InstallPrepare -> {
-                    if (!showSettings) {
+                    if (!showSettings && !showPermissions) {
                         IconButton(onClick = { viewModel.dispatch(InstallerViewAction.ShowMiuixSheetRightActionSettings) }) {
                             Icon(
                                 imageVector = MiuixIcons.Useful.Settings,
@@ -273,23 +286,41 @@ fun MiuixInstallerPage(
                 }
 
                 is InstallerViewState.InstallPrepare -> {
+                    val prepareSubState = when {
+                        showSettings -> "settings"
+                        showPermissions -> "permissions"
+                        else -> "prepare"
+                    }
+
                     AnimatedContent(
-                        targetState = showSettings,
-                        label = "PrepareContentVsSettings",
+                        targetState = prepareSubState,
+                        label = "PrepareContentVsSettingsVsPermissions",
                         transitionSpec = {
                             fadeIn(animationSpec = tween(durationMillis = 150)) togetherWith
                                     fadeOut(animationSpec = tween(durationMillis = 150))
                         }
-                    ) { isShowingSettings ->
-                        if (isShowingSettings) {
-                            PrepareSettingsContent(installer, viewModel)
-                        } else {
-                            InstallPrepareContent(
-                                installer = installer,
-                                viewModel = viewModel,
-                                onCancel = closeSheet,
-                                onInstall = { viewModel.dispatch(InstallerViewAction.Install) }
-                            )
+                    ) { subState ->
+                        when (subState) {
+                            "settings" -> {
+                                PrepareSettingsContent(installer, viewModel)
+                            }
+
+                            "permissions" -> {
+                                InstallPreparePermissionContent(
+                                    installer = installer,
+                                    viewModel = viewModel,
+                                    onBack = { viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList) }
+                                )
+                            }
+
+                            else -> { // "prepare"
+                                InstallPrepareContent(
+                                    installer = installer,
+                                    viewModel = viewModel,
+                                    onCancel = closeSheet,
+                                    onInstall = { viewModel.dispatch(InstallerViewAction.Install) }
+                                )
+                            }
                         }
                     }
                 }
