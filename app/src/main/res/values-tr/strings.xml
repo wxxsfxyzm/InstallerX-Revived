@@ -484,4 +484,6 @@
     <string name="split_name_language_group_title">Dil Bölümleri</string>
     <string name="split_name_density_group_title">Ekran Yoğunluğu Bölümleri</string>
     <string name="split_name_feature_group_title">Özellik Bölümleri</string>
+    <string name="config_app_authorizer_desc">Ayrıcalıklı işlemleri gerçekleştirme yetkisi verir</string>
+    <string name="config_install_authorizer_desc">Uygulamaları yüklemek için yetkilendirici</string>
 </resources>
