@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.installer
 
 import android.os.Build
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
@@ -73,8 +74,8 @@ fun LegacyInstallerGlobalSettingsPage(
                     trailingContent = {
                         AnimatedVisibility(
                             visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                            enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
-                            exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
                         ) {
                             IntNumberPickerWidget(
                                 icon = AppIcons.Working,
@@ -101,33 +102,60 @@ fun LegacyInstallerGlobalSettingsPage(
                 )
             }
             item {
+                val isDialogMode =
+                    state.installMode == ConfigEntity.InstallMode.Dialog || state.installMode == ConfigEntity.InstallMode.AutoDialog
+                val isNotificationMode =
+                    state.installMode == ConfigEntity.InstallMode.Notification || state.installMode == ConfigEntity.InstallMode.AutoNotification
+
                 AnimatedVisibility(
-                    visible = state.installMode == ConfigEntity.InstallMode.Dialog || state.installMode == ConfigEntity.InstallMode.AutoDialog,
+                    visible = isDialogMode || isNotificationMode,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
                     Column(modifier = Modifier.animateContentSize()) {
-                        LabelWidget(label = stringResource(id = R.string.installer_settings_dialog_mode_options))
-                        SwitchWidget(
-                            icon = AppIcons.MultiLineSettingIcon,
-                            title = stringResource(id = R.string.version_compare_in_single_line),
-                            description = stringResource(id = R.string.version_compare_in_single_line_desc),
-                            checked = state.versionCompareInSingleLine,
-                            isM3E = false,
-                            onCheckedChange = {
-                                viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it))
-                            }
-                        )
-                        SwitchWidget(
-                            icon = AppIcons.SingleLineSettingIcon,
-                            title = stringResource(id = R.string.sdk_compare_in_multi_line),
-                            description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
-                            checked = state.sdkCompareInMultiLine,
-                            isM3E = false,
-                            onCheckedChange = {
-                                viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it))
-                            }
-                        )
+                        AnimatedContent(
+                            targetState = if (isDialogMode) {
+                                R.string.installer_settings_dialog_mode_options
+                            } else {
+                                R.string.installer_settings_notification_mode_options
+                            },
+                            label = "OptionsTitleAnimation"
+                        ) { targetTitleRes ->
+                            LabelWidget(label = stringResource(id = targetTitleRes))
+                        }
+
+                        AnimatedVisibility(visible = isDialogMode) {
+                            SwitchWidget(
+                                icon = AppIcons.MultiLineSettingIcon,
+                                title = stringResource(id = R.string.version_compare_in_single_line),
+                                description = stringResource(id = R.string.version_compare_in_single_line_desc),
+                                checked = state.versionCompareInSingleLine,
+                                isM3E = false,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeVersionCompareInSingleLine(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                        AnimatedVisibility(visible = isDialogMode) {
+                            SwitchWidget(
+                                icon = AppIcons.SingleLineSettingIcon,
+                                title = stringResource(id = R.string.sdk_compare_in_multi_line),
+                                description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
+                                checked = state.sdkCompareInMultiLine,
+                                isM3E = false,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeSdkCompareInMultiLine(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                        }
                         AnimatedVisibility(
                             visible = state.installMode == ConfigEntity.InstallMode.Dialog,
                             enter = fadeIn(),
@@ -146,82 +174,69 @@ fun LegacyInstallerGlobalSettingsPage(
                                 }
                             )
                         }
-                        SwitchWidget(
-                            icon = AppIcons.Suggestion,
-                            title = stringResource(id = R.string.show_intelligent_suggestion),
-                            description = stringResource(id = R.string.show_intelligent_suggestion_desc),
-                            checked = viewModel.state.showSmartSuggestion,
-                            isM3E = false,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowSuggestion(it)
-                                )
-                            }
-                        )
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                        AnimatedVisibility(visible = isDialogMode) {
                             SwitchWidget(
-                                icon = AppIcons.LiveActivity,
-                                title = stringResource(R.string.theme_settings_use_live_activity),
-                                description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                                checked = state.showLiveActivity,
+                                icon = AppIcons.Suggestion,
+                                title = stringResource(id = R.string.show_intelligent_suggestion),
+                                description = stringResource(id = R.string.show_intelligent_suggestion_desc),
+                                checked = viewModel.state.showSmartSuggestion,
                                 isM3E = false,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowLiveActivity(it)
+                                        PreferredViewAction.ChangeShowSuggestion(it)
                                     )
                                 }
                             )
-                        SwitchWidget(
-                            icon = AppIcons.NotificationDisabled,
-                            title = stringResource(id = R.string.disable_notification),
-                            description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
-                            checked = viewModel.state.disableNotificationForDialogInstall,
-                            isM3E = false,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowDisableNotification(it)
-                                )
-                            }
-                        )
-                    }
-                }
-            }
-            item {
-                AnimatedVisibility(
-                    visible = state.installMode == ConfigEntity.InstallMode.Notification ||
-                            state.installMode == ConfigEntity.InstallMode.AutoNotification,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
-                ) {
-                    Column(modifier = Modifier.animateContentSize()) {
-                        LabelWidget(label = stringResource(id = R.string.installer_settings_notification_mode_options))
-                        SwitchWidget(
-                            icon = AppIcons.Dialog,
-                            title = stringResource(id = R.string.show_dialog_when_pressing_notification),
-                            description = stringResource(id = R.string.change_notification_touch_behavior),
-                            checked = viewModel.state.showDialogWhenPressingNotification,
-                            isM3E = false,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
-                                )
-                            }
-                        )
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                        }
+
+                        AnimatedVisibility(visible = isNotificationMode) {
                             SwitchWidget(
-                                icon = AppIcons.LiveActivity,
-                                title = stringResource(R.string.theme_settings_use_live_activity),
-                                description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                                checked = state.showLiveActivity,
+                                icon = AppIcons.Dialog,
+                                title = stringResource(id = R.string.show_dialog_when_pressing_notification),
+                                description = stringResource(id = R.string.change_notification_touch_behavior),
+                                checked = viewModel.state.showDialogWhenPressingNotification,
                                 isM3E = false,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowLiveActivity(it)
+                                        PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
                                     )
                                 }
                             )
+                        }
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                            AnimatedVisibility(visible = isDialogMode || isNotificationMode) {
+                                SwitchWidget(
+                                    icon = AppIcons.LiveActivity,
+                                    title = stringResource(R.string.theme_settings_use_live_activity),
+                                    description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                    checked = state.showLiveActivity,
+                                    isM3E = false,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(
+                                            PreferredViewAction.ChangeShowLiveActivity(it)
+                                        )
+                                    }
+                                )
+                            }
+
+                        AnimatedVisibility(visible = isDialogMode) {
+                            SwitchWidget(
+                                icon = AppIcons.NotificationDisabled,
+                                title = stringResource(id = R.string.disable_notification),
+                                description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
+                                checked = viewModel.state.disableNotificationForDialogInstall,
+                                isM3E = false,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeShowDisableNotification(it)
+                                    )
+                                }
+                            )
+                        }
+
                         AnimatedVisibility(
-                            visible = viewModel.state.showDialogWhenPressingNotification,
+                            visible = isNotificationMode && viewModel.state.showDialogWhenPressingNotification,
                             enter = fadeIn(),
                             exit = fadeOut()
                         ) {
@@ -290,7 +305,6 @@ fun LegacyInstallerGlobalSettingsPage(
                     }
                 )
                 AnimatedVisibility(
-                    // Only show exempted packages if there are any blacklisted UIDs
                     visible = state.managedSharedUserIdBlacklist.isNotEmpty(),
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
