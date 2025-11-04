@@ -484,4 +484,12 @@
     <string name="uninstall_title">Desinstalar InstallerX Revived</string>
     <string name="uninstall_content">Após desinstalar este app, você não poderá mais usar o InstallerX Revived para instalar apps.</string>
     <string name="exception_install_parse_failed_no_certificates">Certificados ausentes</string>
+    <string name="config_install_authorizer_desc">Autorizador para instalar aplicativos</string>
+    <string name="config_app_authorizer_desc">Autorizador para realizar operações privilegiadas</string>
+    <string name="installer_choice_install_as_module">Instalar como Módulo</string>
+    <string name="installer_module_id">ID do Módulo: %1$s</string>
+    <string name="installer_choice_install_as_app">Instalar como App(s)</string>
+    <string name="installer_choice_install_as_app_desc">Selecione quais apps instalar a partir do ZIP</string>
+    <string name="exception_install_parse_failed_unexpected_exception">Falha na Análise</string>
+    <string name="installer_mixed_module_zip_description">Este arquivo contém um módulo e apps. Escolha como instalar</string>
 </resources>
