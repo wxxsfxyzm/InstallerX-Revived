@@ -244,7 +244,7 @@ private fun MiuixItemsWidget(
             .scrollEndHaptic(),
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(8.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
         overscrollEffect = null
     ) {
         items(viewModel.state.checkedApps, key = { it.packageName }) {
@@ -268,9 +268,6 @@ private fun MiuixItemsWidget(
                 viewModel = viewModel,
                 app = it
             )
-            SideEffect {
-                alpha = 1f
-            }
         }
     }
 }

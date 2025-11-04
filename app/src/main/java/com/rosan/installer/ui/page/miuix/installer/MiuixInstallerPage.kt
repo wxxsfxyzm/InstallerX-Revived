@@ -39,6 +39,7 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallExtendedM
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallFailedContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallPrepareContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallPreparePermissionContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallPreparingContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallSuccessContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallingContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.LoadingContent
@@ -273,16 +274,16 @@ fun MiuixInstallerPage(
             }
         ) { _ ->
             when (viewModel.state) {
-                is InstallerViewState.Preparing -> {
-                    LoadingContent(statusText = stringResource(R.string.installer_preparing))
-                }
-
                 is InstallerViewState.InstallChoice -> {
                     InstallChoiceContent(installer, viewModel, closeSheet)
                 }
 
                 is InstallerViewState.InstallExtendedMenu -> {
                     InstallExtendedMenuContent(installer, viewModel)
+                }
+
+                is InstallerViewState.Preparing -> {
+                    InstallPreparingContent(viewModel = viewModel)
                 }
 
                 is InstallerViewState.InstallPrepare -> {
