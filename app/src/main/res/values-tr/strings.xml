@@ -486,4 +486,10 @@
     <string name="split_name_feature_group_title">Özellik Bölümleri</string>
     <string name="config_app_authorizer_desc">Ayrıcalıklı işlemleri gerçekleştirme yetkisi verir</string>
     <string name="config_install_authorizer_desc">Uygulamaları yüklemek için yetkilendirici</string>
+    <string name="installer_choice_install_as_module">Modül olarak yükle</string>
+    <string name="installer_module_id">Modül Kimliği: %1$s</string>
+    <string name="installer_choice_install_as_app">Uygulama(lar) olarak yükle</string>
+    <string name="installer_choice_install_as_app_desc">ZIP dosyasından hangi uygulamaların yükleneceğini seçin</string>
+    <string name="exception_install_parse_failed_unexpected_exception">Ayrıştırma Başarısız Oldu</string>
+    <string name="installer_mixed_module_zip_description">Bu dosya hem bir modül hem de uygulamalar içerir. Nasıl yükleneceğini seçin</string>
 </resources>
