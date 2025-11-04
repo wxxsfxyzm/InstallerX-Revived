@@ -379,4 +379,7 @@
     <string name="internet_access_disabled">Desconectado</string>
     <string name="telegram_channel">Canal de Telegram</string>
     <string name="telegram_channel_desc">Únete al canal para recibir noticias y actualizaciones.</string>
+    <string name="uninstall_title">Desinstalar InstallerX Revived</string>
+    <string name="uninstall_content">Después de desinstalar esta aplicación, ya no podrá usar InstallerX Revived para instalar aplicaciones.</string>
+    <string name="theme_settings_miuix_ui_desc">Similar a HyperOS</string>
 </resources>
