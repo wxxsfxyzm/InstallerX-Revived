@@ -1,0 +1,136 @@
+package com.rosan.installer.ui.page.miuix.installer.sheetcontent
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.rosan.installer.R
+import com.rosan.installer.data.app.util.PackageManagerUtil
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.miuix.widgets.MiuixCheckboxWidget
+import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardColors
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+@Composable
+fun UninstallPrepareContent(
+    viewModel: InstallerViewModel,
+    onCancel: () -> Unit,
+    onUninstall: () -> Unit
+) {
+    val uninstallInfo by viewModel.uiUninstallInfo.collectAsState()
+    val info = uninstallInfo ?: return
+
+    val uninstallFlags by viewModel.uninstallFlags.collectAsState()
+    val keepData by remember(uninstallFlags) {
+        mutableStateOf((uninstallFlags and PackageManagerUtil.DELETE_KEEP_DATA) != 0)
+    }
+    val deleteAllUsers by remember(uninstallFlags) {
+        mutableStateOf((uninstallFlags and PackageManagerUtil.DELETE_ALL_USERS) != 0)
+    }
+    val deleteSystemApp by remember(uninstallFlags) {
+        mutableStateOf((uninstallFlags and PackageManagerUtil.DELETE_SYSTEM_APP) != 0)
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AppInfoSlot(
+            icon = info.appIcon,
+            label = info.appLabel ?: "Unknown App",
+            packageName = info.packageName
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            colors = CardColors(
+                color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
+                contentColor = MiuixTheme.colorScheme.onSurface
+            )
+        ) {
+            MiuixCheckboxWidget(
+                title = stringResource(id = R.string.uninstall_keep_data),
+                description = stringResource(id = R.string.uninstall_keep_data_desc),
+                checked = keepData,
+                onCheckedChange = { isChecked ->
+                    viewModel.dispatch(
+                        InstallerViewAction.ToggleUninstallFlag(
+                            flag = PackageManagerUtil.DELETE_KEEP_DATA,
+                            enable = isChecked
+                        )
+                    )
+                }
+            )
+
+            MiuixCheckboxWidget(
+                title = stringResource(id = R.string.uninstall_all_users),
+                description = stringResource(id = R.string.uninstall_all_users_desc),
+                checked = deleteAllUsers,
+                onCheckedChange = { isChecked ->
+                    viewModel.dispatch(
+                        InstallerViewAction.ToggleUninstallFlag(
+                            flag = PackageManagerUtil.DELETE_ALL_USERS,
+                            enable = isChecked
+                        )
+                    )
+                }
+            )
+
+            MiuixCheckboxWidget(
+                title = stringResource(id = R.string.uninstall_delete_system_app),
+                description = stringResource(id = R.string.uninstall_delete_system_app_desc),
+                checked = deleteSystemApp,
+                onCheckedChange = { isChecked ->
+                    viewModel.dispatch(
+                        InstallerViewAction.ToggleUninstallFlag(
+                            flag = PackageManagerUtil.DELETE_SYSTEM_APP,
+                            enable = isChecked
+                        )
+                    )
+                }
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                text = stringResource(R.string.cancel),
+                modifier = Modifier.weight(1f),
+                onClick = onCancel,
+            )
+            TextButton(
+                text = stringResource(R.string.uninstall),
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary(),
+                onClick = onUninstall,
+            )
+        }
+    }
+}

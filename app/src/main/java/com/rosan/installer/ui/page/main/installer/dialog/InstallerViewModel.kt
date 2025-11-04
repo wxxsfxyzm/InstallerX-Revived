@@ -312,7 +312,9 @@ class InstallerViewModel(
                         newPackageNameFromProgress = null
                     }
 
+                    is ProgressEntity.UninstallResolveFailed,
                     is ProgressEntity.InstallResolvedFailed -> newState = InstallerViewState.ResolveFailed
+
                     is ProgressEntity.InstallAnalysedFailed -> newState = InstallerViewState.AnalyseFailed
                     is ProgressEntity.InstallAnalysedSuccess -> {
                         // When analysis is successful, this is the first moment we have the full, original list.

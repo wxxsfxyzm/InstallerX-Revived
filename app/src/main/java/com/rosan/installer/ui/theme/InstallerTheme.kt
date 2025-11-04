@@ -77,6 +77,11 @@ private val DarkColorScheme = darkColorScheme(
     scrim = scrimDark,
 )
 
+enum class InstallerTheme {
+    MATERIAL,
+    MIUIX
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InstallerMaterialExpressiveTheme(

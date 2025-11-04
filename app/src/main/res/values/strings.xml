@@ -265,10 +265,16 @@
     <string name="installer_live_channel_short_text_success">Success</string>
     <string name="installer_live_channel_short_text_resolve_failed">Failed</string>
     <string name="installer_live_channel_short_text_install_failed">Failed</string>
+    <string name="installer_uninstall_app">Uninstall App</string>
+    <string name="installer_uninstalling">Uninstalling</string>
     <string name="uninstall_keep_data">Keep Data</string>
+    <string name="uninstall_keep_data_desc">App data and cache will be retained</string>
     <string name="uninstall_all_users">For All Users</string>
+    <string name="uninstall_all_users_desc">Uninstall this app for all users on this device</string>
     <string name="uninstall_delete_system_app">Delete SystemApp</string>
+    <string name="uninstall_delete_system_app_desc">Allow deleting system apps</string>
     <string name="uninstall_success_message">Uninstall Success</string>
+    <string name="uninstall_failed_message">Uninstall Failed</string>
     <string name="permission_read_external_storage">Read external storage</string>
     <string name="permission_write_external_storage">Write external storage</string>
     <string name="permission_access_fine_location">Access fine location</string>
@@ -381,6 +387,7 @@
     <string name="exception_install_failed_user_restricted">System restricted install through USB, please enable it</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS does not allow uninstalling this app!</string>
     <string name="exception_uninstall_failed_internal_error">Package Manager internal error</string>
+    <string name="exception_package_manager_name_not_found">Package name not found</string>
     <string name="exception_shizuku_not_work">Please activate Sui or Shizuku and grant permission</string>
     <string name="exception_dhizuku_not_work">Please activate Dhizuku and grant permission</string>
     <string name="exception_root_not_work">Couldn\'t access root</string>

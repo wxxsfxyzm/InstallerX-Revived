@@ -45,6 +45,10 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallingConten
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.LoadingContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.NonInstallFailedContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.PrepareSettingsContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallFailedContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallPrepareContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallSuccessContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallingContent
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.util.getSupportTitle
 import kotlinx.coroutines.delay
@@ -118,6 +122,10 @@ fun MiuixInstallerPage(
         is InstallerViewState.InstallCompleted -> stringResource(R.string.installer_install_success)
         is InstallerViewState.InstallSuccess -> stringResource(R.string.installer_install_success)
         is InstallerViewState.InstallFailed -> stringResource(R.string.installer_install_failed)
+        is InstallerViewState.UninstallReady -> stringResource(R.string.installer_uninstall_app)
+        is InstallerViewState.Uninstalling -> stringResource(R.string.installer_uninstalling)
+        is InstallerViewState.UninstallSuccess -> stringResource(R.string.uninstall_success_message)
+        is InstallerViewState.UninstallFailed -> stringResource(R.string.uninstall_failed_message)
         is InstallerViewState.AnalyseFailed -> stringResource(R.string.installer_analyse_failed)
         is InstallerViewState.ResolveFailed -> stringResource(R.string.installer_resolve_failed)
         is InstallerViewState.Resolving -> stringResource(R.string.installer_resolving)
@@ -163,6 +171,9 @@ fun MiuixInstallerPage(
                 is InstallerViewState.InstallCompleted,
                 is InstallerViewState.InstallFailed,
                 is InstallerViewState.InstallSuccess,
+                is InstallerViewState.UninstallReady,
+                is InstallerViewState.UninstallSuccess,
+                is InstallerViewState.UninstallFailed,
                 is InstallerViewState.AnalyseFailed,
                 is InstallerViewState.ResolveFailed -> {
                     MiuixBackButton(
@@ -242,9 +253,7 @@ fun MiuixInstallerPage(
                     }
                 }
 
-                else -> {
-                    Spacer(Modifier.size(48.dp))
-                }
+                else -> null
             }
         },
         title = sheetTitle, // DYNAMIC TITLE
@@ -363,10 +372,34 @@ fun MiuixInstallerPage(
                     )
                 }
 
+                is InstallerViewState.UninstallReady -> {
+                    UninstallPrepareContent(
+                        viewModel = viewModel,
+                        onCancel = closeSheet,
+                        onUninstall = { viewModel.dispatch(InstallerViewAction.Uninstall) }
+                    )
+                }
+
+                is InstallerViewState.Uninstalling -> {
+                    UninstallingContent(viewModel = viewModel)
+                }
+
+                is InstallerViewState.UninstallSuccess -> {
+                    UninstallSuccessContent(viewModel = viewModel, onClose = closeSheet)
+                }
+
+                is InstallerViewState.UninstallFailed -> {
+                    UninstallFailedContent(
+                        installer = installer,
+                        viewModel = viewModel,
+                        onClose = closeSheet
+                    )
+                }
+
                 is InstallerViewState.AnalyseFailed, is InstallerViewState.ResolveFailed -> {
                     NonInstallFailedContent(
                         error = installer.error,
-                        onClose = { viewModel.dispatch(InstallerViewAction.Close) }
+                        onClose = closeSheet
                     )
                 }
 

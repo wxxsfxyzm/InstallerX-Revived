@@ -1,6 +1,7 @@
 package com.rosan.installer.util
 
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
@@ -106,6 +107,7 @@ private fun Throwable.getStringResourceId() =
         is DhizukuNotWorkException -> R.string.exception_dhizuku_not_work
         is UninstallFailedHyperOSSystemAppException -> R.string.exception_uninstall_failed_hyperos_system_app
         is UninstallFailedInternalErrorException -> R.string.exception_uninstall_failed_internal_error
+        is PackageManager.NameNotFoundException -> R.string.exception_package_manager_name_not_found
         is RootNotWorkException -> R.string.exception_root_not_work
         is AppProcessNotWorkException -> R.string.exception_app_process_not_work
         else -> R.string.exception_install_failed_unknown

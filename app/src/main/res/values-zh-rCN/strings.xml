@@ -256,10 +256,16 @@
     <string name="installer_live_channel_short_text_success">已安装</string>
     <string name="installer_live_channel_short_text_resolve_failed">解析失败</string>
     <string name="installer_live_channel_short_text_install_failed">安装失败</string>
+    <string name="installer_uninstall_app">卸载应用</string>
+    <string name="installer_uninstalling">正在卸载</string>
     <string name="uninstall_keep_data">保留数据</string>
+    <string name="uninstall_keep_data_desc">保留用户数据</string>
     <string name="uninstall_all_users">为所有用户卸载</string>
-    <string name="uninstall_delete_system_app">允许卸载系统应用</string>
+    <string name="uninstall_all_users_desc">为这台设备上的所有用户卸载</string>
+    <string name="uninstall_delete_system_app">卸载系统应用</string>
+    <string name="uninstall_delete_system_app_desc">允许卸载系统应用</string>
     <string name="uninstall_success_message">卸载成功</string>
+    <string name="uninstall_failed_message">卸载失败</string>
     <string name="permission_read_external_storage">读取外部存储</string>
     <string name="permission_write_external_storage">写入外部存储</string>
     <string name="permission_access_fine_location">精确位置</string>
@@ -363,6 +369,7 @@
     <string name="exception_install_failed_user_restricted">系统限制USB安装，请启用它</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS不允许在此处卸载该应用</string>
     <string name="exception_uninstall_failed_internal_error">包管理服务内部错误</string>
+    <string name="exception_package_manager_name_not_found">找不到对应包名的app</string>
     <string name="exception_shizuku_not_work">请激活Sui或Shizuku，并授予权限</string>
     <string name="exception_dhizuku_not_work">请激活Dhizuku，并授予权限</string>
     <string name="exception_root_not_work">请授予ROOT权限</string>
