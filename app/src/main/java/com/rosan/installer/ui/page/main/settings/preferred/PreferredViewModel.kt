@@ -2,7 +2,6 @@ package com.rosan.installer.ui.page.main.settings.preferred
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -29,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -48,6 +48,8 @@ class PreferredViewModel(
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
+    private val adbVerifyEnabledFlow = MutableStateFlow(true) // refresh default value at init
+    private val isIgnoringBatteryOptFlow = MutableStateFlow(true)
     var state by mutableStateOf(PreferredViewState())
         private set
 
@@ -141,6 +143,10 @@ class PreferredViewModel(
         // DataStore async initialization
         if (initialized) return
         initialized = true
+
+        refreshIgnoreBatteryOptStatus()
+        refreshAdbVerifyStatus()
+
         viewModelScope.launch {
             val authorizerFlow = appDataStore.getString(AppDataStore.AUTHORIZER)
                 .map { AuthorizerConverter.revert(it) }
@@ -183,13 +189,6 @@ class PreferredViewModel(
                 appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
             val managedSharedUserIdExemptPkgFlow =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
-
-            val adbVerifyEnabledFlow = getSettingsGlobalIntAsFlow(
-                context.contentResolver,
-                "verifier_verify_adb_installs",
-                1
-            ).map { it != 0 }
-            val isIgnoringBatteryOptFlow = getIsIgnoreBatteryOptAsFlow()
 
             combine(
                 authorizerFlow,
@@ -424,19 +423,6 @@ class PreferredViewModel(
             appDataStore.putSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST, newList)
         }
 
-
-    /**
-     * A reusable helper function to get a Settings.Global integer value as a Flow,
-     * ensuring the blocking call is always on a background thread.
-     */
-    private fun getSettingsGlobalIntAsFlow(
-        cr: ContentResolver,
-        name: String,
-        defaultValue: Int
-    ): Flow<Int> = flow {
-        emit(Settings.Global.getInt(cr, name, defaultValue))
-    }.flowOn(Dispatchers.IO)
-
     private fun getIsIgnoreBatteryOptAsFlow(): Flow<Boolean> = flow {
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         emit(pm.isIgnoringBatteryOptimizations(context.packageName))
@@ -470,8 +456,8 @@ class PreferredViewModel(
         viewModelScope.launch {
             // Use .first() to get a single, up-to-date value from the flow.
             val isIgnoring = getIsIgnoreBatteryOptAsFlow().first()
-            // After refreshing, update the state.
-            state = state.copy(isIgnoringBatteryOptimizations = isIgnoring)
+            // Emit new value instead of updating state directly
+            isIgnoringBatteryOptFlow.value = isIgnoring
         }
 
     private suspend fun setAdbVerifyEnabled(enabled: Boolean, action: PreferredViewAction) =
@@ -500,9 +486,15 @@ class PreferredViewModel(
                     "verifier_verify_adb_installs",
                     if (enabled) 1 else 0
                 )
-                state = state.copy(adbVerifyEnabled = enabled)
+                adbVerifyEnabledFlow.value = enabled
             }
         )
+
+    private fun refreshAdbVerifyStatus() =
+        viewModelScope.launch(Dispatchers.IO) {
+            val enabled = Settings.Global.getInt(context.contentResolver, "verifier_verify_adb_installs", 1) != 0
+            adbVerifyEnabledFlow.value = enabled
+        }
 
     private suspend fun setDefaultInstaller(lock: Boolean, action: PreferredViewAction) {
         val config = ConfigUtil.getByPackageName(null)

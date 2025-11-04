@@ -383,7 +383,7 @@ fun AutoLockInstaller(
     onCheckedChange: (Boolean) -> Unit
 ) {
     SwitchWidget(
-        icon = AppIcons.BugReport,
+        icon = AppIcons.AutoLockDefault,
         title = stringResource(R.string.auto_lock_default_installer),
         description = stringResource(R.string.auto_lock_default_installer_desc),
         checked = checked,

@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
+import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
@@ -99,6 +100,7 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     val action: MutableSharedFlow<Action> = MutableSharedFlow(replay = 1, extraBufferCapacity = 1)
     override val background: MutableSharedFlow<Boolean> = MutableStateFlow(false)
     override val uninstallInfo: MutableStateFlow<UninstallInfo?> = MutableStateFlow(null)
+    override val confirmationDetails: MutableStateFlow<ConfirmationDetails?> = MutableStateFlow(null)
 
     override fun resolveInstall(activity: Activity) {
         Timber.d("[id=$id] resolve() called. Emitting Action.Resolve.")
@@ -128,6 +130,16 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         action.tryEmit(Action.Uninstall(packageName))
     }
 
+    override fun resolveConfirmInstall(activity: Activity, sessionId: Int) {
+        Timber.d("[id=$id] resolveConfirmInstall() called for session $sessionId. Emitting Action.ResolveConfirmInstall.")
+        action.tryEmit(Action.ResolveConfirmInstall(activity, sessionId))
+    }
+
+    override fun approveConfirmation(sessionId: Int, granted: Boolean) {
+        Timber.d("[id=$id] approveConfirmation() called for session $sessionId, granted: $granted.")
+        action.tryEmit(Action.ApproveSession(sessionId, granted))
+    }
+
     override fun background(value: Boolean) {
         Timber.d("[id=$id] background() called with value: $value.")
         background.tryEmit(value)
@@ -149,6 +161,8 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         data object Install : Action()
         data class ResolveUninstall(val activity: Activity, val packageName: String) : Action()
         data class Uninstall(val packageName: String) : Action()
+        data class ResolveConfirmInstall(val activity: Activity, val sessionId: Int) : Action()
+        data class ApproveSession(val sessionId: Int, val granted: Boolean) : Action()
         data object Finish : Action()
     }
 }

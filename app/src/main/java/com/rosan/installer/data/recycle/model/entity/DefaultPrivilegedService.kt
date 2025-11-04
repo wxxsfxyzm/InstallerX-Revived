@@ -12,19 +12,27 @@ import android.content.pm.IPackageManager
 import android.content.pm.PackageManager
 import android.content.pm.ParceledListSlice
 import android.content.pm.ResolveInfo
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.os.ServiceManager
 import android.util.Log
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.inject
 import rikka.shizuku.SystemServiceHelper
+import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.lang.reflect.Field
+import java.lang.reflect.Method
 import android.os.Process as AndroidProcess
 
 @SuppressLint("LogNotTimber")
@@ -131,10 +139,6 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         }
     }
 
-    /**
-     * Implements the grantRuntimePermission from our IPrivilegedService.aidl.
-     * This method runs inside the privileged process.
-     */
     override fun grantRuntimePermission(packageName: String, permission: String) {
         try {
             val iPackageManager = IPackageManager.Stub.asInterface(
@@ -157,16 +161,6 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         }
     }
 
-    /**
-     * Checks if a package has a given permission.
-     * This method runs inside the privileged process, which is not subject to
-     * package visibility restrictions that a normal app would face.
-     *
-     * @param packageName The package to check.
-     * @param permission The permission to check for.
-     * @return True if the permission is granted, false otherwise.
-     * @throws RemoteException if any underlying error occurs.
-     */
     override fun isPermissionGranted(packageName: String, permission: String): Boolean {
         Log.d("PrivilegedService", "Checking permission '$permission' for package '$packageName'")
         try {
@@ -190,7 +184,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             val am = IActivityManager.Stub.asInterface(amBinder)
 
             val userId = AndroidProcess.myUid() / 100000
-            
+
             val callerPackage = "com.android.shell"
             val resolvedType = intent.resolveType(context.contentResolver)
 
@@ -222,11 +216,163 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         }
     }
 
-    /**
-     * Implements the getUsers method from our AIDL interface.
-     * This method runs inside the privileged process and uses reflection
-     * to call hidden system APIs for fetching a complete user list.
-     */
+    override fun getSessionDetails(sessionId: Int): Bundle? {
+        Log.d("PrivilegedService", "getSessionDetails: sessionId=$sessionId")
+        try {
+            val packageInstaller = context.packageManager.packageInstaller
+            val sessionInfo = packageInstaller.getSessionInfo(sessionId) ?: run {
+                Log.w("PrivilegedService", "getSessionDetails: SessionInfo is null for id $sessionId")
+                return null
+            }
+
+            val originatingUid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                sessionInfo.originatingUid
+            } else {
+                -1 // Return -1 if SDK too low (Process.INVALID_UID)
+            }
+            Log.d("PrivilegedService", "Got originatingUid: $originatingUid")
+
+            var resolvedLabel: CharSequence? = null
+            var resolvedIcon: Bitmap? = null
+            var path: String? = null
+
+            // Get apk path via reflection
+            try {
+                val resolvedField: Field? = reflect.getDeclaredField(
+                    sessionInfo::class.java,
+                    "resolvedBaseCodePath"
+                )
+                if (resolvedField != null) {
+                    resolvedField.isAccessible = true
+                    path = resolvedField.get(sessionInfo) as? String
+                }
+            } catch (e: Exception) {
+                Log.e("PrivilegedService", "Failed to reflect resolvedBaseCodePath", e)
+            }
+
+            // Load appInfo from path
+            if (!path.isNullOrEmpty()) {
+                Log.d("PrivilegedService", "Loading info from APK path: $path")
+                try {
+                    val pm = context.packageManager
+                    val pkgInfo = pm.getPackageArchiveInfo(
+                        path,
+                        PackageManager.GET_PERMISSIONS
+                    )
+                    val appInfo = pkgInfo?.applicationInfo
+                    if (appInfo != null) {
+                        appInfo.publicSourceDir = path
+
+                        // Load Label
+                        try {
+                            resolvedLabel = appInfo.loadLabel(pm)
+                            Log.d("PrivilegedService", "Label loaded successfully: $resolvedLabel")
+                        } catch (e: Exception) {
+                            Log.e("PrivilegedService", "Failed to load label", e)
+                        }
+
+                        try {
+                            // Load Resources for APK
+                            // appInfo.publicSourceDir must be set
+                            val apkResources = pm.getResourcesForApplication(appInfo)
+                            val iconId = appInfo.icon
+
+                            if (iconId == 0) {
+                                Log.w("PrivilegedService", "appInfo.icon ID is 0, using default icon.")
+                                // Fallback to default icon
+                                val defaultIcon = pm.defaultActivityIcon
+                                resolvedIcon = (defaultIcon as? BitmapDrawable)?.bitmap
+                                    ?: defaultIcon.toBitmap(
+                                        defaultIcon.intrinsicWidth.coerceAtLeast(1),
+                                        defaultIcon.intrinsicHeight.coerceAtLeast(1)
+                                    )
+                            } else {
+                                Log.d("PrivilegedService", "Loading icon ID $iconId from APK resources.")
+                                val drawableIcon = apkResources.getDrawable(iconId, null) // Use null for theme
+
+                                val width = drawableIcon.intrinsicWidth
+                                val height = drawableIcon.intrinsicHeight
+                                Log.d(
+                                    "PrivilegedService",
+                                    "Drawable loaded from resources. Class: ${drawableIcon.javaClass.name}, WxH: ${width}x${height}"
+                                )
+
+                                if (width <= 0 || height <= 0) {
+                                    Log.w("PrivilegedService", "Drawable has invalid dimensions, cannot convert.")
+                                } else {
+                                    // Render Drawable to Bitmap manually
+                                    // Handles VectorDrawable, AdaptiveIconDrawable etc.
+                                    val bitmap = createBitmap(width, height)
+                                    val canvas = Canvas(bitmap)
+                                    drawableIcon.setBounds(0, 0, canvas.width, canvas.height)
+                                    drawableIcon.draw(canvas)
+                                    resolvedIcon = bitmap
+                                    Log.d("PrivilegedService", "Manually rendered drawable to bitmap.")
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("PrivilegedService", "Failed to load icon using getResourcesForApplication", e)
+                        }
+
+                    }
+                } catch (e: Exception) {
+                    Log.e("PrivilegedService", "Failed to load info from APK path", e)
+                }
+            }
+
+            // Fallback to sessionInfo (mostly null)
+            Log.d("PrivilegedService", "Icon Decision: resolvedIcon is null: ${resolvedIcon == null}")
+            Log.d("PrivilegedService", "Icon Decision: sessionInfo.appIcon is null: ${sessionInfo.appIcon == null}")
+
+            val finalLabel = resolvedLabel ?: sessionInfo.appLabel ?: "N/A"
+            val finalIcon = resolvedIcon ?: sessionInfo.appIcon
+            Log.d("PrivilegedService", "Icon Decision: finalIcon is null: ${finalIcon == null}")
+
+            // Package into Bundle
+            val bundle = Bundle()
+            bundle.putCharSequence("appLabel", finalLabel)
+            if (finalIcon != null) {
+                val stream = ByteArrayOutputStream()
+                finalIcon.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                bundle.putByteArray("appIcon", stream.toByteArray())
+            }
+            bundle.putInt("originatingUid", originatingUid)
+            return bundle
+        } catch (e: Exception) {
+            Log.e("PrivilegedService", "getSessionDetails failed", e)
+            return null
+        }
+    }
+
+    override fun approveSession(sessionId: Int, granted: Boolean) {
+        try {
+            val packageInstaller = context.packageManager.packageInstaller
+
+            val method: Method? = reflect.getMethod(
+                packageInstaller::class.java,
+                "setPermissionsResult",
+                Int::class.java,
+                Boolean::class.java
+            )
+
+            if (method != null) {
+                method.invoke(packageInstaller, sessionId, granted)
+                Log.d("PrivilegedService", "Invoked setPermissionsResult($sessionId, $granted)")
+            } else {
+                throw NoSuchMethodException("setPermissionsResult not found")
+            }
+        } catch (e: Exception) {
+            Log.e("PrivilegedService", "approveSession failed", e)
+            if (!granted) {
+                try {
+                    context.packageManager.packageInstaller.abandonSession(sessionId)
+                } catch (e2: Exception) {
+                    Log.e("PrivilegedService", "Fallback abandonSession failed", e2)
+                }
+            }
+        }
+    }
+
     @SuppressLint("PrivateApi")
     override fun getUsers(): Map<Int, String> {
         val userMap = mutableMapOf<Int, String>()
@@ -390,10 +536,6 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         } as ParceledListSlice<ResolveInfo>).list
     }
 
-    /**
-     * 读取执行结果，利用 Kotlin 的扩展函数简化代码。
-     * 如果有异常会向上抛出。
-     */
     @Throws(IOException::class, InterruptedException::class)
     private fun readResult(process: Process): String {
         // 分别读取标准输出和标准错误
