@@ -486,4 +486,7 @@
     <string name="split_name_language_group_title">Langue séparées</string>
     <string name="split_name_density_group_title">Densité d\'écran séparées</string>
     <string name="split_name_feature_group_title">Fonctionnalités séparées m</string>
+    <string name="installer_choice_install_as_module">Installer comme module</string>
+    <string name="installer_module_id">ID du module : %1$s</string>
+    <string name="installer_choice_install_as_app">installer comme appli·s</string>
 </resources>
