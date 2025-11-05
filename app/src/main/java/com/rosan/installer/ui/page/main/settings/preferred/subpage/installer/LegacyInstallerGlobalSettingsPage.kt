@@ -220,6 +220,18 @@ fun LegacyInstallerGlobalSettingsPage(
                                 )
                             }
 
+                        AnimatedVisibility(isDialogMode) {
+                            SwitchWidget(
+                                icon = AppIcons.Silent,
+                                title = stringResource(id = R.string.auto_silent_install),
+                                description = stringResource(id = R.string.auto_silent_install_desc),
+                                checked = state.autoSilentInstall,
+                                onCheckedChange = {
+                                    viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it))
+                                }
+                            )
+                        }
+
                         AnimatedVisibility(visible = isDialogMode) {
                             SwitchWidget(
                                 icon = AppIcons.NotificationDisabled,

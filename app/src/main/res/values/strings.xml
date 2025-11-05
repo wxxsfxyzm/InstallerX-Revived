@@ -406,6 +406,8 @@
     <string name="show_dialog_install_extended_menu">Show extended menu</string>
     <string name="show_dialog_install_extended_menu_desc">Show more options in the install dialog</string>
     <string name="extended_menu">Extended Menu</string>
+    <string name="auto_silent_install">Auto Silent Install</string>
+    <string name="auto_silent_install_desc">Auto silent install on dialog install start</string>
     <string name="disable_notification">Foreground Install without Notification</string>
     <string name="close_immediately_on_dialog_dismiss">Dialog remains foreground while installing, clicking blank area will silently exit</string>
     <string name="disable_notification_on_dismiss">Close On Dialog Dismiss</string>

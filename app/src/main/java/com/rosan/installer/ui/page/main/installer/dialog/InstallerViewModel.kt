@@ -77,6 +77,7 @@ class InstallerViewModel(
     var sdkCompareInMultiLine by mutableStateOf(false)
         private set
     var showOPPOSpecial by mutableStateOf(false)
+    private var autoSilentInstall by mutableStateOf(false)
 
     // Text to show in the progress bar
     private val _installProgressText = MutableStateFlow<UiText?>(null)
@@ -184,6 +185,8 @@ class InstallerViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false).first()
             showOPPOSpecial =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false).first()
+            autoSilentInstall =
+                appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false).first()
 
             // Load managed packages for installer selection.
             appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
@@ -671,7 +674,10 @@ class InstallerViewModel(
 
     private fun install() {
         autoInstallJob?.cancel()
-        repo.install()
+        if (autoSilentInstall && (state is InstallerViewState.InstallPrepare || state is InstallerViewState.InstallFailed)) {
+            repo.install()
+            repo.background(true)
+        } else repo.install()
     }
 
     private fun background() {

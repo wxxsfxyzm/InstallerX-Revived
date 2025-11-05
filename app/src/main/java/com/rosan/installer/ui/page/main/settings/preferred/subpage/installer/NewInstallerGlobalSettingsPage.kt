@@ -272,6 +272,17 @@ fun NewInstallerGlobalSettingsPage(
                             },
                             DynamicSettingItem(isDialogMode) {
                                 SwitchWidget(
+                                    icon = AppIcons.Silent,
+                                    title = stringResource(id = R.string.auto_silent_install),
+                                    description = stringResource(id = R.string.auto_silent_install_desc),
+                                    checked = state.autoSilentInstall,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it))
+                                    }
+                                )
+                            },
+                            DynamicSettingItem(isDialogMode) {
+                                SwitchWidget(
                                     icon = AppIcons.NotificationDisabled,
                                     title = stringResource(id = R.string.disable_notification),
                                     description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),

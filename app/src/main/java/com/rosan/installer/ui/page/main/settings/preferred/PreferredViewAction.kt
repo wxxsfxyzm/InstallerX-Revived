@@ -24,6 +24,7 @@ sealed class PreferredViewAction {
     data class ChangeSdkCompareInMultiLine(val sdkCompareInMultiLine: Boolean) : PreferredViewAction()
     data class ChangeShowOPPOSpecial(val showOPPOSpecial: Boolean) : PreferredViewAction()
     data class ChangeAutoLockInstaller(val autoLockInstaller: Boolean) : PreferredViewAction()
+    data class ChangeAutoSilentInstall(val autoSilentInstall: Boolean) : PreferredViewAction()
 
     data class AddManagedInstallerPackage(val pkg: NamedPackage) : PreferredViewAction()
     data class RemoveManagedInstallerPackage(val pkg: NamedPackage) : PreferredViewAction()

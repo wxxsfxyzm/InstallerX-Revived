@@ -133,7 +133,6 @@ fun MiuixInstallerGlobalSettingsPage(
                         exit = fadeOut() + shrinkVertically()
                     ) {
                         MiuixSwitchWidget(
-                            icon = AppIcons.MenuOpen,
                             title = stringResource(id = R.string.show_dialog_install_extended_menu),
                             description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
                             checked = viewModel.state.showDialogInstallExtendedMenu,
@@ -151,7 +150,6 @@ fun MiuixInstallerGlobalSettingsPage(
                         exit = fadeOut() + shrinkVertically()
                     ) {
                         MiuixSwitchWidget(
-                            icon = AppIcons.Dialog,
                             title = stringResource(id = R.string.show_dialog_when_pressing_notification),
                             description = stringResource(id = R.string.change_notification_touch_behavior),
                             checked = viewModel.state.showDialogWhenPressingNotification,
@@ -186,7 +184,21 @@ fun MiuixInstallerGlobalSettingsPage(
                         exit = fadeOut() + shrinkVertically()
                     ) {
                         MiuixSwitchWidget(
-                            icon = AppIcons.NotificationDisabled,
+                            title = stringResource(id = R.string.auto_silent_install),
+                            description = stringResource(id = R.string.auto_silent_install_desc),
+                            checked = state.autoSilentInstall,
+                            onCheckedChange = {
+                                viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it))
+                            }
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = isDialogMode,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
                             title = stringResource(id = R.string.disable_notification),
                             description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
                             checked = viewModel.state.disableNotificationForDialogInstall,
