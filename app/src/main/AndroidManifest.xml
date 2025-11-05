@@ -31,6 +31,8 @@
         tools:ignore="RequestInstallPackagesPolicy" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
+    <uses-permission android:name="com.rosan.dhizuku.permission.API" />
+
     <uses-sdk tools:overrideLibrary="rikka.shizuku.api, rikka.shizuku.provider, rikka.shizuku.shared, rikka.shizuku.aidl" />
 
     <application

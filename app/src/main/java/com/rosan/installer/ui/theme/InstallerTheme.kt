@@ -77,6 +77,11 @@ private val DarkColorScheme = darkColorScheme(
     scrim = scrimDark,
 )
 
+enum class InstallerTheme {
+    MATERIAL,
+    MIUIX
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InstallerMaterialExpressiveTheme(
@@ -93,14 +98,6 @@ fun InstallerMaterialExpressiveTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-
-    // TODO not needed since targetSDK 35
-    /*if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as ComponentActivity).window
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-        }
-    }*/
 
     MaterialExpressiveTheme(
         colorScheme = colorScheme,

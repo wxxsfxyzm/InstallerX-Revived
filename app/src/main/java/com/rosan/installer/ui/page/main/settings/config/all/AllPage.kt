@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -39,11 +37,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
@@ -173,10 +166,9 @@ fun AllPage(
 
                 viewModel.state.data.progress is AllViewState.Data.Progress.Loaded
                         && viewModel.state.data.configs.isEmpty() -> {
-                    LottieWidget(
-                        spec = LottieCompositionSpec.RawRes(R.raw.empty_state),
-                        text = stringResource(id = R.string.empty_configs)
-                    )
+                    // TODO Add error handling
+                    // Since we don't allow removing default profile,
+                    // There is no need to handle an empty state.
                 }
 
                 else -> {
@@ -192,41 +184,6 @@ fun AllPage(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun LottieWidget(
-    spec: LottieCompositionSpec,
-    text: String
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val composition by rememberLottieComposition(spec)
-            val progress by animateLottieCompositionAsState(
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-            )
-            LottieAnimation(
-                modifier = Modifier
-                    .size(200.dp),
-                composition = composition,
-                progress = { progress }
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleLarge
-            )
         }
     }
 }

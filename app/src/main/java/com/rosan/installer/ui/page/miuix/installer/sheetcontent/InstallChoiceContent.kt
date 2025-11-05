@@ -13,7 +13,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.entity.MmzSelectionMode
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
@@ -30,6 +34,8 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixCheckboxWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallChoiceTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixMultiApkCheckboxWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
+import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.util.getSupportSubtitle
 import com.rosan.installer.util.asUserReadableSplitName
 import com.rosan.installer.util.getDisplayName
 import com.rosan.installer.util.getSplitType
@@ -55,6 +61,9 @@ fun InstallChoiceContent(
     val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
     val isMultiApk = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
     val isModuleApk = containerType == DataType.MIXED_MODULE_APK
+    val isMixedModuleZip = containerType == DataType.MIXED_MODULE_ZIP
+
+    var selectionMode by remember(containerType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
 
     val primaryButtonTextRes = if (isMultiApk) R.string.install else R.string.next
     val primaryButtonAction = if (isMultiApk) {
@@ -67,23 +76,41 @@ fun InstallChoiceContent(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val cardText = when (containerType) {
-            DataType.MIXED_MODULE_APK -> stringResource(R.string.installer_mixed_module_apk_description)
-            DataType.MULTI_APK_ZIP -> stringResource(R.string.installer_multi_apk_zip_description)
-            DataType.MULTI_APK -> stringResource(R.string.installer_multi_apk_description)
-            else -> null
-        }
+        val cardText = containerType.getSupportSubtitle(selectionMode = selectionMode)
 
         if (cardText != null)
             MiuixInstallChoiceTipCard(cardText)
 
-        Box(modifier = Modifier.weight(1f, fill = false)) {
-            ChoiceLazyList(
-                analysisResults = analysisResults,
-                viewModel = viewModel,
-                isModuleApk = isModuleApk,
-                isMultiApk = isMultiApk
-            )
+        if (isMixedModuleZip && selectionMode == MmzSelectionMode.INITIAL_CHOICE) {
+            Box(modifier = Modifier.weight(1f, fill = false)) {
+                MixedModuleZip_InitialChoice(
+                    analysisResults = analysisResults,
+                    viewModel = viewModel,
+                    onSelectModule = { viewModel.dispatch(InstallerViewAction.InstallPrepare) },
+                    onSelectApk = { selectionMode = MmzSelectionMode.APK_CHOICE }
+                )
+            }
+        } else {
+            val resultsForList = if (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE) {
+                analysisResults.mapNotNull { pkgResult ->
+                    val apkEntities = pkgResult.appEntities.filter {
+                        it.app is AppEntity.BaseEntity || it.app is AppEntity.SplitEntity || it.app is AppEntity.DexMetadataEntity
+                    }
+                    if (apkEntities.isEmpty()) null
+                    else pkgResult.copy(appEntities = apkEntities)
+                }
+            } else {
+                analysisResults
+            }
+
+            Box(modifier = Modifier.weight(1f, fill = false)) {
+                ChoiceLazyList(
+                    analysisResults = resultsForList,
+                    viewModel = viewModel,
+                    isModuleApk = isModuleApk,
+                    isMultiApk = isMultiApk || (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE)
+                )
+            }
         }
 
         Row(
@@ -93,21 +120,40 @@ fun InstallChoiceContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (isMultiApk || isModuleApk)
+            if (isMultiApk || isModuleApk || isMixedModuleZip) {
+                val isBack = isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE
                 TextButton(
-                    onClick = onCancel,
-                    text = stringResource(R.string.cancel),
+                    onClick = {
+                        if (isBack) {
+                            selectionMode = MmzSelectionMode.INITIAL_CHOICE
+                        } else {
+                            onCancel()
+                        }
+                    },
+                    text = stringResource(if (isBack) R.string.back else R.string.cancel),
                     modifier = Modifier.weight(1f),
                 )
-            if (!isModuleApk)
+            }
+
+            val showPrimaryButton =
+                (!isModuleApk && !isMixedModuleZip) || (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE)
+
+            if (showPrimaryButton) {
+                val (currentPrimaryTextRes, currentPrimaryAction) =
+                    if (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE) {
+                        R.string.install to { viewModel.dispatch(InstallerViewAction.InstallMultiple) }
+                    } else {
+                        primaryButtonTextRes to primaryButtonAction
+                    }
+
                 TextButton(
-                    onClick = primaryButtonAction,
-                    text = stringResource(primaryButtonTextRes),
+                    onClick = currentPrimaryAction,
+                    text = stringResource(currentPrimaryTextRes),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                     enabled = analysisResults.any { it.appEntities.any { it.selected } },
                     modifier = Modifier.weight(1f)
                 )
-
+            }
         }
     }
 }
@@ -119,7 +165,7 @@ private fun ChoiceLazyList(
     isModuleApk: Boolean,
     isMultiApk: Boolean
 ) {
-    val cardColor = if (isSystemInDarkTheme()) Color(0xFF434343) else Color.White
+    val cardColor = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White
 
     if (isModuleApk) {
         val allSelectableEntities = analysisResults.flatMap { it.appEntities }
@@ -146,7 +192,7 @@ private fun ChoiceLazyList(
                         val baseEntityInfo = baseSelectableEntity.app as AppEntity.BaseEntity
                         MiuixNavigationItemWidget(
                             title = baseEntityInfo.label ?: "N/A",
-                            description = "Package: ${baseEntityInfo.packageName}",
+                            description = stringResource(R.string.installer_package_name, baseEntityInfo.packageName),
                             onClick = {
                                 viewModel.dispatch(
                                     InstallerViewAction.ToggleSelection(
@@ -164,7 +210,7 @@ private fun ChoiceLazyList(
                         val moduleEntityInfo = moduleSelectableEntity.app as AppEntity.ModuleEntity
                         MiuixNavigationItemWidget(
                             title = moduleEntityInfo.name,
-                            description = "Module ID: ${moduleEntityInfo.id}",
+                            description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
                             onClick = {
                                 viewModel.dispatch(
                                     InstallerViewAction.ToggleSelection(
@@ -270,7 +316,7 @@ private fun ChoiceLazyList(
                                 )
                             }
                     }
-                } // End Card
+                }
             }
         }
     } else { // Single-Package Split Mode
@@ -389,6 +435,67 @@ private fun ChoiceLazyList(
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MixedModuleZip_InitialChoice(
+    analysisResults: List<PackageAnalysisResult>,
+    viewModel: InstallerViewModel,
+    onSelectModule: () -> Unit,
+    onSelectApk: () -> Unit
+) {
+    val cardColor = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White
+
+    val allSelectableEntities = analysisResults.flatMap { it.appEntities }
+    val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }
+    val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
+
+    LazyColumn(
+        modifier = Modifier
+            .wrapContentSize()
+            .scrollEndHaptic()
+            .overScrollVertical(),
+        overscrollEffect = null,
+        contentPadding = PaddingValues(vertical = 8.dp)
+    ) {
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardColors(
+                    color = cardColor,
+                    contentColor = MiuixTheme.colorScheme.onSurface
+                )
+            ) {
+                if (moduleSelectableEntity != null) {
+                    val moduleEntityInfo = moduleSelectableEntity.app as AppEntity.ModuleEntity
+                    MiuixNavigationItemWidget(
+                        title = stringResource(R.string.installer_choice_install_as_module),
+                        description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
+                        onClick = {
+                            viewModel.dispatch(
+                                InstallerViewAction.ToggleSelection(
+                                    packageName = moduleSelectableEntity.app.packageName,
+                                    entity = moduleSelectableEntity,
+                                    isMultiSelect = false
+                                )
+                            )
+                            onSelectModule()
+                        }
+                    )
+                }
+
+                if (baseSelectableEntity != null) {
+                    MiuixNavigationItemWidget(
+                        title = stringResource(R.string.installer_choice_install_as_app),
+                        description = stringResource(R.string.installer_choice_install_as_app_desc),
+                        onClick = {
+                            onSelectApk()
+                        }
+                    )
                 }
             }
         }

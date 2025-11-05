@@ -146,7 +146,7 @@ fun MiuixPreferredPage(
                         .fillMaxSize()
                         .scrollEndHaptic()
                         .overScrollVertical()
-                        .padding(top = innerPadding.calculateTopPadding()),
+                        .padding(top = innerPadding.calculateTopPadding() + 12.dp),
                     overscrollEffect = null
                 ) {
                     item { SmallTitle(stringResource(R.string.global)) }
@@ -154,7 +154,7 @@ fun MiuixPreferredPage(
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
-                                .padding(bottom = 6.dp)
+                                .padding(bottom = 12.dp)
                         ) {
                             MiuixNavigationItemWidget(
                                 icon = AppIcons.Theme,
@@ -180,12 +180,13 @@ fun MiuixPreferredPage(
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
-                                .padding(bottom = 6.dp)
+                                .padding(bottom = 12.dp)
                         ) {
                             MiuixDisableAdbVerify(
                                 checked = !state.adbVerifyEnabled,
                                 isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                                enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku,
+                                enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
+                                        state.authorizer != ConfigEntity.Authorizer.None,
                                 onCheckedChange = { isDisabled ->
                                     viewModel.dispatch(
                                         PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
@@ -200,8 +201,14 @@ fun MiuixPreferredPage(
                                 checked = state.autoLockInstaller,
                                 enabled = state.authorizer != ConfigEntity.Authorizer.None,
                             ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
-                            MiuixDefaultInstaller(true) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
-                            MiuixDefaultInstaller(false) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
+                            MiuixDefaultInstaller(
+                                lock = true,
+                                enabled = state.authorizer != ConfigEntity.Authorizer.None,
+                            ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
+                            MiuixDefaultInstaller(
+                                lock = false,
+                                enabled = state.authorizer != ConfigEntity.Authorizer.None,
+                            ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
                             MiuixClearCache()
                         }
                     }
@@ -210,7 +217,7 @@ fun MiuixPreferredPage(
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
-                                .padding(bottom = 6.dp)
+                                .padding(bottom = 12.dp)
                         ) {
                             MiuixSettingsAboutItemWidget(
                                 imageVector = AppIcons.Info,

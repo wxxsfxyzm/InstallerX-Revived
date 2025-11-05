@@ -220,8 +220,6 @@ dependencies {
     implementation(libs.koin.compose)
     implementation(libs.koin.compose.viewmodel)
 
-    implementation(libs.lottie.compose)
-
     implementation(libs.accompanist.drawablepainter)
 
     implementation(libs.rikka.shizuku.api)

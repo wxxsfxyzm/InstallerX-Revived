@@ -22,7 +22,6 @@ import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -78,6 +77,7 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeSdkCompareInMultiLine -> changeSdkCompareInMultiLine(action.sdkCompareInMultiLine)
             is PreferredViewAction.ChangeShowOPPOSpecial -> changeShowOPPOSpecial(action.showOPPOSpecial)
             is PreferredViewAction.ChangeAutoLockInstaller -> changeAutoLockInstaller(action.autoLockInstaller)
+            is PreferredViewAction.ChangeAutoSilentInstall -> changeAutoSilentInstall(action.autoSilentInstall)
 
             is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
                 state.managedInstallerPackages,
@@ -175,6 +175,8 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false)
             val autoLockInstallerFlow =
                 appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER, false)
+            val autoSilentInstallFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false)
             val showMiuixUIFlow =
                 appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
             val preferSystemIconFlow =
@@ -205,6 +207,7 @@ class PreferredViewModel(
                 showExpressiveUIFlow,
                 showLiveActivityFlow,
                 autoLockInstallerFlow,
+                autoSilentInstallFlow,
                 showMiuixUIFlow,
                 preferSystemIconFlow,
                 showLauncherIconFlow,
@@ -229,19 +232,20 @@ class PreferredViewModel(
                 val showExpressiveUI = values[11] as Boolean
                 val showLiveActivity = values[12] as Boolean
                 val autoLockInstaller = values[13] as Boolean
-                val showMiuixUI = values[14] as Boolean
-                val preferSystemIcon = values[15] as Boolean
-                val showLauncherIcon = values[16] as Boolean
+                val autoSilentInstall = values[14] as Boolean
+                val showMiuixUI = values[15] as Boolean
+                val preferSystemIcon = values[16] as Boolean
+                val showLauncherIcon = values[17] as Boolean
                 val managedInstallerPackages =
-                    (values[17] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedBlacklistPackages =
                     (values[18] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedBlacklistPackages =
+                    (values[19] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
                 val managedSharedUserIdBlacklist =
-                    (values[19] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
+                    (values[20] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
                 val managedSharedUserIdExemptPkg =
-                    (values[20] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[21] as Boolean
-                val isIgnoringBatteryOptimizations = values[22] as Boolean
+                    (values[21] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[22] as Boolean
+                val isIgnoringBatteryOptimizations = values[23] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -260,6 +264,7 @@ class PreferredViewModel(
                     showExpressiveUI = showExpressiveUI,
                     showLiveActivity = showLiveActivity,
                     autoLockInstaller = autoLockInstaller,
+                    autoSilentInstall = autoSilentInstall,
                     showMiuixUI = showMiuixUI,
                     preferSystemIcon = preferSystemIcon,
                     showLauncherIcon = showLauncherIcon,
@@ -374,6 +379,11 @@ class PreferredViewModel(
     private fun changeAutoLockInstaller(autoLockInstaller: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.AUTO_LOCK_INSTALLER, autoLockInstaller)
+        }
+
+    private fun changeAutoSilentInstall(enabled: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, enabled)
         }
 
     private fun addManagedPackage(
@@ -497,13 +507,13 @@ class PreferredViewModel(
         }
 
     private suspend fun setDefaultInstaller(lock: Boolean, action: PreferredViewAction) {
-        val config = ConfigUtil.getByPackageName(null)
+        val authorizer = state.authorizer
         val component = ComponentName(context, InstallerActivity::class.java)
         runPrivilegedAction(
             action = action,
             titleForError = context.getString(if (lock) R.string.lock_default_installer_failed else R.string.unlock_default_installer_failed),
             successMessage = context.getString(if (lock) R.string.lock_default_installer_success else R.string.unlock_default_installer_success),
-            block = { paRepo.setDefaultInstaller(config, component, lock) }
+            block = { paRepo.setDefaultInstaller(authorizer, component, lock) }
         )
     }
 

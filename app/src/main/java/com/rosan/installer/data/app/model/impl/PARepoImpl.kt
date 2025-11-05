@@ -10,16 +10,16 @@ import timber.log.Timber
 
 object PARepoImpl : PARepo, KoinComponent {
     override suspend fun setDefaultInstaller(
-        config: ConfigEntity,
+        authorizer: ConfigEntity.Authorizer,
         component: ComponentName,
         enable: Boolean
     ) {
         // The special logic for 'su 1000' is specific to this operation.
-        val specialAuth = if (config.authorizer == ConfigEntity.Authorizer.Root) {
+        val specialAuth = if (authorizer == ConfigEntity.Authorizer.Root) {
             { "su 1000" }
         } else null
 
-        useUserService(config, specialAuth) { userService ->
+        useUserService(authorizer, special = specialAuth) { userService ->
             userService.privileged.setDefaultInstaller(component, enable)
         }
     }

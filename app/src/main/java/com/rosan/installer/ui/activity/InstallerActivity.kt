@@ -31,12 +31,12 @@ import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import com.rosan.installer.ui.theme.InstallerMiuixTheme
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.util.PermissionDenialReason
 import com.rosan.installer.ui.util.PermissionManager
 import com.rosan.installer.util.toast
@@ -58,17 +58,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     private val appDataStore: AppDataStore by inject()
-    private val reflect: ReflectRepo by inject()
 
     private var installer by mutableStateOf<InstallerRepo?>(null)
     private var job: Job? = null
 
     private lateinit var permissionManager: PermissionManager
-
-    private enum class InstallerTheme {
-        MATERIAL,
-        MIUIX
-    }
 
     // Define a data class for the UI state
     private data class InstallerUiState(

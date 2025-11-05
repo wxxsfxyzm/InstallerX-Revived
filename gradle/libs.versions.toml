@@ -19,7 +19,6 @@ room = "2.8.3"
 ktx-serialization = "1.9.0"
 accompanist = "0.37.3"
 rikka-shizuku = "13.1.5"
-lottie = "6.7.0"
 koin-bom = "4.1.1"
 materialVersion = "1.13.0"
 datastoreCoreAndroid = "1.2.0-beta01"
@@ -79,12 +78,6 @@ koin-android = { group = "io.insert-koin", name = "koin-android" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
 koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel" }
 
-# Lottie for Android Compose
-# http://airbnb.io/lottie/#/android-compose
-lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
-
-# Pager layouts
-# https://google.github.io/accompanist/pager/
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 
 # Rikka Shizuku

@@ -60,29 +60,24 @@ class InstallerViewModel(
 
     var showMiuixSheetRightActionSettings by mutableStateOf(false)
         private set
-
+    var showMiuixPermissionList by mutableStateOf(false)
+        private set
     var navigatedFromPrepareToChoice by mutableStateOf(false)
         private set
-
     var autoCloseCountDown by mutableIntStateOf(3)
         private set
-
     var showExtendedMenu by mutableStateOf(false)
         private set
-
     var showSmartSuggestion by mutableStateOf(true)
         private set
-
     var disableNotificationOnDismiss by mutableStateOf(false)
         private set
-
     var versionCompareInSingleLine by mutableStateOf(false)
         private set
-
     var sdkCompareInMultiLine by mutableStateOf(false)
         private set
-
     var showOPPOSpecial by mutableStateOf(false)
+    private var autoSilentInstall by mutableStateOf(false)
 
     // Text to show in the progress bar
     private val _installProgressText = MutableStateFlow<UiText?>(null)
@@ -104,11 +99,11 @@ class InstallerViewModel(
     val isDismissible
         get() = when (state) {
             is InstallerViewState.Analysing,
-            is InstallerViewState.Resolving -> false
-
+            is InstallerViewState.Resolving,
             is InstallerViewState.InstallExtendedMenu,
             is InstallerViewState.InstallChoice -> false
 
+            is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
             is InstallerViewState.Installing -> !disableNotificationOnDismiss
             else -> true
         }
@@ -190,6 +185,8 @@ class InstallerViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false).first()
             showOPPOSpecial =
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false).first()
+            autoSilentInstall =
+                appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false).first()
 
             // Load managed packages for installer selection.
             appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
@@ -223,6 +220,8 @@ class InstallerViewModel(
 
             is InstallerViewAction.ShowMiuixSheetRightActionSettings -> showMiuixSheetRightActionSettings = true
             is InstallerViewAction.HideMiuixSheetRightActionSettings -> showMiuixSheetRightActionSettings = false
+            is InstallerViewAction.ShowMiuixPermissionList -> showMiuixPermissionList = true
+            is InstallerViewAction.HideMiuixPermissionList -> showMiuixPermissionList = false
 
             is InstallerViewAction.ToggleSelection -> toggleSelection(
                 action.packageName,
@@ -316,7 +315,9 @@ class InstallerViewModel(
                         newPackageNameFromProgress = null
                     }
 
+                    is ProgressEntity.UninstallResolveFailed,
                     is ProgressEntity.InstallResolvedFailed -> newState = InstallerViewState.ResolveFailed
+
                     is ProgressEntity.InstallAnalysedFailed -> newState = InstallerViewState.AnalyseFailed
                     is ProgressEntity.InstallAnalysedSuccess -> {
                         // When analysis is successful, this is the first moment we have the full, original list.
@@ -673,7 +674,10 @@ class InstallerViewModel(
 
     private fun install() {
         autoInstallJob?.cancel()
-        repo.install()
+        if (autoSilentInstall && (state is InstallerViewState.InstallPrepare || state is InstallerViewState.InstallFailed)) {
+            repo.install()
+            repo.background(true)
+        } else repo.install()
     }
 
     private fun background() {
