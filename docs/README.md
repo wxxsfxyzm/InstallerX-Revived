@@ -103,8 +103,7 @@ Compared to stock installers, **InstallerX** offers more installation features:
 
 - **Unable to lock InstallerX as default installer?**
     - Some Systems have very strict policy on Package Installers. You must use a LSPosed module to intercept the intent and forward it to the installer in this case.
-    - Strongly recommended: [Chimioo/InxLocker](https://github.com/Chimioo/InxLocker) which can also lock uninstaller.
-    - If you want to use locker from original InstallerX, please note that due to package name change, use the modified [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk) from this repository.
+    - Strongly recommended: [Chimioo/InxLocker](https://github.com/Chimioo/InxLocker)
 
 - An error occurred in the resolving phase: `No Content Provider` or `reading provider` reported `Permission Denial`?
     - You have enabled Hide app list or similar functions, please configure the whitelist.
