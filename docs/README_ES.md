@@ -13,11 +13,11 @@
 
 > Un instalador de aplicaciones Android moderno y funcional. (Sabes que algunos pájaros no están hechos para estar enjaulados, sus plumas son demasiado brillantes.)
 
-¿Buscas un mejor instalador de aplicaciones? ¡Prueba **InstallerX**!
+¿Buscas un mejor instalador de aplicaciones? ¡Prueba **InstallerX Revived**!
 
-Muchas ROMs chinas personalizadas vienen con instaladores predeterminados deficientes. Puedes reemplazarlos con **InstallerX**.
+Muchas ROMs chinas personalizadas vienen con instaladores predeterminados deficientes. Puedes reemplazarlos con **InstallerX Revived**.
 
-En comparación con los instaladores de stock, **InstallerX** ofrece más funciones de instalación:
+En comparación con los instaladores de stock, **InstallerX Revived** ofrece más funciones de instalación:
 - Tipos de instalación ricos: APK, APKS, APKM, XAPK, APKs dentro de ZIP y APKs en lote.
 - Instalación basada en diálogo.
 - Instalación basada en notificación (compatible con API de Live Activity).
@@ -26,13 +26,13 @@ En comparación con los instaladores de stock, **InstallerX** ofrece más funcio
 - Configuración de banderas de instalación (pueden heredar configuraciones de Perfil).
 - Instalación para un usuario específico / todos los usuarios.
 - Dex2oat después de una instalación exitosa.
-- Bloqueo de instalación de aplicaciones específicas o por sharedUID.
+- Bloqueo de instalación de aplicaciones específicas mediante nombre de paquete o por sharedUID.
 - Eliminación automática de APK después de la instalación.
 - Sin comandos shell, solo llamadas a API nativas.
 
 ## Versiones compatibles
 
-- **Soporte completo:** Android SDK 34 - 36 (Android 14 - 16)
+- **Soporte completo:** Android SDK 34 - 36.1 (Android 14 - 16)
 - **Soporte limitado:** Android SDK 26 - 33 (Android 8.0 - 13) (por favor, reporta problemas).
 
 ## Cambios clave y características
@@ -46,50 +46,47 @@ En comparación con los instaladores de stock, **InstallerX** ofrece más funcio
 - **Iconos del sistema:** Soporte para mostrar paquetes de iconos del sistema durante la instalación. Permite alternar entre iconos de APK y paquetes de iconos del sistema mediante un interruptor.
 - **Comparación de versiones:** Soporte para mostrar la comparación de números de versión en formato de una línea o múltiples líneas.
 - **Información SDK:** Diálogos de instalación muestran targetSDK y minSDK en formato de una línea o múltiples líneas.
+- **Confirmación de instalación por sesión**: Con la ayuda de [InxLocker](https://github.com/Chimioo/InxLocker), esta función ahora es compatible.
 - **Evitar intercepciones:** Shizuku/Root puede evitar restricciones de inicio en cadena de OS personalizados al abrir una App después de la instalación.
     - Actualmente solo funciona para instalación por diálogo.
     - Dhizuku carece de permisos suficientes, por lo que se añadió una opción de cuenta regresiva personalizable para reservar tiempo para la acción de abrir la app.
-- **Menú extendido:** Para instalación por diálogo (activar en configuraciones):
+- **Menú extendido:** Para instalación por diálogo (puede activarse en ajustes):
     - Muestra permisos solicitados por la aplicación.
     - Configuración de InstallFlags (puede heredar configuraciones de Perfil global).
       - **Importante:** Configurar InstallFlags **no garantiza** que siempre funcionen. Algunas opciones podrían representar riesgos de seguridad, dependiendo del sistema.
 - **Fuentes preconfiguradas:** Soporte para preconfigurar nombres de paquetes de origen de instalación en configuraciones, permitiendo selección rápida en perfiles y el menú de instalación por diálogo.
 - **Instalación desde ZIP:** Soporte para instalar archivos APK dentro de archivos ZIP (solo instalación por diálogo).
-    - Sin límite de cantidad.
-    - Soporta archivos APK en directorios anidados dentro del ZIP, **no limitado al directorio raíz**.
-    - Soporta manejo automático de múltiples versiones del mismo paquete:
-        - Deduplicación (eliminar duplicados).
-        - Selección inteligente del mejor paquete para instalar.
+    - Permite cantidad ilimitada y admite múltiples archivos ZIP.
+    - Permite archivos APK en directorios anidados dentro del ZIP, **no limitado al directorio raíz**.
+    - Permite gestionar automáticamente múltiples versiones de un mismo paquete mediante deduplicación y selección optimizada.
 - **Instalación en lote:** Soporte para instalar múltiples APKs a la vez (selección múltiple y compartir con InstallerX).
     - Solo instalación por diálogo.
     - Sin límite de cantidad.
     - Solo archivos APK.
-    - Soporta manejo automático de múltiples versiones del mismo paquete:
-        - Deduplicación (eliminar duplicados).
-        - Selección inteligente del mejor paquete para instalar.
+    - Admite el manejo automático de múltiples versiones del mismo paquete (eliminación de duplicados y selección inteligente).
 - **Archivos APKS/APKM/XAPK:** Soporte para selección automática de la mejor división.
-    - Soporta tanto notificación como instalación por diálogo.
-        - Hacer clic en "Instalar" en la notificación elige la mejor opción.
+    - Permite tanto notificación como instalación por diálogo.
+        - Al hacer clic en "Instalar" en la notificación, se selecciona la mejor opción y se continúa con la instalación.
         - En el diálogo, la mejor opción está seleccionada por defecto, pero se puede elegir manualmente.
     - La interfaz de selección de divisiones muestra descripciones amigables para el usuario.
 - **Soporte de arquitectura:** Permite instalar paquetes armeabi-v7a, armeabi/X86 en sistemas solo arm64-v8a/X86_64 (la funcionalidad real depende de que el sistema proporcione traducción en tiempo de ejecución).
 - **Downgrade con o sin datos:** Soporte para realizar downgrades de apps con o sin preservación de datos en algunos sistemas OEM Android 15/16 (con optimización del sistema activada, como HyperOS).
-    - Esta característica solo soporta Android 15 y superior. En Android 14, prueba la opción `Permitir downgrade` en las opciones de instalación.
+    - Esta característica solo admite Android 15. En Android 14, prueba la opción `Permitir downgrade` en las opciones de instalación.
     - La característica está disponible en las sugerencias inteligentes del diálogo de instalación. Para usarla, activa primero la opción `Mostrar sugerencias inteligentes`.
     - **¡Usa esta característica con extrema precaución en apps del sistema!** La pérdida de datos de una app del sistema podría dejar el dispositivo inutilizable.
-    - No compatible con OneUI 7.0, RealmeUI y algunas versiones de ColorOS (restricciones de AOSP). Si solo ves la opción de downgrade *sin* preservación de datos, significa que tu sistema no soporta downgrade *con* datos.
+    - No compatible con OneUI 7.0, RealmeUI y algunas versiones de ColorOS (restricciones de AOSP). Si solo ves la opción de downgrade *sin* preservación de datos, significa que tu sistema no permite downgrade *con* datos.
 - **Lista negra:** Soporte para configurar una lista de nombres de paquetes prohibidos para instalación en las configuraciones.
-    - Soporte para lista negra por packageName / sharedUID con exenciones.
-    - Lista negra sharedUID 1000/1001 por defecto; si no lo quieres, elimínalo de la lista negra.
+    - Lista negra mediante nombre de paquete o sharedUID con exenciones.
     - `Permitir una vez` en sugerencias inteligentes.
 - **DexOpt:** Después de una instalación exitosa, la app puede realizar automáticamente dex2oat en las aplicaciones instaladas según las configuraciones de Perfil.
-    - No soporta Dhizuku.
+    - No admite Dhizuku.
 - **Verificación de firma:** Verifica la firma de la app instalada y el APK a instalar, y da una advertencia si no coinciden.
 - **Seleccionar usuario objetivo:** Soporte para instalar apps en un usuario específico.
-    - No soporta Dhizuku.
+    - Obtiene dinámicamente los detalles del usuario actual.
+    - No admite Dhizuku.
     - Puede ser sobrescrito por la opción de instalación `Instalar para todos los usuarios`.
 - **Declarar como desinstalador:** Aceptar intentos de desinstalación en ciertos OS; OS personalizados podrían no ser compatibles.
-- [Experimental] **Instalación directa desde enlace de descarga:** La versión online soporta compartir directamente el enlace de descarga de un archivo APK a InstallerX para instalación. Actualmente, el APK no se mantiene localmente, pero se añadirá una opción para retener el paquete de instalación en el futuro.
+- [Experimental] **Instalación directa desde enlace de descarga:** La versión online permite compartir directamente el enlace de descarga de un archivo APK a InstallerX para instalación. Actualmente, el APK no se mantiene localmente, pero se añadirá una opción para retener el paquete de instalación en el futuro.
 
 ## Preguntas frecuentes (FAQ)
 
@@ -105,8 +102,8 @@ En comparación con los instaladores de stock, **InstallerX** ofrece más funcio
 
 - **¿No puedes bloquear InstallerX como instalador predeterminado?**
     - Algunos sistemas tienen políticas muy estrictas sobre instaladores de paquetes. Debes usar un módulo LSPosed para interceptar el intent y reenviarlo al instalador en este caso.
-    - Recomendado encarecidamente: [Chimioo/InxLocker](https://github.com/Chimioo/InxLocker), que también puede bloquear el desinstalador.
-    - Si quieres usar el bloqueador del InstallerX original, nota que debido al cambio de nombre de paquete, usa la versión modificada [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk) de este repositorio.
+    - Funciona mejor con: [Chimioo/InxLocker](https://github.com/Chimioo/InxLocker)  
+    - El uso de otros lockers basados en LSPosed ya no es aconsejable.
 
 - ¿Ocurrió un error en la fase de resolución: `No Content Provider` o `reading provider` reportó `Permission Denial`?
     - Has activado la lista de apps ocultas o funciones similares; por favor, configura la lista blanca.
@@ -117,7 +114,7 @@ En comparación con los instaladores de stock, **InstallerX** ofrece más funcio
     - Nueva característica: InstallerX detecta automáticamente HyperOS y añade una configuración predeterminada (`com.miui.packageinstaller`). Puedes cambiarla en las configuraciones si es necesario.
 
 - **HyperOS reinstala el instalador predeterminado / el bloqueo falla**
-    - HyperOS puede restablecer el instalador predeterminado después de que el usuario instale una app que maneje APK.
+    - Intenta habilitar `Bloqueo automático del instalador` en los ajustes.
     - En algunas versiones de HyperOS, el fallo en el bloqueo es esperado.
     - HyperOS intercepta solicitudes de instalación USB (ADB/Shizuku) con un diálogo. Si el usuario rechaza la instalación de una app nueva, el sistema revocará la configuración del instalador y forzará el predeterminado. Si esto ocurre, bloquea InstallerX de nuevo.
 
@@ -128,7 +125,7 @@ En comparación con los instaladores de stock, **InstallerX** ofrece más funcio
 - **¿Problemas en sistemas Oppo/Vivo/Lenovo/... ?**
     - No tenemos dispositivos de estas marcas para pruebas. Puedes discutirlo en [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions), o reportar a través de nuestro [Canal de Telegram](https://t.me/installerx_revived).
     - Para bloquear el instalador en Oppo/Vivo, usa la herramienta de bloqueo.
-    - Para instalar apps a través de Shizuku en Honor, desactiva `Monitorizar instalación ADB` en opciones de desarrollador.
+    - Para instalar apps a través de Shizuku en dispositivos Honor, desactiva `Monitorizar instalación ADB` en opciones de desarrollador.
 
 ## Sobre las versiones
 
@@ -140,7 +137,7 @@ En comparación con los instaladores de stock, **InstallerX** ofrece más funcio
 - **Rama `main`:** Cuando se fusionan cambios estables desde `dev`, el sistema CI/CD construye y publica automáticamente una nueva versión alpha.
 - **Versiones estables:** Publicadas manualmente al finalizar una fase de desarrollo/pruebas. CI/CD las publica automáticamente como release.
 - **Sobre permiso de red:** A medida que las características se han expandido, se han introducido funciones relacionadas con la red. Sin embargo, muchos usuarios prefieren que el instalador permanezca puramente local sin requerir acceso a la red. Por lo tanto, se lanzarán dos versiones: **online** y **offline**. Ambas versiones comparten el mismo nombre de paquete, código de versión y firma, por lo que no se pueden instalar lado a lado (una sobrescribirá la otra). Por favor, descarga según tus necesidades.
-  - **Versión online**: Soporta compartir enlaces de descarga directos a InstallerX para instalación. Se pueden añadir más utilidades relacionadas con la red en el futuro, pero el permiso de red **nunca** se usará para propósitos no relacionados con la instalación. Segura de usar.
+  - **Versión online**: Permite compartir enlaces de descarga directos a InstallerX para instalación. Se pueden añadir más utilidades relacionadas con la red en el futuro, pero el permiso de red **nunca** se usará para propósitos no relacionados con la instalación. Segura de usar.
   - **Versión offline**: No solicita permisos de red en absoluto. Al intentar usar características online, recibirás un mensaje de error claro. Esta versión permanece como un instalador puramente local.
 
 ## Sobre la localización
@@ -149,21 +146,7 @@ En comparación con los instaladores de stock, **InstallerX** ofrece más funcio
 
 ### Estado de localización
 
-| Idioma              | Estado                                                                                                                                                                                                       |
-|:--------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Todos los idiomas** | [![Translation status](https://hosted.weblate.org/widget/installerx-revived/strings/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/)                                         |
-| English             | [![Translation status for English](https://hosted.weblate.org/widget/installerx-revived/strings/en/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/en/)                       |
-| Simplified Chinese  | [![Translation status for Simplified Chinese](https://hosted.weblate.org/widget/installerx-revived/strings/zh_Hans/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/zh_Hans/)  |
-| Traditional Chinese | [![Translation status for Traditional Chinese](https://hosted.weblate.org/widget/installerx-revived/strings/zh_Hant/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/zh_Hant/) |
-| Arabic              | [![Translation status for Arabic](https://hosted.weblate.org/widget/installerx-revived/strings/ar/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/ar/)                        |
-| French              | [![Translation status for French](https://hosted.weblate.org/widget/installerx-revived/strings/fr/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/fr/)                        |
-| German              | [![Translation status for German](https://hosted.weblate.org/widget/installerx-revived/strings/de/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/de/)                        |
-| Portuguese (Brazil) | [![Translation status for Portuguese (Brazil)](https://hosted.weblate.org/widget/installerx-revived/strings/pt_BR/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/pt_BR/)     |
-| Russian             | [![Translation status for Russian](https://hosted.weblate.org/widget/installerx-revived/strings/ru/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/ru/)                       |
-| Spanish             | [![Translation status for Spanish](https://hosted.weblate.org/widget/installerx-revived/strings/es/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/es/)                       |
-| Thai                | [![Translation status for Thai](https://hosted.weblate.org/widget/installerx-revived/strings/th/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/th/)                          |
-| Turkish             | [![Translation status for Turkish](https://hosted.weblate.org/widget/installerx-revived/strings/tr/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/tr/)                       |
-| Ukrainian           | [![Translation status for Ukrainian](https://hosted.weblate.org/widget/installerx-revived/strings/uk/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/uk/)                     |
+[![Estado de la localización](https://hosted.weblate.org/widget/installerx-revived/strings/multi-auto.svg)](https://hosted.weblate.org/engage/installerx-revived/)
 
 ## Licencia
 
