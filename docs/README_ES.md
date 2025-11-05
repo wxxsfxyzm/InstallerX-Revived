@@ -1,10 +1,10 @@
 # InstallerX Revived (Edición Comunitaria)
 
-**English** | [简体中文](README_CN.md) | **Español**
+[English](README.md) | [简体中文](README_CN.md) | **Español**
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![Latest Release](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=Stable)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![Prerelease](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=Beta)](https://github.com/wxxsfxyzm/InstallerX/releases)[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
+[![Licencia: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![Última versión](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=Stable)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![Versión de prueba](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=Beta)](https://github.com/wxxsfxyzm/InstallerX/releases)[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
-- Esta es una bifurcación mantenida por la comunidad después de que el [proyecto original](https://github.com/iamr0s/InstallerX) fuera archivado por el autor.
+- Esto es un fork mantenido por la comunidad después de que el [proyecto original](https://github.com/iamr0s/InstallerX) fuera archivado por el autor.
 - Proporciona actualizaciones y soporte limitados de código abierto.
 - Sigue estrictamente la GNU GPLv3: todas las modificaciones son de código abierto.
 - ¡Damos la bienvenida a las contribuciones de la comunidad!
@@ -37,7 +37,7 @@ En comparación con los instaladores de stock, **InstallerX** ofrece más funcio
 
 ## Cambios clave y características
 
-- **Opciones de UI:** Alternable entre un nuevo diseño de UI basado en Material 3 Expressive y Miuix similar a HyperOS.
+- **Interfaz renovada:** Alternable entre un nuevo diseño de interfaz basado en Material 3 Expressive y Miuix similar a HyperOS.
 - **Más personalización:** Más configuraciones de interfaz personalizables.
 - **Correcciones de errores:** Resueltos problemas de eliminación de APK del proyecto original en ciertos sistemas.
 - **Rendimiento:** Velocidad de análisis optimizada, parsing mejorado de varios tipos de paquetes.
