@@ -8,8 +8,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -27,8 +29,11 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAuthorizerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIntNumberPickerWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixManagedPackagesWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixManagedUidsWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
@@ -243,6 +248,99 @@ fun MiuixInstallerGlobalSettingsPage(
                             description = stringResource(id = R.string.installer_show_oem_special_desc),
                             checked = state.showOPPOSpecial,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowOPPOSpecial(it)) }
+                        )
+                    }
+                }
+            }
+
+            item { SmallTitle(stringResource(R.string.config_managed_installer_packages_title)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixManagedPackagesWidget(
+                        noContentTitle = stringResource(R.string.config_no_preset_install_sources),
+                        packages = state.managedInstallerPackages,
+                        onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
+                        onRemovePackage = {
+                            viewModel.dispatch(
+                                PreferredViewAction.RemoveManagedInstallerPackage(it)
+                            )
+                        }
+                    )
+                }
+            }
+
+            item { SmallTitle(stringResource(R.string.config_managed_blacklist_by_package_name_title)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixManagedPackagesWidget(
+                        noContentTitle = stringResource(R.string.config_no_managed_blacklist),
+                        packages = state.managedBlacklistPackages,
+                        onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it)) },
+                        onRemovePackage = {
+                            viewModel.dispatch(
+                                PreferredViewAction.RemoveManagedBlacklistPackage(it)
+                            )
+                        }
+                    )
+                }
+            }
+
+            item { SmallTitle(stringResource(R.string.config_managed_blacklist_by_shared_user_id_title)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 16.dp)
+                ) {
+                    MiuixManagedUidsWidget(
+                        noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
+                        uids = state.managedSharedUserIdBlacklist,
+                        onAddUid = {
+                            viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
+                        },
+                        onRemoveUid = {
+                            viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it))
+                        }
+                    )
+                    AnimatedVisibility(
+                        visible = state.managedSharedUserIdBlacklist.isNotEmpty(),
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                        MiuixManagedPackagesWidget(
+                            noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                            noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
+                            packages = state.managedSharedUserIdExemptedPackages,
+                            infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                            isInfoVisible = state.managedSharedUserIdExemptedPackages.isNotEmpty(),
+                            onAddPackage = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
+                                        it
+                                    )
+                                )
+                            },
+                            onRemovePackage = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
+                                        it
+                                    )
+                                )
+                            }
                         )
                     }
                 }

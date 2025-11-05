@@ -268,6 +268,9 @@ private fun MiuixItemsWidget(
                 viewModel = viewModel,
                 app = it
             )
+            SideEffect {
+                alpha = 1f
+            }
         }
     }
 }

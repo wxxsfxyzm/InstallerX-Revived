@@ -164,8 +164,8 @@
     <string name="config_managed_blacklist_by_package_name_title">Apps prohibited from installation by package name</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">Apps prohibited from installation by SharedUID</string>
     <string name="config_no_preset_install_sources">No preset install sources</string>
-    <string name="config_no_managed_blacklist">Fill in the package names of blocked apps here</string>
-    <string name="config_no_managed_shared_user_id_blacklist">No apps prohibited from installation by shared user ID</string>
+    <string name="config_no_managed_blacklist">No apps prohibited from installation by packageName</string>
+    <string name="config_no_managed_shared_user_id_blacklist">No apps prohibited from installation by sharedUID</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Exemptions that only target SharedUID; if it is forbidden by package name, it still cannot be installed.</string>
     <string name="config_add_new_shared_uid">Add New Shared User ID</string>
     <string name="config_shared_uid_name">Shared User ID name</string>

@@ -157,8 +157,8 @@
     <string name="config_managed_blacklist_by_package_name_title">根据包名禁止安装应用程序</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">根据SharedUID禁止安装应用程序</string>
     <string name="config_no_preset_install_sources">没有预设的安装来源</string>
-    <string name="config_no_managed_blacklist">在这里填写需要禁止安装的应用</string>
-    <string name="config_no_managed_shared_user_id_blacklist">没有根据SharedUID禁止安装的应用</string>
+    <string name="config_no_managed_blacklist">没有需要禁止安装的应用包名</string>
+    <string name="config_no_managed_shared_user_id_blacklist">没有需要禁止安装的应用sharedUID</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">排除仅针对SharedUID，如果按包名禁止则依然不能安装</string>
     <string name="config_add_new_shared_uid">添加新的共享用户 ID</string>
     <string name="config_shared_uid_name">SharedUID 名称</string>

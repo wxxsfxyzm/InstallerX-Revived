@@ -259,11 +259,11 @@ private fun DataItemWidget(
                         Spacer(modifier = Modifier.size(8.dp))
                         Card(
                             colors = CardDefaults.defaultColors(
-                                color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+                                color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
                                 contentColor = MiuixTheme.colorScheme.onSurface
                             )
                         ) {
-                            Box(modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)) {
+                            Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                                 Text(
                                     text = stringResource(R.string.config_global_default),
                                     color = MiuixTheme.colorScheme.primary,

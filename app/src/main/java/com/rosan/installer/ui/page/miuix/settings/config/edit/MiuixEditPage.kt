@@ -197,7 +197,7 @@ fun MiuixEditPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 16.dp)
                 ) {
                     MiuixDataForAllUserWidget(viewModel = viewModel)
                     MiuixDataAllowTestOnlyWidget(viewModel = viewModel)
