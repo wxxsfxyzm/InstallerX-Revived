@@ -372,6 +372,7 @@
     <string name="exception_package_manager_name_not_found">找不到对应包名的应用</string>
     <string name="exception_shizuku_not_work">请激活Sui或Shizuku，并授予权限</string>
     <string name="exception_dhizuku_not_work">请激活Dhizuku，并授予权限</string>
+    <string name="exception_dhizuku_dead_service">Dhizuku远程服务已经死亡</string>
     <string name="exception_root_not_work">请授予ROOT权限</string>
     <string name="exception_app_process_not_work">授权器启动失败</string>
     <string name="old_version_prefix">当前</string>

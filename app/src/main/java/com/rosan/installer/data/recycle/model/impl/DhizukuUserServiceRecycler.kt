@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.ServiceConnection
+import android.os.DeadObjectException
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.Keep
@@ -12,6 +13,7 @@ import com.rosan.dhizuku.api.DhizukuUserServiceArgs
 import com.rosan.installer.IDhizukuUserService
 import com.rosan.installer.IPrivilegedService
 import com.rosan.installer.data.recycle.model.entity.DhizukuPrivilegedService
+import com.rosan.installer.data.recycle.model.exception.DhizukuDeadServiceException
 import com.rosan.installer.data.recycle.repo.Recycler
 import com.rosan.installer.data.recycle.repo.recyclable.UserService
 import com.rosan.installer.data.recycle.util.requireDhizukuPermissionGranted
@@ -25,6 +27,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 
+@SuppressLint("LogNotTimber")
 object DhizukuUserServiceRecycler : Recycler<DhizukuUserServiceRecycler.UserServiceProxy>(),
     KoinComponent {
     class UserServiceProxy(
@@ -38,18 +41,9 @@ object DhizukuUserServiceRecycler : Recycler<DhizukuUserServiceRecycler.UserServ
         }
     }
 
-    @SuppressLint("LogNotTimber")
     class DhizukuUserService @Keep constructor(context: Context) : IDhizukuUserService.Stub() {
         init {
-            // 在远程服务进程中，必须首先初始化 Dhizuku API。
-            // 否则会导致AssertionError
-            if (Dhizuku.init(context)) {
-                // 在此处记录日志，因为初始化失败将导致所有后续操作失败。
-                // 也可以选择抛出一个异常来提前终止。
-                Log.d("DhizukuUserService", "Dhizuku.init() succeeded in remote process!")
-            } else {
-                Log.e("DhizukuUserService", "CRITICAL: Dhizuku.init() failed in remote process!")
-            }
+            Dhizuku.init(context)
             Log.d(
                 "DhizukuUserService",
                 "Dhizuku.mOwnerComponent: ${Dhizuku.getOwnerComponent()}"
@@ -75,21 +69,31 @@ object DhizukuUserServiceRecycler : Recycler<DhizukuUserServiceRecycler.UserServ
 
     private suspend fun onInnerMake(): UserServiceProxy = callbackFlow {
         val connection = object : ServiceConnection {
-            @SuppressLint("LogNotTimber")
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 if (service == null) {
-                    // 记录一个明确的错误，并通知调用者连接失败
                     Log.e(
                         "onServiceConnected",
                         "Failed to connect to DhizukuUserService because the remote service failed to start."
                     )
-                    close(IllegalStateException("Remote service connection failed."))
+                    close(IllegalStateException("Remote service connection failed, binder is null."))
                     return
                 }
-                trySend(UserServiceProxy(this, IDhizukuUserService.Stub.asInterface(service)))
-                service.linkToDeath({
-                    if (entity?.service == service) recycleForcibly()
-                }, 0)
+
+                try {
+                    val proxy = UserServiceProxy(this, IDhizukuUserService.Stub.asInterface(service))
+                    trySend(proxy)
+
+                    service.linkToDeath({
+                        if (entity?.service == service) recycleForcibly()
+                    }, 0)
+
+                } catch (e: DeadObjectException) {
+                    Log.e("onServiceConnected", "Remote Dhizuku process died during the connection attempt.", e)
+                    close(DhizukuDeadServiceException("Failed to connect: The remote Dhizuku process has died.", e))
+                } catch (e: Exception) {
+                    Log.e("onServiceConnected", "An unexpected error occurred during service connection.", e)
+                    close(IllegalStateException("An unexpected error occurred during service connection.", e))
+                }
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {

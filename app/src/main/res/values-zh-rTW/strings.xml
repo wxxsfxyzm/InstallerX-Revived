@@ -341,6 +341,7 @@
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS 不允許在此處解除安裝該應用程式</string>
     <string name="exception_shizuku_not_work">請啟用 Sui 或 Shizuku，並授予權限</string>
     <string name="exception_dhizuku_not_work">請啟用 Dhizuku，並授予權限</string>
+    <string name="exception_dhizuku_dead_service">Dhizuku遠端服務已經死亡</string>
     <string name="exception_root_not_work">請授予 ROOT 權限</string>
     <string name="exception_app_process_not_work">授權器啟動失敗</string>
     <string name="old_version_prefix">目前</string>
