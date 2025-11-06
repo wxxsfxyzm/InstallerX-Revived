@@ -46,7 +46,7 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 - **System Icons:** Support for displaying system icon packs during installation. Allows switching between APK icons and system icon packs through a toggle.
 - **Version Comparison:** Support for displaying version number comparison in single-line or multi-line format.
 - **SDK Information:** Installation dialogs show targetSDK and minSDK in single-line or multi-line format.
-- **Session Install Confirmation**: With the help of [InxLocker](https://github.com/Chimioo/InxLocker), confirm install from store apps (Aurora Store/F-Droid/...) is now supported.
+- **Session Install Confirmation**: With the help of [InxLocker](https://github.com/Chimioo/InxLocker), confirming installations from store apps (Aurora Store, F-Droid, etc.) is now supported.
 - **Bypass Interceptions:** Shizuku/Root can bypass custom OS chain-start restrictions when opening an App after installation.
     - Currently only works for dialog installation.
     - Dhizuku lacks sufficient permissions, so a customizable countdown option was added to reserve time for the app opening action.
