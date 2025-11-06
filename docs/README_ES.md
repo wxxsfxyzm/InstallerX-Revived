@@ -69,9 +69,9 @@ En comparación con los instaladores de stock, **InstallerX Revived** ofrece má
         - Al hacer clic en "Instalar" en la notificación, se selecciona la mejor opción y se continúa con la instalación.
         - En el diálogo, la mejor opción está seleccionada por defecto, pero se puede elegir manualmente.
     - La interfaz de selección de divisiones muestra descripciones amigables para el usuario.
-- **Soporte de arquitectura:** Permite instalar paquetes armeabi-v7a, armeabi/X86 en sistemas solo arm64-v8a/X86_64 (la funcionalidad real depende de que el sistema proporcione traducción en tiempo de ejecución).
+- **Soporte de arquitectura:** Permite instalar paquetes armeabi-v7a en sistemas solo arm64-v8a. La funcionalidad real depende de que el sistema proporcione traducción en tiempo de ejecución.
 - **Downgrade con o sin datos:** Soporte para realizar downgrades de apps con o sin preservación de datos en algunos sistemas OEM Android 15/16 (con optimización del sistema activada, como HyperOS).
-    - Esta característica solo admite Android 15. En Android 14, prueba la opción `Permitir downgrade` en las opciones de instalación.
+    - Esta característica solo admite Android 15. En Android 14 versiones anteriores, prueba la opción `Permitir downgrade` en las opciones de instalación.
     - La característica está disponible en las sugerencias inteligentes del diálogo de instalación. Para usarla, activa primero la opción `Mostrar sugerencias inteligentes`.
     - **¡Usa esta característica con extrema precaución en apps del sistema!** La pérdida de datos de una app del sistema podría dejar el dispositivo inutilizable.
     - No compatible con OneUI 7.0, RealmeUI y algunas versiones de ColorOS (restricciones de AOSP). Si solo ves la opción de downgrade *sin* preservación de datos, significa que tu sistema no permite downgrade *con* datos.
