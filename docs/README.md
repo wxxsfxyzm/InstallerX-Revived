@@ -53,7 +53,7 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 - **Extended Menu:** For dialog installation (can be enabled in settings):
     - Displays permissions requested by the application.
     - InstallFlags configuration (can inherit global Profile settings).
-      - **Important** Setting InstallFlags **does not guarantee** they will always work. Some options might pose security risks, depending on the system.
+      - **Important:** Setting InstallFlags **does not guarantee** they will always work. Some options might pose security risks, depending on the system.
 - **Preset Sources:** Support for pre-configuring installation source package names in settings, allowing quick selection in profiles and the dialog installation menu.
 - **Install from ZIP:** Support for installing APK files inside ZIP archives (dialog installation only).
     - Supports unlimited quantity and multiple ZIP files.
