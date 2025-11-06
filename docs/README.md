@@ -15,7 +15,7 @@
 
 Looking for a better app installer? Try **InstallerX**!
 
-Many customized Chinese ROMs come with subpar default installers. You can replace them with **InstallerX**.
+Many customized Chinese ROMs come with subpar default installers. You can replace them with **InstallerX Revived**.
 
 Compared to stock installers, **InstallerX Revived** offers more installation features:
 - Rich installation types: APK, APKS, APKM, XAPK, APKs inside ZIP, and batch APKs.
@@ -24,11 +24,11 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 - Automatic installation
 - Installer declaration
 - Setting install flags (can inherit Profile settings)
-- Install For specific user / all users
+- Install for specific user / all users
 - Dex2oat after successful installation
-- Block installation of specific app's packageName or by sharedUID
+- Block the installation of specific app's packageName or by sharedUID
 - Auto-delete APK after installation
-- No shell commands, native api call only
+- No shell commands, native API calls only
 
 ## Supported Versions
 
@@ -46,20 +46,20 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 - **System Icons:** Support for displaying system icon packs during installation. Allows switching between APK icons and system icon packs through a toggle.
 - **Version Comparison:** Support for displaying version number comparison in single-line or multi-line format.
 - **SDK Information:** Installation dialogs show targetSDK and minSDK in single-line or multi-line format.
-- **Confirm Session Install:** With the help of [InxLocker](https://github.com/Chimioo/InxLocker), confirming session install is supported.
+- **Session Install Confirmation**: With the help of [InxLocker](https://github.com/Chimioo/InxLocker), this feature is now supported.
 - **Bypass Interceptions:** Shizuku/Root can bypass custom OS chain-start restrictions when opening an App after installation.
     - Currently only works for dialog installation.
-    - Dhizuku cannot invoke this privileged action, so a customizable countdown option was added to reserve time for the app opening action.
+    - Dhizuku lacks sufficient permissions, so a customizable countdown option was added to reserve time for the app opening action.
 - **Extended Menu:** For dialog installation (can be enabled in settings):
     - Displays permissions requested by the application.
     - InstallFlags configuration (can inherit global Profile settings).
       - **Important** Setting InstallFlags **does not guarantee** they will always work. Some options might pose security risks, depending on the system.
 - **Preset Sources:** Support for pre-configuring installation source package names in settings, allowing quick selection in profiles and the dialog installation menu.
 - **Install from ZIP:** Support for installing APK files inside ZIP archives (dialog installation only).
-    - No quantity limit, multiple zips also supported.
+    - Supports unlimited quantity and multiple ZIP files.
     - Supports APK files in nested directories within the ZIP, **not limited to the root directory**.
     - Supports automatic handling of multiple versions of the same package:
-        - Deduplication.
+        - Deduplication
         - Smart selection of the best package to install.
 - **Batch Installation:** Support for installing multiple APKs at once (multi-select and share to InstallerX).
     - Dialog installation only.
@@ -68,24 +68,24 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
     - Supports automatic handling of multiple versions of the same package (deduplication and smart selection).
 - **APKS/APKM/XAPK Files:** Support for automatic selection of the best split.
     - Supports both notification and dialog installation.
-        - Clicking "Install" in the notification chooses the best option and proceed.
+        - Clicking "Install" in the notification selects the best option and proceeds with installation.
         - In the dialog, the best option is selected by default, but can be chosen manually.
     - The split selection interface shows user-friendly descriptions.
-- **Architecture Support:** Allows installing armeabi-v7a packages on arm64-v8a only systems. Actual functionality depends on the system providing runtime translation.
-- **Downgrade with/without Data:** Support for performing app downgrades with or without data preservation on some OEM Android 15/16 systems.
+- **Architecture Support:** Allows installing armeabi-v7 packages on arm64-v8a only systems (actual functionality depends on the system providing runtime translation).
+- **Downgrade with or without Data:** Support for performing app downgrades with or without data preservation on some OEM Android 15/16 systems (with system optimization enabled, like HyperOS).
     - This feature only supports Android 15. On Android 14 or below, try the `Allow downgrade` option in the install options.
     - The feature is available in the smart suggestions of the dialog installation. To use it, first enable the `Show smart suggestions` option.
-    - **Use this feature with extreme caution on system apps!** Loss of system app data could let your device unusable.
-    - Not compatible with OneUI 7.0, RealmeUI, and some ColorOS versions (AOSP restrictions). If you only see the downgrade option *without* data preservation, it means your system does not support downgrade *with* data.
+    - **Use this feature with extreme caution on system apps!** Loss of data from a system app could render the device unusable.
+    - Not compatible with OneUI 7.0, RealmeUI, and some ColorOS versions (AOSP has fixed). If you only see the downgrade option *without* data preservation, it means your system does not support downgrade *with* data.
 - **Blacklist:** Support for configuring a list of banned package names for installation in the settings.
     - Support blacklist by packageName / sharedUID with exemptions
     - `Allow once` in smart suggestions
 - **DexOpt:** After successful installation, the app can automatically perform dex2oat on the installed applications according to the configured Profile settings.
-    - Not support Dhizuku
+    - Does not support Dhizuku
 - **Signature Verification：** Verify the signature of the installed app and apk to install, and give a warning if they do not match.
 - **Select Target User:** Support installing apps to a specific user.
-    - Get current user info dynamically
-    - Not support Dhizuku
+    - Dynamically obtain current user details.
+    - Does not support Dhizuku
     - Can be overridden by `Install For All Users` install option
 - **Declare as Uninstaller:** Accept Uninstall intent on certain OS, custom OS may not be supported.
 - [Experimental] **Directly Install From Download Link:** The online version supports directly sharing the download link of an APK file to InstallerX for installation. Currently, the APK is not kept locally, but an option to retain the installation package will be added in the future.
@@ -107,27 +107,27 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
     - Works best with: [Chimioo/InxLocker](https://github.com/Chimioo/InxLocker)
     - Other lockers working as LSPosed are no longer recommended
 
-- An error occurred in the resolving phase: `No Content Provider` or `reading provider` reported `Permission Denial`?
+- An error occurred in the resolution phase: `No Content Provider` or `reading provider` reported `Permission Denial`?
     - You have enabled Hide app list or similar functions, please configure the whitelist.
 
 - **HyperOS shows "Installing system apps requires declaring a valid installer" error**
-    - It's a system security restriction. You must declare an installer that is a system app (recommended: `com.android.fileexplorer` or `com.android.vending`).
+    - It's a system security restriction. You must declare an installer that is a system app (recommended: `com.android.fileexplorer` or `com.android.vending` for HyperOS; app store for Vivo).
     - Works with Shizuku/Root. **Dhizuku is not supported**.
     - New feature: InstallerX automatically detects HyperOS and adds a default configuration (`com.miui.packageinstaller`). You can change it in the settings if needed.
 
 - **HyperOS reinstalls the default installer / locking fails**
-    - Try enabling `Auto Lock Installer` in the settings.
+    - Try enabling `Auto Lock Installer` in settings.
     - On some HyperOS versions, locking failure is expected.
     - HyperOS intercepts USB installation requests (ADB/Shizuku) with a dialog. If the user rejects the installation of a new app, the system will revoke the installer setting and force the default one. If this happens, lock InstallerX again.
 
 - **Notification progress bar freezes**
     - Some custom OS has very strict background app controls. Set "No background restrictions" for the app if you encounter this.
-    - The app is optimized: it ends all background services and closes 1 seconds after completing the installation task (when the user clicks "Done" or clears the notification). You can enable the foreground service notification to monitor.
+    - The app is optimized: it ends all background services and closes 1 second after completing the installation task (when the user clicks "Done" or clears the notification). You can enable the foreground service notification to monitor.
 
 - **Problems on Oppo/Vivo/Lenovo/... systems?**
     - We do not have devices from these brands for testing. You can discuss it in [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions), or report through our [Telegram Channel](https://t.me/installerx_revived).
-    - To lock the installer on Oppo/Vivo, use the lock tool (Lock Tool).
-    - To install apps through shizuku on Honor Devices, disable `Monitor ADB install` in developer settings.    
+    - To lock the installer on Oppo/Vivo, use the lock tool.
+    - To install apps through shizuku on Honor devices, disable `Monitor ADB install` in developer settings.
 
 ## About Releases
 
@@ -138,7 +138,7 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 - **`dev` branch:** Contains features under development. If you want to test them, look for the corresponding CI builds in Github Actions.
 - **`main` branch:** When stable changes are merged from `dev`, the CI/CD system automatically builds and publishes a new alpha version.
 - **Stable releases:** Manually published when finishing a development/testing phase. CI/CD automatically publishes them as a release.
-- **About network permission:** With feature expansion, some network-related functions have been introduced. However, many users prefer the installer to remain purely local without requiring network access. Therefore, two versions will be released: **online** and **offline**. Both versions share the same package name, version code, and signature, and can be installed side by side. Please download according to your needs.
+- **About network permission:** As features have expanded, some network-related functions have been introduced. However, many users prefer the installer to remain purely local without requiring network access. Therefore, two versions will be released: **online** and **offline**. Both versions share the same package name, version code, and signature, so they can't be installed side by side (one will overwrite the other). Please download according to your needs.
   - **Online version**: Supports sharing direct download links to InstallerX for installation. More network-related utilities may be added in the future, but network permission will **never** be used for non-installation purposes. Safe to use.
   - **Offline version**: Requests no network permissions at all. When attempting to use online features, you will receive a clear error message. This version remains a purely local installer.
 
