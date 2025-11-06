@@ -46,7 +46,7 @@ En comparación con los instaladores de stock, **InstallerX Revived** ofrece má
 - **Iconos del sistema:** Soporte para mostrar paquetes de iconos del sistema durante la instalación. Permite alternar entre iconos de APK y paquetes de iconos del sistema mediante un interruptor.
 - **Comparación de versiones:** Soporte para mostrar la comparación de números de versión en formato de una línea o múltiples líneas.
 - **Información SDK:** Diálogos de instalación muestran targetSDK y minSDK en formato de una línea o múltiples líneas.
-- **Confirmación de instalación por sesión**: Con la ayuda de [InxLocker](https://github.com/Chimioo/InxLocker), esta función ahora es compatible.
+- **Confirmación de instalación por sesión**: Con la ayuda de [InxLocker](https://github.com/Chimioo/InxLocker), confirmar instalación desde tiendas de apps (Aurora Store, F-Droid, etc) ahora es compatible.
 - **Evitar intercepciones:** Shizuku/Root puede evitar restricciones de inicio en cadena de OS personalizados al abrir una App después de la instalación.
     - Actualmente solo funciona para instalación por diálogo.
     - Dhizuku carece de permisos suficientes, por lo que se añadió una opción de cuenta regresiva personalizable para reservar tiempo para la acción de abrir la app.
@@ -70,7 +70,7 @@ En comparación con los instaladores de stock, **InstallerX Revived** ofrece má
         - En el diálogo, la mejor opción está seleccionada por defecto, pero se puede elegir manualmente.
     - La interfaz de selección de divisiones muestra descripciones amigables para el usuario.
 - **Soporte de arquitectura:** Permite instalar paquetes armeabi-v7a en sistemas solo arm64-v8a. La funcionalidad real depende de que el sistema proporcione traducción en tiempo de ejecución.
-- **Downgrade con o sin datos:** Soporte para realizar downgrades de apps con o sin preservación de datos en algunos sistemas OEM Android 15/16 (con optimización del sistema activada, como HyperOS).
+- **Downgrade con o sin datos:** Soporte para realizar downgrades de apps con o sin preservación de datos en algunos sistemas OEM Android 15.
     - Esta característica solo admite Android 15. En Android 14 versiones anteriores, prueba la opción `Permitir downgrade` en las opciones de instalación.
     - La característica está disponible en las sugerencias inteligentes del diálogo de instalación. Para usarla, activa primero la opción `Mostrar sugerencias inteligentes`.
     - **¡Usa esta característica con extrema precaución en apps del sistema!** La pérdida de datos de una app del sistema podría dejar el dispositivo inutilizable.
@@ -136,7 +136,7 @@ En comparación con los instaladores de stock, **InstallerX Revived** ofrece má
 - **Rama `dev`:** Contiene características en desarrollo. Si quieres probarlas, busca las builds CI correspondientes en Github Actions.
 - **Rama `main`:** Cuando se fusionan cambios estables desde `dev`, el sistema CI/CD construye y publica automáticamente una nueva versión alpha.
 - **Versiones estables:** Publicadas manualmente al finalizar una fase de desarrollo/pruebas. CI/CD las publica automáticamente como release.
-- **Sobre permiso de red:** A medida que las características se han expandido, se han introducido funciones relacionadas con la red. Sin embargo, muchos usuarios prefieren que el instalador permanezca puramente local sin requerir acceso a la red. Por lo tanto, se lanzarán dos versiones: **online** y **offline**. Ambas versiones comparten el mismo nombre de paquete, código de versión y firma, por lo que no se pueden instalar lado a lado (una sobrescribirá la otra). Por favor, descarga según tus necesidades.
+- **Sobre permiso de red:** A medida que las caracteristicas se han expandido, se han introducido funciones relacionadas con el uso de red. Sin embargo, muchos usuarios prefieren que el instalador permanezca puramente local sin requerir acceso a la red. Por lo tanto, se ofrecen dos versiones: **online** y **offline**. Ambas versiones comparten el mismo nombre de paquete, código de versión y firma, por lo que no se pueden instalar lado a lado (pero pueden reemplazarse directamente). Por favor, descarga según tus necesidades.
   - **Versión online**: Permite compartir enlaces de descarga directos a InstallerX para instalación. Se pueden añadir más utilidades relacionadas con la red en el futuro, pero el permiso de red **nunca** se usará para propósitos no relacionados con la instalación. Segura de usar.
   - **Versión offline**: No solicita permisos de red en absoluto. Al intentar usar características online, recibirás un mensaje de error claro. Esta versión permanece como un instalador puramente local.
 
