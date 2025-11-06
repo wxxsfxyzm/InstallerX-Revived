@@ -36,6 +36,7 @@ import androidx.compose.material.icons.twotone.ColorLens
 import androidx.compose.material.icons.twotone.Compress
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
+import androidx.compose.material.icons.twotone.DoNotDisturbOnTotalSilence
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Expand
@@ -130,6 +131,7 @@ object AppIcons {
     val ClearAll = Icons.TwoTone.ClearAll
     val LiveActivity = Icons.AutoMirrored.TwoTone.Send
     val IconPack = Icons.TwoTone.Widgets
+    val Silent = Icons.TwoTone.DoNotDisturbOnTotalSilence
     val OEMSpecial = Icons.TwoTone.FindInPage
     // --- 设置图标结束 ---
 

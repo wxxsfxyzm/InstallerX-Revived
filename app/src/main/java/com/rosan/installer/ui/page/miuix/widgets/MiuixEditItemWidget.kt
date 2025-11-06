@@ -105,7 +105,7 @@ fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
     SuperSpinner(
         mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(R.string.config_authorizer),
-        // summary = data[stateAuthorizer], // Display current selection text
+        summary = stringResource(R.string.config_install_authorizer_desc),
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->

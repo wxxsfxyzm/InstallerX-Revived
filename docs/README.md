@@ -59,7 +59,7 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
     - Supports unlimited quantity and multiple ZIP files.
     - Supports APK files in nested directories within the ZIP, **not limited to the root directory**.
     - Supports automatic handling of multiple versions of the same package:
-        - Deduplication (remove duplicates).
+        - Deduplication
         - Smart selection of the best package to install.
 - **Batch Installation:** Support for installing multiple APKs at once (multi-select and share to InstallerX).
     - Dialog installation only.
@@ -71,9 +71,9 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
         - Clicking "Install" in the notification selects the best option and proceeds with installation.
         - In the dialog, the best option is selected by default, but can be chosen manually.
     - The split selection interface shows user-friendly descriptions.
-- **Architecture Support:** Allows installing armeabi-v7a, armeabi/X86 packages on arm64-v8a/X86_64 only systems (actual functionality depends on the system providing runtime translation).
+- **Architecture Support:** Allows installing armeabi-v7 packages on arm64-v8a only systems (actual functionality depends on the system providing runtime translation).
 - **Downgrade with or without Data:** Support for performing app downgrades with or without data preservation on some OEM Android 15/16 systems (with system optimization enabled, like HyperOS).
-    - This feature only supports Android 15. On Android 14, try the `Allow downgrade` option in the install options.
+    - This feature only supports Android 15. On Android 14 or below, try the `Allow downgrade` option in the install options.
     - The feature is available in the smart suggestions of the dialog installation. To use it, first enable the `Show smart suggestions` option.
     - **Use this feature with extreme caution on system apps!** Loss of data from a system app could render the device unusable.
     - Not compatible with OneUI 7.0, RealmeUI, and some ColorOS versions (AOSP has fixed). If you only see the downgrade option *without* data preservation, it means your system does not support downgrade *with* data.
@@ -127,7 +127,7 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 - **Problems on Oppo/Vivo/Lenovo/... systems?**
     - We do not have devices from these brands for testing. You can discuss it in [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions), or report through our [Telegram Channel](https://t.me/installerx_revived).
     - To lock the installer on Oppo/Vivo, use the lock tool.
-    - To install apps through shizuku on Honor devices, disable `Monitor ADB install` in developer settings.    
+    - To install apps through shizuku on Honor devices, disable `Monitor ADB install` in developer settings.
 
 ## About Releases
 

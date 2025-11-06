@@ -1,0 +1,73 @@
+package com.rosan.installer.ui.page.miuix.installer.sheetcontent
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.rosan.installer.R
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.patched.ProgressButton
+import top.yukonga.miuix.kmp.basic.patched.ProgressButtonDefaults
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+@Composable
+fun InstallPreparingContent(viewModel: InstallerViewModel) {
+    val currentState = viewModel.state
+    val progress = if (currentState is InstallerViewState.Preparing) {
+        currentState.progress
+    } else {
+        0f
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.5f)
+    ) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(bottom = 100.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            InfiniteProgressIndicator()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(R.string.installer_preparing_desc),
+                style = MiuixTheme.textStyles.body1
+            )
+        }
+
+        ProgressButton(
+            progress = progress,
+            onClick = {
+                viewModel.dispatch(InstallerViewAction.Close)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 24.dp),
+            colors = ProgressButtonDefaults.progressButtonColors(
+                trackColor = MiuixTheme.colorScheme.secondaryVariant,
+                progressColor = MiuixTheme.colorScheme.primary,
+                contentColor = MiuixTheme.colorScheme.onPrimary
+            )
+        ) {
+            Text(text = stringResource(R.string.loading))
+        }
+    }
+}

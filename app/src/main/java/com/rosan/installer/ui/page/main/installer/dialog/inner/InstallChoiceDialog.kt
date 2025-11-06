@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.entity.MmzSelectionMode
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
@@ -55,6 +56,8 @@ import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.util.getSupportSubtitle
+import com.rosan.installer.ui.util.getSupportTitle
 import com.rosan.installer.util.asUserReadableSplitName
 import timber.log.Timber
 
@@ -67,13 +70,10 @@ fun installChoiceDialog(
 
     val isMultiApk = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
     val isModuleApk = containerType == DataType.MIXED_MODULE_APK
+    val isMixedModuleZip = containerType == DataType.MIXED_MODULE_ZIP
+    var selectionMode by remember(containerType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
 
-    val titleRes = when (containerType) {
-        DataType.MIXED_MODULE_APK -> R.string.installer_select_from_mixed_module_apk
-        DataType.MULTI_APK_ZIP -> R.string.installer_select_from_zip
-        DataType.MULTI_APK -> R.string.installer_select_multi_apk
-        else -> R.string.installer_select_install
-    }
+    val titleRes = containerType.getSupportTitle()
     val primaryButtonText = if (isMultiApk) R.string.install else R.string.next
     val primaryButtonAction = if (isMultiApk) {
         { viewModel.dispatch(InstallerViewAction.InstallMultiple) }
@@ -85,25 +85,24 @@ fun installChoiceDialog(
         icon = DialogInnerParams(DialogParamsType.IconWorking.id, workingIcon),
         title = DialogInnerParams(DialogParamsType.InstallChoice.id) { Text(stringResource(titleRes)) },
         subtitle = DialogInnerParams(DialogParamsType.InstallChoice.id) {
-            when (containerType) {
-                DataType.APKS, DataType.XAPK, DataType.APKM -> Text(stringResource(R.string.installer_select_split_desc))
-                DataType.MIXED_MODULE_APK -> Text(stringResource(R.string.installer_mixed_module_apk_description))
-                DataType.MULTI_APK_ZIP -> Text(stringResource(R.string.installer_multi_apk_zip_description))
-                DataType.MULTI_APK -> Text(stringResource(R.string.installer_multi_apk_description))
-                else -> null
-            }
+            containerType.getSupportSubtitle(selectionMode)?.let { Text(it) }
         },
         content = DialogInnerParams(DialogParamsType.InstallChoice.id) {
             ChoiceContent(
                 analysisResults = analysisResults,
                 viewModel = viewModel,
                 isModuleApk = isModuleApk,
-                isMultiApk = isMultiApk
+                isMultiApk = isMultiApk,
+                isMixedModuleZip = isMixedModuleZip,
+                selectionMode = selectionMode,
+                onSetSelectionMode = { selectionMode = it }
             )
         },
         buttons = DialogButtons(DialogParamsType.InstallChoice.id) {
             buildList {
-                if (!isModuleApk)
+                if ((!isModuleApk && !isMixedModuleZip) ||
+                    (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE)
+                )
                     add(DialogButton(stringResource(primaryButtonText), onClick = primaryButtonAction))
                 add(DialogButton(stringResource(R.string.cancel)) { viewModel.dispatch(InstallerViewAction.Close) })
             }
@@ -116,7 +115,10 @@ private fun ChoiceContent(
     analysisResults: List<PackageAnalysisResult>,
     viewModel: InstallerViewModel,
     isModuleApk: Boolean = false,
-    isMultiApk: Boolean
+    isMultiApk: Boolean,
+    isMixedModuleZip: Boolean,
+    selectionMode: MmzSelectionMode,
+    onSetSelectionMode: (MmzSelectionMode) -> Unit
 ) {
     // Define shapes for different positions
     val cornerRadius = 16.dp
@@ -156,7 +158,7 @@ private fun ChoiceContent(
                         SettingsNavigationItemWidget(
                             iconPlaceholder = false,
                             title = baseEntityInfo.label ?: "N/A",
-                            description = "Package: ${baseEntityInfo.packageName}",
+                            description = stringResource(R.string.installer_package_name, baseEntityInfo.packageName),
                             onClick = {
                                 // The initial state of baseSelectableEntity.selected is false.
                                 // Toggling it will set its 'selected' state to true.
@@ -180,7 +182,7 @@ private fun ChoiceContent(
                         SettingsNavigationItemWidget(
                             iconPlaceholder = false,
                             title = moduleEntityInfo.name,
-                            description = "Module ID: ${moduleEntityInfo.id}",
+                            description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
                             onClick = {
                                 // The initial state of moduleSelectableEntity.selected is false.
                                 // Toggling it will set its 'selected' state to true.
@@ -199,9 +201,62 @@ private fun ChoiceContent(
                 }
             }
         )
-    } else if (isMultiApk) {
+    } else if (isMixedModuleZip && selectionMode == MmzSelectionMode.INITIAL_CHOICE) {
+        val allSelectableEntities = analysisResults.flatMap { it.appEntities }
+        val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }
+        val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
+
+        SplicedColumnGroup(
+            content = buildList {
+                if (moduleSelectableEntity != null) {
+                    val moduleEntityInfo = moduleSelectableEntity.app as AppEntity.ModuleEntity
+                    add {
+                        SettingsNavigationItemWidget(
+                            iconPlaceholder = false,
+                            title = stringResource(R.string.installer_choice_install_as_module),
+                            description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
+                            onClick = {
+                                viewModel.dispatch(
+                                    InstallerViewAction.ToggleSelection(
+                                        packageName = moduleSelectableEntity.app.packageName,
+                                        entity = moduleSelectableEntity,
+                                        isMultiSelect = false
+                                    )
+                                )
+                                viewModel.dispatch(InstallerViewAction.InstallPrepare)
+                            }
+                        )
+                    }
+                }
+                if (baseSelectableEntity != null) {
+                    add {
+                        SettingsNavigationItemWidget(
+                            iconPlaceholder = false,
+                            title = stringResource(R.string.installer_choice_install_as_app),
+                            description = stringResource(R.string.installer_choice_install_as_app_desc),
+                            onClick = {
+                                onSetSelectionMode(MmzSelectionMode.APK_CHOICE)
+                            }
+                        )
+                    }
+                }
+            }
+        )
+    } else if (isMultiApk || (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE)) {
         // --- Multi-APK Mode ---
-        val listSize = analysisResults.size
+        val resultsForList = if (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE) {
+            analysisResults.mapNotNull { pkgResult ->
+                val apkEntities = pkgResult.appEntities.filter {
+                    it.app is AppEntity.BaseEntity || it.app is AppEntity.SplitEntity || it.app is AppEntity.DexMetadataEntity
+                }
+                if (apkEntities.isEmpty()) null
+                else pkgResult.copy(appEntities = apkEntities)
+            }
+        } else {
+            analysisResults
+        }
+
+        val listSize = resultsForList.size
         if (listSize == 0) return
 
         LazyColumn(
@@ -209,7 +264,7 @@ private fun ChoiceContent(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            itemsIndexed(analysisResults, key = { _, it -> it.packageName }) { index, packageResult ->
+            itemsIndexed(resultsForList, key = { _, it -> it.packageName }) { index, packageResult ->
                 val shape = when {
                     listSize == 1 -> singleShape
                     index == 0 -> topShape

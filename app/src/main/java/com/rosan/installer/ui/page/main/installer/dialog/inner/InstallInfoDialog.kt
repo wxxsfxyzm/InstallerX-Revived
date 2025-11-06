@@ -112,10 +112,8 @@ fun installInfoDialog(
                 else -> entityToInstall.packageName
             }
 
-    // --- New Icon Loading Logic ---
     // Collect the icon state directly from the ViewModel.
     val displayIcon = iconMap[entityToInstall.packageName]
-    // --- New Icon Loading Logic End ---
 
     return DialogParams(
         icon = DialogInnerParams(uniqueContentKey) {

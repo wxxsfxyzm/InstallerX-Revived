@@ -2,6 +2,7 @@ package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
@@ -28,7 +29,7 @@ internal fun AppInfoSlot(
             contentDescription = "App Icon",
             modifier = Modifier.size(72.dp)
         )
-        Text(label, style = MiuixTheme.textStyles.title2)
+        Text(label, style = MiuixTheme.textStyles.title2, modifier = Modifier.basicMarquee())
         Text(packageName, style = MiuixTheme.textStyles.subtitle)
     }
 }

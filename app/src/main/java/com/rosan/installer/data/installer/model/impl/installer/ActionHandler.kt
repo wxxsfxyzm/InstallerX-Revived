@@ -50,7 +50,6 @@ import com.rosan.installer.util.isSystemInstaller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -205,13 +204,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             return
         }
 
-        // This ensures the "Analysing" UI state is visible for at least a brief moment (e.g., 100ms),
-        // providing a stable starting point for the transition animation, regardless of how fast the analysis is.
-        val elapsedTime = System.currentTimeMillis() - startTime
-        val minDuration = 100L // 100 milliseconds
-        if (elapsedTime < minDuration) {
-            delay(minDuration - elapsedTime)
-        }
+        /*        // This ensures the "Analysing" UI state is visible for at least a brief moment (e.g., 100ms),
+                // providing a stable starting point for the transition animation, regardless of how fast the analysis is.
+                val elapsedTime = System.currentTimeMillis() - startTime
+                val minDuration = 100L // 100 milliseconds
+                if (elapsedTime < minDuration) {
+                    delay(minDuration - elapsedTime)
+                }*/
 
         // --- REFACTORED LOGIC ---
         // The complex logic for deduplication and optimal split selection has been moved to AnalyserRepoImpl.
