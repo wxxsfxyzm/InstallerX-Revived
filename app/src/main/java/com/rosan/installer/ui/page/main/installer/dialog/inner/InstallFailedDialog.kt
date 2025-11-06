@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -19,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,10 +46,10 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.widget.chip.Chip
-import com.rosan.installer.ui.page.main.widget.chip.SuggestionChipInfo
 import com.rosan.installer.ui.page.main.widget.dialog.UninstallConfirmationDialog
 import kotlinx.coroutines.delay
 import timber.log.Timber
+import kotlin.reflect.KClass
 
 // Assume errorText is accessible
 
@@ -121,6 +123,14 @@ private fun ErrorSuggestions(
     val context = LocalContext.current
     var showUninstallConfirmDialog by remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
+
+    class SuggestionChipInfo(
+        vararg val errorClasses: KClass<out Throwable>,
+        val selected: () -> Boolean,
+        val onClick: () -> Unit,
+        @param:StringRes val labelRes: Int,
+        val icon: ImageVector
+    )
 
     val possibleSuggestions = remember(installer) {
         buildList {

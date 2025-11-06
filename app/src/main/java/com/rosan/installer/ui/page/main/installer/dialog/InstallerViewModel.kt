@@ -100,6 +100,7 @@ class InstallerViewModel(
         get() = when (state) {
             is InstallerViewState.Analysing,
             is InstallerViewState.Resolving,
+            is InstallerViewState.Preparing,
             is InstallerViewState.InstallExtendedMenu,
             is InstallerViewState.InstallChoice -> false
 

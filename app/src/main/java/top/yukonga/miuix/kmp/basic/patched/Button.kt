@@ -79,15 +79,19 @@ fun ProgressButton(
             modifier = Modifier
                 .defaultMinSize(minWidth = minWidth, minHeight = minHeight)
                 .drawWithContent {
-                    val cornerRadiusPx = cornerRadius.toPx()
-                    val minProgressWidth = cornerRadiusPx * 2
-                    val progressWidth = minProgressWidth + (size.width - minProgressWidth) * progressCoerced
+                    // Only draw the progress indicator if progress is greater than 0.
+                    if (progressCoerced > 0f) {
+                        val cornerRadiusPx = cornerRadius.toPx()
+                        val minProgressWidth = cornerRadiusPx * 2
+                        val progressWidth =
+                            minProgressWidth + (size.width - minProgressWidth) * progressCoerced
 
-                    drawRoundRect(
-                        color = progressColor,
-                        size = Size(width = progressWidth, height = size.height),
-                        cornerRadius = CornerRadius(cornerRadiusPx)
-                    )
+                        drawRoundRect(
+                            color = progressColor,
+                            size = Size(width = progressWidth, height = size.height),
+                            cornerRadius = CornerRadius(cornerRadiusPx)
+                        )
+                    }
 
                     drawContent()
                 }

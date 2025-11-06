@@ -517,15 +517,26 @@
     <string name="split_name_feature_group_title">Feature Splits</string>
     <!-- SplitNameUtil End -->
 
+    <string name="smart_suggestions">Suggestions</string>
     <string name="suggestion_uninstall_and_retry">Uninstall old and retry</string>
+    <string name="suggestion_uninstall_and_retry_desc">This will uninstall the current version of the app and try to install the new one</string>
     <string name="suggestion_uninstall_and_retry_keep_data">Uninstall old, keep data and retry</string>
+    <string name="suggestion_uninstall_and_retry_keep_data_desc">This will uninstall the current version of the app while keeping its data, then try to install the new one</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_action">Confirm Action</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">This will uninstall the current version of the app while keeping its data, then try to install the new one. DO NOT use on system app!</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">This will uninstall the current version of the app and try to install the new one. DO NOT use on system app!</string>
-    <string name="suggestion_allow_downgrade">Temporarily Allow Downgrade and retry</string>
-    <string name="suggestion_allow_test_app">Temporarily Allow Test and retry</string>
-    <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
-    <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
-    <string name="suggestion_bypass_low_target_sdk">Temporarily allow bypassing restrictions and retry</string>
+    <string name="suggestion_allow_downgrade">Allow Downgrade</string>
+    <string name="suggestion_allow_downgrade_desc">Temporarily Allow Downgrade and retry</string>
+    <string name="suggestion_allow_test_app">Allow Test</string>
+    <string name="suggestion_allow_test_app_desc">Temporarily Allow Test and retry</string>
+    <string name="suggestion_mi_isolation">Try a valid installer</string>
+    <string name="suggestion_mi_isolation_desc">Temporarily add valid installer and retry</string>
+    <string name="suggestion_user_restricted">Enable USB installation</string>
+    <string name="suggestion_user_restricted_desc">Go to Developer options to enable USB installation</string>
+    <string name="suggestion_bypass_low_target_sdk">Allow bypassing restrictions</string>
+    <string name="suggestion_bypass_low_target_sdk_desc">Temporarily allow bypassing restrictions and retry</string>
     <string name="suggestion_bypass_blacklist_set_by_user">Allow install once</string>
+    <string name="suggestion_bypass_blacklist_set_by_user_desc">Temporarily allow install once</string>
+    <string name="suggestion_retry_install_desc">Try install again</string>
+
 </resources>

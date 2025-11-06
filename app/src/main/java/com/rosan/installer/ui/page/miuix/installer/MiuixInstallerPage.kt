@@ -367,7 +367,8 @@ fun MiuixInstallerPage(
                     InstallFailedContent(
                         baseEntity = baseEntity,
                         appIcon = appIcon,
-                        error = installer.error,
+                        installer = installer,
+                        viewModel = viewModel,
                         onClose = closeSheet
                     )
                 }

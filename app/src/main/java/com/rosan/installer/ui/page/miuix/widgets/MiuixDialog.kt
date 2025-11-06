@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
@@ -203,6 +204,62 @@ fun MiuixUpdateDialog(
                     onClick = onDismiss,
                     text = stringResource(R.string.cancel)
                 )
+            }
+        }
+    )
+}
+
+/**
+ * A miuix-style dialog to confirm the uninstallation of an application.
+ *
+ * @param showState A MutableState controlling the visibility of the dialog.
+ * @param onDismiss Request to close the dialog.
+ * @param onConfirm Request to perform the uninstall action.
+ * @param keepData Indicates whether user data should be kept during uninstallation.
+ */
+@Composable
+fun MiuixUninstallConfirmationDialog(
+    showState: MutableState<Boolean>,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    keepData: Boolean
+) {
+    SuperDialog(
+        show = showState,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.suggestion_uninstall_alert_dialog_confirm_action),
+        content = {
+            Column {
+                val message = if (keepData)
+                    stringResource(R.string.suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message)
+                else
+                    stringResource(R.string.suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message)
+
+                Text(text = message)
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss,
+                        text = stringResource(R.string.cancel)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onConfirm,
+                        text = stringResource(R.string.confirm),
+                        colors = ButtonDefaults.textButtonColors(
+                            textColor = MaterialTheme.colorScheme.error
+                        )
+                    )
+                }
             }
         }
     )

@@ -186,8 +186,7 @@ fun InstallPrepareContent(
                             SDKComparison(
                                 entityToInstall = primaryEntity,
                                 preInstallAppInfo = currentPackage.installedAppInfo,
-                                installer = installer,
-                                viewModel = viewModel
+                                installer = installer
                             )
                             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
                                 AnimatedVisibility(visible = viewModel.showOPPOSpecial && primaryEntity.containerType == DataType.APK) {
@@ -251,12 +250,13 @@ fun InstallPrepareContent(
                 ) {
                     Column {
                         // Permissions List
-                        MiuixNavigationItemWidget(
-                            title = stringResource(R.string.permission_list),
-                            description = stringResource(R.string.permission_list_desc),
-                            insideMargin = PaddingValues(12.dp),
-                            onClick = { viewModel.dispatch(InstallerViewAction.ShowMiuixPermissionList) },
-                        )
+                        if (containerType == DataType.APK)
+                            MiuixNavigationItemWidget(
+                                title = stringResource(R.string.permission_list),
+                                description = stringResource(R.string.permission_list_desc),
+                                insideMargin = PaddingValues(12.dp),
+                                onClick = { viewModel.dispatch(InstallerViewAction.ShowMiuixPermissionList) },
+                            )
 
                         // Install Options
                         if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku ||
@@ -445,7 +445,6 @@ private fun WarningTextBlock(warnings: List<Pair<String, Color>>) {
 private fun SDKComparison(
     entityToInstall: AppEntity,
     preInstallAppInfo: InstalledAppInfo?,
-    viewModel: InstallerViewModel,
     installer: InstallerRepo
 ) {
     AnimatedVisibility(visible = installer.config.displaySdk) {
@@ -504,8 +503,8 @@ private fun SdkInfoRow(
         // Label to the right.
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (showComparison) {
-                val isDowngrade = newSdkInt < oldSdkInt
-                val isIncompatible = type == "min" && newSdkInt > Build.VERSION.SDK_INT
+                // val isDowngrade = newSdkInt < oldSdkInt
+                // val isIncompatible = type == "min" && newSdkInt > Build.VERSION.SDK_INT
                 // val color = if (isDowngrade || isIncompatible) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
 
                 val oldText = if (isArchived) stringResource(R.string.old_version_archived) else oldSdk
