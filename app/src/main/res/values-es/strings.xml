@@ -117,7 +117,7 @@
     <string name="config_error_name">El nombre no puede estar vacío</string>
     <string name="config_error_customize_authorizer">El autorizador personalizado no puede estar vacío</string>
     <string name="config_error_installer">La fuente de instalación no puede estar vacía</string>
-    <string name="discard">Descartar Cambios</string>
+    <string name="discard">Descartar</string>
     <string name="confirm">Confirmar</string>
     <string name="cancel">Cancelar</string>
     <string name="retry">Reintentar</string>

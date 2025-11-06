@@ -145,7 +145,7 @@
     <string name="config_error_name">O nome não pode ser vazio</string>
     <string name="config_error_customize_authorizer">Autorizador customizado não pode ser vazio</string>
     <string name="config_error_installer">Instalador de origem não pode ser vazio</string>
-    <string name="discard">Desfazer Mudanças</string>
+    <string name="discard">Desfazer</string>
     <string name="confirm">Confirmar</string>
     <string name="cancel">Cancelar</string>
     <string name="retry">Repetir</string>

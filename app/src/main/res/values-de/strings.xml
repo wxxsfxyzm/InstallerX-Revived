@@ -145,7 +145,7 @@
     <string name="config_error_name">Der Name darf nicht leer sein</string>
     <string name="config_error_customize_authorizer">Der Custom authorizer darf nicht leer sein</string>
     <string name="config_error_installer">Installationsquelle darf nicht leer sein</string>
-    <string name="discard">Änderungen verwerfen</string>
+    <string name="discard">"Verwerfen "</string>
     <string name="confirm">Bestätigen</string>
     <string name="cancel">Abbrechen</string>
     <string name="retry">Wiederholen</string>

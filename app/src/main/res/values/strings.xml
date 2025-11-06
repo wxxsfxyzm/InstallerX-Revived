@@ -183,7 +183,7 @@
     <string name="config_error_name">Name can\'t be empty</string>
     <string name="config_error_customize_authorizer">Custom authorizer can\'t be empty</string>
     <string name="config_error_installer">Installer source can\'t be empty</string>
-    <string name="discard">Discard Changes</string>
+    <string name="discard">Discard</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>

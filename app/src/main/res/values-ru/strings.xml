@@ -94,7 +94,7 @@
     <string name="disable_notification_on_dismiss">Закрыть при отклонении диалогового окна</string>
     <string name="disable_verification">Отключить проверку</string>
     <string name="disable_verification_desc">Отключает проверку пакета во время установки. Это не проверка подписи.</string>
-    <string name="discard">Отменить изменения</string>
+    <string name="discard">Не сохранять</string>
     <string name="dont_kill_app">Не убивайте приложение</string>
     <string name="dont_kill_app_desc">Используется при установке функции для разделенного приложения, чтобы предотвратить отключение основного приложения во время установки.</string>
     <string name="downgrade_version_prefix">Даунгрейд</string>
