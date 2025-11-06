@@ -46,7 +46,7 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 - **System Icons:** Support for displaying system icon packs during installation. Allows switching between APK icons and system icon packs through a toggle.
 - **Version Comparison:** Support for displaying version number comparison in single-line or multi-line format.
 - **SDK Information:** Installation dialogs show targetSDK and minSDK in single-line or multi-line format.
-- **Session Install Confirmation**: With the help of [InxLocker](https://github.com/Chimioo/InxLocker), this feature is now supported.
+- **Session Install Confirmation**: With the help of [InxLocker](https://github.com/Chimioo/InxLocker), confirm install from store apps (Aurora Store/F-Droid/...) is now supported.
 - **Bypass Interceptions:** Shizuku/Root can bypass custom OS chain-start restrictions when opening an App after installation.
     - Currently only works for dialog installation.
     - Dhizuku lacks sufficient permissions, so a customizable countdown option was added to reserve time for the app opening action.
@@ -71,8 +71,8 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
         - Clicking "Install" in the notification selects the best option and proceeds with installation.
         - In the dialog, the best option is selected by default, but can be chosen manually.
     - The split selection interface shows user-friendly descriptions.
-- **Architecture Support:** Allows installing armeabi-v7 packages on arm64-v8a only systems (actual functionality depends on the system providing runtime translation).
-- **Downgrade with or without Data:** Support for performing app downgrades with or without data preservation on some OEM Android 15/16 systems (with system optimization enabled, like HyperOS).
+- **Architecture Support:** Allows installing armeabi-v7a packages on arm64-v8a only systems (actual functionality depends on the system providing runtime translation).
+- **Downgrade with or without Data:** Support for performing app downgrades with or without data preservation on some OEM Android 15 systems.
     - This feature only supports Android 15. On Android 14 or below, try the `Allow downgrade` option in the install options.
     - The feature is available in the smart suggestions of the dialog installation. To use it, first enable the `Show smart suggestions` option.
     - **Use this feature with extreme caution on system apps!** Loss of data from a system app could render the device unusable.
@@ -138,7 +138,7 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 - **`dev` branch:** Contains features under development. If you want to test them, look for the corresponding CI builds in Github Actions.
 - **`main` branch:** When stable changes are merged from `dev`, the CI/CD system automatically builds and publishes a new alpha version.
 - **Stable releases:** Manually published when finishing a development/testing phase. CI/CD automatically publishes them as a release.
-- **About network permission:** As features have expanded, some network-related functions have been introduced. However, many users prefer the installer to remain purely local without requiring network access. Therefore, two versions will be released: **online** and **offline**. Both versions share the same package name, version code, and signature, so they can't be installed side by side (one will overwrite the other). Please download according to your needs.
+- **About network permission:** As features have expanded, some network-related functions have been introduced. However, many users prefer the installer to remain purely local without requiring network access. Therefore, two versions will be released: **online** and **offline**. Both versions share the same package name, version code, and signature, so they can't be installed side by side (but can be replaced directly). Please download according to your needs.
   - **Online version**: Supports sharing direct download links to InstallerX for installation. More network-related utilities may be added in the future, but network permission will **never** be used for non-installation purposes. Safe to use.
   - **Offline version**: Requests no network permissions at all. When attempting to use online features, you will receive a clear error message. This version remains a purely local installer.
 
