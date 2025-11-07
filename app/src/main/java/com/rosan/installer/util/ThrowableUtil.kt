@@ -48,6 +48,7 @@ import com.rosan.installer.data.app.model.exception.UninstallFailedInternalError
 import com.rosan.installer.data.installer.model.exception.ResolveException
 import com.rosan.installer.data.installer.model.exception.ResolvedFailedNoInternetAccessException
 import com.rosan.installer.data.recycle.model.exception.AppProcessNotWorkException
+import com.rosan.installer.data.recycle.model.exception.DhizukuDeadServiceException
 import com.rosan.installer.data.recycle.model.exception.DhizukuNotWorkException
 import com.rosan.installer.data.recycle.model.exception.RootNotWorkException
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
@@ -105,6 +106,7 @@ private fun Throwable.getStringResourceId() =
         is InstallFailedUserRestrictedException -> R.string.exception_install_failed_user_restricted
         is ShizukuNotWorkException -> R.string.exception_shizuku_not_work
         is DhizukuNotWorkException -> R.string.exception_dhizuku_not_work
+        is DhizukuDeadServiceException -> R.string.exception_dhizuku_dead_service
         is UninstallFailedHyperOSSystemAppException -> R.string.exception_uninstall_failed_hyperos_system_app
         is UninstallFailedInternalErrorException -> R.string.exception_uninstall_failed_internal_error
         is PackageManager.NameNotFoundException -> R.string.exception_package_manager_name_not_found

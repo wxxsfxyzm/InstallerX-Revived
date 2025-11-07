@@ -126,8 +126,8 @@
     <string name="config_managed_blacklist_by_package_name_title">Apps proibidos de instalação pelo nome do pacote</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">Apps proibidos de instalação pelo SharedUID</string>
     <string name="config_no_preset_install_sources">Nenhuma fonte de instalação predefinida</string>
-    <string name="config_no_managed_blacklist">Preencha aqui os nomes dos pacotes dos apps bloqueados</string>
-    <string name="config_no_managed_shared_user_id_blacklist">Nenhum app proibido de instalação por ID de usuário compartilhado</string>
+    <string name="config_no_managed_blacklist">Nenhum app proibido de instalação por nome de pacote</string>
+    <string name="config_no_managed_shared_user_id_blacklist">Nenhum app proibido de instalação por sharedUID</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Exceções que têm como alvo apenas o SharedUID; se for proibido pelo nome do pacote, ele ainda não poderá ser instalado.</string>
     <string name="config_add_new_shared_uid">Adicionar novo ID de Usuário compartilhado</string>
     <string name="config_shared_uid_name">Nome de ID de usuário compartilhado</string>
@@ -145,7 +145,7 @@
     <string name="config_error_name">O nome não pode ser vazio</string>
     <string name="config_error_customize_authorizer">Autorizador customizado não pode ser vazio</string>
     <string name="config_error_installer">Instalador de origem não pode ser vazio</string>
-    <string name="discard">Desfazer Mudanças</string>
+    <string name="discard">Descartar</string>
     <string name="confirm">Confirmar</string>
     <string name="cancel">Cancelar</string>
     <string name="retry">Repetir</string>
@@ -402,11 +402,11 @@
     <string name="suggestion_uninstall_alert_dialog_confirm_action">Confirme a ação</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">Isto irá desinstalar a versão atual do app mas vai manter seus dados, e então tentar uma nova instalação. NÃO USE em apps de sistema!</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">Isto irá desinstalar a versão atual do app e fará nova tentativa de instalação. NÃO USE em apps de sistema!</string>
-    <string name="suggestion_allow_downgrade">Permitir o downgrade temporariamente e tentar novamente</string>
-    <string name="suggestion_allow_test_app">Permitir testar temporariamente e tentar novamente</string>
-    <string name="suggestion_mi_isolation">Adicionar temporariamente um instalador válido e tentar novamente</string>
-    <string name="suggestion_user_restricted">Ir para as opções do desenvolvedor e habilitar a instalação USB</string>
-    <string name="suggestion_bypass_low_target_sdk">Permitir temporariamente ignorar restrições e tentar novamente</string>
+    <string name="suggestion_allow_downgrade">Permitir Downgrade</string>
+    <string name="suggestion_allow_test_app">Permitir Teste</string>
+    <string name="suggestion_mi_isolation">Tente um instalador válido</string>
+    <string name="suggestion_user_restricted">Permitir instalações via USB</string>
+    <string name="suggestion_bypass_low_target_sdk">Permitir contornar restrições</string>
     <string name="pull_to_refresh_hint4">Atualizado com sucesso</string>
     <string name="pull_to_refresh_hint3">Atualizando…</string>
     <string name="pull_to_refresh_hint2">Solte para atualizar</string>
@@ -501,4 +501,14 @@
     <string name="exception_package_manager_name_not_found">Nome do pacote não encontrado</string>
     <string name="auto_silent_install">Instalação Silenciosa Automática</string>
     <string name="auto_silent_install_desc">Instalação silenciosa automática ao exibir a caixa de diálogo</string>
+    <string name="suggestion_uninstall_and_retry_desc">Isso desinstalará a versão atual do app e tentará instalar a nova versão</string>
+    <string name="suggestion_uninstall_and_retry_keep_data_desc">Isso desinstalará a versão atual do app, mantendo seus dados, e tentará instalar a nova versão</string>
+    <string name="suggestion_allow_downgrade_desc">Permitir Temporariamente o Downgrade e repetir</string>
+    <string name="suggestion_allow_test_app_desc">Permitir Temporariamente o Teste e repetir</string>
+    <string name="suggestion_mi_isolation_desc">Adicionar temporariamente um instalador válido e repetir</string>
+    <string name="suggestion_user_restricted_desc">Vá para as Opções do desenvolvedor para permitir a instalação via USB</string>
+    <string name="suggestion_bypass_low_target_sdk_desc">Temporariamente permitir ignorar restrições e repetir</string>
+    <string name="suggestion_bypass_blacklist_set_by_user_desc">Permitir temporariamente instalar uma vez</string>
+    <string name="suggestion_retry_install_desc">Tentar instalar novamente</string>
+    <string name="smart_suggestions">Sugestões</string>
 </resources>

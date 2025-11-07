@@ -239,4 +239,5 @@ dependencies {
 
     // miuix
     implementation(libs.miuix)
+    implementation(libs.capsule)
 }

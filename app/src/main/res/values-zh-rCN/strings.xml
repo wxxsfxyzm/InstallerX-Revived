@@ -372,6 +372,7 @@
     <string name="exception_package_manager_name_not_found">找不到对应包名的应用</string>
     <string name="exception_shizuku_not_work">请激活Sui或Shizuku，并授予权限</string>
     <string name="exception_dhizuku_not_work">请激活Dhizuku，并授予权限</string>
+    <string name="exception_dhizuku_dead_service">Dhizuku远程服务已经死亡</string>
     <string name="exception_root_not_work">请授予ROOT权限</string>
     <string name="exception_app_process_not_work">授权器启动失败</string>
     <string name="old_version_prefix">当前</string>
@@ -502,15 +503,25 @@
     <string name="split_name_feature_group_title">功能分包</string>
     <!-- SplitNameUtil End -->
 
+    <string name="smart_suggestions">建议</string>
     <string name="suggestion_uninstall_and_retry">卸载后重新安装</string>
+    <string name="suggestion_uninstall_and_retry_desc">卸载当前应用，不保留数据，并安装新应用</string>
     <string name="suggestion_uninstall_and_retry_keep_data">保留数据卸载后重试</string>
+    <string name="suggestion_uninstall_and_retry_keep_data_desc">卸载当前应用，保留数据，并尝试安装新应用（不一定能安装成功）</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_action">确认操作</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">将保留数据卸载应用，然后尝试安装。请勿用于系统应用！</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">将会卸载你的应用然后安装新版，所有数据都会丢失。请勿用于系统应用！</string>
-    <string name="suggestion_allow_downgrade">临时允许降级并重试</string>
-    <string name="suggestion_allow_test_app">临时允许测试包并重试</string>
-    <string name="suggestion_mi_isolation">临时添加有效安装者并重试</string>
-    <string name="suggestion_user_restricted">前往开发者选项启用USB安装</string>
-    <string name="suggestion_bypass_low_target_sdk">临时允许绕过限制并重试</string>
+    <string name="suggestion_allow_downgrade">允许降级</string>
+    <string name="suggestion_allow_downgrade_desc">临时允许降级并重试（Android 15以上需要ROOT权限）</string>
+    <string name="suggestion_allow_test_app">允许测试包</string>
+    <string name="suggestion_allow_test_app_desc">临时允许测试包并重试</string>
+    <string name="suggestion_mi_isolation">临时使用有效的安装者并重试</string>
+    <string name="suggestion_mi_isolation_desc">临时以有效安装者身份重试</string>
+    <string name="suggestion_user_restricted">允许USB安装</string>
+    <string name="suggestion_user_restricted_desc">前往开发者选项启用USB安装</string>
+    <string name="suggestion_bypass_low_target_sdk">允许绕过低目标SDK限制</string>
+    <string name="suggestion_bypass_low_target_sdk_desc">临时允许绕过限制并重试</string>
     <string name="suggestion_bypass_blacklist_set_by_user">本次允许安装</string>
+    <string name="suggestion_bypass_blacklist_set_by_user_desc">本次允许黑名单内应用安装</string>
+    <string name="suggestion_retry_install_desc">重新尝试安装</string>
 </resources>

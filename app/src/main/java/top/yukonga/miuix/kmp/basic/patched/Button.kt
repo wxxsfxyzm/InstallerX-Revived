@@ -1,3 +1,6 @@
+// Copyright 2025, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package top.yukonga.miuix.kmp.basic.patched
 
 import androidx.compose.foundation.layout.Arrangement
@@ -13,18 +16,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import com.kyant.capsule.ContinuousRoundedRectangle
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.G2RoundedCornerShape
 
 /**
  * A [ProgressButton] component with Miuix style that can show progress.
@@ -61,7 +63,8 @@ fun ProgressButton(
     // Coerce progress value to be between 0.0 and 1.0
     val progressCoerced = progress.coerceIn(0f, 1f)
 
-    val shape = remember(cornerRadius) { G2RoundedCornerShape(cornerRadius) }
+    // The shape implementation is updated to match the new Button
+    val shape = remember(cornerRadius) { ContinuousRoundedRectangle(cornerRadius) }
 
     // Select colors based on the enabled state
     val trackColor = if (enabled) colors.trackColor else colors.disabledTrackColor
@@ -79,16 +82,13 @@ fun ProgressButton(
             modifier = Modifier
                 .defaultMinSize(minWidth = minWidth, minHeight = minHeight)
                 .drawWithContent {
-                    val cornerRadiusPx = cornerRadius.toPx()
-                    val minProgressWidth = cornerRadiusPx * 2
-                    val progressWidth = minProgressWidth + (size.width - minProgressWidth) * progressCoerced
-
-                    drawRoundRect(
-                        color = progressColor,
-                        size = Size(width = progressWidth, height = size.height),
-                        cornerRadius = CornerRadius(cornerRadiusPx)
-                    )
-
+                    // Only draw the progress indicator if progress is greater than 0.
+                    if (progressCoerced > 0f)
+                        drawRect(
+                            color = progressColor,
+                            size = Size(width = size.width * progressCoerced, height = size.height)
+                        )
+                    
                     drawContent()
                 }
                 .padding(insideMargin),

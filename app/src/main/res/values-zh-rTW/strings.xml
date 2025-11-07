@@ -341,6 +341,7 @@
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS 不允許在此處解除安裝該應用程式</string>
     <string name="exception_shizuku_not_work">請啟用 Sui 或 Shizuku，並授予權限</string>
     <string name="exception_dhizuku_not_work">請啟用 Dhizuku，並授予權限</string>
+    <string name="exception_dhizuku_dead_service">Dhizuku遠端服務已經死亡</string>
     <string name="exception_root_not_work">請授予 ROOT 權限</string>
     <string name="exception_app_process_not_work">授權器啟動失敗</string>
     <string name="old_version_prefix">目前</string>
@@ -457,19 +458,29 @@
     <string name="split_dpi_anydpi">任意密度</string>
     <!-- SplitNameUtil End -->
 
+    <string name="smart_suggestions">建議</string>
     <string name="suggestion_uninstall_and_retry">解除安裝後重新安裝</string>
+    <string name="suggestion_uninstall_and_retry_desc">解除安裝目前應用程式，不保留資料，並安裝新應用程式</string>
     <string name="suggestion_uninstall_and_retry_keep_data">保留資料解除安裝後重試</string>
+    <string name="suggestion_uninstall_and_retry_keep_data_desc">解除安裝目前應用程式，保留資料，並嘗試安裝新應用程式（不一定能安裝成功）</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_action">確認操作</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">將保留資料解除安裝應用程式，然後嘗試安裝。請勿用於系統應用程式！</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">將會解除安裝您的應用程式然後安裝新版，所有資料都會遺失。請勿用於系統應用程式！</string>
-    <string name="suggestion_allow_downgrade">暫時允許降級並重試</string>
-    <string name="suggestion_allow_test_app">暫時允許測試套件並重試</string>
-    <string name="suggestion_mi_isolation">暫時新增有效安裝者並重試</string>
-    <string name="suggestion_user_restricted">前往開發人員選項啟用 USB 安裝</string>
-    <string name="suggestion_bypass_low_target_sdk">暫時允許繞過限制並重試</string>
+    <string name="suggestion_allow_downgrade">允許降級</string>
+    <string name="suggestion_allow_downgrade_desc">暫時允許降級並重試（Android 15以上需要ROOT權限）</string>
+    <string name="suggestion_allow_test_app">允許測試套件</string>
+    <string name="suggestion_allow_test_app_desc">暫時允許測試套件並重試</string>
+    <string name="suggestion_mi_isolation">暫時使用有效的安裝者並重試</string>
+    <string name="suggestion_mi_isolation_desc">暫時以有效安裝者身分重試</string>
+    <string name="suggestion_user_restricted">允許USB安裝</string>
+    <string name="suggestion_user_restricted_desc">前往開發人員選項啟用USB安裝</string>
+    <string name="suggestion_bypass_low_target_sdk">允許繞過低目標SDK限制</string>
+    <string name="suggestion_bypass_low_target_sdk_desc">暫時允許繞過限制並重試</string>
     <string name="suggestion_bypass_blacklist_set_by_user">本次允許安裝</string>
+    <string name="suggestion_bypass_blacklist_set_by_user_desc">本次允許黑名單內應用程式安裝</string>
+    <string name="suggestion_retry_install_desc">重新嘗試安裝</string>
     <string name="uninstall_title">卸載 InstallerX Revived</string>
-    <string name="uninstall_content">卸載本應用程式後，您將無法再使用 InstallerX Revived 安裝應用程式。</string>
+    <string name="uninstall_content">卸載本應用程式後，您將無法再使用 InstallerX Revived 安裝應用程式。</string>
     <string name="auto_lock_default_installer">自動設為預設安裝程式</string>
     <string name="auto_lock_default_installer_desc">在開始新安裝時自動將此應用程式設為安裝程式</string>
     <string name="config_global_default">全域預設</string>

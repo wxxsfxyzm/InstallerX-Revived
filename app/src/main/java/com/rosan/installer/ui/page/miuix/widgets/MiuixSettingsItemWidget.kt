@@ -61,7 +61,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.SuperSpinner
@@ -129,7 +128,6 @@ fun MiuixDataAuthorizerWidget(
 
     SuperSpinner(
         modifier = modifier,
-        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.config_authorizer),
         summary = stringResource(R.string.config_app_authorizer_desc),
         items = spinnerEntries,
@@ -200,7 +198,6 @@ fun MiuixDataInstallModeWidget(
 
     SuperSpinner(
         modifier = modifier,
-        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.config_install_mode),
         // summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,
@@ -441,7 +438,6 @@ fun MiuixThemeEngineWidget(
 
     SuperSpinner(
         modifier = modifier,
-        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.theme_settings_ui_engine),
         // summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,

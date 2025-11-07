@@ -1,5 +1,7 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,6 +34,12 @@ fun InstallPreparingContent(viewModel: InstallerViewModel) {
         0f
     }
 
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 300),
+        label = "ProgressAnimation"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -53,7 +62,7 @@ fun InstallPreparingContent(viewModel: InstallerViewModel) {
         }
 
         ProgressButton(
-            progress = progress,
+            progress = animatedProgress,
             onClick = {
                 viewModel.dispatch(InstallerViewAction.Close)
             },

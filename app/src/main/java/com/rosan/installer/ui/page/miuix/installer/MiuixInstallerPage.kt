@@ -58,7 +58,7 @@ import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.extra.patched.SuperBottomSheet
+import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Back
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
@@ -66,7 +66,7 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Info
 import top.yukonga.miuix.kmp.icon.icons.useful.Settings
 import top.yukonga.miuix.kmp.utils.BackHandler
 
-private const val SHEET_ANIMATION_DURATION = 100L
+private const val SHEET_ANIMATION_DURATION = 250L
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
@@ -367,7 +367,8 @@ fun MiuixInstallerPage(
                     InstallFailedContent(
                         baseEntity = baseEntity,
                         appIcon = appIcon,
-                        error = installer.error,
+                        installer = installer,
+                        viewModel = viewModel,
                         onClose = closeSheet
                     )
                 }
