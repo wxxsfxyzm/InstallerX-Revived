@@ -16,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
@@ -84,19 +83,12 @@ fun ProgressButton(
                 .defaultMinSize(minWidth = minWidth, minHeight = minHeight)
                 .drawWithContent {
                     // Only draw the progress indicator if progress is greater than 0.
-                    if (progressCoerced > 0f) {
-                        val cornerRadiusPx = cornerRadius.toPx()
-                        val minProgressWidth = cornerRadiusPx * 2
-                        val progressWidth =
-                            minProgressWidth + (size.width - minProgressWidth) * progressCoerced
-
-                        drawRoundRect(
+                    if (progressCoerced > 0f)
+                        drawRect(
                             color = progressColor,
-                            size = Size(width = progressWidth, height = size.height),
-                            cornerRadius = CornerRadius(cornerRadiusPx)
+                            size = Size(width = size.width * progressCoerced, height = size.height)
                         )
-                    }
-
+                    
                     drawContent()
                 }
                 .padding(insideMargin),
