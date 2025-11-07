@@ -42,7 +42,6 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -221,7 +220,6 @@ private fun ExtendedMenuLazyList(
                         }.coerceAtLeast(0) // Ensure index is not -1
 
                         SuperSpinner(
-                            mode = SpinnerMode.AlwaysOnRight,
                             title = stringResource(R.string.config_installer),
                             items = installerEntries,
                             selectedIndex = selectedInstallerIndex,
@@ -251,7 +249,6 @@ private fun ExtendedMenuLazyList(
                         }
 
                         SuperSpinner(
-                            mode = SpinnerMode.AlwaysOnRight,
                             title = stringResource(R.string.config_target_user),
                             items = userEntries,
                             selectedIndex = selectedUserIndex,

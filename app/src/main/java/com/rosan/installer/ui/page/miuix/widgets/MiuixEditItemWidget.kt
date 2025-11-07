@@ -24,7 +24,6 @@ import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 
 @Composable
@@ -103,7 +102,6 @@ fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
 
     // Replace DropDownMenuWidget with SuperSpinner.
     SuperSpinner(
-        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(R.string.config_authorizer),
         summary = stringResource(R.string.config_install_authorizer_desc),
         items = spinnerEntries,
@@ -173,7 +171,6 @@ fun MiuixDataInstallModeWidget(viewModel: EditViewModel) {
 
     // Replace DropDownMenuWidget with SuperSpinner.
     SuperSpinner(
-        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(R.string.config_install_mode),
         // summary = data[stateInstallMode], // Display current selection text
         items = spinnerEntries,
@@ -247,7 +244,6 @@ fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
 
             // This spinner allows the user to select the package source.
             SuperSpinner(
-                mode = SpinnerMode.AlwaysOnRight,
                 title = stringResource(R.string.config_package_source),
                 // summary = summary,
                 items = spinnerEntries,
@@ -392,7 +388,6 @@ fun MiuixDataUserWidget(viewModel: EditViewModel) {
 
             // This spinner allows the user to select the target user for installation.
             SuperSpinner(
-                mode = SpinnerMode.AlwaysOnRight,
                 title = stringResource(R.string.config_target_user),
                 // summary = summary,
                 items = spinnerEntries,
@@ -473,7 +468,6 @@ fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
 
             // Replace DropDownMenuWidget with SuperSpinner.
             SuperSpinner(
-                mode = SpinnerMode.AlwaysOnRight,
                 title = stringResource(R.string.config_dexopt_mode),
                 // Display the currently selected mode name as summary.
                 // summary = data[currentMode] ?: spinnerEntries.firstOrNull()?.title ?: "",
