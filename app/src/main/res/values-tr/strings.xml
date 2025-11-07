@@ -21,8 +21,8 @@
     <string name="get_update_detail">Yazılım güncellemelerini ve yeni özellikleri kontrol edin</string>
     <string name="get_source_code">Kaynak kodunu kontrol edin</string>
     <string name="get_source_code_detail">GitHub\'da kaynak kodunu kontrol edin</string>
-    <string name="internet_access_enabled">Çevrimiçi</string>
-    <string name="internet_access_disabled">Çevrimdışı</string>
+    <string name="internet_access_enabled">Çevrimiçi\\s</string>
+    <string name="internet_access_disabled">Çevrimdışı\\s</string>
     <string name="stable">Stabil sürüm</string>
     <string name="preview">Önizleme sürümü</string>
     <string name="unstable">Stabil olmayan sürüm</string>
@@ -135,8 +135,8 @@
     <string name="config_managed_blacklist_by_package_name_title">Paket adına göre kurulumu yasaklanan uygulamalar</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">SharedUID tarafından kurulumu yasaklanan uygulamalar</string>
     <string name="config_no_preset_install_sources">Önceden ayarlanmış kurulum kaynağı yok</string>
-    <string name="config_no_managed_blacklist">Engellenen uygulamaların paket adlarını buraya girin</string>
-    <string name="config_no_managed_shared_user_id_blacklist">Paylaşılan kullanıcı kimliğiyle kurulumu yasaklanmış uygulama yok</string>
+    <string name="config_no_managed_blacklist">Paket adına göre kurulumu yasaklanmış uygulama yok</string>
+    <string name="config_no_managed_shared_user_id_blacklist">SharedUID tarafından kurulumu yasaklanan uygulama yok</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Yalnızca SharedUID\'yi hedefleyen muafiyetler; paket adı tarafından yasaklanmışsa, yine de yüklenemez.</string>
     <string name="config_add_new_shared_uid">Yeni Paylaşılan Kullanıcı Kimliği ekle</string>
     <string name="config_shared_uid_name">Paylaşılan Kullanıcı Kimliği adı</string>
@@ -334,10 +334,10 @@
     <string name="install_choice">Paket Seç</string>
     <string name="show_dialog_when_pressing_notification">Bildirim\'e basıldığında Diyaloğu göster</string>
     <string name="change_notification_touch_behavior">Bildirim dokunma davranışını değiştir</string>
-    <string name="version_compare_in_single_line">Sürüm karşılaştırmasını tek satırda gösterir</string>
+    <string name="version_compare_in_single_line">Sürüm karşılaştırmasını tek satırda göster</string>
     <string name="version_compare_in_single_line_desc">Yükleme diyaloğunda sürüm karşılaştırmasını tek satırda gösterir</string>
     <string name="show_dialog_install_extended_menu">Genişletilmiş menüyü göster</string>
-    <string name="show_dialog_install_extended_menu_desc">Yükleme diyaloğunda daha fazla seçenek göster</string>
+    <string name="show_dialog_install_extended_menu_desc">Yükleme diyaloğunda daha fazla seçenek gösterir</string>
     <string name="extended_menu">Genişletilmiş Menü</string>
     <string name="disable_notification">Bildirim olmadan ön planda yükleme</string>
     <string name="close_immediately_on_dialog_dismiss">Yükleme sırasında diyalog ön planda kalır, boş alana tıklandığında sessizce çıkılır</string>
@@ -351,7 +351,7 @@
     <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku modu dexopt ayarını desteklemiyor!</string>
     <string name="grant_permission_after_install">Yüklemeden sonra izin vermek için tıklayın</string>
     <string name="show_intelligent_suggestion">Akıllı Önerileri Göster</string>
-    <string name="show_intelligent_suggestion_desc">Yükleme başarısız olduğunda akıllı öneriler göster</string>
+    <string name="show_intelligent_suggestion_desc">Yükleme başarısız olduğunda akıllı öneriler gösterir</string>
     <string name="permission_list">İzin Listesi</string>
     <string name="permission_list_desc">Yüklenen paketin talep ettiği izinlerin listesi</string>
     <string name="theme_settings_package_icons">Paket simgesi kaynağı</string>
@@ -372,7 +372,7 @@
     <string name="installer_live_channel_short_text_resolve_failed">Başarısız</string>
     <string name="installer_live_channel_short_text_install_failed">Başarısız</string>
     <string name="exception_install_failed_missing_install_permission">Lütfen bilinmeyen uygulamaları yükleme iznini verin ve tekrar deneyin</string>
-    <string name="sdk_compare_in_multi_line">SDK karşılaştırmasını çoklu satırda gösterir</string>
+    <string name="sdk_compare_in_multi_line">SDK karşılaştırmasını çoklu satırda göster</string>
     <string name="sdk_compare_in_multi_line_desc">Yükleme diyaloğunda SDK karşılaştırmasını çoklu satırda gösterir</string>
     <string name="config_allow_test">Teste İzin ver</string>
     <string name="config_allow_test_desc">Paket sadece test amacıyla yüklenen uygulamaysa, yüklenmesine izin verir</string>
@@ -449,7 +449,7 @@
     <string name="exception_install_failed_missing_split">Gerekli bölünmüş paket(ler) eksik</string>
     <string name="installer_oppo_related">OPPO ile alakalı</string>
     <string name="installer_show_oem_special">OEM ekstra bilgilerini göster</string>
-    <string name="installer_show_oem_special_desc">Yükleme diyaloğunda OEM APK\'ları için bazı özel değerleri analiz edin ve gösterin</string>
+    <string name="installer_show_oem_special_desc">Yükleme diyaloğunda OEM APK\'ları için bazı özel değerleri analiz eder ve gösterir</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">Bu, uygulamanın mevcut sürümünü verilerini koruyarak kaldıracak ve ardından yeni sürümü yüklemeyi deneyecektir. Sistem uygulamalarında KULLANMAYIN!</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">Bu, uygulamanın mevcut sürümünü kaldıracak ve yenisini yüklemeyi deneyecektir. Sistem uygulamalarında KULLANMAYIN!</string>
     <string name="suggestion_allow_downgrade">Geçici Olarak Sürüm Düşürmeye İzin ver ve yeniden dene</string>
@@ -492,4 +492,13 @@
     <string name="installer_choice_install_as_app_desc">ZIP dosyasından hangi uygulamaların yükleneceğini seçin</string>
     <string name="exception_install_parse_failed_unexpected_exception">Ayrıştırma Başarısız Oldu</string>
     <string name="installer_mixed_module_zip_description">Bu dosya hem bir modül hem de uygulamalar içerir. Nasıl yükleneceğini seçin</string>
+    <string name="installer_uninstall_app">Uygulamayı Kaldır</string>
+    <string name="installer_uninstalling">Kaldırılıyor</string>
+    <string name="uninstall_keep_data_desc">Uygulama verileri ve önbelleği saklanacaktır</string>
+    <string name="uninstall_all_users_desc">Bu uygulamayı bu cihazdaki tüm kullanıcılar için kaldırır</string>
+    <string name="uninstall_delete_system_app_desc">Sistem uygulamalarının silinmesine izin verir</string>
+    <string name="uninstall_failed_message">Kaldırma Başarısız</string>
+    <string name="exception_package_manager_name_not_found">Paket adı bulunamadı</string>
+    <string name="auto_silent_install">Otomatik Sessiz Yükleme</string>
+    <string name="auto_silent_install_desc">Yükleme diyaloğu başladığında otomatik sessiz kurulum</string>
 </resources>
