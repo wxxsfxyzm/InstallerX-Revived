@@ -9,19 +9,20 @@
 
 [versions]
 agp = "8.13.0"
+capsule = "2.1.1"
 kotlin = "2.2.21"
 ksp = "2.2.21-2.0.4"
-composeBom = "2025.10.01"
+composeBom = "2025.11.00"
 compose = "1.9.4"
-splashScreen = "1.0.1"
-material3 = "1.5.0-alpha07"
+splashScreen = "1.2.0"
+material3 = "1.5.0-alpha08"
 room = "2.8.3"
 ktx-serialization = "1.9.0"
 accompanist = "0.37.3"
 rikka-shizuku = "13.1.5"
 koin-bom = "4.1.1"
 materialVersion = "1.13.0"
-datastoreCoreAndroid = "1.2.0-beta01"
+datastoreCoreAndroid = "1.2.0-rc01"
 aboutLibraries = "13.1.0"
 appiconloader = "1.5.0"
 timber = "5.0.1"
@@ -46,6 +47,7 @@ androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-k
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
 androix-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
 
+capsule = { module = "io.github.kyant0:capsule", version.ref = "capsule" }
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "compose" }
@@ -53,7 +55,7 @@ compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = 
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.5" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.6" }
 compose-materialIcons = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -105,4 +107,4 @@ aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3",
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 # miuix
-miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version = "0.5.2" }
+miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version = "0.6.1" }

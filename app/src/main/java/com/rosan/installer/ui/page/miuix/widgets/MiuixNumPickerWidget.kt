@@ -58,23 +58,17 @@ fun MiuixIntNumberPickerWidget(
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            // Adjusted padding to align with standard list item specs.
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            // The custom Miuix Slider component replaces the Material Slider.
+            val steps = (endInt - startInt - 1).coerceAtLeast(0)
+
             Slider(
-                progress = value.toFloat(),
-                onProgressChange = {
-                    // The slider's callback provides a Float, which we round to the nearest Int.
-                    onValueChange(it.roundToInt())
-                },
+                value = value.toFloat(),
+                onValueChange = { onValueChange(it.roundToInt()) },
                 modifier = Modifier.weight(1f),
                 enabled = enabled,
-                minValue = startInt.toFloat(),
-                maxValue = endInt.toFloat(),
-                // Setting decimalPlaces to 0 makes the slider behave like an integer selector.
-                decimalPlaces = 0,
-                // Use the slider's built-in haptic feedback for step changes.
+                valueRange = startInt.toFloat()..endInt.toFloat(),
+                steps = steps,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step
             )
             Spacer(modifier = Modifier.width(16.dp))
