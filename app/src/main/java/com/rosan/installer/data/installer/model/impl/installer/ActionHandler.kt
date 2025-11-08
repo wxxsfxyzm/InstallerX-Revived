@@ -303,6 +303,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 Timber.d("Custom user is disabled. Installing for current user: $currentUserId")
                 currentUserId
             }
+            val sessionContainerType = entitiesToInstall.firstOrNull()?.containerType
 
             installEntities(
                 installer.config,
@@ -312,6 +313,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 sharedUserIdBlacklist,
                 sharedUserIdExemption
             )
+
+            if (sessionContainerType != DataType.MULTI_APK && sessionContainerType != DataType.MULTI_APK_ZIP) {
+                Timber.d("[id=${installer.id}] Single-app install succeeded. Clearing cache now.")
+                clearCacheDirectory()
+            } else {
+                Timber.d("[id=${installer.id}] Multi-app install step succeeded. Deferring cache cleanup.")
+            }
         }.getOrElse {
             Timber.e(it, "[id=${installer.id}] install: Failed.")
             installer.error = it
@@ -321,7 +329,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
         Timber.d("[id=${installer.id}] install: Succeeded. Emitting ProgressEntity.InstallSuccess.")
         installer.progress.emit(ProgressEntity.InstallSuccess)
-        clearCacheDirectory()
     }
 
     /**
