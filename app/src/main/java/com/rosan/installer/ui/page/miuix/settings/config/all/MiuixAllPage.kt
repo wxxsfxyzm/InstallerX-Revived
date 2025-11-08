@@ -1,9 +1,5 @@
 package com.rosan.installer.ui.page.miuix.settings.config.all
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,9 +18,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,25 +34,19 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
-import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewState
-import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.MiuixScopeTipCard
 import kotlinx.coroutines.flow.collectLatest
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Delete
 import top.yukonga.miuix.kmp.icon.icons.useful.Edit
@@ -70,7 +57,9 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 @Composable
 fun MiuixAllPage(
     navController: NavController,
-    viewModel: AllViewModel
+    viewModel: AllViewModel,
+    scrollBehavior: ScrollBehavior,
+    paddingValues: PaddingValues
 ) {
     LaunchedEffect(Unit) {
         viewModel.navController = navController
@@ -79,11 +68,7 @@ fun MiuixAllPage(
     val showFloatingState = remember { mutableStateOf(true) }
     val showFloating by showFloatingState
     val listState = rememberLazyStaggeredGridState()
-    val snackBarHostState = remember { SnackbarHostState() }
-    // Use MiuixScrollBehavior for TopAppBar
-    val scrollBehavior = MiuixScrollBehavior()
 
-    // Logic to show/hide FAB based on scroll direction
     LaunchedEffect(listState) {
         var previousIndex = listState.firstVisibleItemIndex
         var previousOffset = listState.firstVisibleItemScrollOffset
@@ -103,114 +88,51 @@ fun MiuixAllPage(
             }
     }
 
-    // Event collection for Snackbar
-    LaunchedEffect(Unit) {
-        viewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is AllViewEvent.DeletedConfig -> {
-                    val result = snackBarHostState.showSnackbar(
-                        message = viewModel.context.getString(R.string.delete_success),
-                        actionLabel = viewModel.context.getString(R.string.restore),
-                        withDismissAction = true
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        viewModel.dispatch(
-                            AllViewAction.RestoreDataConfig(configEntity = event.configEntity)
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    // Use Miuix Scaffold
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            // Use Miuix TopAppBar
-            TopAppBar(
-                title = stringResource(id = R.string.config),
-                scrollBehavior = scrollBehavior
-            )
-        },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = showFloating,
-                enter = scaleIn(),
-                exit = scaleOut()
-            ) {
-                // Use Miuix FloatingActionButton
-                FloatingActionButton(
-                    modifier = Modifier.padding(end = 16.dp),
-                    containerColor = MiuixTheme.colorScheme.surface,
-                    shadowElevation = 2.dp,
-                    onClick = { navController.navigate(MiuixSettingsScreen.Builder.MiuixEditConfig(null).route) }
+    Box(
+        modifier = Modifier.padding(paddingValues)
+    ) {
+        when (viewModel.state.data.progress) {
+            is AllViewState.Data.Progress.Loading if viewModel.state.data.configs.isEmpty() -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = AppIcons.Add,
-                        modifier = Modifier.size(40.dp),
-                        contentDescription = stringResource(id = R.string.add),
-                        tint = MiuixTheme.colorScheme.primary
-                    )
-                }
-            }
-        },
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier.padding(top = paddingValues.calculateTopPadding() + 12.dp)
-        ) {
-            when {
-                viewModel.state.data.progress is AllViewState.Data.Progress.Loading
-                        && viewModel.state.data.configs.isEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            InfiniteProgressIndicator()
-                            Text(
-                                text = stringResource(id = R.string.loading),
-                                style = MiuixTheme.textStyles.main
-                            )
-                        }
-                    }
-                }
-
-                viewModel.state.data.progress is AllViewState.Data.Progress.Loaded
-                        && viewModel.state.data.configs.isEmpty() -> {
-                    // TODO Add error handling
-                    // Since we don't allow removing default profile,
-                    // There is no need to handle an empty state.
-                }
-
-                else -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        if (!viewModel.state.userReadScopeTips) {
-                            MiuixScopeTipCard(viewModel = viewModel)
-                            Spacer(modifier = Modifier.size(8.dp))
-                        }
-                        ShowDataWidget(
-                            viewModel = viewModel,
-                            listState = listState
+                        InfiniteProgressIndicator()
+                        Text(
+                            text = stringResource(id = R.string.loading),
+                            style = MiuixTheme.textStyles.main
                         )
                     }
                 }
+            }
+
+            is AllViewState.Data.Progress.Loaded if viewModel.state.data.configs.isEmpty() -> {
+                // TODO Add error handling
+                // Since we don't allow removing default profile,
+                // There is no need to handle an empty state.
+            }
+
+            else -> {
+                ShowDataWidget(
+                    viewModel = viewModel,
+                    listState = listState,
+                    scrollBehavior = scrollBehavior
+                )
+
             }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ShowDataWidget(
     viewModel: AllViewModel,
-    listState: LazyStaggeredGridState = rememberLazyStaggeredGridState()
+    listState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
+    scrollBehavior: ScrollBehavior
 ) {
     val configs = viewModel.state.data.configs
     val minId = configs.minByOrNull { it.id }?.id
@@ -218,7 +140,8 @@ private fun ShowDataWidget(
     LazyVerticalStaggeredGrid(
         modifier = Modifier
             .fillMaxSize()
-            .overScrollVertical(),
+            .overScrollVertical()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         columns = StaggeredGridCells.Adaptive(350.dp),
         contentPadding = PaddingValues(16.dp),
         verticalItemSpacing = 16.dp,
@@ -226,6 +149,13 @@ private fun ShowDataWidget(
         overscrollEffect = null,
         state = listState,
     ) {
+
+        if (!viewModel.state.userReadScopeTips)
+            item {
+                MiuixScopeTipCard(viewModel = viewModel)
+            }
+        else item { Spacer(modifier = Modifier.size(6.dp)) }
+
         items(viewModel.state.data.configs) {
             DataItemWidget(viewModel, it, it.id == minId)
         }

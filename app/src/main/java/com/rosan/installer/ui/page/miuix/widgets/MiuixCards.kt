@@ -64,7 +64,7 @@ private fun TipCard(
 @Composable
 fun MiuixScopeTipCard(viewModel: AllViewModel) {
     TipCard(
-        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        //modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         tipContent = {
             Text(
                 text = stringResource(R.string.scope_tips),

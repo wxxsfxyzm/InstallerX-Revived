@@ -1,25 +1,75 @@
 package com.rosan.installer.ui.page.miuix.settings
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.RoomPreferences
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.rosan.installer.R
+import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
+import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
+import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.miuix.settings.config.all.MiuixAllPage
 import com.rosan.installer.ui.page.miuix.settings.config.apply.MiuixApplyPage
 import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
-import com.rosan.installer.ui.page.miuix.settings.main.MiuixMainPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPreferredPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home.MiuixHomePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.MiuixInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixThemeSettingsPage
+import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
+import top.yukonga.miuix.kmp.basic.FloatingActionButton
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationItem
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
+    val context = LocalContext.current
     val navController = rememberNavController()
 
     NavHost(
@@ -55,7 +105,138 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
         composable(
             route = MiuixSettingsScreen.MiuixMain.route,
         ) {
-            MiuixMainPage(navController = navController, preferredViewModel)
+            val allViewModel: AllViewModel = koinViewModel { parametersOf(navController) }
+            LaunchedEffect(Unit) {
+                allViewModel.dispatch(AllViewAction.Init)
+            }
+
+            val navigationItems = listOf(
+                NavigationItem(
+                    label = stringResource(R.string.config),
+                    icon = Icons.Rounded.RoomPreferences
+                ),
+                NavigationItem(
+                    label = stringResource(R.string.preferred),
+                    icon = Icons.Rounded.Settings
+                )
+            )
+
+            val pagerState = rememberPagerState(pageCount = { navigationItems.size })
+            val coroutineScope = rememberCoroutineScope()
+            val snackBarHostState = remember { SnackbarHostState() }
+            val scrollBehaviors = List(navigationItems.size) { MiuixScrollBehavior() }
+            // LaunchedEffect to handle snackbar events from AllViewModel
+            LaunchedEffect(Unit) {
+                allViewModel.eventFlow.collectLatest { event ->
+                    when (event) {
+                        is AllViewEvent.DeletedConfig -> {
+                            val result = snackBarHostState.showSnackbar(
+                                message = allViewModel.context.getString(R.string.delete_success),
+                                actionLabel = allViewModel.context.getString(R.string.restore),
+                                withDismissAction = true
+                            )
+                            if (result == SnackbarResult.ActionPerformed) {
+                                allViewModel.dispatch(
+                                    AllViewAction.RestoreDataConfig(configEntity = event.configEntity)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowErrorDialog?>(null) }
+            val showErrorSheetState = remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                preferredViewModel.uiEvents.collect { event ->
+                    snackBarHostState.currentSnackbarData?.dismiss()
+                    when (event) {
+                        is PreferredViewEvent.ShowSnackbar -> {
+                            snackBarHostState.showSnackbar(event.message)
+                        }
+
+                        is PreferredViewEvent.ShowErrorDialog -> {
+                            val snackbarResult = snackBarHostState.showSnackbar(
+                                message = event.title,
+                                actionLabel = context.getString(R.string.details),
+                                duration = SnackbarDuration.Short
+                            )
+                            if (snackbarResult == SnackbarResult.ActionPerformed) {
+                                errorDialogInfo = event
+                                showErrorSheetState.value = true
+                            }
+                        }
+                    }
+                }
+            }
+
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    TopAppBar(
+                        title = navigationItems[pagerState.currentPage].label,
+                        // Use the shared scroll behavior
+                        scrollBehavior = scrollBehaviors[pagerState.currentPage]
+                    )
+                },
+                bottomBar = {
+                    NavigationBar(
+                        items = navigationItems,
+                        selected = pagerState.currentPage,
+                        showDivider = true,
+                        onClick = { index ->
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        }
+                    )
+                },
+                floatingActionButton = {
+                    // Conditionally show FAB only on the first page
+                    AnimatedVisibility(
+                        visible = pagerState.currentPage == 0,
+                        enter = scaleIn(),
+                        exit = scaleOut()
+                    ) {
+                        FloatingActionButton(
+                            modifier = Modifier.padding(end = 16.dp),
+                            containerColor = MiuixTheme.colorScheme.surface,
+                            shadowElevation = 2.dp,
+                            onClick = { navController.navigate(MiuixSettingsScreen.Builder.MiuixEditConfig(null).route) }
+                        ) {
+                            Icon(
+                                imageVector = AppIcons.Add,
+                                modifier = Modifier.size(40.dp),
+                                contentDescription = stringResource(id = R.string.add),
+                                tint = MiuixTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                },
+                snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
+            ) { paddingValues ->
+                InstallerPagerContent(
+                    pagerState = pagerState,
+                    navController = navController,
+                    allViewModel = allViewModel,
+                    preferredViewModel = preferredViewModel,
+                    scrollBehaviors = scrollBehaviors,
+                    paddingValues = paddingValues
+                )
+            }
+            errorDialogInfo?.let { dialogInfo ->
+                ErrorDisplaySheet(
+                    showState = showErrorSheetState,
+                    exception = dialogInfo.exception,
+                    onDismissRequest = { showErrorSheetState.value = false }, // Hide sheet on dismiss
+                    onRetry = errorDialogInfo?.retryAction?.let { retryAction ->
+                        {
+                            showErrorSheetState.value = false // Hide sheet
+                            preferredViewModel.dispatch(retryAction) // Then execute retry action
+                        }
+                    },
+                    title = errorDialogInfo?.title ?: ""
+                )
+            }
         }
         composable(
             route = MiuixSettingsScreen.MiuixEditConfig.route,
@@ -101,6 +282,38 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             route = MiuixSettingsScreen.MiuixInstallerGlobal.route,
         ) {
             MiuixInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
+        }
+    }
+}
+
+@Composable
+private fun InstallerPagerContent(
+    pagerState: PagerState,
+    navController: NavController,
+    allViewModel: AllViewModel,
+    preferredViewModel: PreferredViewModel,
+    scrollBehaviors: List<ScrollBehavior>,
+    paddingValues: PaddingValues
+) {
+    HorizontalPager(
+        state = pagerState,
+        userScrollEnabled = false,
+        modifier = Modifier.fillMaxSize()
+    ) { page ->
+        when (page) {
+            0 -> MiuixAllPage(
+                navController = navController,
+                viewModel = allViewModel,
+                scrollBehavior = scrollBehaviors[page],
+                paddingValues = paddingValues
+            )
+
+            1 -> MiuixPreferredPage(
+                navController = navController,
+                viewModel = preferredViewModel,
+                scrollBehavior = scrollBehaviors[page],
+                paddingValues = paddingValues
+            )
         }
     }
 }

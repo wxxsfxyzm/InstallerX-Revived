@@ -2,10 +2,12 @@ package com.rosan.installer.ui.page.miuix.settings.config.edit
 
 import android.os.Build
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -43,7 +45,6 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDataUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySdkWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNoneInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
-import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -83,14 +84,12 @@ fun MiuixEditPage(
             showUnsavedDialogState.value = false
             navController.navigateUp()
         },
-        // Pass the list of active error messages from the ViewModel.
         errorMessages = viewModel.activeErrorMessages
     )
     // The condition for interception is now expanded to include errors.
     // If there are unsaved changes OR if there are validation errors, we should intercept.
     val shouldInterceptBackPress = viewModel.hasUnsavedChanges || viewModel.hasErrors
 
-    // Use this new combined condition for the BackHandler.
     BackHandler(enabled = shouldInterceptBackPress) {
         showUnsavedDialogState.value = true
     }
@@ -122,11 +121,7 @@ fun MiuixEditPage(
     }
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentWindowInsets = WindowInsets.none,
+        modifier = Modifier.imePadding(),
         topBar = {
             TopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -152,16 +147,17 @@ fun MiuixEditPage(
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-    ) {
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .padding(it)
-                .padding(top = 12.dp),
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
             overscrollEffect = null,
         ) {
+            item { Spacer(modifier = Modifier.size(12.dp)) }
             item { MiuixDataNameWidget(viewModel = viewModel) }
             item { MiuixDataDescriptionWidget(viewModel = viewModel) }
             item { SmallTitle(stringResource(R.string.config)) }

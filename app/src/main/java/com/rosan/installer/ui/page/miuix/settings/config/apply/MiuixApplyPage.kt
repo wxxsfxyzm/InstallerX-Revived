@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -56,7 +55,6 @@ import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDropdown
-import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -104,9 +102,6 @@ fun MiuixApplyPage(
         }
     }
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentWindowInsets = WindowInsets.none,
         topBar = {
             Column {
                 TopAppBar(
@@ -120,6 +115,7 @@ fun MiuixApplyPage(
                     },
                     actions = { TopAppBarActions(viewModel = viewModel) }
                 )
+                Spacer(modifier = Modifier.size(6.dp))
                 InputField(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -240,8 +236,7 @@ private fun MiuixItemsWidget(
     lazyListState: LazyListState,
 ) {
     LazyColumn(
-        modifier = modifier
-            .scrollEndHaptic(),
+        modifier = modifier.scrollEndHaptic(),
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(vertical = 8.dp),

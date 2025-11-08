@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -27,7 +28,10 @@ import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -263,4 +267,74 @@ fun MiuixUninstallConfirmationDialog(
             }
         }
     )
+}
+
+/**
+ * A reusable SuperBottomSheet to display detailed information about an exception.
+ *
+ * @param showState A MutableState controlling the visibility of the sheet.
+ * @param exception The exception to display.
+ * @param onDismissRequest Callback invoked when the user wants to dismiss the sheet.
+ * @param onRetry Callback invoked when the user clicks the "Retry" button. Can be null if retry is not applicable.
+ * @param title The title of the sheet.
+ */
+@Composable
+fun ErrorDisplaySheet(
+    showState: MutableState<Boolean>,
+    exception: Throwable,
+    onDismissRequest: () -> Unit,
+    onRetry: (() -> Unit)?,
+    title: String
+) {
+    SuperBottomSheet(
+        show = showState,
+        onDismissRequest = onDismissRequest,
+        title = title,
+        leftAction = {
+            MiuixBackButton(
+                icon = MiuixIcons.Useful.Cancel,
+                onClick = onDismissRequest
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            MiuixErrorTextBlock(
+                error = exception,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 40.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (onRetry != null) {
+                    TextButton(
+                        text = stringResource(R.string.cancel),
+                        onClick = onDismissRequest,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(
+                        text = stringResource(R.string.retry),
+                        onClick = onRetry,
+                        modifier = Modifier.weight(1f),
+                    )
+                } else {
+                    TextButton(
+                        text = stringResource(R.string.close),
+                        onClick = onDismissRequest,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
+    }
 }
