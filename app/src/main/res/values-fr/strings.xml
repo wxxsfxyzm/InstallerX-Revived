@@ -511,4 +511,5 @@
     <string name="suggestion_bypass_low_target_sdk_desc">Autoriser temporairement le contournement des restrictions et réessayer</string>
     <string name="suggestion_bypass_blacklist_set_by_user_desc">Autoriser l\'installation temporairement seulement une fois</string>
     <string name="suggestion_retry_install_desc">Réessayez l\'installation</string>
+    <string name="exception_dhizuku_dead_service">Le service Dhizuku s\'est arrêté</string>
 </resources>

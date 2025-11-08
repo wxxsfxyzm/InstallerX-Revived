@@ -21,8 +21,8 @@
     <string name="get_update_detail">Yazılım güncellemelerini ve yeni özellikleri kontrol edin</string>
     <string name="get_source_code">Kaynak kodunu kontrol edin</string>
     <string name="get_source_code_detail">GitHub\'da kaynak kodunu kontrol edin</string>
-    <string name="internet_access_enabled">Çevrimiçi\\s</string>
-    <string name="internet_access_disabled">Çevrimdışı\\s</string>
+    <string name="internet_access_enabled">Çevrimiçi</string>
+    <string name="internet_access_disabled">Çevrimdışı</string>
     <string name="stable">Stabil sürüm</string>
     <string name="preview">Önizleme sürümü</string>
     <string name="unstable">Stabil olmayan sürüm</string>
@@ -154,7 +154,7 @@
     <string name="config_error_name">İsim boş olamaz</string>
     <string name="config_error_customize_authorizer">Özel yetkilendirici boş olamaz</string>
     <string name="config_error_installer">Yükleyici kaynağı boş olamaz</string>
-    <string name="discard">Değişiklikleri Sil</string>
+    <string name="discard">İptal Et</string>
     <string name="confirm">Onayla</string>
     <string name="cancel">İptal</string>
     <string name="retry">Tekrar dene</string>
@@ -452,11 +452,11 @@
     <string name="installer_show_oem_special_desc">Yükleme diyaloğunda OEM APK\'ları için bazı özel değerleri analiz eder ve gösterir</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">Bu, uygulamanın mevcut sürümünü verilerini koruyarak kaldıracak ve ardından yeni sürümü yüklemeyi deneyecektir. Sistem uygulamalarında KULLANMAYIN!</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">Bu, uygulamanın mevcut sürümünü kaldıracak ve yenisini yüklemeyi deneyecektir. Sistem uygulamalarında KULLANMAYIN!</string>
-    <string name="suggestion_allow_downgrade">Geçici Olarak Sürüm Düşürmeye İzin ver ve yeniden dene</string>
-    <string name="suggestion_allow_test_app">Geçici olarak Test etmeye ve yeniden denemeye izin ver</string>
-    <string name="suggestion_mi_isolation">Geçici olarak geçerli yükleyiciyi ekleyin ve yeniden deneyin</string>
-    <string name="suggestion_user_restricted">USB kurulumunu etkinleştirmek için Geliştirici seçeneklerine gidin</string>
-    <string name="suggestion_bypass_low_target_sdk">Geçici olarak kısıtlamaları atlatmaya izin ver ve yeniden dene</string>
+    <string name="suggestion_allow_downgrade">Sürüm Düşürmeye İzin Ver</string>
+    <string name="suggestion_allow_test_app">Teste İzin Ver</string>
+    <string name="suggestion_mi_isolation">Geçerli bir yükleyici deneyin</string>
+    <string name="suggestion_user_restricted">USB kurulumunu etkinleştir</string>
+    <string name="suggestion_bypass_low_target_sdk">Kısıtlamaları atlatmaya izin ver</string>
     <string name="suggestion_bypass_blacklist_set_by_user">Yüklemeye bir kez izin ver</string>
     <string name="config_global_default">Global Varsayılan</string>
     <string name="installer_version_name_label">Versiyon Adı:</string>
@@ -501,4 +501,15 @@
     <string name="exception_package_manager_name_not_found">Paket adı bulunamadı</string>
     <string name="auto_silent_install">Otomatik Sessiz Yükleme</string>
     <string name="auto_silent_install_desc">Yükleme diyaloğu başladığında otomatik sessiz kurulum</string>
+    <string name="exception_dhizuku_dead_service">Dhizuku uzaktan hizmeti sona erdi</string>
+    <string name="smart_suggestions">Öneriler</string>
+    <string name="suggestion_uninstall_and_retry_desc">Bu, uygulamanın mevcut sürümünü kaldıracak ve yeni sürümü yüklemeyi deneyecektir</string>
+    <string name="suggestion_uninstall_and_retry_keep_data_desc">Bu, verilerini koruyarak uygulamanın mevcut sürümünü kaldıracak ve ardından yeni sürümü yüklemeyi deneyecektir</string>
+    <string name="suggestion_allow_downgrade_desc">Geçici Olarak Sürüm Düşürmeye İzin Ver ve Yeniden Dene</string>
+    <string name="suggestion_allow_test_app_desc">Geçici olarak Teste İzin Ver ve yeniden dene</string>
+    <string name="suggestion_mi_isolation_desc">Geçici olarak geçerli yükleyiciyi ekleyin ve yeniden deneyin</string>
+    <string name="suggestion_user_restricted_desc">USB kurulumunu etkinleştirmek için Geliştirici seçeneklerine gidin</string>
+    <string name="suggestion_bypass_low_target_sdk_desc">Geçici olarak kısıtlamaları atlatmaya izin ver ve yeniden dene</string>
+    <string name="suggestion_bypass_blacklist_set_by_user_desc">Geçici olarak bir kez kuruluma izin ver</string>
+    <string name="suggestion_retry_install_desc">Tekrar yüklemeyi deneyin</string>
 </resources>
