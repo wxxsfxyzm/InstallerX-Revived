@@ -12,12 +12,14 @@ import android.content.pm.IPackageManager
 import android.content.pm.PackageManager
 import android.content.pm.ParceledListSlice
 import android.content.pm.ResolveInfo
+import android.content.pm.UserInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.os.IUserManager
 import android.os.RemoteException
 import android.os.ServiceManager
 import android.util.Log
@@ -25,10 +27,11 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
+import com.rosan.installer.data.recycle.util.ShizukuHook
 import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.inject
-import rikka.shizuku.SystemServiceHelper
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.lang.reflect.Field
@@ -39,12 +42,71 @@ import android.os.Process as AndroidProcess
 class DefaultPrivilegedService : BasePrivilegedService() {
     private val reflect by inject<ReflectRepo>()
 
+    private val isHookMode by lazy {
+        val processName: String? = try {
+            val activityThreadClass = Class.forName("android.app.ActivityThread")
+            val currentProcessNameMethod = reflect.getDeclaredMethod(activityThreadClass, "currentProcessName")
+            currentProcessNameMethod?.isAccessible = true
+
+            currentProcessNameMethod?.invoke(null) as? String
+        } catch (e: Exception) {
+            Log.e("PrivilegedService", "Failed to get current process name reflection setup: ${e.message}")
+            null
+        }
+
+        Log.d("PrivilegedService", "Detected process name: '$processName'")
+
+        if (processName == null) {
+            Log.d("PrivilegedService", "Process name is null, assuming UserService Mode.")
+            false // isHookMode is false (UserService Mode)
+        } else {
+            val isShizukuProcess = processName.endsWith(":shizuku_privileged")
+            Log.d(
+                "PrivilegedService",
+                "Process name is '$processName', isShizukuProcess: $isShizukuProcess. Assuming Hook Mode: ${!isShizukuProcess}"
+            )
+            !isShizukuProcess // isHookMode is true for main process
+        }
+    }
+
+    /**
+     *  懒加载 IPackageManager 实例。
+     *  根据 isHookMode 决定获取方式。
+     */
+    private val iPackageManager: IPackageManager by lazy {
+        if (isHookMode) {
+            Log.d("PrivilegedService", "Getting IPackageManager in Hook Mode (Directly).")
+            ShizukuHook.hookedPackageManager
+        } else {
+            Timber.d("Getting IPackageManager in UserService Mode.")
+            IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
+        }
+    }
+
+    private val iActivityManager: IActivityManager by lazy {
+        if (isHookMode) {
+            ShizukuHook.hookedActivityManager
+        } else {
+            IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
+        }
+    }
+
+    private val iUserManager: IUserManager by lazy {
+        if (isHookMode) {
+            Log.d("PrivilegedService", "Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
+            ShizukuHook.hookedUserManager
+        } else {
+            Log.d("PrivilegedService", "Getting IUserManager in UserService Mode.")
+            IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
+        }
+    }
+
     override fun delete(paths: Array<out String>) = deletePaths(paths)
 
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
+        Log.d("PrivilegedService", "Hook Mode: $isHookMode")
         val uid = AndroidProcess.myUid()
         val userId = uid / 100000
-        val iPackageManager = IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
 
         val intent = Intent(Intent.ACTION_VIEW)
             .addCategory(Intent.CATEGORY_DEFAULT)
@@ -141,10 +203,6 @@ class DefaultPrivilegedService : BasePrivilegedService() {
 
     override fun grantRuntimePermission(packageName: String, permission: String) {
         try {
-            val iPackageManager = IPackageManager.Stub.asInterface(
-                ServiceManager.getService("package")
-            ) ?: throw RemoteException("Failed to get 'package' service.")
-
             val userId = AndroidProcess.myUid() / 100000
 
             Log.d("PrivilegedService", "Granting $permission for $packageName (UID: $userId)")
@@ -180,11 +238,9 @@ class DefaultPrivilegedService : BasePrivilegedService() {
 
     override fun startActivityPrivileged(intent: Intent): Boolean {
         try {
-            val amBinder = ServiceManager.getService(Context.ACTIVITY_SERVICE)
-            val am = IActivityManager.Stub.asInterface(amBinder)
+            val am = iActivityManager
 
             val userId = AndroidProcess.myUid() / 100000
-
             val callerPackage = "com.android.shell"
             val resolvedType = intent.resolveType(context.contentResolver)
 
@@ -377,65 +433,31 @@ class DefaultPrivilegedService : BasePrivilegedService() {
     override fun getUsers(): Map<Int, String> {
         val userMap = mutableMapOf<Int, String>()
         try {
-            Log.d("PrivilegedService", "Using context: ${context.packageName}, UID: ${AndroidProcess.myUid()}")
+            val userManagerInstance = this.iUserManager
 
-            val userManagerBinder = SystemServiceHelper.getSystemService(Context.USER_SERVICE)
-            val userManagerClass = Class.forName("android.os.IUserManager\$Stub")
-            val asInterfaceMethod = reflect.getMethod(userManagerClass, "asInterface", IBinder::class.java)
-                ?: throw NoSuchMethodException("asInterface method not found")
-            val userManagerInstance = asInterfaceMethod.invoke(null, userManagerBinder)
-
-            val getUsersMethod =
+            val usersList: List<UserInfo>? =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT_FULL <= Build.VERSION_CODES_FULL.BAKLAVA) {
-                    reflect.getMethod(
-                        userManagerInstance::class.java,
-                        "getUsers",
-                        Boolean::class.java,
-                        Boolean::class.java,
-                        Boolean::class.java
-                    )
+                    userManagerInstance.getUsers(false, false, false)
                 } else {
-                    reflect.getMethod(
-                        userManagerInstance::class.java,
-                        "getUsers",
-                        Boolean::class.java
-                    )
-                } ?: throw NoSuchMethodException("getUsers method not found")
-
-            val usersList =
-                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT_FULL <= Build.VERSION_CODES_FULL.BAKLAVA) {
-                    getUsersMethod.invoke(userManagerInstance, false, false, false)
-                } else {
-                    getUsersMethod.invoke(userManagerInstance, false)
-                }) as? List<*>
+                    userManagerInstance.getUsers(false)
+                }
 
             if (usersList == null) {
                 Log.e("PrivilegedService", "Failed to get user list, method returned null.")
                 return userMap
             }
 
-            val userInfoClass = Class.forName("android.content.pm.UserInfo")
-            val idField = reflect.getField(userInfoClass, "id")
-                ?: throw NoSuchFieldException("Field 'id' not found in UserInfo")
-            val nameField = reflect.getField(userInfoClass, "name")
-                ?: throw NoSuchFieldException("Field 'name' not found in UserInfo")
-
             for (userObject in usersList) {
-                if (userObject != null) {
-                    idField.isAccessible = true
-                    nameField.isAccessible = true
-                    val userId = idField.getInt(userObject)
-                    val userName = nameField.get(userObject) as? String ?: "Unknown User"
-                    userMap[userId] = userName
-                }
+                userMap[userObject.id] = userObject.name ?: "Unknown User"
             }
+
             Log.d("PrivilegedService", "Fetched users: $userMap")
         } catch (e: SecurityException) {
             Log.e("PrivilegedService", "Permission denied for getUsers, falling back to current user", e)
             val userId = AndroidProcess.myUid() / 100000
             userMap[userId] = "Current User"
         } catch (e: Exception) {
-            Log.e("PrivilegedService", "Error getting users using ReflectRepo", e)
+            Log.e("PrivilegedService", "Error getting users", e)
         }
         return userMap
     }

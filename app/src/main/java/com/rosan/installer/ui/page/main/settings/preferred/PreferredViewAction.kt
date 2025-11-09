@@ -40,4 +40,6 @@ sealed class PreferredViewAction {
     data object RequestIgnoreBatteryOptimization : PreferredViewAction()
     data object RefreshIgnoreBatteryOptimizationStatus : PreferredViewAction()
     data class SetDefaultInstaller(val lock: Boolean) : PreferredViewAction()
+
+    data class LabChangeShizukuHookMode(val enable: Boolean) : PreferredViewAction()
 }

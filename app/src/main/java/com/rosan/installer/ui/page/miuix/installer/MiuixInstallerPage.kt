@@ -66,7 +66,7 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Info
 import top.yukonga.miuix.kmp.icon.icons.useful.Settings
 import top.yukonga.miuix.kmp.utils.BackHandler
 
-private const val SHEET_ANIMATION_DURATION = 250L
+private const val SHEET_ANIMATION_DURATION = 200L
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable

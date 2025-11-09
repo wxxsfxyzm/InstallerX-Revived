@@ -57,6 +57,7 @@ import androidx.compose.material.icons.twotone.Refresh
 import androidx.compose.material.icons.twotone.RocketLaunch
 import androidx.compose.material.icons.twotone.RoomPreferences
 import androidx.compose.material.icons.twotone.Save
+import androidx.compose.material.icons.twotone.Science
 import androidx.compose.material.icons.twotone.Search
 import androidx.compose.material.icons.twotone.Security
 import androidx.compose.material.icons.twotone.SecurityUpdateWarning
@@ -85,6 +86,7 @@ object AppIcons {
     val Terminal = Icons.TwoTone.Terminal
     val Launcher = Icons.TwoTone.RocketLaunch
     val History = Icons.TwoTone.History
+    val Lab = Icons.TwoTone.Science
     val Suggestion = Icons.TwoTone.AutoAwesome
     val Tip = Icons.Filled.Lightbulb
     val Update = Icons.TwoTone.SystemUpdate

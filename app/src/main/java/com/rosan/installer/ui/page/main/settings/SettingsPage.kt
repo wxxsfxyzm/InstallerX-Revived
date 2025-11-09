@@ -21,6 +21,8 @@ import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.HomePage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.NewHomePage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.LegacyInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.NewInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.LegacyLabPage
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.NewLabPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.LegacyThemeSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.NewThemeSettingsPage
 
@@ -152,6 +154,17 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
                 NewInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
             } else {
                 LegacyInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
+            }
+        }
+        composable(
+            route = SettingsScreen.Lab.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+            popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
+        ) {
+            if (preferredViewModel.state.showExpressiveUI) {
+                NewLabPage(navController = navController, viewModel = preferredViewModel)
+            } else {
+                LegacyLabPage(navController = navController, viewModel = preferredViewModel)
             }
         }
     }

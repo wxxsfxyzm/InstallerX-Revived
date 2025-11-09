@@ -51,6 +51,7 @@ import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPreferredPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home.MiuixHomePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.MiuixInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.lab.MiuixLabPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import kotlinx.coroutines.flow.collectLatest
@@ -100,11 +101,8 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                 animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
             )
         }
-
     ) {
-        composable(
-            route = MiuixSettingsScreen.MiuixMain.route,
-        ) {
+        composable(route = MiuixSettingsScreen.MiuixMain.route) {
             val allViewModel: AllViewModel = koinViewModel { parametersOf(navController) }
             LaunchedEffect(Unit) {
                 allViewModel.dispatch(AllViewAction.Init)
@@ -267,21 +265,18 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                 id = id
             )
         }
-        composable(
-            route = MiuixSettingsScreen.MiuixAbout.route,
-        ) {
+        composable(route = MiuixSettingsScreen.MiuixAbout.route) {
             MiuixHomePage(navController)
         }
-        composable(
-            route = MiuixSettingsScreen.MiuixTheme.route,
-        ) {
+        composable(route = MiuixSettingsScreen.MiuixTheme.route) {
             MiuixThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
 
         }
-        composable(
-            route = MiuixSettingsScreen.MiuixInstallerGlobal.route,
-        ) {
+        composable(route = MiuixSettingsScreen.MiuixInstallerGlobal.route) {
             MiuixInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
+        }
+        composable(route = MiuixSettingsScreen.MiuixLab.route) {
+            MiuixLabPage(navController = navController, viewModel = preferredViewModel)
         }
     }
 }

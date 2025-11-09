@@ -21,6 +21,7 @@ import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
@@ -142,7 +143,11 @@ fun MiuixPreferredPage(
                     .padding(bottom = 12.dp)
             ) {
                 MiuixSettingsAboutItemWidget(
-                    imageVector = AppIcons.Info,
+                    headlineContentText = stringResource(R.string.lab),
+                    supportingContentText = stringResource(R.string.lab_desc),
+                    onClick = { navController.navigate(SettingsScreen.Lab.route) }
+                )
+                MiuixSettingsAboutItemWidget(
                     headlineContentText = stringResource(R.string.about_detail),
                     supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
                     onClick = { navController.navigate(MiuixSettingsScreen.MiuixAbout.route) }

@@ -30,6 +30,7 @@ data class PreferredViewState(
     val managedBlacklistPackages: List<NamedPackage> = emptyList(),
     val managedSharedUserIdBlacklist: List<SharedUid> = emptyList(),
     val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList(),
+    val labShizukuHookMode: Boolean = false
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 

@@ -135,6 +135,9 @@ class PreferredViewModel(
             is PreferredViewAction.SetDefaultInstaller -> viewModelScope.launch {
                 setDefaultInstaller(action.lock, action)
             }
+
+            is PreferredViewAction.LabChangeShizukuHookMode -> labChangeShizukuHookMode(action.enable)
+
         }
 
 
@@ -191,6 +194,8 @@ class PreferredViewModel(
                 appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
             val managedSharedUserIdExemptPkgFlow =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
+            val labShizukuHookModeFlow =
+                appDataStore.getBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, false)
 
             combine(
                 authorizerFlow,
@@ -216,7 +221,8 @@ class PreferredViewModel(
                 managedSharedUserIdBlacklistFlow,
                 managedSharedUserIdExemptPkgFlow,
                 adbVerifyEnabledFlow,
-                isIgnoringBatteryOptFlow
+                isIgnoringBatteryOptFlow,
+                labShizukuHookModeFlow
             ) { values: Array<Any?> ->
                 val authorizer = values[0] as ConfigEntity.Authorizer
                 val customize = values[1] as String
@@ -246,6 +252,7 @@ class PreferredViewModel(
                     (values[21] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
                 val adbVerifyEnabled = values[22] as Boolean
                 val isIgnoringBatteryOptimizations = values[23] as Boolean
+                val labShizukuHookMode = values[24] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -273,7 +280,8 @@ class PreferredViewModel(
                     managedSharedUserIdBlacklist = managedSharedUserIdBlacklist,
                     managedSharedUserIdExemptedPackages = managedSharedUserIdExemptPkg,
                     adbVerifyEnabled = adbVerifyEnabled,
-                    isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations
+                    isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations,
+                    labShizukuHookMode = labShizukuHookMode
                 )
             }.collectLatest { state = it }
         }
@@ -516,6 +524,11 @@ class PreferredViewModel(
             block = { paRepo.setDefaultInstaller(authorizer, component, lock) }
         )
     }
+
+    private fun labChangeShizukuHookMode(enabled: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, enabled)
+        }
 
     private suspend fun runPrivilegedAction(
         action: PreferredViewAction,

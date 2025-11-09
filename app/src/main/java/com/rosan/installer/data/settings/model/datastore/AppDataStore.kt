@@ -77,6 +77,9 @@ class AppDataStore(
             stringPreferencesKey("managed_shared_user_id_blacklist")
         val MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST =
             stringPreferencesKey("managed_shared_user_id_blacklist_exempted_packages_list")
+
+        // Lab
+        val LAB_USE_SHIZUKU_HOOK_MODE = booleanPreferencesKey("use_shizuku_hook_mode")
     }
 
     suspend fun putString(key: Preferences.Key<String>, value: String) {
