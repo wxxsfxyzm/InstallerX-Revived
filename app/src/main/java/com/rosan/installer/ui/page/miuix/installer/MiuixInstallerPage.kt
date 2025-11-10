@@ -29,6 +29,9 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
+import com.rosan.installer.data.app.model.exception.ModuleInstallException
+import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
@@ -37,6 +40,7 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallChoiceCon
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallCompletedContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallExtendedMenuContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallFailedContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallModuleContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallPrepareContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallPreparePermissionContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallPreparingContent
@@ -115,9 +119,13 @@ fun MiuixInstallerPage(
         is InstallerViewState.InstallPrepare -> when {
             showSettings -> stringResource(R.string.installer_settings)
             showPermissions -> stringResource(R.string.permission_list)
-            else -> stringResource(R.string.installer_install_app)
+            else -> stringResource(
+                if (viewModel.isInstallingModule) R.string.installer_install_module
+                else R.string.installer_install_app
+            )
         }
 
+        is InstallerViewState.InstallingModule -> stringResource(R.string.installer_installing_module)
         is InstallerViewState.Installing -> stringResource(R.string.installer_installing)
         is InstallerViewState.InstallCompleted -> stringResource(R.string.installer_install_success)
         is InstallerViewState.InstallSuccess -> stringResource(R.string.installer_install_success)
@@ -265,9 +273,14 @@ fun MiuixInstallerPage(
                 showBottomSheet.value = !showBottomSheet.value
                 scope.launch {
                     delay(SHEET_ANIMATION_DURATION) // Wait for sheet animation
-                    if (viewModel.disableNotificationOnDismiss) {
+                    val isModuleInstall = viewModel.state is InstallerViewState.InstallingModule
+
+                    // If it's a module install OR the "disable notification" setting is on,
+                    // the dismiss action should be a full close.
+                    if (isModuleInstall || viewModel.disableNotificationOnDismiss) {
                         viewModel.dispatch(InstallerViewAction.Close)
                     } else {
+                        // Otherwise (for standard APKs), the dismiss action sends it to the background.
                         viewModel.dispatch(InstallerViewAction.Background)
                     }
                 }
@@ -364,11 +377,29 @@ fun MiuixInstallerPage(
                 }
 
                 is InstallerViewState.InstallFailed -> {
-                    InstallFailedContent(
-                        baseEntity = baseEntity,
-                        appIcon = appIcon,
-                        installer = installer,
-                        viewModel = viewModel,
+                    if (installer.error is ModuleInstallFailedIncompatibleAuthorizerException ||
+                        installer.error is ModuleInstallCmdInitException ||
+                        installer.error is ModuleInstallException
+                    )
+                        NonInstallFailedContent(
+                            error = installer.error,
+                            onClose = closeSheet
+                        )
+                    else
+                        InstallFailedContent(
+                            baseEntity = baseEntity,
+                            appIcon = appIcon,
+                            installer = installer,
+                            viewModel = viewModel,
+                            onClose = closeSheet
+                        )
+                }
+
+                is InstallerViewState.InstallingModule -> {
+                    val moduleState = viewModel.state as InstallerViewState.InstallingModule
+                    InstallModuleContent(
+                        outputLines = moduleState.output,
+                        isFinished = moduleState.isFinished,
                         onClose = closeSheet
                     )
                 }

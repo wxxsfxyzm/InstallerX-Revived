@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.installer.ICommandOutputListener
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.deletePaths
 import timber.log.Timber
@@ -48,6 +49,11 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
 
 
     override fun execArr(command: Array<String>): String {
+        // Device Owner Privileged Service does not support shell access
+        throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
+    }
+
+    override fun execArrWithCallback(command: Array<String>, listener: ICommandOutputListener?) {
         // Device Owner Privileged Service does not support shell access
         throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
     }

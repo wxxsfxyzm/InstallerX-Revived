@@ -31,8 +31,8 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDefaultInstaller
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisableAdbVerify
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationSetting
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixNoneInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
@@ -97,7 +97,7 @@ fun MiuixPreferredPage(
                 )
             }
         }
-        if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) item { MiuixNoneInstallerTipCard() }
+        if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) item { MiuixSettingsTipCard(stringResource(R.string.config_authorizer_none_tips)) }
         item { SmallTitle(stringResource(R.string.basic)) }
         item {
             Card(

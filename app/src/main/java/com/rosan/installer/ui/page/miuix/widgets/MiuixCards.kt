@@ -4,9 +4,11 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
@@ -38,8 +40,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 private fun TipCard(
     modifier: Modifier = Modifier,
     tipContent: @Composable () -> Unit,
-    actionContent: @Composable () -> Unit = {}
+    actionContent: @Composable (() -> Unit)? = null
 ) {
+    val endPadding = if (actionContent == null) 16.dp else 12.dp
+
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.defaultColors(
@@ -50,13 +54,17 @@ private fun TipCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 12.dp, top = 16.dp, bottom = 16.dp),
+                .padding(start = 16.dp, end = endPadding, top = 16.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(modifier = Modifier.weight(1f)) {
                 tipContent()
             }
-            actionContent()
+
+            if (actionContent != null) {
+                Spacer(modifier = Modifier.width(8.dp))
+                actionContent()
+            }
         }
     }
 }
@@ -90,18 +98,18 @@ fun MiuixScopeTipCard(viewModel: AllViewModel) {
 }
 
 @Composable
-fun MiuixNoneInstallerTipCard() {
+fun MiuixSettingsTipCard(text: String) {
     TipCard(
         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         tipContent = {
             Text(
-                text = stringResource(R.string.config_authorizer_none_tips),
+                text = text,
                 style = MiuixTheme.textStyles.body2,
                 color = MiuixTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold
             )
         }
-    ) {}
+    )
 }
 
 @Composable
@@ -116,7 +124,7 @@ fun MiuixInstallChoiceTipCard(text: String) {
                 fontWeight = FontWeight.SemiBold
             )
         }
-    ) {}
+    )
 }
 
 /**

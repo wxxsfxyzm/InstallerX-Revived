@@ -95,6 +95,22 @@ fun NewLabPage(
                     }
                 )
             }
+            /*item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.config_authorizer_shizuku),
+                    content = buildList {
+                        add {
+                            SwitchWidget(
+                                icon = Icons.AutoMirrored.Filled.AltRoute,
+                                title = "Use Hook Mode",
+                                description = "Use hook mode instead of userService",
+                                checked = state.labShizukuHookMode,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
+                            )
+                        }
+                    }
+                )
+            }*/
         }
     }
 }

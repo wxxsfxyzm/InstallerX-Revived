@@ -15,6 +15,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
+import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.app.repo.PrivilegedActionRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
@@ -137,7 +138,8 @@ class PreferredViewModel(
             }
 
             is PreferredViewAction.LabChangeShizukuHookMode -> labChangeShizukuHookMode(action.enable)
-
+            is PreferredViewAction.LabChangeRootModuleFlash -> labChangeRootModuleFlash(action.enable)
+            is PreferredViewAction.LabChangeRootImplementation -> labChangeRootImplementation(action.implementation)
         }
 
 
@@ -196,6 +198,10 @@ class PreferredViewModel(
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
             val labShizukuHookModeFlow =
                 appDataStore.getBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, false)
+            val labRootModuleFlashFlow =
+                appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false)
+            val labRootImplementationFlow = appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
+                .map { RootImplementation.fromString(it) }
 
             combine(
                 authorizerFlow,
@@ -222,7 +228,9 @@ class PreferredViewModel(
                 managedSharedUserIdExemptPkgFlow,
                 adbVerifyEnabledFlow,
                 isIgnoringBatteryOptFlow,
-                labShizukuHookModeFlow
+                labShizukuHookModeFlow,
+                labRootModuleFlashFlow,
+                labRootImplementationFlow
             ) { values: Array<Any?> ->
                 val authorizer = values[0] as ConfigEntity.Authorizer
                 val customize = values[1] as String
@@ -253,6 +261,9 @@ class PreferredViewModel(
                 val adbVerifyEnabled = values[22] as Boolean
                 val isIgnoringBatteryOptimizations = values[23] as Boolean
                 val labShizukuHookMode = values[24] as Boolean
+                val labRootModuleFlash = values[25] as Boolean
+                val labRootImplementation = values[26] as RootImplementation
+
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -281,7 +292,9 @@ class PreferredViewModel(
                     managedSharedUserIdExemptedPackages = managedSharedUserIdExemptPkg,
                     adbVerifyEnabled = adbVerifyEnabled,
                     isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations,
-                    labShizukuHookMode = labShizukuHookMode
+                    labShizukuHookMode = labShizukuHookMode,
+                    labRootEnableModuleFlash = labRootModuleFlash,
+                    labRootImplementation = labRootImplementation
                 )
             }.collectLatest { state = it }
         }
@@ -528,6 +541,19 @@ class PreferredViewModel(
     private fun labChangeShizukuHookMode(enabled: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, enabled)
+        }
+
+    private fun labChangeRootModuleFlash(enabled: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, enabled)
+        }
+
+    private fun labChangeRootImplementation(implementation: RootImplementation) =
+        viewModelScope.launch {
+            appDataStore.putString(
+                AppDataStore.LAB_ROOT_IMPLEMENTATION,
+                implementation.name
+            )
         }
 
     private suspend fun runPrivilegedAction(

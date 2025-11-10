@@ -26,14 +26,17 @@ import android.util.Log
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
+import com.rosan.installer.ICommandOutputListener
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.ShizukuHook
 import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.inject
 import timber.log.Timber
+import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.InputStreamReader
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import android.os.Process as AndroidProcess
@@ -69,10 +72,6 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         }
     }
 
-    /**
-     *  懒加载 IPackageManager 实例。
-     *  根据 isHookMode 决定获取方式。
-     */
     private val iPackageManager: IPackageManager by lazy {
         if (isHookMode) {
             Log.d("PrivilegedService", "Getting IPackageManager in Hook Mode (Directly).")
@@ -198,6 +197,78 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             Thread.currentThread().interrupt()
             // 将 InterruptedException 包装成 RemoteException 抛出
             throw RemoteException(e.message)
+        }
+    }
+
+    @Throws(RemoteException::class)
+    override fun execArrWithCallback(command: Array<String>, listener: ICommandOutputListener?) {
+        if (listener == null) {
+            // If no listener is provided, we can't stream output.
+            // You could either throw an exception or just execute without feedback.
+            Log.w("PrivilegedService", "execArrWithCallback called with a null listener.")
+            return
+        }
+
+        var process: Process? = null
+        try {
+            process = Runtime.getRuntime().exec(command)
+            val stdoutReader = BufferedReader(InputStreamReader(process.inputStream))
+            val stderrReader = BufferedReader(InputStreamReader(process.errorStream))
+
+            // Thread to read standard output
+            val stdoutThread = Thread {
+                try {
+                    var line: String?
+                    while (stdoutReader.readLine().also { line = it } != null) {
+                        listener.onOutput(line)
+                    }
+                } catch (e: Exception) {
+                    if (e is IOException || e is RemoteException) {
+                        Log.e("PrivilegedService", "Error reading stdout or sending callback", e)
+                    }
+                }
+            }
+
+            // Thread to read standard error
+            val stderrThread = Thread {
+                try {
+                    var line: String?
+                    while (stderrReader.readLine().also { line = it } != null) {
+                        listener.onError(line)
+                    }
+                } catch (e: Exception) {
+                    if (e is IOException || e is RemoteException) {
+                        Log.e("PrivilegedService", "Error reading stderr or sending callback", e)
+                    }
+                }
+            }
+
+            stdoutThread.start()
+            stderrThread.start()
+
+            // Wait for the process to complete
+            val exitCode = process.waitFor()
+
+            // Wait for reader threads to finish to ensure all output is captured
+            stdoutThread.join()
+            stderrThread.join()
+
+            // Notify client that the process is complete
+            listener.onComplete(exitCode)
+
+        } catch (e: Exception) {
+            // If process creation itself fails
+            val errorMessage = "Failed to execute command: ${e.message}"
+            Log.e("PrivilegedService", errorMessage, e)
+            try {
+                listener.onError(errorMessage)
+                listener.onComplete(-1) // Send a failure exit code
+            } catch (re: RemoteException) {
+                // The client might be dead, just log it.
+                Log.e("PrivilegedService", "Failed to send execution error to client.", re)
+            }
+        } finally {
+            process?.destroy()
         }
     }
 

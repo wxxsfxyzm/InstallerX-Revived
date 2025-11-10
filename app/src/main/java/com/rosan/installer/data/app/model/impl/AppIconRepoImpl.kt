@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.AppIconCache
-import com.rosan.installer.data.app.util.sourcePath
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -41,7 +41,8 @@ class AppIconRepoImpl : AppIconRepo, KoinComponent {
             async(Dispatchers.IO) {
                 val baseEntity = entityToInstall as? AppEntity.BaseEntity
                 val rawApkIcon = baseEntity?.icon
-                val apkPath = baseEntity?.data?.sourcePath()
+                // val apkPath = baseEntity?.data?.sourcePath()
+                val apkPath = (baseEntity?.data as? DataEntity.FileEntity)?.path
 
                 // Try to get ApplicationInfo from an already installed package.
                 val installedAppInfo = try {

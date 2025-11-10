@@ -64,7 +64,6 @@ fun useUserService(
 
 /**
  * Core private function to select the correct recycler based on authorizer type.
- * This avoids code duplication between the two public functions.
  */
 private fun getRecyclableInstance(
     authorizer: ConfigEntity.Authorizer,
@@ -87,8 +86,7 @@ private fun getRecyclableInstance(
         }
 
         ConfigEntity.Authorizer.Dhizuku -> DhizukuUserServiceRecycler.make()
-        ConfigEntity.Authorizer.Customize -> ProcessUserServiceRecyclers.get(customizeAuthorizer)
-            .make()
+        ConfigEntity.Authorizer.Customize -> ProcessUserServiceRecyclers.get(customizeAuthorizer).make()
         // 其余情况，不使用授权器
         else -> null
     } else {

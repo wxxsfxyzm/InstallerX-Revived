@@ -326,6 +326,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     private suspend fun installIt(
         config: ConfigEntity, entity: InstallEntity, extra: InstallExtraInfoEntity, session: Session
     ) {
+        Timber.d("Installing entity: ${entity.name}, data path: ${entity.data}, top source: ${entity.data.getSourceTop()}")
         val inputStream = entity.data.getInputStreamWhileNotEmpty()
             ?: throw Exception("can't open input stream for this data: '${entity.data}'")
         session.openWrite(

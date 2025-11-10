@@ -33,11 +33,26 @@ object ModuleZipAnalyserRepoImpl : FileAnalyserRepo {
             ZipFile(fileEntity.path).use { zipFile ->
                 val modulePropEntry = zipFile.getEntry("module.prop")
                     ?: zipFile.getEntry("common/module.prop")
-                    ?: return emptyList() // Not a module if module.prop doesn't exist in either location
+                    ?: return emptyList()
 
-                zipFile.getInputStream(modulePropEntry).use { inputStream ->
+                zipFile.getInputStream(modulePropEntry).buffered().use { inputStream ->
+                    // --- ROBUST BOM HANDLING ---
+                    // Mark the beginning of the stream
+                    inputStream.mark(3)
+                    val bom = ByteArray(3)
+                    val bytesRead = inputStream.read(bom, 0, 3)
+
+                    // Check if the first 3 bytes match the UTF-8 BOM (0xEF, 0xBB, 0xBF)
+                    if (bytesRead < 3 || bom[0] != 0xEF.toByte() || bom[1] != 0xBB.toByte() || bom[2] != 0xBF.toByte()) {
+                        // If it's not a BOM, reset the stream to the beginning
+                        inputStream.reset()
+                    }
+                    // If it IS a BOM, we've now consumed it and the stream is positioned right after it.
+                    // --- END OF BOM HANDLING ---
+
                     val properties = Properties().apply {
-                        // Use a reader to handle character encoding properly, assuming UTF-8
+                        // Now, load from the potentially BOM-skipped stream.
+                        // Using a reader with specified charset is still good practice.
                         load(inputStream.reader(Charsets.UTF_8))
                     }
 
@@ -49,7 +64,7 @@ object ModuleZipAnalyserRepoImpl : FileAnalyserRepo {
                     val description = properties.getProperty("description", "")
 
                     if (id.isBlank() || name.isBlank()) {
-                        Timber.w("Module file ${fileEntity.path} has incomplete module.prop (missing id or name).")
+                        Timber.w("Module file ${fileEntity.path} has incomplete module.prop (missing id or name). Parsed properties: $properties") // Added more logging
                         return emptyList()
                     }
 

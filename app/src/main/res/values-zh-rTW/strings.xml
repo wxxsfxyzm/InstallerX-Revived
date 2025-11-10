@@ -344,6 +344,9 @@
     <string name="exception_dhizuku_dead_service">Dhizuku遠端服務已經死亡</string>
     <string name="exception_root_not_work">請授予 ROOT 權限</string>
     <string name="exception_app_process_not_work">授權器啟動失敗</string>
+    <string name="exception_module_cmd_init_failed">模組安裝命令執行失敗</string>
+    <string name="exception_module_install_failed">模組安裝失敗</string>
+    <string name="exception_module_install_failed_incompatible_authorizer">不相容的授權器</string>
     <string name="old_version_prefix">目前</string>
     <string name="old_version_archived">已歸檔</string>
     <string name="upgrade_version_prefix">升級</string>
@@ -515,9 +518,16 @@
     <string name="installer_mixed_module_zip_description">這個檔案同時包含了模組和應用程式包，請選擇安裝模式</string>
     <string name="installer_select_from_mixed_module_apk">選擇安裝類型</string>
     <string name="installer_mixed_module_apk_description">请選擇安裝類型</string>
+    <string name="installer_mixed_module_apk_description_notification">請點開通知選擇要安裝的類型</string>
     <string name="split_name_base_group_title">應用主包</string>
     <string name="split_name_architecture_group_title">架構拆分</string>
     <string name="split_name_language_group_title">語言分包</string>
     <string name="split_name_density_group_title">螢幕密度分包</string>
     <string name="split_name_feature_group_title">功能分包</string>
+    <string name="lab_tip">實驗室中的功能可能不穩定或存在風險，隨時可能被修改或移除，請自行承擔使用風險</string>
+    <string name="lab_use_hook_mode">使用 Hook 模式</string>
+    <string name="lab_use_hook_mode_desc">使用 Hook 模式取代 userService，以獲得更好的效能</string>
+    <string name="lab_module_flashing">啟用模組刷寫</string>
+    <string name="lab_module_flashing_desc">在刷寫任何模組前務必再次確認！</string>
+    <string name="lab_module_select_root_impl">選擇 Root 實現方式</string>
 </resources>
