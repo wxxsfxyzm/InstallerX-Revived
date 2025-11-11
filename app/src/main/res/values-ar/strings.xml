@@ -231,7 +231,7 @@
     <string name="permission_dhizuku">استخدام Dhizuku</string>
     <string name="permission_unknown">إذن غير معروف</string>
     <string name="installer_running">InstallerX قيد التشغيل</string>
-    <string name="installer_version_short">" إصدار %1$s (%2$s)"</string>
+    <string name="installer_version_short">إصدار %1$s (%2$s)</string>
     <string name="installer_version">الإصدار: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">الحزمة: %1$s</string>

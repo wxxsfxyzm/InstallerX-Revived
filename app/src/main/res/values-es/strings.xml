@@ -220,7 +220,7 @@
     <string name="permission_dhizuku">Usar Dhizuku</string>
     <string name="permission_unknown">Permiso desconocido</string>
     <string name="installer_running">InstallerX en ejecución</string>
-    <string name="installer_version_short">" Ver. %1$s (%2$s)"</string>
+    <string name="installer_version_short">Ver. %1$s (%2$s)</string>
     <string name="installer_version">Versión: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">Paquete: %1$s</string>

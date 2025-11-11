@@ -211,7 +211,7 @@
     <string name="installer_unknown_error">Неизвестная ошибка</string>
     <string name="installer_version">Версия: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
-    <string name="installer_version_short"> Ver. %1$s (%2$s)</string>
+    <string name="installer_version_short">Ver. %1$s (%2$s)</string>
     <string name="installing_progress_text">Установка %1$s (%2$d/%3$d)</string>
     <string name="instant_app">Мгновенное приложение</string>
     <string name="instant_app_desc">Установите пакет как мгновенное приложение.</string>

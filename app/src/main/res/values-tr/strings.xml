@@ -280,7 +280,7 @@
     <string name="permission_dhizuku">Dhizu\'yu kullan</string>
     <string name="permission_unknown">Bilinmeyen izin</string>
     <string name="installer_running">InstallerX çalışıyor</string>
-    <string name="installer_version_short">" Ver. %1$s (%2$s)"</string>
+    <string name="installer_version_short">Ver. %1$s (%2$s)</string>
     <string name="installer_version">Versiyon: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">Paket: %1$s</string>

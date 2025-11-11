@@ -219,7 +219,7 @@
     <string name="installer_unknown_error">ข้อผิดพลาดที่ไม่รู้จัก</string>
     <string name="installer_version">เวอร์ชัน: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
-    <string name="installer_version_short">" Ver. %1$s (%2$s)"</string>
+    <string name="installer_version_short">Ver. %1$s (%2$s)</string>
     <string name="installing_progress_text">กำลังติดตั้ง %1$s (%2$d/%3$d)</string>
     <string name="instant_app">Instant Apps</string>
     <string name="instant_app_desc">ติดตั้งแพ็คเกจเป็น Instant Apps</string>

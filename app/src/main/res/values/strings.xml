@@ -217,7 +217,6 @@
     <string name="sort_by_selected_first">Selected go first</string>
     <string name="sort_by_show_system_app">Display system app</string>
     <string name="sort_by_show_package_name">Display package name</string>
-
     <string name="installer_ready">Ready</string>
     <string name="installer_resolving">Checking…</string>
     <string name="installer_resolve_failed">Resolve failed</string>
@@ -327,7 +326,7 @@
     <string name="permission_dhizuku">Use Dhizuku</string>
     <string name="permission_unknown">Unknown permission</string>
     <string name="installer_running">InstallerX running</string>
-    <string name="installer_version_short">" Ver. %1$s (%2$s)"</string>
+    <string name="installer_version_short">Ver. %1$s (%2$s)</string>
     <string name="installer_version_name_label">Version Name:</string>
     <string name="installer_version_code_label">Version Code:</string>
     <string name="installer_version">Version: %1$s (%2$s)</string>
@@ -539,5 +538,4 @@
     <string name="suggestion_bypass_blacklist_set_by_user">Allow install once</string>
     <string name="suggestion_bypass_blacklist_set_by_user_desc">Temporarily allow install once</string>
     <string name="suggestion_retry_install_desc">Try install again</string>
-
 </resources>
