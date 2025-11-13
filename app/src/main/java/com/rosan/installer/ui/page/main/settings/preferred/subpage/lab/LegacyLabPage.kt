@@ -52,8 +52,8 @@ fun LegacyLabPage(
             item {
                 SwitchWidget(
                     icon = Icons.AutoMirrored.Filled.AltRoute,
-                    title = "Use Hook Mode",
-                    description = "Use hook mode instead of userService",
+                    title = stringResource(R.string.lab_use_hook_mode),
+                    description = stringResource(R.string.lab_use_hook_mode_desc),
                     checked = state.labShizukuHookMode,
                     isM3E = false,
                     onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
