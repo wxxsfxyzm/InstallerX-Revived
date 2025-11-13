@@ -90,4 +90,10 @@ class ReflectRepoImpl : ReflectRepo {
             null
         }
     }
+
+    override fun getStaticObjectField(clazz: Class<*>, fieldName: String): Any {
+        val field = clazz.getDeclaredField(fieldName)
+        field.isAccessible = true
+        return field.get(null)
+    }
 }

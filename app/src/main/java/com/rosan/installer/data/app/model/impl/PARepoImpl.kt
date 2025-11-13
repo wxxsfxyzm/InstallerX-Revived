@@ -4,22 +4,34 @@ import android.content.ComponentName
 import android.content.Intent
 import com.rosan.installer.data.app.repo.PARepo
 import com.rosan.installer.data.recycle.util.useUserService
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.LAB_USE_SHIZUKU_HOOK_MODE
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 
 object PARepoImpl : PARepo, KoinComponent {
+    private val appDataStore by inject<AppDataStore>()
+    private val useShizukuHookModeFlow = appDataStore.getBoolean(LAB_USE_SHIZUKU_HOOK_MODE)
+
     override suspend fun setDefaultInstaller(
         authorizer: ConfigEntity.Authorizer,
         component: ComponentName,
         enable: Boolean
     ) {
+        val useShizukuHookMode = useShizukuHookModeFlow.first()
         // The special logic for 'su 1000' is specific to this operation.
         val specialAuth = if (authorizer == ConfigEntity.Authorizer.Root) {
             { "su 1000" }
         } else null
 
-        useUserService(authorizer, special = specialAuth) { userService ->
+        useUserService(
+            authorizer = authorizer,
+            useShizukuHookMode = useShizukuHookMode,
+            special = specialAuth
+        ) { userService ->
             userService.privileged.setDefaultInstaller(component, enable)
         }
     }
@@ -95,8 +107,9 @@ object PARepoImpl : PARepo, KoinComponent {
     }
 
     override suspend fun startActivityPrivileged(config: ConfigEntity, intent: Intent): Boolean {
+        val useShizukuHookMode = useShizukuHookModeFlow.first()
         var success = false
-        useUserService(config) {
+        useUserService(config = config, useShizukuHookMode = useShizukuHookMode) {
             try {
                 success = it.privileged.startActivityPrivileged(intent)
             } catch (e: Exception) {
@@ -108,8 +121,9 @@ object PARepoImpl : PARepo, KoinComponent {
     }
 
     override suspend fun getUsers(authorizer: ConfigEntity.Authorizer): Map<Int, String> {
+        val useShizukuHookMode = useShizukuHookModeFlow.first()
         var users: Map<Int, String> = emptyMap()
-        useUserService(authorizer) {
+        useUserService(authorizer = authorizer, useShizukuHookMode = useShizukuHookMode) {
             try {
                 // Call the new getUsers method on the privileged service
                 // The result from AIDL is Map<*, *>, so we cast it safely.

@@ -43,7 +43,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDataNameWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataPackageSourceWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySdkWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixNoneInstallerTipCard
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
@@ -172,7 +172,7 @@ fun MiuixEditPage(
                     MiuixDataInstallModeWidget(viewModel = viewModel)
                 }
             }
-            if (isNone) item { MiuixNoneInstallerTipCard() }
+            if (isNone) item { MiuixSettingsTipCard(stringResource(R.string.config_authorizer_none_tips)) }
             item { SmallTitle(stringResource(R.string.config_label_installer_settings)) }
             item {
                 Card(

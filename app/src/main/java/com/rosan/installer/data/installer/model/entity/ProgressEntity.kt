@@ -21,6 +21,7 @@ sealed class ProgressEntity {
     data object InstallAnalysedSuccess : ProgressEntity()
 
     data object Installing : ProgressEntity()
+    data class InstallingModule(val output: List<String>) : ProgressEntity()
     data object InstallFailed : ProgressEntity()
     data object InstallSuccess : ProgressEntity()
 

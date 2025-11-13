@@ -21,6 +21,7 @@ import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
@@ -30,8 +31,8 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDefaultInstaller
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisableAdbVerify
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationSetting
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixNoneInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
@@ -96,7 +97,7 @@ fun MiuixPreferredPage(
                 )
             }
         }
-        if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) item { MiuixNoneInstallerTipCard() }
+        if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) item { MiuixSettingsTipCard(stringResource(R.string.config_authorizer_none_tips)) }
         item { SmallTitle(stringResource(R.string.basic)) }
         item {
             Card(
@@ -142,7 +143,11 @@ fun MiuixPreferredPage(
                     .padding(bottom = 12.dp)
             ) {
                 MiuixSettingsAboutItemWidget(
-                    imageVector = AppIcons.Info,
+                    headlineContentText = stringResource(R.string.lab),
+                    supportingContentText = stringResource(R.string.lab_desc),
+                    onClick = { navController.navigate(SettingsScreen.Lab.route) }
+                )
+                MiuixSettingsAboutItemWidget(
                     headlineContentText = stringResource(R.string.about_detail),
                     supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
                     onClick = { navController.navigate(MiuixSettingsScreen.MiuixAbout.route) }

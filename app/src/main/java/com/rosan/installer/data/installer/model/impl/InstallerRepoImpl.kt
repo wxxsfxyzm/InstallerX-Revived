@@ -7,6 +7,7 @@ import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
@@ -75,7 +76,7 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
                 val intent = Intent(InstallerService.Action.Ready.value)
                 intent.component = ComponentName(context, InstallerService::class.java)
                 intent.putExtra(InstallerService.EXTRA_ID, impl.id)
-                context.startService(intent)
+                ContextCompat.startForegroundService(context, intent)
                 impl
             }
         }

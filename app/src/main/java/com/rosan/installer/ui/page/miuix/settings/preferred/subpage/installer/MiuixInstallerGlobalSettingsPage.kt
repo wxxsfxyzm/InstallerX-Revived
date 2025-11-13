@@ -153,6 +153,20 @@ fun MiuixInstallerGlobalSettingsPage(
                         )
                     }
 
+                    AnimatedVisibility(visible = isDialogMode) {
+                        MiuixSwitchWidget(
+                            icon = AppIcons.Suggestion,
+                            title = stringResource(id = R.string.show_intelligent_suggestion),
+                            description = stringResource(id = R.string.show_intelligent_suggestion_desc),
+                            checked = viewModel.state.showSmartSuggestion,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowSuggestion(it)
+                                )
+                            }
+                        )
+                    }
+
                     AnimatedVisibility(
                         visible = isNotificationMode,
                         enter = fadeIn() + expandVertically(),

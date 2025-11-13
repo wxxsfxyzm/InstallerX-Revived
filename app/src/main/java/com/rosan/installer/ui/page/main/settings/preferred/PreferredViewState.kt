@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
+import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -30,6 +31,9 @@ data class PreferredViewState(
     val managedBlacklistPackages: List<NamedPackage> = emptyList(),
     val managedSharedUserIdBlacklist: List<SharedUid> = emptyList(),
     val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList(),
+    val labShizukuHookMode: Boolean = false,
+    val labRootEnableModuleFlash: Boolean = false,
+    val labRootImplementation: RootImplementation = RootImplementation.Magisk
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 

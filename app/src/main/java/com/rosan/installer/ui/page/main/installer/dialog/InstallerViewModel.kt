@@ -15,6 +15,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
+import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.repo.PARepo
 import com.rosan.installer.data.app.util.InstallOption
@@ -55,6 +56,15 @@ class InstallerViewModel(
     var state by mutableStateOf<InstallerViewState>(InstallerViewState.Ready)
         private set
 
+    /**
+     * Checks if the current selection for installation contains at least one module.
+     * This is determined by checking if any selected entity is of type ModuleEntity.
+     */
+    val isInstallingModule: Boolean
+        get() = repo.analysisResults.any { result ->
+            result.appEntities.any { entity -> entity.selected && entity.app is AppEntity.ModuleEntity }
+        }
+
     // Hold the original, complete analysis results for multi-install scenarios.
     private var originalAnalysisResults: List<PackageAnalysisResult> = emptyList()
 
@@ -78,6 +88,7 @@ class InstallerViewModel(
         private set
     var showOPPOSpecial by mutableStateOf(false)
     private var autoSilentInstall by mutableStateOf(false)
+    var enableModuleInstall by mutableStateOf(false)
 
     // Text to show in the progress bar
     private val _installProgressText = MutableStateFlow<UiText?>(null)
@@ -103,6 +114,8 @@ class InstallerViewModel(
             is InstallerViewState.Preparing,
             is InstallerViewState.InstallExtendedMenu,
             is InstallerViewState.InstallChoice -> false
+
+            is InstallerViewState.InstallingModule -> (state as InstallerViewState.InstallingModule).isFinished
 
             is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
             is InstallerViewState.Installing -> !disableNotificationOnDismiss
@@ -188,6 +201,8 @@ class InstallerViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false).first()
             autoSilentInstall =
                 appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false).first()
+            enableModuleInstall =
+                appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false).first()
 
             // Load managed packages for installer selection.
             appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
@@ -338,7 +353,9 @@ class InstallerViewModel(
 
                         val isMultiAppMode = analysisResults.size > 1 ||
                                 containerType == DataType.MULTI_APK ||
-                                containerType == DataType.MULTI_APK_ZIP
+                                containerType == DataType.MULTI_APK_ZIP ||
+                                containerType == DataType.MIXED_MODULE_APK ||
+                                containerType == DataType.MIXED_MODULE_ZIP
 
                         if (isMultiAppMode) {
                             // If the backend (ActionHandler) determined it's a multi-app scenario,
@@ -369,19 +386,46 @@ class InstallerViewModel(
                     }
 
                     is ProgressEntity.InstallFailed -> {
-                        newState = InstallerViewState.InstallFailed
                         autoInstallJob?.cancel()
-                        if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
-                            newPackageNameFromProgress = repo.analysisResults.first().packageName
+                        // If we were installing a module, just mark it as finished instead of switching state.
+                        if (state is InstallerViewState.InstallingModule && repo.error is ModuleInstallExitCodeNonZeroException) {
+                            // Get the current list of output lines from the UI state.
+                            val currentOutput = (state as InstallerViewState.InstallingModule).output.toMutableList()
+
+                            // Get the error message from the repository, which ActionHandler has set.
+                            val errorMessage = repo.error.message
+                            if (!errorMessage.isNullOrBlank()) {
+                                currentOutput.add("ERROR: $errorMessage")
+                            }
+
+                            // Create the new, final state with the updated output and the finished flag.
+                            newState = (state as InstallerViewState.InstallingModule).copy(
+                                output = currentOutput,
+                                isFinished = true
+                            )
+                        } else {
+                            newState = InstallerViewState.InstallFailed
+                            if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
+                                newPackageNameFromProgress = repo.analysisResults.first().packageName
+                            }
                         }
                     }
 
                     is ProgressEntity.InstallSuccess -> {
-                        newState = InstallerViewState.InstallSuccess
                         autoInstallJob?.cancel()
-                        if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
-                            newPackageNameFromProgress = repo.analysisResults.first().packageName
+                        // If a module installation succeeded, just mark it as finished.
+                        if (state is InstallerViewState.InstallingModule) {
+                            newState = (state as InstallerViewState.InstallingModule).copy(isFinished = true)
+                        } else {
+                            newState = InstallerViewState.InstallSuccess
+                            if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
+                                newPackageNameFromProgress = repo.analysisResults.first().packageName
+                            }
                         }
+                    }
+
+                    is ProgressEntity.InstallingModule -> {
+                        newState = InstallerViewState.InstallingModule(progress.output)
                     }
 
                     is ProgressEntity.Uninstalling -> {
@@ -675,10 +719,15 @@ class InstallerViewModel(
 
     private fun install() {
         autoInstallJob?.cancel()
-        if (autoSilentInstall && (state is InstallerViewState.InstallPrepare || state is InstallerViewState.InstallFailed)) {
+
+        if (autoSilentInstall && !isInstallingModule && (state is InstallerViewState.InstallPrepare || state is InstallerViewState.InstallFailed)) {
+            Timber.d("Auto-install triggered for APK-only installation. Going to background.")
             repo.install()
             repo.background(true)
-        } else repo.install()
+        } else {
+            Timber.d("Standard foreground installation triggered. Contains Module: $isInstallingModule")
+            repo.install()
+        }
     }
 
     private fun background() {

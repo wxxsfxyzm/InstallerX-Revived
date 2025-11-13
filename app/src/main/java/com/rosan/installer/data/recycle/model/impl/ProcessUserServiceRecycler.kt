@@ -7,8 +7,8 @@ import com.rosan.app_process.AppProcess
 import com.rosan.installer.IAppProcessService
 import com.rosan.installer.IPrivilegedService
 import com.rosan.installer.data.recycle.model.entity.DefaultPrivilegedService
-import com.rosan.installer.data.recycle.repo.recyclable.UserService
 import com.rosan.installer.data.recycle.repo.Recycler
+import com.rosan.installer.data.recycle.repo.recyclable.UserService
 import com.rosan.installer.di.init.processModules
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.KoinComponent
@@ -47,13 +47,13 @@ class ProcessUserServiceRecycler(private val shell: String) :
 
     override fun onMake(): UserServiceProxy {
         appProcessRecycler = AppProcessRecyclers.get(shell)
-        val binder = appProcessRecycler.make().entity.startProcess(
+        val binder = appProcessRecycler.make().entity.isolatedServiceBinder(
             ComponentName(
                 context, AppProcessService::class.java
             )
         )
         binder.linkToDeath({
-            if (entity?.service == binder) recycleForcibly()
+            if (entity?.service?.asBinder() == binder) recycleForcibly()
         }, 0)
         return UserServiceProxy(IAppProcessService.Stub.asInterface(binder))
     }

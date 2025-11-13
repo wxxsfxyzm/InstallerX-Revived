@@ -7,6 +7,8 @@ sealed class MiuixSettingsScreen(val route: String) {
     data object MiuixAbout : MiuixSettingsScreen("about")
     data object MiuixTheme : MiuixSettingsScreen("theme")
     data object MiuixInstallerGlobal : MiuixSettingsScreen("installerGlobal")
+    data object MiuixLab : MiuixSettingsScreen("lab")
+
 
     sealed class Builder(val route: String) {
         data object MiuixMain : MiuixSettingsScreen("main")
