@@ -20,7 +20,6 @@ import android.provider.OpenableColumns
 import android.system.Os
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
-import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
@@ -29,8 +28,10 @@ import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
+import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
+import com.rosan.installer.data.app.model.impl.ModuleInstallerRepoImpl
 import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
@@ -51,6 +52,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -127,6 +129,23 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Timber.d("[id=${installer.id}] resolve: State has been reset. Emitting ProgressEntity.Resolving.")
         installer.progress.emit(ProgressEntity.InstallResolving)
 
+        val uris = try {
+            resolveDataUris(activity)
+        } catch (e: Exception) {
+            Timber.e(e, "[id=${installer.id}] resolve: Could not resolve any URIs from the intent.")
+            installer.error = e
+            installer.progress.emit(ProgressEntity.InstallResolvedFailed)
+            return
+        }
+
+        Timber.d("[id=${installer.id}] resolve: URIs resolved successfully (${uris.size}).")
+
+        var forceDialogMode = false
+        if (uris.size > 1 || uris.any { it.path?.endsWith(".zip", ignoreCase = true) == true }) {
+            Timber.d("[id=${installer.id}] resolve: Batch share (count=${uris.size}) or module file detected. Will force install mode to Dialog.")
+            forceDialogMode = true
+        }
+
         installer.config = try {
             resolveConfig(activity)
         } catch (e: Exception) {
@@ -136,6 +155,11 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             return
         }
         Timber.d("[id=${installer.id}] resolve: Config resolved. installMode=${installer.config.installMode}")
+
+        if (forceDialogMode) {
+            Timber.d("[id=${installer.id}] resolve: Forcing install mode to Dialog (overriding config).")
+            installer.config.installMode = ConfigEntity.InstallMode.Dialog
+        }
 
         // Launch in a separate coroutine to avoid blocking the UI.
         scope.launch {
@@ -170,7 +194,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         // The caching logic is now integrated directly into the data resolution step.
         installer.data = try {
-            resolveAndStabilizeData(activity)
+            resolveAndStabilizeData(activity, uris)
         } catch (e: Exception) {
             Timber.e(e, "[id=${installer.id}] resolve: Failed to resolve and stabilize data.")
             installer.error = e
@@ -185,8 +209,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun analyse() {
         Timber.d("[id=${installer.id}] analyse: Starting. Emitting ProgressEntity.Analysing.")
-        // --- Enforce a minimum duration for the "Analysing" state ---
-        val startTime = System.currentTimeMillis()
         installer.progress.emit(ProgressEntity.InstallAnalysing)
         val analysisResults = runCatching {
             analyseEntities(installer.data)
@@ -203,14 +225,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             installer.progress.emit(ProgressEntity.InstallAnalysedFailed)
             return
         }
-
-        /*        // This ensures the "Analysing" UI state is visible for at least a brief moment (e.g., 100ms),
-                // providing a stable starting point for the transition animation, regardless of how fast the analysis is.
-                val elapsedTime = System.currentTimeMillis() - startTime
-                val minDuration = 100L // 100 milliseconds
-                if (elapsedTime < minDuration) {
-                    delay(minDuration - elapsedTime)
-                }*/
 
         // --- REFACTORED LOGIC ---
         // The complex logic for deduplication and optimal split selection has been moved to AnalyserRepoImpl.
@@ -233,18 +247,90 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         Timber.d("[id=${installer.id}] analyse: Analyse completed. isNotificationInstall=$isNotificationInstall, isMultiAppMode=$isMultiAppMode")
 
-        if (isNotificationInstall && isMultiAppMode) {
-            Timber.w("[id=${installer.id}] analyse: Multi-APK not supported in notification mode. Emitting AnalysedUnsupported.")
-            installer.progress.emit(
-                ProgressEntity.InstallAnalysedUnsupported(context.getString(R.string.installer_current_install_mode_not_supported))
-            )
-        } else {
-            Timber.d("[id=${installer.id}] analyse: Emitting ProgressEntity.AnalysedSuccess.")
-            installer.progress.emit(ProgressEntity.InstallAnalysedSuccess)
-        }
+        Timber.d("[id=${installer.id}] analyse: Emitting ProgressEntity.AnalysedSuccess.")
+        installer.progress.emit(ProgressEntity.InstallAnalysedSuccess)
+
     }
 
     private suspend fun install() {
+        Timber.d("[id=${installer.id}] install: Starting.")
+
+        // Get all entities marked for installation from the analysis results.
+        val entitiesToInstall = installer.analysisResults
+            .flatMap { it.appEntities }
+            .filter { it.selected }
+
+        if (entitiesToInstall.isEmpty()) {
+            Timber.w("[id=${installer.id}] install: No entities selected for installation. Finishing.")
+            installer.progress.emit(ProgressEntity.InstallFailed) // Or a more specific error
+            installer.error = IllegalStateException("No items were selected for installation.")
+            return
+        }
+
+        val firstEntity = entitiesToInstall.first().app
+
+        if (firstEntity is AppEntity.ModuleEntity) {
+            installModule(firstEntity)
+        } else {
+            installApp()
+        }
+    }
+
+    private suspend fun installModule(moduleEntity: AppEntity.ModuleEntity) {
+        Timber.d("[id=${installer.id}] installModule: Starting module installation for ${moduleEntity.name}")
+        val banner = """
+             ___           _        _ _         __  __ 
+            |_ _|_ __  ___| |_ __ _| | | ___ _ _\ \/ / 
+             | || '_ \/ __| __/ _` | | |/ _ \ '__\  / 
+             | || | | \__ \ || (_| | | |  __/ |  /  \ 
+            |___|_| |_|___/\__\__,_|_|_|\___|_| /_/\_\ 
+
+             ____            _               _ 
+            |  _ \ _____   _(_)_   _____  __| | 
+            | |_) / _ \ \ / / \ \ / / _ \/ _` | 
+            |  _ <  __/\ V /| |\ V /  __/ (_| | 
+            |_| \_\___| \_/ |_| \_/ \___|\__,_| 
+
+            Starting installation...
+        """.trimIndent()
+        // Initialize the output list with the banner lines
+        val outputLines = banner.lines().toMutableList()
+
+        // Emit the initial state with the full banner
+        installer.progress.emit(ProgressEntity.InstallingModule(outputLines.toList()))
+
+        try {
+            // Get the selected Root Implementation from settings.
+            val rootImplementation = appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
+                .map { RootImplementation.fromString(it) }
+                .first()
+
+            // Call the module installer backend, which returns a Flow.
+            val moduleInstallerFlow = ModuleInstallerRepoImpl.doInstallWork(
+                installer.config,
+                moduleEntity,
+                rootImplementation
+            )
+
+            // Collect the flow of output lines.
+            moduleInstallerFlow.collect { line ->
+                outputLines.add(line)
+                // Emit the new progress state with the updated list of logs.
+                installer.progress.emit(ProgressEntity.InstallingModule(outputLines.toList()))
+            }
+
+            // If the flow completes without an exception, it's a success.
+            Timber.d("[id=${installer.id}] installModule: Succeeded. Emitting ProgressEntity.InstallSuccess.")
+            installer.progress.emit(ProgressEntity.InstallSuccess)
+
+        } catch (e: Exception) {
+            Timber.e(e, "[id=${installer.id}] installModule: Failed.")
+            installer.error = e
+            installer.progress.emit(ProgressEntity.InstallFailed) // Then emit failure state
+        }
+    }
+
+    private suspend fun installApp() {
         Timber.d("[id=${installer.id}] install: Starting. Emitting ProgressEntity.Installing.")
         installer.progress.emit(ProgressEntity.Installing)
         runCatching {
@@ -304,6 +390,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 currentUserId
             }
             val sessionContainerType = entitiesToInstall.firstOrNull()?.containerType
+            val isSingleSession =
+                sessionContainerType == DataType.APK || sessionContainerType == DataType.APKS || sessionContainerType == DataType.APKM || sessionContainerType == DataType.XAPK
 
             installEntities(
                 installer.config,
@@ -314,7 +402,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 sharedUserIdExemption
             )
 
-            if (sessionContainerType != DataType.MULTI_APK && sessionContainerType != DataType.MULTI_APK_ZIP) {
+            if (isSingleSession) {
                 Timber.d("[id=${installer.id}] Single-app install succeeded. Clearing cache now.")
                 clearCacheDirectory()
             } else {
@@ -675,8 +763,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
      * @param activity The activity context to use for resolving data URIs.
      * @return A list of DataEntity objects representing the resolved and stabilized data.
      */
-    private suspend fun resolveAndStabilizeData(activity: Activity): List<DataEntity> {
-        val uris = resolveDataUris(activity)
+    private suspend fun resolveAndStabilizeData(activity: Activity, uris: List<Uri>): List<DataEntity> {
         val data = mutableListOf<DataEntity>()
         for (uri in uris) {
             data.addAll(resolveDataUri(activity, uri))
@@ -784,7 +871,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         uri: Uri,
         retry: Int = 3
     ): List<DataEntity> {
-        // HACK: wait for PermissionRecords ok.
+        // Wait for PermissionRecords ok.
         if (activity.checkCallingOrSelfUriPermission(
                 uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
             ) != PackageManager.PERMISSION_GRANTED &&
@@ -915,7 +1002,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             // Validate if the URL points to a likely installer file.
             // First, check the URL path extension.
             val path = uri.path ?: ""
-            val isSupportedExtension = listOf(".apk", ".xapk", ".apkm", ".apks").any { ext ->
+            val isSupportedExtension = listOf(".apk", ".xapk", ".apkm", ".apks", ".zip").any { ext ->
                 path.endsWith(ext, ignoreCase = true)
             }
             // As a fallback, check the Content-Type header from the server response.

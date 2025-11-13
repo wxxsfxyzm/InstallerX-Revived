@@ -30,4 +30,6 @@ interface ReflectRepo {
     fun getMethod(clazz: Class<*>, name: String, vararg parameterTypes: Class<*>): Method?
 
     fun getDeclaredMethod(clazz: Class<*>, name: String, vararg parameterTypes: Class<*>): Method?
+
+    fun getStaticObjectField(clazz: Class<*>, fieldName: String): Any
 }

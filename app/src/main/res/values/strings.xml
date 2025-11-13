@@ -18,6 +18,8 @@
     <string name="menu">Menu</string>
     <string name="about">About</string>
     <string name="other">Other</string>
+    <string name="lab">Laboratory</string>
+    <string name="lab_desc">Access experimental and developer features</string>
     <string name="about_detail">About InstallerX Revived</string>
     <string name="get_update">Get update</string>
     <string name="get_update_detail">Check for software updates and new features</string>
@@ -247,7 +249,9 @@
     <string name="installer_prepare_signature_mismatch">Signature mismatch! Continuing installation may cause data loss or security risks.</string>
     <string name="installer_prepare_signature_unknown">Unable to verify app signature, please proceed with caution.</string>
     <string name="installer_install_app">Install App</string>
+    <string name="installer_install_module">Install Module</string>
     <string name="installer_installing">Installing…</string>
+    <string name="installer_installing_module">Installing Module</string>
     <string name="installer_install_failed">Install failed</string>
     <string name="installer_install_success">Install success</string>
     <string name="installer_silent_install">Silent Install</string>
@@ -393,6 +397,9 @@
     <string name="exception_dhizuku_dead_service">Dhizuku remote service died</string>
     <string name="exception_root_not_work">Couldn\'t access root</string>
     <string name="exception_app_process_not_work">Couldn\'t connect the authorizer</string>
+    <string name="exception_module_cmd_init_failed">Module installation command init failed</string>
+    <string name="exception_module_install_failed">Module install failed</string>
+    <string name="exception_module_install_failed_incompatible_authorizer">Incompatible authorizer</string>
     <string name="old_version_prefix">Current</string>
     <string name="old_version_archived">Archived</string>
     <string name="upgrade_version_prefix">Upgrade</string>
@@ -496,6 +503,7 @@
     <!-- MixedModuleApk Installer -->
     <string name="installer_select_from_mixed_module_apk">Select install type</string>
     <string name="installer_mixed_module_apk_description">Select file type you want to install</string>
+    <string name="installer_mixed_module_apk_description_notification">Please click on the notification to select the installation type</string>
     <!-- MixedModuleApk End -->
 
     <!-- SplitNameUtil Start -->
@@ -540,4 +548,10 @@
     <string name="suggestion_bypass_blacklist_set_by_user_desc">Temporarily allow install once</string>
     <string name="suggestion_retry_install_desc">Try install again</string>
 
+    <string name="lab_tip">Experimental features in the lab may be unstable or risky and could change or be removed at any time. Use at your own risk</string>
+    <string name="lab_use_hook_mode">Use hook mode</string>
+    <string name="lab_use_hook_mode_desc">Use hook mode instead of userService to get better performance</string>
+    <string name="lab_module_flashing">Enable module flashing</string>
+    <string name="lab_module_flashing_desc">Always check twice before flashing any modules!</string>
+    <string name="lab_module_select_root_impl">Choose root implementation</string>
 </resources>

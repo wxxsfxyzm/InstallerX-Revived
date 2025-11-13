@@ -356,7 +356,7 @@ fun MiuixClearCache() {
 @Composable
 fun MiuixSettingsAboutItemWidget(
     modifier: Modifier = Modifier,
-    imageVector: ImageVector,
+    imageVector: ImageVector? = null,
     imageContentDescription: String? = null,
     headlineContentText: String,
     supportingContentText: String? = null,

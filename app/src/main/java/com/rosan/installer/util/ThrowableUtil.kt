@@ -43,6 +43,9 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVerificationTim
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
 import com.rosan.installer.data.app.model.exception.InstallParseFailedNoCertificatesException
 import com.rosan.installer.data.app.model.exception.InstallParseFailedUnexpectedException
+import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
+import com.rosan.installer.data.app.model.exception.ModuleInstallException
+import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.data.app.model.exception.UninstallFailedHyperOSSystemAppException
 import com.rosan.installer.data.app.model.exception.UninstallFailedInternalErrorException
 import com.rosan.installer.data.installer.model.exception.ResolveException
@@ -112,6 +115,10 @@ private fun Throwable.getStringResourceId() =
         is PackageManager.NameNotFoundException -> R.string.exception_package_manager_name_not_found
         is RootNotWorkException -> R.string.exception_root_not_work
         is AppProcessNotWorkException -> R.string.exception_app_process_not_work
+        is ModuleInstallException -> R.string.exception_module_install_failed
+        is ModuleInstallCmdInitException -> R.string.exception_module_cmd_init_failed
+        is ModuleInstallFailedIncompatibleAuthorizerException -> R.string.exception_module_install_failed_incompatible_authorizer
+
         else -> R.string.exception_install_failed_unknown
     }
 

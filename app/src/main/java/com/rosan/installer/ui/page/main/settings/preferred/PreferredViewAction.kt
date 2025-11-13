@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
+import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -40,4 +41,8 @@ sealed class PreferredViewAction {
     data object RequestIgnoreBatteryOptimization : PreferredViewAction()
     data object RefreshIgnoreBatteryOptimizationStatus : PreferredViewAction()
     data class SetDefaultInstaller(val lock: Boolean) : PreferredViewAction()
+
+    data class LabChangeShizukuHookMode(val enable: Boolean) : PreferredViewAction()
+    data class LabChangeRootModuleFlash(val enable: Boolean) : PreferredViewAction()
+    data class LabChangeRootImplementation(val implementation: RootImplementation) : PreferredViewAction()
 }

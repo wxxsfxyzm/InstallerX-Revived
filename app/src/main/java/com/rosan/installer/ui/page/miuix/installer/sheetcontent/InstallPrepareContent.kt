@@ -284,13 +284,19 @@ fun InstallPrepareContent(
             }
         }
 
-        val canInstall = entityToInstall != null &&
-                (entityToInstall.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true)
-        val isAPK =
-            containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK
+        val canInstallBaseEntity = (primaryEntity as? AppEntity.BaseEntity)?.let {
+            it.minSdk?.toIntOrNull()?.let { sdk -> sdk <= Build.VERSION.SDK_INT } ?: true
+        } ?: false
 
-        // "Expand" / "Collapse" Button
-        if (viewModel.showExtendedMenu && canInstall)
+        val canInstallModuleEntity = (primaryEntity as? AppEntity.ModuleEntity)?.let {
+            viewModel.enableModuleInstall
+        } ?: false
+
+        val canInstall = canInstallBaseEntity || canInstallModuleEntity
+
+        val showExpandButton = canInstallBaseEntity && viewModel.showExtendedMenu
+
+        if (showExpandButton)
             item {
                 TextButton(
                     onClick = { isExpanded = !isExpanded },
