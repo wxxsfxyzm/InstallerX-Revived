@@ -1,6 +1,9 @@
 package com.rosan.installer.ui.page.main.installer.dialog
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -8,9 +11,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kyant.m3color.quantize.QuantizerCelebi
+import com.kyant.m3color.score.Score
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
@@ -86,6 +93,8 @@ class InstallerViewModel(
         private set
     var sdkCompareInMultiLine by mutableStateOf(false)
         private set
+    var useDynColorFollowPkgIcon by mutableStateOf(false)
+        private set
     var showOPPOSpecial by mutableStateOf(false)
     private var autoSilentInstall by mutableStateOf(false)
     var enableModuleInstall by mutableStateOf(false)
@@ -130,6 +139,10 @@ class InstallerViewModel(
 
     var preferSystemIconForUpdates by mutableStateOf(false)
         private set
+
+    // --- StateFlow to hold the seed color extracted from the icon ---
+    private val _seedColor = MutableStateFlow<Color?>(null)
+    val seedColor: StateFlow<Color?> = _seedColor.asStateFlow()
 
     // StateFlow to manage `install flags`
     // An Int value formed by combining all options using bitwise operations.
@@ -203,7 +216,8 @@ class InstallerViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false).first()
             enableModuleInstall =
                 appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false).first()
-
+            useDynColorFollowPkgIcon =
+                appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
             // Load managed packages for installer selection.
             appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
                 _managedInstallerPackages.value = packages
@@ -329,6 +343,7 @@ class InstallerViewModel(
                     is ProgressEntity.Ready -> {
                         newState = InstallerViewState.Ready
                         newPackageNameFromProgress = null
+                        _seedColor.value = null
                     }
 
                     is ProgressEntity.UninstallResolveFailed,
@@ -465,6 +480,25 @@ class InstallerViewModel(
                         _uninstallFlags.value = 0 // Reset flags for new session
                         repo.config.uninstallFlags = 0
                         newState = InstallerViewState.UninstallReady
+
+                        if (useDynColorFollowPkgIcon) {
+                            val icon = repo.uninstallInfo.value?.appIcon
+                            if (icon != null) {
+                                viewModelScope.launch(Dispatchers.Default) {
+                                    try {
+                                        val bitmap = drawableToBitmap(icon)
+                                        val colorInt = extractSeedColorFromBitmap(bitmap)
+                                        _seedColor.value = Color(colorInt)
+                                    } catch (e: Exception) {
+                                        Timber.e(e, "Failed to extract color from uninstall icon")
+                                        _seedColor.value = null
+                                    }
+                                }
+                            } else {
+                                // Reset Colors if icon is null
+                                _seedColor.value = null
+                            }
+                        }
                     }
 
                     else -> newState = InstallerViewState.Ready
@@ -582,6 +616,36 @@ class InstallerViewModel(
     }
 
     /**
+     * Helper function to safely convert a Drawable to a Bitmap.
+     * @param drawable The drawable to convert.
+     * @return A Bitmap representation of the drawable.
+     */
+    private fun drawableToBitmap(drawable: Drawable): Bitmap {
+        // If the drawable is already a BitmapDrawable, just return its bitmap.
+        if (drawable is BitmapDrawable) {
+            if (drawable.bitmap != null) {
+                return drawable.bitmap
+            }
+        }
+
+        // For other drawable types, we need to draw it onto a new bitmap.
+        // Create a bitmap with the drawable's dimensions.
+        // If dimensions are invalid, create a 1x1 pixel bitmap as a fallback.
+        val bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
+            // Use ARGB_8888 for high quality, matches createBitmap overload
+            createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        } else {
+            createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        }
+
+        // Create a canvas to draw on the bitmap.
+        val canvas = Canvas(bitmap) // Pass bitmap to constructor
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
+
+    /**
      * Loads the display icon for the given package name and updates the StateFlow.
      * @param packageName The package name of the app to load the icon for.
      */
@@ -638,6 +702,83 @@ class InstallerViewModel(
                 } else currentMap
             }
 
+            // Launch a background task to extract the color from the icon.
+            // Use Dispatchers.Default as quantization is CPU-intensive.
+            if (useDynColorFollowPkgIcon)
+                viewModelScope.launch(Dispatchers.Default) {
+                    // Use a null-safe call to handle the Drawable? type
+                    finalIcon?.let { nonNullIcon ->
+                        try {
+                            // Convert the Drawable to an Android Bitmap
+                            // (Uses the existing helper function in the ViewModel)
+                            val bitmap = drawableToBitmap(nonNullIcon)
+
+                            // Call our new suspend tool function to extract the color
+                            // This function already runs on Dispatchers.Default
+                            val extractedColorInt = extractSeedColorFromBitmap(bitmap)
+
+                            // Update the seed color state only if a valid color was found.
+                            // StateFlow updates are thread-safe.
+                            _seedColor.value = Color(extractedColorInt)
+
+                        } catch (e: Exception) {
+                            Timber.e(e, "Failed to extract color from icon for $packageName")
+                            _seedColor.value = null // Reset on failure
+                        }
+                    }
+                }
+        }
+    }
+
+    /**
+     * Extracts the Material 3 seed color from a Bitmap asynchronously.
+     *
+     * This function performs CPU-intensive quantization and scoring,
+     * so it must be called from a coroutine and will run on Dispatchers.Default.
+     *
+     * @param bitmap The source image.
+     * @param maxColors The maximum number of colors to quantize.
+     * A lower number (e.g., 128) is faster.
+     * @param fallbackColorArgb The ARGB Int color to return if scoring fails.
+     * @return ARGB formatted seed color (Int).
+     */
+    private suspend fun extractSeedColorFromBitmap(
+        bitmap: Bitmap,
+        maxColors: Int = 128, // Lowered for potentially better performance
+        fallbackColorArgb: Int = -12417548 // 0xFF3F51B5 - Indigo 500 from Score.java
+    ): Int {
+        // Run the heavy computation on the default dispatcher
+        return withContext(Dispatchers.Default) {
+
+            // Get pixels from Bitmap
+            val width = bitmap.width
+            val height = bitmap.height
+            val pixels = IntArray(width * height)
+
+            bitmap.getPixels(
+                pixels,
+                0,      // offset
+                width,  // stride
+                0,      // x
+                0,      // y
+                width,
+                height
+            )
+
+            // Quantize: Get the map of prominent colors to their count
+            val colorToCountMap: Map<Int, Int> = QuantizerCelebi.quantize(pixels, maxColors)
+
+            // Score: Get the sorted list of best colors
+            val sortedColors: List<Int> = Score.score(
+                colorToCountMap,
+                1, // desired: We only need the top 1 color
+                fallbackColorArgb,
+                true // filter: Apply default filtering rules
+            )
+
+            // Return the best color (first in the list)
+            // Score.score ensures the fallback is present if the list would be empty.
+            sortedColors.first()
         }
     }
 

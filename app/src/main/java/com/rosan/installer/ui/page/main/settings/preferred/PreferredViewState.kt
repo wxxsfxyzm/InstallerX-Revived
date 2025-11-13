@@ -1,9 +1,13 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
+import androidx.compose.ui.graphics.Color
 import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.theme.m3color.PaletteStyle
+import com.rosan.installer.ui.theme.m3color.PresetColors
+import com.rosan.installer.ui.theme.m3color.ThemeMode
 
 data class PreferredViewState(
     val progress: Progress = Progress.Loading,
@@ -33,7 +37,12 @@ data class PreferredViewState(
     val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList(),
     val labShizukuHookMode: Boolean = false,
     val labRootEnableModuleFlash: Boolean = false,
-    val labRootImplementation: RootImplementation = RootImplementation.Magisk
+    val labRootImplementation: RootImplementation = RootImplementation.Magisk,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
+    val useDynamicColor: Boolean = true,
+    val seedColor: Color = PresetColors.first().color,
+    val useDynColorFollowPkgIcon: Boolean = false
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 

@@ -1,9 +1,12 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
+import androidx.compose.ui.graphics.Color
 import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.theme.m3color.PaletteStyle
+import com.rosan.installer.ui.theme.m3color.ThemeMode
 
 sealed class PreferredViewAction {
     data object Init : PreferredViewAction()
@@ -45,4 +48,9 @@ sealed class PreferredViewAction {
     data class LabChangeShizukuHookMode(val enable: Boolean) : PreferredViewAction()
     data class LabChangeRootModuleFlash(val enable: Boolean) : PreferredViewAction()
     data class LabChangeRootImplementation(val implementation: RootImplementation) : PreferredViewAction()
+    data class SetThemeMode(val mode: ThemeMode) : PreferredViewAction()
+    data class SetPaletteStyle(val style: PaletteStyle) : PreferredViewAction()
+    data class SetUseDynamicColor(val use: Boolean) : PreferredViewAction()
+    data class SetSeedColor(val color: Color) : PreferredViewAction()
+    data class SetDynColorFollowPkgIcon(val follow: Boolean) : PreferredViewAction()
 }

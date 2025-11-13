@@ -78,15 +78,23 @@ fun InstallPrepareContent(
         return
     }
 
-    val selectedEntities = currentPackage.appEntities.filter { it.selected }.map { it.app }.sortedBest()
-    if (selectedEntities.isEmpty()) {
-        LoadingContent(statusText = "No apps selected")
+    val allEntities = (if (installer.analysisResults.size > 1) {
+        currentPackage.appEntities.filter { it.selected }
+    } else {
+        currentPackage.appEntities
+    }).map { it.app }
+    
+    val primaryEntity = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+        ?: allEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
+        ?: allEntities.sortedBest().firstOrNull()
+
+    if (primaryEntity == null) {
+        LoadingContent(statusText = "No main app entity found")
         return
     }
 
-    val primaryEntity = selectedEntities.first()
     val containerType = primaryEntity.containerType
-    val entityToInstall = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+    val entityToInstall = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val displayIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
 
     val errorColor = MaterialTheme.colorScheme.error
