@@ -235,7 +235,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                     }
                 } catch (e: Exception) {
                     if (e is IOException || e is RemoteException) {
-                        Log.e("PrivilegedService", "Error reading stdout or sending callback", e)
+                        Log.e("PrivilegedService", "Error reading stderr or sending callback", e)
                     }
                 }
             }
