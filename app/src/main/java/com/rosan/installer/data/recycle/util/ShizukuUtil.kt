@@ -43,7 +43,16 @@ suspend fun <T> requireShizukuPermissionGranted(action: suspend () -> T): T {
     }.catch {
         throw ShizukuNotWorkException(it)
     }.first()
-    return action()
+    return try {
+        action()
+    } catch (e: IllegalStateException) {
+        if (e.message?.contains("binder haven't been received") == true) {
+            throw ShizukuNotWorkException("Shizuku service connection lost during operation.", e)
+        }
+        throw e
+    } catch (e: Exception) {
+        throw e
+    }
 }
 
 @SuppressLint("PrivateApi", "DiscouragedPrivateApi")

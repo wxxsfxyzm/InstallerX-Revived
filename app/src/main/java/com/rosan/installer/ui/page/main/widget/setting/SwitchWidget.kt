@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
@@ -46,6 +47,7 @@ fun SwitchWidget(
                     Icon(
                         imageVector = Icons.Filled.Check,
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(SwitchDefaults.IconSize),
                     )
                 }
@@ -54,6 +56,7 @@ fun SwitchWidget(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.surfaceContainerHighest,
                         modifier = Modifier.size(SwitchDefaults.IconSize),
                     )
                 }

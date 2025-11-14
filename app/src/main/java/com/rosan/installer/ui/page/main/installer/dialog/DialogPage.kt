@@ -1,9 +1,15 @@
 package com.rosan.installer.ui.page.main.installer.dialog
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.widget.dialog.PositionDialog
+import com.rosan.installer.ui.theme.m3color.PaletteStyle
+import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -11,8 +17,25 @@ import org.koin.core.parameter.parametersOf
 fun DialogPage(
     installer: InstallerRepo, viewModel: InstallerViewModel = koinViewModel {
         parametersOf(installer)
-    }
+    },
+    activeColorSchemeState: MutableState<ColorScheme>,
+    globalColorScheme: ColorScheme,
+    isDarkMode: Boolean,
+    basePaletteStyle: PaletteStyle
 ) {
+    val temporarySeedColor by viewModel.seedColor.collectAsState()
+    LaunchedEffect(temporarySeedColor, globalColorScheme, isDarkMode, basePaletteStyle) {
+        if (temporarySeedColor == null) {
+            activeColorSchemeState.value = globalColorScheme
+        } else {
+            activeColorSchemeState.value = dynamicColorScheme(
+                keyColor = temporarySeedColor!!,
+                isDark = isDarkMode,
+                style = basePaletteStyle
+            )
+        }
+    }
+
     LaunchedEffect(installer.id) {
         viewModel.dispatch(InstallerViewAction.CollectRepo(installer))
     }

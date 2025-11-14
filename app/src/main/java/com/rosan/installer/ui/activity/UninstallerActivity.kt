@@ -6,30 +6,36 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.ui.activity.themestate.ThemeUiState
+import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import com.rosan.installer.ui.theme.InstallerMiuixTheme
-import com.rosan.installer.ui.theme.InstallerTheme
+import com.rosan.installer.ui.theme.m3color.ThemeMode
+import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
+import com.rosan.installer.ui.theme.primaryLight
 import com.rosan.installer.ui.util.PermissionDenialReason
 import com.rosan.installer.ui.util.PermissionManager
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -50,12 +56,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
     private lateinit var permissionManager: PermissionManager
 
-    private data class UninstallerUiState(
-        val theme: InstallerTheme = InstallerTheme.MATERIAL,
-        val isThemeLoaded: Boolean = false
-    )
-
-    private var uiState by mutableStateOf(UninstallerUiState())
+    private var uiState by mutableStateOf(ThemeUiState())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -66,11 +67,9 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         Timber.d("UninstallerActivity onCreate.")
 
         lifecycleScope.launch {
-            val useMiuix = appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false).first()
-            uiState = uiState.copy(
-                theme = if (useMiuix) InstallerTheme.MIUIX else InstallerTheme.MATERIAL,
-                isThemeLoaded = true
-            )
+            createThemeUiStateFlow(appDataStore).collect { newState ->
+                uiState = newState
+            }
         }
 
         permissionManager = PermissionManager(this)
@@ -162,7 +161,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
     private fun showContent() {
         setContent {
-            if (!uiState.isThemeLoaded) return@setContent
+            if (!uiState.isLoaded) return@setContent
 
             val currentInstaller = installer
             if (currentInstaller == null) {
@@ -173,20 +172,53 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                 return@setContent
             }
 
-            when (uiState.theme) {
-                InstallerTheme.MATERIAL -> {
-                    InstallerMaterialExpressiveTheme {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            InstallerPage(installer = currentInstaller)
-                        }
+            val useDarkTheme = when (uiState.themeMode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
+
+            if (uiState.useMiuix) {
+                InstallerMiuixTheme {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        MiuixInstallerPage(installer = currentInstaller)
                     }
                 }
+            } else {
+                val colorRes =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) colorResource(id = android.R.color.system_accent1_500) else primaryLight
+                val globalColorScheme = remember(uiState, useDarkTheme) {
+                    val keyColor = if (uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        colorRes
+                    } else {
+                        uiState.seedColor
+                    }
 
-                InstallerTheme.MIUIX -> {
-                    InstallerMiuixTheme {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            MiuixInstallerPage(installer = currentInstaller)
-                        }
+                    dynamicColorScheme(
+                        keyColor = keyColor,
+                        isDark = useDarkTheme,
+                        style = uiState.paletteStyle
+                    )
+                }
+
+                val activeColorSchemeState = remember { mutableStateOf(globalColorScheme) }
+
+                LaunchedEffect(globalColorScheme) {
+                    activeColorSchemeState.value = globalColorScheme
+                }
+
+                InstallerMaterialExpressiveTheme(
+                    darkTheme = useDarkTheme,
+                    colorScheme = activeColorSchemeState.value,
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        InstallerPage(
+                            installer = currentInstaller,
+                            activeColorSchemeState = activeColorSchemeState,
+                            globalColorScheme = globalColorScheme,
+                            isDarkMode = useDarkTheme,
+                            basePaletteStyle = uiState.paletteStyle
+                        )
                     }
                 }
             }

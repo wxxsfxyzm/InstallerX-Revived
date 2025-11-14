@@ -5,11 +5,14 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
@@ -24,6 +27,9 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
 import com.rosan.installer.ui.activity.InstallerActivity
+import com.rosan.installer.ui.theme.m3color.PaletteStyle
+import com.rosan.installer.ui.theme.m3color.PresetColors
+import com.rosan.installer.ui.theme.m3color.ThemeMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -140,6 +146,12 @@ class PreferredViewModel(
             is PreferredViewAction.LabChangeShizukuHookMode -> labChangeShizukuHookMode(action.enable)
             is PreferredViewAction.LabChangeRootModuleFlash -> labChangeRootModuleFlash(action.enable)
             is PreferredViewAction.LabChangeRootImplementation -> labChangeRootImplementation(action.implementation)
+
+            is PreferredViewAction.SetThemeMode -> setThemeMode(action.mode)
+            is PreferredViewAction.SetPaletteStyle -> setPaletteStyle(action.style)
+            is PreferredViewAction.SetUseDynamicColor -> setUseDynamicColor(action.use)
+            is PreferredViewAction.SetSeedColor -> setSeedColor(action.color)
+            is PreferredViewAction.SetDynColorFollowPkgIcon -> setDynColorFollowPkgIcon(action.follow)
         }
 
 
@@ -200,8 +212,22 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, false)
             val labRootModuleFlashFlow =
                 appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false)
-            val labRootImplementationFlow = appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
-                .map { RootImplementation.fromString(it) }
+            val labRootImplementationFlow =
+                appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
+                    .map { RootImplementation.fromString(it) }
+            val themeModeFlow =
+                appDataStore.getString(AppDataStore.THEME_MODE, ThemeMode.SYSTEM.name)
+                    .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
+            val paletteStyleFlow =
+                appDataStore.getString(AppDataStore.THEME_PALETTE_STYLE, PaletteStyle.TonalSpot.name)
+                    .map { runCatching { PaletteStyle.valueOf(it) }.getOrDefault(PaletteStyle.TonalSpot) }
+            val useDynamicColorFlow =
+                appDataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            val seedColorFlow =
+                appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
+                    .map { Color(it) }
+            val useDynColorFollowPkgIconFlow =
+                appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false)
 
             combine(
                 authorizerFlow,
@@ -230,40 +256,50 @@ class PreferredViewModel(
                 isIgnoringBatteryOptFlow,
                 labShizukuHookModeFlow,
                 labRootModuleFlashFlow,
-                labRootImplementationFlow
+                labRootImplementationFlow,
+                themeModeFlow,
+                paletteStyleFlow,
+                useDynamicColorFlow,
+                seedColorFlow,
+                useDynColorFollowPkgIconFlow
             ) { values: Array<Any?> ->
-                val authorizer = values[0] as ConfigEntity.Authorizer
-                val customize = values[1] as String
-                val installMode = values[2] as ConfigEntity.InstallMode
-                val showMenu = values[3] as Boolean
-                val showSuggestion = values[4] as Boolean
-                val showNotification = values[5] as Boolean
-                val showDialog = values[6] as Boolean
-                val countDown = values[7] as Int
-                val versionCompareInMultiLine = values[8] as Boolean
-                val sdkCompareInSingleLine = values[9] as Boolean
-                val showOPPOSpecial = values[10] as Boolean
-                val showExpressiveUI = values[11] as Boolean
-                val showLiveActivity = values[12] as Boolean
-                val autoLockInstaller = values[13] as Boolean
-                val autoSilentInstall = values[14] as Boolean
-                val showMiuixUI = values[15] as Boolean
-                val preferSystemIcon = values[16] as Boolean
-                val showLauncherIcon = values[17] as Boolean
+                var idx = 0
+                val authorizer = values[idx++] as ConfigEntity.Authorizer
+                val customize = values[idx++] as String
+                val installMode = values[idx++] as ConfigEntity.InstallMode
+                val showMenu = values[idx++] as Boolean
+                val showSuggestion = values[idx++] as Boolean
+                val showNotification = values[idx++] as Boolean
+                val showDialog = values[idx++] as Boolean
+                val countDown = values[idx++] as Int
+                val versionCompareInMultiLine = values[idx++] as Boolean
+                val sdkCompareInSingleLine = values[idx++] as Boolean
+                val showOPPOSpecial = values[idx++] as Boolean
+                val showExpressiveUI = values[idx++] as Boolean
+                val showLiveActivity = values[idx++] as Boolean
+                val autoLockInstaller = values[idx++] as Boolean
+                val autoSilentInstall = values[idx++] as Boolean
+                val showMiuixUI = values[idx++] as Boolean
+                val preferSystemIcon = values[idx++] as Boolean
+                val showLauncherIcon = values[idx++] as Boolean
                 val managedInstallerPackages =
-                    (values[18] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                    (values[idx++] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
                 val managedBlacklistPackages =
-                    (values[19] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                    (values[idx++] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
                 val managedSharedUserIdBlacklist =
-                    (values[20] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
+                    (values[idx++] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
                 val managedSharedUserIdExemptPkg =
-                    (values[21] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[22] as Boolean
-                val isIgnoringBatteryOptimizations = values[23] as Boolean
-                val labShizukuHookMode = values[24] as Boolean
-                val labRootModuleFlash = values[25] as Boolean
-                val labRootImplementation = values[26] as RootImplementation
-
+                    (values[idx++] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[idx++] as Boolean
+                val isIgnoringBatteryOptimizations = values[idx++] as Boolean
+                val labShizukuHookMode = values[idx++] as Boolean
+                val labRootModuleFlash = values[idx++] as Boolean
+                val labRootImplementation = values[idx++] as RootImplementation
+                val themeMode = values[idx++] as ThemeMode
+                val paletteStyle = values[idx++] as PaletteStyle
+                val useDynamicColor = values[idx++] as Boolean
+                val seedColor = values[idx++] as Color
+                val useDynColorFollowPkgIcon = values[idx] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -294,7 +330,12 @@ class PreferredViewModel(
                     isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations,
                     labShizukuHookMode = labShizukuHookMode,
                     labRootEnableModuleFlash = labRootModuleFlash,
-                    labRootImplementation = labRootImplementation
+                    labRootImplementation = labRootImplementation,
+                    themeMode = themeMode,
+                    paletteStyle = paletteStyle,
+                    useDynamicColor = useDynamicColor,
+                    seedColor = seedColor,
+                    useDynColorFollowPkgIcon = useDynColorFollowPkgIcon
                 )
             }.collectLatest { state = it }
         }
@@ -554,6 +595,29 @@ class PreferredViewModel(
                 AppDataStore.LAB_ROOT_IMPLEMENTATION,
                 implementation.name
             )
+        }
+
+    private fun setThemeMode(mode: ThemeMode) = viewModelScope.launch {
+        appDataStore.putString(AppDataStore.THEME_MODE, mode.name)
+    }
+
+    private fun setPaletteStyle(style: PaletteStyle) = viewModelScope.launch {
+        appDataStore.putString(AppDataStore.THEME_PALETTE_STYLE, style.name)
+    }
+
+    private fun setUseDynamicColor(use: Boolean) = viewModelScope.launch {
+        appDataStore.putBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, use)
+    }
+
+    private fun setSeedColor(color: Color) = viewModelScope.launch {
+        // When user picks a color, automatically turn off dynamic color
+        appDataStore.putBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, false)
+        appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, color.toArgb())
+    }
+
+    private fun setDynColorFollowPkgIcon(enable: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, enable)
         }
 
     private suspend fun runPrivilegedAction(
