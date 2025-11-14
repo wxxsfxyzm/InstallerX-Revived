@@ -512,4 +512,18 @@
     <string name="suggestion_bypass_low_target_sdk_desc">Geçici olarak kısıtlamaları atlatmaya izin ver ve yeniden dene</string>
     <string name="suggestion_bypass_blacklist_set_by_user_desc">Geçici olarak bir kez kuruluma izin ver</string>
     <string name="suggestion_retry_install_desc">Tekrar yüklemeyi deneyin</string>
+    <string name="lab">Laboratuvar</string>
+    <string name="lab_desc">Deneysel ve geliştirici özelliklerine erişin</string>
+    <string name="installer_install_module">Modülü Yükle</string>
+    <string name="installer_installing_module">Modül Yükleniyor</string>
+    <string name="exception_module_cmd_init_failed">Modül yükleme komutu init başarısız oldu</string>
+    <string name="exception_module_install_failed">Modül yüklemesi başarısız oldu</string>
+    <string name="exception_module_install_failed_incompatible_authorizer">Uyumsuz yetkilendirici</string>
+    <string name="installer_mixed_module_apk_description_notification">Lütfen yükleme türünü seçmek için bildirime tıklayın</string>
+    <string name="lab_tip">Laboratuvardaki deneysel özellikler dengesiz veya riskli olabilir ve herhangi bir zamanda değişebilir veya kaldırılabilir. Kullanım kendi sorumluluğunuzdadır</string>
+    <string name="lab_use_hook_mode">Hook modunu kullan</string>
+    <string name="lab_use_hook_mode_desc">Daha iyi performans elde etmek için userService yerine hook modunu kullanın</string>
+    <string name="lab_module_flashing">Modül flaşlamayı etkinleştir</string>
+    <string name="lab_module_flashing_desc">Herhangi bir modülü flaş etmeden önce mutlaka iki kez kontrol edin!</string>
+    <string name="lab_module_select_root_impl">Kök uygulamasını seçin</string>
 </resources>
