@@ -86,7 +86,7 @@
     <string name="theme_settings_hide_launcher_icon">隐藏桌面图标</string>
     <string name="theme_settings_hide_launcher_icon_desc">通过 *#*#46789#*#* 来访问设置</string>
     <string name="theme_settings_hide_launcher_icon_warning">请在隐藏之前确认你能够访问本应用设置界面！</string>
-    <string name="theme_settings_hide_launcher_icon_warning_xiaomi">对于 HyperOS，请允许“自启动”和“后台弹出界面”，以接收拨号界面代码。</string>
+    <string name="theme_settings_hide_launcher_icon_warning_xiaomi">对于 HyperOS，请允许“自启动”和“后台弹出界面”，以接收拨号界面代码！</string>
     <string name="installer_settings">安装器设置</string>
     <string name="installer_settings_desc">更改安装器的全局设置</string>
     <string name="installer_settings_global_installer">全局</string>
