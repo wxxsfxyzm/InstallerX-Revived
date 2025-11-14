@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
@@ -19,6 +20,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewState
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsPage
 import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import com.rosan.installer.ui.theme.InstallerMiuixTheme
+import com.rosan.installer.ui.theme.m3color.ThemeMode
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -59,6 +61,11 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                 preferredViewModel.dispatch(PreferredViewAction.Init)
             }
             val state = preferredViewModel.state
+            val useDarkTheme = when (state.themeMode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
             if (state.showMiuixUI) {
                 InstallerMiuixTheme {
                     MiuixSurface(modifier = Modifier.fillMaxSize()) {
@@ -66,7 +73,13 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     }
                 }
             } else {
-                InstallerMaterialExpressiveTheme {
+                InstallerMaterialExpressiveTheme(
+                    darkTheme = useDarkTheme,
+                    useDynamicColor = state.useDynamicColor,
+                    compatStatusBarColor = true,
+                    seedColor = state.seedColor,
+                    paletteStyle = state.paletteStyle
+                ) {
                     Material3Surface(modifier = Modifier.fillMaxSize()) {
                         SettingsPage(preferredViewModel)
                     }

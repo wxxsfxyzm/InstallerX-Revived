@@ -33,7 +33,7 @@ fun NonInstallFailedContent(
                 .fillMaxWidth()
                 .weight(1f, fill = false)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier

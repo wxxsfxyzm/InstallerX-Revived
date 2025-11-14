@@ -36,12 +36,12 @@ import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction.Set
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallExtendedMenuAction
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
+import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -169,7 +169,7 @@ private fun ExtendedMenuLazyList(
     availableUsers: Map<Int, String>,
     selectedUserId: Int
 ) {
-    val cardColor = if (isSystemInDarkTheme()) Color(0xFF434343) else Color.White
+    val cardColor = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White
     val context = LocalContext.current
 
     Card(
@@ -220,7 +220,6 @@ private fun ExtendedMenuLazyList(
                         }.coerceAtLeast(0) // Ensure index is not -1
 
                         SuperSpinner(
-                            mode = SpinnerMode.AlwaysOnRight,
                             title = stringResource(R.string.config_installer),
                             items = installerEntries,
                             selectedIndex = selectedInstallerIndex,
@@ -250,7 +249,6 @@ private fun ExtendedMenuLazyList(
                         }
 
                         SuperSpinner(
-                            mode = SpinnerMode.AlwaysOnRight,
                             title = stringResource(R.string.config_target_user),
                             items = userEntries,
                             selectedIndex = selectedUserIndex,

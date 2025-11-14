@@ -1,6 +1,7 @@
 package com.rosan.installer.util
 
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
@@ -41,11 +42,16 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVerificationFai
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationTimeoutException
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
 import com.rosan.installer.data.app.model.exception.InstallParseFailedNoCertificatesException
+import com.rosan.installer.data.app.model.exception.InstallParseFailedUnexpectedException
+import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
+import com.rosan.installer.data.app.model.exception.ModuleInstallException
+import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.data.app.model.exception.UninstallFailedHyperOSSystemAppException
 import com.rosan.installer.data.app.model.exception.UninstallFailedInternalErrorException
 import com.rosan.installer.data.installer.model.exception.ResolveException
 import com.rosan.installer.data.installer.model.exception.ResolvedFailedNoInternetAccessException
 import com.rosan.installer.data.recycle.model.exception.AppProcessNotWorkException
+import com.rosan.installer.data.recycle.model.exception.DhizukuDeadServiceException
 import com.rosan.installer.data.recycle.model.exception.DhizukuNotWorkException
 import com.rosan.installer.data.recycle.model.exception.RootNotWorkException
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
@@ -98,14 +104,21 @@ private fun Throwable.getStringResourceId() =
         is InstallFailedRejectedByBuildTypeException -> R.string.exception_install_failed_rejected_by_build_type
         is InstallFailedOriginOSBlacklistException -> R.string.exception_install_failed_origin_os_blacklist
         is InstallFailedHyperOSIsolationViolationException -> R.string.exception_install_failed_hyperos_isolation_violation
+        is InstallParseFailedUnexpectedException -> R.string.exception_install_parse_failed_unexpected_exception
         is InstallParseFailedNoCertificatesException -> R.string.exception_install_parse_failed_no_certificates
         is InstallFailedUserRestrictedException -> R.string.exception_install_failed_user_restricted
         is ShizukuNotWorkException -> R.string.exception_shizuku_not_work
         is DhizukuNotWorkException -> R.string.exception_dhizuku_not_work
+        is DhizukuDeadServiceException -> R.string.exception_dhizuku_dead_service
         is UninstallFailedHyperOSSystemAppException -> R.string.exception_uninstall_failed_hyperos_system_app
         is UninstallFailedInternalErrorException -> R.string.exception_uninstall_failed_internal_error
+        is PackageManager.NameNotFoundException -> R.string.exception_package_manager_name_not_found
         is RootNotWorkException -> R.string.exception_root_not_work
         is AppProcessNotWorkException -> R.string.exception_app_process_not_work
+        is ModuleInstallException -> R.string.exception_module_install_failed
+        is ModuleInstallCmdInitException -> R.string.exception_module_cmd_init_failed
+        is ModuleInstallFailedIncompatibleAuthorizerException -> R.string.exception_module_install_failed_incompatible_authorizer
+
         else -> R.string.exception_install_failed_unknown
     }
 

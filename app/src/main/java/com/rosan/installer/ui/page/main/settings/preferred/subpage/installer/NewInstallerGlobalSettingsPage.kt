@@ -1,11 +1,15 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.installer
 
 import android.os.Build
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -14,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,8 +30,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,6 +54,12 @@ import com.rosan.installer.ui.page.main.widget.setting.ManagedUidsWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.none
+
+@Immutable
+private data class DynamicSettingItem(
+    val visible: Boolean,
+    val content: @Composable () -> Unit
+)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -138,23 +151,60 @@ fun NewInstallerGlobalSettingsPage(
                                 currentInstallMode = state.installMode,
                                 changeInstallMode = {
                                     viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(it))
-                                },
-                                onClick = {}
+                                }
                             )
                         }
                     )
                 )
             }
+
             item {
+                val isDialogMode =
+                    state.installMode == ConfigEntity.InstallMode.Dialog || state.installMode == ConfigEntity.InstallMode.AutoDialog
+                val isNotificationMode =
+                    state.installMode == ConfigEntity.InstallMode.Notification || state.installMode == ConfigEntity.InstallMode.AutoNotification
+
                 AnimatedVisibility(
-                    visible = state.installMode == ConfigEntity.InstallMode.Dialog || state.installMode == ConfigEntity.InstallMode.AutoDialog,
+                    visible = isDialogMode || isNotificationMode,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    SplicedColumnGroup(
-                        title = stringResource(R.string.installer_settings_dialog_mode_options),
-                        content = buildList {
-                            add {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                        AnimatedContent(
+                            targetState = if (isDialogMode) {
+                                R.string.installer_settings_dialog_mode_options
+                            } else {
+                                R.string.installer_settings_notification_mode_options
+                            },
+                            label = "OptionsTitleAnimation"
+                        ) { targetTitleRes ->
+                            Text(
+                                text = stringResource(targetTitleRes),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                            )
+                        }
+
+                        val cornerRadius = 16.dp
+                        val connectionRadius = 5.dp
+                        val topShape = RoundedCornerShape(
+                            topStart = cornerRadius,
+                            topEnd = cornerRadius,
+                            bottomStart = connectionRadius,
+                            bottomEnd = connectionRadius
+                        )
+                        val middleShape = RoundedCornerShape(connectionRadius)
+                        val bottomShape = RoundedCornerShape(
+                            topStart = connectionRadius,
+                            topEnd = connectionRadius,
+                            bottomStart = cornerRadius,
+                            bottomEnd = cornerRadius
+                        )
+                        val singleShape = RoundedCornerShape(cornerRadius)
+
+                        val allItems = listOf(
+                            DynamicSettingItem(isDialogMode) {
                                 SwitchWidget(
                                     icon = AppIcons.SingleLineSettingIcon,
                                     title = stringResource(id = R.string.version_compare_in_single_line),
@@ -164,8 +214,8 @@ fun NewInstallerGlobalSettingsPage(
                                         viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it))
                                     }
                                 )
-                            }
-                            add {
+                            },
+                            DynamicSettingItem(isDialogMode) {
                                 SwitchWidget(
                                     icon = AppIcons.MultiLineSettingIcon,
                                     title = stringResource(id = R.string.sdk_compare_in_multi_line),
@@ -175,24 +225,19 @@ fun NewInstallerGlobalSettingsPage(
                                         viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it))
                                     }
                                 )
-                            }
-                            if (state.installMode == ConfigEntity.InstallMode.Dialog) {
-                                add {
-                                    SwitchWidget(
-                                        icon = AppIcons.MenuOpen,
-                                        title = stringResource(id = R.string.show_dialog_install_extended_menu),
-                                        description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
-                                        checked = state.showDialogInstallExtendedMenu,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
-                                            )
-                                        }
-                                    )
-                                }
-                            }
-                            // Add the other SwitchWidgets unconditionally
-                            add {
+                            },
+                            DynamicSettingItem(state.installMode == ConfigEntity.InstallMode.Dialog) {
+                                SwitchWidget(
+                                    icon = AppIcons.MenuOpen,
+                                    title = stringResource(id = R.string.show_dialog_install_extended_menu),
+                                    description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
+                                    checked = state.showDialogInstallExtendedMenu,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it))
+                                    }
+                                )
+                            },
+                            DynamicSettingItem(isDialogMode) {
                                 SwitchWidget(
                                     icon = AppIcons.Suggestion,
                                     title = stringResource(id = R.string.show_intelligent_suggestion),
@@ -202,97 +247,104 @@ fun NewInstallerGlobalSettingsPage(
                                         viewModel.dispatch(PreferredViewAction.ChangeShowSuggestion(it))
                                     }
                                 )
-                            }
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                                add {
-                                    SwitchWidget(
-                                        icon = AppIcons.LiveActivity,
-                                        title = stringResource(R.string.theme_settings_use_live_activity),
-                                        description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                                        checked = state.showLiveActivity,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowLiveActivity(it)
-                                            )
-                                        }
-                                    )
-                                }
-                            add {
-                                SwitchWidget(
-                                    icon = AppIcons.NotificationDisabled,
-                                    title = stringResource(id = R.string.disable_notification),
-                                    description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
-                                    checked = state.disableNotificationForDialogInstall,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.ChangeShowDisableNotification(it)
-                                        )
-                                    }
-                                )
-                            }
-                        }
-                    )
-                }
-            }
-            item {
-                AnimatedVisibility(
-                    visible = state.installMode == ConfigEntity.InstallMode.Notification || state.installMode == ConfigEntity.InstallMode.AutoNotification,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
-                ) {
-                    SplicedColumnGroup(
-                        title = stringResource(R.string.installer_settings_notification_mode_options),
-                        content = buildList {
-                            add {
+                            },
+                            DynamicSettingItem(isNotificationMode) {
                                 SwitchWidget(
                                     icon = AppIcons.Dialog,
                                     title = stringResource(id = R.string.show_dialog_when_pressing_notification),
                                     description = stringResource(id = R.string.change_notification_touch_behavior),
                                     checked = state.showDialogWhenPressingNotification,
                                     onCheckedChange = {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.ChangeShowDialogWhenPressingNotification(
-                                                it
-                                            )
-                                        )
+                                        viewModel.dispatch(PreferredViewAction.ChangeShowDialogWhenPressingNotification(it))
+                                    }
+                                )
+                            },
+                            DynamicSettingItem(Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && (isDialogMode || isNotificationMode)) {
+                                SwitchWidget(
+                                    icon = AppIcons.LiveActivity,
+                                    title = stringResource(R.string.theme_settings_use_live_activity),
+                                    description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                    checked = state.showLiveActivity,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(PreferredViewAction.ChangeShowLiveActivity(it))
+                                    }
+                                )
+                            },
+                            DynamicSettingItem(isDialogMode) {
+                                SwitchWidget(
+                                    icon = AppIcons.Silent,
+                                    title = stringResource(id = R.string.auto_silent_install),
+                                    description = stringResource(id = R.string.auto_silent_install_desc),
+                                    checked = state.autoSilentInstall,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it))
+                                    }
+                                )
+                            },
+                            DynamicSettingItem(isDialogMode) {
+                                SwitchWidget(
+                                    icon = AppIcons.NotificationDisabled,
+                                    title = stringResource(id = R.string.disable_notification),
+                                    description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
+                                    checked = state.disableNotificationForDialogInstall,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(PreferredViewAction.ChangeShowDisableNotification(it))
+                                    }
+                                )
+                            },
+                            DynamicSettingItem(isNotificationMode && state.showDialogWhenPressingNotification) {
+                                SwitchWidget(
+                                    icon = AppIcons.NotificationDisabled,
+                                    title = stringResource(id = R.string.disable_notification_on_dismiss),
+                                    description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
+                                    checked = state.disableNotificationForDialogInstall,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(PreferredViewAction.ChangeShowDisableNotification(it))
                                     }
                                 )
                             }
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                                add {
-                                    SwitchWidget(
-                                        icon = AppIcons.LiveActivity,
-                                        title = stringResource(R.string.theme_settings_use_live_activity),
-                                        description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                                        checked = state.showLiveActivity,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowLiveActivity(it)
+                        )
+
+                        val visibleItems = allItems.filter { it.visible }
+
+                        Column(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(cornerRadius))
+                                .animateContentSize(),
+                        ) {
+                            allItems.forEach { item ->
+                                AnimatedVisibility(
+                                    visible = item.visible,
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
+                                ) {
+                                    val visibleIndex = visibleItems.indexOf(item)
+                                    val visibleSize = visibleItems.size
+
+                                    val shape = when {
+                                        visibleSize == 1 -> singleShape
+                                        visibleIndex == 0 -> topShape
+                                        visibleIndex == visibleSize - 1 -> bottomShape
+                                        else -> middleShape
+                                    }
+
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(top = if (visibleIndex > 0) 2.dp else 0.dp)
+                                            .background(
+                                                MaterialTheme.colorScheme.surfaceBright,
+                                                shape
                                             )
-                                        }
-                                    )
-                                }
-                            add {
-                                AnimatedVisibility(visible = state.showDialogWhenPressingNotification) {
-                                    SwitchWidget(
-                                        icon = AppIcons.NotificationDisabled,
-                                        title = stringResource(id = R.string.disable_notification_on_dismiss),
-                                        description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
-                                        checked = state.disableNotificationForDialogInstall,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowDisableNotification(
-                                                    it
-                                                )
-                                            )
-                                        }
-                                    )
+                                    ) {
+                                        item.content()
+                                    }
                                 }
                             }
                         }
-                    )
+                    }
                 }
             }
+
             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
                 item {
                     SplicedColumnGroup(
@@ -343,52 +395,52 @@ fun NewInstallerGlobalSettingsPage(
                 )
             }
             item {
-                SplicedColumnGroup(
-                    title = stringResource(R.string.config_managed_blacklist_by_shared_user_id_title),
-                    content = buildList {
+                val uids = state.managedSharedUserIdBlacklist
+                val showExempted = uids.isNotEmpty()
+
+                val content = mutableListOf<@Composable () -> Unit>().apply {
+                    add {
+                        ManagedUidsWidget(
+                            noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
+                            uids = uids,
+                            onAddUid = {
+                                viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
+                            },
+                            onRemoveUid = {
+                                viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it))
+                            }
+                        )
+                    }
+                    if (showExempted) {
                         add {
-                            ManagedUidsWidget(
-                                noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
-                                uids = state.managedSharedUserIdBlacklist,
-                                onAddUid = {
-                                    viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
+                            ManagedPackagesWidget(
+                                noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                                noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
+                                packages = state.managedSharedUserIdExemptedPackages,
+                                infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                                isInfoVisible = state.managedSharedUserIdExemptedPackages.isNotEmpty(),
+                                onAddPackage = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
+                                            it
+                                        )
+                                    )
                                 },
-                                onRemoveUid = {
-                                    viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it))
+                                onRemovePackage = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
+                                            it
+                                        )
+                                    )
                                 }
                             )
                         }
-                        add {
-                            AnimatedVisibility(
-                                // Only show exempted packages if there are any blacklisted UIDs
-                                visible = state.managedSharedUserIdBlacklist.isNotEmpty(),
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                ManagedPackagesWidget(
-                                    noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
-                                    noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
-                                    packages = state.managedSharedUserIdExemptedPackages,
-                                    infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
-                                    isInfoVisible = state.managedSharedUserIdExemptedPackages.isNotEmpty(),
-                                    onAddPackage = {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
-                                                it
-                                            )
-                                        )
-                                    },
-                                    onRemovePackage = {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
-                                                it
-                                            )
-                                        )
-                                    }
-                                )
-                            }
-                        }
                     }
+                }
+
+                SplicedColumnGroup(
+                    title = stringResource(R.string.config_managed_blacklist_by_shared_user_id_title),
+                    content = content
                 )
             }
         }

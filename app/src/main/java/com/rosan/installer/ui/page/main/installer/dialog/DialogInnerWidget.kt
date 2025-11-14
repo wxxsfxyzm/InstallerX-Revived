@@ -71,5 +71,5 @@ fun dialogGenerateParams(
         is InstallerViewState.Uninstalling -> uninstallingDialog(installer, viewModel)
         is InstallerViewState.UninstallResolveFailed -> uninstallFailedDialog(installer, viewModel)
         // when is exhaustive, so no need to handle the else case
-        // else -> readyDialog(installer, viewModel)
+        else -> readyDialog(viewModel)
     }

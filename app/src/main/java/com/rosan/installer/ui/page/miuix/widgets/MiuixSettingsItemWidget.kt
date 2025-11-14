@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,25 +14,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,13 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
@@ -62,17 +50,21 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.util.MIN_FEEDBACK_DURATION_MS
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.getDirectorySize
-import com.rosan.installer.util.openUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SpinnerMode
 import top.yukonga.miuix.kmp.extra.SuperArrow
+import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.SuperSpinner
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.io.File
 
 data class AuthorizerInfo(
@@ -116,9 +108,9 @@ fun MiuixDataAuthorizerWidget(
         }
     }
 
-    //    Convert the authorizerOptions Map into a List<SpinnerEntry>
-    //    which is required by the SuperSpinner component.
-    //    This is done once and remembered.
+    // Convert the authorizerOptions Map into a List<SpinnerEntry>
+    // which is required by the SuperSpinner component.
+    // This is done once and remembered.
     val spinnerEntries = remember(authorizerOptions) {
         authorizerOptions.values.map { authorizerInfo ->
             SpinnerEntry(
@@ -128,17 +120,16 @@ fun MiuixDataAuthorizerWidget(
         }
     }
 
-    //    SuperSpinner requires an integer index for the selected item.
-    //    Find the index of the currentAuthorizer from the map's keys.
+    // SuperSpinner requires an integer index for the selected item.
+    // Find the index of the currentAuthorizer from the map's keys.
     val selectedIndex = remember(currentAuthorizer, authorizerOptions) {
         authorizerOptions.keys.indexOf(currentAuthorizer).coerceAtLeast(0)
     }
 
     SuperSpinner(
         modifier = modifier,
-        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.config_authorizer),
-        // summary = spinnerEntries[selectedIndex].title,
+        summary = stringResource(R.string.config_app_authorizer_desc),
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
@@ -207,7 +198,6 @@ fun MiuixDataInstallModeWidget(
 
     SuperSpinner(
         modifier = modifier,
-        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.config_install_mode),
         // summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,
@@ -276,7 +266,11 @@ fun MiuixAutoLockInstaller(
 }
 
 @Composable
-fun MiuixDefaultInstaller(lock: Boolean, onClick: () -> Unit) {
+fun MiuixDefaultInstaller(
+    lock: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
     BasicComponent(
         title = stringResource(
             if (lock) R.string.lock_default_installer else R.string.unlock_default_installer
@@ -284,6 +278,7 @@ fun MiuixDefaultInstaller(lock: Boolean, onClick: () -> Unit) {
         summary = stringResource(
             if (lock) R.string.lock_default_installer_desc else R.string.unlock_default_installer_desc
         ),
+        enabled = enabled,
         onClick = onClick
     )
 }
@@ -361,7 +356,7 @@ fun MiuixClearCache() {
 @Composable
 fun MiuixSettingsAboutItemWidget(
     modifier: Modifier = Modifier,
-    imageVector: ImageVector,
+    imageVector: ImageVector? = null,
     imageContentDescription: String? = null,
     headlineContentText: String,
     supportingContentText: String? = null,
@@ -400,462 +395,6 @@ fun MiuixNavigationItemWidget(
         summary = description,
         insideMargin = insideMargin,
         onClick = onClick
-    )
-}
-
-@Composable
-fun MiuixBottomSheetContent(
-    title: String
-) {
-    val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
-    Column(
-        modifier = Modifier
-            .fillMaxWidth() // 填充横向宽度
-            .padding(16.dp, 0.dp, 16.dp, 16.dp), // 整体内边距
-        horizontalAlignment = Alignment.CenterHorizontally // 左对齐内容
-    ) {
-        // 标题
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineMedium, // 使用合适的标题样式
-            modifier = Modifier.padding(bottom = 20.dp) // 标题下方留白
-        )
-
-        // GitHub 按钮
-        Button(
-            onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                // 点击按钮时调用 openUrl 工具函数
-                context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
-            },
-            modifier = Modifier.fillMaxWidth() // 按钮填充横向宽度
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_github),
-                contentDescription = "GitHub Icon", // 辅助功能描述
-                modifier = Modifier.size(24.dp) // 图标大小
-            )
-            Spacer(modifier = Modifier.width(8.dp)) // 图标与文字之间的间隔
-            Text(text = "GitHub") // 按钮文本
-        }
-        Button(
-            onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                context.openUrl("https://t.me/installerx_revived")
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
-                contentDescription = "Telegram Icon",
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Telegram") // 按钮文本
-        }
-        Spacer(modifier = Modifier.size(60.dp)) // 按钮下方留白
-    }
-}
-
-/**
- * A reusable widget to display and manage a list of NamedPackage items.
- * It is stateless and relies on callbacks to handle data modifications.
- *
- * @param noContentTitle The title if no packages are available.
- * @param packages The list of NamedPackage items to display.
- * @param onAddPackage A callback invoked when a new package should be added.
- * @param onRemovePackage A callback invoked when an existing package should be removed.
- * @param modifier The modifier to be applied to the widget's container.
- */
-@Composable
-fun MiuixManagedPackagesWidget(
-    modifier: Modifier = Modifier,
-    noContentTitle: String,
-    noContentDescription: String = stringResource(R.string.config_add_one_to_get_started),
-    packages: List<NamedPackage>,
-    infoText: String? = null,
-    isInfoVisible: Boolean = false,
-    infoColor: Color = MaterialTheme.colorScheme.primary,
-    onAddPackage: (NamedPackage) -> Unit,
-    onRemovePackage: (NamedPackage) -> Unit,
-) {
-    var showAddDialog by remember { mutableStateOf(false) }
-    var showDeleteConfirmation by remember { mutableStateOf<NamedPackage?>(null) }
-
-    // Main container for the widget
-    Column(modifier = modifier.padding(vertical = 8.dp)) {
-        // Display each package in the list
-        if (packages.isEmpty()) {
-            ListItem(
-                headlineContent = { Text(noContentTitle) },
-                supportingContent = { Text(noContentDescription) },
-                leadingContent = {
-                    Icon(
-                        // imageVector = AppIcons.Info,
-                        imageVector = Icons.Default.Info, // Placeholder icon
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-            )
-        } else {
-            packages.forEach { item ->
-                ListItem(
-                    headlineContent = { Text(item.name) },
-                    supportingContent = { Text(item.packageName) },
-                    leadingContent = {
-                        Icon(
-                            imageVector = AppIcons.Android, // Placeholder icon
-                            contentDescription = "Icon Placeholder",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    trailingContent = {
-                        IconButton(onClick = { showDeleteConfirmation = item }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.delete),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                )
-            }
-        }
-
-        // "Add New Package" button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically // 垂直居中对齐
-        ) {
-            // 1. 左侧新增的 AnimatedVisibility 文本区域
-            AnimatedVisibility(
-                visible = isInfoVisible && !infoText.isNullOrBlank(),
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                // 使用一个 Box 来应用背景和圆角
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50)) // 50%的圆角使其成为胶囊形状
-                        .background(infoColor.copy(alpha = 0.1f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = infoText!!, // 确定不为空时才显示
-                        color = infoColor,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-            }
-
-            // 2. 一个带权重的 Spacer，它会“推开”两边的元素，占据所有可用空间
-            Spacer(modifier = Modifier.weight(1f))
-
-            // 3. 右侧原有的 "添加" 按钮
-            TextButton(onClick = { showAddDialog = true }) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp)) // 使用 width 比 size 更精确
-                Text(stringResource(R.string.add))
-            }
-        }
-    }
-
-    // --- Dialogs ---
-
-    // Dialog for adding a new package
-    if (showAddDialog) {
-        MiuixAddPackageDialog(
-            onDismiss = { showAddDialog = false },
-            onConfirm = { newItem ->
-                onAddPackage(newItem) // Use the callback
-                showAddDialog = false
-            }
-        )
-    }
-
-    // Dialog for confirming deletion
-    showDeleteConfirmation?.let { itemToDelete ->
-        MiuixDeleteNamedPackageConfirmationDialog(
-            item = itemToDelete,
-            onDismiss = { showDeleteConfirmation = null },
-            onConfirm = {
-                onRemovePackage(itemToDelete) // Use the callback
-                showDeleteConfirmation = null
-            }
-        )
-    }
-}
-
-/**
- * A reusable widget to display and manage a list of NamedPackage items.
- * It is stateless and relies on callbacks to handle data modifications.
- *
- * @param noContentTitle The title if no packages are available.
- * @param uids The list of SharedUid items to display.
- * @param onAddUid A callback invoked when a new package should be added.
- * @param onRemoveUid A callback invoked when an existing package should be removed.
- * @param modifier The modifier to be applied to the widget's container.
- */
-@Composable
-fun MiuixManagedUidsWidget(
-    noContentTitle: String,
-    uids: List<SharedUid>,
-    onAddUid: (SharedUid) -> Unit,
-    onRemoveUid: (SharedUid) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var showAddDialog by remember { mutableStateOf(false) }
-    var showDeleteConfirmation by remember { mutableStateOf<SharedUid?>(null) }
-
-    // Main container for the widget
-    Column(modifier = modifier.padding(vertical = 8.dp)) {
-        // Display each package in the list
-        if (uids.isEmpty()) {
-            ListItem(
-                headlineContent = { Text(noContentTitle) },
-                supportingContent = { Text(stringResource(R.string.config_add_one_to_get_started)) },
-                leadingContent = {
-                    Icon(
-                        // imageVector = AppIcons.Info,
-                        imageVector = Icons.Default.Info, // Placeholder icon
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-            )
-        } else {
-            uids.forEach { item ->
-                ListItem(
-                    headlineContent = { Text(item.uidName) },
-                    supportingContent = { Text("UID: ${item.uidValue}") },
-                    leadingContent = {
-                        Icon(
-                            imageVector = AppIcons.BugReport, // Placeholder icon
-                            contentDescription = "Icon Placeholder",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    trailingContent = {
-                        IconButton(onClick = { showDeleteConfirmation = item }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.delete),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                )
-            }
-        }
-
-        // "Add New Package" button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.End
-        ) {
-            TextButton(onClick = { showAddDialog = true }) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(stringResource(R.string.add))
-            }
-        }
-    }
-
-    // --- Dialogs ---
-
-    // Dialog for adding a new package
-    if (showAddDialog) {
-        MiuixAddUidDialog(
-            onDismiss = { showAddDialog = false },
-            onConfirm = { newUID ->
-                onAddUid(newUID)
-                showAddDialog = false
-            }
-        )
-    }
-
-    // Dialog for confirming deletion
-    showDeleteConfirmation?.let { uidToDelete ->
-        MiuixDeleteSharedUidConfirmationDialog(
-            item = uidToDelete,
-            onDismiss = { showDeleteConfirmation = null },
-            onConfirm = {
-                onRemoveUid(uidToDelete) // Use the callback
-                showDeleteConfirmation = null
-            }
-        )
-    }
-}
-
-/**
- * An AlertDialog for adding a new NamedPackage.
- */
-@Composable
-private fun MiuixAddPackageDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (NamedPackage) -> Unit
-) {
-    var name by remember { mutableStateOf("") }
-    var packageName by remember { mutableStateOf("") }
-    val isConfirmEnabled = name.isNotBlank() && packageName.isNotBlank()
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.config_add_new_package)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.config_name)) },
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = packageName,
-                    onValueChange = { packageName = it },
-                    label = { Text(stringResource(R.string.config_package_name)) },
-                    singleLine = true
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(NamedPackage(name, packageName)) },
-                enabled = isConfirmEnabled
-            ) {
-                Text(stringResource(R.string.confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
-/**
- * An AlertDialog for adding a new SharedUid.
- */
-@Composable
-private fun MiuixAddUidDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (SharedUid) -> Unit
-) {
-    var uidName by remember { mutableStateOf("") }
-    var uidValueString by remember { mutableStateOf("") }
-
-    // Confirm button is enabled if both name and value are not blank
-    val isConfirmEnabled = uidName.isNotBlank() && uidValueString.toIntOrNull() != null
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.config_add_new_shared_uid)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = uidName,
-                    onValueChange = { uidName = it },
-                    label = { Text(stringResource(R.string.config_shared_uid_name)) }, // "Shared UID 名称"
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = uidValueString,
-                    onValueChange = { uidValueString = it },
-                    label = { Text(stringResource(R.string.config_shared_uid_value)) }, // "Shared UID 值"
-                    singleLine = true,
-                    // Set the keyboard type to Number
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    // Convert uidValueString to Int before creating SharedUid
-                    val uidValue = uidValueString.toInt()
-                    onConfirm(SharedUid(uidName, uidValue))
-                },
-                enabled = isConfirmEnabled
-            ) {
-                Text(stringResource(R.string.confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
-/**
- * An AlertDialog to confirm the deletion of an pkg.
- */
-@Composable
-private fun MiuixDeleteNamedPackageConfirmationDialog(
-    item: NamedPackage,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.config_confirm_deletion)) },
-        text = { Text(stringResource(R.string.config_confirm_deletion_desc, item.name)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
-/**
- * An AlertDialog to confirm the deletion of an pkg.
- */
-@Composable
-private fun MiuixDeleteSharedUidConfirmationDialog(
-    item: SharedUid,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.config_confirm_deletion)) },
-        text = { Text(stringResource(R.string.config_confirm_deletion_desc, item.uidName)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
     )
 }
 
@@ -899,7 +438,6 @@ fun MiuixThemeEngineWidget(
 
     SuperSpinner(
         modifier = modifier,
-        mode = SpinnerMode.AlwaysOnRight,
         title = stringResource(id = R.string.theme_settings_ui_engine),
         // summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,
@@ -909,6 +447,439 @@ fun MiuixThemeEngineWidget(
             val newModeIsMiuix = themeOptions.keys.sortedDescending().elementAt(newIndex)
             if (currentThemeIsMiuix != newModeIsMiuix) {
                 onThemeChange(newModeIsMiuix)
+            }
+        }
+    )
+}
+
+@Composable
+fun MiuixManagedPackagesWidget(
+    modifier: Modifier = Modifier,
+    noContentTitle: String,
+    noContentDescription: String = stringResource(R.string.config_add_one_to_get_started),
+    packages: List<NamedPackage>,
+    infoText: String? = null,
+    isInfoVisible: Boolean = false,
+    infoColor: Color = MiuixTheme.colorScheme.primary,
+    onAddPackage: (NamedPackage) -> Unit,
+    onRemovePackage: (NamedPackage) -> Unit,
+) {
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf<NamedPackage?>(null) }
+
+    Column(modifier = modifier) {
+        if (packages.isEmpty()) {
+            BasicComponent(
+                title = noContentTitle,
+                summary = noContentDescription
+            )
+        } else {
+            packages.forEach { item ->
+                BasicComponent(
+                    title = item.name,
+                    summary = item.packageName,
+                    rightActions = {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(
+                                    MiuixTheme.colorScheme.primaryContainer.copy(
+                                        alpha = 0.2f
+                                    )
+                                )
+                                .clickable { showDeleteConfirmation = item }
+                                .padding(horizontal = 20.dp, vertical = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.delete),
+                                color = MiuixTheme.colorScheme.primary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            AnimatedVisibility(
+                visible = isInfoVisible && !infoText.isNullOrBlank(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(infoColor.copy(alpha = 0.1f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = infoText!!,
+                        color = infoColor,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            TextButton(
+                modifier = Modifier.padding(bottom = 8.dp),
+                text = stringResource(R.string.add),
+                onClick = { showAddDialog = true },
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        }
+    }
+
+    if (showAddDialog) {
+        MiuixAddPackageDialog(
+            onDismiss = { showAddDialog = false },
+            onConfirm = { newItem ->
+                onAddPackage(newItem)
+                showAddDialog = false
+            }
+        )
+    }
+
+    showDeleteConfirmation?.let { itemToDelete ->
+        MiuixDeleteNamedPackageConfirmationDialog(
+            item = itemToDelete,
+            onDismiss = { showDeleteConfirmation = null },
+            onConfirm = {
+                onRemovePackage(itemToDelete)
+                showDeleteConfirmation = null
+            }
+        )
+    }
+}
+
+/**
+ * A Miuix-style dialog for adding a new NamedPackage.
+ *
+ * @param onDismiss Callback invoked when the dialog is dismissed.
+ * @param onConfirm Callback invoked with the new NamedPackage when confirmed.
+ */
+@Composable
+private fun MiuixAddPackageDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (NamedPackage) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var packageName by remember { mutableStateOf("") }
+    val isConfirmEnabled = name.isNotBlank() && packageName.isNotBlank()
+    val showState = remember { mutableStateOf(true) }
+
+    SuperDialog(
+        show = showState,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.config_add_new_package),
+        content = {
+            Column {
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = stringResource(R.string.config_name),
+                    useLabelAsPlaceholder = true,
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                TextField(
+                    value = packageName,
+                    onValueChange = { packageName = it },
+                    label = stringResource(R.string.config_package_name),
+                    useLabelAsPlaceholder = true,
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.cancel),
+                        onClick = onDismiss
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.confirm),
+                        onClick = { onConfirm(NamedPackage(name, packageName)) },
+                        enabled = isConfirmEnabled,
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
+                }
+            }
+        }
+    )
+}
+
+/**
+ * A Miuix-style dialog to confirm the deletion of a NamedPackage.
+ *
+ * @param item The item to be deleted.
+ * @param onDismiss Callback invoked when the dialog is dismissed.
+ * @param onConfirm Callback invoked when the deletion is confirmed.
+ */
+@Composable
+private fun MiuixDeleteNamedPackageConfirmationDialog(
+    item: NamedPackage,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val showState = remember { mutableStateOf(true) }
+
+    SuperDialog(
+        show = showState,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.config_confirm_deletion),
+        content = {
+            Column {
+                Text(stringResource(R.string.config_confirm_deletion_desc, item.name))
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.cancel),
+                        onClick = onDismiss
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.delete),
+                        colors = ButtonDefaults.textButtonColors(
+                            textColor = MaterialTheme.colorScheme.error
+                        ),
+                        onClick = onConfirm
+                    )
+                }
+            }
+        }
+    )
+}
+
+/**
+ * A reusable Miuix-style widget to display and manage a list of SharedUid items.
+ * It is stateless and relies on callbacks to handle data modifications.
+ *
+ * @param modifier The modifier to be applied to the widget's container.
+ * @param noContentTitle The title to display if no uids are available.
+ * @param uids The list of SharedUid items to display.
+ * @param onAddUid A callback invoked when a new uid should be added.
+ * @param onRemoveUid A callback invoked when an existing uid should be removed.
+ */
+@Composable
+fun MiuixManagedUidsWidget(
+    modifier: Modifier = Modifier,
+    noContentTitle: String,
+    uids: List<SharedUid>,
+    onAddUid: (SharedUid) -> Unit,
+    onRemoveUid: (SharedUid) -> Unit,
+) {
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf<SharedUid?>(null) }
+
+    // Main container for the widget
+    Column(modifier = modifier) {
+        // Display each UID in the list or a placeholder message
+        if (uids.isEmpty()) {
+            BasicComponent(
+                title = noContentTitle,
+                summary = stringResource(R.string.config_add_one_to_get_started)
+            )
+        } else {
+            uids.forEach { item ->
+                BasicComponent(
+                    title = item.uidName,
+                    summary = "UID: ${item.uidValue}",
+                    rightActions = {
+                        // Custom delete button
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50)) // Pill shape
+                                .background(
+                                    MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.15f)
+                                )
+                                .clickable { showDeleteConfirmation = item }
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.delete),
+                                color = MiuixTheme.colorScheme.primary,
+                                style = MiuixTheme.textStyles.button
+                            )
+                        }
+                    }
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(
+                modifier = Modifier.padding(bottom = 8.dp),
+                text = stringResource(R.string.add),
+                onClick = { showAddDialog = true },
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        }
+    }
+
+    // --- Dialogs ---
+
+    // Dialog for adding a new UID
+    if (showAddDialog) {
+        MiuixAddUidDialog(
+            onDismiss = { showAddDialog = false },
+            onConfirm = { newUID ->
+                onAddUid(newUID)
+                showAddDialog = false
+            }
+        )
+    }
+
+    // Dialog for confirming deletion
+    showDeleteConfirmation?.let { uidToDelete ->
+        MiuixDeleteSharedUidConfirmationDialog(
+            item = uidToDelete,
+            onDismiss = { showDeleteConfirmation = null },
+            onConfirm = {
+                onRemoveUid(uidToDelete)
+                showDeleteConfirmation = null
+            }
+        )
+    }
+}
+
+/**
+ * A Miuix-style dialog for adding a new SharedUid.
+ *
+ * @param onDismiss Callback invoked when the dialog is dismissed.
+ * @param onConfirm Callback invoked with the new SharedUid when confirmed.
+ */
+@Composable
+private fun MiuixAddUidDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (SharedUid) -> Unit
+) {
+    var uidName by remember { mutableStateOf("") }
+    var uidValueString by remember { mutableStateOf("") }
+    val showState = remember { mutableStateOf(true) }
+
+    // Confirm button is enabled if both name and value are not blank and value is a valid integer.
+    val isConfirmEnabled = uidName.isNotBlank() && uidValueString.toIntOrNull() != null
+
+    SuperDialog(
+        show = showState,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.config_add_new_shared_uid),
+        content = {
+            Column {
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = uidName,
+                    onValueChange = { uidName = it },
+                    label = stringResource(R.string.config_shared_uid_name),
+                    useLabelAsPlaceholder = true,
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                TextField(
+                    value = uidValueString,
+                    onValueChange = { uidValueString = it },
+                    label = stringResource(R.string.config_shared_uid_value),
+                    useLabelAsPlaceholder = true,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.cancel),
+                        onClick = onDismiss
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.confirm),
+                        onClick = {
+                            val uidValue = uidValueString.toInt()
+                            onConfirm(SharedUid(uidName, uidValue))
+                        },
+                        enabled = isConfirmEnabled,
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
+                }
+            }
+        }
+    )
+}
+
+/**
+ * A Miuix-style dialog to confirm the deletion of a SharedUid.
+ *
+ * @param item The item to be deleted.
+ * @param onDismiss Callback invoked when the dialog is dismissed.
+ * @param onConfirm Callback invoked when the deletion is confirmed.
+ */
+@Composable
+private fun MiuixDeleteSharedUidConfirmationDialog(
+    item: SharedUid,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val showState = remember { mutableStateOf(true) }
+
+    SuperDialog(
+        show = showState,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.config_confirm_deletion),
+        content = {
+            Column {
+                Text(stringResource(R.string.config_confirm_deletion_desc, item.uidName))
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.cancel),
+                        onClick = onDismiss
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.delete),
+                        colors = ButtonDefaults.textButtonColors(
+                            textColor = MaterialTheme.colorScheme.error
+                        ),
+                        onClick = onConfirm
+                    )
+                }
             }
         }
     )

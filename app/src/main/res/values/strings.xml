@@ -18,6 +18,8 @@
     <string name="menu">Menu</string>
     <string name="about">About</string>
     <string name="other">Other</string>
+    <string name="lab">Laboratory</string>
+    <string name="lab_desc">Access experimental and developer features</string>
     <string name="about_detail">About InstallerX Revived</string>
     <string name="get_update">Get update</string>
     <string name="get_update_detail">Check for software updates and new features</string>
@@ -48,6 +50,36 @@
     <string name="theme_settings_use_expressive_ui">Use Expressive UI</string>
     <string name="theme_settings_use_expressive_ui_desc">Use the new M3 Expressive style</string>
     <string name="theme_settings_google_ui_style">Google UI style</string>
+    <string name="theme_settings_theme_mode">Theme Mode</string>
+    <string name="theme_settings_theme_mode_desc">Select theme mode</string>
+    <string name="theme_settings_theme_mode_light">Light theme</string>
+    <string name="theme_settings_theme_mode_dark">Dark theme</string>
+    <string name="theme_settings_theme_mode_system">Follow system theme</string>
+    <string name="theme_settings_palette_style">Palette Style</string>
+    <string name="theme_settings_palette_style_desc">Select palette style</string>
+    <string name="theme_settings_dynamic_color">Dynamic Color</string>
+    <string name="theme_settings_dynamic_color_desc">Theme color based on wallpaper</string>
+    <string name="theme_settings_theme_color">Theme Color</string>
+    <string name="theme_settings_dynamic_color_follow_icon">Colorful Dialog</string>
+    <string name="theme_settings_dynamic_color_follow_icon_desc">The installation dialog will no longer follow the app’s theme colors. Instead, it will use colors extracted from the icon of the package being installed</string>
+    <string name="color_default">Default</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_red">Red</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_amber">Amber</string>
+    <string name="color_yellow">Yellow</string>
+    <string name="color_lime">Lime</string>
+    <string name="color_green">Green</string>
+    <string name="color_cyan">Cyan</string>
+    <string name="color_teal">Teal</string>
+    <string name="color_light_blue">Light Blue</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_indigo">Indigo</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_deep_purple">Deep Purple</string>
+    <string name="color_blue_grey">Blue Grey</string>
+    <string name="color_brown">Brown</string>
+    <string name="color_grey">Grey</string>
     <string name="theme_settings_use_live_activity">Live Activity</string>
     <string name="theme_settings_use_live_activity_desc">Use Live Activity instead of notifications, may not be supported on custom ROMs</string>
     <string name="theme_settings_package_icons">Package icon source</string>
@@ -57,7 +89,7 @@
     <string name="theme_settings_hide_launcher_icon">Hide launcher icon</string>
     <string name="theme_settings_hide_launcher_icon_desc">Dial *#*#46789#*#* to open settings</string>
     <string name="theme_settings_hide_launcher_icon_warning">Please make sure you can access this page before hiding launcher icon!</string>
-    <string name="theme_settings_hide_launcher_icon_warning_xiaomi">For HyperOS, please allow "Autostart" and "Open new windows while running in the background" to receive dialer code.</string>
+    <string name="theme_settings_hide_launcher_icon_warning_xiaomi">For HyperOS, please allow "Autostart" and "Open new windows while running in the background" to receive dialer code!</string>
     <string name="installer_settings">Installer Settings</string>
     <string name="installer_settings_desc">Change the global settings of the installer</string>
     <string name="installer_settings_global_installer">Global</string>
@@ -106,6 +138,8 @@
     <string name="config_scope">Scope</string>
     <string name="config_description">Profile description</string>
     <string name="config_authorizer">Authorizer</string>
+    <string name="config_app_authorizer_desc">Authorizer to perform privileged operations</string>
+    <string name="config_install_authorizer_desc">Authorizer to install apps</string>
     <string name="config_authorizer_global">Global</string>
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">None</string>
@@ -162,8 +196,8 @@
     <string name="config_managed_blacklist_by_package_name_title">Apps prohibited from installation by package name</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">Apps prohibited from installation by SharedUID</string>
     <string name="config_no_preset_install_sources">No preset install sources</string>
-    <string name="config_no_managed_blacklist">Fill in the package names of blocked apps here</string>
-    <string name="config_no_managed_shared_user_id_blacklist">No apps prohibited from installation by shared user ID</string>
+    <string name="config_no_managed_blacklist">No apps prohibited from installation by packageName</string>
+    <string name="config_no_managed_shared_user_id_blacklist">No apps prohibited from installation by sharedUID</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Exemptions that only target SharedUID; if it is forbidden by package name, it still cannot be installed.</string>
     <string name="config_add_new_shared_uid">Add New Shared User ID</string>
     <string name="config_shared_uid_name">Shared User ID name</string>
@@ -181,7 +215,7 @@
     <string name="config_error_name">Name can\'t be empty</string>
     <string name="config_error_customize_authorizer">Custom authorizer can\'t be empty</string>
     <string name="config_error_installer">Installer source can\'t be empty</string>
-    <string name="discard">Discard Changes</string>
+    <string name="discard">Discard</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>
@@ -227,6 +261,10 @@
     <string name="installer_select_install">Select apps to install</string>
     <string name="installer_select_split">Select APK splits</string>
     <string name="installer_select_split_desc">Re-select the APK splits to install</string>
+    <string name="installer_choice_install_as_module">Install as Module</string>
+    <string name="installer_module_id">Module ID: %1$s</string>
+    <string name="installer_choice_install_as_app">Install as Application(s)</string>
+    <string name="installer_choice_install_as_app_desc">Select which applications to install from the ZIP</string>
     <string name="installer_prepare_install">Before you install</string>
     <string name="installer_prepare_install_empty">Please select at least one package</string>
     <string name="installer_prepare_install_too_many">Please select only one base.apk</string>
@@ -241,7 +279,9 @@
     <string name="installer_prepare_signature_mismatch">Signature mismatch! Continuing installation may cause data loss or security risks.</string>
     <string name="installer_prepare_signature_unknown">Unable to verify app signature, please proceed with caution.</string>
     <string name="installer_install_app">Install App</string>
+    <string name="installer_install_module">Install Module</string>
     <string name="installer_installing">Installing…</string>
+    <string name="installer_installing_module">Installing Module</string>
     <string name="installer_install_failed">Install failed</string>
     <string name="installer_install_success">Install success</string>
     <string name="installer_silent_install">Silent Install</string>
@@ -259,10 +299,16 @@
     <string name="installer_live_channel_short_text_success">Success</string>
     <string name="installer_live_channel_short_text_resolve_failed">Failed</string>
     <string name="installer_live_channel_short_text_install_failed">Failed</string>
+    <string name="installer_uninstall_app">Uninstall App</string>
+    <string name="installer_uninstalling">Uninstalling</string>
     <string name="uninstall_keep_data">Keep Data</string>
+    <string name="uninstall_keep_data_desc">App data and cache will be retained</string>
     <string name="uninstall_all_users">For All Users</string>
+    <string name="uninstall_all_users_desc">Uninstall this app for all users on this device</string>
     <string name="uninstall_delete_system_app">Delete SystemApp</string>
+    <string name="uninstall_delete_system_app_desc">Allow deleting system apps</string>
     <string name="uninstall_success_message">Uninstall Success</string>
+    <string name="uninstall_failed_message">Uninstall Failed</string>
     <string name="permission_read_external_storage">Read external storage</string>
     <string name="permission_write_external_storage">Write external storage</string>
     <string name="permission_access_fine_location">Access fine location</string>
@@ -315,7 +361,7 @@
     <string name="permission_dhizuku">Use Dhizuku</string>
     <string name="permission_unknown">Unknown permission</string>
     <string name="installer_running">InstallerX running</string>
-    <string name="installer_version_short">" Ver. %1$s (%2$s)"</string>
+    <string name="installer_version_short">Ver. %1$s (%2$s)</string>
     <string name="installer_version_name_label">Version Name:</string>
     <string name="installer_version_code_label">Version Code:</string>
     <string name="installer_version">Version: %1$s (%2$s)</string>
@@ -370,14 +416,20 @@
     <string name="exception_install_failed_origin_os_blacklist">Please add a valid install source for installing vivo system app</string>
     <string name="exception_install_failed_hyperos_isolation_violation">Please add a valid install source for installing mi system app</string>
     <string name="exception_install_failed_duplicate_permission">The package is trying to redeclare permission already declared by another app!</string>
+    <string name="exception_install_parse_failed_unexpected_exception">Parse Failed</string>
     <string name="exception_install_parse_failed_no_certificates">Missing certificates</string>
     <string name="exception_install_failed_user_restricted">System restricted install through USB, please enable it</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS does not allow uninstalling this app!</string>
     <string name="exception_uninstall_failed_internal_error">Package Manager internal error</string>
+    <string name="exception_package_manager_name_not_found">Package name not found</string>
     <string name="exception_shizuku_not_work">Please activate Sui or Shizuku and grant permission</string>
     <string name="exception_dhizuku_not_work">Please activate Dhizuku and grant permission</string>
+    <string name="exception_dhizuku_dead_service">Dhizuku remote service died</string>
     <string name="exception_root_not_work">Couldn\'t access root</string>
     <string name="exception_app_process_not_work">Couldn\'t connect the authorizer</string>
+    <string name="exception_module_cmd_init_failed">Module installation command init failed</string>
+    <string name="exception_module_install_failed">Module install failed</string>
+    <string name="exception_module_install_failed_incompatible_authorizer">Incompatible authorizer</string>
     <string name="old_version_prefix">Current</string>
     <string name="old_version_archived">Archived</string>
     <string name="upgrade_version_prefix">Upgrade</string>
@@ -392,6 +444,8 @@
     <string name="show_dialog_install_extended_menu">Show extended menu</string>
     <string name="show_dialog_install_extended_menu_desc">Show more options in the install dialog</string>
     <string name="extended_menu">Extended Menu</string>
+    <string name="auto_silent_install">Auto Silent Install</string>
+    <string name="auto_silent_install_desc">Auto silent install on dialog install start</string>
     <string name="disable_notification">Foreground Install without Notification</string>
     <string name="close_immediately_on_dialog_dismiss">Dialog remains foreground while installing, clicking blank area will silently exit</string>
     <string name="disable_notification_on_dismiss">Close On Dialog Dismiss</string>
@@ -473,11 +527,13 @@
     <string name="installer_completed">Install complete</string>
     <string name="installer_completed_subtitle">Successful %1$s, failed %2$s</string>
     <string name="installer_current_install_mode_not_supported">Current mode does not support installing this type of file</string>
+    <string name="installer_mixed_module_zip_description">This file contains both a module and applications. Choose how to install</string>
     <!-- MultiApkZip End -->
 
     <!-- MixedModuleApk Installer -->
     <string name="installer_select_from_mixed_module_apk">Select install type</string>
     <string name="installer_mixed_module_apk_description">Select file type you want to install</string>
+    <string name="installer_mixed_module_apk_description_notification">Please click on the notification to select the installation type</string>
     <!-- MixedModuleApk End -->
 
     <!-- SplitNameUtil Start -->
@@ -500,15 +556,32 @@
     <string name="split_name_feature_group_title">Feature Splits</string>
     <!-- SplitNameUtil End -->
 
+    <string name="smart_suggestions">Suggestions</string>
     <string name="suggestion_uninstall_and_retry">Uninstall old and retry</string>
+    <string name="suggestion_uninstall_and_retry_desc">This will uninstall the current version of the app and try to install the new one</string>
     <string name="suggestion_uninstall_and_retry_keep_data">Uninstall old, keep data and retry</string>
+    <string name="suggestion_uninstall_and_retry_keep_data_desc">This will uninstall the current version of the app while keeping its data, then try to install the new one</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_action">Confirm Action</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">This will uninstall the current version of the app while keeping its data, then try to install the new one. DO NOT use on system app!</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">This will uninstall the current version of the app and try to install the new one. DO NOT use on system app!</string>
-    <string name="suggestion_allow_downgrade">Temporarily Allow Downgrade and retry</string>
-    <string name="suggestion_allow_test_app">Temporarily Allow Test and retry</string>
-    <string name="suggestion_mi_isolation">Temporarily add valid installer and retry</string>
-    <string name="suggestion_user_restricted">Go to Developer options to enable USB installation</string>
-    <string name="suggestion_bypass_low_target_sdk">Temporarily allow bypassing restrictions and retry</string>
+    <string name="suggestion_allow_downgrade">Allow Downgrade</string>
+    <string name="suggestion_allow_downgrade_desc">Temporarily Allow Downgrade and retry</string>
+    <string name="suggestion_allow_test_app">Allow Test</string>
+    <string name="suggestion_allow_test_app_desc">Temporarily Allow Test and retry</string>
+    <string name="suggestion_mi_isolation">Try a valid installer</string>
+    <string name="suggestion_mi_isolation_desc">Temporarily add valid installer and retry</string>
+    <string name="suggestion_user_restricted">Enable USB installation</string>
+    <string name="suggestion_user_restricted_desc">Go to Developer options to enable USB installation</string>
+    <string name="suggestion_bypass_low_target_sdk">Allow bypassing restrictions</string>
+    <string name="suggestion_bypass_low_target_sdk_desc">Temporarily allow bypassing restrictions and retry</string>
     <string name="suggestion_bypass_blacklist_set_by_user">Allow install once</string>
+    <string name="suggestion_bypass_blacklist_set_by_user_desc">Temporarily allow install once</string>
+    <string name="suggestion_retry_install_desc">Try install again</string>
+
+    <string name="lab_tip">Experimental features in the lab may be unstable or risky and could change or be removed at any time. Use at your own risk</string>
+    <string name="lab_use_hook_mode">Use hook mode</string>
+    <string name="lab_use_hook_mode_desc">Use hook mode instead of userService to get better performance</string>
+    <string name="lab_module_flashing">Enable module flashing</string>
+    <string name="lab_module_flashing_desc">Always check twice before flashing any modules!</string>
+    <string name="lab_module_select_root_impl">Choose root implementation</string>
 </resources>

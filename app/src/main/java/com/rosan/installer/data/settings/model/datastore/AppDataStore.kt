@@ -20,7 +20,12 @@ class AppDataStore(
     companion object {
         // UI Fresh Switch
         val UI_EXPRESSIVE_SWITCH = booleanPreferencesKey("ui_fresh_switch")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
+        val THEME_PALETTE_STYLE = stringPreferencesKey("theme_palette_style")
+        val THEME_USE_DYNAMIC_COLOR = booleanPreferencesKey("theme_use_dynamic_color")
+        val THEME_SEED_COLOR = intPreferencesKey("theme_seed_color")
         val UI_USE_MIUIX = booleanPreferencesKey("ui_use_miui_x")
+        val UI_DYN_COLOR_FOLLOW_PKG_ICON = booleanPreferencesKey("ui_dyn_color_follow_pkg_icon")
 
         // Show Live Activity
         val SHOW_LIVE_ACTIVITY = booleanPreferencesKey("show_live_activity")
@@ -57,21 +62,31 @@ class AppDataStore(
             booleanPreferencesKey("show_dialog_sdk_compare_multi_line")
         val DIALOG_AUTO_CLOSE_COUNTDOWN =
             intPreferencesKey("show_dhizuku_auto_close_count_down_menu")
-        val DIALOG_SHOW_EXTENDED_MENU = booleanPreferencesKey("show_dialog_install_extended_menu")
+        val DIALOG_SHOW_EXTENDED_MENU =
+            booleanPreferencesKey("show_dialog_install_extended_menu")
         val DIALOG_SHOW_INTELLIGENT_SUGGESTION =
             booleanPreferencesKey("show_dialog_install_intelligent_suggestion")
         val DIALOG_DISABLE_NOTIFICATION_ON_DISMISS =
             booleanPreferencesKey("show_disable_notification_for_dialog_install")
-        val DIALOG_SHOW_OPPO_SPECIAL = booleanPreferencesKey("show_oppo_special")
+        val DIALOG_SHOW_OPPO_SPECIAL =
+            booleanPreferencesKey("show_oppo_special")
+        val DIALOG_AUTO_SILENT_INSTALL =
+            booleanPreferencesKey("auto_silent_install")
 
         // Customize Installer
-        val MANAGED_INSTALLER_PACKAGES_LIST = stringPreferencesKey("managed_packages_list")
+        val MANAGED_INSTALLER_PACKAGES_LIST =
+            stringPreferencesKey("managed_packages_list")
         val MANAGED_BLACKLIST_PACKAGES_LIST =
             stringPreferencesKey("managed_blacklist_packages_list")
         val MANAGED_SHARED_USER_ID_BLACKLIST =
             stringPreferencesKey("managed_shared_user_id_blacklist")
         val MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST =
             stringPreferencesKey("managed_shared_user_id_blacklist_exempted_packages_list")
+
+        // Lab
+        val LAB_USE_SHIZUKU_HOOK_MODE = booleanPreferencesKey("use_shizuku_hook_mode")
+        val LAB_ENABLE_MODULE_FLASH = booleanPreferencesKey("enable_module_flash")
+        val LAB_ROOT_IMPLEMENTATION = stringPreferencesKey("lab_root_implementation")
     }
 
     suspend fun putString(key: Preferences.Key<String>, value: String) {

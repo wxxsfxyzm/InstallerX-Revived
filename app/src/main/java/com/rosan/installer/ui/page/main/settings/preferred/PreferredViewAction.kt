@@ -1,8 +1,12 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
+import androidx.compose.ui.graphics.Color
+import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.theme.m3color.PaletteStyle
+import com.rosan.installer.ui.theme.m3color.ThemeMode
 
 sealed class PreferredViewAction {
     data object Init : PreferredViewAction()
@@ -24,6 +28,7 @@ sealed class PreferredViewAction {
     data class ChangeSdkCompareInMultiLine(val sdkCompareInMultiLine: Boolean) : PreferredViewAction()
     data class ChangeShowOPPOSpecial(val showOPPOSpecial: Boolean) : PreferredViewAction()
     data class ChangeAutoLockInstaller(val autoLockInstaller: Boolean) : PreferredViewAction()
+    data class ChangeAutoSilentInstall(val autoSilentInstall: Boolean) : PreferredViewAction()
 
     data class AddManagedInstallerPackage(val pkg: NamedPackage) : PreferredViewAction()
     data class RemoveManagedInstallerPackage(val pkg: NamedPackage) : PreferredViewAction()
@@ -39,4 +44,13 @@ sealed class PreferredViewAction {
     data object RequestIgnoreBatteryOptimization : PreferredViewAction()
     data object RefreshIgnoreBatteryOptimizationStatus : PreferredViewAction()
     data class SetDefaultInstaller(val lock: Boolean) : PreferredViewAction()
+
+    data class LabChangeShizukuHookMode(val enable: Boolean) : PreferredViewAction()
+    data class LabChangeRootModuleFlash(val enable: Boolean) : PreferredViewAction()
+    data class LabChangeRootImplementation(val implementation: RootImplementation) : PreferredViewAction()
+    data class SetThemeMode(val mode: ThemeMode) : PreferredViewAction()
+    data class SetPaletteStyle(val style: PaletteStyle) : PreferredViewAction()
+    data class SetUseDynamicColor(val use: Boolean) : PreferredViewAction()
+    data class SetSeedColor(val color: Color) : PreferredViewAction()
+    data class SetDynColorFollowPkgIcon(val follow: Boolean) : PreferredViewAction()
 }

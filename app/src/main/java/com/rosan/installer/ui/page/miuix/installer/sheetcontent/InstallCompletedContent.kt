@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.model.entity.InstallResult
+import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.util.help
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -81,7 +82,7 @@ fun InstallCompletedContent(
 private fun MiuixResultItemCard(result: InstallResult) {
     val app = result.entity.app
     val appLabel = (app as? AppEntity.BaseEntity)?.label ?: app.packageName
-    val cardColor = if (isSystemInDarkTheme()) Color(0xFF434343) else Color.White
+    val cardColor = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White
 
     Card(
         modifier = Modifier.fillMaxWidth(),

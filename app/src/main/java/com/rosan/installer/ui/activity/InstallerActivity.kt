@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -17,12 +18,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -31,19 +35,22 @@ import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.ui.activity.themestate.ThemeUiState
+import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import com.rosan.installer.ui.theme.InstallerMiuixTheme
+import com.rosan.installer.ui.theme.m3color.ThemeMode
+import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
+import com.rosan.installer.ui.theme.primaryLight
 import com.rosan.installer.ui.util.PermissionDenialReason
 import com.rosan.installer.ui.util.PermissionManager
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -58,25 +65,13 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     private val appDataStore: AppDataStore by inject()
-    private val reflect: ReflectRepo by inject()
 
     private var installer by mutableStateOf<InstallerRepo?>(null)
     private var job: Job? = null
 
     private lateinit var permissionManager: PermissionManager
 
-    private enum class InstallerTheme {
-        MATERIAL,
-        MIUIX
-    }
-
-    // Define a data class for the UI state
-    private data class InstallerUiState(
-        val theme: InstallerTheme = InstallerTheme.MATERIAL, // Default theme
-        val isThemeLoaded: Boolean = false // Flag to check if loading is complete
-    )
-
-    private var uiState by mutableStateOf(InstallerUiState())
+    private var uiState by mutableStateOf(ThemeUiState())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (RsConfig.isDebug && RsConfig.LEVEL == Level.UNSTABLE)
@@ -89,11 +84,9 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         Timber.d("onCreate. SavedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}")
 
         lifecycleScope.launch {
-            val useMiuix = appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false).first()
-            uiState = uiState.copy(
-                theme = if (useMiuix) InstallerTheme.MIUIX else InstallerTheme.MATERIAL,
-                isThemeLoaded = true
-            )
+            createThemeUiStateFlow(appDataStore).collect { newState ->
+                uiState = newState
+            }
         }
 
         permissionManager = PermissionManager(this)
@@ -246,7 +239,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     private fun showContent() {
         setContent {
-            if (!uiState.isThemeLoaded) return@setContent
+            if (!uiState.isLoaded) return@setContent
 
             val installer = installer ?: return@setContent
             val background by installer.background.collectAsState(false)
@@ -258,34 +251,73 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
             val confirmationDetails by installer.confirmationDetails.collectAsState(null)
 
-            when (uiState.theme) {
-                InstallerTheme.MATERIAL -> {
-                    InstallerMaterialExpressiveTheme {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            if (confirmationDetails != null)
-                                ShowConfirmationDialog(
-                                    appLabel = confirmationDetails!!.appLabel,
-                                    appIcon = confirmationDetails!!.appIcon,
-                                    onInstall = {
-                                        Timber.d("CONFIRM: Install clicked for session ${confirmationDetails!!.sessionId}")
-                                        installer.approveConfirmation(confirmationDetails!!.sessionId, true)
-                                    },
-                                    onCancel = {
-                                        Timber.d("CONFIRM: Cancel clicked for session ${confirmationDetails!!.sessionId}")
-                                        installer.approveConfirmation(confirmationDetails!!.sessionId, false)
-                                    }
-                                )
-                            else {
-                                InstallerPage(installer)
-                            }
-                        }
+            val useDarkTheme = when (uiState.themeMode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
+
+            if (uiState.useMiuix) {
+                InstallerMiuixTheme {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        MiuixInstallerPage(installer)
                     }
                 }
+            } else {
+                val colorRes =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) colorResource(id = android.R.color.system_accent1_500) else primaryLight
+                val globalColorScheme = remember(uiState, useDarkTheme) {
+                    val keyColor = if (uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        colorRes
+                    } else {
+                        uiState.seedColor
+                    }
 
-                InstallerTheme.MIUIX -> {
-                    InstallerMiuixTheme {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            MiuixInstallerPage(installer)
+                    dynamicColorScheme(
+                        keyColor = keyColor,
+                        isDark = useDarkTheme,
+                        style = uiState.paletteStyle
+                    )
+                }
+
+                val activeColorSchemeState = remember { mutableStateOf(globalColorScheme) }
+
+                LaunchedEffect(globalColorScheme) {
+                    activeColorSchemeState.value = globalColorScheme
+                }
+
+                InstallerMaterialExpressiveTheme(
+                    darkTheme = useDarkTheme,
+                    colorScheme = activeColorSchemeState.value,
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        if (confirmationDetails != null)
+                            ShowConfirmationDialog(
+                                appLabel = confirmationDetails!!.appLabel,
+                                appIcon = confirmationDetails!!.appIcon,
+                                onInstall = {
+                                    Timber.d("CONFIRM: Install clicked for session ${confirmationDetails!!.sessionId}")
+                                    installer.approveConfirmation(
+                                        confirmationDetails!!.sessionId,
+                                        true
+                                    )
+                                },
+                                onCancel = {
+                                    Timber.d("CONFIRM: Cancel clicked for session ${confirmationDetails!!.sessionId}")
+                                    installer.approveConfirmation(
+                                        confirmationDetails!!.sessionId,
+                                        false
+                                    )
+                                }
+                            )
+                        else {
+                            InstallerPage(
+                                installer = installer,
+                                activeColorSchemeState = activeColorSchemeState,
+                                globalColorScheme = globalColorScheme,
+                                isDarkMode = useDarkTheme,
+                                basePaletteStyle = uiState.paletteStyle
+                            )
                         }
                     }
                 }

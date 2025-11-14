@@ -2,6 +2,7 @@ package com.rosan.installer;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import com.rosan.installer.ICommandOutputListener;
 
 /**
  * AIDL interface for privileged installer service.
@@ -52,6 +53,11 @@ interface IPrivilegedService {
      * @return the standard output of the executed command
      */
     String execArr(in String[] command);
+
+    /**
+     * Executes a command and streams its output back via a listener.
+     */
+    void execArrWithCallback(in String[] command, ICommandOutputListener listener);
 
     /**
      * Grants a runtime permission to a specified package using the privileged service.

@@ -382,7 +382,6 @@ fun MenuItemWidget(
                     // 判断是否选中，仅对安装选项有效
                     val isSelected = option?.let { (installFlags and it.value) != 0 } ?: false
 
-                    // 使用 Card 作为可点击区域和背景
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = shape,

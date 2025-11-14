@@ -218,6 +218,14 @@ fun PreferredPage(
                     item { LabelWidget(stringResource(R.string.other)) }
                     item {
                         SettingsAboutItemWidget(
+                            imageVector = AppIcons.Lab,
+                            headlineContentText = stringResource(R.string.lab),
+                            supportingContentText = stringResource(R.string.lab_desc),
+                            onClick = { navController.navigate(SettingsScreen.Lab.route) }
+                        )
+                    }
+                    item {
+                        SettingsAboutItemWidget(
                             imageVector = AppIcons.Info,
                             headlineContentText = stringResource(R.string.about_detail),
                             supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
@@ -264,28 +272,3 @@ fun PreferredPage(
         )
     }
 }
-
-/*@Composable
-fun UserTerms() {
-    val context = LocalContext.current
-    BaseWidget(
-        icon = Icons.TwoTone.Gavel,
-        title = stringResource(id = R.string.user_terms),
-        onClick = {
-            openUrl(context, "https://iamr0s.github.io/InstallerXDocs/terms")
-        }
-    ) {}
-}*/
-
-/*
-@Composable
-fun PrivacyPolicy() {
-    val context = LocalContext.current
-    BaseWidget(
-        icon = Icons.TwoTone.PrivacyTip,
-        title = stringResource(id = R.string.privacy_policy),
-        onClick = {
-            openUrl(context, "https://iamr0s.github.io/InstallerXDocs/privacy")
-        }
-    ) {}
-}*/

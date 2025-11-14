@@ -248,16 +248,24 @@ fun NewPreferredPage(
                     item {
                         SplicedColumnGroup(
                             title = stringResource(R.string.other),
-                            content = listOf(
-                                {
+                            content = buildList {
+                                add {
+                                    SettingsAboutItemWidget(
+                                        imageVector = AppIcons.Lab,
+                                        headlineContentText = stringResource(R.string.lab),
+                                        supportingContentText = stringResource(R.string.lab_desc),
+                                        onClick = { navController.navigate(SettingsScreen.Lab.route) }
+                                    )
+                                }
+                                add {
                                     SettingsAboutItemWidget(
                                         imageVector = AppIcons.Info,
                                         headlineContentText = stringResource(R.string.about_detail),
                                         supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
                                         onClick = { navController.navigate(SettingsScreen.About.route) }
                                     )
-                                },
-                                {
+                                }
+                                add {
                                     SettingsAboutItemWidget(
                                         imageVector = AppIcons.Update,
                                         headlineContentText = stringResource(R.string.get_update),
@@ -265,7 +273,7 @@ fun NewPreferredPage(
                                         onClick = { showBottomSheet = true }
                                     )
                                 }
-                            )
+                            }
                         )
                     }
                 }

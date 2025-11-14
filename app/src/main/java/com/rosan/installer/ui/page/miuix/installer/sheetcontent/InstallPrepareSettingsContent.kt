@@ -23,6 +23,7 @@ import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
+import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -51,7 +52,7 @@ fun PrepareSettingsContent(
         Card(
             modifier = Modifier.padding(bottom = 6.dp),
             colors = CardColors(
-                color = if (isSystemInDarkTheme()) Color(0xFF434343) else Color.White,
+                color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
                 contentColor = MiuixTheme.colorScheme.onSurface
             )
         ) {

@@ -138,7 +138,7 @@ suspend fun setInstallerDefaultPrivileged(
     withContext(Dispatchers.IO) {
         Timber.d("Setting default installer (lock=$lock) using authorizer: ${config.authorizer}")
         val component = ComponentName(context, InstallerActivity::class.java)
-        PARepoImpl.setDefaultInstaller(config, component, lock)
+        PARepoImpl.setDefaultInstaller(config.authorizer, component, lock)
     }
 }
 

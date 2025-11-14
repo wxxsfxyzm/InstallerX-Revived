@@ -20,6 +20,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
+import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.getInfo
 import com.rosan.installer.data.app.util.sortedBest
@@ -767,16 +768,32 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
 
             is ProgressEntity.InstallAnalysedSuccess -> {
-                contentTitle = installer.analysisResults.flatMap { it.appEntities }
-                    .filter { it.selected }.map { it.app }.getInfo(context).title
+                // Get all entities from analysis result, not just selected ones, for the check.
+                val allEntities = installer.analysisResults.flatMap { it.appEntities }
+                contentTitle = allEntities.map { it.app }.getInfo(context).title
                 shortText = getString(R.string.installer_live_channel_short_text_pending)
+
                 // Progress is now at the end of the Analysing stage.
                 val progressValue = installStages.subList(0, 3).sumOf { it.weight.toDouble() }.toFloat()
                 progressStyle.setProgress(progressValue.toInt())
-                baseBuilder.setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
-                    .addAction(0, getString(R.string.install), installIntent)
-                    .addAction(0, getString(R.string.cancel), finishIntent)
-                    .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
+
+                // Check for the specific Mixed Module/APK case first, just like in the legacy notification.
+                val isMixedType = allEntities.any {
+                    it.app.containerType == DataType.MIXED_MODULE_APK
+                }
+
+                if (isMixedType) {
+                    // For mixed types, we must prompt the user to open the app for selection.
+                    // We only provide a "Cancel" action, not an "Install" action.
+                    baseBuilder.setContentText(getString(R.string.installer_mixed_module_apk_description_notification))
+                        .addAction(0, getString(R.string.cancel), finishIntent)
+                } else {
+                    // This is the original logic for standard installs.
+                    baseBuilder.setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
+                        .addAction(0, getString(R.string.install), installIntent)
+                        .addAction(0, getString(R.string.cancel), finishIntent)
+                }
+                baseBuilder.setLargeIcon(getLargeIconBitmap(preferSystemIcon))
             }
 
             is ProgressEntity.Installing -> {
@@ -1062,14 +1079,32 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun onAnalysedSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): Notification {
         val selectedEntities = installer.analysisResults
             .flatMap { it.appEntities }
-            .filter { it.selected }
+        // In notification mode, nothing is pre-selected, so we consider all entities.
+        // .filter { it.selected }
         val selectedApps = selectedEntities.map { it.app }
+        val info = selectedApps.getInfo(context)
 
-        return (if (selectedApps.groupBy { it.packageName }.size != 1) builder.setContentTitle(
-            getString(R.string.installer_prepare_install)
-        ).addAction(0, getString(R.string.cancel), finishIntent)
-        else {
-            val info = selectedApps.getInfo(context)
+        // Check for the specific Mixed Module/APK case first. This is the highest priority.
+        val isMixedType = selectedEntities.any {
+            it.app.containerType == DataType.MIXED_MODULE_APK
+        }
+
+        if (isMixedType) {
+            // If it's a mixed type, always show the specific description and install options.
+            return builder.setContentTitle(info.title)
+                .setContentText(getString(R.string.installer_mixed_module_apk_description_notification))
+                .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
+                .addAction(0, getString(R.string.cancel), finishIntent)
+                .build()
+        }
+
+        // Fallback to the original logic for standard single or multi-app installs.
+        return (if (selectedApps.groupBy { it.packageName }.size != 1) {
+            // This is for true multi-APK installs (e.g., sharing 3 different APKs).
+            builder.setContentTitle(getString(R.string.installer_prepare_install))
+                .addAction(0, getString(R.string.cancel), finishIntent)
+        } else {
+            // This is for a standard single APK install.
             builder.setContentTitle(info.title)
                 .setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
                 .setLargeIcon(getLargeIconBitmap(preferSystemIcon))

@@ -15,24 +15,24 @@
 
 Looking for a better app installer? Try **InstallerX**!
 
-Many customized Chinese ROMs come with subpar default installers. You can replace them with **InstallerX**.
+Many customized Chinese ROMs come with subpar default installers. You can replace them with **InstallerX Revived**.
 
-Compared to stock installers, **InstallerX** offers more installation features:
+Compared to stock installers, **InstallerX Revived** offers more installation features:
 - Rich installation types: APK, APKS, APKM, XAPK, APKs inside ZIP, and batch APKs.
 - Dialog-based installation
 - Notification-based installation (Live Activity API supported)
 - Automatic installation
 - Installer declaration
 - Setting install flags (can inherit Profile settings)
-- Install For specific user / all users
+- Install for specific user / all users
 - Dex2oat after successful installation
-- Block installation of specific apps or by sharedUID
+- Block the installation of specific app's packageName or by sharedUID
 - Auto-delete APK after installation
-- No shell commands, native api call only
+- No shell commands, native API calls only
 
 ## Supported Versions
 
-- **Full support:** Android SDK 34 - 36 (Android 14 - 16)
+- **Full support:** Android SDK 34 - 36.1 (Android 14 - 16)
 - **Limited support:** Android SDK 26 - 33 (Android 8.0 - 13) (please report issues)
 
 ## Key Changes and Features
@@ -46,45 +46,46 @@ Compared to stock installers, **InstallerX** offers more installation features:
 - **System Icons:** Support for displaying system icon packs during installation. Allows switching between APK icons and system icon packs through a toggle.
 - **Version Comparison:** Support for displaying version number comparison in single-line or multi-line format.
 - **SDK Information:** Installation dialogs show targetSDK and minSDK in single-line or multi-line format.
+- **Session Install Confirmation**: With the help of [InxLocker](https://github.com/Chimioo/InxLocker), confirming installations from store apps (Aurora Store, F-Droid, etc.) is now supported.
 - **Bypass Interceptions:** Shizuku/Root can bypass custom OS chain-start restrictions when opening an App after installation.
     - Currently only works for dialog installation.
-    - Dhizuku cannot invoke permissions, so a customizable countdown option was added to reserve time for the app opening action.
-- **Extended Menu:** For dialog installation (enable in settings):
+    - Dhizuku lacks sufficient permissions, so a customizable countdown option was added to reserve time for the app opening action.
+- **Extended Menu:** For dialog installation (can be enabled in settings):
     - Displays permissions requested by the application.
     - InstallFlags configuration (can inherit global Profile settings).
-      - **Important** Setting InstallFlags **does not guarantee** they will always work. Some options might pose security risks, depending on the system.
+      - **Important:** Setting InstallFlags **does not guarantee** they will always work. Some options might pose security risks, depending on the system.
 - **Preset Sources:** Support for pre-configuring installation source package names in settings, allowing quick selection in profiles and the dialog installation menu.
 - **Install from ZIP:** Support for installing APK files inside ZIP archives (dialog installation only).
-    - No quantity limit.
+    - Supports unlimited quantity and multiple ZIP files.
     - Supports APK files in nested directories within the ZIP, **not limited to the root directory**.
     - Supports automatic handling of multiple versions of the same package:
-        - Deduplication.
-        - Intelligent selection of the best package to install.
+        - Deduplication
+        - Smart selection of the best package to install.
 - **Batch Installation:** Support for installing multiple APKs at once (multi-select and share to InstallerX).
     - Dialog installation only.
     - No quantity limit.
     - APK files only.
-    - Supports automatic handling of multiple versions of the same package (deduplication and intelligent selection).
+    - Supports automatic handling of multiple versions of the same package (deduplication and smart selection).
 - **APKS/APKM/XAPK Files:** Support for automatic selection of the best split.
     - Supports both notification and dialog installation.
-        - Clicking "Install" in the notification chooses the best option.
+        - Clicking "Install" in the notification selects the best option and proceeds with installation.
         - In the dialog, the best option is selected by default, but can be chosen manually.
     - The split selection interface shows user-friendly descriptions.
-- **Architecture Support:** Allows installing armeabi-v7a packages on arm64-v8a only systems. Actual functionality depends on the system providing runtime translation.
-- **Downgrade with/without Data:** Support for performing app downgrades with or without data preservation on some OEM Android 15/16 systems.
-    - This feature only supports Android 15 and above. On Android 14 or below, try the `Allow downgrade` option in the install options.
+- **Architecture Support:** Allows installing armeabi-v7a packages on arm64-v8a only systems (actual functionality depends on the system providing runtime translation).
+- **Downgrade with or without Data:** Support for performing app downgrades with or without data preservation on some OEM Android 15 systems.
+    - This feature only supports Android 15. On Android 14 or below, try the `Allow downgrade` option in the install options.
     - The feature is available in the smart suggestions of the dialog installation. To use it, first enable the `Show smart suggestions` option.
-    - **Use this feature with extreme caution on system apps!** Loss of system app data could let your device unusable.
-    - Not compatible with OneUI 7.0, RealmeUI, and some ColorOS versions (AOSP restrictions). If you only see the downgrade option *without* data preservation, it means your system does not support downgrade *with* data.
+    - **Use this feature with extreme caution on system apps!** Loss of data from a system app could render the device unusable.
+    - Not compatible with OneUI 7.0, RealmeUI, and some ColorOS versions (AOSP has fixed). If you only see the downgrade option *without* data preservation, it means your system does not support downgrade *with* data.
 - **Blacklist:** Support for configuring a list of banned package names for installation in the settings.
     - Support blacklist by packageName / sharedUID with exemptions
-    - Blacklist sharedUID 1000/1001 by default, if you don't want this, remove it from the blacklist.
     - `Allow once` in smart suggestions
 - **DexOpt:** After successful installation, the app can automatically perform dex2oat on the installed applications according to the configured Profile settings.
-    - Not support Dhizuku
+    - Does not support Dhizuku
 - **Signature Verification：** Verify the signature of the installed app and apk to install, and give a warning if they do not match.
 - **Select Target User:** Support installing apps to a specific user.
-    - Not support Dhizuku
+    - Dynamically obtain current user details.
+    - Does not support Dhizuku
     - Can be overridden by `Install For All Users` install option
 - **Declare as Uninstaller:** Accept Uninstall intent on certain OS, custom OS may not be supported.
 - [Experimental] **Directly Install From Download Link:** The online version supports directly sharing the download link of an APK file to InstallerX for installation. Currently, the APK is not kept locally, but an option to retain the installation package will be added in the future.
@@ -103,30 +104,30 @@ Compared to stock installers, **InstallerX** offers more installation features:
 
 - **Unable to lock InstallerX as default installer?**
     - Some Systems have very strict policy on Package Installers. You must use a LSPosed module to intercept the intent and forward it to the installer in this case.
-    - Strongly recommended: [Chimioo/InxLocker](https://github.com/Chimioo/InxLocker) which can also lock uninstaller.
-    - If you want to use locker from original InstallerX, please note that due to package name change, use the modified [InstallerX Lock Tool](https://github.com/wxxsfxyzm/InstallerX-Revived/blob/main/InstallerX%E9%94%81%E5%AE%9A%E5%99%A8_1.3.apk) from this repository.
+    - Works best with: [Chimioo/InxLocker](https://github.com/Chimioo/InxLocker)
+    - Other lockers working as LSPosed are no longer recommended
 
-- An error occurred in the resolving phase: `No Content Provider` or `reading provider` reported `Permission Denial`?
+- An error occurred in the resolution phase: `No Content Provider` or `reading provider` reported `Permission Denial`?
     - You have enabled Hide app list or similar functions, please configure the whitelist.
 
 - **HyperOS shows "Installing system apps requires declaring a valid installer" error**
-    - It's a system security restriction. You must declare an installer that is a system app (recommended: `com.android.fileexplorer` or `com.android.vending`).
+    - It's a system security restriction. You must declare an installer that is a system app (recommended: `com.android.fileexplorer` or `com.android.vending` for HyperOS; app store for Vivo).
     - Works with Shizuku/Root. **Dhizuku is not supported**.
     - New feature: InstallerX automatically detects HyperOS and adds a default configuration (`com.miui.packageinstaller`). You can change it in the settings if needed.
 
 - **HyperOS reinstalls the default installer / locking fails**
-    - HyperOS may reset the default installer after the user installs an APK-handling app.
+    - Try enabling `Auto Lock Installer` in settings.
     - On some HyperOS versions, locking failure is expected.
     - HyperOS intercepts USB installation requests (ADB/Shizuku) with a dialog. If the user rejects the installation of a new app, the system will revoke the installer setting and force the default one. If this happens, lock InstallerX again.
 
 - **Notification progress bar freezes**
     - Some custom OS has very strict background app controls. Set "No background restrictions" for the app if you encounter this.
-    - The app is optimized: it ends all background services and closes 1 seconds after completing the installation task (when the user clicks "Done" or clears the notification). You can enable the foreground service notification to monitor.
+    - The app is optimized: it ends all background services and closes 1 second after completing the installation task (when the user clicks "Done" or clears the notification). You can enable the foreground service notification to monitor.
 
 - **Problems on Oppo/Vivo/Lenovo/... systems?**
     - We do not have devices from these brands for testing. You can discuss it in [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions), or report through our [Telegram Channel](https://t.me/installerx_revived).
-    - To lock the installer on Oppo/Vivo, use the lock tool (Lock Tool).
-    - To install apps through shizuku on Honor, disable `Monitor ADB install` in developer settings.    
+    - To lock the installer on Oppo/Vivo, use the lock tool.
+    - To install apps through shizuku on Honor devices, disable `Monitor ADB install` in developer settings.
 
 ## About Releases
 
@@ -137,7 +138,7 @@ Compared to stock installers, **InstallerX** offers more installation features:
 - **`dev` branch:** Contains features under development. If you want to test them, look for the corresponding CI builds in Github Actions.
 - **`main` branch:** When stable changes are merged from `dev`, the CI/CD system automatically builds and publishes a new alpha version.
 - **Stable releases:** Manually published when finishing a development/testing phase. CI/CD automatically publishes them as a release.
-- **About network permission:** With feature expansion, some network-related functions have been introduced. However, many users prefer the installer to remain purely local without requiring network access. Therefore, two versions will be released: **online** and **offline**. Both versions share the same package name, version code, and signature, and can be installed side by side. Please download according to your needs.
+- **About network permission:** As features have expanded, some network-related functions have been introduced. However, many users prefer the installer to remain purely local without requiring network access. Therefore, two versions will be released: **online** and **offline**. Both versions share the same package name, version code, and signature, so they can't be installed side by side (but can be replaced directly). Please download according to your needs.
   - **Online version**: Supports sharing direct download links to InstallerX for installation. More network-related utilities may be added in the future, but network permission will **never** be used for non-installation purposes. Safe to use.
   - **Offline version**: Requests no network permissions at all. When attempting to use online features, you will receive a clear error message. This version remains a purely local installer.
 
@@ -147,21 +148,7 @@ Help us translate this project! You can contribute at: https://hosted.weblate.or
 
 ### Localization Status
 
-| Language            | Status                                                                                                                                                                                                       |
-|:--------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **All Languages**   | [![Translation status](https://hosted.weblate.org/widget/installerx-revived/strings/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/)                                         |
-| English             | [![Translation status for English](https://hosted.weblate.org/widget/installerx-revived/strings/en/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/en/)                       |
-| Simplified Chinese  | [![Translation status for Simplified Chinese](https://hosted.weblate.org/widget/installerx-revived/strings/zh_Hans/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/zh_Hans/)  |
-| Traditional Chinese | [![Translation status for Traditional Chinese](https://hosted.weblate.org/widget/installerx-revived/strings/zh_Hant/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/zh_Hant/) |
-| Arabic              | [![Translation status for Arabic](https://hosted.weblate.org/widget/installerx-revived/strings/ar/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/ar/)                        |
-| French              | [![Translation status for French](https://hosted.weblate.org/widget/installerx-revived/strings/fr/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/fr/)                        |
-| German              | [![Translation status for German](https://hosted.weblate.org/widget/installerx-revived/strings/de/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/de/)                        |
-| Portuguese (Brazil) | [![Translation status for Portuguese (Brazil)](https://hosted.weblate.org/widget/installerx-revived/strings/pt_BR/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/pt_BR/)     |
-| Russian             | [![Translation status for Russian](https://hosted.weblate.org/widget/installerx-revived/strings/ru/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/ru/)                       |
-| Spanish             | [![Translation status for Spanish](https://hosted.weblate.org/widget/installerx-revived/strings/es/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/es/)                       |
-| Thai                | [![Translation status for Thai](https://hosted.weblate.org/widget/installerx-revived/strings/th/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/th/)                          |
-| Turkish             | [![Translation status for Turkish](https://hosted.weblate.org/widget/installerx-revived/strings/tr/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/tr/)                       |
-| Ukrainian           | [![Translation status for Ukrainian](https://hosted.weblate.org/widget/installerx-revived/strings/uk/svg-badge.svg)](https://hosted.weblate.org/projects/installerx-revived/strings/uk/)                     |
+[![Localization Status](https://hosted.weblate.org/widget/installerx-revived/strings/multi-auto.svg)](https://hosted.weblate.org/engage/installerx-revived/)
 
 ## License
 

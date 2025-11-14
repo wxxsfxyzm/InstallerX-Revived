@@ -39,7 +39,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
@@ -174,10 +173,9 @@ fun NewAllPage(
 
                 viewModel.state.data.progress is AllViewState.Data.Progress.Loaded
                         && viewModel.state.data.configs.isEmpty() -> {
-                    LottieWidget(
-                        spec = LottieCompositionSpec.RawRes(R.raw.empty_state),
-                        text = stringResource(id = R.string.empty_configs)
-                    )
+                    // TODO Add error handling
+                    // Since we don't allow removing default profile,
+                    // There is no need to handle an empty state.
                 }
 
                 else -> {

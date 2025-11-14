@@ -1,9 +1,28 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
+import android.os.Build
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Style
+import androidx.compose.material.icons.twotone.Colorize
+import androidx.compose.material.icons.twotone.InvertColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -14,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -25,9 +45,12 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SelectableSettingItem
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
+import com.rosan.installer.ui.theme.m3color.PresetColors
+import com.rosan.installer.ui.theme.m3color.ThemeMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +61,31 @@ fun LegacyThemeSettingsPage(
     val state = viewModel.state
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showHideLauncherIconDialog by remember { mutableStateOf(false) }
+
+    var showPaletteDialog by remember { mutableStateOf(false) }
+    var showThemeModeDialog by remember { mutableStateOf(false) }
+
+    if (showPaletteDialog) {
+        PaletteStyleDialog(
+            currentStyle = state.paletteStyle,
+            onDismiss = { showPaletteDialog = false },
+            onSelect = { style ->
+                viewModel.dispatch(PreferredViewAction.SetPaletteStyle(style))
+                showPaletteDialog = false
+            }
+        )
+    }
+
+    if (showThemeModeDialog) {
+        ThemeModeDialog(
+            currentMode = state.themeMode,
+            onDismiss = { showThemeModeDialog = false },
+            onSelect = { mode ->
+                viewModel.dispatch(PreferredViewAction.SetThemeMode(mode))
+                showThemeModeDialog = false
+            }
+        )
+    }
 
     HideLauncherIconWarningDialog(
         show = showHideLauncherIconDialog,
@@ -103,6 +151,113 @@ fun LegacyThemeSettingsPage(
                         viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))
                     }
                 )
+            }
+            item {
+                BaseWidget(
+                    icon = Icons.Default.DarkMode,
+                    title = stringResource(R.string.theme_settings_theme_mode),
+                    description = when (state.themeMode) {
+                        ThemeMode.LIGHT -> stringResource(R.string.theme_settings_theme_mode_light)
+                        ThemeMode.DARK -> stringResource(R.string.theme_settings_theme_mode_dark)
+                        ThemeMode.SYSTEM -> stringResource(R.string.theme_settings_theme_mode_system)
+                    },
+                    onClick = { showThemeModeDialog = true }
+                ) {}
+            }
+            item {
+                BaseWidget(
+                    icon = Icons.Default.Style,
+                    title = stringResource(R.string.theme_settings_palette_style),
+                    description = state.paletteStyle.displayName,
+                    onClick = { showPaletteDialog = true }
+                ) {}
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                item {
+                    SwitchWidget(
+                        icon = Icons.TwoTone.InvertColors,
+                        title = stringResource(R.string.theme_settings_dynamic_color),
+                        description = stringResource(R.string.theme_settings_dynamic_color_desc),
+                        isM3E = false,
+                        checked = state.useDynamicColor,
+                        onCheckedChange = {
+                            viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
+                        }
+                    )
+                }
+            item {
+                SwitchWidget(
+                    icon = Icons.TwoTone.Colorize,
+                    title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
+                    description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
+                    isM3E = false,
+                    checked = state.useDynColorFollowPkgIcon,
+                    onCheckedChange = {
+                        viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIcon(it))
+                    }
+                )
+            }
+            if (!state.showMiuixUI) {
+                val showColorGrid = !state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+                if (showColorGrid)
+                    item { LabelWidget(stringResource(R.string.theme_settings_theme_color)) }
+                item {
+                    AnimatedVisibility(
+                        visible = showColorGrid,
+                        enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
+                                expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
+                                shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
+                    ) {
+                        BoxWithConstraints(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 16.dp)
+                        ) {
+                            val itemMinWidth = 88.dp
+
+                            val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
+
+                            val chunkedColors = PresetColors.chunked(columns)
+
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                chunkedColors.forEach { rowItems ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        rowItems.forEach { rawColor ->
+                                            Box(
+                                                modifier = Modifier.weight(1f),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                ColorSwatchPreview(
+                                                    rawColor = rawColor,
+                                                    currentStyle = state.paletteStyle,
+                                                    isSelected = !state.useDynamicColor && state.seedColor == rawColor.color
+                                                ) {
+                                                    viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
+                                                }
+                                            }
+                                        }
+
+                                        val remaining = columns - rowItems.size
+                                        if (remaining > 0) {
+                                            repeat(remaining) {
+                                                Spacer(Modifier.weight(1f))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
             }
             item { LabelWidget(stringResource(R.string.theme_settings_package_icons)) }
             item {

@@ -49,6 +49,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
+import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
@@ -77,33 +78,40 @@ fun InstallPrepareContent(
         return
     }
 
-    val selectedEntities = currentPackage.appEntities.filter { it.selected }.map { it.app }.sortedBest()
-    if (selectedEntities.isEmpty()) {
-        LoadingContent(statusText = "No apps selected")
+    val allEntities = (if (installer.analysisResults.size > 1) {
+        currentPackage.appEntities.filter { it.selected }
+    } else {
+        currentPackage.appEntities
+    }).map { it.app }
+    
+    val primaryEntity = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+        ?: allEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
+        ?: allEntities.sortedBest().firstOrNull()
+
+    if (primaryEntity == null) {
+        LoadingContent(statusText = "No main app entity found")
         return
     }
 
-    val primaryEntity = selectedEntities.first()
     val containerType = primaryEntity.containerType
-    val entityToInstall = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+    val entityToInstall = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val displayIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
 
     val errorColor = MaterialTheme.colorScheme.error
     val tertiaryColor = MiuixTheme.colorScheme.primary
 
     val (warningMessages, buttonTextId) = remember(currentPackage, entityToInstall) {
-        val newEntity = entityToInstall
         val oldInfo = currentPackage.installedAppInfo
         val signatureStatus = currentPackage.signatureMatchStatus
         val warnings = mutableListOf<Pair<String, Color>>()
         var finalButtonTextId = R.string.install
-        if (newEntity != null) {
+        if (entityToInstall != null) {
             if (oldInfo == null) {
                 finalButtonTextId = R.string.install
             } else {
                 when {
-                    newEntity.versionCode > oldInfo.versionCode -> finalButtonTextId = R.string.upgrade
-                    newEntity.versionCode < oldInfo.versionCode -> {
+                    entityToInstall.versionCode > oldInfo.versionCode -> finalButtonTextId = R.string.upgrade
+                    entityToInstall.versionCode < oldInfo.versionCode -> {
                         warnings.add(context.getString(R.string.installer_prepare_type_downgrade) to errorColor)
                         finalButtonTextId = R.string.install_anyway
                     }
@@ -126,7 +134,7 @@ fun InstallPrepareContent(
 
                 else -> {}
             }
-        val newMinSdk = newEntity?.minSdk?.toIntOrNull()
+        val newMinSdk = entityToInstall?.minSdk?.toIntOrNull()
         if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
             warnings.add(0, context.getString(R.string.installer_prepare_sdk_incompatible) to errorColor)
         }
@@ -160,7 +168,7 @@ fun InstallPrepareContent(
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
                 colors = CardColors(
-                    color = if (isSystemInDarkTheme()) Color(0xFF434343) else Color.White,
+                    color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
                     contentColor = MiuixTheme.colorScheme.onSurface
                 )
             ) {
@@ -186,8 +194,7 @@ fun InstallPrepareContent(
                             SDKComparison(
                                 entityToInstall = primaryEntity,
                                 preInstallAppInfo = currentPackage.installedAppInfo,
-                                installer = installer,
-                                viewModel = viewModel
+                                installer = installer
                             )
                             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
                                 AnimatedVisibility(visible = viewModel.showOPPOSpecial && primaryEntity.containerType == DataType.APK) {
@@ -245,18 +252,19 @@ fun InstallPrepareContent(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     colors = CardColors(
-                        color = if (isSystemInDarkTheme()) Color(0xFF434343) else Color.White,
+                        color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
                         contentColor = MiuixTheme.colorScheme.onSurface
                     )
                 ) {
                     Column {
                         // Permissions List
-                        MiuixNavigationItemWidget(
-                            title = stringResource(R.string.permission_list),
-                            description = stringResource(R.string.permission_list_desc),
-                            insideMargin = PaddingValues(12.dp),
-                            onClick = { viewModel.toast("To be implemented") },
-                        )
+                        if (containerType == DataType.APK)
+                            MiuixNavigationItemWidget(
+                                title = stringResource(R.string.permission_list),
+                                description = stringResource(R.string.permission_list_desc),
+                                insideMargin = PaddingValues(12.dp),
+                                onClick = { viewModel.dispatch(InstallerViewAction.ShowMiuixPermissionList) },
+                            )
 
                         // Install Options
                         if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku ||
@@ -284,13 +292,19 @@ fun InstallPrepareContent(
             }
         }
 
-        val canInstall = entityToInstall != null &&
-                (entityToInstall.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true)
-        val isAPK =
-            containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK
+        val canInstallBaseEntity = (primaryEntity as? AppEntity.BaseEntity)?.let {
+            it.minSdk?.toIntOrNull()?.let { sdk -> sdk <= Build.VERSION.SDK_INT } ?: true
+        } ?: false
 
-        // "Expand" / "Collapse" Button
-        if (viewModel.showExtendedMenu && canInstall)
+        val canInstallModuleEntity = (primaryEntity as? AppEntity.ModuleEntity)?.let {
+            viewModel.enableModuleInstall
+        } ?: false
+
+        val canInstall = canInstallBaseEntity || canInstallModuleEntity
+
+        val showExpandButton = canInstallBaseEntity && viewModel.showExtendedMenu
+
+        if (showExpandButton)
             item {
                 TextButton(
                     onClick = { isExpanded = !isExpanded },
@@ -445,7 +459,6 @@ private fun WarningTextBlock(warnings: List<Pair<String, Color>>) {
 private fun SDKComparison(
     entityToInstall: AppEntity,
     preInstallAppInfo: InstalledAppInfo?,
-    viewModel: InstallerViewModel,
     installer: InstallerRepo
 ) {
     AnimatedVisibility(visible = installer.config.displaySdk) {
@@ -504,8 +517,8 @@ private fun SdkInfoRow(
         // Label to the right.
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (showComparison) {
-                val isDowngrade = newSdkInt < oldSdkInt
-                val isIncompatible = type == "min" && newSdkInt > Build.VERSION.SDK_INT
+                // val isDowngrade = newSdkInt < oldSdkInt
+                // val isIncompatible = type == "min" && newSdkInt > Build.VERSION.SDK_INT
                 // val color = if (isDowngrade || isIncompatible) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
 
                 val oldText = if (isArchived) stringResource(R.string.old_version_archived) else oldSdk

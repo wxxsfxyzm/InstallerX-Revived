@@ -1,16 +1,20 @@
 package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer
 
 import android.os.Build
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -28,8 +32,11 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAuthorizerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIntNumberPickerWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixManagedPackagesWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixManagedUidsWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
@@ -46,7 +53,6 @@ fun MiuixInstallerGlobalSettingsPage(
     val scrollBehavior = MiuixScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
                 title = stringResource(R.string.installer_settings),
@@ -62,15 +68,17 @@ fun MiuixInstallerGlobalSettingsPage(
                 .fillMaxSize()
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .padding(paddingValues),
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
             overscrollEffect = null
         ) {
+            item { Spacer(modifier = Modifier.size(12.dp)) }
             item { SmallTitle(stringResource(R.string.installer_settings_global_installer)) }
             item {
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     MiuixDataAuthorizerWidget(
                         currentAuthorizer = state.authorizer,
@@ -105,155 +113,153 @@ fun MiuixInstallerGlobalSettingsPage(
                     )
                 }
             }
+
+            val isDialogMode = state.installMode == ConfigEntity.InstallMode.Dialog ||
+                    state.installMode == ConfigEntity.InstallMode.AutoDialog
+            val isNotificationMode = state.installMode == ConfigEntity.InstallMode.Notification ||
+                    state.installMode == ConfigEntity.InstallMode.AutoNotification
             item {
-                AnimatedVisibility(
-                    visible = state.installMode == ConfigEntity.InstallMode.Dialog || state.installMode == ConfigEntity.InstallMode.AutoDialog,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
-                ) {
-                    Column(modifier = Modifier.animateContentSize()) {
-                        SmallTitle(stringResource(id = R.string.installer_settings_dialog_mode_options))
-                        Card(
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp)
-                                .padding(bottom = 6.dp)
-                        ) {
-/*                            MiuixSwitchWidget(
-                                icon = AppIcons.SingleLineSettingIcon,
-                                title = stringResource(id = R.string.version_compare_in_single_line),
-                                description = stringResource(id = R.string.version_compare_in_single_line_desc),
-                                checked = state.versionCompareInSingleLine,
-                                onCheckedChange = {
-                                    viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it))
-                                }
-                            )
-                            MiuixSwitchWidget(
-                                icon = AppIcons.MultiLineSettingIcon,
-                                title = stringResource(id = R.string.sdk_compare_in_multi_line),
-                                description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
-                                checked = state.sdkCompareInMultiLine,
-                                onCheckedChange = {
-                                    viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it))
-                                }
-                            )*/
-                            AnimatedVisibility(
-                                visible = state.installMode == ConfigEntity.InstallMode.Dialog,
-                                enter = fadeIn(),
-                                exit = fadeOut()
-                            ) {
-                                MiuixSwitchWidget(
-                                    icon = AppIcons.MenuOpen,
-                                    title = stringResource(id = R.string.show_dialog_install_extended_menu),
-                                    description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
-                                    checked = viewModel.state.showDialogInstallExtendedMenu,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
-                                        )
-                                    }
-                                )
-                            }
-                            /*MiuixSwitchWidget(
-                                icon = AppIcons.Suggestion,
-                                title = stringResource(id = R.string.show_intelligent_suggestion),
-                                description = stringResource(id = R.string.show_intelligent_suggestion_desc),
-                                checked = viewModel.state.showSmartSuggestion,
-                                onCheckedChange = {
-                                    viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowSuggestion(it)
-                                    )
-                                }
-                            )*/
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                                MiuixSwitchWidget(
-                                    title = stringResource(R.string.theme_settings_use_live_activity),
-                                    description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                                    checked = state.showLiveActivity,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.ChangeShowLiveActivity(it)
-                                        )
-                                    }
-                                )
-                            MiuixSwitchWidget(
-                                icon = AppIcons.NotificationDisabled,
-                                title = stringResource(id = R.string.disable_notification),
-                                description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
-                                checked = viewModel.state.disableNotificationForDialogInstall,
-                                onCheckedChange = {
-                                    viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowDisableNotification(it)
-                                    )
-                                }
-                            )
-                        }
-                    }
+                AnimatedContent(
+                    targetState = if (isDialogMode) {
+                        R.string.installer_settings_dialog_mode_options
+                    } else {
+                        R.string.installer_settings_notification_mode_options
+                    },
+                    label = "OptionsTitleAnimation"
+                ) { targetTitleRes ->
+                    SmallTitle(stringResource(id = targetTitleRes))
                 }
             }
             item {
-                AnimatedVisibility(
-                    visible = state.installMode == ConfigEntity.InstallMode.Notification ||
-                            state.installMode == ConfigEntity.InstallMode.AutoNotification,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
                 ) {
-                    Column(modifier = Modifier.animateContentSize()) {
-                        SmallTitle(stringResource(id = R.string.installer_settings_notification_mode_options))
-                        Card(
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp)
-                                .padding(bottom = 6.dp)
-                        ) {
-                            MiuixSwitchWidget(
-                                icon = AppIcons.Dialog,
-                                title = stringResource(id = R.string.show_dialog_when_pressing_notification),
-                                description = stringResource(id = R.string.change_notification_touch_behavior),
-                                checked = viewModel.state.showDialogWhenPressingNotification,
-                                onCheckedChange = {
-                                    viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
-                                    )
-                                }
-                            )
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                                MiuixSwitchWidget(
-                                    title = stringResource(R.string.theme_settings_use_live_activity),
-                                    description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                                    checked = state.showLiveActivity,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.ChangeShowLiveActivity(it)
-                                        )
-                                    }
-                                )
-                            AnimatedVisibility(
-                                visible = viewModel.state.showDialogWhenPressingNotification,
-                                enter = fadeIn(),
-                                exit = fadeOut()
-                            ) {
-                                MiuixSwitchWidget(
-                                    icon = AppIcons.NotificationDisabled,
-                                    title = stringResource(id = R.string.disable_notification_on_dismiss),
-                                    description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
-                                    checked = viewModel.state.disableNotificationForDialogInstall,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.ChangeShowDisableNotification(it)
-                                        )
-                                    }
+                    AnimatedVisibility(
+                        visible = state.installMode == ConfigEntity.InstallMode.Dialog,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(id = R.string.show_dialog_install_extended_menu),
+                            description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
+                            checked = viewModel.state.showDialogInstallExtendedMenu,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
                                 )
                             }
-                        }
+                        )
+                    }
+
+                    AnimatedVisibility(visible = isDialogMode) {
+                        MiuixSwitchWidget(
+                            icon = AppIcons.Suggestion,
+                            title = stringResource(id = R.string.show_intelligent_suggestion),
+                            description = stringResource(id = R.string.show_intelligent_suggestion_desc),
+                            checked = viewModel.state.showSmartSuggestion,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowSuggestion(it)
+                                )
+                            }
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = isNotificationMode,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(id = R.string.show_dialog_when_pressing_notification),
+                            description = stringResource(id = R.string.change_notification_touch_behavior),
+                            checked = viewModel.state.showDialogWhenPressingNotification,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
+                                )
+                            }
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.theme_settings_use_live_activity),
+                            description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                            checked = state.showLiveActivity,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowLiveActivity(it)
+                                )
+                            }
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = isDialogMode,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(id = R.string.auto_silent_install),
+                            description = stringResource(id = R.string.auto_silent_install_desc),
+                            checked = state.autoSilentInstall,
+                            onCheckedChange = {
+                                viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it))
+                            }
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = isDialogMode,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(id = R.string.disable_notification),
+                            description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
+                            checked = viewModel.state.disableNotificationForDialogInstall,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowDisableNotification(it)
+                                )
+                            }
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = isNotificationMode && viewModel.state.showDialogWhenPressingNotification,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            icon = AppIcons.NotificationDisabled,
+                            title = stringResource(id = R.string.disable_notification_on_dismiss),
+                            description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
+                            checked = viewModel.state.disableNotificationForDialogInstall,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeShowDisableNotification(it)
+                                )
+                            }
+                        )
                     }
                 }
             }
+
             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
                 item { SmallTitle(stringResource(R.string.installer_oppo_related)) }
                 item {
                     Card(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
-                            .padding(bottom = 6.dp)
+                            .padding(bottom = 12.dp)
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(id = R.string.installer_show_oem_special),
@@ -264,71 +270,99 @@ fun MiuixInstallerGlobalSettingsPage(
                     }
                 }
             }
-            /*item { SmallTitle(stringResource(id = R.string.config_managed_installer_packages_title)) }
+
+            item { SmallTitle(stringResource(R.string.config_managed_installer_packages_title)) }
             item {
-                ManagedPackagesWidget(
-                    noContentTitle = stringResource(R.string.config_no_managed_installer_packages),
-                    packages = state.managedInstallerPackages,
-                    onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
-                    onRemovePackage = {
-                        viewModel.dispatch(
-                            PreferredViewAction.RemoveManagedInstallerPackage(it)
-                        )
-                    })
-            }
-            item { SmallTitle(stringResource(id = R.string.config_managed_blacklist_by_package_name_title)) }
-            item {
-                ManagedPackagesWidget(
-                    noContentTitle = stringResource(R.string.config_no_managed_blacklist),
-                    packages = state.managedBlacklistPackages,
-                    onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it)) },
-                    onRemovePackage = {
-                        viewModel.dispatch(
-                            PreferredViewAction.RemoveManagedBlacklistPackage(it)
-                        )
-                    })
-            }
-            item { SmallTitle(stringResource(id = R.string.config_managed_blacklist_by_shared_user_id_title)) }
-            item {
-                ManagedUidsWidget(
-                    noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
-                    uids = state.managedSharedUserIdBlacklist,
-                    onAddUid = {
-                        viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
-                    },
-                    onRemoveUid = {
-                        viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it))
-                    }
-                )
-                AnimatedVisibility(
-                    // Only show exempted packages if there are any blacklisted UIDs
-                    visible = state.managedSharedUserIdBlacklist.isNotEmpty(),
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
                 ) {
-                    ManagedPackagesWidget(
-                        noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
-                        noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
-                        packages = state.managedSharedUserIdExemptedPackages,
-                        infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
-                        isInfoVisible = state.managedSharedUserIdExemptedPackages.isNotEmpty(),
-                        onAddPackage = {
-                            viewModel.dispatch(
-                                PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
-                                    it
-                                )
-                            )
-                        },
+                    MiuixManagedPackagesWidget(
+                        noContentTitle = stringResource(R.string.config_no_preset_install_sources),
+                        packages = state.managedInstallerPackages,
+                        onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
                         onRemovePackage = {
                             viewModel.dispatch(
-                                PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
-                                    it
-                                )
+                                PreferredViewAction.RemoveManagedInstallerPackage(it)
                             )
                         }
                     )
                 }
-            }*/
+            }
+
+            item { SmallTitle(stringResource(R.string.config_managed_blacklist_by_package_name_title)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixManagedPackagesWidget(
+                        noContentTitle = stringResource(R.string.config_no_managed_blacklist),
+                        packages = state.managedBlacklistPackages,
+                        onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it)) },
+                        onRemovePackage = {
+                            viewModel.dispatch(
+                                PreferredViewAction.RemoveManagedBlacklistPackage(it)
+                            )
+                        }
+                    )
+                }
+            }
+
+            item { SmallTitle(stringResource(R.string.config_managed_blacklist_by_shared_user_id_title)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 16.dp)
+                ) {
+                    MiuixManagedUidsWidget(
+                        noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
+                        uids = state.managedSharedUserIdBlacklist,
+                        onAddUid = {
+                            viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
+                        },
+                        onRemoveUid = {
+                            viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it))
+                        }
+                    )
+                    AnimatedVisibility(
+                        visible = state.managedSharedUserIdBlacklist.isNotEmpty(),
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                        MiuixManagedPackagesWidget(
+                            noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                            noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
+                            packages = state.managedSharedUserIdExemptedPackages,
+                            infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                            isInfoVisible = state.managedSharedUserIdExemptedPackages.isNotEmpty(),
+                            onAddPackage = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
+                                        it
+                                    )
+                                )
+                            },
+                            onRemovePackage = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
+                                        it
+                                    )
+                                )
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 }

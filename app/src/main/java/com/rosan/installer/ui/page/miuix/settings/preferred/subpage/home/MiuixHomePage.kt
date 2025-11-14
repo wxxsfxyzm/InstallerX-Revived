@@ -4,8 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -13,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -33,6 +31,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -58,9 +57,6 @@ fun MiuixHomePage(
     )
 
     Scaffold(
-        modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = stringResource(id = R.string.about),
@@ -72,13 +68,13 @@ fun MiuixHomePage(
                 }
             )
         },
-    ) { innerPadding ->
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .height(getWindowSize().height.dp)
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .padding(top = innerPadding.calculateTopPadding()),
+                .padding(top = paddingValues.calculateTopPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -109,7 +105,7 @@ fun MiuixHomePage(
             Card(
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 6.dp)
+                    .padding(bottom = 12.dp)
             ) {
                 MiuixNavigationItemWidget(
                     title = stringResource(R.string.get_source_code),

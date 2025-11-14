@@ -64,7 +64,7 @@ fun InstallingContent(
                 .fillMaxWidth()
                 .padding(vertical = 24.dp),
         ) {
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 InfiniteProgressIndicator()
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(

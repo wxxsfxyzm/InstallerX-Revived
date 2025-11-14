@@ -36,6 +36,7 @@ import androidx.compose.material.icons.twotone.ColorLens
 import androidx.compose.material.icons.twotone.Compress
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
+import androidx.compose.material.icons.twotone.DoNotDisturbOnTotalSilence
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Expand
@@ -56,6 +57,7 @@ import androidx.compose.material.icons.twotone.Refresh
 import androidx.compose.material.icons.twotone.RocketLaunch
 import androidx.compose.material.icons.twotone.RoomPreferences
 import androidx.compose.material.icons.twotone.Save
+import androidx.compose.material.icons.twotone.Science
 import androidx.compose.material.icons.twotone.Search
 import androidx.compose.material.icons.twotone.Security
 import androidx.compose.material.icons.twotone.SecurityUpdateWarning
@@ -84,6 +86,7 @@ object AppIcons {
     val Terminal = Icons.TwoTone.Terminal
     val Launcher = Icons.TwoTone.RocketLaunch
     val History = Icons.TwoTone.History
+    val Lab = Icons.TwoTone.Science
     val Suggestion = Icons.TwoTone.AutoAwesome
     val Tip = Icons.Filled.Lightbulb
     val Update = Icons.TwoTone.SystemUpdate
@@ -130,6 +133,7 @@ object AppIcons {
     val ClearAll = Icons.TwoTone.ClearAll
     val LiveActivity = Icons.AutoMirrored.TwoTone.Send
     val IconPack = Icons.TwoTone.Widgets
+    val Silent = Icons.TwoTone.DoNotDisturbOnTotalSilence
     val OEMSpecial = Icons.TwoTone.FindInPage
     // --- 设置图标结束 ---
 

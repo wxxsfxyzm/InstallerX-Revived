@@ -7,6 +7,7 @@ sealed class SettingsScreen(val route: String) {
     data object About : SettingsScreen("about")
     data object Theme : SettingsScreen("theme")
     data object InstallerGlobal : SettingsScreen("installerGlobal")
+    data object Lab : SettingsScreen("lab")
 
     sealed class Builder(val route: String) {
         data object Main : SettingsScreen("main")

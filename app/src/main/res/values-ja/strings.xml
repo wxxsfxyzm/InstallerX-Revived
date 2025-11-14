@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agreement_title">プライバシーポリシー</string>
+    <string name="privacy_policy">プライバシーポリシー</string>
+    <string name="open_source_license">オープンソースライセンス</string>
+    <string name="back">戻る</string>
+    <string name="home">戻る</string>
+    <string name="config">プロフィール</string>
+    <string name="app">アプリ</string>
+    <string name="preferred">設定</string>
+    <string name="personalization">パーソナル化</string>
+    <string name="search">検索</string>
+    <string name="menu">メニュー</string>
+    <string name="about">このアプリについて</string>
+    <string name="other">その他</string>
+    <string name="about_detail">InstallerX Revived について</string>
+</resources>

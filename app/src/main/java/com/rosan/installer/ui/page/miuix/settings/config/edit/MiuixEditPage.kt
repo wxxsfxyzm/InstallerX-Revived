@@ -2,14 +2,13 @@ package com.rosan.installer.ui.page.miuix.settings.config.edit
 
 import android.os.Build
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -44,9 +43,8 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDataNameWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataPackageSourceWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySdkWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixNoneInstallerTipCard
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
-import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -63,10 +61,6 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-    ExperimentalMaterial3ExpressiveApi::class
-)
 @Composable
 fun MiuixEditPage(
     navController: NavController,
@@ -90,14 +84,12 @@ fun MiuixEditPage(
             showUnsavedDialogState.value = false
             navController.navigateUp()
         },
-        // Pass the list of active error messages from the ViewModel.
         errorMessages = viewModel.activeErrorMessages
     )
     // The condition for interception is now expanded to include errors.
     // If there are unsaved changes OR if there are validation errors, we should intercept.
     val shouldInterceptBackPress = viewModel.hasUnsavedChanges || viewModel.hasErrors
 
-    // Use this new combined condition for the BackHandler.
     BackHandler(enabled = shouldInterceptBackPress) {
         showUnsavedDialogState.value = true
     }
@@ -129,11 +121,7 @@ fun MiuixEditPage(
     }
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentWindowInsets = WindowInsets.none,
+        modifier = Modifier.imePadding(),
         topBar = {
             TopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -159,15 +147,17 @@ fun MiuixEditPage(
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-    ) {
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .padding(it),
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = PaddingValues(top = paddingValues.calculateTopPadding()),
             overscrollEffect = null,
         ) {
+            item { Spacer(modifier = Modifier.size(12.dp)) }
             item { MiuixDataNameWidget(viewModel = viewModel) }
             item { MiuixDataDescriptionWidget(viewModel = viewModel) }
             item { SmallTitle(stringResource(R.string.config)) }
@@ -175,20 +165,20 @@ fun MiuixEditPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     MiuixDataAuthorizerWidget(viewModel = viewModel)
                     MiuixDataCustomizeAuthorizerWidget(viewModel = viewModel)
                     MiuixDataInstallModeWidget(viewModel = viewModel)
                 }
             }
-            if (isNone) item { MiuixNoneInstallerTipCard() }
+            if (isNone) item { MiuixSettingsTipCard(stringResource(R.string.config_authorizer_none_tips)) }
             item { SmallTitle(stringResource(R.string.config_label_installer_settings)) }
             item {
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     MiuixDataUserWidget(viewModel = viewModel)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) MiuixDataPackageSourceWidget(viewModel = viewModel)
@@ -203,7 +193,7 @@ fun MiuixEditPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 6.dp)
+                        .padding(bottom = 16.dp)
                 ) {
                     MiuixDataForAllUserWidget(viewModel = viewModel)
                     MiuixDataAllowTestOnlyWidget(viewModel = viewModel)
