@@ -39,6 +39,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.lang.reflect.Field
 import java.lang.reflect.Method
+import java.nio.charset.StandardCharsets
 import android.os.Process as AndroidProcess
 
 @SuppressLint("LogNotTimber")
@@ -212,15 +213,12 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         var process: Process? = null
         try {
             process = Runtime.getRuntime().exec(command)
-            val stdoutReader = BufferedReader(InputStreamReader(process.inputStream))
-            val stderrReader = BufferedReader(InputStreamReader(process.errorStream))
 
             // Thread to read standard output
             val stdoutThread = Thread {
                 try {
-                    var line: String?
-                    while (stdoutReader.readLine().also { line = it } != null) {
-                        listener.onOutput(line)
+                    process.inputStream.bufferedReader(StandardCharsets.UTF_8).forEachLine {
+                        listener.onOutput(it)
                     }
                 } catch (e: Exception) {
                     if (e is IOException || e is RemoteException) {
@@ -232,13 +230,12 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             // Thread to read standard error
             val stderrThread = Thread {
                 try {
-                    var line: String?
-                    while (stderrReader.readLine().also { line = it } != null) {
-                        listener.onError(line)
+                    process.errorStream.bufferedReader(StandardCharsets.UTF_8).forEachLine {
+                        listener.onError(it)
                     }
                 } catch (e: Exception) {
                     if (e is IOException || e is RemoteException) {
-                        Log.e("PrivilegedService", "Error reading stderr or sending callback", e)
+                        Log.e("PrivilegedService", "Error reading stdout or sending callback", e)
                     }
                 }
             }
@@ -248,6 +245,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
 
             // Wait for the process to complete
             val exitCode = process.waitFor()
+            process.destroy()
 
             // Wait for reader threads to finish to ensure all output is captured
             stdoutThread.join()
