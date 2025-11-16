@@ -383,12 +383,22 @@ class InstallerViewModel(
                             analysisResults.forEach { result ->
                                 loadDisplayIcon(result.packageName)
                             }
+
+                            if (useDynColorFollowPkgIcon) {
+                                val colorInt = repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
+                                _seedColor.value = colorInt?.let { Color(it) }
+                            }
                         } else {
                             // If it's not a multi-app scenario (e.g., single APK with splits),
                             // it's safe to proceed directly to the prepare screen for the single app.
                             Timber.d("ViewModel: Single-app mode detected. Proceeding to InstallPrepare.")
                             newState = InstallerViewState.InstallPrepare
                             newPackageNameFromProgress = analysisResults.firstOrNull()?.packageName
+
+                            if (useDynColorFollowPkgIcon) {
+                                val colorInt = analysisResults.firstOrNull()?.seedColor
+                                _seedColor.value = colorInt?.let { Color(it) }
+                            }
                         }
                     }
 
@@ -504,14 +514,33 @@ class InstallerViewModel(
                     else -> newState = InstallerViewState.Ready
                 }
 
-                // Simplified package name handling. No more fetching is required.
-                if (newPackageNameFromProgress != null) {
-                    if (_currentPackageName.value != newPackageNameFromProgress) {
-                        _currentPackageName.value = newPackageNameFromProgress
-                        loadDisplayIcon(newPackageNameFromProgress)
+                if (newPackageNameFromProgress != _currentPackageName.value) {
+                    if (newPackageNameFromProgress != null) {
+                        if (_currentPackageName.value != newPackageNameFromProgress) {
+                            _currentPackageName.value = newPackageNameFromProgress
+                            loadDisplayIcon(newPackageNameFromProgress)
+                        }
+
+                        // --- Update color when the focused package name changes ---
+                        // This handles the transition from choice screen to prepare screen.
+                        if (useDynColorFollowPkgIcon) {
+                            val colorInt = repo.analysisResults.find { it.packageName == newPackageNameFromProgress }?.seedColor
+                            _seedColor.value = colorInt?.let { Color(it) }
+                        }
+                    } else {
+                        if (_currentPackageName.value != null) _currentPackageName.value = null
+                        if (useDynColorFollowPkgIcon) {
+                            val colorInt = repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
+                            _seedColor.value = colorInt?.let { Color(it) }
+                        }
                     }
-                } else {
-                    if (_currentPackageName.value != null) _currentPackageName.value = null
+                } else if (newPackageNameFromProgress == null && _currentPackageName.value != null) {
+                    _currentPackageName.value = null
+                    // Set the color back to the first available one for choice screen consistency
+                    if (useDynColorFollowPkgIcon) {
+                        val colorInt = repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
+                        _seedColor.value = colorInt?.let { Color(it) }
+                    }
                 }
 
                 if (newState !is InstallerViewState.InstallPrepare && autoInstallJob?.isActive == true) {
@@ -701,32 +730,6 @@ class InstallerViewModel(
                     currentMap + (packageName to finalIcon)
                 } else currentMap
             }
-
-            // Launch a background task to extract the color from the icon.
-            // Use Dispatchers.Default as quantization is CPU-intensive.
-            if (useDynColorFollowPkgIcon)
-                viewModelScope.launch(Dispatchers.Default) {
-                    // Use a null-safe call to handle the Drawable? type
-                    finalIcon?.let { nonNullIcon ->
-                        try {
-                            // Convert the Drawable to an Android Bitmap
-                            // (Uses the existing helper function in the ViewModel)
-                            val bitmap = drawableToBitmap(nonNullIcon)
-
-                            // Call our new suspend tool function to extract the color
-                            // This function already runs on Dispatchers.Default
-                            val extractedColorInt = extractSeedColorFromBitmap(bitmap)
-
-                            // Update the seed color state only if a valid color was found.
-                            // StateFlow updates are thread-safe.
-                            _seedColor.value = Color(extractedColorInt)
-
-                        } catch (e: Exception) {
-                            Timber.e(e, "Failed to extract color from icon for $packageName")
-                            _seedColor.value = null // Reset on failure
-                        }
-                    }
-                }
         }
     }
 
@@ -829,6 +832,10 @@ class InstallerViewModel(
         if (uniquePackages.size == 1) {
             val targetPackageName = selectedEntities.first().app.packageName
             _currentPackageName.value = targetPackageName
+            if (useDynColorFollowPkgIcon) {
+                val colorInt = repo.analysisResults.find { it.packageName == targetPackageName }?.seedColor
+                _seedColor.value = colorInt?.let { Color(it) }
+            }
             state = InstallerViewState.InstallPrepare
         } else {
             // Handle case where multiple packages are selected, maybe go back to choice.

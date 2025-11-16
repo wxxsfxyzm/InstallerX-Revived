@@ -13,6 +13,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
+import androidx.compose.material3.ColorScheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -28,6 +30,8 @@ import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.theme.m3color.PaletteStyle
+import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
 import com.rosan.installer.ui.theme.primaryDark
 import com.rosan.installer.ui.theme.primaryLight
 import com.rosan.installer.util.getErrorMessage
@@ -194,11 +198,24 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .setOngoing(true)
             .setRequestPromotedOngoing(true)
 
+        // Find the first available seed color from the analysis results.
+        // This safely handles single and multi-app scenarios.
+        val seedColorInt = installer.analysisResults.firstNotNullOfOrNull { it.seedColor }
+
+        // Generate a dynamic color scheme if a seed color was found
+        val dynamicColorScheme = seedColorInt?.let { color ->
+            dynamicColorScheme(
+                keyColor = Color(color),
+                isDark = isDarkTheme,
+                style = PaletteStyle.TonalSpot
+            )
+        }
+
         // --- New Weighted & Dynamic Progress Logic ---
         // Find the current stage's information.
         val currentStageIndex = installStages.indexOfFirst { it.progressClass.isInstance(progress) }
         // Create the raw, uncolored segments with correct lengths.
-        val segments = createInstallSegments(installStages)
+        val segments = createInstallSegments(installStages, dynamicColorScheme)
         // Create the ProgressStyle.
         val progressStyle = NotificationCompat.ProgressStyle()
             .setProgressSegments(segments)
@@ -320,11 +337,30 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
      */
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     private fun createInstallSegments(
-        stages: List<InstallStageInfo>
+        stages: List<InstallStageInfo>,
+        colorScheme: ColorScheme?
     ): List<NotificationCompat.ProgressStyle.Segment> {
         return stages.map { stageInfo ->
-            // The length of each segment is now its defined weight.
-            NotificationCompat.ProgressStyle.Segment(stageInfo.weight.toInt())
+            val segment = NotificationCompat.ProgressStyle.Segment(stageInfo.weight.toInt())
+
+            // If a color scheme is available, apply colors based on the stage type.
+            colorScheme?.let {
+                val color = when (stageInfo.progressClass) {
+                    // Main "work" stages get the primary color
+                    ProgressEntity.InstallPreparing::class,
+                    ProgressEntity.Installing::class -> it.primary.toArgb()
+
+                    // Transitional/quick stages get the tertiary color
+                    ProgressEntity.InstallResolving::class,
+                    ProgressEntity.InstallAnalysing::class -> it.tertiary.toArgb()
+
+                    // Fallback for any other stages, though unlikely
+                    else -> it.primary.toArgb()
+                }
+                segment.setColor(color)
+            }
+
+            segment // Return the configured segment
         }
     }
 
