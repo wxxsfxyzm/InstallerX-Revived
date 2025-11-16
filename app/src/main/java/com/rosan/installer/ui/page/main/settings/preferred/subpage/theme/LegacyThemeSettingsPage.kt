@@ -29,16 +29,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -50,6 +53,7 @@ import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SelectableSettingItem
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.m3color.PresetColors
+import com.rosan.installer.ui.theme.m3color.RawColor
 import com.rosan.installer.ui.theme.m3color.ThemeMode
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -172,19 +176,18 @@ fun LegacyThemeSettingsPage(
                     onClick = { showPaletteDialog = true }
                 ) {}
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                item {
-                    SwitchWidget(
-                        icon = Icons.TwoTone.InvertColors,
-                        title = stringResource(R.string.theme_settings_dynamic_color),
-                        description = stringResource(R.string.theme_settings_dynamic_color_desc),
-                        isM3E = false,
-                        checked = state.useDynamicColor,
-                        onCheckedChange = {
-                            viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
-                        }
-                    )
-                }
+            item {
+                SwitchWidget(
+                    icon = Icons.TwoTone.InvertColors,
+                    title = stringResource(R.string.theme_settings_dynamic_color),
+                    description = stringResource(R.string.theme_settings_dynamic_color_desc),
+                    isM3E = false,
+                    checked = state.useDynamicColor,
+                    onCheckedChange = {
+                        viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
+                    }
+                )
+            }
             item {
                 SwitchWidget(
                     icon = Icons.TwoTone.Colorize,
@@ -218,7 +221,15 @@ fun LegacyThemeSettingsPage(
 
                             val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
 
-                            val chunkedColors = PresetColors.chunked(columns)
+                            val chunkedColors = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                                var wallpaperColors by remember { mutableStateOf<List<Int>?>(null) }
+
+                                LaunchedEffect(Unit) {
+                                    wallpaperColors = MonetCompat.getInstance().getAvailableWallpaperColors()
+                                }
+
+                                wallpaperColors?.chunked(columns) ?: PresetColors.chunked(columns)
+                            } else PresetColors.chunked(columns)
 
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
@@ -234,12 +245,22 @@ fun LegacyThemeSettingsPage(
                                                 modifier = Modifier.weight(1f),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                ColorSwatchPreview(
-                                                    rawColor = rawColor,
-                                                    currentStyle = state.paletteStyle,
-                                                    isSelected = !state.useDynamicColor && state.seedColor == rawColor.color
-                                                ) {
-                                                    viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
+                                                if (rawColor is RawColor) {
+                                                    ColorSwatchPreview(
+                                                        rawColor,
+                                                        currentStyle = state.paletteStyle,
+                                                        isSelected = !state.useDynamicColor && state.seedColor == rawColor.color
+                                                    ) {
+                                                        viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
+                                                    }
+                                                } else if (rawColor is Int) {
+                                                    ColorSwatchPreview(
+                                                        RawColor(rawColor.toHexString(), Color(rawColor)),
+                                                        currentStyle = state.paletteStyle,
+                                                        isSelected = state.seedColor == Color(rawColor)
+                                                    ) {
+                                                        viewModel.dispatch(PreferredViewAction.SetSeedColor(Color(rawColor)))
+                                                    }
                                                 }
                                             }
                                         }

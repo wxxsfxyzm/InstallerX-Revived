@@ -233,11 +233,18 @@ dependencies {
 
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)
+
     // log
     implementation(libs.timber)
+
     // miuix
     implementation(libs.miuix)
     implementation(libs.capsule)
+
     // m3color
     implementation(libs.m3color)
+
+    // monetcompat
+    implementation(libs.monetcompat)
+    implementation(libs.androidx.palette)
 }
