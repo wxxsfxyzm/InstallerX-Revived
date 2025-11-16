@@ -330,12 +330,13 @@ fun NewThemeSettingsPage(
                                                                     viewModel.dispatch(PreferredViewAction.SetSeedColor(namedColor.color))
                                                                 }
                                                             } else if (namedColor is Int) {
+                                                                val rawColor = RawColor(namedColor.toHexString(), Color(namedColor))
                                                                 ColorSwatchPreview(
-                                                                    rawColor = RawColor(namedColor.toHexString(), Color(namedColor)),
+                                                                    rawColor,
                                                                     currentStyle = state.paletteStyle,
-                                                                    isSelected = !state.useDynamicColor && state.seedColor == Color(namedColor)
+                                                                    isSelected = state.seedColor == rawColor.color
                                                                 ) {
-                                                                    viewModel.dispatch(PreferredViewAction.SetSeedColor(Color(namedColor)))
+                                                                    viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
                                                                 }
                                                             }
                                                         }
@@ -566,7 +567,7 @@ internal fun ColorSwatchPreview(
         }
 
         val displayName = rawColor.getDisplayName(LocalContext.current)
-        if (displayName == rawColor.key) {
+        if (displayName != rawColor.key) {
             Spacer(Modifier.height(12.dp))
             Text(
                 text = displayName,

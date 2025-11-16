@@ -254,12 +254,13 @@ fun LegacyThemeSettingsPage(
                                                         viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
                                                     }
                                                 } else if (rawColor is Int) {
+                                                    val rawColor = RawColor(rawColor.toHexString(), Color(rawColor))
                                                     ColorSwatchPreview(
-                                                        RawColor(rawColor.toHexString(), Color(rawColor)),
+                                                        rawColor,
                                                         currentStyle = state.paletteStyle,
-                                                        isSelected = state.seedColor == Color(rawColor)
+                                                        isSelected = state.seedColor == rawColor.color
                                                     ) {
-                                                        viewModel.dispatch(PreferredViewAction.SetSeedColor(Color(rawColor)))
+                                                        viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
                                                     }
                                                 }
                                             }
