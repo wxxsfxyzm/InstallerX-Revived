@@ -102,7 +102,7 @@
     <string name="config_label_main_settings">Головні налаштування</string>
     <string name="config_label_installer_settings">Налаштування встановлювача</string>
     <string name="config_label_install_options">Параметри встановлення</string>
-    <string name="config_dialog_title_invalid">Невірне введення</string>
+    <string name="config_dialog_title_invalid">Неправильне введення</string>
     <string name="config_dialog_title_unsaved_changes">Незбережені зміни</string>
     <string name="config_dialog_message_unsaved_changes">Вийти без збереження?</string>
     <string name="config_follow_settings">Слідкувати за профілем</string>
@@ -237,4 +237,6 @@
     <string name="permission_answer_phone_calls">Відповідати на дзвінки</string>
     <string name="permission_schedule_exact_alarm">Запланувати точний будильник</string>
     <string name="permission_request_ignore_battery_optimizations">Запит на ігнорування оптимізації батареї</string>
+    <string name="auto_lock_default_installer">Автоматично встановлювати як типовий встановлювач</string>
+    <string name="auto_lock_default_installer_desc">Автоматично встановлювати цей застосунок як встановлювач під час початку нового встановлення</string>
 </resources>
