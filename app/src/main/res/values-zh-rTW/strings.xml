@@ -180,8 +180,8 @@
     <string name="config_managed_blacklist_by_package_name_title">根據套件名稱禁止安裝應用程式</string>
     <string name="config_managed_blacklist_by_shared_user_id_title">根據 SharedUID 禁止安裝應用程式</string>
     <string name="config_no_preset_install_sources">沒有預設的安裝來源</string>
-    <string name="config_no_managed_blacklist">在這裡填寫需要禁止安裝的應用程式</string>
-    <string name="config_no_managed_shared_user_id_blacklist">沒有根據 SharedUID 禁止安裝的應用程式</string>
+    <string name="config_no_managed_blacklist">沒有需要禁止安裝的應用程式包名</string>
+    <string name="config_no_managed_shared_user_id_blacklist">沒有需要禁止安裝的應用程式 SharedUID</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">排除僅針對 SharedUID，如果按套件名稱禁止則依然不能安裝。</string>
     <string name="config_add_new_shared_uid">新增共享使用者 ID</string>
     <string name="config_shared_uid_name">SharedUID 名稱</string>
@@ -560,4 +560,10 @@
     <string name="lab_module_flashing">啟用模組刷寫</string>
     <string name="lab_module_flashing_desc">在刷寫任何模組前務必再次確認！</string>
     <string name="lab_module_select_root_impl">選擇 Root 實現方式</string>
+    <string name="lab">實驗室</string>
+    <string name="lab_desc">訪問實驗性或開發中的新功能</string>
+    <string name="installer_install_module">安裝模組</string>
+    <string name="installer_installing_module">安裝模組中</string>
+    <string name="auto_silent_install">自動靜默安裝</string>
+    <string name="auto_silent_install_desc">對話安裝框開始時自動靜默安裝</string>
 </resources>

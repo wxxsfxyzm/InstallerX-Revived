@@ -134,7 +134,4 @@ object NoneInstallerRepoImpl : InstallerRepo, KoinComponent {
         extra: InstallExtraInfoEntity
     ) {
     }
-
-    private fun List<InstallEntity>.sourcePath(): Array<String> =
-        this.mapNotNull { it.data.sourcePath() }.distinct().toTypedArray()
 }

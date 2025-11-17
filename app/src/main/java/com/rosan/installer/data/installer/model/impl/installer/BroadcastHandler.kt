@@ -8,8 +8,14 @@ import androidx.core.content.ContextCompat
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.installer.util.pendingActivity
 import com.rosan.installer.data.installer.util.pendingBroadcast
+import com.rosan.installer.data.recycle.util.openAppPrivileged
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -39,6 +45,12 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 .putExtra(KEY_ID, installer.id)
                 .putExtra(KEY_NAME, name.value)
                 .pendingBroadcast(context, getRequestCode(installer, name))
+
+        fun privilegedLaunchAndFinishIntent(context: Context, installer: InstallerRepo) =
+            Intent(ACTION).setPackage(context.packageName)
+                .putExtra(KEY_ID, installer.id)
+                .putExtra(KEY_NAME, Name.PrivilegedLaunchAndFinish.value)
+                .pendingBroadcast(context, getRequestCode(installer, Name.PrivilegedLaunchAndFinish))
     }
 
     private val context by inject<Context>()
@@ -63,11 +75,14 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
         context.unregisterReceiver(receiver)
     }
 
-    private class Receiver(private val installer: InstallerRepo) : BroadcastReceiver(),
-        KoinComponent {
+    private class Receiver(private val installer: InstallerRepo) :
+        BroadcastReceiver(), KoinComponent {
+        private val appDataStore: AppDataStore by inject()
+        private val receiverScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         override fun onReceive(context: Context?, intent: Intent?) {
             intent ?: return
             if (intent.action != ACTION) return
+            context ?: return // Ensure context is not null
 
             val receivedId = intent.getStringExtra(KEY_ID)
             Timber
@@ -81,18 +96,56 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
             val keyName = intent.getStringExtra(KEY_NAME) ?: return
             val name = Name.revert(keyName)
             Timber.d("[id=${installer.id}] Receiver: Received broadcast for name: $name. Dispatching action.")
-            doWork(name)
+            val pendingResult = goAsync()
+            receiverScope.launch {
+                try {
+                    doWork(context, name)
+                } finally {
+                    pendingResult.finish()
+                }
+            }
         }
 
-        private fun doWork(name: Name) {
+        private suspend fun doWork(context: Context, name: Name) {
             when (name) {
                 Name.Analyse -> installer.analyse()
                 Name.Install -> installer.install()
                 Name.Finish -> installer.close()
+                Name.PrivilegedLaunchAndFinish -> handlePrivilegedLaunchAndFinish(context)
                 else -> {
                     Timber.d("[id=${installer.id}] Receiver: No action for broadcast name: $name")
                 }
             }
+        }
+
+        private suspend fun handlePrivilegedLaunchAndFinish(context: Context) {
+            val packageName = installer.analysisResults
+                .flatMap { it.appEntities }
+                .firstOrNull { it.selected }?.app?.packageName
+
+            if (packageName == null) {
+                Timber.e("[id=${installer.id}] No selected package found for privileged launch.")
+                // If we can't open, at least finish the session to not leave it hanging
+                installer.close()
+                return
+            }
+
+            Timber.d("[id=${installer.id}] Starting privileged launch for $packageName")
+            
+            val autoCloseSeconds = appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first()
+
+            openAppPrivileged(
+                context = context,
+                config = installer.config,
+                packageName = packageName,
+                dhizukuAutoCloseSeconds = autoCloseSeconds,
+                onSuccess = {
+                    Timber.d("[id=${installer.id}] Privileged launch successful, closing session.")
+                    receiverScope.launch {
+                        installer.close()
+                    }
+                }
+            )
         }
     }
 
@@ -101,7 +154,8 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Analyse("analyse"),
         Install("install"),
         Finish("finish"),
-        Launch("launch");
+        Launch("launch"),
+        PrivilegedLaunchAndFinish("privileged_launch_and_finish");
 
         companion object {
             fun revert(value: String): Name = entries.first { it.value == value }

@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import androidx.core.app.NotificationCompat
+import android.app.PendingIntent
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -42,6 +43,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
+import kotlin.reflect.KClass
 
 class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
@@ -646,7 +648,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     
     // A data class to hold information about each installation stage.
     private data class InstallStageInfo(
-        val progressClass: kotlin.reflect.KClass<out ProgressEntity>,
+        val progressClass: KClass<out ProgressEntity>,
         val weight: Float // Represents the relative length of this stage's segment.
     )
 
@@ -1126,7 +1128,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private fun onInstallFailed(
         builder: NotificationCompat.Builder
-    ): NotificationCompat.Builder { // Changed return type
+    ): NotificationCompat.Builder {
         val info = installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }
@@ -1146,23 +1148,36 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .addAction(0, getString(R.string.cancel), finishIntent)
     }
 
-    private fun onInstallSuccess(builder: NotificationCompat.Builder): NotificationCompat.Builder { // Changed return type
+    private fun onInstallSuccess(builder: NotificationCompat.Builder): NotificationCompat.Builder {
         val entities = installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }
             .map { it.app }
         val info = entities.getInfo(context)
-        val launchIntent =
-            context.packageManager.getLaunchIntentForPackage(entities.first().packageName)
-        val launchPendingIntent = launchIntent?.let {
-            BroadcastHandler.launchIntent(context, installer, it)
+        var openPendingIntent: PendingIntent? = null
+
+        val launchIntent = entities.firstOrNull()?.packageName?.let {
+            context.packageManager.getLaunchIntentForPackage(it)
+        }
+        if (launchIntent != null) {
+            val supportsPrivileged = installer.config.authorizer in listOf(
+                ConfigEntity.Authorizer.Root,
+                ConfigEntity.Authorizer.Shizuku,
+                ConfigEntity.Authorizer.Customize
+            )
+
+            openPendingIntent = if (supportsPrivileged) {
+                BroadcastHandler.privilegedLaunchAndFinishIntent(context, installer)
+            } else {
+                BroadcastHandler.launchIntent(context, installer, launchIntent)
+            }
         }
 
         var newBuilder = builder.setContentTitle(info.title)
             .setContentText(getString(R.string.installer_install_success))
-        if (launchIntent != null) newBuilder =
-            newBuilder.addAction(0, getString(R.string.open), launchPendingIntent)
-        return newBuilder // Return builder directly
-            .addAction(0, getString(R.string.finish), finishIntent)
+        if (openPendingIntent != null)
+            newBuilder = newBuilder.addAction(0, getString(R.string.open), openPendingIntent)
+
+        return newBuilder.addAction(0, getString(R.string.finish), finishIntent)
     }
 }
