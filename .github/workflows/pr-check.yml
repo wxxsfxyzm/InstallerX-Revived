@@ -1,0 +1,37 @@
+name: PR Build and Test Check
+
+# This workflow is triggered when a pull request is created or updated
+# that targets the "main" "dev" branch.
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build_for_pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code from the PR branch
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up the JDK environment
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+          cache: gradle
+
+      # Step 3: Grant execute permission for gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # Step 4: Run the build for a single variant to check for compilation errors
+      # We choose 'onlinePreviewDebug' as a representative build variant.
+      # This task will compile the code and run associated unit tests without
+      # building all possible APKs, which is faster.
+      - name: Build Single Variant (onlinePreviewDebug)
+        run: ./gradlew assembleOnlinePreviewDebug
