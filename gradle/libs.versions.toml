@@ -15,6 +15,7 @@ ksp = "2.2.21-2.0.4"
 composeBom = "2025.11.00"
 compose = "1.9.4"
 m3color = "2025.4"
+haze = "1.7.0"
 splashScreen = "1.2.0"
 material3 = "1.5.0-alpha08"
 room = "2.8.3"
@@ -50,6 +51,8 @@ androix-splashscreen = { group = "androidx.core", name = "core-splashscreen", ve
 
 capsule = { module = "io.github.kyant0:capsule", version.ref = "capsule" }
 m3color = { module = "com.github.Kyant0:m3color", version.ref = "m3color" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "compose" }

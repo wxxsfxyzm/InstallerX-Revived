@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -54,6 +55,12 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.Mi
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.lab.MiuixLabPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -68,6 +75,7 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
+@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
     val context = LocalContext.current
@@ -123,6 +131,12 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             val coroutineScope = rememberCoroutineScope()
             val snackBarHostState = remember { SnackbarHostState() }
             val scrollBehaviors = List(navigationItems.size) { MiuixScrollBehavior() }
+            val hazeState = remember { HazeState() }
+            val hazeStyle = HazeStyle(
+                backgroundColor = MiuixTheme.colorScheme.background,
+                tint = HazeTint(MiuixTheme.colorScheme.background.copy(0.8f))
+            )
+
             // LaunchedEffect to handle snackbar events from AllViewModel
             LaunchedEffect(Unit) {
                 allViewModel.eventFlow.collectLatest { event ->
@@ -171,6 +185,11 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
                     TopAppBar(
+                        modifier = Modifier.hazeEffect(hazeState) {
+                            style = hazeStyle
+                            blurRadius = 30.dp
+                            noiseFactor = 0f
+                        },
                         title = navigationItems[pagerState.currentPage].label,
                         // Use the shared scroll behavior
                         scrollBehavior = scrollBehaviors[pagerState.currentPage]
@@ -178,6 +197,12 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                 },
                 bottomBar = {
                     NavigationBar(
+                        modifier = Modifier.hazeEffect(hazeState) {
+                            style = hazeStyle
+                            blurRadius = 30.dp
+                            noiseFactor = 0f
+                        },
+                        color = Color.Transparent,
                         items = navigationItems,
                         selected = pagerState.currentPage,
                         showDivider = true,
@@ -213,6 +238,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                 snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
             ) { paddingValues ->
                 InstallerPagerContent(
+                    hazeState = hazeState,
                     pagerState = pagerState,
                     navController = navController,
                     allViewModel = allViewModel,
@@ -283,6 +309,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
 
 @Composable
 private fun InstallerPagerContent(
+    hazeState: HazeState,
     pagerState: PagerState,
     navController: NavController,
     allViewModel: AllViewModel,
@@ -293,7 +320,9 @@ private fun InstallerPagerContent(
     HorizontalPager(
         state = pagerState,
         userScrollEnabled = false,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .hazeSource(hazeState)
     ) { page ->
         when (page) {
             0 -> MiuixAllPage(

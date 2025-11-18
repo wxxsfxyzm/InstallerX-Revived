@@ -256,6 +256,8 @@ dependencies {
     implementation(libs.timber)
     // miuix
     implementation(libs.miuix)
+    implementation(libs.haze)
+    implementation(libs.haze.materials)
     implementation(libs.capsule)
     // m3color
     implementation(libs.m3color)
