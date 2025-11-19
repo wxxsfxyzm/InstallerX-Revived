@@ -67,12 +67,9 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @OptIn(ExperimentalHazeMaterialsApi::class)
@@ -130,7 +127,6 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             val pagerState = rememberPagerState(pageCount = { navigationItems.size })
             val coroutineScope = rememberCoroutineScope()
             val snackBarHostState = remember { SnackbarHostState() }
-            val scrollBehaviors = List(navigationItems.size) { MiuixScrollBehavior() }
             val hazeState = remember { HazeState() }
             val hazeStyle = HazeStyle(
                 backgroundColor = MiuixTheme.colorScheme.background,
@@ -183,18 +179,6 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
 
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
-                topBar = {
-                    TopAppBar(
-                        modifier = Modifier.hazeEffect(hazeState) {
-                            style = hazeStyle
-                            blurRadius = 30.dp
-                            noiseFactor = 0f
-                        },
-                        title = navigationItems[pagerState.currentPage].label,
-                        // Use the shared scroll behavior
-                        scrollBehavior = scrollBehaviors[pagerState.currentPage]
-                    )
-                },
                 bottomBar = {
                     NavigationBar(
                         modifier = Modifier.hazeEffect(hazeState) {
@@ -213,8 +197,8 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                         }
                     )
                 },
+                snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
                 floatingActionButton = {
-                    // Conditionally show FAB only on the first page
                     AnimatedVisibility(
                         visible = pagerState.currentPage == 0,
                         enter = scaleIn(),
@@ -234,8 +218,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                             )
                         }
                     }
-                },
-                snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
+                }
             ) { paddingValues ->
                 InstallerPagerContent(
                     hazeState = hazeState,
@@ -243,10 +226,14 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                     navController = navController,
                     allViewModel = allViewModel,
                     preferredViewModel = preferredViewModel,
-                    scrollBehaviors = scrollBehaviors,
-                    paddingValues = paddingValues
+                    navigationItems = navigationItems,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .hazeSource(hazeState),
+                    outerPadding = paddingValues
                 )
             }
+
             errorDialogInfo?.let { dialogInfo ->
                 ErrorDisplaySheet(
                     showState = showErrorSheetState,
@@ -314,29 +301,30 @@ private fun InstallerPagerContent(
     navController: NavController,
     allViewModel: AllViewModel,
     preferredViewModel: PreferredViewModel,
-    scrollBehaviors: List<ScrollBehavior>,
-    paddingValues: PaddingValues
+    navigationItems: List<NavigationItem>,
+    modifier: Modifier = Modifier,
+    outerPadding: PaddingValues
 ) {
     HorizontalPager(
         state = pagerState,
-        userScrollEnabled = false,
-        modifier = Modifier
-            .fillMaxSize()
-            .hazeSource(hazeState)
+        userScrollEnabled = true,
+        modifier = modifier
     ) { page ->
         when (page) {
             0 -> MiuixAllPage(
                 navController = navController,
                 viewModel = allViewModel,
-                scrollBehavior = scrollBehaviors[page],
-                paddingValues = paddingValues
+                hazeState = hazeState,
+                title = navigationItems[page].label,
+                outerPadding = outerPadding
             )
 
             1 -> MiuixPreferredPage(
                 navController = navController,
                 viewModel = preferredViewModel,
-                scrollBehavior = scrollBehaviors[page],
-                paddingValues = paddingValues
+                hazeState = hazeState,
+                title = navigationItems[page].label,
+                outerPadding = outerPadding
             )
         }
     }
