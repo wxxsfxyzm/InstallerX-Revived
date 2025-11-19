@@ -220,7 +220,7 @@ fun MiuixAutoClearNotificationTimeWidget(
     onValueChange: (Int) -> Unit
 ) {
     val context = LocalContext.current
-    val options = remember { listOf(0, 3, 5, 10, 15, 20, 30) } // 0 means "Never"
+    val options = remember { listOf(0, 5, 10, 15, 20, 30) } // 0 means "Never"
 
     val entries = remember(options) {
         options.map { time ->
