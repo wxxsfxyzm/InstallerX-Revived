@@ -476,12 +476,23 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) packageInfo.longVersionCode else packageInfo.versionCode.toLong()
             val appIcon = pm.getApplicationIcon(packageName)
 
+            val useDynamicColor = appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+            val seedColor = if (useDynamicColor) {
+                Timber.d("[id=${installer.id}] resolveUninstall: Dynamic color enabled, extracting color.")
+                // We can reuse the same extractor. The parameters for uninstall are simpler.
+                iconColorExtractor.extractColorFromDrawable(appIcon)
+            } else {
+                Timber.d("[id=${installer.id}] resolveUninstall: Dynamic color disabled.")
+                null
+            }
+
             val uninstallDetails = UninstallInfo(
                 packageName = packageName,
                 appLabel = appLabel,
                 versionName = versionName,
                 versionCode = versionCode,
-                appIcon = appIcon
+                appIcon = appIcon,
+                seedColor = seedColor
             )
 
             // Update the repo with the fetched information

@@ -33,9 +33,10 @@ fun PrepareSettingsContent(
     installer: InstallerRepo,
     viewModel: InstallerViewModel
 ) {
+    val settings = viewModel.viewSettings
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
-    var showOPPOSpecial by remember { mutableStateOf(viewModel.showOPPOSpecial) }
+    var showOPPOSpecial by remember { mutableStateOf(settings.showOPPOSpecial) }
 
     LaunchedEffect(autoDelete, displaySdk) {
         val currentConfig = installer.config
@@ -84,7 +85,7 @@ fun PrepareSettingsContent(
                     onCheckedChange = {
                         val newValue = !showOPPOSpecial
                         showOPPOSpecial = newValue
-                        viewModel.showOPPOSpecial = newValue
+                        settings.copy(showOPPOSpecial = newValue)
                     }
                 )
         }

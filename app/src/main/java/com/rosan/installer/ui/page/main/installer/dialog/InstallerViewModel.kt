@@ -1,23 +1,16 @@
 package com.rosan.installer.ui.page.main.installer.dialog
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.createBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kyant.m3color.quantize.QuantizerCelebi
-import com.kyant.m3color.score.Score
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
@@ -75,29 +68,15 @@ class InstallerViewModel(
     // Hold the original, complete analysis results for multi-install scenarios.
     private var originalAnalysisResults: List<PackageAnalysisResult> = emptyList()
 
+    var viewSettings by mutableStateOf(InstallerViewSettings())
+        private set
+
     var showMiuixSheetRightActionSettings by mutableStateOf(false)
         private set
     var showMiuixPermissionList by mutableStateOf(false)
         private set
     var navigatedFromPrepareToChoice by mutableStateOf(false)
         private set
-    var autoCloseCountDown by mutableIntStateOf(3)
-        private set
-    var showExtendedMenu by mutableStateOf(false)
-        private set
-    var showSmartSuggestion by mutableStateOf(true)
-        private set
-    var disableNotificationOnDismiss by mutableStateOf(false)
-        private set
-    var versionCompareInSingleLine by mutableStateOf(false)
-        private set
-    var sdkCompareInMultiLine by mutableStateOf(false)
-        private set
-    var useDynColorFollowPkgIcon by mutableStateOf(false)
-        private set
-    var showOPPOSpecial by mutableStateOf(false)
-    private var autoSilentInstall by mutableStateOf(false)
-    var enableModuleInstall by mutableStateOf(false)
 
     // Text to show in the progress bar
     private val _installProgressText = MutableStateFlow<UiText?>(null)
@@ -127,7 +106,7 @@ class InstallerViewModel(
             is InstallerViewState.InstallingModule -> (state as InstallerViewState.InstallingModule).isFinished
 
             is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
-            is InstallerViewState.Installing -> !disableNotificationOnDismiss
+            is InstallerViewState.Installing -> !viewSettings.disableNotificationOnDismiss
             else -> true
         }
 
@@ -136,9 +115,6 @@ class InstallerViewModel(
 
     private val _displayIcons = MutableStateFlow<Map<String, Drawable?>>(emptyMap())
     val displayIcons: StateFlow<Map<String, Drawable?>> = _displayIcons.asStateFlow()
-
-    var preferSystemIconForUpdates by mutableStateOf(false)
-        private set
 
     // --- StateFlow to hold the seed color extracted from the icon ---
     private val _seedColor = MutableStateFlow<Color?>(null)
@@ -195,29 +171,8 @@ class InstallerViewModel(
 
     init {
         Timber.d("DialogViewModel init")
+        loadInitialSettings()
         viewModelScope.launch {
-            preferSystemIconForUpdates =
-                appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first()
-            autoCloseCountDown =
-                appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first()
-            showExtendedMenu =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false).first()
-            showSmartSuggestion =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true).first()
-            disableNotificationOnDismiss =
-                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first()
-            versionCompareInSingleLine =
-                appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false).first()
-            sdkCompareInMultiLine =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false).first()
-            showOPPOSpecial =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false).first()
-            autoSilentInstall =
-                appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false).first()
-            enableModuleInstall =
-                appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false).first()
-            useDynColorFollowPkgIcon =
-                appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
             // Load managed packages for installer selection.
             appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
                 _managedInstallerPackages.value = packages
@@ -276,289 +231,256 @@ class InstallerViewModel(
         }
     }
 
+    private fun loadInitialSettings() =
+        viewModelScope.launch {
+            viewSettings = viewSettings.copy(
+                preferSystemIconForUpdates =
+                    appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first(),
+                autoCloseCountDown =
+                    appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first(),
+                showExtendedMenu =
+                    appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false).first(),
+                showSmartSuggestion =
+                    appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true).first(),
+                disableNotificationOnDismiss =
+                    appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first(),
+                versionCompareInSingleLine =
+                    appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false).first(),
+                sdkCompareInMultiLine = appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false).first(),
+                showOPPOSpecial = appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false).first(),
+                autoSilentInstall = appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false).first(),
+                enableModuleInstall = appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false).first(),
+                useDynColorFollowPkgIcon = appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+            )
+        }
+
+    /**
+     * Maps a ProgressEntity from the repository to the corresponding InstallerViewState.
+     * This function centralizes the logic for state transitions based on progress updates.
+     *
+     * @param progress The latest ProgressEntity from the repository.
+     * @return The calculated InstallerViewState.
+     */
+    private fun mapProgressToViewState(progress: ProgressEntity): InstallerViewState {
+        return when (progress) {
+            is ProgressEntity.Ready -> InstallerViewState.Ready
+
+            is ProgressEntity.UninstallResolveFailed,
+            is ProgressEntity.InstallResolvedFailed -> InstallerViewState.ResolveFailed
+
+            is ProgressEntity.InstallAnalysedFailed -> InstallerViewState.AnalyseFailed
+
+            is ProgressEntity.InstallAnalysedSuccess -> {
+                // Backup original results on first successful analysis.
+                if (originalAnalysisResults.isEmpty()) {
+                    originalAnalysisResults = repo.analysisResults
+                }
+                val analysisResults = repo.analysisResults
+                val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType
+
+                val isMultiAppMode = analysisResults.size > 1 ||
+                        containerType == DataType.MULTI_APK ||
+                        containerType == DataType.MULTI_APK_ZIP ||
+                        containerType == DataType.MIXED_MODULE_APK ||
+                        containerType == DataType.MIXED_MODULE_ZIP
+
+                if (isMultiAppMode) InstallerViewState.InstallChoice else InstallerViewState.InstallPrepare
+            }
+
+            is ProgressEntity.Installing -> InstallerViewState.Installing
+
+            is ProgressEntity.InstallFailed -> {
+                if (state is InstallerViewState.InstallingModule && repo.error is ModuleInstallExitCodeNonZeroException) {
+                    // If a module install fails with a specific error, update the existing state instead of replacing it.
+                    val currentOutput = (state as InstallerViewState.InstallingModule).output.toMutableList()
+                    repo.error.message?.let { currentOutput.add("ERROR: $it") }
+                    (state as InstallerViewState.InstallingModule).copy(
+                        output = currentOutput,
+                        isFinished = true
+                    )
+                } else {
+                    InstallerViewState.InstallFailed
+                }
+            }
+
+            is ProgressEntity.InstallSuccess -> {
+                // If a module install succeeds, just mark it as finished.
+                if (state is InstallerViewState.InstallingModule) {
+                    (state as InstallerViewState.InstallingModule).copy(isFinished = true)
+                } else {
+                    InstallerViewState.InstallSuccess
+                }
+            }
+
+            is ProgressEntity.InstallingModule -> InstallerViewState.InstallingModule(progress.output)
+
+            is ProgressEntity.Uninstalling -> {
+                if (isRetryingInstall) InstallerViewState.InstallRetryDowngradeUsingUninstall else InstallerViewState.Uninstalling
+            }
+
+            is ProgressEntity.UninstallFailed -> {
+                if (isRetryingInstall) {
+                    isRetryingInstall = false
+                    InstallerViewState.InstallFailed
+                } else {
+                    InstallerViewState.UninstallFailed
+                }
+            }
+
+            is ProgressEntity.UninstallSuccess -> {
+                if (isRetryingInstall) {
+                    isRetryingInstall = false
+                    repo.install() // Trigger reinstall
+                    InstallerViewState.InstallRetryDowngradeUsingUninstall
+                } else {
+                    InstallerViewState.UninstallSuccess
+                }
+            }
+
+            is ProgressEntity.UninstallReady -> {
+                // This state has side effects (updating UI-specific state), so they are handled here.
+                _uiUninstallInfo.value = repo.uninstallInfo.value
+                _uninstallFlags.value = 0
+                repo.config.uninstallFlags = 0
+                InstallerViewState.UninstallReady
+            }
+
+            // For states that are handled specially (like loading), or have no UI change, return the current state.
+            is ProgressEntity.InstallResolving, is ProgressEntity.InstallAnalysing, is ProgressEntity.InstallPreparing -> state
+
+            // Fallback for any other unhandled progress types.
+            else -> InstallerViewState.Ready
+        }
+    }
+
+    /**
+     * Handles all side effects related to a progress update, such as managing jobs,
+     * updating focused package name, and handling dynamic colors.
+     *
+     * @param newPackageName The package name derived from the new state, if any.
+     * @param newState The newly calculated InstallerViewState.
+     * @param progress The original ProgressEntity that triggered the update.
+     */
+    private fun handleStateSideEffects(newPackageName: String?, newState: InstallerViewState, progress: ProgressEntity) {
+        // --- 1. Manage loading indicator job ---
+        if (progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallAnalysedFailed) {
+            loadingStateJob?.cancel()
+            loadingStateJob = null
+        }
+
+        // --- 2. Update current package name ---
+        if (newPackageName != _currentPackageName.value) {
+            _currentPackageName.value = newPackageName
+            if (newPackageName != null) {
+                loadDisplayIcon(newPackageName)
+            }
+        }
+
+        // --- 3. UNIFIED DYNAMIC COLOR LOGIC ---
+        if (viewSettings.useDynColorFollowPkgIcon) {
+            val colorInt: Int? = when (newState) {
+                // For install states, get color from analysis results
+                is InstallerViewState.InstallPrepare,
+                is InstallerViewState.Installing,
+                is InstallerViewState.InstallFailed,
+                is InstallerViewState.InstallSuccess -> repo.analysisResults.find { it.packageName == newPackageName }?.seedColor
+
+                // For choice screen, get the first available color
+                is InstallerViewState.InstallChoice -> repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
+
+                // For uninstall state, get pre-calculated color from uninstall info
+                is InstallerViewState.UninstallReady -> repo.uninstallInfo.value?.seedColor
+
+                // For all other states, we can clear the color
+                else -> null
+            }
+            _seedColor.value =
+                colorInt?.let { Color(it) } ?: _seedColor.value.takeIf { newState is InstallerViewState.Ready }?.let { null }
+
+        } else if (_seedColor.value != null) {
+            // If the feature is disabled, ensure the color is cleared.
+            _seedColor.value = null
+        }
+
+        // --- 4. Manage auto-install job ---
+        autoInstallJob?.cancel() // Cancel any previous auto-install job by default.
+        if (newState is InstallerViewState.InstallPrepare && repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
+            autoInstallJob = viewModelScope.launch {
+                delay(500)
+                if (state is InstallerViewState.InstallPrepare) {
+                    install()
+                }
+            }
+        }
+    }
+
+    // Replace your existing collectRepo with this refactored version
     private fun collectRepo(repo: InstallerRepo) {
         this.repo = repo
-        // Load/reload available users based on the new repo's config
-        if (repo.config.enableCustomizeUser)
+        if (repo.config.enableCustomizeUser) {
             loadAvailableUsers(repo.config.authorizer)
-        // initialize install flags based on repo.config
+        }
+
+        // Initialize install flags from repo config
         _installFlags.value = listOfNotNull(
-            repo.config.allowTestOnly.takeIf { it }
-                ?.let { InstallOption.AllowTest.value },
-            repo.config.allowDowngrade.takeIf { it }
-                ?.let { InstallOption.AllowDowngrade.value },
-            repo.config.forAllUser.takeIf { it }
-                ?.let { InstallOption.AllUsers.value },
-            repo.config.allowRestrictedPermissions.takeIf { it }
-                ?.let { InstallOption.AllWhitelistRestrictedPermissions.value },
-            repo.config.bypassLowTargetSdk.takeIf { it }
-                ?.let { InstallOption.BypassLowTargetSdkBlock.value },
-            repo.config.allowAllRequestedPermissions.takeIf { it }
-                ?.let { InstallOption.GrantAllRequestedPermissions.value }
+            repo.config.allowTestOnly.takeIf { it }?.let { InstallOption.AllowTest.value },
+            repo.config.allowDowngrade.takeIf { it }?.let { InstallOption.AllowDowngrade.value },
+            repo.config.forAllUser.takeIf { it }?.let { InstallOption.AllUsers.value },
+            repo.config.allowRestrictedPermissions.takeIf { it }?.let { InstallOption.AllWhitelistRestrictedPermissions.value },
+            repo.config.bypassLowTargetSdk.takeIf { it }?.let { InstallOption.BypassLowTargetSdkBlock.value },
+            repo.config.allowAllRequestedPermissions.takeIf { it }?.let { InstallOption.GrantAllRequestedPermissions.value }
         ).fold(0) { acc, flag -> acc or flag }
-        // sync to repo.config
         repo.config.installFlags = _installFlags.value
+
         _currentPackageName.value = null
         val newPackageNames = repo.analysisResults.map { it.packageName }.toSet()
         _displayIcons.update { old -> old.filterKeys { it in newPackageNames } }
+
         collectRepoJob?.cancel()
         autoInstallJob?.cancel()
 
         collectRepoJob = viewModelScope.launch {
             repo.progress.collect { progress ->
-                // 如果正在进行批量安装，则由专门的逻辑处理
+                // --- Stage 1: Handle high-priority, blocking states first ---
                 if (multiInstallQueue.isNotEmpty()) {
                     handleMultiInstallProgress(progress)
-                    return@collect
-                }
-                if (progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallAnalysedFailed) {
-                    loadingStateJob?.cancel()
-                    loadingStateJob = null
-                }
-                when (progress) {
-                    is ProgressEntity.InstallResolving,
-                    is ProgressEntity.InstallPreparing,
-                    is ProgressEntity.InstallAnalysing -> {
-                        if (loadingStateJob == null || loadingStateJob?.isActive == false) {
-                            loadingStateJob = viewModelScope.launch {
-                                delay(200L)
-                                state = if (progress is ProgressEntity.InstallPreparing) {
-                                    InstallerViewState.Preparing(progress.progress)
-                                } else {
-                                    InstallerViewState.Analysing
-                                }
-                            }
-                        }
-                        return@collect
-                    }
-
-                    else -> {}
+                    return@collect // Multi-install has its own state machine
                 }
 
-                val previousState = state
-                var newState: InstallerViewState
-                var newPackageNameFromProgress: String? = _currentPackageName.value
-
-                when (progress) {
-                    is ProgressEntity.Ready -> {
-                        newState = InstallerViewState.Ready
-                        newPackageNameFromProgress = null
-                        _seedColor.value = null
-                    }
-
-                    is ProgressEntity.UninstallResolveFailed,
-                    is ProgressEntity.InstallResolvedFailed -> newState = InstallerViewState.ResolveFailed
-
-                    is ProgressEntity.InstallAnalysedFailed -> newState = InstallerViewState.AnalyseFailed
-                    is ProgressEntity.InstallAnalysedSuccess -> {
-                        // When analysis is successful, this is the first moment we have the full, original list.
-                        // This is the correct time to back it up.
-                        if (originalAnalysisResults.isEmpty()) {
-                            originalAnalysisResults = repo.analysisResults
-                        }
-                        val analysisResults = repo.analysisResults
-
-                        // The decision to show the choice screen should not only depend on the number of packages,
-                        // but also on the container type determined by the analyser.
-                        // If the analyser found a ZIP with multiple APKs for the SAME package,
-                        // analysisResults.size would be 1, but we still need to show the choice screen.
-                        val containerType = analysisResults.firstOrNull()
-                            ?.appEntities?.firstOrNull()
-                            ?.app?.containerType
-
-                        val isMultiAppMode = analysisResults.size > 1 ||
-                                containerType == DataType.MULTI_APK ||
-                                containerType == DataType.MULTI_APK_ZIP ||
-                                containerType == DataType.MIXED_MODULE_APK ||
-                                containerType == DataType.MIXED_MODULE_ZIP
-
-                        if (isMultiAppMode) {
-                            // If the backend (ActionHandler) determined it's a multi-app scenario,
-                            // ALWAYS go to the choice screen, regardless of package names.
-                            Timber.d("ViewModel: Multi-app mode detected. Forcing InstallChoice state.")
-                            newState = InstallerViewState.InstallChoice
-                            newPackageNameFromProgress = null // No single package is the focus.
-
-                            // Trigger icon loading for all apps in the list.
-                            analysisResults.forEach { result ->
-                                loadDisplayIcon(result.packageName)
-                            }
-
-                            if (useDynColorFollowPkgIcon) {
-                                val colorInt = repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
-                                _seedColor.value = colorInt?.let { Color(it) }
-                            }
-                        } else {
-                            // If it's not a multi-app scenario (e.g., single APK with splits),
-                            // it's safe to proceed directly to the prepare screen for the single app.
-                            Timber.d("ViewModel: Single-app mode detected. Proceeding to InstallPrepare.")
-                            newState = InstallerViewState.InstallPrepare
-                            newPackageNameFromProgress = analysisResults.firstOrNull()?.packageName
-
-                            if (useDynColorFollowPkgIcon) {
-                                val colorInt = analysisResults.firstOrNull()?.seedColor
-                                _seedColor.value = colorInt?.let { Color(it) }
-                            }
-                        }
-                    }
-
-                    is ProgressEntity.Installing -> {
-                        newState = InstallerViewState.Installing
-                        autoInstallJob?.cancel()
-                        if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
-                            newPackageNameFromProgress = repo.analysisResults.first().packageName
-                        }
-                    }
-
-                    is ProgressEntity.InstallFailed -> {
-                        autoInstallJob?.cancel()
-                        // If we were installing a module, just mark it as finished instead of switching state.
-                        if (state is InstallerViewState.InstallingModule && repo.error is ModuleInstallExitCodeNonZeroException) {
-                            // Get the current list of output lines from the UI state.
-                            val currentOutput = (state as InstallerViewState.InstallingModule).output.toMutableList()
-
-                            // Get the error message from the repository, which ActionHandler has set.
-                            val errorMessage = repo.error.message
-                            if (!errorMessage.isNullOrBlank()) {
-                                currentOutput.add("ERROR: $errorMessage")
-                            }
-
-                            // Create the new, final state with the updated output and the finished flag.
-                            newState = (state as InstallerViewState.InstallingModule).copy(
-                                output = currentOutput,
-                                isFinished = true
-                            )
-                        } else {
-                            newState = InstallerViewState.InstallFailed
-                            if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
-                                newPackageNameFromProgress = repo.analysisResults.first().packageName
-                            }
-                        }
-                    }
-
-                    is ProgressEntity.InstallSuccess -> {
-                        autoInstallJob?.cancel()
-                        // If a module installation succeeded, just mark it as finished.
-                        if (state is InstallerViewState.InstallingModule) {
-                            newState = (state as InstallerViewState.InstallingModule).copy(isFinished = true)
-                        } else {
-                            newState = InstallerViewState.InstallSuccess
-                            if (newPackageNameFromProgress == null && repo.analysisResults.size == 1) {
-                                newPackageNameFromProgress = repo.analysisResults.first().packageName
-                            }
-                        }
-                    }
-
-                    is ProgressEntity.InstallingModule -> {
-                        newState = InstallerViewState.InstallingModule(progress.output)
-                    }
-
-                    is ProgressEntity.Uninstalling -> {
-                        newState = if (isRetryingInstall) {
-                            //isRetryingInstall = false
-                            InstallerViewState.InstallRetryDowngradeUsingUninstall
-                        } else {
-                            InstallerViewState.Uninstalling
-                        }
-                    }
-
-                    is ProgressEntity.UninstallFailed -> {
-                        // If uninstall fails during retry, revert to install failed state
-                        if (isRetryingInstall) {
-                            isRetryingInstall = false
-                            newState = InstallerViewState.InstallFailed
-                        } else {
-                            newState = InstallerViewState.UninstallFailed
-                        }
-                    }
-
-                    is ProgressEntity.UninstallSuccess -> {
-                        // If uninstall succeeded as part of a retry, trigger the install
-                        if (isRetryingInstall) {
-                            isRetryingInstall = false
-                            repo.install()
-                            // Stay in a transitional state until Install starts
-                            newState = InstallerViewState.InstallRetryDowngradeUsingUninstall
-                        } else {
-                            // now it has a meaning of normal uninstall success
-                            newState = InstallerViewState.UninstallSuccess
-                        }
-                    }
-
-                    is ProgressEntity.UninstallReady -> {
-                        _uiUninstallInfo.value = repo.uninstallInfo.value
-                        _uninstallFlags.value = 0 // Reset flags for new session
-                        repo.config.uninstallFlags = 0
-                        newState = InstallerViewState.UninstallReady
-
-                        if (useDynColorFollowPkgIcon) {
-                            val icon = repo.uninstallInfo.value?.appIcon
-                            if (icon != null) {
-                                viewModelScope.launch(Dispatchers.Default) {
-                                    try {
-                                        val bitmap = drawableToBitmap(icon)
-                                        val colorInt = extractSeedColorFromBitmap(bitmap)
-                                        _seedColor.value = Color(colorInt)
-                                    } catch (e: Exception) {
-                                        Timber.e(e, "Failed to extract color from uninstall icon")
-                                        _seedColor.value = null
-                                    }
-                                }
+                // Handle transient "loading" states separately, as they don't always cause a full state change.
+                if (progress is ProgressEntity.InstallResolving || progress is ProgressEntity.InstallPreparing || progress is ProgressEntity.InstallAnalysing) {
+                    if (loadingStateJob == null || !loadingStateJob!!.isActive) {
+                        loadingStateJob = viewModelScope.launch {
+                            delay(200L) // Show loading indicator only if the operation is not instant
+                            state = if (progress is ProgressEntity.InstallPreparing) {
+                                InstallerViewState.Preparing(progress.progress)
                             } else {
-                                // Reset Colors if icon is null
-                                _seedColor.value = null
+                                InstallerViewState.Analysing
                             }
                         }
                     }
-
-                    else -> newState = InstallerViewState.Ready
+                    return@collect // Don't proceed to full state-machine for these transient states.
                 }
 
-                if (newPackageNameFromProgress != _currentPackageName.value) {
-                    if (newPackageNameFromProgress != null) {
-                        if (_currentPackageName.value != newPackageNameFromProgress) {
-                            _currentPackageName.value = newPackageNameFromProgress
-                            loadDisplayIcon(newPackageNameFromProgress)
-                        }
+                // --- Stage 2: Map the progress to a new view state ---
+                val newState = mapProgressToViewState(progress)
 
-                        // --- Update color when the focused package name changes ---
-                        // This handles the transition from choice screen to prepare screen.
-                        if (useDynColorFollowPkgIcon) {
-                            val colorInt = repo.analysisResults.find { it.packageName == newPackageNameFromProgress }?.seedColor
-                            _seedColor.value = colorInt?.let { Color(it) }
-                        }
-                    } else {
-                        if (_currentPackageName.value != null) _currentPackageName.value = null
-                        if (useDynColorFollowPkgIcon) {
-                            val colorInt = repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
-                            _seedColor.value = colorInt?.let { Color(it) }
-                        }
-                    }
-                } else if (newPackageNameFromProgress == null && _currentPackageName.value != null) {
-                    _currentPackageName.value = null
-                    // Set the color back to the first available one for choice screen consistency
-                    if (useDynColorFollowPkgIcon) {
-                        val colorInt = repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
-                        _seedColor.value = colorInt?.let { Color(it) }
-                    }
+                // --- Stage 3: Determine context (like the current package name) from the new state ---
+                val newPackageName = when (newState) {
+                    is InstallerViewState.InstallPrepare,
+                    is InstallerViewState.Installing,
+                    is InstallerViewState.InstallFailed,
+                    is InstallerViewState.InstallSuccess -> repo.analysisResults.firstOrNull()?.packageName
+                    // For choice/multi-app states, there is no single focused package.
+                    is InstallerViewState.InstallChoice, is InstallerViewState.Ready -> null
+                    // For other states, keep the current package name unless explicitly cleared.
+                    else -> _currentPackageName.value
                 }
 
-                if (newState !is InstallerViewState.InstallPrepare && autoInstallJob?.isActive == true) {
-                    autoInstallJob?.cancel()
-                }
+                // --- Stage 4: Handle all side effects based on the new state and progress ---
+                handleStateSideEffects(newPackageName, newState, progress)
 
-                if (newState is InstallerViewState.InstallPrepare && previousState !is InstallerViewState.InstallPrepare) {
-                    if (repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
-                        autoInstallJob?.cancel()
-                        autoInstallJob = viewModelScope.launch {
-                            delay(500)
-                            if (state is InstallerViewState.InstallPrepare && repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
-                                install()
-                            }
-                        }
-                    }
-                }
-
+                // --- Stage 5: Apply the final state change if necessary ---
                 if (newState != state) {
                     Timber.d("State transition: ${state::class.simpleName} -> ${newState::class.simpleName}")
                     state = newState
@@ -645,36 +567,6 @@ class InstallerViewModel(
     }
 
     /**
-     * Helper function to safely convert a Drawable to a Bitmap.
-     * @param drawable The drawable to convert.
-     * @return A Bitmap representation of the drawable.
-     */
-    private fun drawableToBitmap(drawable: Drawable): Bitmap {
-        // If the drawable is already a BitmapDrawable, just return its bitmap.
-        if (drawable is BitmapDrawable) {
-            if (drawable.bitmap != null) {
-                return drawable.bitmap
-            }
-        }
-
-        // For other drawable types, we need to draw it onto a new bitmap.
-        // Create a bitmap with the drawable's dimensions.
-        // If dimensions are invalid, create a 1x1 pixel bitmap as a fallback.
-        val bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
-            // Use ARGB_8888 for high quality, matches createBitmap overload
-            createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        } else {
-            createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
-        }
-
-        // Create a canvas to draw on the bitmap.
-        val canvas = Canvas(bitmap) // Pass bitmap to constructor
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        return bitmap
-    }
-
-    /**
      * Loads the display icon for the given package name and updates the StateFlow.
      * @param packageName The package name of the app to load the icon for.
      */
@@ -707,13 +599,13 @@ class InstallerViewModel(
             val iconSizePx = 256 // A reasonably high resolution
 
             val loadedIcon = try {
-                Timber.d("Prefer system icon: $preferSystemIconForUpdates")
+                Timber.d("Prefer system icon: $viewSettings.preferSystemIconForUpdates")
                 appIconRepo.getIcon(
                     sessionId = repo.id,
                     packageName = packageName,
                     entityToInstall = entityToInstall,
                     iconSizePx = iconSizePx,
-                    preferSystemIcon = preferSystemIconForUpdates
+                    preferSystemIcon = viewSettings.preferSystemIconForUpdates
                 )
             } catch (e: Exception) {
                 // Log the error and return null if icon loading fails
@@ -730,58 +622,6 @@ class InstallerViewModel(
                     currentMap + (packageName to finalIcon)
                 } else currentMap
             }
-        }
-    }
-
-    /**
-     * Extracts the Material 3 seed color from a Bitmap asynchronously.
-     *
-     * This function performs CPU-intensive quantization and scoring,
-     * so it must be called from a coroutine and will run on Dispatchers.Default.
-     *
-     * @param bitmap The source image.
-     * @param maxColors The maximum number of colors to quantize.
-     * A lower number (e.g., 128) is faster.
-     * @param fallbackColorArgb The ARGB Int color to return if scoring fails.
-     * @return ARGB formatted seed color (Int).
-     */
-    private suspend fun extractSeedColorFromBitmap(
-        bitmap: Bitmap,
-        maxColors: Int = 128, // Lowered for potentially better performance
-        fallbackColorArgb: Int = -12417548 // 0xFF3F51B5 - Indigo 500 from Score.java
-    ): Int {
-        // Run the heavy computation on the default dispatcher
-        return withContext(Dispatchers.Default) {
-
-            // Get pixels from Bitmap
-            val width = bitmap.width
-            val height = bitmap.height
-            val pixels = IntArray(width * height)
-
-            bitmap.getPixels(
-                pixels,
-                0,      // offset
-                width,  // stride
-                0,      // x
-                0,      // y
-                width,
-                height
-            )
-
-            // Quantize: Get the map of prominent colors to their count
-            val colorToCountMap: Map<Int, Int> = QuantizerCelebi.quantize(pixels, maxColors)
-
-            // Score: Get the sorted list of best colors
-            val sortedColors: List<Int> = Score.score(
-                colorToCountMap,
-                1, // desired: We only need the top 1 color
-                fallbackColorArgb,
-                true // filter: Apply default filtering rules
-            )
-
-            // Return the best color (first in the list)
-            // Score.score ensures the fallback is present if the list would be empty.
-            sortedColors.first()
         }
     }
 
@@ -832,7 +672,7 @@ class InstallerViewModel(
         if (uniquePackages.size == 1) {
             val targetPackageName = selectedEntities.first().app.packageName
             _currentPackageName.value = targetPackageName
-            if (useDynColorFollowPkgIcon) {
+            if (viewSettings.useDynColorFollowPkgIcon) {
                 val colorInt = repo.analysisResults.find { it.packageName == targetPackageName }?.seedColor
                 _seedColor.value = colorInt?.let { Color(it) }
             }
@@ -868,7 +708,7 @@ class InstallerViewModel(
     private fun install() {
         autoInstallJob?.cancel()
 
-        if (autoSilentInstall && !isInstallingModule && (state is InstallerViewState.InstallPrepare || state is InstallerViewState.InstallFailed)) {
+        if (viewSettings.autoSilentInstall && !isInstallingModule && (state is InstallerViewState.InstallPrepare || state is InstallerViewState.InstallFailed)) {
             Timber.d("Auto-install triggered for APK-only installation. Going to background.")
             repo.install()
             repo.background(true)

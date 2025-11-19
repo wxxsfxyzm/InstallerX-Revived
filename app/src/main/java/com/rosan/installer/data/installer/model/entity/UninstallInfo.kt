@@ -7,5 +7,6 @@ data class UninstallInfo(
     val appLabel: String? = null,
     val versionName: String? = null,
     val versionCode: Long? = null,
-    val appIcon: Drawable? = null
+    val appIcon: Drawable? = null,
+    val seedColor: Int? = null
 )

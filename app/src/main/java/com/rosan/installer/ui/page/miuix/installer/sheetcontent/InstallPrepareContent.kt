@@ -70,6 +70,7 @@ fun InstallPrepareContent(
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
     val displayIcons by viewModel.displayIcons.collectAsState()
+    val settings = viewModel.viewSettings
 
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -83,7 +84,7 @@ fun InstallPrepareContent(
     } else {
         currentPackage.appEntities
     }).map { it.app }
-    
+
     val primaryEntity = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
         ?: allEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
         ?: allEntities.sortedBest().firstOrNull()
@@ -197,7 +198,7 @@ fun InstallPrepareContent(
                                 installer = installer
                             )
                             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                                AnimatedVisibility(visible = viewModel.showOPPOSpecial && primaryEntity.containerType == DataType.APK) {
+                                AnimatedVisibility(visible = settings.showOPPOSpecial && primaryEntity.containerType == DataType.APK) {
                                     primaryEntity.minOsdkVersion?.let {
                                         AdaptiveInfoRow(
                                             labelResId = R.string.installer_package_minOsdkVersion_label,
@@ -297,12 +298,12 @@ fun InstallPrepareContent(
         } ?: false
 
         val canInstallModuleEntity = (primaryEntity as? AppEntity.ModuleEntity)?.let {
-            viewModel.enableModuleInstall
+            settings.enableModuleInstall
         } ?: false
 
         val canInstall = canInstallBaseEntity || canInstallModuleEntity
 
-        val showExpandButton = canInstallBaseEntity && viewModel.showExtendedMenu
+        val showExpandButton = canInstallBaseEntity && settings.showExtendedMenu
 
         if (showExpandButton)
             item {

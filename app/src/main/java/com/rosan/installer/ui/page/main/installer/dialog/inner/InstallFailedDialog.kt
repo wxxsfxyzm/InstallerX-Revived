@@ -52,8 +52,6 @@ import kotlinx.coroutines.delay
 import timber.log.Timber
 import kotlin.reflect.KClass
 
-// Assume errorText is accessible
-
 @Composable
 fun installFailedDialog( // 小写开头
     installer: InstallerRepo, viewModel: InstallerViewModel
@@ -89,7 +87,7 @@ fun installFailedDialog( // 小写开头
                 ErrorTextBlock(
                     installer.error,
                     suggestions = {
-                        if (viewModel.showSmartSuggestion)
+                        if (viewModel.viewSettings.showSmartSuggestion)
                             ErrorSuggestions(
                                 error = installer.error,
                                 viewModel = viewModel,

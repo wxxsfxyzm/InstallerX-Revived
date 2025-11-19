@@ -48,7 +48,7 @@ fun DialogPage(
                     // Only allow dismiss if the current state is dismissible
                     // If the setting is enabled, close the dialog directly.
                     // Otherwise, send it to the background (which shows a notification).
-                    if (viewModel.disableNotificationOnDismiss) {
+                    if (viewModel.viewSettings.disableNotificationOnDismiss) {
                         viewModel.dispatch(InstallerViewAction.Close)
                     } else {
                         viewModel.dispatch(InstallerViewAction.Background)

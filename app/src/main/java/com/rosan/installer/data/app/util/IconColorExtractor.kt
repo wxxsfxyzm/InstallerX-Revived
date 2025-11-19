@@ -19,8 +19,8 @@ class IconColorExtractor : KoinComponent {
     private val appIconRepo: AppIconRepo by inject()
 
     /**
-     * Extracts the Material 3 seed color from an app's icon.
-     * This is the main entry point for this utility.
+     * Extracts the Material 3 seed color from an app's icon by fetching it first.
+     * This is the main entry point for the installation flow.
      *
      * @param sessionId The installer session ID.
      * @param packageName The package name to get the icon from.
@@ -35,7 +35,7 @@ class IconColorExtractor : KoinComponent {
         preferSystemIcon: Boolean
     ): Int? {
         return try {
-            //  Get the icon drawable
+            // Get the icon drawable
             val iconSizePx = 256 // A reasonably high resolution for color quantization
             val iconDrawable = appIconRepo.getIcon(
                 sessionId = sessionId,
@@ -43,15 +43,33 @@ class IconColorExtractor : KoinComponent {
                 entityToInstall = entityToInstall,
                 iconSizePx = iconSizePx,
                 preferSystemIcon = preferSystemIcon
-            ) ?: return null
+            )
 
-            // Convert drawable to bitmap
-            val bitmap = drawableToBitmap(iconDrawable)
-
-            // Extract the seed color from the bitmap
-            extractSeedColorFromBitmap(bitmap)
+            // Extract color from the obtained drawable
+            extractColorFromDrawable(iconDrawable)
         } catch (e: Exception) {
             Timber.e(e, "Failed to extract color for package: $packageName")
+            null
+        }
+    }
+
+    /**
+     * Extracts the Material 3 seed color directly from a Drawable.
+     * This is the main entry point for the uninstallation flow where the drawable is already available.
+     *
+     * @param drawable The source drawable.
+     * @return ARGB formatted seed color (Int), or null if the drawable is null or extraction fails.
+     */
+    suspend fun extractColorFromDrawable(drawable: Drawable?): Int? {
+        if (drawable == null) {
+            Timber.d("Drawable is null, cannot extract color.")
+            return null
+        }
+        return try {
+            val bitmap = drawableToBitmap(drawable)
+            extractSeedColorFromBitmap(bitmap)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to extract color from provided drawable.")
             null
         }
     }

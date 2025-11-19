@@ -41,6 +41,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -52,6 +53,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     companion object {
         private const val MINIMUM_VISIBILITY_DURATION_MS = 400L
     }
+
+    private data class NotificationSettings(
+        val showDialog: Boolean,
+        val showLiveActivity: Boolean,
+        val preferSystemIcon: Boolean
+    )
 
     private var job: Job? = null
     private var sessionStartTime: Long = 0L
@@ -66,16 +73,20 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     override suspend fun onStart() {
         Timber.d("[id=${installer.id}] onStart: Starting to combine and collect flows.")
         sessionStartTime = System.currentTimeMillis()
+
+        val settings = NotificationSettings(
+            showDialog = appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true).first(),
+            showLiveActivity = appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false).first(),
+            preferSystemIcon = appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first()
+        )
+
         job = scope.launch {
             combine(
                 installer.progress,
-                installer.background,
-                appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true),
-                appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false),
-                appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false)
-            ) { progress, background, showDialog, showLiveActivity, preferSystemIcon ->
+                installer.background
+            ) { progress, background ->
 
-                Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=$showDialog")
+                Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=$settings.showDialog")
 
                 if (progress is ProgressEntity.InstallAnalysedUnsupported) {
                     Timber.w("[id=${installer.id}] AnalysedUnsupported: ${progress.reason}")
@@ -90,10 +101,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     // --- VERSION CHECK & DISPATCH ---
                     // This is the main branching point. It decides which notification style to use.
                     val notification =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && showLiveActivity) {
-                            buildModernNotification(progress, showDialog, preferSystemIcon)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && settings.showLiveActivity) {
+                            buildModernNotification(progress, settings.showDialog, settings.preferSystemIcon)
                         } else {
-                            buildLegacyNotification(progress, true, showDialog, preferSystemIcon)
+                            buildLegacyNotification(progress, true, settings.showDialog, settings.preferSystemIcon)
                         }
                     setNotification(notification)
 
@@ -107,7 +118,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     Timber.d("[id=${installer.id}] Foreground mode. Cancelling notification.")
                     setNotification(null)
                 }
-
             }.collect()
         }
     }
@@ -115,7 +125,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override suspend fun onFinish() {
         Timber.d("[id=${installer.id}] onFinish: Cancelling notification and job.")
-        // Clear cache for all involved packages to ensure freshness on next install
+        // Clear icon cache for all involved packages to ensure freshness on next install
         installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }

@@ -83,6 +83,7 @@ fun MiuixInstallerPage(
 
     val viewModel: InstallerViewModel = koinViewModel { parametersOf(installer) }
     val currentState = viewModel.state
+    val settings = viewModel.viewSettings
     val showSettings = viewModel.showMiuixSheetRightActionSettings
     val showPermissions = viewModel.showMiuixPermissionList
 
@@ -277,7 +278,7 @@ fun MiuixInstallerPage(
 
                     // If it's a module install OR the "disable notification" setting is on,
                     // the dismiss action should be a full close.
-                    if (isModuleInstall || viewModel.disableNotificationOnDismiss) {
+                    if (isModuleInstall || settings.disableNotificationOnDismiss) {
                         viewModel.dispatch(InstallerViewAction.Close)
                     } else {
                         // Otherwise (for standard APKs), the dismiss action sends it to the background.
@@ -364,7 +365,7 @@ fun MiuixInstallerPage(
                         installer = installer,
                         packageName = packageName,
                         appIcon = appIcon,
-                        dhizukuAutoClose = viewModel.autoCloseCountDown,
+                        dhizukuAutoClose = settings.autoCloseCountDown,
                         onClose = closeSheet
                     )
                 }

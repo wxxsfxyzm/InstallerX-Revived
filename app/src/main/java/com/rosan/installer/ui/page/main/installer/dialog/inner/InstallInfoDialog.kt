@@ -81,6 +81,7 @@ fun installInfoDialog(
     viewModel: InstallerViewModel,
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
+    val settings = viewModel.viewSettings
     val iconMap by viewModel.displayIcons.collectAsState()
     // --- NEW DATA FETCHING LOGIC ---
     val currentPackageName by viewModel.currentPackageName.collectAsState()
@@ -223,7 +224,7 @@ fun installInfoDialog(
                         } else {
                             //
                             // true = singleLine, false = multiLine
-                            val defaultIsSingleLine = viewModel.versionCompareInSingleLine
+                            val defaultIsSingleLine = settings.versionCompareInSingleLine
 
                             // Pair(first = isSingleLine, second = shouldAnimate)
                             var contentState by remember {
@@ -289,7 +290,7 @@ fun installInfoDialog(
                     else -> {}
                 }
                 // --- SDK Information Showcase ---
-                val defaultSdkSingleLine = !viewModel.sdkCompareInMultiLine
+                val defaultSdkSingleLine = !settings.sdkCompareInMultiLine
                 var sdkContentState by remember { mutableStateOf(Pair(defaultSdkSingleLine, false)) }
 
                 AnimatedVisibility(visible = installer.config.displaySdk && entityToInstall.containerType != DataType.MODULE_ZIP) {
@@ -374,7 +375,7 @@ fun installInfoDialog(
                     }
                 }
                 if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
-                    AnimatedVisibility(viewModel.showOPPOSpecial && entityToInstall.containerType == DataType.APK) {
+                    AnimatedVisibility(settings.showOPPOSpecial && entityToInstall.containerType == DataType.APK) {
                         Column {
                             Spacer(modifier = Modifier.height(8.dp))
                             (entityToInstall as AppEntity.BaseEntity).minOsdkVersion?.let {
