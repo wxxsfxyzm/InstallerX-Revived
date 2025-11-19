@@ -57,6 +57,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private data class NotificationSettings(
         val showDialog: Boolean,
         val showLiveActivity: Boolean,
+        val autoCloseNotification: Int,
         val preferSystemIcon: Boolean
     )
 
@@ -77,6 +78,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val settings = NotificationSettings(
             showDialog = appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true).first(),
             showLiveActivity = appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false).first(),
+            autoCloseNotification = appDataStore.getInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, 0).first(),
             preferSystemIcon = appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first()
         )
 
@@ -107,6 +109,20 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                             buildLegacyNotification(progress, true, settings.showDialog, settings.preferSystemIcon)
                         }
                     setNotification(notification)
+
+                    if (progress is ProgressEntity.InstallSuccess) {
+                        scope.launch {
+                            val clearTimeSeconds = settings.autoCloseNotification
+                            if (clearTimeSeconds > 0) {
+                                Timber.d("[id=${installer.id}] Scheduling removal of success notification in $clearTimeSeconds seconds.")
+                                delay(clearTimeSeconds * 1000L)
+                                Timber.d("[id=${installer.id}] Auto-clearing success notification now.")
+                                notificationManager.cancel(notificationId)
+                                Timber.d("[id=${installer.id}] Auto-closing session now.")
+                                installer.close()
+                            }
+                        }
+                    }
 
                     val elapsedTime = System.currentTimeMillis() - sessionStartTime
                     if (elapsedTime < MINIMUM_VISIBILITY_DURATION_MS) {

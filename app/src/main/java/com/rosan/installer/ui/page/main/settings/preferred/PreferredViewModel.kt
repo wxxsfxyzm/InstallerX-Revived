@@ -75,6 +75,7 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeShowDisableNotification -> changeDisableNotificationState(action.showDisableNotification)
             is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialog(action.showDialog)
             is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(action.countDown)
+            is PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds -> changeNotificationSuccessAutoClearSeconds(action.seconds)
             is PreferredViewAction.ChangeShowExpressiveUI -> changeUseExpressiveUI(action.showRefreshedUI)
             is PreferredViewAction.ChangeShowLiveActivity -> changeUseLiveActivity(action.showLiveActivity)
             is PreferredViewAction.ChangeUseMiuix -> changeUseMiuix(action.useMiuix)
@@ -180,6 +181,8 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true)
             val dhizukuAutoCloseCountDownFlow =
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
+            val notificationSuccessAutoClearSecondsFlow =
+                appDataStore.getInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, 0)
             val versionCompareInSingleLineFlow =
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
             val sdkCompareInSingleLineFlow =
@@ -238,6 +241,7 @@ class PreferredViewModel(
                 showNotificationForDialogInstallFlow,
                 showDialogWhenPressingNotificationFlow,
                 dhizukuAutoCloseCountDownFlow,
+                notificationSuccessAutoClearSecondsFlow,
                 versionCompareInSingleLineFlow,
                 sdkCompareInSingleLineFlow,
                 showOPPOSpecialFlow,
@@ -272,6 +276,7 @@ class PreferredViewModel(
                 val showNotification = values[idx++] as Boolean
                 val showDialog = values[idx++] as Boolean
                 val countDown = values[idx++] as Int
+                val notificationSuccessAutoClearSeconds = values[idx++] as Int
                 val versionCompareInMultiLine = values[idx++] as Boolean
                 val sdkCompareInSingleLine = values[idx++] as Boolean
                 val showOPPOSpecial = values[idx++] as Boolean
@@ -312,6 +317,7 @@ class PreferredViewModel(
                     disableNotificationForDialogInstall = showNotification,
                     showDialogWhenPressingNotification = showDialog,
                     dhizukuAutoCloseCountDown = countDown,
+                    notificationSuccessAutoClearSeconds = notificationSuccessAutoClearSeconds,
                     versionCompareInSingleLine = versionCompareInMultiLine,
                     sdkCompareInMultiLine = sdkCompareInSingleLine,
                     showOPPOSpecial = showOPPOSpecial,
@@ -385,6 +391,11 @@ class PreferredViewModel(
             if (countDown in 1..10) {
                 appDataStore.putInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, countDown)
             }
+        }
+
+    private fun changeNotificationSuccessAutoClearSeconds(seconds: Int) =
+        viewModelScope.launch {
+            appDataStore.putInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, seconds)
         }
 
     private fun changeUseExpressiveUI(showRefreshedUI: Boolean) =
@@ -516,7 +527,7 @@ class PreferredViewModel(
         } catch (e: Exception) {
             Timber.e(e, "Could not start activity to request ignore battery optimizations")
             viewModelScope.launch {
-                _uiEvents.send(PreferredViewEvent.ShowSnackbar("无法打开电池优化设置"))
+                _uiEvents.send(PreferredViewEvent.ShowSnackbar("Could not start activity to request ignore battery optimizations"))
             }
         }
 

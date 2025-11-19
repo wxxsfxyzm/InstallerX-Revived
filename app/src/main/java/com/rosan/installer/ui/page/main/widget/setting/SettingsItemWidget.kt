@@ -250,7 +250,8 @@ data class InstallModeInfo(
 fun DataInstallModeWidget(
     modifier: Modifier = Modifier,
     currentInstallMode: ConfigEntity.InstallMode,
-    changeInstallMode: (ConfigEntity.InstallMode) -> Unit
+    changeInstallMode: (ConfigEntity.InstallMode) -> Unit,
+    trailingContent: @Composable () -> Unit = {}
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -305,7 +306,55 @@ fun DataInstallModeWidget(
                 )
             }
         }
+        trailingContent()
     }
+}
+
+
+/**
+ * A DropDownMenuWidget for selecting the auto-clear time for success notifications.
+ */
+@Composable
+fun AutoClearNotificationTimeWidget(
+    currentValue: Int,
+    onValueChange: (Int) -> Unit
+) {
+    val context = LocalContext.current
+    // Define the options for consistency
+    val options = remember { listOf(0, 3, 5, 10, 15, 20, 30) }
+
+    // Create display strings for the dropdown menu
+    val displayStrings = remember(options) {
+        options.map { time ->
+            if (time == 0) {
+                context.getString(R.string.installer_settings_auto_clear_time_never)
+            } else {
+                context.getString(R.string.installer_settings_auto_clear_time_seconds_format, time)
+            }
+        }
+    }
+
+    // Find the index of the current value
+    val selectedIndex = remember(currentValue, options) {
+        options.indexOf(currentValue).coerceAtLeast(0)
+    }
+
+    // Determine the description text based on the current value
+    val descriptionText = displayStrings.getOrElse(selectedIndex) { "" }
+
+    DropDownMenuWidget(
+        icon = AppIcons.Timer,
+        title = stringResource(id = R.string.installer_settings_auto_clear_success_notification),
+        description = descriptionText,
+        choice = selectedIndex,
+        data = displayStrings,
+        onChoiceChange = { newIndex ->
+            val newValue = options.getOrElse(newIndex) { 0 } // Safe access
+            if (currentValue != newValue) {
+                onValueChange(newValue)
+            }
+        }
+    )
 }
 
 @Composable

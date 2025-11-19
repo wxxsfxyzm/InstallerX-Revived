@@ -28,6 +28,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.miuix.widgets.MiuixAutoClearNotificationTimeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAuthorizerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
@@ -51,6 +52,11 @@ fun MiuixInstallerGlobalSettingsPage(
 ) {
     val state = viewModel.state
     val scrollBehavior = MiuixScrollBehavior()
+
+    val isDialogMode = state.installMode == ConfigEntity.InstallMode.Dialog ||
+            state.installMode == ConfigEntity.InstallMode.AutoDialog
+    val isNotificationMode = state.installMode == ConfigEntity.InstallMode.Notification ||
+            state.installMode == ConfigEntity.InstallMode.AutoNotification
 
     Scaffold(
         topBar = {
@@ -84,40 +90,52 @@ fun MiuixInstallerGlobalSettingsPage(
                         currentAuthorizer = state.authorizer,
                         changeAuthorizer = { newAuthorizer ->
                             viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(newAuthorizer))
-                        },
-                        trailingContent = {
-                            AnimatedVisibility(
-                                visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
+                        }
+                    ) {
+                        AnimatedVisibility(
+                            visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            MiuixIntNumberPickerWidget(
+                                title = stringResource(R.string.set_countdown),
+                                description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
+                                value = state.dhizukuAutoCloseCountDown,
+                                startInt = 1,
+                                endInt = 10
                             ) {
-                                MiuixIntNumberPickerWidget(
-                                    title = stringResource(R.string.set_countdown),
-                                    description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                                    value = state.dhizukuAutoCloseCountDown,
-                                    startInt = 1,
-                                    endInt = 10
-                                ) {
-                                    viewModel.dispatch(
-                                        PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
-                                    )
-                                }
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
+                                )
                             }
                         }
-                    )
+                    }
                     MiuixDataInstallModeWidget(
                         currentInstallMode = state.installMode,
                         changeInstallMode = { newMode ->
                             viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(newMode))
                         }
-                    )
+                    ) {
+                        AnimatedVisibility(
+                            visible = isNotificationMode,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            MiuixAutoClearNotificationTimeWidget(
+                                currentValue = state.notificationSuccessAutoClearSeconds,
+                                onValueChange = { seconds ->
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(
+                                            seconds
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    }
                 }
             }
 
-            val isDialogMode = state.installMode == ConfigEntity.InstallMode.Dialog ||
-                    state.installMode == ConfigEntity.InstallMode.AutoDialog
-            val isNotificationMode = state.installMode == ConfigEntity.InstallMode.Notification ||
-                    state.installMode == ConfigEntity.InstallMode.AutoNotification
             item {
                 AnimatedContent(
                     targetState = if (isDialogMode) {

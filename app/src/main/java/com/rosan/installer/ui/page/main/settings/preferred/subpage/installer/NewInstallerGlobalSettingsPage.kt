@@ -46,6 +46,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.AutoClearNotificationTimeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
@@ -74,6 +75,11 @@ fun NewInstallerGlobalSettingsPage(
     LaunchedEffect(Unit) {
         topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
     }
+
+    val isDialogMode = state.installMode == ConfigEntity.InstallMode.Dialog ||
+            state.installMode == ConfigEntity.InstallMode.AutoDialog
+    val isNotificationMode = state.installMode == ConfigEntity.InstallMode.Notification ||
+            state.installMode == ConfigEntity.InstallMode.AutoNotification
 
     Scaffold(
         modifier = Modifier
@@ -120,31 +126,30 @@ fun NewInstallerGlobalSettingsPage(
                                 currentAuthorizer = state.authorizer,
                                 changeAuthorizer = {
                                     viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(it))
-                                },
-                                trailingContent = {
-                                    AnimatedVisibility(
-                                        visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                                        enter = fadeIn() + expandVertically(),
-                                        exit = fadeOut() + shrinkVertically()
-                                    ) {
-                                        IntNumberPickerWidget(
-                                            icon = AppIcons.Working,
-                                            title = stringResource(R.string.set_countdown),
-                                            description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                                            value = state.dhizukuAutoCloseCountDown,
-                                            startInt = 1,
-                                            endInt = 10,
-                                            onValueChange = {
-                                                viewModel.dispatch(
-                                                    PreferredViewAction.ChangeDhizukuAutoCloseCountDown(
-                                                        it
-                                                    )
-                                                )
-                                            }
-                                        )
-                                    }
                                 }
-                            )
+                            ) {
+                                AnimatedVisibility(
+                                    visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
+                                ) {
+                                    IntNumberPickerWidget(
+                                        icon = AppIcons.Working,
+                                        title = stringResource(R.string.set_countdown),
+                                        description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
+                                        value = state.dhizukuAutoCloseCountDown,
+                                        startInt = 1,
+                                        endInt = 10,
+                                        onValueChange = {
+                                            viewModel.dispatch(
+                                                PreferredViewAction.ChangeDhizukuAutoCloseCountDown(
+                                                    it
+                                                )
+                                            )
+                                        }
+                                    )
+                                }
+                            }
                         },
                         {
                             DataInstallModeWidget(
@@ -152,18 +157,30 @@ fun NewInstallerGlobalSettingsPage(
                                 changeInstallMode = {
                                     viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(it))
                                 }
-                            )
+                            ) {
+                                AnimatedVisibility(
+                                    visible = isNotificationMode,
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
+                                ) {
+                                    AutoClearNotificationTimeWidget(
+                                        currentValue = state.notificationSuccessAutoClearSeconds,
+                                        onValueChange = { seconds ->
+                                            viewModel.dispatch(
+                                                PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(
+                                                    seconds
+                                                )
+                                            )
+                                        }
+                                    )
+                                }
+                            }
                         }
                     )
                 )
             }
 
             item {
-                val isDialogMode =
-                    state.installMode == ConfigEntity.InstallMode.Dialog || state.installMode == ConfigEntity.InstallMode.AutoDialog
-                val isNotificationMode =
-                    state.installMode == ConfigEntity.InstallMode.Notification || state.installMode == ConfigEntity.InstallMode.AutoNotification
-
                 AnimatedVisibility(
                     visible = isDialogMode || isNotificationMode,
                     enter = fadeIn() + expandVertically(),

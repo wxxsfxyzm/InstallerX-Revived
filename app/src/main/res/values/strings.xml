@@ -95,6 +95,10 @@
     <string name="installer_settings_global_installer">Global</string>
     <string name="installer_settings_dialog_mode_options">Options for Dialog</string>
     <string name="installer_settings_notification_mode_options">Options for Notification</string>
+    <string name="installer_settings_auto_clear_success_notification">Auto-clear notification</string>
+    <string name="installer_settings_auto_clear_success_notification_desc">Auto-clear notification of successful installation</string>
+    <string name="installer_settings_auto_clear_time_never">Never</string>
+    <string name="installer_settings_auto_clear_time_seconds_format">%d seconds</string>
     <string name="basic">Basic</string>
     <string name="disable_adb_install_verify">Disable ADB Verify</string>
     <string name="disable_adb_install_verify_desc">Disable ADB install verification, useful on some systems where a installation will trigger an scan (Play Protect)</string>

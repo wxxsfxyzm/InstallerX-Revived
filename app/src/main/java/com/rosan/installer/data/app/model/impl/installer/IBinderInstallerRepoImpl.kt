@@ -340,6 +340,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         }
     }
 
+    @SuppressLint("RequestInstallPackagesPolicy")
     private fun commit(
         config: ConfigEntity,
         entities: List<InstallEntity>,
@@ -426,9 +427,15 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             // Enable autoDelete only when the containerType is not MULTI_APK_ZIP
             if (config.autoDelete && entities.first().containerType != DataType.MULTI_APK_ZIP) {
                 Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
+                // Improve logging for better debugging
                 coroutineScope.launch {
-                    runCatching { onDeleteWork(config, entities, extraInfo) }.exceptionOrNull()
-                        ?.printStackTrace()
+                    runCatching {
+                        Timber.tag("doFinishWork").d("Attempting to call onDeleteWork.")
+                        onDeleteWork(config, entities, extraInfo)
+                        Timber.tag("doFinishWork").d("onDeleteWork call completed successfully.")
+                    }.onFailure { e ->
+                        Timber.tag("doFinishWork").e(e, "onDeleteWork failed with an exception.")
+                    }
                 }
             }
         }
@@ -441,6 +448,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     ) {
         fun special() = null
         val authorizer = config.authorizer
+
         useUserService(
             config = config,
             special = if (authorizer == ConfigEntity.Authorizer.None
@@ -448,7 +456,6 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             ) ::special
             else null
         ) {
-            Timber.tag("onDeleteWork").d("onDeleteWork: ${entities.sourcePath()}")
             it.privileged.delete(entities.sourcePath())
         }
     }

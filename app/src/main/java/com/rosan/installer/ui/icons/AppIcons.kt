@@ -66,6 +66,7 @@ import androidx.compose.material.icons.twotone.Source
 import androidx.compose.material.icons.twotone.SystemUpdate
 import androidx.compose.material.icons.twotone.TaskAlt
 import androidx.compose.material.icons.twotone.Terminal
+import androidx.compose.material.icons.twotone.Timer
 import androidx.compose.material.icons.twotone.Widgets
 
 /**
@@ -118,6 +119,7 @@ object AppIcons {
     val NotificationDisabled = Icons.Outlined.NotificationsOff
     val AutoNotification = Icons.Outlined.NotificationsActive
     val Ignore = Icons.Outlined.NotInterested
+    val Timer = Icons.TwoTone.Timer
     // --- 安装方式图标结束 ---
 
     // --- 设置图标集合 ---

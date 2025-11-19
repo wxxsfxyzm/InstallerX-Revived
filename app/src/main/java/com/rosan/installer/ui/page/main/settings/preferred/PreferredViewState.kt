@@ -21,6 +21,7 @@ data class PreferredViewState(
     val disableNotificationForDialogInstall: Boolean = false,
     val showDialogWhenPressingNotification: Boolean = true,
     val dhizukuAutoCloseCountDown: Int = 3,
+    val notificationSuccessAutoClearSeconds: Int = 0,
     val versionCompareInSingleLine: Boolean = false,
     val sdkCompareInMultiLine: Boolean = false,
     val showOPPOSpecial: Boolean = false,

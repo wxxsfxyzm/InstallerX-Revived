@@ -38,6 +38,7 @@ class AppDataStore(
 
         // ForegroundInfoHandler
         val SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION = booleanPreferencesKey("show_dialog_when_pressing_notification")
+        val NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS = intPreferencesKey("notification_success_auto_clear_seconds")
 
         // Auto Lock Installer
         val AUTO_LOCK_INSTALLER = booleanPreferencesKey("auto_lock_installer")
@@ -55,7 +56,7 @@ class AppDataStore(
         val APPLY_SHOW_SYSTEM_APP = booleanPreferencesKey("apply_show_system_app")
         val APPLY_SHOW_PACKAGE_NAME = booleanPreferencesKey("apply_show_package_name")
 
-        // DialogViewModel
+        // InstallerViewModel
         val DIALOG_VERSION_COMPARE_SINGLE_LINE =
             booleanPreferencesKey("show_dialog_version_compare_single_line")
         val DIALOG_SDK_COMPARE_MULTI_LINE =

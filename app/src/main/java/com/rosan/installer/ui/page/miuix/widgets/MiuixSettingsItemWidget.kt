@@ -156,6 +156,7 @@ fun MiuixDataInstallModeWidget(
     modifier: Modifier = Modifier,
     currentInstallMode: ConfigEntity.InstallMode,
     changeInstallMode: (ConfigEntity.InstallMode) -> Unit,
+    trailingContent: @Composable () -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -184,10 +185,7 @@ fun MiuixDataInstallModeWidget(
     // for the SuperSpinner component.
     val spinnerEntries = remember(installModeOptions) {
         installModeOptions.values.map { modeInfo ->
-            SpinnerEntry(
-                // icon = { Icon(imageVector = modeInfo.icon, contentDescription = null) },
-                title = context.getString(modeInfo.labelResId)
-            )
+            SpinnerEntry(title = context.getString(modeInfo.labelResId))
         }
     }
 
@@ -206,6 +204,55 @@ fun MiuixDataInstallModeWidget(
             val newMode = installModeOptions.keys.elementAt(newIndex)
             if (currentInstallMode != newMode) {
                 changeInstallMode(newMode)
+            }
+        }
+    )
+    trailingContent()
+}
+
+/**
+ * Widget for selecting notification auto-clear time.
+ */
+@Composable
+fun MiuixAutoClearNotificationTimeWidget(
+    modifier: Modifier = Modifier,
+    currentValue: Int,
+    onValueChange: (Int) -> Unit
+) {
+    val context = LocalContext.current
+    val options = remember { listOf(0, 3, 5, 10, 15, 20, 30) } // 0 means "Never"
+
+    val entries = remember(options) {
+        options.map { time ->
+            val text = if (time == 0) {
+                context.getString(R.string.installer_settings_auto_clear_time_never)
+            } else {
+                context.getString(R.string.installer_settings_auto_clear_time_seconds_format, time)
+            }
+            SpinnerEntry(title = text)
+        }
+    }
+
+    val summaryText = if (currentValue == 0) {
+        stringResource(R.string.installer_settings_auto_clear_time_never)
+    } else {
+        stringResource(R.string.installer_settings_auto_clear_time_seconds_format, currentValue)
+    }
+
+    val selectedIndex = remember(currentValue, options) {
+        options.indexOf(currentValue).coerceAtLeast(0)
+    }
+
+    SuperSpinner(
+        modifier = modifier,
+        title = stringResource(id = R.string.installer_settings_auto_clear_success_notification),
+        summary = stringResource(id = R.string.installer_settings_auto_clear_success_notification_desc),
+        items = entries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            val newValue = options[newIndex]
+            if (currentValue != newValue) {
+                onValueChange(newValue)
             }
         }
     )
