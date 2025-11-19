@@ -555,6 +555,8 @@
     <string name="suggestion_allow_test_app_desc">临时允许测试包并重试</string>
     <string name="suggestion_mi_isolation">临时使用有效的安装者并重试</string>
     <string name="suggestion_mi_isolation_desc">临时以有效安装者身份重试</string>
+    <string name="suggestion_shizuku_isolation">使用 shizuku 重试</string>
+    <string name="suggestion_shizuku_isolation_desc">临时以 shizuku 和有效安装者身份重试</string>
     <string name="suggestion_user_restricted">允许 USB 安装</string>
     <string name="suggestion_user_restricted_desc">前往开发者选项启用 USB 安装</string>
     <string name="suggestion_bypass_low_target_sdk">允许绕过低目标 SDK 限制</string>

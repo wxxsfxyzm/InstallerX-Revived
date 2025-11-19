@@ -570,6 +570,8 @@
     <string name="suggestion_allow_test_app_desc">Temporarily Allow Test and retry</string>
     <string name="suggestion_mi_isolation">Try a valid installer</string>
     <string name="suggestion_mi_isolation_desc">Temporarily add valid installer and retry</string>
+    <string name="suggestion_shizuku_isolation">Try using shizuku</string>
+    <string name="suggestion_shizuku_isolation_desc">Retry using shizuku and valid installer</string>
     <string name="suggestion_user_restricted">Enable USB installation</string>
     <string name="suggestion_user_restricted_desc">Go to Developer options to enable USB installation</string>
     <string name="suggestion_bypass_low_target_sdk">Allow bypassing restrictions</string>
