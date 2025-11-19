@@ -1,12 +1,13 @@
 package com.rosan.installer.data.app.model.entity
 
 /**
- * 包含了分析过程中可能需要的附加信息。
- * @param cacheDirectory 用于存放临时文件的缓存目录路径。
- * @param dataType 【新增】 由顶层分析器确定的文件容器类型。
+ * Includes extra data during analyse
+ * @param cacheDirectory Cache directory to store files
+ * @param dataType The type of data being analysed.
+ * @param isModuleFlashEnabled Whether module flash is enabled.
  */
 data class AnalyseExtraEntity(
     val cacheDirectory: String,
-    // --- 新增字段 ---
-    val dataType: DataType? = null
+    val dataType: DataType? = null,
+    val isModuleFlashEnabled: Boolean = false
 )

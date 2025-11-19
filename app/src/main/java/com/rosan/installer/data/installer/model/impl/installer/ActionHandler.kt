@@ -996,8 +996,19 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         })
     }
 
-    private suspend fun analyseEntities(data: List<DataEntity>): List<PackageAnalysisResult> =
-        AnalyserRepoImpl.doWork(installer.config, data, AnalyseExtraEntity(cacheDirectory))
+    private suspend fun analyseEntities(data: List<DataEntity>): List<PackageAnalysisResult> {
+        val isModuleFlashEnabled = appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false).first()
+        Timber.d("[id=${installer.id}] Module flashing enabled: $isModuleFlashEnabled")
+
+        return AnalyserRepoImpl.doWork(
+            config = installer.config,
+            data = data,
+            extra = AnalyseExtraEntity(
+                cacheDirectory = cacheDirectory,
+                isModuleFlashEnabled = isModuleFlashEnabled
+            )
+        )
+    }
 
     private suspend fun installEntities(
         config: ConfigEntity,
