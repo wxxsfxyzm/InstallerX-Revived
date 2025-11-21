@@ -275,6 +275,9 @@ class InstallerViewModel(
                 if (originalAnalysisResults.isEmpty()) {
                     originalAnalysisResults = repo.analysisResults
                 }
+                repo.analysisResults.forEach { result ->
+                    loadDisplayIcon(result.packageName)
+                }
                 val analysisResults = repo.analysisResults
                 val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType
 
@@ -571,33 +574,70 @@ class InstallerViewModel(
      * @param packageName The package name of the app to load the icon for.
      */
     private fun loadDisplayIcon(packageName: String) {
-        if (packageName.isBlank() || _displayIcons.value.containsKey(packageName))
-        // Do not reload if blank or already loading/loaded.
+        Timber.tag("IconDebug").d("loadDisplayIcon called for: [$packageName]")
+
+        if (packageName.isBlank()) {
+            Timber.tag("IconDebug").d("loadDisplayIcon: packageName is blank, returning.")
+            // Do not reload if blank or already loading/loaded.
             return
+        }
+
+        // --- DEBUG LOG START: 检查防抖逻辑状态 ---
+        val currentMapValue = _displayIcons.value[packageName]
+        val hasKey = _displayIcons.value.containsKey(packageName)
+        val isJobActive = iconJobs[packageName]?.isActive == true
+
+        Timber.tag("IconDebug").d("Status Check -> hasKey: $hasKey, valueInMap: $currentMapValue, isJobActive: $isJobActive")
+
+        if (_displayIcons.value.containsKey(packageName)) {
+            val isLoaded = _displayIcons.value[packageName] != null
+            val isLoading = iconJobs[packageName]?.isActive == true
+            // 如果这里打印了，说明命中了原来的防抖逻辑直接退出了
+            // 如果此时 valueInMap 是 null 且 isJobActive 是 false，那就证明了死锁问题
+            if (isLoaded || isLoading) {
+                Timber.tag("IconDebug")
+                    .d("loadDisplayIcon: Skipped. isLoaded=$isLoaded, isLoading=$isLoading")
+                return
+            }
+        }
+        // --- DEBUG LOG END ---
 
         // Add a placeholder to prevent re-triggering while loading
         // This safely adds the placeholder without risking a lost update.
         _displayIcons.update { currentMap ->
             if (currentMap.containsKey(packageName)) {
+                Timber.tag("IconDebug").d("update: Key already exists in map during placeholder update.")
                 currentMap // Already contains a placeholder or icon, do nothing.
             } else {
+                Timber.tag("IconDebug").d("update: Inserting NULL placeholder into map.")
                 currentMap + (packageName to null)
             }
         }
 
         iconJobs[packageName]?.cancel() // Cancel any existing job for this package name
         iconJobs[packageName] = viewModelScope.launch {
+            Timber.tag("IconDebug").d("Coroutine: Started job for [$packageName]")
+
             // Find the entity from the repo to pass to the repository method
-            val entityToInstall = repo.analysisResults
+            val rawEntities = repo.analysisResults
                 .find { it.packageName == packageName }
                 ?.appEntities
                 ?.map { it.app }
-                ?.filterIsInstance<AppEntity.BaseEntity>()
-                ?.firstOrNull()
+
+            // 打印一下原始能找到的所有实体类型
+            Timber.tag("IconDebug").d("Coroutine: Raw entities found: ${rawEntities?.map { it::class.simpleName }}")
+
+            val entityToInstall = rawEntities?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
+                ?: rawEntities?.filterIsInstance<AppEntity.ModuleEntity>()?.firstOrNull()
+
+            // 打印经过 filterIsInstance<BaseEntity> 筛选后的结果
+            // 如果你是模块，这里大概率是 null
+            Timber.tag("IconDebug").d("Coroutine: Filtered BaseEntity: $entityToInstall")
 
             // Define a generic icon size, could also be passed as a parameter if needed
             val iconSizePx = 256 // A reasonably high resolution
 
+            Timber.tag("IconDebug").d("Coroutine: Calling appIconRepo.getIcon...")
             val loadedIcon = try {
                 Timber.d("Prefer system icon: $viewSettings.preferSystemIconForUpdates")
                 appIconRepo.getIcon(
@@ -609,18 +649,31 @@ class InstallerViewModel(
                 )
             } catch (e: Exception) {
                 // Log the error and return null if icon loading fails
-                Timber.d("Failed to load icon for package $packageName: ${e.message}")
+                Timber.tag("IconDebug").e(e, "Coroutine: Failed to load icon for package $packageName")
                 null
             }
+            Timber.tag("IconDebug").d("Coroutine: appIconRepo returned: $loadedIcon")
+
             // Update the map with the loaded icon, or the fallback icon if it failed.
-            val finalIcon = loadedIcon ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+            val fallbackIcon = ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+            val finalIcon = loadedIcon ?: fallbackIcon
+
+            Timber.tag("IconDebug").d("Coroutine: Final icon to set: $finalIcon (Is fallback? ${finalIcon == fallbackIcon})")
 
             // Create a new map with the updated value
             // This guarantees that setting the final icon won't overwrite other concurrent updates.
             _displayIcons.update { currentMap ->
-                if (currentMap[packageName] == null) {
+                val currentVal = currentMap[packageName]
+                Timber.tag("IconDebug").d("Coroutine: Updating map. Current value in map is: $currentVal")
+
+                if (currentVal == null) {
+                    Timber.tag("IconDebug").d("Coroutine: Success! Updating map with final icon.")
                     currentMap + (packageName to finalIcon)
-                } else currentMap
+                } else {
+                    Timber.tag("IconDebug")
+                        .w("Coroutine: Map was already updated by someone else (value not null), skipping update.")
+                    currentMap
+                }
             }
         }
     }

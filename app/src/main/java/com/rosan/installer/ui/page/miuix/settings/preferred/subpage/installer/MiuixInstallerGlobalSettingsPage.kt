@@ -135,7 +135,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(newMode))
                         }
                     ) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
                             MiuixSwitchWidget(
                                 title = stringResource(R.string.theme_settings_use_live_activity),
                                 description = stringResource(R.string.theme_settings_use_live_activity_desc),
