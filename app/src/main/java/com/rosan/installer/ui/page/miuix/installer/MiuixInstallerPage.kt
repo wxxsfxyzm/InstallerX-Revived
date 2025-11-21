@@ -146,7 +146,12 @@ fun MiuixInstallerPage(
             )
         }
 
-        is InstallerViewState.InstallingModule -> stringResource(R.string.installer_installing_module)
+        is InstallerViewState.InstallingModule -> if (currentState.isFinished) {
+            stringResource(R.string.installer_install_complete)
+        } else {
+            stringResource(R.string.installer_installing_module)
+        }
+
         is InstallerViewState.Installing -> stringResource(R.string.installer_installing)
         is InstallerViewState.InstallCompleted -> stringResource(R.string.installer_install_success)
         is InstallerViewState.InstallSuccess -> stringResource(R.string.installer_install_success)
