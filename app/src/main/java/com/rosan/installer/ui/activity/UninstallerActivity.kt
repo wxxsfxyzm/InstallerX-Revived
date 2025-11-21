@@ -178,35 +178,47 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
 
+            val colorRes =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) colorResource(id = android.R.color.system_accent1_500) else primaryLight
+            val globalColorScheme = remember(uiState, useDarkTheme) {
+                val keyColor = if (uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    colorRes
+                } else {
+                    uiState.seedColor
+                }
+
+                dynamicColorScheme(
+                    keyColor = keyColor,
+                    isDark = useDarkTheme,
+                    style = uiState.paletteStyle
+                )
+            }
+
+            val activeColorSchemeState = remember { mutableStateOf(globalColorScheme) }
+
+            LaunchedEffect(globalColorScheme) {
+                activeColorSchemeState.value = globalColorScheme
+            }
+
             if (uiState.useMiuix) {
-                InstallerMiuixTheme {
+                InstallerMiuixTheme(
+                    darkTheme = useDarkTheme,
+                    themeMode = uiState.themeMode,
+                    useDynamicColor = uiState.useDynamicColor,
+                    useMiuixMonet = uiState.useMiuixMonet,
+                    seedColor = uiState.seedColor
+                ) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        MiuixInstallerPage(installer = currentInstaller)
+                        MiuixInstallerPage(
+                            installer = currentInstaller,
+                            activeColorSchemeState = activeColorSchemeState,
+                            globalColorScheme = globalColorScheme,
+                            isDarkMode = useDarkTheme,
+                            basePaletteStyle = uiState.paletteStyle
+                        )
                     }
                 }
             } else {
-                val colorRes =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) colorResource(id = android.R.color.system_accent1_500) else primaryLight
-                val globalColorScheme = remember(uiState, useDarkTheme) {
-                    val keyColor = if (uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        colorRes
-                    } else {
-                        uiState.seedColor
-                    }
-
-                    dynamicColorScheme(
-                        keyColor = keyColor,
-                        isDark = useDarkTheme,
-                        style = uiState.paletteStyle
-                    )
-                }
-
-                val activeColorSchemeState = remember { mutableStateOf(globalColorScheme) }
-
-                LaunchedEffect(globalColorScheme) {
-                    activeColorSchemeState.value = globalColorScheme
-                }
-
                 InstallerMaterialExpressiveTheme(
                     darkTheme = useDarkTheme,
                     colorScheme = activeColorSchemeState.value,

@@ -37,6 +37,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -72,8 +73,8 @@ fun MiuixAllPage(
 
     val scrollBehavior = MiuixScrollBehavior()
     val hazeStyle = HazeStyle(
-        backgroundColor = MiuixTheme.colorScheme.background,
-        tint = HazeTint(MiuixTheme.colorScheme.background.copy(alpha = 0.8f))
+        backgroundColor = MiuixTheme.colorScheme.surface,
+        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(alpha = 0.8f))
     )
 
     Scaffold(
@@ -124,6 +125,7 @@ fun MiuixAllPage(
                 LazyVerticalStaggeredGrid(
                     modifier = Modifier
                         .fillMaxSize()
+                        .hazeSource(hazeState)
                         .overScrollVertical()
                         .nestedScroll(scrollBehavior.nestedScrollConnection),
                     columns = StaggeredGridCells.Adaptive(350.dp),

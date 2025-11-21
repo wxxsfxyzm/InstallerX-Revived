@@ -151,8 +151,10 @@ class PreferredViewModel(
             is PreferredViewAction.SetThemeMode -> setThemeMode(action.mode)
             is PreferredViewAction.SetPaletteStyle -> setPaletteStyle(action.style)
             is PreferredViewAction.SetUseDynamicColor -> setUseDynamicColor(action.use)
+            is PreferredViewAction.SetUseMiuixMonet -> setUsemiuixMonet(action.use)
             is PreferredViewAction.SetSeedColor -> setSeedColor(action.color)
             is PreferredViewAction.SetDynColorFollowPkgIcon -> setDynColorFollowPkgIcon(action.follow)
+            is PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity -> setDynColorFollowPkgIconForLiveActivity(action.follow)
         }
 
 
@@ -226,11 +228,15 @@ class PreferredViewModel(
                     .map { runCatching { PaletteStyle.valueOf(it) }.getOrDefault(PaletteStyle.TonalSpot) }
             val useDynamicColorFlow =
                 appDataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            val useMiuixMonetFlow =
+                appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false)
             val seedColorFlow =
                 appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
                     .map { Color(it) }
             val useDynColorFollowPkgIconFlow =
                 appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false)
+            val useDynColorFollowPkgIconForLiveActivityFlow =
+                appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false)
 
             combine(
                 authorizerFlow,
@@ -264,8 +270,10 @@ class PreferredViewModel(
                 themeModeFlow,
                 paletteStyleFlow,
                 useDynamicColorFlow,
+                useMiuixMonetFlow,
                 seedColorFlow,
-                useDynColorFollowPkgIconFlow
+                useDynColorFollowPkgIconFlow,
+                useDynColorFollowPkgIconForLiveActivityFlow
             ) { values: Array<Any?> ->
                 var idx = 0
                 val authorizer = values[idx++] as ConfigEntity.Authorizer
@@ -303,8 +311,10 @@ class PreferredViewModel(
                 val themeMode = values[idx++] as ThemeMode
                 val paletteStyle = values[idx++] as PaletteStyle
                 val useDynamicColor = values[idx++] as Boolean
+                val useMiuixMonet = values[idx++] as Boolean
                 val seedColor = values[idx++] as Color
-                val useDynColorFollowPkgIcon = values[idx] as Boolean
+                val useDynColorFollowPkgIcon = values[idx++] as Boolean
+                val useDynColorFollowPkgIconForLiveActivity = values[idx] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
                 PreferredViewState(
@@ -340,8 +350,10 @@ class PreferredViewModel(
                     themeMode = themeMode,
                     paletteStyle = paletteStyle,
                     useDynamicColor = useDynamicColor,
+                    useMiuixMonet = useMiuixMonet,
                     seedColor = seedColor,
-                    useDynColorFollowPkgIcon = useDynColorFollowPkgIcon
+                    useDynColorFollowPkgIcon = useDynColorFollowPkgIcon,
+                    useDynColorFollowPkgIconForLiveActivity = useDynColorFollowPkgIconForLiveActivity
                 )
             }.collectLatest { state = it }
         }
@@ -620,6 +632,10 @@ class PreferredViewModel(
         appDataStore.putBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, use)
     }
 
+    private fun setUsemiuixMonet(use: Boolean) = viewModelScope.launch {
+        appDataStore.putBoolean(AppDataStore.UI_USE_MIUIX_MONET, use)
+    }
+
     private fun setSeedColor(color: Color) = viewModelScope.launch {
         // When user picks a color, automatically turn off dynamic color
         appDataStore.putBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, false)
@@ -629,6 +645,11 @@ class PreferredViewModel(
     private fun setDynColorFollowPkgIcon(enable: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, enable)
+        }
+
+    private fun setDynColorFollowPkgIconForLiveActivity(enable: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, enable)
         }
 
     private suspend fun runPrivilegedAction(

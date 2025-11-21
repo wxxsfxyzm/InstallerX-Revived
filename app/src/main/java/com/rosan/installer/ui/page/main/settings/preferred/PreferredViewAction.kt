@@ -52,6 +52,8 @@ sealed class PreferredViewAction {
     data class SetThemeMode(val mode: ThemeMode) : PreferredViewAction()
     data class SetPaletteStyle(val style: PaletteStyle) : PreferredViewAction()
     data class SetUseDynamicColor(val use: Boolean) : PreferredViewAction()
+    data class SetUseMiuixMonet(val use: Boolean) : PreferredViewAction()
     data class SetSeedColor(val color: Color) : PreferredViewAction()
     data class SetDynColorFollowPkgIcon(val follow: Boolean) : PreferredViewAction()
+    data class SetDynColorFollowPkgIconForLiveActivity(val follow: Boolean) : PreferredViewAction()
 }

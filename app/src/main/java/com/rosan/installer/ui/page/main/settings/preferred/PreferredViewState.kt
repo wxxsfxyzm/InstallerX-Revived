@@ -42,8 +42,10 @@ data class PreferredViewState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val useDynamicColor: Boolean = true,
+    val useMiuixMonet: Boolean = false,
     val seedColor: Color = PresetColors.first().color,
-    val useDynColorFollowPkgIcon: Boolean = false
+    val useDynColorFollowPkgIcon: Boolean = false,
+    val useDynColorFollowPkgIconForLiveActivity: Boolean = false
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 

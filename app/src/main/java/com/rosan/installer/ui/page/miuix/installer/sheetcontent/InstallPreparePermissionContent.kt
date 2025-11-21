@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,9 +34,12 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun InstallPreparePermissionContent(
+    colorScheme: ColorScheme,
+    isDarkMode: Boolean = isSystemInDarkTheme(),
     installer: InstallerRepo,
     viewModel: InstallerViewModel,
     onBack: () -> Unit
@@ -63,7 +67,8 @@ fun InstallPreparePermissionContent(
                 .weight(1f, fill = false)
                 .padding(vertical = 6.dp),
             colors = CardColors(
-                color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
+                color = if (isDynamicColor) colorScheme.surfaceContainer else
+                    if (isDarkMode) miuixSheetCardColorDark else Color.White,
                 contentColor = MiuixTheme.colorScheme.onSurface
             )
         ) {

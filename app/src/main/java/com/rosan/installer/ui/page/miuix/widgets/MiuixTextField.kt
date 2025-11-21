@@ -38,7 +38,7 @@ fun MiuixHintTextField(
 
     // Define colors and calculate animated border properties based on focus state.
     val cornerRadius = 16.dp
-    val backgroundColor = MiuixTheme.colorScheme.surface // Color when not focused
+    val backgroundColor = MiuixTheme.colorScheme.surfaceContainer // Color when not focused
     val focusedBorderColor = MiuixTheme.colorScheme.primary // Color when focused
 
     // Animate border width: 2dp when focused, 0dp when not focused.

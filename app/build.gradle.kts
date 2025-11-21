@@ -92,7 +92,7 @@ android {
         getByName("release") {
             signingConfig =
                 if (hasCustomSigning) {
-                    println("Applying 'releaseCustom' signing to debug build.")
+                    println("Applying 'releaseCustom' signing to release build.")
                     signingConfigs.getByName("releaseCustom")
                 } else {
                     println("No custom signing info. Debug build will use the default debug keystore.")

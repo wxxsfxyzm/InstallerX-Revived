@@ -25,7 +25,9 @@ class AppDataStore(
         val THEME_USE_DYNAMIC_COLOR = booleanPreferencesKey("theme_use_dynamic_color")
         val THEME_SEED_COLOR = intPreferencesKey("theme_seed_color")
         val UI_USE_MIUIX = booleanPreferencesKey("ui_use_miui_x")
+        val UI_USE_MIUIX_MONET = booleanPreferencesKey("ui_use_miui_x_monet")
         val UI_DYN_COLOR_FOLLOW_PKG_ICON = booleanPreferencesKey("ui_dyn_color_follow_pkg_icon")
+        val LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON = booleanPreferencesKey("live_activity_dyn_color_follow_pkg_icon")
 
         // Show Live Activity
         val SHOW_LIVE_ACTIVITY = booleanPreferencesKey("show_live_activity")

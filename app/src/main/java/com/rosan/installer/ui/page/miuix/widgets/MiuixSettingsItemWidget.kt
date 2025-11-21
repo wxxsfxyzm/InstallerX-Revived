@@ -47,6 +47,7 @@ import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.theme.m3color.ThemeMode
 import com.rosan.installer.ui.util.MIN_FEEDBACK_DURATION_MS
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.getDirectorySize
@@ -197,7 +198,7 @@ fun MiuixDataInstallModeWidget(
     SuperSpinner(
         modifier = modifier,
         title = stringResource(id = R.string.config_install_mode),
-        // summary = spinnerEntries[selectedIndex].title,
+        summary = stringResource(R.string.config_install_mode_desc),
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
@@ -220,7 +221,7 @@ fun MiuixAutoClearNotificationTimeWidget(
     onValueChange: (Int) -> Unit
 ) {
     val context = LocalContext.current
-    val options = remember { listOf(0, 5, 10, 15, 20, 30) } // 0 means "Never"
+    val options = remember { listOf(0, 3, 5, 10, 15, 20, 30) } // 0 means "Never"
 
     val entries = remember(options) {
         options.map { time ->
@@ -231,12 +232,6 @@ fun MiuixAutoClearNotificationTimeWidget(
             }
             SpinnerEntry(title = text)
         }
-    }
-
-    val summaryText = if (currentValue == 0) {
-        stringResource(R.string.installer_settings_auto_clear_time_never)
-    } else {
-        stringResource(R.string.installer_settings_auto_clear_time_seconds_format, currentValue)
     }
 
     val selectedIndex = remember(currentValue, options) {
@@ -608,6 +603,61 @@ fun MiuixManagedPackagesWidget(
             }
         )
     }
+}
+
+/**
+ * A SuperSpinner widget for selecting the application's theme mode (Light, Dark, or System).
+ *
+ * @param modifier The modifier to be applied to the SuperSpinner.
+ * @param currentThemeMode The currently selected ThemeMode.
+ * @param onThemeModeChange A callback that is invoked when the theme mode selection changes.
+ */
+@Composable
+fun MiuixThemeModeWidget(
+    modifier: Modifier = Modifier,
+    currentThemeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit,
+) {
+    val context = LocalContext.current
+
+    // Map of ThemeMode enum to its corresponding string resource ID.
+    val themeModeOptions = remember {
+        // The order in the map definition determines the order in the spinner.
+        mapOf(
+            ThemeMode.LIGHT to R.string.theme_settings_theme_mode_light,
+            ThemeMode.DARK to R.string.theme_settings_theme_mode_dark,
+            ThemeMode.SYSTEM to R.string.theme_settings_theme_mode_system
+        )
+    }
+
+    // Convert the map of options to a list of SpinnerEntry for the SuperSpinner component.
+    // The order of items in the list is important for index mapping.
+    val spinnerEntries = remember(themeModeOptions) {
+        themeModeOptions.entries.map { entry ->
+            SpinnerEntry(title = context.getString(entry.value))
+        }
+    }
+
+    // Calculate the selected index based on the current theme mode.
+    // It finds the index of the currentThemeMode in the ordered list of keys.
+    val selectedIndex = remember(currentThemeMode, themeModeOptions) {
+        themeModeOptions.keys.indexOf(currentThemeMode).coerceAtLeast(0)
+    }
+
+    SuperSpinner(
+        modifier = modifier,
+        title = stringResource(id = R.string.theme_settings_theme_mode),
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            // Retrieve the new ThemeMode based on the selected index.
+            val newMode = themeModeOptions.keys.elementAt(newIndex)
+            // Invoke the callback only if the mode has actually changed.
+            if (currentThemeMode != newMode) {
+                onThemeModeChange(newMode)
+            }
+        }
+    )
 }
 
 /**

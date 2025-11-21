@@ -59,7 +59,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -129,8 +128,8 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             val snackBarHostState = remember { SnackbarHostState() }
             val hazeState = remember { HazeState() }
             val hazeStyle = HazeStyle(
-                backgroundColor = MiuixTheme.colorScheme.background,
-                tint = HazeTint(MiuixTheme.colorScheme.background.copy(0.8f))
+                backgroundColor = MiuixTheme.colorScheme.surface,
+                tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
             )
 
             // LaunchedEffect to handle snackbar events from AllViewModel
@@ -206,7 +205,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                     ) {
                         FloatingActionButton(
                             modifier = Modifier.padding(end = 16.dp),
-                            containerColor = MiuixTheme.colorScheme.surface,
+                            containerColor = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.background,
                             shadowElevation = 2.dp,
                             onClick = { navController.navigate(MiuixSettingsScreen.Builder.MiuixEditConfig(null).route) }
                         ) {
@@ -214,7 +213,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                                 imageVector = AppIcons.Add,
                                 modifier = Modifier.size(40.dp),
                                 contentDescription = stringResource(id = R.string.add),
-                                tint = MiuixTheme.colorScheme.primary
+                                tint = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.primary
                             )
                         }
                     }
@@ -227,9 +226,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                     allViewModel = allViewModel,
                     preferredViewModel = preferredViewModel,
                     navigationItems = navigationItems,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .hazeSource(hazeState),
+                    modifier = Modifier.fillMaxSize(),
                     outerPadding = paddingValues
                 )
             }

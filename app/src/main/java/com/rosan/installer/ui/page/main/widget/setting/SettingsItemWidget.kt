@@ -278,6 +278,7 @@ fun DataInstallModeWidget(
         BaseWidget(
             icon = AppIcons.InstallMode,
             title = stringResource(R.string.config_install_mode),
+            description = stringResource(R.string.config_install_mode_desc),
             content = {}
         )
 

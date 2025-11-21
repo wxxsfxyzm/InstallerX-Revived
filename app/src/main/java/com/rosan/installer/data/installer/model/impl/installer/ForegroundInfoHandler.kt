@@ -58,7 +58,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val showDialog: Boolean,
         val showLiveActivity: Boolean,
         val autoCloseNotification: Int,
-        val preferSystemIcon: Boolean
+        val preferSystemIcon: Boolean,
+        val preferDynamicColor: Boolean
     )
 
     private var job: Job? = null
@@ -79,7 +80,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             showDialog = appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true).first(),
             showLiveActivity = appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false).first(),
             autoCloseNotification = appDataStore.getInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, 0).first(),
-            preferSystemIcon = appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first()
+            preferSystemIcon = appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first(),
+            preferDynamicColor = appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
         )
 
         job = scope.launch {
@@ -104,7 +106,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     // This is the main branching point. It decides which notification style to use.
                     val notification =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && settings.showLiveActivity) {
-                            buildModernNotification(progress, settings.showDialog, settings.preferSystemIcon)
+                            buildModernNotification(
+                                progress = progress,
+                                showDialog = settings.showDialog,
+                                preferSystemIcon = settings.preferSystemIcon,
+                                preferDynamicColor = settings.preferDynamicColor
+                            )
                         } else {
                             buildLegacyNotification(progress, true, settings.showDialog, settings.preferSystemIcon)
                         }
@@ -177,17 +184,18 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun buildModernNotification(
         progress: ProgressEntity,
         showDialog: Boolean,
-        preferSystemIcon: Boolean = false
+        preferSystemIcon: Boolean = false,
+        preferDynamicColor: Boolean = false
     ): Notification? {
         if (progress is ProgressEntity.Finish || progress is ProgressEntity.Error || progress is ProgressEntity.InstallAnalysedUnsupported) {
             return null
         }
-        val builder = newModernNotificationBuilder(progress, showDialog, preferSystemIcon)
+        val builder = newModernNotificationBuilder(progress, showDialog, preferSystemIcon, preferDynamicColor)
 
         // Finalize notification content for terminal states, which might require async operations.
         return when (progress) {
-            is ProgressEntity.InstallFailed -> onInstallFailed(builder).build()
-            is ProgressEntity.InstallSuccess -> onInstallSuccess(builder).build()
+            is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
+            is ProgressEntity.InstallSuccess -> onInstallSuccess(builder, preferSystemIcon).build()
             else -> builder.build()
         }
     }
@@ -199,7 +207,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun newModernNotificationBuilder(
         progress: ProgressEntity,
         showDialog: Boolean,
-        preferSystemIcon: Boolean = false
+        preferSystemIcon: Boolean = false,
+        preferDynamicColor: Boolean = false
     ): NotificationCompat.Builder {
         val channel = NotificationChannelCompat.Builder(
             Channel.InstallerLiveChannel.value,
@@ -229,13 +238,15 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val seedColorInt = installer.analysisResults.firstNotNullOfOrNull { it.seedColor }
 
         // Generate a dynamic color scheme if a seed color was found
-        val dynamicColorScheme = seedColorInt?.let { color ->
-            dynamicColorScheme(
-                keyColor = Color(color),
-                isDark = isDarkTheme,
-                style = PaletteStyle.TonalSpot
-            )
-        }
+        val dynamicColorScheme = if (preferDynamicColor) {
+            seedColorInt?.let { color ->
+                dynamicColorScheme(
+                    keyColor = Color(color),
+                    isDark = isDarkTheme,
+                    style = PaletteStyle.TonalSpot
+                )
+            }
+        } else null
 
         // --- New Weighted & Dynamic Progress Logic ---
         // Find the current stage's information.
@@ -504,8 +515,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallAnalysedFailed -> onAnalysedFailed(builder)
             is ProgressEntity.InstallAnalysedSuccess -> onAnalysedSuccess(builder, preferSystemIcon)
             is ProgressEntity.Installing -> onInstalling(builder, preferSystemIcon)
-            is ProgressEntity.InstallFailed -> onInstallFailed(builder).build()
-            is ProgressEntity.InstallSuccess -> onInstallSuccess(builder).build()
+            is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
+            is ProgressEntity.InstallSuccess -> onInstallSuccess(builder, preferSystemIcon).build()
             is ProgressEntity.Finish, is ProgressEntity.Error, is ProgressEntity.InstallAnalysedUnsupported -> null
             else -> null // TODO temporarily disable uninstall notification
         }
@@ -655,8 +666,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .setLargeIcon(getLargeIconBitmap(preferSystemIcon)).build()
     }
 
-    private fun onInstallFailed(
-        builder: NotificationCompat.Builder
+    private suspend fun onInstallFailed(
+        builder: NotificationCompat.Builder,
+        preferSystemIcon: Boolean
     ): NotificationCompat.Builder {
         val info = installer.analysisResults
             .flatMap { it.appEntities }
@@ -673,11 +685,15 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return builder.setContentTitle(info.title) // Return builder directly
             .setContentText(contentText)
             .setStyle(bigTextStyle)
+            .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
             .addAction(0, getString(R.string.retry), installIntent)
             .addAction(0, getString(R.string.cancel), finishIntent)
     }
 
-    private fun onInstallSuccess(builder: NotificationCompat.Builder): NotificationCompat.Builder {
+    private suspend fun onInstallSuccess(
+        builder: NotificationCompat.Builder,
+        preferSystemIcon: Boolean
+    ): NotificationCompat.Builder {
         val entities = installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }
@@ -704,6 +720,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         var newBuilder = builder.setContentTitle(info.title)
             .setContentText(getString(R.string.installer_install_success))
+            .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
         if (openPendingIntent != null)
             newBuilder = newBuilder.addAction(0, getString(R.string.open), openPendingIntent)
 

@@ -120,8 +120,8 @@ fun NewInstallerGlobalSettingsPage(
             item {
                 SplicedColumnGroup(
                     title = stringResource(R.string.installer_settings_global_installer),
-                    content = listOf(
-                        {
+                    content = buildList {
+                        add {
                             DataAuthorizerWidget(
                                 currentAuthorizer = state.authorizer,
                                 changeAuthorizer = {
@@ -150,33 +150,40 @@ fun NewInstallerGlobalSettingsPage(
                                     )
                                 }
                             }
-                        },
-                        {
+                        }
+                        add {
                             DataInstallModeWidget(
                                 currentInstallMode = state.installMode,
                                 changeInstallMode = {
                                     viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(it))
                                 }
-                            ) {
-                                AnimatedVisibility(
-                                    visible = isNotificationMode,
-                                    enter = fadeIn() + expandVertically(),
-                                    exit = fadeOut() + shrinkVertically()
-                                ) {
-                                    AutoClearNotificationTimeWidget(
-                                        currentValue = state.notificationSuccessAutoClearSeconds,
-                                        onValueChange = { seconds ->
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(
-                                                    seconds
-                                                )
-                                            )
-                                        }
+                            )
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                            add {
+                                SwitchWidget(
+                                    icon = AppIcons.LiveActivity,
+                                    title = stringResource(R.string.theme_settings_use_live_activity),
+                                    description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                    checked = state.showLiveActivity,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(PreferredViewAction.ChangeShowLiveActivity(it))
+                                    }
+                                )
+                            }
+                        add {
+                            AutoClearNotificationTimeWidget(
+                                currentValue = state.notificationSuccessAutoClearSeconds,
+                                onValueChange = { seconds ->
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(
+                                            seconds
+                                        )
                                     )
                                 }
-                            }
+                            )
                         }
-                    )
+                    }
                 )
             }
 
@@ -273,17 +280,6 @@ fun NewInstallerGlobalSettingsPage(
                                     checked = state.showDialogWhenPressingNotification,
                                     onCheckedChange = {
                                         viewModel.dispatch(PreferredViewAction.ChangeShowDialogWhenPressingNotification(it))
-                                    }
-                                )
-                            },
-                            DynamicSettingItem(Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && (isDialogMode || isNotificationMode)) {
-                                SwitchWidget(
-                                    icon = AppIcons.LiveActivity,
-                                    title = stringResource(R.string.theme_settings_use_live_activity),
-                                    description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                                    checked = state.showLiveActivity,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(PreferredViewAction.ChangeShowLiveActivity(it))
                                     }
                                 )
                             },

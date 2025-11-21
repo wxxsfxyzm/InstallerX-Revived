@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,7 +27,7 @@ import top.yukonga.miuix.kmp.basic.patched.ProgressButtonDefaults
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-fun InstallPreparingContent(viewModel: InstallerViewModel) {
+fun InstallPreparingContent(colorScheme: ColorScheme, viewModel: InstallerViewModel) {
     val currentState = viewModel.state
     val progress = if (currentState is InstallerViewState.Preparing) {
         currentState.progress

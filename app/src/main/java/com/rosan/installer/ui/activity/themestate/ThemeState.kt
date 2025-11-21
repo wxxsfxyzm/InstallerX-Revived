@@ -19,6 +19,7 @@ data class ThemeUiState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val useDynamicColor: Boolean = true,
+    val useMiuixMonet: Boolean = false,
     val seedColor: Color = PresetColors.first().color
 )
 
@@ -32,27 +33,35 @@ fun createThemeUiStateFlow(dataStore: AppDataStore): Flow<ThemeUiState> {
     val useMiuixFlow = dataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
     val themeModeFlow = dataStore.getString(AppDataStore.THEME_MODE, ThemeMode.SYSTEM.name)
         .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
-    val paletteStyleFlow =
-        dataStore.getString(AppDataStore.THEME_PALETTE_STYLE, PaletteStyle.TonalSpot.name)
-            .map { runCatching { PaletteStyle.valueOf(it) }.getOrDefault(PaletteStyle.TonalSpot) }
+    val paletteStyleFlow = dataStore.getString(AppDataStore.THEME_PALETTE_STYLE, PaletteStyle.TonalSpot.name)
+        .map { runCatching { PaletteStyle.valueOf(it) }.getOrDefault(PaletteStyle.TonalSpot) }
     val useDynamicColorFlow = dataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, true)
-    val seedColorFlow =
-        dataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
-            .map { Color(it) }
+    val useMiuixMonetFlow = dataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false)
+    val seedColorFlow = dataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
+        .map { Color(it) }
 
     return combine(
         useMiuixFlow,
         themeModeFlow,
         paletteStyleFlow,
         useDynamicColorFlow,
+        useMiuixMonetFlow,
         seedColorFlow
-    ) { useMiuix, themeMode, paletteStyle, useDynamic, seedColor ->
+    ) { values: Array<Any?> ->
+        var idx = 0
+        val useMiuix = values[idx++] as Boolean
+        val themeMode = values[idx++] as ThemeMode
+        val paletteStyle = values[idx++] as PaletteStyle
+        val useDynamic = values[idx++] as Boolean
+        val useMonet = values[idx++] as Boolean
+        val seedColor = values[idx] as Color
         ThemeUiState(
             isLoaded = true,
             useMiuix = useMiuix,
             themeMode = themeMode,
             paletteStyle = paletteStyle,
             useDynamicColor = useDynamic,
+            useMiuixMonet = useMonet,
             seedColor = seedColor
         )
     }

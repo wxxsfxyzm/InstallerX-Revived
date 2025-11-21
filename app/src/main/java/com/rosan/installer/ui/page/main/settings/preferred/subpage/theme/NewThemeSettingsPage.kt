@@ -268,6 +268,18 @@ fun NewThemeSettingsPage(
                                     }
                                 )
                             }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && state.showLiveActivity)
+                                add {
+                                    SwitchWidget(
+                                        icon = Icons.TwoTone.Colorize,
+                                        title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
+                                        description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
+                                        checked = state.useDynColorFollowPkgIconForLiveActivity,
+                                        onCheckedChange = {
+                                            viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity(it))
+                                        }
+                                    )
+                                }
                         }
                     )
                 }
@@ -288,52 +300,59 @@ fun NewThemeSettingsPage(
                         SplicedColumnGroup(
                             title = stringResource(R.string.theme_settings_theme_color),
                             content =
-                                listOf {
-                                    BoxWithConstraints(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 12.dp, vertical = 16.dp)
-                                    ) {
-                                        val itemMinWidth = 88.dp
+                                buildList {
+                                    add(
+                                        @Composable {
+                                            BoxWithConstraints(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 12.dp, vertical = 16.dp)
+                                            ) {
+                                                val itemMinWidth = 88.dp
 
-                                        val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
+                                                val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
 
-                                        val chunkedColors = PresetColors.chunked(columns)
+                                                val chunkedColors = PresetColors.chunked(columns)
 
-                                        Column(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            chunkedColors.forEach { rowItems ->
-                                                Row(
+                                                Column(
                                                     modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.Center
+                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
                                                 ) {
-                                                    rowItems.forEach { namedColor ->
-                                                        Box(
-                                                            modifier = Modifier.weight(1f),
-                                                            contentAlignment = Alignment.Center
+                                                    chunkedColors.forEach { rowItems ->
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            horizontalArrangement = Arrangement.Center
                                                         ) {
-                                                            ColorSwatchPreview(
-                                                                rawColor = namedColor,
-                                                                currentStyle = state.paletteStyle,
-                                                                isSelected = !state.useDynamicColor && state.seedColor == namedColor.color
-                                                            ) {
-                                                                viewModel.dispatch(PreferredViewAction.SetSeedColor(namedColor.color))
+                                                            rowItems.forEach { namedColor ->
+                                                                Box(
+                                                                    modifier = Modifier.weight(1f),
+                                                                    contentAlignment = Alignment.Center
+                                                                ) {
+                                                                    ColorSwatchPreview(
+                                                                        rawColor = namedColor,
+                                                                        currentStyle = state.paletteStyle,
+                                                                        isSelected = !state.useDynamicColor && state.seedColor == namedColor.color
+                                                                    ) {
+                                                                        viewModel.dispatch(
+                                                                            PreferredViewAction.SetSeedColor(
+                                                                                namedColor.color
+                                                                            )
+                                                                        )
+                                                                    }
+                                                                }
                                                             }
-                                                        }
-                                                    }
 
-                                                    val remaining = columns - rowItems.size
-                                                    if (remaining > 0) {
-                                                        repeat(remaining) {
-                                                            Spacer(Modifier.weight(1f))
+                                                            val remaining = columns - rowItems.size
+                                                            if (remaining > 0) {
+                                                                repeat(remaining) {
+                                                                    Spacer(Modifier.weight(1f))
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
-                                        }
-                                    }
+                                        })
                                 }
                         )
                     }
@@ -383,6 +402,7 @@ fun NewThemeSettingsPage(
                     }
                 )
             }
+            item { Spacer(modifier = Modifier.height(12.dp)) }
         }
     }
 }

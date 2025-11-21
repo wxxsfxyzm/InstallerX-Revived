@@ -58,10 +58,14 @@
     <string name="theme_settings_palette_style">Palette Style</string>
     <string name="theme_settings_palette_style_desc">Select palette style</string>
     <string name="theme_settings_dynamic_color">Dynamic Color</string>
+    <string name="theme_settings_dynamic_color_miuix_desc">Enable monet color for miuix</string>
     <string name="theme_settings_dynamic_color_desc">Theme color based on wallpaper</string>
+    <string name="theme_settings_dynamic_color_follow_system">Follow system theme color</string>
     <string name="theme_settings_theme_color">Theme Color</string>
     <string name="theme_settings_dynamic_color_follow_icon">Colorful Dialog</string>
     <string name="theme_settings_dynamic_color_follow_icon_desc">The installation dialog will no longer follow the app’s theme colors. Instead, it will use colors extracted from the icon of the package being installed</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon">Colorful Live Activity Progress</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">The progress segment of the live activity will use colors extracted from the icon of the package</string>
     <string name="color_default">Default</string>
     <string name="color_pink">Pink</string>
     <string name="color_red">Red</string>
@@ -154,6 +158,7 @@
     <string name="config_authorizer_customize">Custom</string>
     <string name="config_customize_authorizer">Custom authorizer</string>
     <string name="config_install_mode">Install mode</string>
+    <string name="config_install_mode_desc">Default Install Mode and related settings</string>
     <string name="config_install_mode_global">Global</string>
     <string name="config_install_mode_global_desc">Global (%1$s)</string>
     <string name="config_install_mode_dialog">Dialog</string>
