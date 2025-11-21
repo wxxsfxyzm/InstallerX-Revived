@@ -275,6 +275,9 @@ class InstallerViewModel(
                 if (originalAnalysisResults.isEmpty()) {
                     originalAnalysisResults = repo.analysisResults
                 }
+                repo.analysisResults.forEach { result ->
+                    loadDisplayIcon(result.packageName)
+                }
                 val analysisResults = repo.analysisResults
                 val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType
 
@@ -571,56 +574,58 @@ class InstallerViewModel(
      * @param packageName The package name of the app to load the icon for.
      */
     private fun loadDisplayIcon(packageName: String) {
-        if (packageName.isBlank() || _displayIcons.value.containsKey(packageName))
-        // Do not reload if blank or already loading/loaded.
-            return
+        if (packageName.isBlank()) return
 
-        // Add a placeholder to prevent re-triggering while loading
-        // This safely adds the placeholder without risking a lost update.
+        val mapSnapshot = _displayIcons.value
+        val currentValue = mapSnapshot[packageName]
+        val existingJob = iconJobs[packageName]
+        val isLoaded = currentValue != null
+        val isJobActive = existingJob?.isActive == true
+
+        if (currentValue != null || isJobActive) {
+            return
+        }
+
         _displayIcons.update { currentMap ->
             if (currentMap.containsKey(packageName)) {
-                currentMap // Already contains a placeholder or icon, do nothing.
+                currentMap
             } else {
                 currentMap + (packageName to null)
             }
         }
 
-        iconJobs[packageName]?.cancel() // Cancel any existing job for this package name
+        existingJob?.cancel()
         iconJobs[packageName] = viewModelScope.launch {
-            // Find the entity from the repo to pass to the repository method
-            val entityToInstall = repo.analysisResults
+            val rawEntities = repo.analysisResults
                 .find { it.packageName == packageName }
                 ?.appEntities
                 ?.map { it.app }
-                ?.filterIsInstance<AppEntity.BaseEntity>()
-                ?.firstOrNull()
 
-            // Define a generic icon size, could also be passed as a parameter if needed
-            val iconSizePx = 256 // A reasonably high resolution
+            val entityToInstall =
+                rawEntities?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
+                    ?: rawEntities?.filterIsInstance<AppEntity.ModuleEntity>()?.firstOrNull()
 
             val loadedIcon = try {
-                Timber.d("Prefer system icon: $viewSettings.preferSystemIconForUpdates")
                 appIconRepo.getIcon(
                     sessionId = repo.id,
                     packageName = packageName,
                     entityToInstall = entityToInstall,
-                    iconSizePx = iconSizePx,
+                    iconSizePx = 256,
                     preferSystemIcon = viewSettings.preferSystemIconForUpdates
                 )
             } catch (e: Exception) {
-                // Log the error and return null if icon loading fails
-                Timber.d("Failed to load icon for package $packageName: ${e.message}")
                 null
             }
-            // Update the map with the loaded icon, or the fallback icon if it failed.
-            val finalIcon = loadedIcon ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
 
-            // Create a new map with the updated value
-            // This guarantees that setting the final icon won't overwrite other concurrent updates.
+            val finalIcon =
+                loadedIcon ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+
             _displayIcons.update { currentMap ->
                 if (currentMap[packageName] == null) {
                     currentMap + (packageName to finalIcon)
-                } else currentMap
+                } else {
+                    currentMap
+                }
             }
         }
     }

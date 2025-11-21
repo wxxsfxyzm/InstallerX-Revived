@@ -75,7 +75,6 @@ fun MiuixThemeSettingsPage(
     navController: NavController,
     viewModel: PreferredViewModel,
 ) {
-    val context = LocalContext.current
     val state = viewModel.state
     val scrollBehavior = MiuixScrollBehavior()
     val hazeState = remember { HazeState() }
