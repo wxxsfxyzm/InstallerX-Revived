@@ -2,6 +2,7 @@ package com.rosan.installer.data.recycle.util
 
 import com.rosan.installer.IPrivilegedService
 import com.rosan.installer.data.recycle.model.entity.DefaultPrivilegedService
+import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
 import com.rosan.installer.data.recycle.model.impl.DhizukuUserServiceRecycler
 import com.rosan.installer.data.recycle.model.impl.ProcessUserServiceRecyclers
 import com.rosan.installer.data.recycle.model.impl.ShizukuHookRecycler
@@ -53,12 +54,21 @@ fun useUserService(
     action: (UserService) -> Unit
 ) {
     val recycler = getRecyclableInstance(authorizer, customizeAuthorizer, useShizukuHookMode, special)
-    if (recycler != null) {
-        Timber.tag("useUserService").e("use $authorizer Privileged Service: $recycler")
-        recycler.use { action.invoke(it.entity) }
-    } else {
-        Timber.tag("useUserService").e("Use Default User Service")
-        action.invoke(DefaultUserService)
+    try {
+        if (recycler != null) {
+            Timber.tag("useUserService").e("use $authorizer Privileged Service: $recycler")
+            recycler.use { action.invoke(it.entity) }
+        } else {
+            Timber.tag("useUserService").e("Use Default User Service")
+            action.invoke(DefaultUserService)
+        }
+    } catch (e: IllegalStateException) {
+        // Specifically catch the Shizuku runtime binder error for any privileged action.
+        if (authorizer == ConfigEntity.Authorizer.Shizuku && e.message?.contains("binder haven't been received") == true) {
+            throw ShizukuNotWorkException("Shizuku service connection lost during privileged action.", e)
+        }
+        // Re-throw any other exception.
+        throw e
     }
 }
 
