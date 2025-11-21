@@ -382,7 +382,16 @@ fun MiuixInstallerPage(
                                     installer = installer,
                                     viewModel = viewModel,
                                     onCancel = closeSheet,
-                                    onInstall = { viewModel.dispatch(InstallerViewAction.Install) }
+                                    onInstall = {
+                                        viewModel.dispatch(InstallerViewAction.Install)
+                                        if (settings.autoSilentInstall && !viewModel.isInstallingModule) {
+                                            showBottomSheet.value = false
+                                            scope.launch {
+                                                delay(SHEET_ANIMATION_DURATION)
+                                                viewModel.dispatch(InstallerViewAction.Background)
+                                            }
+                                        }
+                                    }
                                 )
                             }
                         }

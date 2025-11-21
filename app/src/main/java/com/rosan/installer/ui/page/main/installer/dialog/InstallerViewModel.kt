@@ -712,15 +712,8 @@ class InstallerViewModel(
 
     private fun install() {
         autoInstallJob?.cancel()
-
-        if (viewSettings.autoSilentInstall && !isInstallingModule && (state is InstallerViewState.InstallPrepare || state is InstallerViewState.InstallFailed)) {
-            Timber.d("Auto-install triggered for APK-only installation. Going to background.")
-            repo.install()
-            repo.background(true)
-        } else {
-            Timber.d("Standard foreground installation triggered. Contains Module: $isInstallingModule")
-            repo.install()
-        }
+        Timber.d("Standard foreground installation triggered. Contains Module: $isInstallingModule")
+        repo.install()
     }
 
     private fun background() {
