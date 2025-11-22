@@ -556,4 +556,10 @@
     <string name="lab_module_flashing">Habilitar flasheamento de módulo</string>
     <string name="lab_module_flashing_desc">Pense duas vezes e sempre confira antes de flashear qualquer módulo!</string>
     <string name="lab_module_select_root_impl">Escolha a implementação de root</string>
+    <string name="installer_settings_auto_clear_time_seconds_format">%d segundos</string>
+    <string name="installer_settings_auto_clear_success_notification">Limpar notificação automaticamente</string>
+    <string name="installer_settings_auto_clear_success_notification_desc">Limpar automaticamente a notificação após uma instalação bem-sucedida</string>
+    <string name="installer_settings_auto_clear_time_never">Nunca</string>
+    <string name="suggestion_shizuku_isolation">Tentar usando o Shizuku</string>
+    <string name="suggestion_shizuku_isolation_desc">Tente novamente usando o Shizuku e um instalador válido</string>
 </resources>
