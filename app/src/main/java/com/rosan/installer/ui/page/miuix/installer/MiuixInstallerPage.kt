@@ -406,16 +406,11 @@ fun MiuixInstallerPage(
                 is InstallerViewState.Installing -> {
                     // TODO Show a progress indicator during installation.
                     InstallingContent(
+                        colorScheme = colorScheme,
                         baseEntity = baseEntity,
                         appIcon = appIcon,
                         // progress = installProgress,
-                        progressTextRes = installProgressTextRes,
-                        onButtonClick = {
-                            scope.launch {
-                                delay(SHEET_ANIMATION_DURATION)
-                                viewModel.dispatch(InstallerViewAction.Background)
-                            }
-                        }
+                        progressTextRes = installProgressTextRes
                     )
                 }
 
