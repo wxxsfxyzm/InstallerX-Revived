@@ -5,13 +5,10 @@ import com.rosan.installer.build.Architecture
 
 sealed class AppEntity {
     abstract val packageName: String
-
     abstract val name: String
-
+    abstract val data: DataEntity
     abstract val targetSdk: String?
-
     abstract val minSdk: String?
-
     abstract val arch: Architecture?
 
     // each app entity may have a container type, such as a split APK or a collection
@@ -20,7 +17,7 @@ sealed class AppEntity {
     data class BaseEntity(
         override val packageName: String,
         val sharedUserId: String?,
-        val data: DataEntity,
+        override val data: DataEntity,
         val versionCode: Long,
         val versionName: String,
         val label: String?,
@@ -40,7 +37,7 @@ sealed class AppEntity {
 
     data class SplitEntity(
         override val packageName: String,
-        val data: DataEntity,
+        override val data: DataEntity,
         val splitName: String,
         override val targetSdk: String?,
         override val minSdk: String?,
@@ -52,7 +49,7 @@ sealed class AppEntity {
 
     data class DexMetadataEntity(
         override val packageName: String,
-        val data: DataEntity,
+        override val data: DataEntity,
         val dmName: String,
         override val targetSdk: String?,
         override val minSdk: String?,
@@ -64,7 +61,7 @@ sealed class AppEntity {
 
     data class CollectionEntity(
         override val packageName: String = "com.rosan.installer.collection.${System.nanoTime()}",
-        val data: DataEntity,
+        override val data: DataEntity,
         override val targetSdk: String? = null,
         override val minSdk: String? = null,
         override val arch: Architecture? = null,
@@ -83,7 +80,7 @@ sealed class AppEntity {
         val versionCode: Long,
         val author: String,
         val description: String,
-        val data: DataEntity,
+        override val data: DataEntity,
         override val containerType: DataType? = null
     ) : AppEntity() {
         override val packageName: String

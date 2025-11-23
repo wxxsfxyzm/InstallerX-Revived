@@ -21,10 +21,15 @@ import com.rosan.installer.data.app.model.impl.analyser.XApkAnalyserRepoImpl
 import com.rosan.installer.data.app.repo.AnalyserRepo
 import com.rosan.installer.data.app.repo.FileAnalyserRepo
 import com.rosan.installer.data.app.util.calculateSHA256
+import com.rosan.installer.data.app.util.sourcePath
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.convertLegacyLanguageCode
 import com.rosan.installer.util.isLanguageCode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import timber.log.Timber
@@ -40,11 +45,8 @@ object AnalyserRepoImpl : AnalyserRepo {
         config: ConfigEntity,
         data: List<DataEntity>,
         extra: AnalyseExtraEntity
-    ): List<PackageAnalysisResult> {
-        // --- Logic to analyse data and return a list of AppEntity ---
-        // A list to hold all raw analysis results before final processing.
-        val rawAppsWithoutHash = mutableListOf<AppEntity>()
-        // A map of all available analysers for different file types.
+    ): List<PackageAnalysisResult> = coroutineScope {
+        // 1. ANALYZE: Parse files in parallel
         val analysers: Map<DataType, FileAnalyserRepo> = mapOf(
             DataType.APK to ApkAnalyserRepoImpl,
             DataType.APKS to ApksAnalyserRepoImpl,
@@ -55,196 +57,149 @@ object AnalyserRepoImpl : AnalyserRepo {
             DataType.MIXED_MODULE_APK to MixedModuleApkAnalyserRepoImpl,
             DataType.MIXED_MODULE_ZIP to MixedModuleZipAnalyserRepoImpl
         )
-        // This loop processes every file/data source provided by the user.
-        for (dataEntity in data) {
-            // Determine the type of the current file (APK, APKS, etc.)
-            val fileType = getDataType(config, dataEntity, extra)
-            // ?: continue // If type is null for any reason, just skip to the next file.
 
-            // Instead of throwing an exception, just skip the invalid file.
-            if (fileType == DataType.NONE) {
-                Timber.w("Skipping unsupported file: ${dataEntity.getSourceTop()}")
-                continue // Continue to the next file in the loop.
-            }
+        val rawEntities = data.map { dataEntity ->
+            async(Dispatchers.IO) {
+                val fileType = getDataType(config, dataEntity, extra)
+                if (fileType == DataType.NONE) {
+                    // 优化点 1：日志中使用 sourcePath()，更直观
+                    Timber.w("Skipping unsupported file: ${dataEntity.sourcePath()}")
+                    return@async emptyList<AppEntity>()
+                }
 
-            // Get the appropriate analyser for this file type.
-            val analyser = analysers[fileType]
-                ?: throw Exception("No analyser found for data type: '$fileType'")
+                val analyser = analysers[fileType]
+                    ?: throw Exception("No analyser found for data type: '$fileType'")
 
-            // Run the specific analyser for this file.
-            // We pass the file's own type for now. The final containerType will be decided later.
-            val analysedEntities = analyser.doWork(
-                config,
-                listOf(dataEntity), // Pass only the current entity to the sub-analyser
-                extra.copy(dataType = fileType)
-            )
-            rawAppsWithoutHash.addAll(analysedEntities)
-        }
-
-        // If after analyzing all files, no app entities were produced, return empty.
-        if (rawAppsWithoutHash.isEmpty()) {
-            return emptyList()
-        }
-
-        val needsDeDuplication = rawAppsWithoutHash
-            .filterIsInstance<AppEntity.BaseEntity>()
-            .groupBy { it.packageName }
-            .any { it.value.size > 1 }
-
-        // Calculate hash values for all entities if needed.
-        val rawApps = if (needsDeDuplication) {
-            Timber.d("Multiple base entities for the same package detected. Calculating file hashes for de-duplication.")
-            rawAppsWithoutHash.map { entity ->
-                if (entity is AppEntity.BaseEntity) {
-                    val path = (entity.data as? DataEntity.FileEntity)?.path
-                    val hash = path?.let { File(it).calculateSHA256() }
-                    entity.copy(fileHash = hash)
-                } else {
-                    entity
+                try {
+                    analyser.doWork(config, listOf(dataEntity), extra.copy(dataType = fileType))
+                } catch (e: Exception) {
+                    // 优化点 1：日志中使用 sourcePath()
+                    Timber.e(e, "Failed to analyze file: ${dataEntity.sourcePath()}")
+                    emptyList()
                 }
             }
-        } else {
-            Timber.d("Single install entity detected. Skipping hash calculation.")
-            rawAppsWithoutHash
-        }
+        }.awaitAll().flatten()
 
-        // --- Group the analysis results by package name ---
-        // This is the key step to differentiate single-app vs multi-app installs.
-        val groupedByPackage = rawApps.groupBy { it.packageName }
+        if (rawEntities.isEmpty()) return@coroutineScope emptyList()
 
-        // --- Determine the final installation type and correct entity properties ---
-        val finalResults = mutableListOf<PackageAnalysisResult>()
+        // PRE-PROCESS: Group, Deduplicate, and Fetch System Info in PARALLEL
+        val packageGroups = rawEntities.groupBy { it.packageName }
 
-        // A multi-app session is defined by having multiple packages, OR having multiple
-        // base APKs within a single package (e.g., different versions of the same app).
-        // However, a single MIXED_MODULE_APK can also produce multiple packages, but should be treated as a single session.
-        val isMultiPackage = groupedByPackage.size > 1
-        val hasMultipleBasesInSinglePackage = !isMultiPackage && rawApps.count { it is AppEntity.BaseEntity } > 1
-        val isFromSingleFile = rawApps.map { entity ->
-            when (entity) {
-                is AppEntity.BaseEntity -> entity.data.getSourceTop()
-                is AppEntity.SplitEntity -> entity.data.getSourceTop()
-                is AppEntity.DexMetadataEntity -> entity.data.getSourceTop()
-                is AppEntity.CollectionEntity -> entity.data.getSourceTop()
-                is AppEntity.ModuleEntity -> entity.data.getSourceTop()
+        data class ProcessedGroup(
+            val packageName: String,
+            val entities: List<AppEntity>,
+            val installedInfo: InstalledAppInfo?
+        )
+
+        val processedGroups = packageGroups.map { (packageName, entities) ->
+            async(Dispatchers.IO) {
+                // Deduplication (Lazy Hashing)
+                val baseEntities = entities.filterIsInstance<AppEntity.BaseEntity>()
+                val uniqueEntities = if (baseEntities.size > 1) {
+                    Timber.d("Duplicate base entities found for $packageName. Calculating hashes to deduplicate.")
+
+                    val hashedBases = baseEntities.map { entity ->
+                        async {
+                            val path = entity.data.sourcePath()
+                            val hash = path?.let { File(it).calculateSHA256() }
+                            entity.copy(fileHash = hash)
+                        }
+                    }.awaitAll()
+
+                    val distinctBases = hashedBases.distinctBy { it.fileHash }
+                    distinctBases + entities.filter { it !is AppEntity.BaseEntity }
+                } else {
+                    entities
+                }
+
+                // B. Fetch Installed App Info
+                val installedInfo = InstalledAppInfo.buildByPackageName(packageName)
+
+                ProcessedGroup(packageName, uniqueEntities, installedInfo)
             }
-        }.distinct().size == 1
-        val originalContainerType = rawApps.firstOrNull()?.containerType
+        }.awaitAll()
+
+        // 3. DECIDE: Determine Global Session Type
+        val allEntities = processedGroups.flatMap { it.entities }
+
+        val isMultiPackage = processedGroups.size > 1
+        val hasMultipleBasesInSinglePackage = !isMultiPackage &&
+                allEntities.count { it is AppEntity.BaseEntity } > 1
+
+        // 优化点 3：使用 sourcePath() 来判断所有 Entity 是否来自同一个源文件
+        // mapNotNull 过滤掉了无法获取路径的内存对象（如果有的话），distinct 比较路径字符串比比较 DataEntity 对象更准确
+        val sourcePaths = allEntities.mapNotNull { it.data.sourcePath() }.distinct()
+        val isFromSingleFile = sourcePaths.size == 1
+
+        val firstContainerType = allEntities.firstOrNull()?.containerType
 
         val isMultiAppSession = if (isFromSingleFile &&
-            originalContainerType == DataType.MIXED_MODULE_APK ||
-            originalContainerType == DataType.MIXED_MODULE_ZIP
+            (firstContainerType == DataType.MIXED_MODULE_APK || firstContainerType == DataType.MIXED_MODULE_ZIP)
         ) {
-            false // SPECIAL CASE: A single mixed module/apk file is NOT a multi-app session.
+            false
         } else {
-            isMultiPackage || hasMultipleBasesInSinglePackage // Use original logic for all other cases
+            isMultiPackage || hasMultipleBasesInSinglePackage
         }
 
         val sessionContainerType = if (isMultiAppSession) {
-            // This is a multi-app install scenario.
-            if (isMultiPackage) {
-                Timber.d("Determined install type: Multi-App (found ${groupedByPackage.size} unique packages).")
-            } else {
-                Timber.d("Determined install type: Multi-App (multiple base APKs found for a single package).")
-            }
-            // If the original source was a ZIP file containing multiple APKs, preserve its type.
-            // Otherwise, it's a generic multi-APK session from multiple file shares.
-            val originalContainerType = rawApps.firstOrNull()?.containerType
-            if (originalContainerType == DataType.MULTI_APK_ZIP) {
-                DataType.MULTI_APK_ZIP
-            } else {
-                DataType.MULTI_APK
-            }
+            if (firstContainerType == DataType.MULTI_APK_ZIP) DataType.MULTI_APK_ZIP else DataType.MULTI_APK
         } else {
-            // This is a single-app install (e.g., one APK, or one base + splits).
-            Timber.d("Determined install type: Single-App (all files for '${groupedByPackage.keys.first()}').")
-            rawApps.first().containerType ?: DataType.APK
+            firstContainerType ?: DataType.APK
         }
 
-        // Iterate over each package group to build the final result
-        groupedByPackage.forEach { (packageName, entitiesInPackage) ->
-            // Fetch information about the currently installed package.
-            // This logic is now part of the backend analysis, not the ViewModel.
-            val installedAppInfo = InstalledAppInfo.buildByPackageName(packageName)
+        Timber.d("Analysis Decision: MultiApp=$isMultiAppSession, Type=$sessionContainerType, Source=${if (isFromSingleFile) "SingleFile" else "MultiFile"}")
 
-            // Find the base entity to get the new signature
-            val baseEntity = entitiesInPackage.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+        // BUILD: Construct Final Results
+        val finalResults = processedGroups.map { group ->
+            val packageName = group.packageName
+            val entities = group.entities
+            val installedAppInfo = group.installedInfo
+
+            val baseEntity = entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
             val newApkSignatureHash = baseEntity?.signatureHash
-            Timber.d("Signature hash for $packageName: $newApkSignatureHash")
-            // --- SIGNATURE COMPARISON LOGIC ---
+
             val signatureMatchStatus = when {
-                installedAppInfo == null -> {
-                    // The app is not installed yet.
-                    SignatureMatchStatus.NOT_INSTALLED
-                }
-
-                newApkSignatureHash.isNullOrBlank() || installedAppInfo.signatureHash.isNullOrBlank() -> {
-                    // We failed to get a signature from either the APK or the installed app.
-                    Timber.w("Could not compare signatures. New: '$newApkSignatureHash', Installed: '${installedAppInfo.signatureHash}'")
-                    SignatureMatchStatus.UNKNOWN_ERROR
-                }
-
-                newApkSignatureHash == installedAppInfo.signatureHash -> {
-                    // Signatures match, this is a safe update.
-                    Timber.d("Signatures match for $packageName.")
-                    SignatureMatchStatus.MATCH
-                }
-
-                else -> {
-                    // Signatures DO NOT match. This is a potential issue.
-                    Timber.w("SIGNATURE MISMATCH for $packageName. New: '$newApkSignatureHash', Installed: '${installedAppInfo.signatureHash}'")
-                    SignatureMatchStatus.MISMATCH
-                }
+                installedAppInfo == null -> SignatureMatchStatus.NOT_INSTALLED
+                newApkSignatureHash.isNullOrBlank() || installedAppInfo.signatureHash.isNullOrBlank() -> SignatureMatchStatus.UNKNOWN_ERROR
+                newApkSignatureHash == installedAppInfo.signatureHash -> SignatureMatchStatus.MATCH
+                else -> SignatureMatchStatus.MISMATCH
             }
-            // --- END OF SIGNATURE LOGIC ---
 
-            // --- Post-process all entities to apply corrections ---
-            val correctedEntities = mutableListOf<AppEntity>()
-            // moved upwards
-            // val baseEntity = entitiesInPackage.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
             val authoritativeTargetSdk = baseEntity?.targetSdk
-
-            entitiesInPackage.forEach { entity ->
-                var correctedEntity = entity
-
-                // Correct the containerType for all entities based on our final decision.
-                correctedEntity = when (correctedEntity) {
-                    is AppEntity.BaseEntity -> correctedEntity.copy(containerType = sessionContainerType)
-                    is AppEntity.SplitEntity -> correctedEntity.copy(containerType = sessionContainerType)
-                    is AppEntity.DexMetadataEntity -> correctedEntity.copy(containerType = sessionContainerType)
-                    is AppEntity.CollectionEntity -> correctedEntity.copy(containerType = sessionContainerType)
-                    is AppEntity.ModuleEntity -> correctedEntity.copy(containerType = sessionContainerType)
+            val correctedEntities = entities.map { entity ->
+                var corrected = when (entity) {
+                    is AppEntity.BaseEntity -> entity.copy(containerType = sessionContainerType)
+                    is AppEntity.SplitEntity -> entity.copy(containerType = sessionContainerType)
+                    is AppEntity.DexMetadataEntity -> entity.copy(containerType = sessionContainerType)
+                    is AppEntity.CollectionEntity -> entity.copy(containerType = sessionContainerType)
+                    is AppEntity.ModuleEntity -> entity.copy(containerType = sessionContainerType)
                 }
 
-                // Correct the targetSdk for splits and metadata if a base entity exists.
                 if (authoritativeTargetSdk != null) {
-                    correctedEntity = when (correctedEntity) {
-                        is AppEntity.SplitEntity -> correctedEntity.copy(targetSdk = authoritativeTargetSdk)
-                        is AppEntity.DexMetadataEntity -> correctedEntity.copy(targetSdk = authoritativeTargetSdk)
-                        else -> correctedEntity // BaseEntity and others are already correct.
+                    corrected = when (corrected) {
+                        is AppEntity.SplitEntity -> corrected.copy(targetSdk = authoritativeTargetSdk)
+                        is AppEntity.DexMetadataEntity -> corrected.copy(targetSdk = authoritativeTargetSdk)
+                        else -> corrected
                     }
                 }
-                correctedEntities.add(correctedEntity)
+                corrected
             }
 
             val selectableEntities = determineDefaultSelections(correctedEntities, sessionContainerType)
-            // Create the final result object for this package
-            finalResults.add(
-                PackageAnalysisResult(
-                    packageName = packageName,
-                    appEntities = selectableEntities,
-                    installedAppInfo = installedAppInfo,
-                    signatureMatchStatus = signatureMatchStatus
-                )
+
+            PackageAnalysisResult(
+                packageName = packageName,
+                appEntities = selectableEntities,
+                installedAppInfo = installedAppInfo,
+                signatureMatchStatus = signatureMatchStatus
             )
         }
 
-        return finalResults
+        return@coroutineScope finalResults
     }
 
     /**
-     * Determines the data type of a given file, respecting the global setting for module installation.
-     * This method is now significantly simplified as it only needs to handle FileEntity.
+     * Determines the data type of a given file.
      */
     private fun getDataType(config: ConfigEntity, data: DataEntity, extra: AnalyseExtraEntity): DataType {
         val fileEntity = data as? DataEntity.FileEntity
@@ -252,13 +207,21 @@ object AnalyserRepoImpl : AnalyserRepo {
 
         return try {
             ZipFile(fileEntity.path).use { zipFile ->
+
+                // OPTIMIZATION: Retrieve entries once as a list to avoid traversing the zip central directory multiple times.
+                // This is crucial for performance on large zip files (like XAPKs or huge flashable zips).
+                val entries = zipFile.entries().asSequence().toList()
+
                 // --- Check for module-related types ONLY if the feature is enabled.
                 if (extra.isModuleFlashEnabled) {
-                    val hasModuleProp = zipFile.getEntry("module.prop") != null || zipFile.getEntry("common/module.prop") != null
+                    // Check logic using the pre-fetched entries list
+                    val hasModuleProp = entries.any {
+                        it.name == "module.prop" || it.name == "common/module.prop"
+                    }
+
                     if (hasModuleProp) {
                         val hasAndroidManifest = zipFile.getEntry("AndroidManifest.xml") != null
-                        val hasApksInside =
-                            zipFile.entries().toList().any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }
+                        val hasApksInside = entries.any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }
 
                         return@use when {
                             hasAndroidManifest -> {
@@ -278,8 +241,6 @@ object AnalyserRepoImpl : AnalyserRepo {
                         }
                     }
                 } else {
-                    // If module flashing is disabled, we will not even check for module.prop.
-                    // Any file containing it will be treated as a regular APK or ZIP file.
                     Timber.d("Module flashing is disabled. Skipping module-specific checks.")
                 }
 
@@ -300,10 +261,10 @@ object AnalyserRepoImpl : AnalyserRepo {
                     return@use DataType.XAPK
                 }
 
-                val entries = zipFile.entries().toList()
-
+                // OPTIMIZATION: Reuse the 'entries' list we fetched earlier.
                 var hasBaseApk = false
                 var hasSplitApk = false
+
                 for (entry in entries) {
                     if (entry.isDirectory || !entry.name.endsWith(".apk", ignoreCase = true)) continue
                     val entryName = File(entry.name).name
@@ -311,8 +272,10 @@ object AnalyserRepoImpl : AnalyserRepo {
                         hasBaseApk = true
                     else
                         hasSplitApk = true
+                    // Break early if both are found
                     if (hasBaseApk && hasSplitApk) break
                 }
+
                 if (hasBaseApk && hasSplitApk) {
                     Timber.d("Detected APKS structure without a manifest.")
                     return@use DataType.APKS
@@ -335,46 +298,30 @@ object AnalyserRepoImpl : AnalyserRepo {
         }
     }
 
-    /**
-     * Uses the ZipFile API to check if the info.json in the APKM is genuine.
-     *
-     * @author wxxsfxyzm
-     * @param zipFile ZipFile Object
-     * @param entry ZipEntry (info.json) to check
-     * @return true if the info.json is a genuine APKM info file.
-     */
     private fun isGenuineApkmInfo(zipFile: ZipFile, entry: ZipEntry): Boolean =
         try {
             zipFile.getInputStream(entry).use { inputStream ->
                 val content = inputStream.bufferedReader().use(BufferedReader::readText)
-
-                // Use kotlinx.serialization to parse the JSON content.
                 val jsonElement = Json.parseToJsonElement(content)
-
-                // Check if the JSON element is an object and contains the "apkm_version" key.
                 jsonElement is JsonObject && jsonElement.containsKey("apkm_version")
             }
         } catch (e: Exception) {
-            // Catch all exceptions to ensure we handle any issues gracefully.
-            // This includes IO exceptions, parsing errors, and serialization exceptions.
             Timber.e(e, "Failed to parse info.json as genuine APKM info.")
             false
         }
 
-    /**
-     * Determines the default selection state for a list of entities.
-     * This method contains the business logic moved from ActionHandler.
-     */
     private fun determineDefaultSelections(
         entities: List<AppEntity>,
         containerType: DataType?
     ): List<SelectInstallEntity> {
         val finalSelectEntities = mutableListOf<SelectInstallEntity>()
         val isMultiAppMode = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
+
         if (containerType == DataType.MIXED_MODULE_APK || containerType == DataType.MIXED_MODULE_ZIP) {
             Timber.d("Mixed Module/APK detected. Setting all entities to be de-selected by default.")
             return entities.map { SelectInstallEntity(it, selected = false) }
         }
+
         if (isMultiAppMode) {
             // --- Multi App Mode Logic ---
             val allBaseEntities = entities.filterIsInstance<AppEntity.BaseEntity>()
@@ -400,6 +347,7 @@ object AnalyserRepoImpl : AnalyserRepo {
         } else {
             // --- Single App Mode Logic ---
             val splits = entities.filterIsInstance<AppEntity.SplitEntity>()
+            // Only calculate optimal splits if there are splits to process
             val optimalSplits = if (splits.isNotEmpty()) findOptimalSplits(splits).toSet() else emptySet()
 
             val processedEntities = entities.map { entity ->
@@ -422,33 +370,17 @@ object AnalyserRepoImpl : AnalyserRepo {
 
     private data class ParsedSplit(
         val category: SplitCategory,
-        val value: String, // The extracted value, e.g., "arm64-v8a", "xhdpi", "en"
+        val value: String,
         val entity: AppEntity.SplitEntity
     )
 
-    /**
-     * Parses a raw split name into a clean configuration value.
-     * This logic is now robust against filenames containing dots.
-     *
-     * Example transformations:
-     * - "split_config.arm64_v8a.apk" -> "arm64_v8a"
-     * - "split_phonesky_data_loader.config.arm64_v8a.apk" -> "arm64_v8a"
-     * - "split_config_zh.apk" -> "zh"
-     * - "split_phonesky_data_loader.apk" -> "phonesky_data_loader"
-     */
     private fun AppEntity.SplitEntity.getCleanConfigValue(): String {
-        // Safely remove only the .apk suffix
         val nameWithoutApk = this.splitName.removeSuffix(".apk")
 
-        // Remove the standard split_ prefix
         val strippedPrefix = nameWithoutApk
             .removePrefix("split_")
             .removePrefix("base-")
 
-        // Extract the actual config value. This is the crucial part.
-        // If ".config." exists, take the part after the last occurrence.
-        // Otherwise, if it starts with "config.", remove that prefix.
-        // If neither, use the whole string (for feature splits like "phonesky_data_loader").
         val configValue = if (strippedPrefix.contains(".config.")) {
             strippedPrefix.substringAfterLast(".config.")
         } else if (strippedPrefix.startsWith("config.")) {
@@ -457,23 +389,17 @@ object AnalyserRepoImpl : AnalyserRepo {
             strippedPrefix
         }
 
-        Timber.d("-> Parsing split '${this.splitName}': raw='${configValue}'")
+        // Timber.v("-> Parsing split '${this.splitName}': raw='${configValue}'") // Reduce log noise
         return configValue
     }
 
-    /**
-     * Finds the most suitable split APKs from a list based on the current device's configuration.
-     * This version implements the final, correct selection logic for each category.
-     *
-     * @param splits The list of all available SplitEntity objects.
-     * @return A list containing only the best-matching splits for each category.
-     */
     private fun findOptimalSplits(splits: List<AppEntity.SplitEntity>): List<AppEntity.SplitEntity> {
         if (splits.isEmpty()) return emptyList()
 
         Timber.d("--- Begin findOptimalSplits for ${splits.size} splits ---")
 
         // Parse and categorize all splits
+        // OPTIMIZATION: Perform mapping once and group immediately.
         val parsedSplits = splits.mapNotNull { split ->
             val rawConfigValue = split.getCleanConfigValue()
             if (rawConfigValue.isEmpty()) {
@@ -490,7 +416,6 @@ object AnalyserRepoImpl : AnalyserRepo {
 
                 else -> SplitCategory.FEATURE
             }
-            Timber.d("   > Categorized '$rawConfigValue' (from ${split.splitName}) as $category")
 
             val normalizedValue = rawConfigValue.replace('_', '-')
             ParsedSplit(category, normalizedValue, split)
@@ -500,88 +425,71 @@ object AnalyserRepoImpl : AnalyserRepo {
         val optimalSplits = mutableListOf<AppEntity.SplitEntity>()
 
         // Select BEST ABI
-        val abiSplitsGroups = categorized[SplitCategory.ABI]?.groupBy { it.value } ?: emptyMap()
-        if (abiSplitsGroups.isNotEmpty()) {
+        categorized[SplitCategory.ABI]?.let { abiSplits ->
+            val abiSplitsGroups = abiSplits.groupBy { it.value }
             val deviceAbis = RsConfig.supportedArchitectures.map { it.arch }
-            Timber.d("Device ABIs (priority order): $deviceAbis")
-            Timber.d("Available ABI splits: ${abiSplitsGroups.keys}")
-
             val normalizedDeviceAbis = deviceAbis.map { it.replace('_', '-') }
+
             // Find the single best ABI that is available
             val bestAbi = normalizedDeviceAbis.firstOrNull { abi -> abiSplitsGroups.containsKey(abi) }
 
             if (bestAbi != null) {
-                Timber.d("   -> Best ABI match is '$bestAbi'. Selecting all splits for this ABI.")
-                // Add all splits for that best ABI ONLY
-                abiSplitsGroups.getValue(bestAbi).forEach { optimalSplits.add(it.entity) }
-            } else {
-                Timber.w("No matching ABI splits found for this device's architectures.")
+                Timber.d("   -> Best ABI match is '$bestAbi'.")
+                abiSplitsGroups[bestAbi]?.forEach { optimalSplits.add(it.entity) }
             }
         }
 
         // Select BEST Density
-        val densitySplitsGroups = categorized[SplitCategory.DENSITY]?.groupBy { it.value } ?: emptyMap()
-        if (densitySplitsGroups.isNotEmpty()) {
+        categorized[SplitCategory.DENSITY]?.let { densitySplits ->
+            val densitySplitsGroups = densitySplits.groupBy { it.value }
             val deviceDensities = RsConfig.supportedDensities.map { it.key }
-            Timber.d("Device Densities (priority order): $deviceDensities")
-            Timber.d("Available Density splits: ${densitySplitsGroups.keys}")
 
             val bestDensity = deviceDensities.firstOrNull { density -> densitySplitsGroups.containsKey(density) }
 
             if (bestDensity != null) {
-                Timber.d("   -> Best Density match is '$bestDensity'. Selecting.")
-                densitySplitsGroups.getValue(bestDensity).forEach { optimalSplits.add(it.entity) }
+                Timber.d("   -> Best Density match is '$bestDensity'.")
+                densitySplitsGroups[bestDensity]?.forEach { optimalSplits.add(it.entity) }
             }
-            // Include 'nodpi' if it exists, as it's universal
-            // TODO is there a nodpi split ?
-            /*densitySplitsGroups["nodpi"]?.let {
-                Timber.d("   -> Found 'nodpi' split(s). Selecting.")
-                it.forEach { p -> optimalSplits.add(p.entity) }
-            }*/
         }
 
         // Select BEST Language
-        val langSplitsGroups =
-            categorized[SplitCategory.LANGUAGE]?.groupBy { it.value.convertLegacyLanguageCode() } ?: emptyMap()
-        if (langSplitsGroups.isNotEmpty()) {
-            val applicationLanguages = langSplitsGroups.keys
-            Timber.d("Available Language splits: $applicationLanguages")
+        categorized[SplitCategory.LANGUAGE]?.let { langSplits ->
+            val langSplitsGroups = langSplits.groupBy { it.value.convertLegacyLanguageCode() }
             val deviceLanguages = RsConfig.supportedLocales
-            Timber.d("Device Languages (priority order): $deviceLanguages")
-            var langFound = false
-            // First, try for an exact match (e.g., 'zh-cn')
-            for (lang in deviceLanguages) {
-                val modernLang = lang.convertLegacyLanguageCode()
-                if (langSplitsGroups.containsKey(modernLang)) {
-                    Timber.d("   -> Found best Language match (exact): '$modernLang'. Selecting.")
-                    langSplitsGroups.getValue(modernLang).forEach { optimalSplits.add(it.entity) }
-                    langFound = true
-                    break
+
+            // OPTIMIZATION: Simplified logic to find best language match (Exact > Base)
+            var bestLangMatch: String? = null
+
+            // 1. Try Exact Match
+            bestLangMatch = deviceLanguages.map { it.convertLegacyLanguageCode() }
+                .firstOrNull { langSplitsGroups.containsKey(it) }
+
+            // 2. If no exact match, Try Base Match (e.g., 'zh' matches 'zh-cn')
+            if (bestLangMatch == null) {
+                bestLangMatch = deviceLanguages.map { it.convertLegacyLanguageCode().substringBefore('-') }
+                    .firstOrNull { baseLang -> langSplitsGroups.keys.any { it.startsWith(baseLang) } }
+                // Note: The original logic selected the split key itself.
+                // If we match base, we need to know WHICH split key matched.
+                // Re-adopting original robust logic but cleaner:
+                if (bestLangMatch != null) {
+                    // Find the actual key in the map that corresponds to this base language
+                    bestLangMatch = langSplitsGroups.keys.firstOrNull { it.startsWith(bestLangMatch!!) }
                 }
             }
-            // If no exact match, try for a base language match (e.g., 'zh')
-            if (!langFound) {
-                for (lang in deviceLanguages) {
-                    val baseLang = lang.convertLegacyLanguageCode().substringBefore('-')
-                    if (langSplitsGroups.containsKey(baseLang)) {
-                        Timber.d("   -> Found best Language match (base): '$baseLang'. Selecting.")
-                        langSplitsGroups.getValue(baseLang).forEach { optimalSplits.add(it.entity) }
-                        langFound = true
-                        break
-                    }
-                }
+
+            if (bestLangMatch != null) {
+                Timber.d("   -> Best Language match is '$bestLangMatch'.")
+                langSplitsGroups[bestLangMatch]?.forEach { optimalSplits.add(it.entity) }
             }
         }
 
         // ALWAYS include all feature splits
         categorized[SplitCategory.FEATURE]?.forEach {
-            Timber.d("   -> Including feature split: '${it.value}'")
+            // Timber.d("   -> Including feature split: '${it.value}'")
             optimalSplits.add(it.entity)
         }
 
         Timber.d("--- Finished findOptimalSplits. Total selected: ${optimalSplits.distinct().size} ---")
-        val result = optimalSplits.distinct()
-        result.forEach { Timber.d("   >> Final Selected: ${it.splitName}") }
-        return result
+        return optimalSplits.distinct()
     }
 }

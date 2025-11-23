@@ -8,8 +8,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,11 +24,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.twotone.Colorize
@@ -38,7 +33,6 @@ import androidx.compose.material.icons.twotone.InvertColors
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -58,9 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -69,6 +61,7 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
@@ -79,9 +72,8 @@ import com.rosan.installer.ui.theme.m3color.PaletteStyle
 import com.rosan.installer.ui.theme.m3color.PresetColors
 import com.rosan.installer.ui.theme.m3color.RawColor
 import com.rosan.installer.ui.theme.m3color.ThemeMode
-import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
 import com.rosan.installer.ui.theme.none
-import com.rosan.installer.ui.util.getDisplayName
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 // This is now a top-level composable, likely in its own file.
 // It takes NavController instead of an onBack lambda.
@@ -341,6 +333,8 @@ fun NewThemeSettingsPage(
                                                                         ColorSwatchPreview(
                                                                             rawColor = namedColor,
                                                                             currentStyle = state.paletteStyle,
+                                                                            textStyle = MiuixTheme.textStyles.footnote1,
+                                                                            textColor = MiuixTheme.colorScheme.onSurface,
                                                                             isSelected = !state.useDynamicColor && state.seedColor == namedColor.color
                                                                         ) {
                                                                             viewModel.dispatch(
@@ -354,6 +348,8 @@ fun NewThemeSettingsPage(
                                                                         ColorSwatchPreview(
                                                                             rawColor,
                                                                             currentStyle = state.paletteStyle,
+                                                                            textStyle = MiuixTheme.textStyles.footnote1,
+                                                                            textColor = MiuixTheme.colorScheme.onSurface,
                                                                             isSelected = state.seedColor == rawColor.color
                                                                         ) {
                                                                             viewModel.dispatch(
@@ -509,100 +505,4 @@ internal fun ThemeModeDialog(
             }
         }
     )
-}
-
-
-@Composable
-internal fun ColorSwatchPreview(
-    rawColor: RawColor,
-    currentStyle: PaletteStyle,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val isDarkForPreview = false
-    val scheme = remember(rawColor.color, currentStyle, isDarkForPreview) {
-        dynamicColorScheme(
-            keyColor = rawColor.color,
-            isDark = isDarkForPreview,
-            style = currentStyle
-        )
-    }
-
-    val primaryForSwatch = scheme.primaryContainer.copy(alpha = 0.9f)
-    val secondaryForSwatch = scheme.secondaryContainer.copy(alpha = 0.6f)
-    val tertiaryForSwatch = scheme.tertiaryContainer.copy(alpha = 0.9f)
-
-    val squircleBackgroundColor = scheme.primary.copy(alpha = 0.3f)
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .background(color = squircleBackgroundColor, shape = RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    drawArc(
-                        color = primaryForSwatch,
-                        startAngle = 180f,
-                        sweepAngle = 180f,
-                        useCenter = true
-                    )
-                    drawArc(
-                        color = tertiaryForSwatch,
-                        startAngle = 90f,
-                        sweepAngle = 90f,
-                        useCenter = true
-                    )
-                    drawArc(
-                        color = secondaryForSwatch,
-                        startAngle = 0f,
-                        sweepAngle = 90f,
-                        useCenter = true
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(scheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isSelected) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Selected",
-                            tint = scheme.inversePrimary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-            }
-        }
-
-        val displayName = rawColor.getDisplayName(LocalContext.current)
-        if (displayName != rawColor.key) {
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = displayName,
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
 }

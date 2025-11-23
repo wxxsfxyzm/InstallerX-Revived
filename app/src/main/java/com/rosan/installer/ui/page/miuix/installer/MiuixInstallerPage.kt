@@ -447,6 +447,7 @@ fun MiuixInstallerPage(
                     else
                         InstallFailedContent(
                             colorScheme = colorScheme,
+                            isDarkMode = isDarkMode,
                             baseEntity = baseEntity,
                             appIcon = appIcon,
                             installer = installer,

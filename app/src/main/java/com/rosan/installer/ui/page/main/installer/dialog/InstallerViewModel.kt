@@ -365,13 +365,7 @@ class InstallerViewModel(
      * @param progress The original ProgressEntity that triggered the update.
      */
     private fun handleStateSideEffects(newPackageName: String?, newState: InstallerViewState, progress: ProgressEntity) {
-        // --- 1. Manage loading indicator job ---
-        if (progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallAnalysedFailed) {
-            loadingStateJob?.cancel()
-            loadingStateJob = null
-        }
-
-        // --- 2. Update current package name ---
+        // --- Update current package name ---
         if (newPackageName != _currentPackageName.value) {
             _currentPackageName.value = newPackageName
             if (newPackageName != null) {
@@ -379,7 +373,7 @@ class InstallerViewModel(
             }
         }
 
-        // --- 3. UNIFIED DYNAMIC COLOR LOGIC ---
+        // --- UNIFIED DYNAMIC COLOR LOGIC ---
         if (viewSettings.useDynColorFollowPkgIcon) {
             val colorInt: Int? = when (newState) {
                 // For install states, get color from analysis results
@@ -405,7 +399,7 @@ class InstallerViewModel(
             _seedColor.value = null
         }
 
-        // --- 4. Manage auto-install job ---
+        // --- Manage auto-install job ---
         autoInstallJob?.cancel() // Cancel any previous auto-install job by default.
         if (newState is InstallerViewState.InstallPrepare && repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
             autoInstallJob = viewModelScope.launch {
@@ -417,7 +411,6 @@ class InstallerViewModel(
         }
     }
 
-    // Replace your existing collectRepo with this refactored version
     private fun collectRepo(repo: InstallerRepo) {
         this.repo = repo
         if (repo.config.enableCustomizeUser) {
@@ -464,6 +457,9 @@ class InstallerViewModel(
                     }
                     return@collect // Don't proceed to full state-machine for these transient states.
                 }
+
+                loadingStateJob?.cancel()
+                loadingStateJob = null
 
                 // --- Stage 2: Map the progress to a new view state ---
                 val newState = mapProgressToViewState(progress)

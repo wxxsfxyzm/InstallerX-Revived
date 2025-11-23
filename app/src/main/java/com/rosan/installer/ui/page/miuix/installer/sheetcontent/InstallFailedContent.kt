@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.StringRes
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,11 +53,13 @@ import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import kotlin.reflect.KClass
 
 @Composable
 fun InstallFailedContent(
     colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     baseEntity: AppEntity.BaseEntity?,
     appIcon: Drawable?,
     installer: InstallerRepo,
@@ -84,6 +85,8 @@ fun InstallFailedContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
         MiuixErrorSuggestions(
+            colorScheme = colorScheme,
+            isDarkMode = isDarkMode,
             error = installer.error,
             viewModel = viewModel,
             installer = installer
@@ -104,6 +107,8 @@ fun InstallFailedContent(
 
 @Composable
 private fun MiuixErrorSuggestions(
+    colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     error: Throwable,
     viewModel: InstallerViewModel,
     installer: InstallerRepo
@@ -277,7 +282,8 @@ private fun MiuixErrorSuggestions(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 colors = CardColors(
-                    color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
+                    color = if (isDynamicColor) colorScheme.surfaceContainer else
+                        if (isDarkMode) miuixSheetCardColorDark else Color.White,
                     contentColor = MiuixTheme.colorScheme.onSurface
                 )
             ) {

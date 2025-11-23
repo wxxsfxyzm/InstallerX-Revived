@@ -13,7 +13,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
@@ -63,6 +62,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
+import java.io.Closeable
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -87,7 +87,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val reflect by inject<ReflectRepo>()
     private val appDataStore by inject<AppDataStore>()
     private val iconColorExtractor by inject<IconColorExtractor>()
-    private val cacheParcelFileDescriptors = mutableListOf<ParcelFileDescriptor>()
+
+    // OPTIMIZATION: Use Closeable to handle both AssetFileDescriptor and ParcelFileDescriptor generically
+    private val cacheCloseables = mutableListOf<Closeable>()
     private val cacheDirectory = "${context.externalCacheDir?.absolutePath}/${installer.id}".apply {
         File(this).mkdirs()
     }
@@ -129,7 +131,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.config = ConfigEntity.default
         installer.data = emptyList()
         installer.analysisResults = emptyList()
-        installer.progress.emit(ProgressEntity.Ready) // Also reset progress
+        installer.progress.emit(ProgressEntity.Ready)
 
         Timber.d("[id=${installer.id}] resolve: State has been reset. Emitting ProgressEntity.Resolving.")
         installer.progress.emit(ProgressEntity.InstallResolving)
@@ -166,7 +168,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             installer.config.installMode = ConfigEntity.InstallMode.Dialog
         }
 
-        // Launch in a separate coroutine to avoid blocking the UI.
         scope.launch {
             if (appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER).first()) runCatching {
                 Timber.d("[id=${installer.id}] resolve: Attempting to auto-lock default installer.")
@@ -181,13 +182,11 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
         }
 
-        // Check for notification mode immediately after resolving config.
         val isNotificationInstall = installer.config.installMode == ConfigEntity.InstallMode.Notification ||
                 installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
 
         if (isNotificationInstall) {
             Timber.d("[id=${installer.id}] Notification mode detected early. Switching to background.")
-            // This will trigger the Activity to finish itself and the ForegroundInfoHandler to start showing notifications.
             installer.background(true)
         }
 
@@ -197,7 +196,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             return
         }
 
-        // The caching logic is now integrated directly into the data resolution step.
         installer.data = try {
             resolveAndStabilizeData(activity, uris)
         } catch (e: Exception) {
@@ -230,7 +228,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             return
         }
 
-        // --- Start of Color Extraction logic ---
         val useDynamicColor = appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
         val useDynamicColorForLiveActivity =
             appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
@@ -261,11 +258,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             initialAnalysisResults
         }
 
-        // Store the final, complete result in the repository. This is now the single source of truth.
         installer.analysisResults = finalAnalysisResults
 
-        // Perform final checks based on the result.
-        // Get the containerType from the first entity in the result to check the session type.
         val containerType = finalAnalysisResults.firstOrNull()
             ?.appEntities?.firstOrNull()
             ?.app?.containerType
@@ -285,14 +279,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun install() {
         Timber.d("[id=${installer.id}] install: Starting.")
 
-        // Get all entities marked for installation from the analysis results.
         val entitiesToInstall = installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }
 
         if (entitiesToInstall.isEmpty()) {
             Timber.w("[id=${installer.id}] install: No entities selected for installation. Finishing.")
-            installer.progress.emit(ProgressEntity.InstallFailed) // Or a more specific error
+            installer.progress.emit(ProgressEntity.InstallFailed)
             installer.error = IllegalStateException("No items were selected for installation.")
             return
         }
@@ -323,40 +316,33 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             Starting installation...
         """.trimIndent()
-        // Initialize the output list with the banner lines
         val outputLines = banner.lines().toMutableList()
 
-        // Emit the initial state with the full banner
         installer.progress.emit(ProgressEntity.InstallingModule(outputLines.toList()))
 
         try {
-            // Get the selected Root Implementation from settings.
             val rootImplementation = appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
                 .map { RootImplementation.fromString(it) }
                 .first()
 
-            // Call the module installer backend, which returns a Flow.
             val moduleInstallerFlow = ModuleInstallerRepoImpl.doInstallWork(
                 installer.config,
                 moduleEntity,
                 rootImplementation
             )
 
-            // Collect the flow of output lines.
             moduleInstallerFlow.collect { line ->
                 outputLines.add(line)
-                // Emit the new progress state with the updated list of logs.
                 installer.progress.emit(ProgressEntity.InstallingModule(outputLines.toList()))
             }
 
-            // If the flow completes without an exception, it's a success.
             Timber.d("[id=${installer.id}] installModule: Succeeded. Emitting ProgressEntity.InstallSuccess.")
             installer.progress.emit(ProgressEntity.InstallSuccess)
 
         } catch (e: Exception) {
             Timber.e(e, "[id=${installer.id}] installModule: Failed.")
             installer.error = e
-            installer.progress.emit(ProgressEntity.InstallFailed) // Then emit failure state
+            installer.progress.emit(ProgressEntity.InstallFailed)
         }
     }
 
@@ -364,7 +350,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Timber.d("[id=${installer.id}] install: Starting. Emitting ProgressEntity.Installing.")
         installer.progress.emit(ProgressEntity.Installing)
         runCatching {
-            // Load the blacklist by package name from AppDataStore.
             Timber.d("[id=${installer.id}] install: Loading package name blacklist from AppDataStore.")
             val packageBlacklist = appDataStore
                 .getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
@@ -372,27 +357,24 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 .map { it.packageName }
             Timber.d("[id=${installer.id}] install: Package name blacklist loaded with ${packageBlacklist.size} entries.")
 
-            // Load the blacklist by UID from AppDataStore.
             Timber.d("[id=${installer.id}] install: Loading SharedUID blacklist from AppDataStore.")
             val sharedUserIdBlacklist = appDataStore
                 .getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
                 .first()
-                .map { it.uidName } // Extract the UID names to compare
+                .map { it.uidName }
             Timber.d("[id=${installer.id}] install: SharedUID blacklist loaded with ${sharedUserIdBlacklist.size} entries.")
 
-            // Load the whitelist by UID from AppDataStore.
             Timber.d("[id=${installer.id}] install: Loading SharedUID whitelist from AppDataStore.")
             val sharedUserIdExemption = appDataStore
                 .getNamedPackageList(key = AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
                 .first()
-                .map { it.packageName } // Extract the package names to compare
+                .map { it.packageName }
             Timber.d("[id=${installer.id}] install: SharedUID whitelist loaded with ${sharedUserIdExemption.size} entries.")
 
-            // Read from the new 'analysisResults' data source.
             val entitiesToInstall = installer.analysisResults
-                .flatMap { it.appEntities }  // 1. Flatten the list of packages into a single list of selectable entities.
-                .filter { it.selected }      // 2. Filter for the ones the user has selected.
-                .map {                       // 3. Map to the InstallEntity model
+                .flatMap { it.appEntities }
+                .filter { it.selected }
+                .map {
                     InstallEntity(
                         name = it.app.name,
                         packageName = it.app.packageName,
@@ -410,11 +392,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 }
 
             val targetUserId = if (installer.config.enableCustomizeUser) {
-                // Use UserId from profile if enableCustomizeUser is true
                 Timber.d("Custom user is enabled. Installing for user: ${installer.config.targetUserId}")
                 installer.config.targetUserId
             } else {
-                // Otherwise, use the current userId instead
                 val currentUserId = Os.getuid() / 100000
                 Timber.d("Custom user is disabled. Installing for current user: $currentUserId")
                 currentUserId
@@ -425,7 +405,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             installEntities(
                 installer.config,
-                entitiesToInstall, // Pass the newly constructed list to the installer backend.
+                entitiesToInstall,
                 InstallExtraInfoEntity(targetUserId, cacheDirectory),
                 packageBlacklist,
                 sharedUserIdBlacklist,
@@ -449,9 +429,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.InstallSuccess)
     }
 
-    /**
-     * Resolves information for the package to be uninstalled and prepares for user confirmation.
-     */
     private suspend fun resolveUninstall(activity: Activity, packageName: String) {
         Timber.d("[id=${installer.id}] resolveUninstall: Starting for $packageName.")
 
@@ -481,7 +458,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             val useDynamicColor = appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
             val seedColor = if (useDynamicColor) {
                 Timber.d("[id=${installer.id}] resolveUninstall: Dynamic color enabled, extracting color.")
-                // We can reuse the same extractor. The parameters for uninstall are simpler.
                 iconColorExtractor.extractColorFromDrawable(appIcon)
             } else {
                 Timber.d("[id=${installer.id}] resolveUninstall: Dynamic color disabled.")
@@ -497,7 +473,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 seedColor = seedColor
             )
 
-            // Update the repo with the fetched information
             installer.uninstallInfo.update { uninstallDetails }
 
             Timber.d("[id=${installer.id}] resolveUninstall: Success. Emitting UninstallReady.")
@@ -519,7 +494,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.Uninstalling)
 
         runCatching {
-            // Call the dispatcher from the worker layer
             com.rosan.installer.data.app.model.impl.InstallerRepoImpl.doUninstallWork(
                 installer.config,
                 packageName,
@@ -541,10 +515,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.InstallResolving)
 
         try {
-            // Assure using the correct global authorizer
             installer.config.authorizer = ConfigUtil.getGlobalAuthorizer()
 
-            // TODO implement Notification Confirmation
             /* val isNotificationMode = installer.config.installMode == ConfigEntity.InstallMode.Notification ||
                     installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
 
@@ -558,7 +530,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             var finalIcon: Bitmap?
 
             when {
-                // Use reflect directly when running as system
                 context.isSystemInstaller() -> {
                     Timber.d("[id=${installer.id}] Handling CONFIRM_INSTALL as system installer.")
                     val (label, icon) = getSessionDetailsLocally(sessionId)
@@ -566,7 +537,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     finalIcon = icon
                 }
 
-                // Use PrivilegedService for Root, Shizuku(Root), and Customize
                 installer.config.authorizer == ConfigEntity.Authorizer.Root ||
                         installer.config.authorizer == ConfigEntity.Authorizer.Shizuku ||
                         installer.config.authorizer == ConfigEntity.Authorizer.Customize -> {
@@ -586,14 +556,12 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     finalIcon = iconBytes?.let { BitmapFactory.decodeByteArray(it, 0, it.size) }
                 }
 
-                // Directly close when authorizer is other than above
                 else -> {
                     Timber.w("[id=${installer.id}] Received CONFIRM_INSTALL with unsupported authorizer (${installer.config.authorizer}). Finishing.")
                     installer.progress.emit(ProgressEntity.Finish)
                     return
                 }
             }
-            // Update repo state
             installer.confirmationDetails.value = ConfirmationDetails(
                 sessionId,
                 finalLabel ?: "N/A",
@@ -633,14 +601,10 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             Timber.e(e, "[id=${installer.id}] approveSession: Failed.")
             installer.error = e
         } finally {
-            // Close whatever the result is
             installer.progress.emit(ProgressEntity.Finish)
         }
     }
 
-    /**
-     * Execute session detail retrieval locally in the app process (only when acting as the system package manager).
-     */
     private fun getSessionDetailsLocally(sessionId: Int): Pair<CharSequence, Bitmap?> {
         val packageInstaller = context.packageManager.packageInstaller
         val sessionInfo = packageInstaller.getSessionInfo(sessionId)
@@ -690,9 +654,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return Pair(finalLabel, finalIcon)
     }
 
-    /**
-     * Execute session approval locally in the app process (only when acting as the system package manager).
-     */
     private fun approveSessionLocally(sessionId: Int, granted: Boolean) {
         try {
             val packageInstaller = context.packageManager.packageInstaller
@@ -726,24 +687,21 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     private val SYSTEM_URI_AUTHORITIES = setOf(
-        "media", // Common MediaStore authority
-        "com.android.providers.media.module", // Media provider on modern Android
-        "com.android.providers.downloads", // Legacy download manager
-        "com.android.externalstorage.documents" // External storage provider
-        // Add any other generic authorities users might encounter
+        "media",
+        "com.android.providers.media.module",
+        "com.android.providers.downloads",
+        "com.android.externalstorage.documents"
     )
 
     private suspend fun resolveConfig(activity: Activity): ConfigEntity {
         Timber.tag("InstallSource").d("[id=${installer.id}] resolveConfig: Starting.")
 
-        // --- Method 1: The original attempt (fast but often null) ---
         val callingPackage = activity.callingPackage
         Timber.tag("InstallSource").d("activity.callingPackage: $callingPackage")
         if (callingPackage != null) {
             return getConfigForPackage(callingPackage)
         }
 
-        // --- Method 2: Check the referrer (with scheme validation) ---
         val referrer = activity.referrer
         Timber.tag("InstallSource").d("activity.referrer: $referrer")
         if (referrer?.scheme == "android-app" && referrer.host != null) {
@@ -754,56 +712,36 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             Timber.tag("InstallSource").w("Ignoring referrer with non-app scheme: ${referrer.scheme}")
         }
 
-        // --- Method 3: The most robust fallback - Inspect the Intent's data URI authority ---
         val intent = activity.intent
         val authority = intent.data?.authority ?: intent.clipData?.getItemAt(0)?.uri?.authority
         Timber.tag("InstallSource").d("URI authority: $authority")
 
         if (authority != null) {
-            // FINAL CHECK: If the authority is a generic system provider, treat it as unknown.
-            // Otherwise, we can trust it as the source app's provider.
             if (authority in SYSTEM_URI_AUTHORITIES) {
                 Timber.tag("InstallSource").w("Authority '$authority' is a generic system provider. Using default config.")
-                return getConfigForPackage(null) // Use default/global config
+                return getConfigForPackage(null)
             } else {
-                // This is a specific app's FileProvider, extract the package name.
                 val authorityPackage = extractPackageFromAuthority(authority)
                 Timber.tag("InstallSource").d("Package from app-specific authority: $authorityPackage")
                 return getConfigForPackage(authorityPackage)
             }
         }
 
-        // --- Fallback: If all methods fail, return a default config ---
         Timber.tag("InstallSource").w("Could not determine calling package. Using default config.")
-        return getConfigForPackage(null) // Or your preferred default behavior
+        return getConfigForPackage(null)
     }
 
-    /**
-     * A helper function to create the config.
-     * Passing null will result in the global default config.
-     */
     private suspend fun getConfigForPackage(packageName: String?): ConfigEntity {
-        // getByPackageName should be designed to return the default config if packageName is null.
         val config = ConfigUtil.getByPackageName(packageName)
         Timber.tag("InstallSource").d("Resolved config for '${packageName ?: "default"}': $config")
         return config
     }
 
-    /**
-     * Extracts the base package name from a FileProvider authority.
-     */
     private fun extractPackageFromAuthority(authority: String): String {
         return authority.removeSuffix(".FileProvider")
             .removeSuffix(".provider")
     }
 
-
-    /**
-     * New function that combines resolving and stabilizing (caching) data in one step.
-     *
-     * @param activity The activity context to use for resolving data URIs.
-     * @return A list of DataEntity objects representing the resolved and stabilized data.
-     */
     private suspend fun resolveAndStabilizeData(activity: Activity, uris: List<Uri>): List<DataEntity> {
         val data = mutableListOf<DataEntity>()
         for (uri in uris) {
@@ -822,7 +760,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         val uris = when (intentAction) {
             Intent.ACTION_SEND -> {
-                // Handle text/plain for URLs, otherwise handle as a file stream.
                 if (intent.type?.startsWith("text/") == true) {
                     if (!RsConfig.isInternetAccessEnabled) {
                         Timber.d("Internet access is disabled in the app settings.")
@@ -832,11 +769,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     if (urlString.isNullOrBlank()) {
                         emptyList()
                     } else {
-                        // Attempt to parse the received text as a URI.
                         runCatching { listOf(urlString.trim().toUri()) }.getOrDefault(emptyList())
                     }
                 } else {
-                    // Keep original logic for file streams.
                     val uri =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                             intent.getParcelableExtra(
@@ -870,31 +805,16 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return uris
     }
 
-    /**
-     * Resolves a data URI, which can be either a file URI or a content URI.
-     *
-     * @param activity The activity context to use for resolving content URIs.
-     * @param uri The URI to resolve.
-     * @return A list of DataEntity objects representing the resolved data.
-     */
     private suspend fun resolveDataUri(activity: Activity, uri: Uri): List<DataEntity> {
         Timber.d("Source URI: $uri")
-        // Route URI based on its scheme.
         return when (uri.scheme?.lowercase()) {
             ContentResolver.SCHEME_FILE -> resolveDataFileUri(uri)
             ContentResolver.SCHEME_CONTENT -> resolveDataContentFile(activity, uri)
-            "http", "https" -> downloadAndCacheHttpUri(uri) // New case for HTTP/HTTPS links.
+            "http", "https" -> downloadAndCacheHttpUri(uri)
             else -> throw ResolveException(action = "Unsupported URI scheme: ${uri.scheme}", uris = listOf(uri))
         }
     }
 
-    /**
-     * Resolves a file URI directly, assuming it points to a local file.
-     * This is a simplified version that does not handle caching or progress.
-     *
-     * @param uri The file URI to resolve.
-     * @return A list containing a single FileEntity with the file path.
-     */
     private fun resolveDataFileUri(uri: Uri): List<DataEntity> {
         Timber.d("uri:$uri")
         val path = uri.path ?: throw Exception("can't get uri path: $uri")
@@ -903,16 +823,11 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return listOf(data)
     }
 
-    /**
-     * This function is now responsible for caching the file if direct access is not possible,
-     * and it will emit progress updates.
-     */
     private suspend fun resolveDataContentFile(
         activity: Activity,
         uri: Uri,
         retry: Int = 3
     ): List<DataEntity> {
-        // Wait for PermissionRecords ok.
         if (activity.checkCallingOrSelfUriPermission(
                 uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
             ) != PackageManager.PERMISSION_GRANTED &&
@@ -924,60 +839,47 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val assetFileDescriptor = context.contentResolver?.openAssetFileDescriptor(uri, "r")
             ?: throw IOException("can't open file descriptor: $uri")
 
-        // Attempt to get a direct, readable file path first.
         val procPath = "/proc/${Os.getpid()}/fd/${assetFileDescriptor.parcelFileDescriptor.fd}"
         val file = File(procPath)
         val sourcePath = runCatching { Os.readlink(procPath).getRealPathFromUri(uri).pathUnify() }.getOrDefault("")
 
-        // Check if the proc path is a valid, readable file. This is the zero-copy happy path.
         if (file.exists() && file.canRead()) {
             try {
-                // We perform a more robust access test. RandomAccessFile will fail with an
-                // IOException (like FileNotFoundException caused by EACCES) if we don't have
-                // proper permissions, but it won't fail for a malformed zip content.
-                RandomAccessFile(file, "r").use { } // Test open and immediately close.
+                RandomAccessFile(file, "r").use { }
 
-                // If the test above passes, we have sufficient permission to use this path directly.
                 if (sourcePath.startsWith('/')) {
                     Timber.d("Success! Got direct, usable file access through procfs: $sourcePath")
-                    cacheParcelFileDescriptors.add(assetFileDescriptor.parcelFileDescriptor)
+                    // OPTIMIZATION: Cache the whole AssetFileDescriptor to ensure we can close it properly later.
+                    // Closing AFD will close the underlying PFD.
+                    cacheCloseables.add(assetFileDescriptor)
                     return listOf(DataEntity.FileEntity(procPath).apply {
                         source = DataEntity.FileEntity(sourcePath)
                     })
                 }
             } catch (e: IOException) {
-                // This will catch EACCES or other low-level IO errors.
-                // THIS is the trigger for the stream fallback, as you requested.
                 Timber.w(e, "Direct access test to /proc path failed. This will trigger the caching fallback.")
             }
         }
 
-        // --- Fallback to Caching with Progress ---
-        // If we reach here, it means we could not get a directly readable file path.
-        // We MUST copy the file content to our cache. This handles all other cases,
-        // including the one that was previously creating a FileDescriptorEntity.
         Timber.d("Direct file access failed. Falling back to caching with progress.")
         val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
 
-        // Aggressively guess file size and go to determinate progress
         val totalSize = guessContentLength(uri, assetFileDescriptor)
 
         withContext(Dispatchers.IO) {
+            // Note: In the fallback path, we use and close the AFD immediately.
             assetFileDescriptor.use { afd ->
                 afd.createInputStream().use { input ->
                     tempFile.outputStream().use { output ->
                         if (totalSize > 0) {
                             installer.progress.emit(ProgressEntity.InstallPreparing(0f))
-                            // Directly emit progress
                             input.copyToFastWithProgress(output, totalSize) { progress ->
                                 installer.progress.tryEmit(
                                     ProgressEntity.InstallPreparing(progress)
                                 )
                             }
                         } else {
-                            // Unknown size: emit indeterminate progress
                             installer.progress.emit(ProgressEntity.InstallPreparing(-1f))
-                            // Keep using a large buffer for all cases
                             val buf = ByteArray(COPY_BUFFER_SIZE)
                             var n = input.read(buf)
                             while (n >= 0) {
@@ -992,9 +894,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
 
         Timber.d("Caching complete. Temp file: ${tempFile.absolutePath}")
-        // Return a FileEntity pointing to the newly cached file.
         return listOf(DataEntity.FileEntity(tempFile.absolutePath).apply {
-            source = DataEntity.FileEntity(sourcePath) // Set original URI as source
+            source = DataEntity.FileEntity(sourcePath)
         })
     }
 
@@ -1023,41 +924,29 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption
     )
 
-    /**
-     * Downloads a file from an HTTP/HTTPS URL, caches it locally, and reports progress.
-     *
-     * @param uri The HTTP/HTTPS URI to download.
-     * @return A list containing a single DataEntity.FileEntity pointing to the cached file.
-     * @throws IOException for network errors or if the server response is not successful.
-     * @throws ResolveException if the link doesn't appear to be a direct download link for a supported file type.
-     */
     private suspend fun downloadAndCacheHttpUri(uri: Uri): List<DataEntity> {
         Timber.d("[id=${installer.id}] Starting download for HTTP URI: $uri")
 
-        // Emit initial progress state (indeterminate) as we don't know the file size yet.
         installer.progress.emit(ProgressEntity.InstallPreparing(-1f))
 
         val url = URL(uri.toString())
         val connection = url.openConnection() as HttpURLConnection
-        // Set a reasonable timeout for connection and reading.
-        connection.connectTimeout = 15000 // 15 seconds
-        connection.readTimeout = 15000 // 15 seconds
+        connection.connectTimeout = 15000
+        connection.readTimeout = 15000
         connection.requestMethod = "GET"
-        connection.connect() // Executes the request
+        // OPTIMIZATION: Explicitly allow redirects
+        connection.instanceFollowRedirects = true
+        connection.connect()
 
         try {
-            // Check for successful HTTP response.
             if (connection.responseCode !in 200..299) {
                 throw IOException("HTTP error ${connection.responseCode}: ${connection.responseMessage}")
             }
 
-            // Validate if the URL points to a likely installer file.
-            // First, check the URL path extension.
             val path = uri.path ?: ""
             val isSupportedExtension = listOf(".apk", ".xapk", ".apkm", ".apks", ".zip").any { ext ->
                 path.endsWith(ext, ignoreCase = true)
             }
-            // As a fallback, check the Content-Type header from the server response.
             val contentType = connection.contentType
             val isSupportedMimeType = contentType != null && (
                     contentType.equals("application/vnd.android.package-archive", ignoreCase = true) ||
@@ -1073,12 +962,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 )
             }
 
-            // Create a temporary file in the installer's specific cache directory.
             val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".apk_cache", File(cacheDirectory))
             val totalSize = connection.contentLengthLong
 
-            // Emit initial progress state. If size is unknown, it's indeterminate (-1f).
-            // Otherwise, start at a determinate 0f.
             if (totalSize > 0) {
                 Timber.d("Starting download of $totalSize bytes from URL.")
                 installer.progress.emit(ProgressEntity.InstallPreparing(0f))
@@ -1089,11 +975,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             connection.inputStream.use { input ->
                 tempFile.outputStream().use { output ->
-                    // Unified call to the fast copy method.
-                    // It uses a large buffer for all cases and handles progress reporting
-                    // only when totalSize is known.
                     input.copyToFastWithProgress(output, totalSize) { progress ->
-                        // Use tryEmit for efficiency, it's non-suspending and suitable for frequent updates.
                         installer.progress.tryEmit(ProgressEntity.InstallPreparing(progress))
                     }
                 }
@@ -1101,19 +983,12 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             Timber.d("URL download and caching complete. Cached file: ${tempFile.absolutePath}")
 
-            // Return a FileEntity pointing to the newly cached file, which feeds into the analysis process.
             return listOf(DataEntity.FileEntity(tempFile.absolutePath))
         } finally {
-            connection.disconnect() // Ensure the connection is always closed.
+            connection.disconnect()
         }
     }
 
-    /**
-     * Faster copy
-     *
-     * @param minStepRatio
-     * @param minIntervalMs
-     */
     private fun InputStream.copyToFastWithProgress(
         out: OutputStream,
         totalSize: Long,
@@ -1145,25 +1020,15 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         if (totalSize > 0) onProgress(1f)
     }
 
-    /**
-     * Guess the content length of a file.
-     * 1) AssetFileDescriptor.declaredLength
-     * 2) ParcelFileDescriptor.statSize
-     * 3) ContentResolver.query(OpenableColumns.SIZE / DocumentsContract.Document.COLUMN_SIZE)
-     * 4) Os.fstat(fd).st_size
-     */
     private fun guessContentLength(uri: Uri, afd: AssetFileDescriptor?): Long {
-        // 1) AFD 的 declaredLength
         if (afd != null && afd.declaredLength > 0) return afd.declaredLength
 
-        // 2) PFD.statSize
         runCatching {
             context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
                 if (pfd.statSize > 0) return pfd.statSize
             }
         }
 
-        // 3) query OpenableColumns / DocumentsContract
         fun queryLong(projection: Array<String>): Long {
             context.contentResolver.query(uri, projection, null, null, null)?.use { c ->
                 if (c.moveToFirst()) {
@@ -1187,7 +1052,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             if (fromDoc > 0) return fromDoc
         }
 
-        // 4) fstat(fd)
         runCatching {
             afd?.parcelFileDescriptor?.fileDescriptor?.let { fd ->
                 val st = Os.fstat(fd)
@@ -1197,18 +1061,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return -1L
     }
 
-    /**
-     * Clears all cached file descriptors and deletes the temporary cache directory.
-     * This method is idempotent and safe to call multiple times.
-     */
     private fun clearCacheDirectory() {
         Timber.d("[id=${installer.id}] clearCacheDirectory: Clearing cache...")
 
-        // Close and clear cached file descriptors
-        cacheParcelFileDescriptors.forEach { it.runCatching { close() } }
-        cacheParcelFileDescriptors.clear()
+        // OPTIMIZATION: Close generic closeables (Handles both PFD and AFD)
+        cacheCloseables.forEach { it.runCatching { close() } }
+        cacheCloseables.clear()
 
-        // Delete the cache directory recursively
         File(cacheDirectory).runCatching {
             if (exists()) {
                 val deleted = deleteRecursively()
