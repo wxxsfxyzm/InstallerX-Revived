@@ -1,4 +1,4 @@
-package com.rosan.installer.build
+package com.rosan.installer.build.model.entity
 
 // Enum for representing CPU architectures with their ABI string and a display name.
 enum class Architecture(val arch: String, val displayName: String) {

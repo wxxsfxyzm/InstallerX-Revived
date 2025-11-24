@@ -23,11 +23,11 @@ import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.entity.RootImplementation
+import com.rosan.installer.data.app.model.entity.SessionMode
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.ModuleInstallerRepoImpl
@@ -88,7 +88,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val appDataStore by inject<AppDataStore>()
     private val iconColorExtractor by inject<IconColorExtractor>()
 
-    // OPTIMIZATION: Use Closeable to handle both AssetFileDescriptor and ParcelFileDescriptor generically
+    // Use Closeable to handle both AssetFileDescriptor and ParcelFileDescriptor generically
     private val cacheCloseables = mutableListOf<Closeable>()
     private val cacheDirectory = "${context.externalCacheDir?.absolutePath}/${installer.id}".apply {
         File(this).mkdirs()
@@ -260,12 +260,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         installer.analysisResults = finalAnalysisResults
 
-        val containerType = finalAnalysisResults.firstOrNull()
-            ?.appEntities?.firstOrNull()
-            ?.app?.containerType
-
-        val isMultiAppMode = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
-
+        val currentMode = finalAnalysisResults.firstOrNull()?.sessionMode ?: SessionMode.Single
+        val isMultiAppMode = currentMode == SessionMode.Batch
         val isNotificationInstall = installer.config.installMode == ConfigEntity.InstallMode.Notification ||
                 installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
 
@@ -387,7 +383,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                             is AppEntity.CollectionEntity -> app.data
                             is AppEntity.ModuleEntity -> app.data
                         },
-                        containerType = it.app.containerType!!
+                        containerType = it.app.sourceType!!
                     )
                 }
 
@@ -399,9 +395,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 Timber.d("Custom user is disabled. Installing for current user: $currentUserId")
                 currentUserId
             }
-            val sessionContainerType = entitiesToInstall.firstOrNull()?.containerType
-            val isSingleSession =
-                sessionContainerType == DataType.APK || sessionContainerType == DataType.APKS || sessionContainerType == DataType.APKM || sessionContainerType == DataType.XAPK
+
+            val currentSessionMode = installer.analysisResults.firstOrNull()?.sessionMode ?: SessionMode.Single
+            val shouldClearCache = currentSessionMode == SessionMode.Single
 
             installEntities(
                 installer.config,
@@ -412,7 +408,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 sharedUserIdExemption
             )
 
-            if (isSingleSession) {
+            if (shouldClearCache) {
                 Timber.d("[id=${installer.id}] Single-app install succeeded. Clearing cache now.")
                 clearCacheDirectory()
             } else {
@@ -1064,7 +1060,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private fun clearCacheDirectory() {
         Timber.d("[id=${installer.id}] clearCacheDirectory: Clearing cache...")
 
-        // OPTIMIZATION: Close generic closeables (Handles both PFD and AFD)
+        // Close generic closeables (Handles both PFD and AFD)
         cacheCloseables.forEach { it.runCatching { close() } }
         cacheCloseables.clear()
 

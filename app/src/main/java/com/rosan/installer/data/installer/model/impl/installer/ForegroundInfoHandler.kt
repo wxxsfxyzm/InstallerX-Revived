@@ -318,7 +318,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 progressStyle.setProgress(progressValue.toInt())
 
                 val isMixedType = allEntities.any {
-                    it.app.containerType == DataType.MIXED_MODULE_APK
+                    it.app.sourceType == DataType.MIXED_MODULE_APK
                 }
 
                 if (isMixedType) {
@@ -583,7 +583,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val info = selectedApps.getInfo(context)
 
         val isMixedType = selectedEntities.any {
-            it.app.containerType == DataType.MIXED_MODULE_APK
+            it.app.sourceType == DataType.MIXED_MODULE_APK
         }
 
         if (isMixedType) {

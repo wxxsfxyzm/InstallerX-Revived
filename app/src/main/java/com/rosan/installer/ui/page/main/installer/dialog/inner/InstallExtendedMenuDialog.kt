@@ -69,7 +69,7 @@ fun installExtendedMenuDialog(
 ): DialogParams {
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val containerType =
-        installer.analysisResults.find { it.packageName == currentPackageName }?.appEntities?.first()?.app?.containerType
+        installer.analysisResults.find { it.packageName == currentPackageName }?.appEntities?.first()?.app?.sourceType
     val installOptions = rememberInstallOptions(installer.config.authorizer)
     val installFlags by viewModel.installFlags.collectAsState()
     val managedPackages by viewModel.managedInstallerPackages.collectAsState()

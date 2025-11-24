@@ -9,6 +9,7 @@ import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
  */
 data class PackageAnalysisResult(
     val packageName: String,
+    val sessionMode: SessionMode,
     val appEntities: List<SelectInstallEntity>,
     val seedColor: Int? = null,
     val installedAppInfo: InstalledAppInfo?,

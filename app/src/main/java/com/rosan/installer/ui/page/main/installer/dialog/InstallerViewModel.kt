@@ -279,7 +279,7 @@ class InstallerViewModel(
                     loadDisplayIcon(result.packageName)
                 }
                 val analysisResults = repo.analysisResults
-                val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType
+                val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType
 
                 val isMultiAppMode = analysisResults.size > 1 ||
                         containerType == DataType.MULTI_APK ||
@@ -653,7 +653,7 @@ class InstallerViewModel(
         if (_currentPackageName.value != null) _currentPackageName.value = null
         val containerType = repo.analysisResults.firstOrNull()
             ?.appEntities?.firstOrNull()
-            ?.app?.containerType
+            ?.app?.sourceType
 
         if (containerType == DataType.MIXED_MODULE_APK) {
             val currentResults = repo.analysisResults.toMutableList()

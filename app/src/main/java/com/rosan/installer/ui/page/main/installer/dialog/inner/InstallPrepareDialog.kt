@@ -26,8 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
@@ -122,7 +122,7 @@ fun installPrepareDialog( // 小写开头
 
     val primaryEntity = selectedEntities.first()
     val entityToInstall = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-    val containerType = primaryEntity.containerType
+    val containerType = primaryEntity.sourceType
     val preInstallAppInfo = currentPackage.installedAppInfo // Get pre-install info from the new model
 
     Timber.tag("AppEntity")

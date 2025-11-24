@@ -46,6 +46,7 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.MmzSelectionMode
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
+import com.rosan.installer.data.app.model.entity.SessionMode
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.icons.AppIcons
@@ -66,14 +67,14 @@ fun installChoiceDialog(
     installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     val analysisResults = installer.analysisResults
-    val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
+    val sourceType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
+    val currentSessionMode = analysisResults.firstOrNull()?.sessionMode ?: SessionMode.Single
+    val isMultiApk = currentSessionMode == SessionMode.Batch
+    val isModuleApk = sourceType == DataType.MIXED_MODULE_APK
+    val isMixedModuleZip = sourceType == DataType.MIXED_MODULE_ZIP
+    var selectionMode by remember(sourceType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
 
-    val isMultiApk = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
-    val isModuleApk = containerType == DataType.MIXED_MODULE_APK
-    val isMixedModuleZip = containerType == DataType.MIXED_MODULE_ZIP
-    var selectionMode by remember(containerType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
-
-    val titleRes = containerType.getSupportTitle()
+    val titleRes = sourceType.getSupportTitle()
     val primaryButtonText = if (isMultiApk) R.string.install else R.string.next
     val primaryButtonAction = if (isMultiApk) {
         { viewModel.dispatch(InstallerViewAction.InstallMultiple) }
@@ -85,7 +86,7 @@ fun installChoiceDialog(
         icon = DialogInnerParams(DialogParamsType.IconWorking.id, workingIcon),
         title = DialogInnerParams(DialogParamsType.InstallChoice.id) { Text(stringResource(titleRes)) },
         subtitle = DialogInnerParams(DialogParamsType.InstallChoice.id) {
-            containerType.getSupportSubtitle(selectionMode)?.let { Text(it) }
+            sourceType.getSupportSubtitle(selectionMode)?.let { Text(it) }
         },
         content = DialogInnerParams(DialogParamsType.InstallChoice.id) {
             ChoiceContent(

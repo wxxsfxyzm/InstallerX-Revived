@@ -36,8 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstalledAppInfo
@@ -97,7 +97,7 @@ fun InstallPrepareContent(
         return
     }
 
-    val containerType = primaryEntity.containerType
+    val containerType = primaryEntity.sourceType
     val entityToInstall = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val displayIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
 
@@ -125,7 +125,7 @@ fun InstallPrepareContent(
                 }
             }
         }
-        if (primaryEntity.containerType == DataType.APK || primaryEntity.containerType == DataType.APKS)
+        if (primaryEntity.sourceType == DataType.APK || primaryEntity.sourceType == DataType.APKS)
             when (signatureStatus) {
                 SignatureMatchStatus.MISMATCH -> {
                     warnings.add(0, context.getString(R.string.installer_prepare_signature_mismatch) to errorColor)
@@ -202,7 +202,7 @@ fun InstallPrepareContent(
                                 installer = installer
                             )
                             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                                AnimatedVisibility(visible = settings.showOPPOSpecial && primaryEntity.containerType == DataType.APK) {
+                                AnimatedVisibility(visible = settings.showOPPOSpecial && primaryEntity.sourceType == DataType.APK) {
                                     primaryEntity.minOsdkVersion?.let {
                                         AdaptiveInfoRow(
                                             labelResId = R.string.installer_package_minOsdkVersion_label,

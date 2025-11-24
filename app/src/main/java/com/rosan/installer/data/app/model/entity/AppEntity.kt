@@ -1,7 +1,7 @@
 package com.rosan.installer.data.app.model.entity
 
 import android.graphics.drawable.Drawable
-import com.rosan.installer.build.Architecture
+import com.rosan.installer.build.model.entity.Architecture
 
 sealed class AppEntity {
     abstract val packageName: String
@@ -10,9 +10,7 @@ sealed class AppEntity {
     abstract val targetSdk: String?
     abstract val minSdk: String?
     abstract val arch: Architecture?
-
-    // each app entity may have a container type, such as a split APK or a collection
-    abstract val containerType: DataType?
+    abstract val sourceType: DataType?
 
     data class BaseEntity(
         override val packageName: String,
@@ -28,7 +26,7 @@ sealed class AppEntity {
         // Only available for oppo apk
         val minOsdkVersion: String? = null,
         override val arch: Architecture? = null,
-        override val containerType: DataType? = null,
+        override val sourceType: DataType? = null,
         // Get from AndroidManifest.xml
         val permissions: List<String>? = null,
         val signatureHash: String? = null,
@@ -42,7 +40,7 @@ sealed class AppEntity {
         override val targetSdk: String?,
         override val minSdk: String?,
         override val arch: Architecture?,
-        override val containerType: DataType? = null,
+        override val sourceType: DataType? = null,
     ) : AppEntity() {
         override val name = "$splitName.apk"
     }
@@ -54,7 +52,7 @@ sealed class AppEntity {
         override val targetSdk: String?,
         override val minSdk: String?,
         override val arch: Architecture? = null,
-        override val containerType: DataType? = null,
+        override val sourceType: DataType? = null,
     ) : AppEntity() {
         override val name = "base.dm"
     }
@@ -65,7 +63,7 @@ sealed class AppEntity {
         override val targetSdk: String? = null,
         override val minSdk: String? = null,
         override val arch: Architecture? = null,
-        override val containerType: DataType? = null,
+        override val sourceType: DataType? = null,
         val label: String = "Collection of APKs",
         val versionCode: Long = -1,
         val versionName: String = "",
@@ -81,7 +79,7 @@ sealed class AppEntity {
         val author: String,
         val description: String,
         override val data: DataEntity,
-        override val containerType: DataType? = null
+        override val sourceType: DataType? = null
     ) : AppEntity() {
         override val packageName: String
             get() = id

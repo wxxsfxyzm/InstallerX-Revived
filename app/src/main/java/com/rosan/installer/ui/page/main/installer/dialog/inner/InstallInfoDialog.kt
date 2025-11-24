@@ -54,8 +54,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstalledAppInfo
@@ -83,7 +83,6 @@ fun installInfoDialog(
 ): DialogParams {
     val settings = viewModel.viewSettings
     val iconMap by viewModel.displayIcons.collectAsState()
-    // --- NEW DATA FETCHING LOGIC ---
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
     // If there's no current package to display, return empty params.
@@ -162,7 +161,6 @@ fun installInfoDialog(
                 ) {
                     // This inner Row groups the spacer and button so they animate as one unit.
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Add a small spacer between the text and the button.
                         Spacer(modifier = Modifier.width(8.dp))
 
                         IconButton(
@@ -192,7 +190,6 @@ fun installInfoDialog(
                 }
             }
         },
-        // --- 修改：恢复版本显示逻辑，依赖传入的 preInstallAppInfo ---
         subtitle = DialogInnerParams(uniqueContentKey) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -293,7 +290,7 @@ fun installInfoDialog(
                 val defaultSdkSingleLine = !settings.sdkCompareInMultiLine
                 var sdkContentState by remember { mutableStateOf(Pair(defaultSdkSingleLine, false)) }
 
-                AnimatedVisibility(visible = installer.config.displaySdk && entityToInstall.containerType != DataType.MODULE_ZIP) {
+                AnimatedVisibility(visible = installer.config.displaySdk && entityToInstall.sourceType != DataType.MODULE_ZIP) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -375,7 +372,7 @@ fun installInfoDialog(
                     }
                 }
                 if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
-                    AnimatedVisibility(settings.showOPPOSpecial && entityToInstall.containerType == DataType.APK) {
+                    AnimatedVisibility(settings.showOPPOSpecial && entityToInstall.sourceType == DataType.APK) {
                         Column {
                             Spacer(modifier = Modifier.height(8.dp))
                             (entityToInstall as AppEntity.BaseEntity).minOsdkVersion?.let {
@@ -579,7 +576,7 @@ private fun SdkInfoExpanded(
             val color =
                 if (isDowngrade || isIncompatible) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
 
-            // --- Label (一次即可) ---
+            // --- Label ---
             Text(text = labelPrefix, style = MaterialTheme.typography.bodyMedium)
 
             Spacer(modifier = Modifier.size(4.dp))

@@ -4,6 +4,10 @@ import android.content.res.Resources
 import android.os.Build
 import android.text.TextUtils
 import com.rosan.installer.BuildConfig
+import com.rosan.installer.build.model.entity.Architecture
+import com.rosan.installer.build.model.entity.Density
+import com.rosan.installer.build.model.entity.Level
+import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.convertLegacyLanguageCode
 

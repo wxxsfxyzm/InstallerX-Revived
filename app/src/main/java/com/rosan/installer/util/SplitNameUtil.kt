@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-import com.rosan.installer.build.Architecture
+import com.rosan.installer.build.model.entity.Architecture
 import java.util.Locale
 
 const val BASE_PREFIX = "base-"
