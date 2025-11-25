@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.main.installer.dialog
+package com.rosan.installer.ui.page.main.installer
 
 import android.graphics.Bitmap
 import com.rosan.installer.data.installer.model.entity.InstallResult

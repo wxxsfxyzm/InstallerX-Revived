@@ -35,9 +35,9 @@ import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitExceptio
 import com.rosan.installer.data.app.model.exception.ModuleInstallException
 import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallChoiceContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallCompletedContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallConfirmContent

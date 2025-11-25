@@ -238,8 +238,6 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             // Return@setContent to show nothing, logs will explain why.
                 return@setContent
 
-            //val confirmationDetails by installer.confirmationDetails.collectAsState(null)
-
             val useDarkTheme = when (uiState.themeMode) {
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
@@ -272,7 +270,6 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 InstallerMiuixTheme(
                     darkTheme = useDarkTheme,
                     themeMode = uiState.themeMode,
-                    useDynamicColor = false,
                     useMiuixMonet = uiState.useMiuixMonet,
                     seedColor = activeColorSchemeState.value.primary
                 ) {

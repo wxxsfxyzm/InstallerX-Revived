@@ -3,6 +3,8 @@ package com.rosan.installer.ui.page.main.installer.dialog
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.inner.analyseFailedDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.analysingDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.installChoiceDialog

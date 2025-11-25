@@ -62,11 +62,11 @@ import com.rosan.installer.data.app.model.entity.InstalledAppInfo
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
 import com.rosan.installer.ui.util.toAndroidVersionName
 
 

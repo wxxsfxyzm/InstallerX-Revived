@@ -45,8 +45,8 @@ import timber.log.Timber
 
 class UninstallerActivity : ComponentActivity(), KoinComponent {
     companion object {
-        const val KEY_ID = "uninstaller_id"
-        const val EXTRA_PACKAGE_NAME = "package_name"
+        private const val KEY_ID = "uninstaller_id"
+        private const val EXTRA_PACKAGE_NAME = "package_name"
     }
 
     private val appDataStore: AppDataStore by inject()
@@ -204,9 +204,8 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                 InstallerMiuixTheme(
                     darkTheme = useDarkTheme,
                     themeMode = uiState.themeMode,
-                    useDynamicColor = uiState.useDynamicColor,
                     useMiuixMonet = uiState.useMiuixMonet,
-                    seedColor = uiState.seedColor
+                    seedColor = activeColorSchemeState.value.primary
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         MiuixInstallerPage(

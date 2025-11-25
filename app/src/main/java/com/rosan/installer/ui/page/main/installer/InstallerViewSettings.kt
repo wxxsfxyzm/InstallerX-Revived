@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.main.installer.dialog
+package com.rosan.installer.ui.page.main.installer
 
 data class InstallerViewSettings(
     val preferSystemIconForUpdates: Boolean = false,

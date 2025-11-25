@@ -90,7 +90,7 @@ fun InstallerMiuixTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     themeMode: ThemeMode,
     useMiuixMonet: Boolean,
-    useDynamicColor: Boolean,
+    useDynamicColor: Boolean = false,
     compatStatusBarColor: Boolean = false,
     seedColor: Color,
     content: @Composable () -> Unit

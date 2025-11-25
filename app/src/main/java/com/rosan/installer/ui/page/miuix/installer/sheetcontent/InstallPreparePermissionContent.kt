@@ -25,7 +25,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.util.getBestPermissionLabel
 import top.yukonga.miuix.kmp.basic.BasicComponent

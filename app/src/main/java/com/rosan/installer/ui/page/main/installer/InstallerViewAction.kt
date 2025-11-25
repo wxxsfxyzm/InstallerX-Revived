@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.main.installer.dialog
+package com.rosan.installer.ui.page.main.installer
 
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo

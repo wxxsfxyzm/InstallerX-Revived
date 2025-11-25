@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.main.installer.dialog
+package com.rosan.installer.ui.page.main.installer
 
 import android.content.Context
 import android.graphics.drawable.Drawable
@@ -31,6 +31,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil.Companion.readGlobal
 import com.rosan.installer.ui.page.main.installer.dialog.inner.UiText
 import com.rosan.installer.util.getErrorMessage
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -400,13 +401,19 @@ class InstallerViewModel(
                 is InstallerViewState.InstallChoice -> repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
 
                 // For uninstall state, get pre-calculated color from uninstall info
-                is InstallerViewState.UninstallReady -> repo.uninstallInfo.value?.seedColor
+                is InstallerViewState.UninstallReady,
+                is InstallerViewState.Uninstalling,
+                is InstallerViewState.UninstallSuccess,
+                is InstallerViewState.UninstallFailed -> repo.uninstallInfo.value?.seedColor
 
                 // For all other states, we can clear the color
                 else -> null
             }
-            _seedColor.value =
-                colorInt?.let { Color(it) } ?: _seedColor.value.takeIf { newState is InstallerViewState.Ready }?.let { null }
+            if (colorInt != null) {
+                _seedColor.value = Color(colorInt)
+            } else if (newState is InstallerViewState.Ready) {
+                _seedColor.value = null
+            }
 
         } else if (_seedColor.value != null) {
             // If the feature is disabled, ensure the color is cleared.
@@ -564,7 +571,7 @@ class InstallerViewModel(
                 }
             }.onFailure { error ->
                 // Check if the error is caused by coroutine cancellation.
-                if (error is kotlinx.coroutines.CancellationException) {
+                if (error is CancellationException) {
                     Timber.d("User loading job was cancelled as expected.")
                     throw error
                 }
@@ -623,7 +630,7 @@ class InstallerViewModel(
                     iconSizePx = 256,
                     preferSystemIcon = viewSettings.preferSystemIconForUpdates
                 )
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
 
