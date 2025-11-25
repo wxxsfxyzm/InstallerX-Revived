@@ -42,6 +42,13 @@ sealed class InstallerViewAction {
     data class SetTargetUser(val userId: Int) : InstallerViewAction()
 
     /**
+     * Approves or denies the installation session.
+     * @param sessionId The ID of the session to approve/deny.
+     * @param granted True to approve, false to deny.
+     */
+    data class ApproveSession(val sessionId: Int, val granted: Boolean) : InstallerViewAction()
+
+    /**
      * Toggles a specific flag for the uninstallation process.
      * @param flag The flag to toggle, e.g., DELETE_KEEP_DATA.
      * @param enable true to add the flag, false to remove it.

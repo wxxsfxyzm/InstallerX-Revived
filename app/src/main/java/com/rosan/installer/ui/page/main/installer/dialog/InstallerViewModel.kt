@@ -228,6 +228,7 @@ class InstallerViewModel(
 
             is InstallerViewAction.SetInstaller -> selectInstaller(action.installer)
             is InstallerViewAction.SetTargetUser -> selectTargetUser(action.userId)
+            is InstallerViewAction.ApproveSession -> repo.approveConfirmation(action.sessionId, action.granted)
         }
     }
 
@@ -316,6 +317,19 @@ class InstallerViewModel(
             }
 
             is ProgressEntity.InstallingModule -> InstallerViewState.InstallingModule(progress.output)
+
+            is ProgressEntity.InstallConfirming -> {
+                val details = repo.confirmationDetails.value
+                if (details != null) {
+                    InstallerViewState.InstallConfirm(
+                        appLabel = details.appLabel,
+                        appIcon = details.appIcon,
+                        sessionId = details.sessionId
+                    )
+                } else {
+                    InstallerViewState.ResolveFailed // Fallback if details are missing
+                }
+            }
 
             is ProgressEntity.Uninstalling -> {
                 if (isRetryingInstall) InstallerViewState.InstallRetryDowngradeUsingUninstall else InstallerViewState.Uninstalling

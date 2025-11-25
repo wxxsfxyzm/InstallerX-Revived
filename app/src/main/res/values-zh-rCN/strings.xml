@@ -281,6 +281,7 @@
     <string name="installer_prepare_signature_unknown">无法验证应用签名，请谨慎操作。</string>
     <string name="installer_install_app">安装应用</string>
     <string name="installer_install_module">安装模块</string>
+    <string name="installer_install_confirm">安装确认</string>
     <string name="installer_installing">安装中…</string>
     <string name="installer_installing_module">安装模块中</string>
     <string name="installer_install_failed">安装失败</string>

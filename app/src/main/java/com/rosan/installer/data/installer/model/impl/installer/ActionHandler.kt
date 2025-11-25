@@ -92,11 +92,14 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is InstallerRepoImpl.Action.ResolveUninstall -> resolveUninstall(action.activity, action.packageName)
             is InstallerRepoImpl.Action.Uninstall -> uninstall(action.packageName)
             is InstallerRepoImpl.Action.ResolveConfirmInstall -> resolveConfirm(action.activity, action.sessionId)
-            is InstallerRepoImpl.Action.ApproveSession -> sessionProcessor.approveSession(
-                action.sessionId,
-                action.granted,
-                installer.config
-            )
+            is InstallerRepoImpl.Action.ApproveSession -> {
+                sessionProcessor.approveSession(
+                    action.sessionId,
+                    action.granted,
+                    installer.config
+                )
+                installer.progress.emit(ProgressEntity.Finish)
+            }
 
             is InstallerRepoImpl.Action.Finish -> installer.progress.emit(ProgressEntity.Finish)
         }
@@ -167,7 +170,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.config.authorizer = ConfigUtil.getGlobalAuthorizer()
         val details = sessionProcessor.getSessionDetails(sessionId, installer.config)
         installer.confirmationDetails.value = details
-        installer.progress.emit(ProgressEntity.InstallAnalysedSuccess)
+        installer.progress.emit(ProgressEntity.InstallConfirming)
     }
 
     private suspend fun resolveUninstall(activity: Activity, packageName: String) {

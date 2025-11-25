@@ -112,7 +112,7 @@ fun MiuixSettingsTipCard(text: String) {
 }
 
 @Composable
-fun MiuixInstallChoiceTipCard(text: String) {
+fun MiuixInstallerTipCard(text: String) {
     TipCard(
         modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp),
         tipContent = {

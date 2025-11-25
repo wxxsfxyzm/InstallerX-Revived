@@ -2,22 +2,14 @@ package com.rosan.installer.ui.activity
 
 import android.content.Intent
 import android.content.pm.PackageInstaller
-import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,10 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
@@ -249,7 +238,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             // Return@setContent to show nothing, logs will explain why.
                 return@setContent
 
-            val confirmationDetails by installer.confirmationDetails.collectAsState(null)
+            //val confirmationDetails by installer.confirmationDetails.collectAsState(null)
 
             val useDarkTheme = when (uiState.themeMode) {
                 ThemeMode.LIGHT -> false
@@ -303,34 +292,13 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                     colorScheme = activeColorSchemeState.value,
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        if (confirmationDetails != null)
-                            ShowConfirmationDialog(
-                                appLabel = confirmationDetails!!.appLabel,
-                                appIcon = confirmationDetails!!.appIcon,
-                                onInstall = {
-                                    Timber.d("CONFIRM: Install clicked for session ${confirmationDetails!!.sessionId}")
-                                    installer.approveConfirmation(
-                                        confirmationDetails!!.sessionId,
-                                        true
-                                    )
-                                },
-                                onCancel = {
-                                    Timber.d("CONFIRM: Cancel clicked for session ${confirmationDetails!!.sessionId}")
-                                    installer.approveConfirmation(
-                                        confirmationDetails!!.sessionId,
-                                        false
-                                    )
-                                }
-                            )
-                        else {
-                            InstallerPage(
-                                installer = installer,
-                                activeColorSchemeState = activeColorSchemeState,
-                                globalColorScheme = globalColorScheme,
-                                isDarkMode = useDarkTheme,
-                                basePaletteStyle = uiState.paletteStyle
-                            )
-                        }
+                        InstallerPage(
+                            installer = installer,
+                            activeColorSchemeState = activeColorSchemeState,
+                            globalColorScheme = globalColorScheme,
+                            isDarkMode = useDarkTheme,
+                            basePaletteStyle = uiState.paletteStyle
+                        )
                     }
                 }
             }
@@ -357,43 +325,4 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         Timber.tag(tag).d("Extras: ${intent.extras?.keySet()?.joinToString(", ")}")
         Timber.tag(tag).d("---------- Intent Details End ----------")
     }
-}
-
-@Composable
-private fun ShowConfirmationDialog(
-    appLabel: CharSequence,
-    appIcon: Bitmap?,
-    onInstall: () -> Unit,
-    onCancel: () -> Unit
-) {
-    val appIconBitmap = appIcon?.asImageBitmap()
-
-    AlertDialog(
-        onDismissRequest = onCancel,
-        confirmButton = {
-            Button(onClick = onInstall) {
-                Text(stringResource(R.string.install))
-            }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onCancel) {
-                Text(stringResource(R.string.cancel))
-            }
-        },
-        icon = {
-            if (appIconBitmap != null) {
-                Image(
-                    bitmap = appIconBitmap,
-                    contentDescription = "App Icon",
-                    modifier = Modifier.size(40.dp)
-                )
-            }
-        },
-        title = {
-            Text(text = appLabel.toString())
-        },
-        text = {
-            Text(text = stringResource(R.string.installer_prepare_type_unknown_confirm))
-        }
-    )
 }

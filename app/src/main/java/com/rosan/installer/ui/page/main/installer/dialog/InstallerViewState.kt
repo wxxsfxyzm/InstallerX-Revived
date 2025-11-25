@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.installer.dialog
 
+import android.graphics.Bitmap
 import com.rosan.installer.data.installer.model.entity.InstallResult
 
 sealed class InstallerViewState {
@@ -24,7 +25,7 @@ sealed class InstallerViewState {
     data object InstallFailed : InstallerViewState()
     data object InstallRetryDowngradeUsingUninstall : InstallerViewState()
     data class InstallCompleted(val results: List<InstallResult>) : InstallerViewState()
-
+    data class InstallConfirm(val appLabel: CharSequence, val appIcon: Bitmap?, val sessionId: Int) : InstallerViewState()
     data object UninstallReady : InstallerViewState()
     data object UninstallResolveFailed : InstallerViewState()
     data object Uninstalling : InstallerViewState()

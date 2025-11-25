@@ -289,6 +289,7 @@
     <string name="installer_prepare_signature_unknown">Unable to verify app signature, please proceed with caution.</string>
     <string name="installer_install_app">Install App</string>
     <string name="installer_install_module">Install Module</string>
+    <string name="installer_install_confirm">Install Confirm</string>
     <string name="installer_installing">Installing…</string>
     <string name="installer_installing_module">Installing Module</string>
     <string name="installer_install_failed">Install failed</string>

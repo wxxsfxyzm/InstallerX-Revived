@@ -40,6 +40,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallChoiceContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallCompletedContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallConfirmContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallExtendedMenuContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallFailedContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallModuleContent
@@ -152,6 +153,7 @@ fun MiuixInstallerPage(
             stringResource(R.string.installer_installing_module)
         }
 
+        is InstallerViewState.InstallConfirm -> stringResource(R.string.installer_install_confirm)
         is InstallerViewState.Installing -> stringResource(R.string.installer_installing)
         is InstallerViewState.InstallCompleted -> stringResource(R.string.installer_install_success)
         is InstallerViewState.InstallSuccess -> stringResource(R.string.installer_install_success)
@@ -201,6 +203,15 @@ fun MiuixInstallerPage(
                             onClick = closeSheet
                         )
                     }
+                }
+
+                is InstallerViewState.InstallConfirm -> {
+                    MiuixBackButton(
+                        icon = MiuixIcons.Useful.Cancel,
+                        onClick = {
+                            viewModel.dispatch(InstallerViewAction.ApproveSession(currentState.sessionId, false))
+                        }
+                    )
                 }
 
                 is InstallerViewState.InstallCompleted,
@@ -323,6 +334,38 @@ fun MiuixInstallerPage(
             }
         ) { _ ->
             when (viewModel.state) {
+                is InstallerViewState.InstallConfirm -> {
+                    InstallConfirmContent(
+                        colorScheme = colorScheme,
+                        isDarkMode = isDarkMode,
+                        viewModel = viewModel,
+                        onCancel = {
+                            showBottomSheet.value = false
+                            scope.launch {
+                                delay(SHEET_ANIMATION_DURATION)
+                                viewModel.dispatch(
+                                    InstallerViewAction.ApproveSession(
+                                        (viewModel.state as InstallerViewState.InstallConfirm).sessionId,
+                                        false
+                                    )
+                                )
+                            }
+                        },
+                        onConfirm = {
+                            showBottomSheet.value = false
+                            scope.launch {
+                                delay(SHEET_ANIMATION_DURATION)
+                                viewModel.dispatch(
+                                    InstallerViewAction.ApproveSession(
+                                        (viewModel.state as InstallerViewState.InstallConfirm).sessionId,
+                                        true
+                                    )
+                                )
+                            }
+                        }
+                    )
+                }
+
                 is InstallerViewState.InstallChoice -> {
                     InstallChoiceContent(
                         colorScheme = colorScheme,

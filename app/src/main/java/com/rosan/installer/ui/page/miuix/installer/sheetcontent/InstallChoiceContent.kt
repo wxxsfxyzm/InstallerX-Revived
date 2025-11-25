@@ -34,7 +34,7 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCheckboxWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallChoiceTipCard
+import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixMultiApkCheckboxWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
@@ -82,7 +82,7 @@ fun InstallChoiceContent(
         val cardText = sourceType.getSupportSubtitle(selectionMode = selectionMode)
 
         if (cardText != null)
-            MiuixInstallChoiceTipCard(cardText)
+            MiuixInstallerTipCard(cardText)
 
         if (isMixedModuleZip && selectionMode == MmzSelectionMode.INITIAL_CHOICE) {
             Box(modifier = Modifier.weight(1f, fill = false)) {
