@@ -55,7 +55,10 @@ object AnalyserRepoImpl : AnalyserRepo {
         processedGroups.forEach { group ->
             Timber.d("  Group: ${group.packageName} contains ${group.entities.size} entities")
         }
-        val detectedMode = if (processedGroups.size > 1) {
+        val hasMultipleBasesInAnyGroup = processedGroups.any { group ->
+            group.entities.count { it is AppEntity.BaseEntity } > 1
+        }
+        val detectedMode = if (processedGroups.size > 1 || hasMultipleBasesInAnyGroup) {
             SessionMode.Batch
         } else {
             SessionMode.Single
