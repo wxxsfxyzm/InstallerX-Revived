@@ -175,6 +175,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         // Handle Dynamic Colors
         val useDynamicColor = appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+        val preferSystemIcon = appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first()
 
         installer.analysisResults = if (useDynamicColor) {
             Timber.d("[id=$installerId] analyse: Dynamic color is enabled. Extracting colors from icons.")
@@ -182,7 +183,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 results.map { res ->
                     async {
                         val base = res.appEntities.map { it.app }.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-                        val color = iconColorExtractor.extractColorFromApp(installer.id, res.packageName, base, false)
+                        val color = iconColorExtractor.extractColorFromApp(installer.id, res.packageName, base, preferSystemIcon)
                         res.copy(seedColor = color)
                     }
                 }.awaitAll()
