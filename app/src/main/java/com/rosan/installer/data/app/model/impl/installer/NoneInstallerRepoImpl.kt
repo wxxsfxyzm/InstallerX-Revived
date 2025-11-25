@@ -95,7 +95,7 @@ object NoneInstallerRepoImpl : InstallerRepo, KoinComponent {
         Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
         if (result.isSuccess) {
             // Enable autoDelete only when the containerType is not MULTI_APK_ZIP.
-            if (config.autoDelete && entities.first().containerType != DataType.MULTI_APK_ZIP) {
+            if (config.autoDelete && entities.first().sourceType != DataType.MULTI_APK_ZIP) {
                 Timber.tag("doFinishWork").d("autoDelete is enabled, starting delete work.")
                 // Launch a background coroutine to handle file deletion.
                 coroutineScope.launch {

@@ -21,7 +21,7 @@ object ModuleStrategy : AnalysisStrategy {
     ): List<AppEntity> = coroutineScope {
         require(data is DataEntity.FileEntity)
 
-        // 对于 MIXED_MODULE_APK，zipFile 可能为 null (如果上层没传)，这里确保有 zipFile
+        // For MIXED_MODULE_APK, zipFile might be null (if not passed by the caller), ensure zipFile exists here.
         val ensureZip = zipFile ?: ZipFile(data.path)
 
         val useZipBlock = suspend {
@@ -71,7 +71,7 @@ object ModuleStrategy : AnalysisStrategy {
                 ?: return emptyList()
 
             zipFile.getInputStream(modulePropEntry).buffered().use { inputStream ->
-                // --- BOM Handling (Copied from original repo) ---
+                // --- BOM Handling ---
                 inputStream.mark(3)
                 val bom = ByteArray(3)
                 val bytesRead = inputStream.read(bom, 0, 3)
@@ -89,7 +89,7 @@ object ModuleStrategy : AnalysisStrategy {
                 val name = properties.getProperty("name", "")
 
                 if (id.isBlank() || name.isBlank()) {
-                    Timber.w("Module file ${data} has incomplete module.prop")
+                    Timber.w("Module file $data has incomplete module.prop")
                     return emptyList()
                 }
 

@@ -29,16 +29,16 @@ object PackagePreprocessor {
     )
 
     /**
-     * 并行处理原始数据：分组 -> 去重 -> 获取系统安装信息
+     * Process raw data in parallel: Group -> Deduplicate -> Get installed system info.
      */
     suspend fun process(rawEntities: List<AppEntity>): List<ProcessedGroup> = coroutineScope {
         rawEntities
             .groupBy { it.packageName }
             .map { (packageName, entities) ->
                 async(Dispatchers.IO) {
-                    // 1. 并行去重 (IO密集)
+                    // 1. Parallel Deduplication (IO intensive)
                     val deduplicated = deduplicateEntities(entities)
-                    // 2. 并行获取系统信息 (IPC/IO密集)
+                    // 2. Parallel fetching of system info (IPC/IO intensive)
                     val installedInfo = InstalledAppInfo.buildByPackageName(packageName)
 
                     ProcessedGroup(packageName, deduplicated, installedInfo)
@@ -47,7 +47,7 @@ object PackagePreprocessor {
     }
 
     /**
-     * 判断会话类型 (用于 UI 展示逻辑)
+     * Determine session type (used for UI display logic).
      */
     fun determineSessionType(
         groups: List<ProcessedGroup>,
@@ -55,23 +55,23 @@ object PackagePreprocessor {
     ): SessionTypeInfo {
         val allEntities = groups.flatMap { it.entities }
 
-        // 1. 判断源文件数量
+        // 1. Determine the number of source files
         val sourcePaths = allEntities.mapNotNull { it.data.sourcePath() }.distinct()
         val isFromSingleFile = sourcePaths.size == 1
 
-        // 2. 获取主容器类型
+        // 2. Get main container type
         val firstType = allEntities.firstOrNull()?.sourceType
 
-        // 3. 判断是否为多应用模式
+        // 3. Determine if it is multi-app mode
         val isMultiPackage = groups.size > 1
         val hasMultipleBases = !isMultiPackage && allEntities.count { it is AppEntity.BaseEntity } > 1
 
-        // 特殊逻辑：如果是混合模块，强制不视为多应用模式，保持整体性
+        // Special logic: If it is a mixed module, force it not to be treated as multi-app mode to maintain integrity.
         val isMixedModule = firstType == DataType.MIXED_MODULE_APK || firstType == DataType.MIXED_MODULE_ZIP
 
         val isMultiAppSession = !isMixedModule && (isMultiPackage || hasMultipleBases)
 
-        // 4. 修正最终的容器类型展示
+        // 4. Correct the final container type display
         val finalContainerType = when {
             isMultiAppSession && firstType == DataType.MULTI_APK_ZIP -> DataType.MULTI_APK_ZIP
             isMultiAppSession -> DataType.MULTI_APK
@@ -82,7 +82,7 @@ object PackagePreprocessor {
     }
 
     /**
-     * 签名校验状态辅助方法
+     * Helper method for signature verification status.
      */
     fun checkSignature(
         baseEntity: AppEntity.BaseEntity?,
@@ -101,18 +101,18 @@ object PackagePreprocessor {
         }
     }
 
-    //Internal: 去重逻辑
+    // Internal: Deduplication logic
     private suspend fun deduplicateEntities(entities: List<AppEntity>): List<AppEntity> = coroutineScope {
         val bases = entities.filterIsInstance<AppEntity.BaseEntity>()
-        // 只有一个 Base 就不需要去重计算，直接返回
+        // If there is only one Base, no deduplication calculation is needed, return directly
         if (bases.size <= 1) return@coroutineScope entities
 
-        // 计算指纹
+        // Calculate fingerprint
         val hashedBases = bases.map { entity ->
             async { calculateFingerprint(entity) to entity }
         }.awaitAll()
 
-        // 根据指纹去重
+        // Deduplicate based on fingerprint
         val distinctBases = hashedBases
             .distinctBy { it.first } // pair.first is hash
             .map { it.second }
@@ -124,12 +124,12 @@ object PackagePreprocessor {
     private fun calculateFingerprint(entity: AppEntity.BaseEntity): String {
         return when (val data = entity.data) {
             is DataEntity.FileEntity -> {
-                // 全文件哈希 (较慢但准确)
+                // Full file hash (slower but accurate)
                 File(data.path).calculateSHA256() ?: "${data.path}_${entity.versionCode}"
             }
 
             is DataEntity.ZipFileEntity -> {
-                // Zip Entry 优化：只用 CRC + Size，不解压，速度极快
+                // Zip Entry optimization: Use CRC + Size only, no decompression, extremely fast
                 try {
                     ZipFile(data.parent.path).use { zip ->
                         zip.getEntry(data.name)?.let { "${it.crc}|${it.size}" }

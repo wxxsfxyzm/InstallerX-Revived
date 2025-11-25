@@ -8,6 +8,7 @@ import com.rosan.installer.data.app.repo.AnalysisStrategy
 import com.rosan.installer.data.app.util.FlexibleXapkVersionCodeSerializer
 import com.rosan.installer.data.app.util.parseSplitMetadata
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -20,6 +21,7 @@ import java.util.zip.ZipFile
 object XApkStrategy : AnalysisStrategy, KoinComponent {
     private val json by inject<Json>()
 
+    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun analyze(
         config: ConfigEntity,
         data: DataEntity,

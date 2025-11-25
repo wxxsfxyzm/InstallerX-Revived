@@ -236,7 +236,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         packageInstaller: PackageInstaller,
         packageName: String
     ): Session {
-        val containerType = entities.first().containerType
+        val containerType = entities.first().sourceType
         val params = if (containerType == DataType.MULTI_APK_ZIP || containerType == DataType.MULTI_APK)
             PackageInstaller.SessionParams(
                 // Always use full mode when apk is definite
@@ -425,7 +425,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
 
             // Never Delete Multi-APK-ZIP files automatically
             // Enable autoDelete only when the containerType is not MULTI_APK_ZIP
-            if (config.autoDelete && entities.first().containerType != DataType.MULTI_APK_ZIP) {
+            if (config.autoDelete && entities.first().sourceType != DataType.MULTI_APK_ZIP) {
                 Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
                 // Improve logging for better debugging
                 coroutineScope.launch {

@@ -184,7 +184,7 @@ fun MiuixErrorTextBlock(
                     value = textToShow,
                     onValueChange = {},
                     readOnly = true,
-                    textStyle = LocalTextStyle.current.copy(color = errorColor),
+                    textStyle = LocalTextStyle.current.copy(color = MiuixTheme.colorScheme.onErrorContainer),
                     modifier = Modifier
                         .fillMaxWidth()
                         // Allow vertical scrolling for long stack traces

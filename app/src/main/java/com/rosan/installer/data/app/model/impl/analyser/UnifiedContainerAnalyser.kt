@@ -27,8 +27,8 @@ object UnifiedContainerAnalyser {
         DataType.APKM to ApkmStrategy,
         DataType.XAPK to XApkStrategy,
         DataType.MULTI_APK_ZIP to MultiApkZipStrategy,
-        DataType.MODULE_ZIP to ModuleStrategy,       // 处理纯模块
-        DataType.MIXED_MODULE_ZIP to ModuleStrategy, // 处理含 APK 的模块 (逻辑通常相似)
+        DataType.MODULE_ZIP to ModuleStrategy,
+        DataType.MIXED_MODULE_ZIP to ModuleStrategy,
         DataType.MIXED_MODULE_APK to SingleApkStrategy
     )
 
