@@ -6,6 +6,7 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.repo.AnalysisStrategy
 import com.rosan.installer.data.app.util.FlexibleXapkVersionCodeSerializer
+import com.rosan.installer.data.app.util.parseSplitMetadata
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -51,6 +52,8 @@ object XApkStrategy : AnalysisStrategy, KoinComponent {
                     val splitName = if (split.splitName == "base") null else split.splitName
 
                     val entity = if (!splitName.isNullOrEmpty()) {
+                        val metadata = splitName.parseSplitMetadata()
+
                         AppEntity.SplitEntity(
                             packageName = manifest.packageName,
                             data = entryData,
@@ -58,7 +61,10 @@ object XApkStrategy : AnalysisStrategy, KoinComponent {
                             targetSdk = manifest.targetSdk,
                             minSdk = manifest.minSdk,
                             arch = null,
-                            sourceType = extra.dataType
+                            sourceType = extra.dataType,
+                            type = metadata.type,
+                            filterType = metadata.filterType,
+                            configValue = metadata.configValue
                         )
                     } else {
                         AppEntity.BaseEntity(

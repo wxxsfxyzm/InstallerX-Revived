@@ -16,6 +16,7 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.util.SignatureUtils
+import com.rosan.installer.data.app.util.parseSplitMetadata
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.res.model.impl.AxmlTreeRepoImpl
 import com.rosan.installer.data.res.repo.AxmlTreeRepo
@@ -239,15 +240,21 @@ object ApkParser : KoinComponent {
             permissions = permissions,
             sourceType = extra.dataType,
             signatureHash = signatureHash
-        ) else AppEntity.SplitEntity(
-            packageName = packageName,
-            data = data,
-            splitName = splitName,
-            targetSdk = targetSdk,
-            minSdk = minSdk,
-            arch = null,
-            sourceType = extra.dataType
-        )
+        ) else {
+            val metadata = splitName.parseSplitMetadata()
+            AppEntity.SplitEntity(
+                packageName = packageName,
+                data = data,
+                splitName = splitName,
+                targetSdk = targetSdk,
+                minSdk = minSdk,
+                arch = null,
+                sourceType = extra.dataType,
+                type = metadata.type,
+                filterType = metadata.filterType,
+                configValue = metadata.configValue
+            )
+        }
     }
 
     private fun resolveString(res: Resources, resId: Int, rawValue: String?): String? {

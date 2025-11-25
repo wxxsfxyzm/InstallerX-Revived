@@ -5,6 +5,7 @@ import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.repo.AnalysisStrategy
+import com.rosan.installer.data.app.util.parseSplitMetadata
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
@@ -54,6 +55,8 @@ object ApkmStrategy : AnalysisStrategy, KoinComponent {
                         val splitName = if (nameWithoutExt == "base") null else nameWithoutExt
 
                         val entity = if (!splitName.isNullOrEmpty()) {
+                            val metadata = splitName.parseSplitMetadata()
+
                             AppEntity.SplitEntity(
                                 packageName = manifest.packageName,
                                 data = entryData,
@@ -61,7 +64,10 @@ object ApkmStrategy : AnalysisStrategy, KoinComponent {
                                 targetSdk = null, // APKM doesn't provide targetSdk in json
                                 minSdk = manifest.minApi,
                                 arch = null,
-                                sourceType = extra.dataType
+                                sourceType = extra.dataType,
+                                type = metadata.type,
+                                filterType = metadata.filterType,
+                                configValue = metadata.configValue
                             )
                         } else {
                             AppEntity.BaseEntity(

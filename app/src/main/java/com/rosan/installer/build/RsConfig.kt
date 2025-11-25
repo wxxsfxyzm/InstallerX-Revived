@@ -12,135 +12,100 @@ import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.convertLegacyLanguageCode
 
 object RsConfig {
-    val LEVEL: Level = getLevel()
-    val isDebug: Boolean = BuildConfig.DEBUG
-    val isInternetAccessEnabled
-        get() = BuildConfig.INTERNET_ACCESS_ENABLED
-
-    private fun getLevel(): Level {
-        return when (BuildConfig.BUILD_LEVEL) {
-            1 -> Level.PREVIEW
-            2 -> Level.STABLE
-            else -> Level.UNSTABLE
-        }
+    // Static configs: Computed once
+    val LEVEL: Level = when (BuildConfig.BUILD_LEVEL) {
+        1 -> Level.PREVIEW
+        2 -> Level.STABLE
+        else -> Level.UNSTABLE
     }
 
+    val isDebug: Boolean = BuildConfig.DEBUG
+    const val isInternetAccessEnabled: Boolean = BuildConfig.INTERNET_ACCESS_ENABLED
     const val VERSION_NAME: String = BuildConfig.VERSION_NAME
     const val VERSION_CODE: Int = BuildConfig.VERSION_CODE
 
-    val systemVersion: String
-        get() = if (Build.VERSION.PREVIEW_SDK_INT != 0)
-            "%s Preview (API %s)".format(Build.VERSION.CODENAME, Build.VERSION.SDK_INT)
-        else
-            "%s (API %s)".format(Build.VERSION.RELEASE, Build.VERSION.SDK_INT)
+    val systemVersion: String = if (Build.VERSION.PREVIEW_SDK_INT != 0)
+        "%s Preview (API %s)".format(Build.VERSION.CODENAME, Build.VERSION.SDK_INT)
+    else
+        "%s (API %s)".format(Build.VERSION.RELEASE, Build.VERSION.SDK_INT)
 
-    val manufacturer: String
-        get() = Build.MANUFACTURER.uppercase()
+    val manufacturer: String = Build.MANUFACTURER.uppercase()
+    val brand: String = Build.BRAND.uppercase()
 
-    /**
-     * The current device manufacturer's enum representation.
-     * The lookup logic is centralized in the Manufacturer.from() companion object function.
-     * @return The matching Manufacturer enum, or UNKNOWN if not found.
-     */
-    val currentManufacturer: Manufacturer
-        get() = Manufacturer.from(Build.MANUFACTURER)
+    val deviceName: String = if (!TextUtils.equals(brand, manufacturer))
+        "$manufacturer $brand ${Build.MODEL}"
+    else
+        "$manufacturer ${Build.MODEL}"
 
-    val brand = Build.BRAND.uppercase()
-
-    val deviceName: String
-        get() = if (!TextUtils.equals(brand, manufacturer))
-            manufacturer + " " + brand + " " + Build.MODEL
-        else
-            manufacturer + " " + Build.MODEL
+    // Lazy properties: Computed only once upon first access for performance
 
     /**
-     * The primary architecture of the device.
-     * This property determines the most preferred ABI supported by the device
-     * and maps it to a safe enum type.
-     * @return The corresponding Architecture enum constant.
+     * Cached Manufacturer enum using the centralized lookup logic.
      */
-    val currentArchitecture: Architecture
-        get() = supportedArchitectures.first()
+    val currentManufacturer: Manufacturer by lazy {
+        Manufacturer.from(Build.MANUFACTURER)
+    }
+
+    val isMiui: Boolean by lazy {
+        OSUtils.isMIUI() || OSUtils.isHyperOS()
+    }
 
     /**
-     * Gets a prioritized list of supported architectures for the device.
-     * The list is ordered from the most preferred to the least preferred.
-     *
-     * @return A List of Architecture enums, sorted by preference.
+     * Cached list of supported architectures.
+     * Maps Build.SUPPORTED_ABIS to our safe Enum.
      */
-    val supportedArchitectures: List<Architecture>
-        get() =
-        // Build.SUPPORTED_ABIS is already ordered by system preference.
-            // We just map the string values to our type-safe enum.
-            Build.SUPPORTED_ABIS.mapNotNull { abiString ->
-                Architecture.fromArchString(abiString)
-            }
+    val supportedArchitectures: List<Architecture> by lazy {
+        Build.SUPPORTED_ABIS.mapNotNull { abiString ->
+            Architecture.fromArchString(abiString)
+        }
+    }
 
     /**
-     * Checks if the primary device architecture is part of the ARM family.
-     * @return True if the architecture is ARM64, ARMv7a, or ARMEABI.
+     * The primary architecture (most preferred).
      */
-    val isArm: Boolean
-        get() = when (currentArchitecture) {
+    val currentArchitecture: Architecture by lazy {
+        supportedArchitectures.firstOrNull() ?: Architecture.UNKNOWN
+    }
+
+    val isArm: Boolean by lazy {
+        when (currentArchitecture) {
             Architecture.ARM64, Architecture.ARM, Architecture.ARMEABI -> true
             else -> false
         }
+    }
 
-    /**
-     * Checks if the primary device architecture is part of the x86 family.
-     * @return True if the architecture is x86_64 or x86.
-     */
-    val isX86: Boolean
-        get() = when (currentArchitecture) {
+    val isX86: Boolean by lazy {
+        when (currentArchitecture) {
             Architecture.X86_64, Architecture.X86 -> true
             else -> false
         }
-
-    val isMiui: Boolean
-        get() = OSUtils.isMIUI() || OSUtils.isHyperOS()
+    }
 
     /**
-     * Gets a prioritized list of screen densities for the device.
-     * The logic prefers densities that are equal to or higher than the device's native density,
-     * followed by lower densities, to ensure the best possible asset quality is chosen first.
-     *
-     * @return A List of Density enums, sorted by preference.
+     * Cached supported densities using the specific prioritization logic
+     * defined in the Density enum companion object.
      */
-    val supportedDensities: List<Density>
-        get() = Density.getPrioritizedList()
+    val supportedDensities: List<Density> by lazy {
+        Density.getPrioritizedList()
+    }
 
     /**
-     * Gets a prioritized list of languages based on the user's system settings.
-     * This version strictly extracts language codes without any modification or conversion.
-     *
-     * Logic is from the PackageUtil.kt file in the PackageInstaller project.
-     * Under Apache License 2.0.
-     *
-     * @return A List of language code Strings, sorted by user preference, with "base" as a fallback.
-     * @see <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>
-     * @see <a href="https://github.com/vvb2060/PackageInstaller/blob/master/app/src/main/java/io/github/vvb2060/packageinstaller/model/PackageUtil.kt">PackageUtil</a>
+     * Supported Locales.
+     * Dynamic Getter: Users might change system language at runtime.
      */
     val supportedLocales: List<String>
         get() {
-            val res = Resources.getSystem()
-            // Use a LinkedHashSet to preserve insertion order while ensuring uniqueness.
-            val languageSet = LinkedHashSet<String>()
-            val locales = res.configuration.locales
+            val locales = Resources.getSystem().configuration.locales
+            if (locales.isEmpty) return listOf("base")
 
-            if (!locales.isEmpty) {
-                for (i in 0 until locales.size()) {
-                    val locale = locales.get(i)
-                    // Get the base language code (e.g., "en" from "en-US") and add it directly.
-                    // No conversion logic is applied.
-                    val langCode = locale.toLanguageTag().substringBefore('-')
-                    languageSet.add(langCode.convertLegacyLanguageCode())
-                }
+            val languages = mutableSetOf<String>()
+            for (i in 0 until locales.size()) {
+                val locale = locales.get(i)
+                // Extract base language (e.g. "en" from "en-US")
+                val langCode = locale.toLanguageTag().substringBefore('-')
+                languages.add(langCode.convertLegacyLanguageCode())
             }
-
-            // Always add "base" as the ultimate fallback.
-            languageSet.add("base")
-            return languageSet.toList()
+            languages.add("base")
+            return languages.toList()
         }
-
-
 }

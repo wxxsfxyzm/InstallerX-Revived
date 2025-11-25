@@ -5,6 +5,7 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.impl.analyser.ApkParser
 import com.rosan.installer.data.app.repo.AnalysisStrategy
+import com.rosan.installer.data.app.util.parseSplitMetadata
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -49,6 +50,8 @@ object ApksStrategy : AnalysisStrategy {
         val finalBase = baseResult.copy(sourceType = extra.dataType)
 
         val splits = splitEntities.map { (entry, name) ->
+            val metadata = name.parseSplitMetadata()
+
             AppEntity.SplitEntity(
                 packageName = finalBase.packageName,
                 data = DataEntity.ZipFileEntity(entry.name, data as DataEntity.FileEntity),
@@ -56,7 +59,10 @@ object ApksStrategy : AnalysisStrategy {
                 targetSdk = finalBase.targetSdk,
                 minSdk = finalBase.minSdk,
                 arch = null, // Can be parsed from name if needed
-                sourceType = extra.dataType
+                sourceType = extra.dataType,
+                type = metadata.type,
+                filterType = metadata.filterType,
+                configValue = metadata.configValue
             )
         }
 

@@ -28,6 +28,8 @@ import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.MmzSelectionMode
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.entity.SessionMode
+import com.rosan.installer.data.app.util.getDisplayName
+import com.rosan.installer.data.app.util.getSplitDisplayName
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
@@ -37,9 +39,6 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixMultiApkCheckboxWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.getSupportSubtitle
-import com.rosan.installer.util.asUserReadableSplitName
-import com.rosan.installer.util.getDisplayName
-import com.rosan.installer.util.getSplitType
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -337,7 +336,7 @@ private fun ChoiceLazyList(
 
         // Group splits by type
         val groupedSplits = splitEntities
-            .groupBy { (it.app as AppEntity.SplitEntity).splitName.getSplitType() }
+            .groupBy { (it.app as AppEntity.SplitEntity).type }
             .toSortedMap(compareBy { it.ordinal }) // Sort groups by enum order
 
         LazyColumn(
@@ -425,7 +424,11 @@ private fun ChoiceLazyList(
                         Column {
                             entitiesInGroup.forEach { item ->
                                 val app = item.app as AppEntity.SplitEntity
-                                val title = app.splitName.asUserReadableSplitName()
+                                val title = getSplitDisplayName(
+                                    type = app.type,
+                                    configValue = app.configValue,
+                                    fallbackName = app.splitName
+                                )
                                 val description = stringResource(R.string.installer_file_name, app.name)
 
                                 MiuixCheckboxWidget(

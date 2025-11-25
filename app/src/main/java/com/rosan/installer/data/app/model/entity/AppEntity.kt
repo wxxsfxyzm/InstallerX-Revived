@@ -2,6 +2,8 @@ package com.rosan.installer.data.app.model.entity
 
 import android.graphics.drawable.Drawable
 import com.rosan.installer.build.model.entity.Architecture
+import com.rosan.installer.data.app.util.FilterType
+import com.rosan.installer.data.app.util.SplitType
 
 sealed class AppEntity {
     abstract val packageName: String
@@ -41,6 +43,13 @@ sealed class AppEntity {
         override val minSdk: String?,
         override val arch: Architecture?,
         override val sourceType: DataType? = null,
+        // Split Type: 用于 UI 分组 (显示在哪个标题下)
+        val type: SplitType = SplitType.FEATURE,
+        // Filter Type: 用于 安装选择策略 (如何过滤)
+        // 默认是 NONE，表示这个 Split 没有特殊的硬件/语言限制，只要用户想要就能装
+        val filterType: FilterType = FilterType.NONE,
+        // Extracted config value ("zh", "xhdpi", "arm64-v8a")
+        val configValue: String? = null
     ) : AppEntity() {
         override val name = "$splitName.apk"
     }

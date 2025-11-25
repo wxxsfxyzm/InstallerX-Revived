@@ -47,6 +47,7 @@ import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.MmzSelectionMode
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.entity.SessionMode
+import com.rosan.installer.data.app.util.getSplitDisplayName
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.icons.AppIcons
@@ -59,7 +60,6 @@ import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWid
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.util.getSupportSubtitle
 import com.rosan.installer.ui.util.getSupportTitle
-import com.rosan.installer.util.asUserReadableSplitName
 import timber.log.Timber
 
 @Composable
@@ -507,7 +507,11 @@ private fun ItemContent(app: AppEntity) {
 
             is AppEntity.SplitEntity -> {
                 Text(
-                    app.splitName.asUserReadableSplitName(),
+                    text = getSplitDisplayName(
+                        type = app.type,
+                        configValue = app.configValue,
+                        fallbackName = app.splitName
+                    ),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
