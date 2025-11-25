@@ -6,6 +6,7 @@ import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.util.FilterType
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.util.convertLegacyLanguageCode
+import timber.log.Timber
 
 object SelectionStrategy {
 
@@ -13,32 +14,48 @@ object SelectionStrategy {
         entities: List<AppEntity>,
         containerType: DataType
     ): List<SelectInstallEntity> {
+        Timber.d("SelectionStrategy: Starting selection for ${entities.size} entities. ContainerType: $containerType")
+
         // 1. Mixed Modules: Default unselected
         if (containerType == DataType.MIXED_MODULE_APK || containerType == DataType.MIXED_MODULE_ZIP) {
+            Timber.d("Mixed Module detected. All entities deselected by default.")
             return entities.map { SelectInstallEntity(it, selected = false) }
         }
 
         // 2. Multi-App Mode: Best Base only
         val isMultiAppMode = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
         if (isMultiAppMode) {
-            val bestBase = findBestBase(entities.filterIsInstance<AppEntity.BaseEntity>())
+            Timber.d("Multi-App Mode detected. Selecting best base entity.")
+            val bases = entities.filterIsInstance<AppEntity.BaseEntity>()
+            val bestBase = findBestBase(bases)
+
+            if (bestBase != null) {
+                Timber.d("Best Base selected: ${bestBase.packageName} (VC: ${bestBase.versionCode})")
+            } else {
+                Timber.w("No BaseEntity found in Multi-App Mode!")
+            }
+
             return entities.map { entity ->
                 SelectInstallEntity(entity, selected = (entity == bestBase))
             }
         }
 
         // 3. Single App Mode: Base + Calculated Splits
+        Timber.d("Single App Mode detected. Calculating optimal splits.")
+
         // Extract all splits to analyze them globally
         val allSplits = entities.filterIsInstance<AppEntity.SplitEntity>()
         val selectedSplits = selectOptimalSplits(allSplits)
 
+        Timber.d("Selected ${selectedSplits.size} splits out of ${allSplits.size} available.")
+
         return entities.map { entity ->
             val isSelected = when (entity) {
-                is AppEntity.BaseEntity -> true
-                is AppEntity.DexMetadataEntity -> true
-                is AppEntity.SplitEntity -> entity in selectedSplits
-                is AppEntity.CollectionEntity -> false
-                is AppEntity.ModuleEntity -> true
+                is AppEntity.BaseEntity -> true // Base APK is always selected
+                is AppEntity.DexMetadataEntity -> true // Metadata is always selected
+                is AppEntity.SplitEntity -> entity in selectedSplits // Only optimal splits are selected
+                is AppEntity.CollectionEntity -> false // Collections (e.g., internal parts) usually skipped
+                is AppEntity.ModuleEntity -> true // Modules are usually selected
             }
             SelectInstallEntity(entity, selected = isSelected)
         }
@@ -50,7 +67,10 @@ object SelectionStrategy {
      * (both Standalone Configs and Feature Configs) against these targets.
      */
     private fun selectOptimalSplits(splits: List<AppEntity.SplitEntity>): Set<AppEntity.SplitEntity> {
-        if (splits.isEmpty()) return emptySet()
+        if (splits.isEmpty()) {
+            Timber.d("No splits to select from.")
+            return emptySet()
+        }
 
         // Step A: Determine the "Target" configurations for this specific app's split set.
         // We look at what matches the device supports, and pick the best one available in the splits.
@@ -65,6 +85,8 @@ object SelectionStrategy {
         val deviceAbis = RsConfig.supportedArchitectures.map { it.arch }
         val targetAbi = findBestDeviceMatch(availableAbis, deviceAbis)
 
+        Timber.d("Split Selection [ABI]: Available=$availableAbis, Device=$deviceAbis, Target=$targetAbi")
+
         // A2. Target Density
         val availableDensities = splits
             .filter { it.filterType == FilterType.DENSITY }
@@ -75,12 +97,16 @@ object SelectionStrategy {
         val deviceDensities = RsConfig.supportedDensities.map { it.key }
         val targetDensity = findBestDeviceMatch(availableDensities, deviceDensities)
 
+        Timber.d("Split Selection [Density]: Available=$availableDensities, Device=$deviceDensities, Target=$targetDensity")
+
         // A3. Target Languages (Can be multiple)
         val availableLangs = splits
             .filter { it.filterType == FilterType.LANGUAGE }
             .mapNotNull { it.configValue }
             .toSet()
         val targetLangs = findBestLanguageMatches(availableLangs)
+
+        Timber.d("Split Selection [Language]: Available=$availableLangs, Selected=$targetLangs")
 
         // Step B: Filter every split based on its individual restriction.
         return splits.filter { split ->
@@ -100,8 +126,6 @@ object SelectionStrategy {
         }.toSet()
     }
 
-    // --- Helper Algorithms ---
-
     private fun findBestDeviceMatch(candidates: Set<String>, devicePreferences: List<String>): String? {
         if (candidates.isEmpty()) return null
         // Return the first device preference that is actually available in the APKs
@@ -113,11 +137,11 @@ object SelectionStrategy {
         val deviceLangs = RsConfig.supportedLocales.map { it.convertLegacyLanguageCode() }
         val selected = mutableSetOf<String>()
 
-        // 1. Exact Matches
+        // 1. Exact Matches (e.g. "zh-cn" == "zh-cn")
         val exactMatches = candidates.filter { lang -> deviceLangs.contains(lang) }
         selected.addAll(exactMatches)
 
-        // 2. Fuzzy Matches
+        // 2. Fuzzy Matches (e.g. Device "zh-cn" matches APK "zh")
         if (selected.isEmpty()) {
             val primaryBase = deviceLangs.firstOrNull()?.substringBefore('-')
             if (primaryBase != null) {
@@ -133,13 +157,24 @@ object SelectionStrategy {
         if (bases.size == 1) return bases.first()
 
         val deviceAbis = RsConfig.supportedArchitectures.map { it.arch }
-        return bases.sortedWith(
+        Timber.d("Selecting best base from ${bases.size} candidates. Device ABIs: $deviceAbis")
+
+        // Sort bases by Architecture Preference -> Version Code -> Version Name
+        val sorted = bases.sortedWith(
             compareBy<AppEntity.BaseEntity> { base ->
                 val abiIndex = base.arch?.let { deviceAbis.indexOf(it.arch) } ?: -1
+                // -1 implies incompatible or unknown, put at the end
                 if (abiIndex == -1) Int.MAX_VALUE else abiIndex
             }
                 .thenByDescending { it.versionCode }
                 .thenByDescending { it.versionName }
-        ).firstOrNull()
+        )
+
+        // Log top candidate for debugging
+        sorted.firstOrNull()?.let {
+            Timber.d("Best base candidate found: ${it.packageName} (Arch=${it.arch}, Ver=${it.versionCode})")
+        }
+
+        return sorted.firstOrNull()
     }
 }

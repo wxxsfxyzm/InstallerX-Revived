@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import timber.log.Timber
 import com.rosan.installer.data.app.model.impl.InstallerRepoImpl as CoreInstaller
 
 class InstallationProcessor(
@@ -28,17 +29,21 @@ class InstallationProcessor(
         cacheDirectory: String
     ) {
         val selected = analysisResults.flatMap { it.appEntities }.filter { it.selected }
-        if (selected.isEmpty()) throw IllegalStateException("No items selected")
+        if (selected.isEmpty()) {
+            Timber.w("install: No entities selected for installation.")
+            throw IllegalStateException("No items selected")
+        }
 
         val firstApp = selected.first().app
         if (firstApp is AppEntity.ModuleEntity) {
             installModule(config, firstApp)
         } else {
-            installApp(config, analysisResults, selected, cacheDirectory)
+            installApp(config, selected, cacheDirectory)
         }
     }
 
     private suspend fun installModule(config: ConfigEntity, module: AppEntity.ModuleEntity) {
+        Timber.d("installModule: Starting module installation for ${module.name}")
         val output = mutableListOf("Starting installation...")
         progressFlow.emit(ProgressEntity.InstallingModule(output.toList()))
 
@@ -48,24 +53,29 @@ class InstallationProcessor(
             output.add(it)
             progressFlow.emit(ProgressEntity.InstallingModule(output.toList()))
         }
+        Timber.d("installModule: Succeeded. Emitting ProgressEntity.InstallSuccess.")
         progressFlow.emit(ProgressEntity.InstallSuccess)
     }
 
     private suspend fun installApp(
         config: ConfigEntity,
-        allResults: List<PackageAnalysisResult>,
         selectedEntities: List<SelectInstallEntity>,
         cacheDirectory: String
     ) {
+        Timber.d("install: Starting. Emitting ProgressEntity.Installing.")
         progressFlow.emit(ProgressEntity.Installing)
 
-        val blacklist =
-            appDataStore.getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST).first().map { it.packageName }
-        val sharedUidBlacklist =
-            appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST).first().map { it.uidName }
-        val sharedUidWhitelist =
-            appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST).first()
-                .map { it.packageName }
+        Timber.d("install: Loading package name blacklist from AppDataStore.")
+        val blacklist = appDataStore.getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
+            .first().map { it.packageName }
+
+        Timber.d("install: Loading SharedUID blacklist from AppDataStore.")
+        val sharedUidBlacklist = appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
+            .first().map { it.uidName }
+
+        Timber.d("install: Loading SharedUID whitelist from AppDataStore.")
+        val sharedUidWhitelist = appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
+            .first().map { it.packageName }
 
         val installEntities = selectedEntities.map {
             InstallEntity(
@@ -78,7 +88,14 @@ class InstallationProcessor(
             )
         }
 
-        val targetUserId = if (config.enableCustomizeUser) config.targetUserId else Os.getuid() / 100000
+        val targetUserId = if (config.enableCustomizeUser) {
+            Timber.d("Custom user is enabled. Installing for user: ${config.targetUserId}")
+            config.targetUserId
+        } else {
+            val uid = Os.getuid() / 100000
+            Timber.d("Custom user is disabled. Installing for current user: $uid")
+            uid
+        }
 
         CoreInstaller.doInstallWork(
             config,
@@ -88,6 +105,7 @@ class InstallationProcessor(
             sharedUidBlacklist,
             sharedUidWhitelist
         )
+        Timber.d("install: Succeeded. Emitting ProgressEntity.InstallSuccess.")
         progressFlow.emit(ProgressEntity.InstallSuccess)
     }
 }

@@ -45,6 +45,8 @@ class SourceResolver(
 
     suspend fun resolve(intent: Intent): List<DataEntity> {
         val uris = extractUris(intent)
+        Timber.d("resolve: URIs extracted from intent (${uris.size}).")
+
         val data = mutableListOf<DataEntity>()
         for (uri in uris) {
             data.addAll(resolveSingleUri(uri))
@@ -57,7 +59,10 @@ class SourceResolver(
         val uris = when (action) {
             Intent.ACTION_SEND -> {
                 if (intent.type?.startsWith("text/") == true) {
-                    if (!RsConfig.isInternetAccessEnabled) throw ResolvedFailedNoInternetAccessException("No internet access")
+                    if (!RsConfig.isInternetAccessEnabled) {
+                        Timber.d("Internet access is disabled in the app settings.")
+                        throw ResolvedFailedNoInternetAccessException("No internet access to download files.")
+                    }
                     intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()?.takeIf { it.isNotBlank() }?.let { listOf(it.toUri()) }
                         ?: emptyList()
                 } else {
@@ -79,9 +84,11 @@ class SourceResolver(
     }
 
     private suspend fun resolveSingleUri(uri: Uri): List<DataEntity> {
+        Timber.d("Source URI: $uri")
         return when (uri.scheme?.lowercase()) {
             "file" -> {
                 val path = uri.path ?: throw Exception("Invalid file URI: $uri")
+                Timber.d("Resolving direct file URI: $path")
                 listOf(DataEntity.FileEntity(path).apply { source = DataEntity.FileEntity(path) })
             }
 
@@ -102,16 +109,18 @@ class SourceResolver(
 
         if (file.canRead()) {
             try {
-                // Validate read access
+                // Validate read access. RandomAccessFile will throw if permission denied.
                 RandomAccessFile(file, "r").use { }
                 if (sourcePath.startsWith('/')) {
-                    Timber.d("Direct procfs access success: $sourcePath")
+                    Timber.d("Success! Got direct, usable file access through procfs: $sourcePath")
                     closeables.add(afd) // Keep open until session ends
                     return listOf(DataEntity.FileEntity(procPath).apply { source = DataEntity.FileEntity(sourcePath) })
                 }
             } catch (e: Exception) {
-                Timber.w("Direct procfs check failed, falling back to cache.")
+                Timber.w(e, "Direct procfs access test failed. Falling back to cache.")
             }
+        } else {
+            Timber.d("Direct file access failed or file not readable. Falling back to caching with progress.")
         }
 
         // Fallback: Cache to temp file
@@ -122,6 +131,8 @@ class SourceResolver(
         withContext(Dispatchers.IO) {
             val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
             val totalSize = guessContentLength(uri, afd)
+
+            Timber.d("Caching content to: ${tempFile.absolutePath}, Size: $totalSize")
 
             afd.use { descriptor ->
                 descriptor.createInputStream().use { input ->
@@ -134,7 +145,9 @@ class SourceResolver(
         }
 
     private suspend fun downloadHttpUri(uri: Uri): List<DataEntity> = withContext(Dispatchers.IO) {
+        Timber.d("Starting download for HTTP URI: $uri")
         progressFlow.emit(ProgressEntity.InstallPreparing(-1f))
+
         val url = URL(uri.toString())
         val conn = (url.openConnection() as HttpURLConnection).apply {
             connectTimeout = 15000
@@ -146,14 +159,17 @@ class SourceResolver(
         try {
             if (conn.responseCode !in 200..299) throw IOException("HTTP ${conn.responseCode}")
 
-            // Basic validation logic omitted for brevity (MimeType/Extension check)
-
             val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".apk_cache", File(cacheDirectory))
+            val totalSize = conn.contentLengthLong
+
+            Timber.d("Downloading $totalSize bytes to ${tempFile.absolutePath}")
+
             conn.inputStream.use { input ->
                 tempFile.outputStream().use { output ->
-                    copyStreamWithProgress(input, output, conn.contentLengthLong)
+                    copyStreamWithProgress(input, output, totalSize)
                 }
             }
+            Timber.d("URL download and caching complete.")
             listOf(DataEntity.FileEntity(tempFile.absolutePath))
         } finally {
             conn.disconnect()
@@ -182,6 +198,7 @@ class SourceResolver(
             }
             read = input.read(buf)
         }
+        if (totalSize > 0) progressFlow.emit(ProgressEntity.InstallPreparing(1f))
     }
 
     private fun guessContentLength(uri: Uri, afd: AssetFileDescriptor?): Long {

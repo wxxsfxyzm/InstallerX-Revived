@@ -26,6 +26,7 @@ class SessionProcessor : KoinComponent {
         var icon: Bitmap? = null
 
         if (context.isSystemInstaller()) {
+            Timber.d("Handling CONFIRM_INSTALL as system installer.")
             val local = getSessionDetailsLocally(sessionId)
             label = local.first
             icon = local.second
@@ -35,19 +36,29 @@ class SessionProcessor : KoinComponent {
                 ConfigEntity.Authorizer.Customize
             )
         ) {
+            Timber.d("Handling CONFIRM_INSTALL using ${config.authorizer} service.")
             var bundle: Bundle? = null
             useUserService(config) { bundle = it.privileged.getSessionDetails(sessionId) }
-            bundle?.let {
+
+            if (bundle == null) {
+                Timber.e("getSessionDetails() failed via ${config.authorizer}.")
+                throw Exception("Failed to get session details from privileged service.")
+            }
+
+            bundle.let {
                 label = it.getCharSequence("appLabel")
                 val bytes = it.getByteArray("appIcon")
                 if (bytes != null) icon = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
+        } else {
+            Timber.w("Received CONFIRM_INSTALL with unsupported authorizer (${config.authorizer}).")
         }
         return ConfirmationDetails(sessionId, label ?: "N/A", icon)
     }
 
     fun approveSession(sessionId: Int, granted: Boolean, config: ConfigEntity) {
         if (context.isSystemInstaller()) {
+            Timber.d("Approving session locally as system installer.")
             approveSessionLocally(sessionId, granted)
         } else if (config.authorizer in listOf(
                 ConfigEntity.Authorizer.Root,
@@ -55,7 +66,10 @@ class SessionProcessor : KoinComponent {
                 ConfigEntity.Authorizer.Customize
             )
         ) {
+            Timber.d("Approving session using ${config.authorizer} service.")
             useUserService(config) { it.privileged.approveSession(sessionId, granted) }
+        } else {
+            Timber.w("approveSession called with unsupported authorizer (${config.authorizer}).")
         }
     }
 
