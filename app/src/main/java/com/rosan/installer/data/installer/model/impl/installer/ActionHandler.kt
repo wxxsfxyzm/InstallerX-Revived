@@ -24,14 +24,18 @@ import com.rosan.installer.data.recycle.util.setInstallerDefaultPrivileged
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -50,6 +54,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private var job: Job? = null
 
+    // A separate job for the current heavy task (Resolve, Install, etc.)
+    private var processingJob: Job? = null
+
     // Helper property to get ID for logging
     private val installerId get() = installer.id
 
@@ -66,7 +73,56 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         job = scope.launch {
             installer.action.collect { action ->
                 Timber.d("[id=$installerId] Received action: ${action::class.simpleName}")
-                runCatching { handleAction(action) }.onFailure { e ->
+
+                // If the action is Cancel, we handle it immediately by cancelling the processing job.
+                when (action) {
+                    is InstallerRepoImpl.Action.Cancel -> {
+                        handleCancel()
+                    }
+
+                    is InstallerRepoImpl.Action.Finish -> {
+                        // Finish should also stop any ongoing work
+                        processingJob?.cancel()
+                        installer.progress.emit(ProgressEntity.Finish)
+                    }
+
+                    else -> {
+                        // For other actions, we launch a new job to process them.
+                        // This prevents the collector from being blocked, allowing Action.Cancel to be received.
+                        startProcessingJob(action)
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun handleCancel() {
+        Timber.d("[id=$installerId] handleCancel: Cancelling current processing job.")
+        // 1. Cancel the current task
+        processingJob?.cancel("User requested cancellation")
+        processingJob = null
+
+        // 2. Perform cleanup (same as onFinish/close)
+        Timber.d("[id=$installerId] handleCancel: Cleaning up resources.")
+        clearCache()
+
+        // 3. Emit Finish instead of Ready. This effectively closes the session.
+        Timber.d("[id=$installerId] handleCancel: Emitting ProgressEntity.Finish.")
+        installer.progress.emit(ProgressEntity.Finish)
+    }
+
+    private fun startProcessingJob(action: InstallerRepoImpl.Action) {
+        // Cancel previous job if exists
+        processingJob?.cancel("New action received, cancelling old one")
+
+        processingJob = scope.launch {
+            runCatching {
+                handleAction(action)
+            }.onFailure { e ->
+                if (e is CancellationException) {
+                    Timber.d("[id=$installerId] Action ${action::class.simpleName} was cancelled.")
+                    // Usually we don't need to emit error on cancellation, just stop.
+                } else {
                     Timber.e(e, "[id=$installerId] Action ${action::class.simpleName} failed")
                     installer.error = e
 
@@ -78,6 +134,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     }
 
                     val currentState = installer.progress.first()
+                    // Avoid overwriting a Finish state or existing error loop
                     if (currentState != errorState && currentState !is ProgressEntity.InstallFailed) {
                         Timber.d("[id=$installerId] Emitting error state: $errorState")
                         installer.progress.emit(errorState)
@@ -90,10 +147,14 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     override suspend fun onFinish() {
         Timber.d("[id=$installerId] onFinish: Cleaning up resources and cancelling job.")
         clearCache()
+        processingJob?.cancel()
         job?.cancel()
     }
 
     private suspend fun handleAction(action: InstallerRepoImpl.Action) {
+        // Check for cancellation before starting
+        if (!currentCoroutineContext().isActive) return
+
         when (action) {
             is InstallerRepoImpl.Action.ResolveInstall -> resolve(action.activity)
             is InstallerRepoImpl.Action.Analyse -> analyse()
@@ -110,10 +171,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 )
                 installer.progress.emit(ProgressEntity.Finish)
             }
-
+            // Cancel and Finish are handled in the collector directly
+            is InstallerRepoImpl.Action.Cancel,
             is InstallerRepoImpl.Action.Finish -> {
-                Timber.d("[id=$installerId] finish: Emitting ProgressEntity.Finish.")
-                installer.progress.emit(ProgressEntity.Finish)
             }
         }
     }
@@ -127,9 +187,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         // 1. Resolve Config
         installer.config = ConfigResolver.resolve(activity)
 
-        // 2. Resolve Data (IO Heavy)
+        // 2. Resolve Data (IO Heavy - Cancellable via SourceResolver)
         Timber.d("[id=$installerId] resolve: Resolving data URIs...")
         val data = sourceResolver.resolve(activity.intent)
+
+        // Check active after IO
+        if (!currentCoroutineContext().isActive) throw CancellationException()
+
         installer.data = data
         Timber.d("[id=$installerId] resolve: Data resolved successfully (${installer.data.size} items).")
 
@@ -166,7 +230,10 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         val extra = AnalyseExtraEntity(cacheDirectory, isModuleFlashEnabled = isModuleEnabled)
 
+        // AnalyserRepoImpl.doWork needs to be responsive to cancellation internally or checked after
         val results = AnalyserRepoImpl.doWork(installer.config, installer.data, extra)
+
+        if (!currentCoroutineContext().isActive) throw CancellationException()
 
         if (results.isEmpty()) {
             Timber.w("[id=$installerId] analyse: Analysis resulted in an empty list. No valid apps found.")
@@ -182,6 +249,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             coroutineScope {
                 results.map { res ->
                     async {
+                        // Check cancellation inside async block if needed
+                        if (!isActive) throw CancellationException()
                         val base = res.appEntities.map { it.app }.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
                         val color = iconColorExtractor.extractColorFromApp(installer.id, res.packageName, base, preferSystemIcon)
                         res.copy(seedColor = color)

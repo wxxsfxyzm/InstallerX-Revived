@@ -258,12 +258,15 @@ dependencies {
 
     // miuix
     implementation(libs.miuix)
+    implementation(libs.capsule)
     implementation(libs.haze)
     implementation(libs.haze.materials)
-    implementation(libs.capsule)
 
     // m3color
     implementation(libs.m3color)
+
+    // okhttp
+    implementation(libs.okhttp)
 
     // monetcompat
     implementation(libs.monetcompat)

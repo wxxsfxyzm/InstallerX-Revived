@@ -185,6 +185,7 @@ class InstallerViewModel(
         when (action) {
             is InstallerViewAction.CollectRepo -> collectRepo(action.repo)
             is InstallerViewAction.Close -> close()
+            is InstallerViewAction.Cancel -> cancel()
             is InstallerViewAction.Analyse -> analyse()
             is InstallerViewAction.InstallChoice -> {
                 // Check if navigating from*InstallPrepare
@@ -663,6 +664,30 @@ class InstallerViewModel(
         iconJobs.clear()
         repo.close()
         state = InstallerViewState.Ready
+    }
+
+    private fun cancel() {
+        // 1. 如果正在进行批量安装，必须清空队列，否则 Repo 取消完当前任务后，
+        // ViewModel 的 triggerNextMultiInstall 会被 InstallFailed/Ready 再次触发，导致无限循环或继续安装下一个。
+        if (multiInstallQueue.isNotEmpty()) {
+            Timber.d("Cancelling multi-install queue.")
+            multiInstallQueue = emptyList()
+            multiInstallResults.clear()
+            currentMultiInstallIndex = 0
+            _installProgress.value = null
+            _installProgressText.value = null
+        }
+
+        // 2. 取消自动安装任务（如果存在）
+        autoInstallJob?.cancel()
+
+        // 3. 取消图标加载任务（可选，优化性能）
+        iconJobs.values.forEach { it.cancel() }
+
+        // 4. 调用 Repo 的取消。
+        // 根据之前的后端修改，ActionHandler 会捕获 Cancel 动作，取消协程，并发送 ProgressEntity.Ready。
+        // ViewModel 监听到 Ready 后，会自动将 state 切换回 InstallerViewState.Ready。
+        repo.cancel()
     }
 
     private fun analyse() {

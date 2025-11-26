@@ -17,9 +17,14 @@ import com.rosan.installer.data.installer.model.exception.ResolveException
 import com.rosan.installer.data.installer.model.exception.ResolvedFailedNoInternetAccessException
 import com.rosan.installer.data.installer.util.getRealPathFromUri
 import com.rosan.installer.data.installer.util.pathUnify
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -29,8 +34,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.RandomAccessFile
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.UUID
 
 class SourceResolver(
@@ -38,6 +41,7 @@ class SourceResolver(
     private val progressFlow: MutableSharedFlow<ProgressEntity>
 ) : KoinComponent {
     private val context by inject<Context>()
+    private val okHttpClient by inject<OkHttpClient>()
     private val closeables = mutableListOf<Closeable>()
     private val COPY_BUFFER_SIZE = 1 * 1024 * 1024 // 1MB
 
@@ -49,6 +53,8 @@ class SourceResolver(
 
         val data = mutableListOf<DataEntity>()
         for (uri in uris) {
+            // Check cancellation between items
+            if (!currentCoroutineContext().isActive) throw CancellationException()
             data.addAll(resolveSingleUri(uri))
         }
         return data
@@ -145,34 +151,83 @@ class SourceResolver(
         }
 
     private suspend fun downloadHttpUri(uri: Uri): List<DataEntity> = withContext(Dispatchers.IO) {
-        Timber.d("Starting download for HTTP URI: $uri")
+        Timber.d("Starting download for HTTP URI: $uri using OkHttp")
         progressFlow.emit(ProgressEntity.InstallPreparing(-1f))
 
-        val url = URL(uri.toString())
-        val conn = (url.openConnection() as HttpURLConnection).apply {
-            connectTimeout = 15000
-            readTimeout = 15000
-            instanceFollowRedirects = true
-            connect()
-        }
+        val request = Request.Builder().url(uri.toString()).build()
+        val call = okHttpClient.newCall(request)
 
         try {
-            if (conn.responseCode !in 200..299) throw IOException("HTTP ${conn.responseCode}")
+            val response = call.execute()
+            if (!response.isSuccessful) {
+                Timber.e("HTTP Request failed. Code: ${response.code}")
+                throw IOException("HTTP ${response.code}")
+            }
 
+            val body = response.body
+
+            // 1. Check Extension
+            val path = uri.path ?: ""
+            Timber.d("[Validation] Checking URI path: $path")
+
+            val isSupportedExtension = listOf(".apk", ".xapk", ".apkm", ".apks", ".zip").any { ext ->
+                path.endsWith(ext, ignoreCase = true)
+            }
+            Timber.d("[Validation] Extension check passed: $isSupportedExtension")
+
+            // 2. Check Content-Type
+            // Get MediaType object from OkHttp
+            val mediaType = body.contentType()
+            // Get raw header as fallback
+            val headerContentType = response.header("Content-Type")
+
+            // Determine which string we are checking
+            val contentTypeToCheck = mediaType?.toString() ?: headerContentType
+
+            Timber.d("[Validation] Server Content-Type (MediaType): ${mediaType?.toString()}")
+            Timber.d("[Validation] Server Content-Type (Header): $headerContentType")
+            Timber.d("[Validation] Final Content-Type string used for check: $contentTypeToCheck")
+
+            val isSupportedMimeType = contentTypeToCheck != null && (
+                    contentTypeToCheck.equals("application/vnd.android.package-archive", ignoreCase = true) ||
+                            contentTypeToCheck.equals("application/octet-stream", ignoreCase = true) ||
+                            contentTypeToCheck.equals("application/vnd.apkm", ignoreCase = true) ||
+                            contentTypeToCheck.equals("application/vnd.apks", ignoreCase = true) ||
+                            contentTypeToCheck.equals("application/xapk-package-archive", ignoreCase = true)
+                    )
+            Timber.d("[Validation] MIME type check passed: $isSupportedMimeType")
+
+            // 3. Final Decision
+            if (!isSupportedExtension && !isSupportedMimeType) {
+                Timber.w("[Validation] Validation FAILED. Neither extension nor MIME type is supported.")
+                // Close body before throwing to avoid connection leaks
+                body.close()
+                throw ResolveException(
+                    action = "Unsupported file type from URL. Path: $path, Content-Type: $contentTypeToCheck",
+                    uris = listOf(uri)
+                )
+            } else {
+                Timber.d("[Validation] Validation SUCCESS. Proceeding with download.")
+            }
+            // --- End Validation Logic ---
+
+            val totalSize = body.contentLength()
             val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".apk_cache", File(cacheDirectory))
-            val totalSize = conn.contentLengthLong
-
             Timber.d("Downloading $totalSize bytes to ${tempFile.absolutePath}")
 
-            conn.inputStream.use { input ->
+            body.byteStream().use { input ->
                 tempFile.outputStream().use { output ->
                     copyStreamWithProgress(input, output, totalSize)
                 }
             }
+
             Timber.d("URL download and caching complete.")
             listOf(DataEntity.FileEntity(tempFile.absolutePath))
-        } finally {
-            conn.disconnect()
+
+        } catch (e: Exception) {
+            Timber.e(e, "Download failed or cancelled")
+            call.cancel()
+            throw e
         }
     }
 
@@ -185,6 +240,9 @@ class SourceResolver(
 
         if (totalSize > 0) progressFlow.emit(ProgressEntity.InstallPreparing(0f))
 
+        // Check for cancellation before starting loop
+        if (!currentCoroutineContext().isActive) throw CancellationException()
+
         var read = input.read(buf)
         while (read >= 0) {
             output.write(buf, 0, read)
@@ -192,6 +250,9 @@ class SourceResolver(
 
             val now = SystemClock.uptimeMillis()
             if (totalSize > 0 && bytesCopied >= nextEmit && now - lastEmitTime >= 200) {
+                // Check cancellation during progress updates
+                if (!currentCoroutineContext().isActive) throw CancellationException()
+
                 progressFlow.tryEmit(ProgressEntity.InstallPreparing(bytesCopied.toFloat() / totalSize))
                 lastEmitTime = now
                 nextEmit = (bytesCopied / step + 1) * step

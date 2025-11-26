@@ -116,6 +116,9 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 # miuix
 miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version.ref = "miuix" }
 
+# okhttp
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "5.3.2" }
+
 # MonetCompat
 # https://github.com/KieronQuinn/MonetCompat
 monetcompat = { module = "com.github.KieronQuinn:MonetCompat", version.ref = "monetcompat" }

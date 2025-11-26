@@ -146,6 +146,11 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         background.tryEmit(value)
     }
 
+    override fun cancel() {
+        Timber.d("[id=$id] cancel() called. Emitting Action.Cancel.")
+        action.tryEmit(Action.Cancel)
+    }
+
     override fun close() {
         // 确保 close 只执行一次
         if (isClosed.compareAndSet(false, true)) {
@@ -164,6 +169,7 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         data class Uninstall(val packageName: String) : Action()
         data class ResolveConfirmInstall(val activity: Activity, val sessionId: Int) : Action()
         data class ApproveSession(val sessionId: Int, val granted: Boolean) : Action()
+        data object Cancel : Action()
         data object Finish : Action()
     }
 }

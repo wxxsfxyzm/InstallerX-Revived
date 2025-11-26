@@ -41,6 +41,6 @@ interface InstallerRepo : Closeable {
     fun approveConfirmation(sessionId: Int, granted: Boolean)
 
     fun background(value: Boolean)
-
+    fun cancel()
     override fun close()
 }

@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
@@ -89,10 +90,10 @@ fun preparingDialog(
         buttons = DialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
-            /*listOf(DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(InstallerViewAction.Close)
-            })*/
-            emptyList()
+            listOf(DialogButton(stringResource(R.string.cancel)) {
+                viewModel.dispatch(InstallerViewAction.Cancel)
+            })
+            //emptyList()
         }
     )
 }

@@ -388,7 +388,17 @@ fun MiuixInstallerPage(
                 }
 
                 is InstallerViewState.Preparing -> {
-                    InstallPreparingContent(colorScheme, viewModel = viewModel)
+                    InstallPreparingContent(
+                        colorScheme,
+                        viewModel = viewModel,
+                        onCancel = {
+                            showBottomSheet.value = false
+                            scope.launch {
+                                delay(SHEET_ANIMATION_DURATION)
+                                viewModel.dispatch(InstallerViewAction.Cancel)
+                            }
+                        }
+                    )
                 }
 
                 is InstallerViewState.InstallPrepare -> {

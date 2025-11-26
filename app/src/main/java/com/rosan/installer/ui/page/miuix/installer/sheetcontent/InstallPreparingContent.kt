@@ -26,7 +26,11 @@ import top.yukonga.miuix.kmp.basic.patched.ProgressButtonDefaults
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-fun InstallPreparingContent(colorScheme: ColorScheme, viewModel: InstallerViewModel) {
+fun InstallPreparingContent(
+    colorScheme: ColorScheme,
+    viewModel: InstallerViewModel,
+    onCancel: () -> Unit
+) {
     val currentState = viewModel.state
     val progress = if (currentState is InstallerViewState.Preparing) {
         currentState.progress
@@ -63,9 +67,7 @@ fun InstallPreparingContent(colorScheme: ColorScheme, viewModel: InstallerViewMo
 
         ProgressButton(
             progress = animatedProgress,
-            onClick = {
-                // viewModel.dispatch(InstallerViewAction.Close)
-            },
+            onClick = onCancel,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)

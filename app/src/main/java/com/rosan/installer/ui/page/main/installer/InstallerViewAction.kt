@@ -14,6 +14,7 @@ sealed class InstallerViewAction {
     data object InstallPrepare : InstallerViewAction()
     data object Install : InstallerViewAction()
     data object Background : InstallerViewAction()
+    data object Cancel : InstallerViewAction()
 
     /** Triggers the uninstallation process. */
     data object Uninstall : InstallerViewAction()
