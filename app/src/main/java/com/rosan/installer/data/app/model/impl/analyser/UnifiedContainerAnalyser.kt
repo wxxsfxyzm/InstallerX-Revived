@@ -29,7 +29,7 @@ object UnifiedContainerAnalyser {
         DataType.MULTI_APK_ZIP to MultiApkZipStrategy,
         DataType.MODULE_ZIP to ModuleStrategy,
         DataType.MIXED_MODULE_ZIP to ModuleStrategy,
-        DataType.MIXED_MODULE_APK to SingleApkStrategy
+        DataType.MIXED_MODULE_APK to ModuleStrategy
     )
 
     suspend fun analyze(

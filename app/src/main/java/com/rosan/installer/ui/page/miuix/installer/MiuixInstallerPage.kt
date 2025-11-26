@@ -97,6 +97,7 @@ fun MiuixInstallerPage(
     val showPermissions = viewModel.showMiuixPermissionList
     val temporarySeedColor by viewModel.seedColor.collectAsState()
     val colorScheme = activeColorSchemeState.value
+
     LaunchedEffect(temporarySeedColor, globalColorScheme, isDarkMode, basePaletteStyle) {
         if (temporarySeedColor == null) {
             activeColorSchemeState.value = globalColorScheme
@@ -108,7 +109,8 @@ fun MiuixInstallerPage(
             )
         }
     }
-    val containerType = installer.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
+
+    val sourceType = installer.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
     val displayIcons by viewModel.displayIcons.collectAsState()
@@ -136,7 +138,7 @@ fun MiuixInstallerPage(
 
     val sheetTitle = when (currentState) {
         is InstallerViewState.Preparing -> stringResource(R.string.installer_preparing)
-        is InstallerViewState.InstallChoice -> stringResource(containerType.getSupportTitle())
+        is InstallerViewState.InstallChoice -> stringResource(sourceType.getSupportTitle())
         is InstallerViewState.InstallExtendedMenu -> stringResource(R.string.config_label_install_options)
         is InstallerViewState.InstallPrepare -> when {
             showSettings -> stringResource(R.string.installer_settings)

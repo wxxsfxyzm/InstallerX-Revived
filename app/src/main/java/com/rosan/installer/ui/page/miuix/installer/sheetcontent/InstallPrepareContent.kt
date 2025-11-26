@@ -48,6 +48,8 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.dialog.inner.WarningTextBlock
+import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -248,7 +250,7 @@ fun InstallPrepareContent(
 
         item {
             AnimatedVisibility(
-                visible = isExpanded,
+                visible = (primaryEntity is AppEntity.BaseEntity) && isExpanded,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
@@ -295,6 +297,18 @@ fun InstallPrepareContent(
                         }
                     }
                 }
+            }
+        }
+
+        item {
+            AnimatedVisibility(
+                visible = (primaryEntity is AppEntity.ModuleEntity) &&
+                        primaryEntity.description.isNotBlank() &&
+                        installer.config.displaySdk,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                MiuixInstallerTipCard((primaryEntity as AppEntity.ModuleEntity).description)
             }
         }
 

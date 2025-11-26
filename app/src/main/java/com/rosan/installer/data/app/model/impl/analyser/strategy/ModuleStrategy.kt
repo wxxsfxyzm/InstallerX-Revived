@@ -66,9 +66,18 @@ object ModuleStrategy : AnalysisStrategy {
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         try {
+            Timber.d("Module: Attempting to find module.prop")
+
+            // Debug: Uncomment the line below to print all entries and check for case-sensitivity issues
+            // zipFile.entries().asSequence().forEach { Timber.d("DebugModule: ZipEntry found: ${it.name}") }
+
             val modulePropEntry = zipFile.getEntry("module.prop")
                 ?: zipFile.getEntry("common/module.prop")
-                ?: return emptyList()
+
+            if (modulePropEntry == null) {
+                Timber.w("Module: module.prop or common/module.prop not found in Zip")
+                return emptyList()
+            }
 
             zipFile.getInputStream(modulePropEntry).buffered().use { inputStream ->
                 // --- BOM Handling ---
@@ -88,8 +97,10 @@ object ModuleStrategy : AnalysisStrategy {
                 val id = properties.getProperty("id", "")
                 val name = properties.getProperty("name", "")
 
+                Timber.d("Module: Parse result id='$id', name='$name'")
+
                 if (id.isBlank() || name.isBlank()) {
-                    Timber.w("Module file $data has incomplete module.prop")
+                    Timber.w("gModule: Incomplete module.prop in file $data (id or name is blank)")
                     return emptyList()
                 }
 
@@ -107,7 +118,7 @@ object ModuleStrategy : AnalysisStrategy {
                 )
             }
         } catch (e: Exception) {
-            Timber.e(e, "Failed to parse module.prop in $data")
+            Timber.e(e, "Module: Exception occurred while parsing module.prop in $data")
             return emptyList()
         }
     }
