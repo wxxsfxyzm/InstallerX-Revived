@@ -45,6 +45,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixHideLauncherIconWarningDia
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeEngineWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeModeWidget
+import com.rosan.installer.ui.theme.m3color.PaletteStyle
 import com.rosan.installer.ui.theme.m3color.PresetColors
 import com.rosan.installer.ui.theme.m3color.RawColor
 import dev.chrisbanes.haze.HazeState
