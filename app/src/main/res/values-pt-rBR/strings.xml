@@ -562,4 +562,10 @@
     <string name="installer_settings_auto_clear_time_never">Nunca</string>
     <string name="suggestion_shizuku_isolation">Tentar usando o Shizuku</string>
     <string name="suggestion_shizuku_isolation_desc">Tente novamente usando o Shizuku e um instalador válido</string>
+    <string name="theme_settings_dynamic_color_miuix_desc">Ativar cor Monet no estilo miuix</string>
+    <string name="theme_settings_dynamic_color_follow_system">Seguir a cor do tema do sistema</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon">Colorir Progresso da Atividade ao Vivo</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">O segmento de progresso da atividade ao vivo utilizará cores extraídas do ícone do pacote</string>
+    <string name="config_install_mode_desc">Modo de Instalação Padrão e configurações relacionadas</string>
+    <string name="installer_install_complete">Instalação concluída</string>
 </resources>

@@ -406,4 +406,15 @@
     <string name="theme_settings_prefer_system_icon_desc">محاولة الحصول على ايقونة من النطام٫ مفيد عند استخدام حزمة ايقونات. تعطيل لعرض ايقونة من حزمة التنزيل</string>
     <string name="theme_settings_launcher_icons">ايقونة الـ Launcher</string>
     <string name="theme_settings_hide_launcher_icon">اخفاء ايقونة الـ launcher</string>
+    <string name="uninstall_title">إلغاء تثبيت InstallerX Revived</string>
+    <string name="uninstall_content">بعد إلغاء تثبيت هذا التطبيق، لن تستطيع إستخدام InstallerX Revived لتثبيت التطبيقات</string>
+    <string name="theme_settings_theme_mode">وضع الثيم</string>
+    <string name="theme_settings_theme_mode_desc">تحديد وضع السمة</string>
+    <string name="theme_settings_theme_mode_light">الوضع الفاتح</string>
+    <string name="theme_settings_theme_mode_dark">الوضع الداكن</string>
+    <string name="theme_settings_theme_mode_system">إتِّباع سمة النظام</string>
+    <string name="theme_settings_palette_style">نمط اللوحة</string>
+    <string name="theme_settings_palette_style_desc">تحديد نمط اللوحة</string>
+    <string name="theme_settings_dynamic_color">لون ديناميكي</string>
+    <string name="theme_settings_dynamic_color_miuix_desc">تمكين لون monet لـ miuix</string>
 </resources>
