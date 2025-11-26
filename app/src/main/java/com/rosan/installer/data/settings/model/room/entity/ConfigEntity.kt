@@ -105,6 +105,12 @@ data class ConfigEntity(
     @Ignore
     var uninstallFlags: Int = 0
 
+    /**
+     * 安装/卸载调用的来源方
+     */
+    @Ignore
+    var callingFromUid: Int? = 0
+
     val isCustomizeAuthorizer: Boolean
         get() = authorizer == Authorizer.Customize
 
