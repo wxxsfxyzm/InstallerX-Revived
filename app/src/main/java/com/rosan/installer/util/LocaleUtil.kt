@@ -1,7 +1,5 @@
 package com.rosan.installer.util
 
-import java.util.Locale
-
 /**
  * Converts legacy Android language codes to their modern equivalents.
  * This ensures compatibility with older and non-standard APK splits.
@@ -23,10 +21,3 @@ fun String.convertLegacyLanguageCode(): String =
         "tl" -> "fil" // Tagalog -> Filipino
         else -> this
     }
-
-fun isLanguageCode(code: String): Boolean {
-    val locale = Locale.forLanguageTag(code)
-    return locale.language.isNotEmpty() &&
-            locale.displayLanguage.isNotEmpty() &&
-            locale.displayLanguage.lowercase() != locale.language
-}

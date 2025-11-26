@@ -52,7 +52,7 @@ object RsConfig {
 
     /**
      * Cached list of supported architectures.
-     * Maps Build.SUPPORTED_ABIS to our safe Enum.
+     * Maps Build.SUPPORTED_ABIS to the safe Enum.
      */
     val supportedArchitectures: List<Architecture> by lazy {
         Build.SUPPORTED_ABIS.mapNotNull { abiString ->

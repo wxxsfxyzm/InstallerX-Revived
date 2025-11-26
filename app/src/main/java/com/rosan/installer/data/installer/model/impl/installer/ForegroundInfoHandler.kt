@@ -75,7 +75,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     override suspend fun onStart() {
         Timber.d("[id=${installer.id}] onStart: Starting to combine and collect flows.")
 
-        // OPTIMIZATION: Create notification channels once at start to avoid IPC overhead during progress updates
         createNotificationChannels()
 
         sessionStartTime = System.currentTimeMillis()
@@ -106,11 +105,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 }
 
                 if (background) {
-                    // --- VERSION CHECK & DISPATCH ---
-                    // Note: Changed BAKLAVA to VANILLA_ICE_CREAM (Android 15) or S (Android 12) if dynamic color is the goal.
-                    // Assuming you want modern notifications on supported devices.
-                    // If you strictly need SDK 36, keep BAKLAVA. I lowered it to S (Android 12) for broader Dynamic Color support logic,
-                    // but the specific Live Activity style implies Android 15+.
                     val isModernEligible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
 
                     val notification =
@@ -232,8 +226,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         preferSystemIcon: Boolean = false,
         preferDynamicColor: Boolean = false
     ): NotificationCompat.Builder {
-        // Channel creation removed from here
-
         val contentIntent = when (installer.config.installMode) {
             ConfigEntity.InstallMode.Notification,
             ConfigEntity.InstallMode.AutoNotification -> if (showDialog) openIntent else null
@@ -398,7 +390,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             notificationManager.cancel(notificationId)
             return
         }
-        // Timber.d here is fine, but consider reducing log level if it spams too much
         notificationManager.notify(notificationId, notification)
     }
 
@@ -500,8 +491,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         } else {
             Channel.InstallerProgressChannel
         }
-
-        // Removed explicit channel creation here. It's done in onStart.
 
         val icon = (if (isWorking) Icon.Working else Icon.Pausing).resId
 

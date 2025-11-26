@@ -354,12 +354,15 @@
     <string name="permission_read_media_video">Read media video</string>
     <string name="permission_read_media_audio">Read media audio</string>
     <string name="permission_access_notification_policy">Access notification policy</string>
+    <string name="permission_flashlight">Control flashlight</string>
     <string name="permission_foreground_service">Foreground service</string>
     <string name="permission_request_install_packages">Request install packages</string>
     <string name="permission_write_settings">Write settings</string>
+    <string name="permission_write_secure_settings">Write secure settings</string>
     <string name="permission_get_accounts">Get accounts</string>
     <string name="permission_use_credentials">Use credentials</string>
     <string name="permission_manage_accounts">Manage accounts</string>
+    <string name="permission_manage_external_storage">Manage external storage</string>
     <string name="permission_read_sync_settings">Read sync settings</string>
     <string name="permission_write_sync_settings">Write sync settings</string>
     <string name="permission_read_call_log">Read call log</string>

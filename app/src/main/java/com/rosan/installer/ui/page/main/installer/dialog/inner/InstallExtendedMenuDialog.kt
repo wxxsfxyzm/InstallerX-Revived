@@ -537,14 +537,13 @@ fun installExtendedMenuSubMenuDialog(
 
 @Composable
 fun PermissionCard(
-    permission: String,         // 当前权限字符串
-    isHighlight: Boolean,        // 是否被选中
+    permission: String,
+    isHighlight: Boolean,
 ) {
     val context = LocalContext.current
-    // 使用 remember(key) 记住计算结果。
-    // 只有当 permission 这个 key 变化时，才会重新计算标签。
+
     val permissionLabel = remember(permission) {
-        getBestPermissionLabel(context, permission)
+        context.getBestPermissionLabel(permission)
     }
 
     Card(

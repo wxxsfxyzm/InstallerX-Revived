@@ -11,10 +11,10 @@ private const val BASE_PREFIX = "base-"
 private const val SPLIT_PREFIX = "split-"
 private const val SPLIT_CONFIG_PREFIX = "split_config."
 private const val CONFIG_PREFIX = "config."
-private const val CONFIG_INFIX = ".config." // 用于识别 Feature 中的配置段
+private const val CONFIG_INFIX = ".config." // Identifies config section in features
 
 /**
- * Split 的主要展示分类 (UI用途)
+ * UI categorization for splits.
  */
 enum class SplitType {
     ARCHITECTURE,
@@ -24,20 +24,21 @@ enum class SplitType {
 }
 
 /**
- * Split 的过滤类型 (选择逻辑用途)
+ * Selection logic for splits.
  */
 enum class FilterType {
-    NONE,       // 无限制，通用的 Feature
-    ABI,        // 架构相关
-    DENSITY,    // 屏幕密度相关
-    LANGUAGE    // 语言相关
+    NONE,       // Generic feature
+    ABI,
+    DENSITY,
+    LANGUAGE
 }
 
 /**
- * 解析结果元数据
- * @property type 主分类 (用于 UI 分组)
- * @property filterType 过滤类型 (用于安装选择算法)
- * @property configValue 具体的配置值 (如 "arm64-v8a", "zh-CN", "xxhdpi")
+ * Holds parsed split metadata.
+ *
+ * @property type UI grouping category.
+ * @property filterType Selection algorithm category.
+ * @property configValue Specific value (e.g., "arm64-v8a", "zh-CN").
  */
 data class SplitMetadata(
     val type: SplitType,
@@ -46,14 +47,13 @@ data class SplitMetadata(
 )
 
 /**
- * [Public API] 解析入口
+ * Parses the split filename into metadata.
  */
 fun String.parseSplitMetadata(): SplitMetadata {
-    // 1. 预处理：去除扩展名
+    // 1. Remove extension
     val rawName = this.removeSuffix(".apk")
 
-    // 2. 提取核心限定符 (Qualifier) 和是否为 Feature 的线索
-    // 逻辑：如果是标准 split_config 开头，它是纯 Config；否则可能是 Feature
+    // 2. Extract qualifier
     var qualifier = rawName
     var isLikelyFeature = true
 
@@ -69,29 +69,23 @@ fun String.parseSplitMetadata(): SplitMetadata {
             .removePrefix(SPLIT_PREFIX)
     }
 
-    // 3. 提取潜在的配置部分 (Config Part)
-    // 如果文件名包含 ".config." (如 split_feature_map.config.arm64_v8a)，则取后缀
-    // 如果不包含，则整体就是潜在的 config (如 arm64_v8a)
+    // 3. Extract potential config
+    // If ".config." exists (e.g., split_feature_map.config.arm64_v8a), take the suffix.
     val potentialConfig = if (qualifier.contains(CONFIG_INFIX)) {
         qualifier.substringAfterLast(CONFIG_INFIX)
     } else {
         qualifier
     }
 
-    // 4. 尝试匹配配置类型 (ABI > Density > Language)
+    // 4. Match config type (ABI > Density > Language)
 
     // 4.1 Check Architecture
-    // 标准化: 统一处理 x86_64 和 x86-64。
-    // 将下划线转为横杠进行统一匹配，或根据 Architecture 枚举的具体实现调整
     val normalizedArch = potentialConfig.replace('_', '-')
-    // 尝试两种情况：原样(可能有下划线) 和 标准化(横杠)
     val arch = Architecture.fromArchString(potentialConfig).takeIf { it != Architecture.UNKNOWN }
         ?: Architecture.fromArchString(normalizedArch).takeIf { it != Architecture.UNKNOWN }
 
     if (arch != null) {
-        // 即使是 Feature，如果带有 Arch 后缀，FilterType 也是 ABI
         val type = if (isLikelyFeature && qualifier.contains(CONFIG_INFIX)) SplitType.FEATURE else SplitType.ARCHITECTURE
-        // 返回标准化的 arch 字符串 (通常 Architecture 枚举里有标准写法，这里假设用 arch 字段)
         return SplitMetadata(type, FilterType.ABI, arch.arch)
     }
 
@@ -109,17 +103,15 @@ fun String.parseSplitMetadata(): SplitMetadata {
         return SplitMetadata(type, FilterType.LANGUAGE, potentialConfig)
     }
 
-    // 5. Fallback: 这是一个没有任何 Config 后缀的纯 Feature
+    // 5. Fallback to generic feature
     return SplitMetadata(SplitType.FEATURE, FilterType.NONE, null)
 }
 
 /**
- * [Public API] 获取显示名称
+ * Returns the display name for UI.
  */
 @Composable
 fun getSplitDisplayName(type: SplitType, configValue: String?, fallbackName: String): String {
-    // Feature 类型即使有 configValue (如 arm64)，通常也优先显示原始功能名，
-    // 或者你可以根据需求修改这里，显示 "Feature Name (arm64)"
     if (type == SplitType.FEATURE) {
         return fallbackName
     }
@@ -147,17 +139,18 @@ fun getSplitDisplayName(type: SplitType, configValue: String?, fallbackName: Str
     }
 }
 
-// --- Helper Methods (保持原样或微调) ---
+// --- Helper Methods ---
 
 private fun getLanguageDisplayName(code: String): String? {
-    // 严格校验：防止长文件名被误认为语言
+    // Strict validation to avoid false positives (e.g. long filenames)
     if (code.length > 8 || code.contains(".") || code.contains("_")) return null
     return try {
         val locale = Locale.forLanguageTag(code)
+        // Check if the locale is valid and recognized
         if (locale.language.isNotEmpty() && locale.displayLanguage.lowercase() != code.lowercase()) {
             locale.getDisplayName(Locale.getDefault())
         } else null
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         null
     }
 }

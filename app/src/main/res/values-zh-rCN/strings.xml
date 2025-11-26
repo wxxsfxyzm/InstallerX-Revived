@@ -346,11 +346,14 @@
     <string name="permission_read_media_audio">读取媒体音频</string>
     <string name="permission_access_notification_policy">访问通知策略</string>
     <string name="permission_foreground_service">前台服务</string>
+    <string name="permission_flashlight">控制闪光灯</string>
     <string name="permission_request_install_packages">请求安装应用</string>
     <string name="permission_write_settings">写入系统设置</string>
+    <string name="permission_write_secure_settings">写入安全设置</string>
     <string name="permission_get_accounts">获取账户</string>
     <string name="permission_use_credentials">使用凭据</string>
     <string name="permission_manage_accounts">管理账户</string>
+    <string name="permission_manage_external_storage">管理外部存储</string>
     <string name="permission_read_sync_settings">读取同步设置</string>
     <string name="permission_write_sync_settings">写入同步设置</string>
     <string name="permission_read_call_log">读取通话记录</string>

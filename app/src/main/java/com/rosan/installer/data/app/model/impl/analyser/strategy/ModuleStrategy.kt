@@ -100,7 +100,7 @@ object ModuleStrategy : AnalysisStrategy {
                 Timber.d("Module: Parse result id='$id', name='$name'")
 
                 if (id.isBlank() || name.isBlank()) {
-                    Timber.w("gModule: Incomplete module.prop in file $data (id or name is blank)")
+                    Timber.w("Module: Incomplete module.prop in file $data (id or name is blank)")
                     return emptyList()
                 }
 

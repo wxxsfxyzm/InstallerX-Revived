@@ -76,7 +76,7 @@ fun InstallPreparePermissionContent(
                 items(permissionList) { permission ->
                     val context = LocalContext.current
                     val permissionLabel = remember(permission) {
-                        getBestPermissionLabel(context, permission)
+                        context.getBestPermissionLabel(permission)
                     }
 
                     BasicComponent(
