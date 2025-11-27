@@ -19,7 +19,11 @@
     <string name="lab">实验室</string>
     <string name="lab_desc">访问实验性或开发中的新功能</string>
     <string name="about_detail">关于 InstallerX Revived</string>
+    <string name="updating">正在更新</string>
     <string name="get_update_detail">检查软件更新和新功能</string>
+    <string name="update_available">有可用更新：%1$s</string>
+    <string name="get_update_directly">直接更新</string>
+    <string name="get_update_directly_desc">直接从 Github 安装更新，不会留下缓存</string>
     <string name="get_source_code">查看源代码</string>
     <string name="get_source_code_detail">在 GitHub 上查看源代码</string>
     <string name="internet_access_enabled">联网</string>

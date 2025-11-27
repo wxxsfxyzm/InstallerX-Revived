@@ -45,7 +45,9 @@ data class PreferredViewState(
     val useMiuixMonet: Boolean = false,
     val seedColor: Color = PresetColors.first().color,
     val useDynColorFollowPkgIcon: Boolean = false,
-    val useDynColorFollowPkgIconForLiveActivity: Boolean = false
+    val useDynColorFollowPkgIconForLiveActivity: Boolean = false,
+    val hasUpdate: Boolean = false,
+    val remoteVersion: String = ""
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 

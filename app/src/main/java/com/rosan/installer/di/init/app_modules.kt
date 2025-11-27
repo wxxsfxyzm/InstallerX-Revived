@@ -9,6 +9,7 @@ import com.rosan.installer.di.paRepoModule
 import com.rosan.installer.di.reflectModule
 import com.rosan.installer.di.roomModule
 import com.rosan.installer.di.serializationModule
+import com.rosan.installer.di.updateModule
 import com.rosan.installer.di.viewModelModule
 
 val appModules = listOf(
@@ -21,5 +22,6 @@ val appModules = listOf(
     datastoreModule,
     appIconModule,
     iconColorExtractorModule,
-    networkModule
+    networkModule,
+    updateModule
 )

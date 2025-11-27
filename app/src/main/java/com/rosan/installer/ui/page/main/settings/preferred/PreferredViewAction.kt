@@ -10,6 +10,7 @@ import com.rosan.installer.ui.theme.m3color.ThemeMode
 
 sealed class PreferredViewAction {
     data object Init : PreferredViewAction()
+    data object Update : PreferredViewAction()
 
     data class ChangeGlobalAuthorizer(val authorizer: ConfigEntity.Authorizer) : PreferredViewAction()
     data class ChangeGlobalCustomizeAuthorizer(val customizeAuthorizer: String) : PreferredViewAction()

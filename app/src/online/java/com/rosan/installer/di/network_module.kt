@@ -1,5 +1,9 @@
 package com.rosan.installer.di
 
+import com.rosan.installer.data.updater.model.impl.OnlineAppUpdater
+import com.rosan.installer.data.updater.model.impl.OnlineUpdateChecker
+import com.rosan.installer.data.updater.repo.AppUpdater
+import com.rosan.installer.data.updater.repo.UpdateChecker
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
 import org.koin.dsl.module
@@ -21,4 +25,9 @@ val networkModule = module {
             )
             .build()
     }
+}
+
+val updateModule = module {
+    single<UpdateChecker> { OnlineUpdateChecker(get(), get()) }
+    single<AppUpdater> { OnlineAppUpdater(get(), get()) }
 }

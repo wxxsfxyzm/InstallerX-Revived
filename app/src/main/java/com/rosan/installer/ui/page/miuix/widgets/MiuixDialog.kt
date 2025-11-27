@@ -296,7 +296,7 @@ fun ErrorDisplaySheet(
     showState: MutableState<Boolean>,
     exception: Throwable,
     onDismissRequest: () -> Unit,
-    onRetry: (() -> Unit)?,
+    onRetry: (() -> Unit)? = null,
     title: String
 ) {
     SuperBottomSheet(

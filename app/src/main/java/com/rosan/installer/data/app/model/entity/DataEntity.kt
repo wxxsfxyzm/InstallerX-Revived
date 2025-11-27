@@ -8,6 +8,8 @@ import java.util.zip.ZipInputStream
 sealed class DataEntity(open var source: DataEntity? = null) {
     abstract fun getInputStream(): InputStream?
 
+    open fun getSize(): Long = getInputStream()?.available()?.toLong() ?: 0L
+
     fun getInputStreamWhileNotEmpty(): InputStream? = getInputStream() ?: source?.getInputStream()
 
     fun getSourceTop(): DataEntity = source?.getSourceTop() ?: this
@@ -74,5 +76,17 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         override var source: DataEntity? = parent.source?.let { ZipInputStreamEntity(name, it) }
 
         override fun toString(): String = "$parent!$name"
+    }
+
+    class StreamDataEntity(
+        private val stream: InputStream,
+        private val length: Long
+    ) : DataEntity() {
+        override fun getInputStream(): InputStream = stream
+
+        // Return the Content-Length from the network
+        override fun getSize(): Long = length
+
+        override fun toString(): String = "NetworkStream(size=$length)"
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -27,6 +28,7 @@ fun BaseWidget(
     iconPlaceholder: Boolean = true,
     title: String,
     description: String? = null,
+    descriptionColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     enabled: Boolean = true,
     isError: Boolean = false,
     onClick: () -> Unit = {},
@@ -75,7 +77,7 @@ fun BaseWidget(
                     Text(
                         text = it,
                         color = if (isError) MaterialTheme.colorScheme.error
-                        else MaterialTheme.colorScheme.onSurfaceVariant, // 保持原有的正常颜色
+                        else descriptionColor,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

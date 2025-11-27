@@ -139,7 +139,7 @@ fun UninstallConfirmationDialog(
 fun ErrorDisplayDialog(
     exception: Throwable,
     onDismissRequest: () -> Unit,
-    onRetry: (() -> Unit)?,
+    onRetry: (() -> Unit)? = null,
     title: String
 ) {
     AlertDialog(

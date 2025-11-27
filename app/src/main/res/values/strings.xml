@@ -21,8 +21,12 @@
     <string name="lab">Laboratory</string>
     <string name="lab_desc">Access experimental and developer features</string>
     <string name="about_detail">About InstallerX Revived</string>
+    <string name="updating">Updating...</string>
     <string name="get_update">Get update</string>
     <string name="get_update_detail">Check for software updates and new features</string>
+    <string name="update_available">Update Available: %1$s</string>
+    <string name="get_update_directly">Get update directly</string>
+    <string name="get_update_directly_desc">Get update directly from GitHub and install, no cache will be left</string>
     <string name="get_source_code">Check for source code</string>
     <string name="get_source_code_detail">Check for source code on GitHub</string>
     <string name="internet_access_enabled">Online</string>

@@ -40,7 +40,6 @@ import com.rosan.installer.util.isSystemInstaller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -323,21 +322,26 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         for (entity in entities) installIt(config, entity, extra, session)
     }
 
-    private suspend fun installIt(
+    private fun installIt(
         config: ConfigEntity, entity: InstallEntity, extra: InstallExtraInfoEntity, session: Session
     ) {
         Timber.d("Installing entity: ${entity.name}, data path: ${entity.data}, top source: ${entity.data.getSourceTop()}")
         val inputStream = entity.data.getInputStreamWhileNotEmpty()
             ?: throw Exception("can't open input stream for this data: '${entity.data}'")
-        session.openWrite(
-            entity.name, 0,
-            withContext(Dispatchers.IO) {
-                inputStream.available()
-            }.toUInt().toLong()
-        ).use {
-            inputStream.copyTo(it)
-            session.fsync(it)
+        val sizeBytes = entity.data.getSize()
+
+        if (sizeBytes <= 0) {
+            throw Exception("Invalid data size: $sizeBytes. Content-Length is required for stream installation.")
         }
+        session.openWrite(
+            entity.name,
+            0,
+            sizeBytes // Use the explicit size
+        ).use { outputStream ->
+            inputStream.copyTo(outputStream)
+            session.fsync(outputStream)
+        }
+        inputStream.close()
     }
 
     @SuppressLint("RequestInstallPackagesPolicy")

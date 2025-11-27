@@ -304,6 +304,7 @@ fun installPrepareDialog( // 小写开头
                 if (canInstall) {
                     add(DialogButton(stringResource(buttonTextId), 1f) {
                         viewModel.dispatch(InstallerViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Background)
                     })
                 }
                 // else if app can be installed and extended menu is shown
