@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Installer" parent="Theme.Material3.DayNight">
+    <style name="Theme.Installer" parent="android:Theme.DeviceDefault.NoActionBar">
         <!--    Compat Navigation Bar Color when ModalBottomSheet activated    -->
         <item name="android:enforceNavigationBarContrast">false</item>
     </style>

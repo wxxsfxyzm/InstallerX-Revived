@@ -39,7 +39,7 @@ class OnlineAppUpdater(
         CoreInstaller.doInstallWork(
             config = config, // Pass in config
             entities = listOf(installEntity),
-            extra = InstallExtraInfoEntity(userId = Process.myUserHandle().hashCode(), ""),
+            extra = InstallExtraInfoEntity(userId = Process.myUid() / 100000, ""),
             blacklist = emptyList(),
             sharedUserIdBlacklist = emptyList(),
             sharedUserIdExemption = emptyList()
