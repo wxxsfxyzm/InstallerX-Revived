@@ -401,8 +401,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     enum class Icon(@param:DrawableRes val resId: Int) {
         LOGO(R.drawable.ic_notification_logo),
-        Working(R.drawable.round_hourglass_empty_black_24),
-        Pausing(R.drawable.round_hourglass_disabled_black_24)
+        Working(R.drawable.round_hourglass_empty_24),
+        Pausing(R.drawable.round_hourglass_disabled_24)
     }
 
     // Removed duplicate notificationChannels map as it is now handled in createNotificationChannels

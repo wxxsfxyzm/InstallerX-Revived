@@ -24,6 +24,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.help
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -68,7 +69,7 @@ fun InstallCompletedContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp),
+                .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
         ) {
             TextButton(
                 onClick = onClose,

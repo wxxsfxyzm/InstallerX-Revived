@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.InstallerViewState
+import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.patched.ProgressButton
@@ -71,7 +72,7 @@ fun InstallPreparingContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 24.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             colors = ProgressButtonDefaults.progressButtonColors(
                 trackColor = MiuixTheme.colorScheme.secondaryVariant,
                 progressColor = MiuixTheme.colorScheme.primary,

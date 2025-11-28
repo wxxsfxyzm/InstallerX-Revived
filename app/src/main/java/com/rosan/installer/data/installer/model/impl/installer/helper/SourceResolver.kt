@@ -154,7 +154,17 @@ class SourceResolver(
         Timber.d("Starting download for HTTP URI: $uri using OkHttp")
         progressFlow.emit(ProgressEntity.InstallPreparing(-1f))
 
-        val request = Request.Builder().url(uri.toString()).build()
+        val request = Request.Builder()
+            .url(uri.toString())
+            .header(
+                "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+            )
+            .header(
+                "Accept",
+                "application/vnd.android.package-archive, application/octet-stream, */*"
+            )
+            .build()
         val call = okHttpClient.newCall(request)
 
         try {

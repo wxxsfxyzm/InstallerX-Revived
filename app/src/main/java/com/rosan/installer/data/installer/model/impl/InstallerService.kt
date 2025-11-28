@@ -66,7 +66,7 @@ class InstallerService : Service() {
         }
         val cancelPendingIntent = PendingIntent.getService(this, 0, cancelIntent, flags)
         val notification = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.round_hourglass_empty_black_24)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setContentTitle(getString(R.string.installer_running))
             .addAction(0, getString(R.string.cancel), cancelPendingIntent)
             .setDeleteIntent(cancelPendingIntent).build()

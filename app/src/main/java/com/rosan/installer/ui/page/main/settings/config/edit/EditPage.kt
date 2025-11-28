@@ -6,8 +6,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -243,6 +245,7 @@ fun EditPage(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
                 item { DataAllowRestrictedPermissionsWidget(viewModel = viewModel, isM3E = false) }
             item { DataAllowAllRequestedPermissionsWidget(viewModel = viewModel, isM3E = false) }
+            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rosan.installer.R
 import com.rosan.installer.ui.util.KeyEventBlocker
+import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
@@ -103,7 +104,7 @@ fun InstallModuleContent(
                 onClick = onClose,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 24.dp),
+                    .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             ) {
                 Text(stringResource(R.string.close))
             }
@@ -113,7 +114,7 @@ fun InstallModuleContent(
                 onClick = {},
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 24.dp),
+                    .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     InfiniteProgressIndicator()
