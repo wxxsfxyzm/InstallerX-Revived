@@ -304,7 +304,8 @@ class PreferredViewModel(
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
 
-                MonetCompat.getInstance().updateMonetColors()
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                    MonetCompat.getInstance().updateMonetColors()
 
                 PreferredViewState(
                     progress = PreferredViewState.Progress.Loaded,
