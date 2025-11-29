@@ -22,20 +22,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -45,9 +39,6 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixHideLauncherIconWarningDia
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeEngineWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeModeWidget
-import com.rosan.installer.ui.theme.m3color.PaletteStyle
-import com.rosan.installer.ui.theme.m3color.PresetColors
-import com.rosan.installer.ui.theme.m3color.RawColor
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -61,7 +52,6 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
-import kotlin.collections.chunked
 
 @Composable
 fun MiuixThemeSettingsPage(
@@ -188,11 +178,10 @@ fun MiuixThemeSettingsPage(
                         )
                 }
             }
-            val showColorGrid =
-                state.useMiuixMonet && (!state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+
             item {
                 AnimatedVisibility(
-                    visible = showColorGrid,
+                    visible = !state.useDynamicColor,
                     enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
                             expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
                     exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
@@ -211,18 +200,8 @@ fun MiuixThemeSettingsPage(
                                     .padding(horizontal = 12.dp, vertical = 16.dp)
                             ) {
                                 val itemMinWidth = 88.dp
-
                                 val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
-
-                                val chunkedColors: List<List<Any>> = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                    var wallpaperColors by remember { mutableStateOf<List<Int>?>(null) }
-
-                                    LaunchedEffect(Unit) {
-                                        wallpaperColors = MonetCompat.getInstance().getAvailableWallpaperColors()
-                                    }
-
-                                    wallpaperColors?.chunked(columns) ?: PresetColors.chunked(columns)
-                                } else PresetColors.chunked(columns)
+                                val chunkedColors = state.availableColors.chunked(columns)
 
                                 Column(
                                     modifier = Modifier.fillMaxWidth(),
@@ -238,35 +217,20 @@ fun MiuixThemeSettingsPage(
                                                     modifier = Modifier.weight(1f),
                                                     contentAlignment = Alignment.Center
                                                 ) {
-                                                    if (rawColor is RawColor) {
-                                                        ColorSwatchPreview(
-                                                            rawColor = rawColor,
-                                                            currentStyle = state.paletteStyle,
-                                                            textStyle = MiuixTheme.textStyles.footnote1,
-                                                            textColor = MiuixTheme.colorScheme.onSurface,
-                                                            isSelected = !state.useDynamicColor && state.seedColor == rawColor.color
-                                                        ) {
-                                                            viewModel.dispatch(
-                                                                PreferredViewAction.SetSeedColor(
-                                                                    rawColor.color
-                                                                )
+                                                    ColorSwatchPreview(
+                                                        rawColor = rawColor,
+                                                        currentStyle = state.paletteStyle,
+                                                        textStyle = MiuixTheme.textStyles.footnote1,
+                                                        textColor = MiuixTheme.colorScheme.onSurface,
+                                                        isSelected = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                                                            state.seedColor == rawColor.color
+                                                        else !state.useDynamicColor && state.seedColor == rawColor.color,
+                                                    ) {
+                                                        viewModel.dispatch(
+                                                            PreferredViewAction.SetSeedColor(
+                                                                rawColor.color
                                                             )
-                                                        }
-                                                    } else if (rawColor is Int) {
-                                                        val rawColor = RawColor(rawColor.toHexString(), Color(rawColor))
-                                                        ColorSwatchPreview(
-                                                            rawColor,
-                                                            currentStyle = state.paletteStyle,
-                                                            textStyle = MiuixTheme.textStyles.footnote1,
-                                                            textColor = MiuixTheme.colorScheme.onSurface,
-                                                            isSelected = state.seedColor == rawColor.color
-                                                        ) {
-                                                            viewModel.dispatch(
-                                                                PreferredViewAction.SetSeedColor(
-                                                                    rawColor.color
-                                                                )
-                                                            )
-                                                        }
+                                                        )
                                                     }
                                                 }
                                             }

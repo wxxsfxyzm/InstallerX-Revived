@@ -32,6 +32,7 @@ import com.rosan.installer.data.updater.repo.UpdateChecker
 import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.ui.theme.m3color.PaletteStyle
 import com.rosan.installer.ui.theme.m3color.PresetColors
+import com.rosan.installer.ui.theme.m3color.RawColor
 import com.rosan.installer.ui.theme.m3color.ThemeMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
@@ -161,7 +162,7 @@ class PreferredViewModel(
             is PreferredViewAction.SetThemeMode -> setThemeMode(action.mode)
             is PreferredViewAction.SetPaletteStyle -> setPaletteStyle(action.style)
             is PreferredViewAction.SetUseDynamicColor -> setUseDynamicColor(action.use)
-            is PreferredViewAction.SetUseMiuixMonet -> setUsemiuixMonet(action.use)
+            is PreferredViewAction.SetUseMiuixMonet -> setUseMiuixMonet(action.use)
             is PreferredViewAction.SetSeedColor -> setSeedColor(action.color)
             is PreferredViewAction.SetDynColorFollowPkgIcon -> setDynColorFollowPkgIcon(action.follow)
             is PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity -> setDynColorFollowPkgIconForLiveActivity(action.follow)
@@ -481,18 +482,21 @@ class PreferredViewModel(
 
     private fun setUseDynamicColor(use: Boolean) = viewModelScope.launch {
         appDataStore.putBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, use)
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             if (use) {
-                MonetCompat.getInstance().getAvailableWallpaperColors()?.let {
-                    appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, it.first())
+                val availableColors = MonetCompat.getInstance().getAvailableWallpaperColors()
+                if (!availableColors.isNullOrEmpty()) {
+                    val bestColor = availableColors.first()
+                    appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, bestColor)
+                } else {
+                    appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
                 }
-            } else {
-                appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
             }
         }
     }
 
-    private fun setUsemiuixMonet(use: Boolean) = viewModelScope.launch {
+    private fun setUseMiuixMonet(use: Boolean) = viewModelScope.launch {
         appDataStore.putBoolean(AppDataStore.UI_USE_MIUIX_MONET, use)
     }
 
@@ -527,6 +531,21 @@ class PreferredViewModel(
         Timber.e(exception, "Privileged action failed")
         _uiEvents.emit(PreferredViewEvent.ShowDefaultInstallerErrorDetail(titleForError, exception, action))
     }
+
+    private fun getWallpaperColorsFlow(): Flow<List<Int>?> = flow {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            // MonetCompat operations should be done safely
+            val colors = try {
+                MonetCompat.getInstance().getAvailableWallpaperColors()
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to get Monet colors")
+                null
+            }
+            emit(colors)
+        } else {
+            emit(null)
+        }
+    }.flowOn(Dispatchers.IO)
 
     private fun getAndCombineState() =
         viewModelScope.launch {
@@ -595,6 +614,7 @@ class PreferredViewModel(
             val seedColorFlow =
                 appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
                     .map { Color(it) }
+            val wallpaperColorsFlow = getWallpaperColorsFlow()
             val useDynColorFollowPkgIconFlow =
                 appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false)
             val useDynColorFollowPkgIconForLiveActivityFlow =
@@ -634,6 +654,7 @@ class PreferredViewModel(
                 useDynamicColorFlow,
                 useMiuixMonetFlow,
                 seedColorFlow,
+                wallpaperColorsFlow,
                 useDynColorFollowPkgIconFlow,
                 useDynColorFollowPkgIconForLiveActivityFlow,
                 updateResultFlow
@@ -676,12 +697,24 @@ class PreferredViewModel(
                 val useDynamicColor = values[idx++] as Boolean
                 val useMiuixMonet = values[idx++] as Boolean
                 val seedColor = values[idx++] as Color
+                @Suppress("UNCHECKED_CAST") val wallpaperColors = values[idx++] as? List<Int>
                 val useDynColorFollowPkgIcon = values[idx++] as Boolean
                 val useDynColorFollowPkgIconForLiveActivity = values[idx++] as Boolean
                 val updateResult = values[idx] as UpdateChecker.CheckResult?
 
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-                    MonetCompat.getInstance().updateMonetColors()
+                // If using dynamic color on legacy Android (< S), use wallpaper colors.
+                // Otherwise (Dynamic Color off OR Android 12+), use PresetColors.
+                val availableColors: List<RawColor> = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                    if (!wallpaperColors.isNullOrEmpty()) {
+                        // Transform Int colors to RawColor for type safety in UI
+                        wallpaperColors.map { colorInt ->
+                            RawColor(
+                                key = colorInt.toHexString(),
+                                color = Color(colorInt)
+                            )
+                        }
+                    } else PresetColors
+                else PresetColors
                 val hasUpdate = updateResult?.hasUpdate ?: false
                 val remoteVersion = updateResult?.remoteVersion ?: ""
                 val customizeAuthorizer =
@@ -721,6 +754,7 @@ class PreferredViewModel(
                     useDynamicColor = useDynamicColor,
                     useMiuixMonet = useMiuixMonet,
                     seedColor = seedColor,
+                    availableColors = availableColors,
                     useDynColorFollowPkgIcon = useDynColorFollowPkgIcon,
                     useDynColorFollowPkgIconForLiveActivity = useDynColorFollowPkgIconForLiveActivity,
                     hasUpdate = hasUpdate,
