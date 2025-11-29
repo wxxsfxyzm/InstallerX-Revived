@@ -482,18 +482,6 @@ class PreferredViewModel(
 
     private fun setUseDynamicColor(use: Boolean) = viewModelScope.launch {
         appDataStore.putBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, use)
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            if (use) {
-                val availableColors = MonetCompat.getInstance().getAvailableWallpaperColors()
-                if (!availableColors.isNullOrEmpty()) {
-                    val bestColor = availableColors.first()
-                    appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, bestColor)
-                } else {
-                    appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
-                }
-            }
-        }
     }
 
     private fun setUseMiuixMonet(use: Boolean) = viewModelScope.launch {
@@ -696,17 +684,24 @@ class PreferredViewModel(
                 val paletteStyle = values[idx++] as PaletteStyle
                 val useDynamicColor = values[idx++] as Boolean
                 val useMiuixMonet = values[idx++] as Boolean
-                val seedColor = values[idx++] as Color
+                val manualSeedColor = values[idx++] as Color
                 @Suppress("UNCHECKED_CAST") val wallpaperColors = values[idx++] as? List<Int>
                 val useDynColorFollowPkgIcon = values[idx++] as Boolean
                 val useDynColorFollowPkgIconForLiveActivity = values[idx++] as Boolean
                 val updateResult = values[idx] as UpdateChecker.CheckResult?
 
-                // If using dynamic color on legacy Android (< S), use wallpaper colors.
-                // Otherwise (Dynamic Color off OR Android 12+), use PresetColors.
+                val effectiveSeedColor = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                    if (!wallpaperColors.isNullOrEmpty()) {
+                        Color(wallpaperColors[0])
+                    } else {
+                        manualSeedColor
+                    }
+                } else {
+                    manualSeedColor
+                }
+
                 val availableColors: List<RawColor> = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
                     if (!wallpaperColors.isNullOrEmpty()) {
-                        // Transform Int colors to RawColor for type safety in UI
                         wallpaperColors.map { colorInt ->
                             RawColor(
                                 key = colorInt.toHexString(),
@@ -753,7 +748,7 @@ class PreferredViewModel(
                     paletteStyle = paletteStyle,
                     useDynamicColor = useDynamicColor,
                     useMiuixMonet = useMiuixMonet,
-                    seedColor = seedColor,
+                    seedColor = effectiveSeedColor,
                     availableColors = availableColors,
                     useDynColorFollowPkgIcon = useDynColorFollowPkgIcon,
                     useDynColorFollowPkgIconForLiveActivity = useDynColorFollowPkgIconForLiveActivity,

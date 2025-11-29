@@ -181,7 +181,7 @@ fun MiuixThemeSettingsPage(
 
             item {
                 AnimatedVisibility(
-                    visible = !state.useDynamicColor,
+                    visible = state.useMiuixMonet && !state.useDynamicColor,
                     enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
                             expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
                     exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +

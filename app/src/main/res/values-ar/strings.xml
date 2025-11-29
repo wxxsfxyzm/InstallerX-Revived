@@ -416,5 +416,6 @@
     <string name="theme_settings_palette_style">نمط اللوحة</string>
     <string name="theme_settings_palette_style_desc">تحديد نمط اللوحة</string>
     <string name="theme_settings_dynamic_color">لون ديناميكي</string>
-    <string name="theme_settings_dynamic_color_miuix_desc">تمكين لون monet لـ miuix</string>
+    <string name="theme_settings_miuix_custom_colors">ألوان مخصّصة</string>
+    <string name="theme_settings_miuix_custom_colors_desc">تخصيص ألوان السمة ضمن نمط Miuix</string>
 </resources>

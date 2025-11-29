@@ -383,9 +383,9 @@
     <string name="theme_settings_palette_style">Стиль палитры</string>
     <string name="theme_settings_palette_style_desc">Выбрать стиль палитры</string>
     <string name="theme_settings_dynamic_color">Динамичиский цвет</string>
-    <string name="theme_settings_dynamic_color_miuix_desc">Включить цвет monet в Miuix</string>
+    <string name="theme_settings_miuix_custom_colors">Пользовательские цвета</string>
+    <string name="theme_settings_miuix_custom_colors_desc">Настройка цветов темы в стиле Miuix</string>
     <string name="theme_settings_dynamic_color_desc">Цвет темы основанный на обоях</string>
-    <string name="theme_settings_dynamic_color_follow_system">Системный цвет</string>
     <string name="theme_settings_theme_color">Цвет темы</string>
     <string name="theme_settings_dynamic_color_follow_icon">Цветной диалог</string>
     <string name="theme_settings_dynamic_color_follow_icon_desc">Цвет диалога учтановки не будет следовать цвету темы, вместо этого цвет будет получатся из иконки кандитата на установку</string>
