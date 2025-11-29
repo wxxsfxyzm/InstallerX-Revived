@@ -313,58 +313,58 @@ fun NewThemeSettingsPage(
 
                                                 val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
 
-                                        val chunkedColors: List<List<Any>> = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                            var wallpaperColors by remember { mutableStateOf<List<Int>?>(null) }
+                                                val chunkedColors: List<List<Any>> = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                                                    var wallpaperColors by remember { mutableStateOf<List<Int>?>(null) }
 
-                                            LaunchedEffect(Unit) {
-                                                wallpaperColors = MonetCompat.getInstance().getAvailableWallpaperColors()
-                                            }
+                                                    LaunchedEffect(Unit) {
+                                                        wallpaperColors = MonetCompat.getInstance().getAvailableWallpaperColors()
+                                                    }
 
-                                            wallpaperColors?.chunked(columns) ?: PresetColors.chunked(columns)
-                                        } else PresetColors.chunked(columns)
+                                                    wallpaperColors?.chunked(columns) ?: PresetColors.chunked(columns)
+                                                } else PresetColors.chunked(columns)
 
-                                        Column(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            chunkedColors.forEach { rowItems ->
-                                                Row(
+                                                Column(
                                                     modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.Center
+                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
                                                 ) {
-                                                    rowItems.forEach { namedColor ->
-                                                        Box(
-                                                            modifier = Modifier.weight(1f),
-                                                            contentAlignment = Alignment.Center
+                                                    chunkedColors.forEach { rowItems ->
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            horizontalArrangement = Arrangement.Center
                                                         ) {
-                                                            if (namedColor is RawColor) {
-                                                                ColorSwatchPreview(
-                                                                    rawColor = namedColor,
-                                                                    currentStyle = state.paletteStyle,
-                                                                    isSelected = !state.useDynamicColor && state.seedColor == namedColor.color
+                                                            rowItems.forEach { namedColor ->
+                                                                Box(
+                                                                    modifier = Modifier.weight(1f),
+                                                                    contentAlignment = Alignment.Center
                                                                 ) {
-                                                                    viewModel.dispatch(
-                                                                        PreferredViewAction.SetSeedColor(
-                                                                            namedColor.color
-                                                                        )
-                                                                    )
-                                                                }
-                                                            } else if (namedColor is Int) {
-                                                                val rawColor = RawColor(namedColor.toHexString(), Color(namedColor))
-                                                                ColorSwatchPreview(
-                                                                    rawColor,
-                                                                    currentStyle = state.paletteStyle,
-                                                                    isSelected = state.seedColor == rawColor.color
-                                                                ) {
-                                                                    viewModel.dispatch(
-                                                                        PreferredViewAction.SetSeedColor(
-                                                                            rawColor.color
-                                                                        )
-                                                                    )
+                                                                    if (namedColor is RawColor) {
+                                                                        ColorSwatchPreview(
+                                                                            rawColor = namedColor,
+                                                                            currentStyle = state.paletteStyle,
+                                                                            isSelected = !state.useDynamicColor && state.seedColor == namedColor.color
+                                                                        ) {
+                                                                            viewModel.dispatch(
+                                                                                PreferredViewAction.SetSeedColor(
+                                                                                    namedColor.color
+                                                                                )
+                                                                            )
+                                                                        }
+                                                                    } else if (namedColor is Int) {
+                                                                        val rawColor = RawColor(namedColor.toHexString(), Color(namedColor))
+                                                                        ColorSwatchPreview(
+                                                                            rawColor,
+                                                                            currentStyle = state.paletteStyle,
+                                                                            isSelected = state.seedColor == rawColor.color
+                                                                        ) {
+                                                                            viewModel.dispatch(
+                                                                                PreferredViewAction.SetSeedColor(
+                                                                                    rawColor.color
+                                                                                )
+                                                                            )
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
-                                                        }
-                                                    }
 
                                                             val remaining = columns - rowItems.size
                                                             if (remaining > 0) {
@@ -376,7 +376,8 @@ fun NewThemeSettingsPage(
                                                     }
                                                 }
                                             }
-                                        })
+                                        }
+                                    )
                                 }
                         )
                     }

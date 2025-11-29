@@ -28,6 +28,7 @@ datastoreCoreAndroid = "1.2.0-rc01"
 aboutLibraries = "13.1.0"
 appiconloader = "1.5.0"
 timber = "5.0.1"
+miuix = "0.7.1"
 monetcompat = "0.4.1"
 
 [plugins]
@@ -113,7 +114,7 @@ aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3",
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 # miuix
-miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version = "0.7.1" }
+miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version.ref = "miuix" }
 
 # MonetCompat
 # https://github.com/KieronQuinn/MonetCompat

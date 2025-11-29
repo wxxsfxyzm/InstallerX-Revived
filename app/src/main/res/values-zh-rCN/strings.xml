@@ -41,6 +41,8 @@
     <string name="theme_settings_desc">更改应用主题</string>
     <string name="theme_settings_miuix_ui">Miuix</string>
     <string name="theme_settings_miuix_ui_desc">类 HyperOS 风格界面</string>
+    <string name="theme_settings_miuix_custom_colors">自定义颜色</string>
+    <string name="theme_settings_miuix_custom_colors_desc">在 Miuix 主题风格下自定义主题颜色</string>
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">标准 Material Design 界面</string>
     <string name="theme_settings_ui_engine">UI 引擎</string>
@@ -55,9 +57,7 @@
     <string name="theme_settings_palette_style">调色板样式</string>
     <string name="theme_settings_palette_style_desc">选择调色板样式</string>
     <string name="theme_settings_dynamic_color">动态颜色</string>
-    <string name="theme_settings_dynamic_color_miuix_desc">为 miuix 启用 monet</string>
     <string name="theme_settings_dynamic_color_desc">基于壁纸的主题颜色</string>
-    <string name="theme_settings_dynamic_color_follow_system">跟随系统主题颜色</string>
     <string name="theme_settings_theme_color">主题颜色</string>
     <string name="theme_settings_dynamic_color_follow_icon">多彩对话框</string>
     <string name="theme_settings_dynamic_color_follow_icon_desc">安装对话框的配色将不再跟随应用主题，而是根据待安装软件包的图标自动取色</string>
