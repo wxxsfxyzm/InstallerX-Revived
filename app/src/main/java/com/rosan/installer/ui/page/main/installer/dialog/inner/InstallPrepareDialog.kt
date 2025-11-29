@@ -151,7 +151,6 @@ fun installPrepareDialog( // 小写开头
 
     // This single block calculates all warnings and the final button text based on priority.
     val (warningMessages, buttonTextId) = remember(currentPackage, entityToInstall, preInstallAppInfo) {
-        val newEntity = entityToInstall
         val oldInfo = currentPackage.installedAppInfo // Use currentPackage directly
         val signatureStatus = currentPackage.signatureMatchStatus
 
@@ -160,16 +159,16 @@ fun installPrepareDialog( // 小写开头
 
         // Determine the base operation type (upgrade, downgrade, etc.)
         // This helps set the initial button text for non-error cases.
-        if (newEntity != null) {
+        if (entityToInstall != null) {
             if (oldInfo == null) {
                 finalButtonTextId = R.string.install // New install
             } else {
                 when {
-                    newEntity.versionCode > oldInfo.versionCode -> {
+                    entityToInstall.versionCode > oldInfo.versionCode -> {
                         finalButtonTextId = R.string.upgrade
                     }
 
-                    newEntity.versionCode < oldInfo.versionCode -> {
+                    entityToInstall.versionCode < oldInfo.versionCode -> {
                         warnings.add(
                             context.getString(R.string.installer_prepare_type_downgrade) to errorColor
                         )
@@ -180,7 +179,7 @@ fun installPrepareDialog( // 小写开头
                         finalButtonTextId = R.string.unarchive
                     }
 
-                    newEntity.versionName == oldInfo.versionName -> {
+                    entityToInstall.versionName == oldInfo.versionName -> {
                         finalButtonTextId = R.string.reinstall
                     }
 
@@ -218,7 +217,7 @@ fun installPrepareDialog( // 小写开头
             }
 
         // Final check for SDK incompatibility. This is a blocking error.
-        val newMinSdk = newEntity?.minSdk?.toIntOrNull()
+        val newMinSdk = entityToInstall?.minSdk?.toIntOrNull()
         if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
             warnings.add(
                 0,
@@ -304,7 +303,8 @@ fun installPrepareDialog( // 小写开头
                 if (canInstall) {
                     add(DialogButton(stringResource(buttonTextId), 1f) {
                         viewModel.dispatch(InstallerViewAction.Install)
-                        viewModel.dispatch(InstallerViewAction.Background)
+                        if (settings.autoSilentInstall)
+                            viewModel.dispatch(InstallerViewAction.Background)
                     })
                 }
                 // else if app can be installed and extended menu is shown
