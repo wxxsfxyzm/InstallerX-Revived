@@ -192,17 +192,6 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
-/*class RoomSchemaArgProvider(
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    val schemaDir: File
-) : CommandLineArgumentProvider {
-
-    override fun asArguments(): Iterable<String> {
-        return listOf("room.schemaLocation=${schemaDir.path}")
-    }
-}*/
-
 dependencies {
     compileOnly(project(":hidden-api"))
 
@@ -218,7 +207,6 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.navigation)
     implementation(libs.compose.materialIcons)
-    //implementation(libs.material)
     // Preview support only for debug builds
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
@@ -250,6 +238,7 @@ dependencies {
 
     implementation(libs.iamr0s.androidAppProcess)
 
+    // aboutlibraries
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)
 
@@ -259,12 +248,12 @@ dependencies {
     // miuix
     implementation(libs.miuix)
     implementation(libs.capsule)
+    // haze
     implementation(libs.haze)
     implementation(libs.haze.materials)
 
     // m3color
     implementation(libs.m3color)
-
     // okhttp
     implementation(libs.okhttp)
 
