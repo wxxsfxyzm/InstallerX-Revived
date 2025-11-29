@@ -17,6 +17,7 @@ import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.app.repo.PrivilegedActionRepo
@@ -317,6 +318,10 @@ class PreferredViewModel(
                 val useDynColorFollowPkgIconForLiveActivity = values[idx] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                    MonetCompat.getInstance().updateMonetColors()
+
                 PreferredViewState(
                     progress = PreferredViewState.Progress.Loaded,
                     authorizer = authorizer,
@@ -630,6 +635,15 @@ class PreferredViewModel(
 
     private fun setUseDynamicColor(use: Boolean) = viewModelScope.launch {
         appDataStore.putBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, use)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            if (use) {
+                MonetCompat.getInstance().getAvailableWallpaperColors()?.let {
+                    appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, it.first())
+                }
+            } else {
+                appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
+            }
+        }
     }
 
     private fun setUsemiuixMonet(use: Boolean) = viewModelScope.launch {
@@ -637,8 +651,6 @@ class PreferredViewModel(
     }
 
     private fun setSeedColor(color: Color) = viewModelScope.launch {
-        // When user picks a color, automatically turn off dynamic color
-        appDataStore.putBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, false)
         appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, color.toArgb())
     }
 

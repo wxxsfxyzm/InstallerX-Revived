@@ -31,17 +31,22 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -69,6 +74,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import kotlin.collections.chunked
 
 @Composable
 fun MiuixThemeSettingsPage(
@@ -149,28 +155,27 @@ fun MiuixThemeSettingsPage(
                         }
                     )
                     MiuixSwitchWidget(
-                        title = stringResource(R.string.theme_settings_dynamic_color),
-                        description = stringResource(R.string.theme_settings_dynamic_color_miuix_desc),
+                        title = stringResource(R.string.theme_settings_miuix_custom_colors),
+                        description = stringResource(R.string.theme_settings_miuix_custom_colors_desc),
                         checked = state.useMiuixMonet,
                         onCheckedChange = {
                             viewModel.dispatch(PreferredViewAction.SetUseMiuixMonet(it))
                         }
                     )
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                        AnimatedVisibility(
-                            visible = state.useMiuixMonet,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
-                            MiuixSwitchWidget(
-                                title = stringResource(R.string.theme_settings_dynamic_color_follow_system),
-                                description = stringResource(R.string.theme_settings_dynamic_color_desc),
-                                checked = state.useDynamicColor,
-                                onCheckedChange = {
-                                    viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
-                                }
-                            )
-                        }
+                    AnimatedVisibility(
+                        visible = state.useMiuixMonet,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.theme_settings_dynamic_color),
+                            description = stringResource(R.string.theme_settings_dynamic_color_desc),
+                            checked = state.useDynamicColor,
+                            onCheckedChange = {
+                                viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
+                            }
+                        )
+                    }
                     AnimatedVisibility(
                         visible = state.useMiuixMonet,
                         enter = fadeIn() + expandVertically(),
@@ -222,7 +227,15 @@ fun MiuixThemeSettingsPage(
 
                                 val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
 
-                                val chunkedColors = PresetColors.chunked(columns)
+                                val chunkedColors: List<List<Any>> = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                                    var wallpaperColors by remember { mutableStateOf<List<Int>?>(null) }
+
+                                    LaunchedEffect(Unit) {
+                                        wallpaperColors = MonetCompat.getInstance().getAvailableWallpaperColors()
+                                    }
+
+                                    wallpaperColors?.chunked(columns) ?: PresetColors.chunked(columns)
+                                } else PresetColors.chunked(columns)
 
                                 Column(
                                     modifier = Modifier.fillMaxWidth(),
@@ -238,12 +251,31 @@ fun MiuixThemeSettingsPage(
                                                     modifier = Modifier.weight(1f),
                                                     contentAlignment = Alignment.Center
                                                 ) {
-                                                    ColorSwatchPreview(
-                                                        rawColor = rawColor,
-                                                        currentStyle = state.paletteStyle,
-                                                        isSelected = !state.useDynamicColor && state.seedColor == rawColor.color
-                                                    ) {
-                                                        viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
+                                                    if (rawColor is RawColor) {
+                                                        ColorSwatchPreview(
+                                                            rawColor = rawColor,
+                                                            currentStyle = state.paletteStyle,
+                                                            isSelected = !state.useDynamicColor && state.seedColor == rawColor.color
+                                                        ) {
+                                                            viewModel.dispatch(
+                                                                PreferredViewAction.SetSeedColor(
+                                                                    rawColor.color
+                                                                )
+                                                            )
+                                                        }
+                                                    } else if (rawColor is Int) {
+                                                        val rawColor = RawColor(rawColor.toHexString(), Color(rawColor))
+                                                        ColorSwatchPreview(
+                                                            rawColor,
+                                                            currentStyle = state.paletteStyle,
+                                                            isSelected = state.seedColor == rawColor.color
+                                                        ) {
+                                                            viewModel.dispatch(
+                                                                PreferredViewAction.SetSeedColor(
+                                                                    rawColor.color
+                                                                )
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }

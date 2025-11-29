@@ -56,6 +56,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -63,6 +64,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -244,19 +246,18 @@ fun NewThemeSettingsPage(
                                     onClick = { showPaletteDialog = true }
                                 ) {}
                             }
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                                add {
-                                    // Dynamic Color Switch
-                                    SwitchWidget(
-                                        icon = Icons.TwoTone.InvertColors,
-                                        title = stringResource(R.string.theme_settings_dynamic_color),
-                                        description = stringResource(R.string.theme_settings_dynamic_color_desc),
-                                        checked = state.useDynamicColor,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
-                                        }
-                                    )
-                                }
+                            add {
+                                // Dynamic Color Switch
+                                SwitchWidget(
+                                    icon = Icons.TwoTone.InvertColors,
+                                    title = stringResource(R.string.theme_settings_dynamic_color),
+                                    description = stringResource(R.string.theme_settings_dynamic_color_desc),
+                                    checked = state.useDynamicColor,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
+                                    }
+                                )
+                            }
                             add {
                                 SwitchWidget(
                                     icon = Icons.TwoTone.Colorize,
@@ -312,7 +313,15 @@ fun NewThemeSettingsPage(
 
                                                 val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
 
-                                                val chunkedColors = PresetColors.chunked(columns)
+                                                val chunkedColors: List<List<Any>> = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                                                    var wallpaperColors by remember { mutableStateOf<List<Int>?>(null) }
+
+                                                    LaunchedEffect(Unit) {
+                                                        wallpaperColors = MonetCompat.getInstance().getAvailableWallpaperColors()
+                                                    }
+
+                                                    wallpaperColors?.chunked(columns) ?: PresetColors.chunked(columns)
+                                                } else PresetColors.chunked(columns)
 
                                                 Column(
                                                     modifier = Modifier.fillMaxWidth(),
@@ -328,16 +337,31 @@ fun NewThemeSettingsPage(
                                                                     modifier = Modifier.weight(1f),
                                                                     contentAlignment = Alignment.Center
                                                                 ) {
-                                                                    ColorSwatchPreview(
-                                                                        rawColor = namedColor,
-                                                                        currentStyle = state.paletteStyle,
-                                                                        isSelected = !state.useDynamicColor && state.seedColor == namedColor.color
-                                                                    ) {
-                                                                        viewModel.dispatch(
-                                                                            PreferredViewAction.SetSeedColor(
-                                                                                namedColor.color
+                                                                    if (namedColor is RawColor) {
+                                                                        ColorSwatchPreview(
+                                                                            rawColor = namedColor,
+                                                                            currentStyle = state.paletteStyle,
+                                                                            isSelected = !state.useDynamicColor && state.seedColor == namedColor.color
+                                                                        ) {
+                                                                            viewModel.dispatch(
+                                                                                PreferredViewAction.SetSeedColor(
+                                                                                    namedColor.color
+                                                                                )
                                                                             )
-                                                                        )
+                                                                        }
+                                                                    } else if (namedColor is Int) {
+                                                                        val rawColor = RawColor(namedColor.toHexString(), Color(namedColor))
+                                                                        ColorSwatchPreview(
+                                                                            rawColor,
+                                                                            currentStyle = state.paletteStyle,
+                                                                            isSelected = state.seedColor == rawColor.color
+                                                                        ) {
+                                                                            viewModel.dispatch(
+                                                                                PreferredViewAction.SetSeedColor(
+                                                                                    rawColor.color
+                                                                                )
+                                                                            )
+                                                                        }
                                                                     }
                                                                 }
                                                             }
@@ -352,7 +376,8 @@ fun NewThemeSettingsPage(
                                                     }
                                                 }
                                             }
-                                        })
+                                        }
+                                    )
                                 }
                         )
                     }
@@ -567,13 +592,17 @@ internal fun ColorSwatchPreview(
                 }
             }
         }
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = rawColor.getDisplayName(LocalContext.current),
-            style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+
+        val displayName = rawColor.getDisplayName(LocalContext.current)
+        if (displayName != rawColor.key) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = displayName,
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }

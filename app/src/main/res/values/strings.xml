@@ -44,6 +44,8 @@
     <string name="theme_settings_desc">Change the theme of the app</string>
     <string name="theme_settings_miuix_ui">Miuix</string>
     <string name="theme_settings_miuix_ui_desc">Similar to Hyperos</string>
+    <string name="theme_settings_miuix_custom_colors">Custom Colors</string>
+    <string name="theme_settings_miuix_custom_colors_desc">Customize theme colors in Miuix theme style</string>
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">Standard Material Design UI</string>
     <string name="theme_settings_ui_engine">UI Engine</string>
@@ -58,9 +60,7 @@
     <string name="theme_settings_palette_style">Palette Style</string>
     <string name="theme_settings_palette_style_desc">Select palette style</string>
     <string name="theme_settings_dynamic_color">Dynamic Color</string>
-    <string name="theme_settings_dynamic_color_miuix_desc">Enable monet color for miuix</string>
     <string name="theme_settings_dynamic_color_desc">Theme color based on wallpaper</string>
-    <string name="theme_settings_dynamic_color_follow_system">Follow system theme color</string>
     <string name="theme_settings_theme_color">Theme Color</string>
     <string name="theme_settings_dynamic_color_follow_icon">Colorful Dialog</string>
     <string name="theme_settings_dynamic_color_follow_icon_desc">The installation dialog will no longer follow the app’s theme colors. Instead, it will use colors extracted from the icon of the package being installed</string>
