@@ -20,7 +20,7 @@ class OnlineUpdateChecker(
 
     override fun check(): UpdateChecker.CheckResult? {
         // Skip check for Debug builds
-        if (!RsConfig.isDebug) {
+        if (RsConfig.isDebug) {
             Timber.d("Update check skipped: Debug build")
             return null
         }
