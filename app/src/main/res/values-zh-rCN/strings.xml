@@ -55,10 +55,14 @@
     <string name="theme_settings_palette_style">调色板样式</string>
     <string name="theme_settings_palette_style_desc">选择调色板样式</string>
     <string name="theme_settings_dynamic_color">动态颜色</string>
+    <string name="theme_settings_dynamic_color_miuix_desc">为 miuix 启用 monet</string>
     <string name="theme_settings_dynamic_color_desc">基于壁纸的主题颜色</string>
+    <string name="theme_settings_dynamic_color_follow_system">跟随系统主题颜色</string>
     <string name="theme_settings_theme_color">主题颜色</string>
     <string name="theme_settings_dynamic_color_follow_icon">多彩对话框</string>
     <string name="theme_settings_dynamic_color_follow_icon_desc">安装对话框的配色将不再跟随应用主题，而是根据待安装软件包的图标自动取色</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon">多彩实时活动进度</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">实时活动进度的配色根据待安装软件包的图标自动取色</string>
     <string name="color_default">默认</string>
     <string name="color_pink">粉红色</string>
     <string name="color_red">红色</string>
@@ -92,6 +96,10 @@
     <string name="installer_settings_global_installer">全局</string>
     <string name="installer_settings_dialog_mode_options">对话框安装自定义选项</string>
     <string name="installer_settings_notification_mode_options">通知安装自定义选项</string>
+    <string name="installer_settings_auto_clear_success_notification">自动清除通知</string>
+    <string name="installer_settings_auto_clear_success_notification_desc">安装成功后自动清理通知</string>
+    <string name="installer_settings_auto_clear_time_never">从不</string>
+    <string name="installer_settings_auto_clear_time_seconds_format">%1$d 秒</string>
     <string name="basic">常规</string>
     <string name="disable_adb_install_verify">停用系统安装验证</string>
     <string name="disable_adb_install_verify_desc">在一些系统上可以禁止安装扫描（Play 保护机制等）</string>
@@ -147,6 +155,7 @@
     <string name="config_authorizer_customize">自定义</string>
     <string name="config_customize_authorizer">自定义授权器</string>
     <string name="config_install_mode">安装方式</string>
+    <string name="config_install_mode_desc">默认的安装模式以及相关个性化设置</string>
     <string name="config_install_mode_global">跟随全局</string>
     <string name="config_install_mode_global_desc">跟随全局（%1$s）</string>
     <string name="config_install_mode_dialog">对话框</string>
@@ -276,6 +285,7 @@
     <string name="installer_installing_module">安装模块中</string>
     <string name="installer_install_failed">安装失败</string>
     <string name="installer_install_success">安装成功</string>
+    <string name="installer_install_complete">安装完成</string>
     <string name="installer_silent_install">静默安装</string>
     <string name="installer_unknown_error">未知错误</string>
     <string name="installer_channel_name">安装通知</string>
@@ -555,6 +565,8 @@
     <string name="suggestion_allow_test_app_desc">临时允许测试包并重试</string>
     <string name="suggestion_mi_isolation">临时使用有效的安装者并重试</string>
     <string name="suggestion_mi_isolation_desc">临时以有效安装者身份重试</string>
+    <string name="suggestion_shizuku_isolation">使用 shizuku 重试</string>
+    <string name="suggestion_shizuku_isolation_desc">临时以 shizuku 和有效安装者身份重试</string>
     <string name="suggestion_user_restricted">允许 USB 安装</string>
     <string name="suggestion_user_restricted_desc">前往开发者选项启用 USB 安装</string>
     <string name="suggestion_bypass_low_target_sdk">允许绕过低目标 SDK 限制</string>

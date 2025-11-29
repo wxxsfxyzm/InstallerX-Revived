@@ -46,7 +46,7 @@ import timber.log.Timber
 
 @Composable
 private fun installPrepareEmptyDialog(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(
@@ -106,18 +106,19 @@ fun installPrepareDialog( // 小写开头
     val context = LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
+    val settings = viewModel.viewSettings
 
     // If there is no specific package to prepare, show an empty/error dialog.
     if (currentPackage == null) {
         return if (installer.analysisResults.size > 1) {
             installPrepareTooManyDialog(installer, viewModel)
         } else {
-            installPrepareEmptyDialog(installer, viewModel)
+            installPrepareEmptyDialog(viewModel)
         }
     }
 
     val selectedEntities = currentPackage.appEntities.filter { it.selected }.map { it.app }.sortedBest()
-    if (selectedEntities.isEmpty()) return installPrepareEmptyDialog(installer, viewModel)
+    if (selectedEntities.isEmpty()) return installPrepareEmptyDialog(viewModel)
 
     val primaryEntity = selectedEntities.first()
     val entityToInstall = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
@@ -130,7 +131,7 @@ fun installPrepareDialog( // 小写开头
     var showChips by remember { mutableStateOf(false) }
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
-    var showOPPOSpecial by remember { mutableStateOf(viewModel.showOPPOSpecial) }
+    var showOPPOSpecial by remember { mutableStateOf(settings.showOPPOSpecial) }
 
     LaunchedEffect(autoDelete, displaySdk) {
         val currentConfig = installer.config
@@ -237,9 +238,8 @@ fun installPrepareDialog( // 小写开头
         ) {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
                 item { WarningTextBlock(warnings = warningMessages) }
-                // --- NEW LOGIC: Show package name and version with animation ---
+                // Show package name and version with animation
                 item {
-                    // Use AnimatedVisibility to show package name and version
                     AnimatedVisibility(
                         visible = showChips,
                         enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
@@ -274,7 +274,7 @@ fun installPrepareDialog( // 小写开头
                                     onClick = {
                                         val newValue = !showOPPOSpecial
                                         showOPPOSpecial = newValue
-                                        viewModel.showOPPOSpecial = newValue
+                                        settings.copy(showOPPOSpecial = newValue)
                                     },
                                     label = stringResource(id = R.string.installer_show_oem_special),
                                     icon = AppIcons.OEMSpecial
@@ -282,7 +282,6 @@ fun installPrepareDialog( // 小写开头
                         }
                     }
                 }
-                // --- LOGIC END ---
             }
         },
         buttons = DialogButtons(
@@ -297,7 +296,7 @@ fun installPrepareDialog( // 小写开头
                     containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK
 
                 // only when the entity is a split APK, XAPK, or APKM
-                if (canInstall && viewModel.showExtendedMenu && isAPK) {
+                if (canInstall && settings.showExtendedMenu && isAPK) {
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
                         viewModel.dispatch(InstallerViewAction.InstallChoice)
                     })
@@ -308,12 +307,12 @@ fun installPrepareDialog( // 小写开头
                     })
                 }
                 // else if app can be installed and extended menu is shown
-                if (canInstall && viewModel.showExtendedMenu) {
+                if (canInstall && settings.showExtendedMenu) {
                     add(DialogButton(stringResource(R.string.menu), 2f) {
                         viewModel.dispatch(InstallerViewAction.InstallExtendedMenu)
                     })
                 }
-                if (canInstall && !viewModel.showExtendedMenu && isAPK)
+                if (canInstall && !settings.showExtendedMenu && isAPK)
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
                         viewModel.dispatch(InstallerViewAction.InstallChoice)
                     })

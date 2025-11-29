@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,7 +23,10 @@ import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
 
 @Composable
-fun UninstallingContent(viewModel: InstallerViewModel) {
+fun UninstallingContent(
+    colorScheme: ColorScheme,
+    viewModel: InstallerViewModel
+) {
     val uninstallInfo by viewModel.uiUninstallInfo.collectAsState()
     val info = uninstallInfo ?: return
 

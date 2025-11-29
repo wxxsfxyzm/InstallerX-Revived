@@ -4,17 +4,19 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +56,8 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallPrepare
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallSuccessContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallingContent
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.theme.m3color.PaletteStyle
+import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
 import com.rosan.installer.ui.util.getSupportTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -68,7 +72,7 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Back
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Info
 import top.yukonga.miuix.kmp.icon.icons.useful.Settings
-import top.yukonga.miuix.kmp.utils.BackHandler
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 private const val SHEET_ANIMATION_DURATION = 200L
 
@@ -76,6 +80,10 @@ private const val SHEET_ANIMATION_DURATION = 200L
 @Composable
 fun MiuixInstallerPage(
     installer: InstallerRepo,
+    activeColorSchemeState: MutableState<ColorScheme>,
+    globalColorScheme: ColorScheme,
+    isDarkMode: Boolean,
+    basePaletteStyle: PaletteStyle
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -83,9 +91,22 @@ fun MiuixInstallerPage(
 
     val viewModel: InstallerViewModel = koinViewModel { parametersOf(installer) }
     val currentState = viewModel.state
+    val settings = viewModel.viewSettings
     val showSettings = viewModel.showMiuixSheetRightActionSettings
     val showPermissions = viewModel.showMiuixPermissionList
-
+    val temporarySeedColor by viewModel.seedColor.collectAsState()
+    val colorScheme = activeColorSchemeState.value
+    LaunchedEffect(temporarySeedColor, globalColorScheme, isDarkMode, basePaletteStyle) {
+        if (temporarySeedColor == null) {
+            activeColorSchemeState.value = globalColorScheme
+        } else {
+            activeColorSchemeState.value = dynamicColorScheme(
+                keyColor = temporarySeedColor!!,
+                isDark = isDarkMode,
+                style = basePaletteStyle
+            )
+        }
+    }
     val containerType = installer.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
@@ -125,7 +146,12 @@ fun MiuixInstallerPage(
             )
         }
 
-        is InstallerViewState.InstallingModule -> stringResource(R.string.installer_installing_module)
+        is InstallerViewState.InstallingModule -> if (currentState.isFinished) {
+            stringResource(R.string.installer_install_complete)
+        } else {
+            stringResource(R.string.installer_installing_module)
+        }
+
         is InstallerViewState.Installing -> stringResource(R.string.installer_installing)
         is InstallerViewState.InstallCompleted -> stringResource(R.string.installer_install_success)
         is InstallerViewState.InstallSuccess -> stringResource(R.string.installer_install_success)
@@ -156,7 +182,8 @@ fun MiuixInstallerPage(
     )
     SuperBottomSheet(
         show = showBottomSheet, // Always true as long as this page is composed.
-        backgroundColor = if (isSystemInDarkTheme()) Color(0xFF242424) else Color(0xFFF7F7F7),
+        backgroundColor = if (isDynamicColor) colorScheme.surfaceContainerHigh else if (isDarkMode)
+            Color(0xFF242424) else Color(0xFFF7F7F7),
         leftAction = {
             when (currentState) {
                 is InstallerViewState.InstallChoice -> {
@@ -277,7 +304,7 @@ fun MiuixInstallerPage(
 
                     // If it's a module install OR the "disable notification" setting is on,
                     // the dismiss action should be a full close.
-                    if (isModuleInstall || viewModel.disableNotificationOnDismiss) {
+                    if (isModuleInstall || settings.disableNotificationOnDismiss) {
                         viewModel.dispatch(InstallerViewAction.Close)
                     } else {
                         // Otherwise (for standard APKs), the dismiss action sends it to the background.
@@ -297,15 +324,26 @@ fun MiuixInstallerPage(
         ) { _ ->
             when (viewModel.state) {
                 is InstallerViewState.InstallChoice -> {
-                    InstallChoiceContent(installer, viewModel, closeSheet)
+                    InstallChoiceContent(
+                        colorScheme = colorScheme,
+                        isDarkMode = isDarkMode,
+                        installer = installer,
+                        viewModel = viewModel,
+                        onCancel = closeSheet
+                    )
                 }
 
                 is InstallerViewState.InstallExtendedMenu -> {
-                    InstallExtendedMenuContent(installer, viewModel)
+                    InstallExtendedMenuContent(
+                        colorScheme = colorScheme,
+                        isDarkMode = isDarkMode,
+                        installer = installer,
+                        viewModel = viewModel
+                    )
                 }
 
                 is InstallerViewState.Preparing -> {
-                    InstallPreparingContent(viewModel = viewModel)
+                    InstallPreparingContent(colorScheme, viewModel = viewModel)
                 }
 
                 is InstallerViewState.InstallPrepare -> {
@@ -325,11 +363,17 @@ fun MiuixInstallerPage(
                     ) { subState ->
                         when (subState) {
                             "settings" -> {
-                                PrepareSettingsContent(installer, viewModel)
+                                PrepareSettingsContent(
+                                    colorScheme = colorScheme,
+                                    isDarkMode = isDarkMode,
+                                    installer = installer,
+                                    viewModel = viewModel
+                                )
                             }
 
                             "permissions" -> {
                                 InstallPreparePermissionContent(
+                                    colorScheme = colorScheme,
                                     installer = installer,
                                     viewModel = viewModel,
                                     onBack = { viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList) }
@@ -338,10 +382,21 @@ fun MiuixInstallerPage(
 
                             else -> { // "prepare"
                                 InstallPrepareContent(
+                                    colorScheme = colorScheme,
+                                    isDarkMode = isDarkMode,
                                     installer = installer,
                                     viewModel = viewModel,
                                     onCancel = closeSheet,
-                                    onInstall = { viewModel.dispatch(InstallerViewAction.Install) }
+                                    onInstall = {
+                                        viewModel.dispatch(InstallerViewAction.Install)
+                                        if (settings.autoSilentInstall && !viewModel.isInstallingModule) {
+                                            showBottomSheet.value = false
+                                            scope.launch {
+                                                delay(SHEET_ANIMATION_DURATION)
+                                                viewModel.dispatch(InstallerViewAction.Background)
+                                            }
+                                        }
+                                    }
                                 )
                             }
                         }
@@ -351,6 +406,7 @@ fun MiuixInstallerPage(
                 is InstallerViewState.Installing -> {
                     // TODO Show a progress indicator during installation.
                     InstallingContent(
+                        colorScheme = colorScheme,
                         baseEntity = baseEntity,
                         appIcon = appIcon,
                         // progress = installProgress,
@@ -360,17 +416,19 @@ fun MiuixInstallerPage(
 
                 is InstallerViewState.InstallSuccess -> {
                     InstallSuccessContent(
+                        colorScheme = colorScheme,
                         baseEntity = baseEntity,
                         installer = installer,
                         packageName = packageName,
                         appIcon = appIcon,
-                        dhizukuAutoClose = viewModel.autoCloseCountDown,
+                        dhizukuAutoClose = settings.autoCloseCountDown,
                         onClose = closeSheet
                     )
                 }
 
                 is InstallerViewState.InstallCompleted -> {
                     InstallCompletedContent(
+                        colorScheme = colorScheme,
                         results = (viewModel.state as InstallerViewState.InstallCompleted).results,
                         onClose = closeSheet
                     )
@@ -382,11 +440,13 @@ fun MiuixInstallerPage(
                         installer.error is ModuleInstallException
                     )
                         NonInstallFailedContent(
+                            colorScheme = colorScheme,
                             error = installer.error,
                             onClose = closeSheet
                         )
                     else
                         InstallFailedContent(
+                            colorScheme = colorScheme,
                             baseEntity = baseEntity,
                             appIcon = appIcon,
                             installer = installer,
@@ -398,6 +458,7 @@ fun MiuixInstallerPage(
                 is InstallerViewState.InstallingModule -> {
                     val moduleState = viewModel.state as InstallerViewState.InstallingModule
                     InstallModuleContent(
+                        colorScheme = colorScheme,
                         outputLines = moduleState.output,
                         isFinished = moduleState.isFinished,
                         onClose = closeSheet
@@ -406,6 +467,8 @@ fun MiuixInstallerPage(
 
                 is InstallerViewState.UninstallReady -> {
                     UninstallPrepareContent(
+                        colorScheme = colorScheme,
+                        isDarkMode = isDarkMode,
                         viewModel = viewModel,
                         onCancel = closeSheet,
                         onUninstall = { viewModel.dispatch(InstallerViewAction.Uninstall) }
@@ -413,11 +476,11 @@ fun MiuixInstallerPage(
                 }
 
                 is InstallerViewState.Uninstalling -> {
-                    UninstallingContent(viewModel = viewModel)
+                    UninstallingContent(colorScheme = colorScheme, viewModel = viewModel)
                 }
 
                 is InstallerViewState.UninstallSuccess -> {
-                    UninstallSuccessContent(viewModel = viewModel, onClose = closeSheet)
+                    UninstallSuccessContent(colorScheme = colorScheme, viewModel = viewModel, onClose = closeSheet)
                 }
 
                 is InstallerViewState.UninstallFailed -> {
@@ -430,6 +493,7 @@ fun MiuixInstallerPage(
 
                 is InstallerViewState.AnalyseFailed, is InstallerViewState.ResolveFailed -> {
                     NonInstallFailedContent(
+                        colorScheme = colorScheme,
                         error = installer.error,
                         onClose = closeSheet
                     )

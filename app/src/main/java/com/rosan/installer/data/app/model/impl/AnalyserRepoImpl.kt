@@ -58,8 +58,8 @@ object AnalyserRepoImpl : AnalyserRepo {
         // This loop processes every file/data source provided by the user.
         for (dataEntity in data) {
             // Determine the type of the current file (APK, APKS, etc.)
-            val fileType = getDataType(config, dataEntity)
-                ?: continue // If type is null for any reason, just skip to the next file.
+            val fileType = getDataType(config, dataEntity, extra)
+            // ?: continue // If type is null for any reason, just skip to the next file.
 
             // Instead of throwing an exception, just skip the invalid file.
             if (fileType == DataType.NONE) {
@@ -243,76 +243,81 @@ object AnalyserRepoImpl : AnalyserRepo {
     }
 
     /**
-     * Determines the data type of a given file.
+     * Determines the data type of a given file, respecting the global setting for module installation.
      * This method is now significantly simplified as it only needs to handle FileEntity.
      */
-    private fun getDataType(config: ConfigEntity, data: DataEntity): DataType? {
+    private fun getDataType(config: ConfigEntity, data: DataEntity, extra: AnalyseExtraEntity): DataType {
         val fileEntity = data as? DataEntity.FileEntity
-            ?: // This should not happen if the cache-first strategy is implemented correctly.
-            throw IllegalArgumentException("AnalyserRepoImpl expected a FileEntity, but got ${data::class.simpleName}")
+            ?: throw IllegalArgumentException("AnalyserRepoImpl expected a FileEntity, but got ${data::class.simpleName}")
 
         return try {
             ZipFile(fileEntity.path).use { zipFile ->
-                val hasModuleProp = zipFile.getEntry("module.prop") != null || zipFile.getEntry("common/module.prop") != null
+                // --- Check for module-related types ONLY if the feature is enabled.
+                if (extra.isModuleFlashEnabled) {
+                    val hasModuleProp = zipFile.getEntry("module.prop") != null || zipFile.getEntry("common/module.prop") != null
+                    if (hasModuleProp) {
+                        val hasAndroidManifest = zipFile.getEntry("AndroidManifest.xml") != null
+                        val hasApksInside =
+                            zipFile.entries().toList().any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }
+
+                        return@use when {
+                            hasAndroidManifest -> {
+                                Timber.d("Found module.prop and AndroidManifest.xml, it's a MIXED_MODULE_APK.")
+                                DataType.MIXED_MODULE_APK
+                            }
+
+                            hasApksInside -> {
+                                Timber.d("Found module.prop and internal APK(s), it's a MIXED_MODULE_ZIP.")
+                                DataType.MIXED_MODULE_ZIP
+                            }
+
+                            else -> {
+                                Timber.d("Found module.prop, it's a MODULE_ZIP.")
+                                DataType.MODULE_ZIP
+                            }
+                        }
+                    }
+                } else {
+                    // If module flashing is disabled, we will not even check for module.prop.
+                    // Any file containing it will be treated as a regular APK or ZIP file.
+                    Timber.d("Module flashing is disabled. Skipping module-specific checks.")
+                }
+
                 val hasAndroidManifest = zipFile.getEntry("AndroidManifest.xml") != null
+                if (hasAndroidManifest) {
+                    Timber.d("Found AndroidManifest.xml at root, it's an APK.")
+                    return@use DataType.APK
+                }
+
+                if (zipFile.getEntry("info.json") != null) {
+                    val isApkm = isGenuineApkmInfo(zipFile, zipFile.getEntry("info.json")!!)
+                    Timber.d("Found info.json at root, it's ${if (isApkm) "APKM" else "APKS"}.")
+                    return@use if (isApkm) DataType.APKM else DataType.APKS
+                }
+
+                if (zipFile.getEntry("manifest.json") != null) {
+                    Timber.d("Found manifest.json at root, it's an XAPK.")
+                    return@use DataType.XAPK
+                }
 
                 val entries = zipFile.entries().toList()
-                val hasApksInside = entries.any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }
-                // Give module detection the highest priority.
-                if (hasModuleProp) {
-                    return@use if (hasAndroidManifest) {
-                        Timber.d("Found module.prop and AndroidManifest.xml, it's a MIXED_MODULE_APK.")
-                        DataType.MIXED_MODULE_APK
-                    } else if (hasApksInside) {
-                        Timber.d("Found module.prop and internal APK(s), it's a MIXED_MODULE_ZIP.")
-                        DataType.MIXED_MODULE_ZIP
-                    } else {
-                        Timber.d("Found module.prop, it's a MODULE_ZIP.")
-                        DataType.MODULE_ZIP
-                    }
-                }
-                when {
-                    hasAndroidManifest -> {
-                        Timber.d("Found AndroidManifest.xml at root, it's an APK.")
-                        return@use DataType.APK
-                    }
 
-                    zipFile.getEntry("info.json") != null -> {
-                        val isApkm = isGenuineApkmInfo(zipFile, zipFile.getEntry("info.json")!!)
-                        Timber.d("Found info.json at root, it's ${if (isApkm) "APKM" else "APKS"}.")
-                        return@use if (isApkm) DataType.APKM else DataType.APKS
-                    }
-
-                    zipFile.getEntry("manifest.json") != null -> {
-                        Timber.d("Found manifest.json at root, it's an XAPK.")
-                        return@use DataType.XAPK
-                    }
-                }
-
-                // If no manifest file is found, check for APKS file structure.
                 var hasBaseApk = false
                 var hasSplitApk = false
                 for (entry in entries) {
                     if (entry.isDirectory || !entry.name.endsWith(".apk", ignoreCase = true)) continue
-                    // Check only the filename, ignoring the path.
                     val entryName = File(entry.name).name
-                    // The base APK could be base.apk, base-master.apk, etc.
                     if (entryName == "base.apk" || entryName.startsWith("base-master"))
                         hasBaseApk = true
                     else
-                    // Any other APK file found alongside a base APK implies it's a split.
                         hasSplitApk = true
-
-                    // Exit early if both conditions are met.
                     if (hasBaseApk && hasSplitApk) break
                 }
-
                 if (hasBaseApk && hasSplitApk) {
                     Timber.d("Detected APKS structure without a manifest.")
                     return@use DataType.APKS
                 }
 
-                // Finally, check if it's a generic ZIP containing any APK files.
                 if (entries.any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }) {
                     Timber.d("Detected as a generic ZIP with APKs (MULTI_APK_ZIP).")
                     return@use DataType.MULTI_APK_ZIP
@@ -322,15 +327,11 @@ object AnalyserRepoImpl : AnalyserRepo {
                 return@use DataType.NONE
             }
         } catch (e: ZipException) {
-            // CATCH: This is a malformed ZIP file.
-            // Assume it's a problematic APK and try to process it as such.
             Timber.w(e, "File is a malformed zip, but assuming it is APK for compatibility: ${fileEntity.path}")
             DataType.APK
         } catch (e: IOException) {
-            // CATCH for other IO errors: Though ActionHandler should prevent EACCES from reaching here,
-            // this serves as a final safety net for other potential IO issues.
             Timber.e(e, "Unexpected IO error while reading zip file, marking as unsupported: ${fileEntity.path}")
-            DataType.NONE // Mark it as an unsupported type.
+            DataType.NONE
         }
     }
 

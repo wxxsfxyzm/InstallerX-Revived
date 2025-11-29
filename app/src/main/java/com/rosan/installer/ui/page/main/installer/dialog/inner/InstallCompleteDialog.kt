@@ -58,7 +58,7 @@ fun installCompletedDialog(
         title = DialogInnerParams(
             DialogParamsType.InstallerInstallCompleted.id
         ) {
-            Text(stringResource(R.string.installer_install_success))
+            Text(stringResource(R.string.installer_install_complete))
         },
         subtitle = DialogInnerParams(
             DialogParamsType.InstallerInstallCompleted.id

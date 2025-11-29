@@ -269,6 +269,18 @@ fun NewThemeSettingsPage(
                                     }
                                 )
                             }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && state.showLiveActivity)
+                                add {
+                                    SwitchWidget(
+                                        icon = Icons.TwoTone.Colorize,
+                                        title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
+                                        description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
+                                        checked = state.useDynColorFollowPkgIconForLiveActivity,
+                                        onCheckedChange = {
+                                            viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity(it))
+                                        }
+                                    )
+                                }
                         }
                     )
                 }
@@ -276,9 +288,11 @@ fun NewThemeSettingsPage(
 
             if (!state.showMiuixUI) {
                 item {
+                    // Define the visibility logic based on Android version and the dynamic color switch state
+                    val showColorGrid = !state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+
                     AnimatedVisibility(
-                        // Define the visibility logic based on Android version and the dynamic color switch state
-                        visible = !state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S,
+                        visible = showColorGrid,
                         enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
                                 expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
                         exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
@@ -287,15 +301,17 @@ fun NewThemeSettingsPage(
                         SplicedColumnGroup(
                             title = stringResource(R.string.theme_settings_theme_color),
                             content =
-                                listOf {
-                                    BoxWithConstraints(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 12.dp, vertical = 16.dp)
-                                    ) {
-                                        val itemMinWidth = 88.dp
+                                buildList {
+                                    add(
+                                        @Composable {
+                                            BoxWithConstraints(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 12.dp, vertical = 16.dp)
+                                            ) {
+                                                val itemMinWidth = 88.dp
 
-                                        val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
+                                                val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
 
                                         val chunkedColors: List<List<Any>> = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                                             var wallpaperColors by remember { mutableStateOf<List<Int>?>(null) }
@@ -327,7 +343,11 @@ fun NewThemeSettingsPage(
                                                                     currentStyle = state.paletteStyle,
                                                                     isSelected = !state.useDynamicColor && state.seedColor == namedColor.color
                                                                 ) {
-                                                                    viewModel.dispatch(PreferredViewAction.SetSeedColor(namedColor.color))
+                                                                    viewModel.dispatch(
+                                                                        PreferredViewAction.SetSeedColor(
+                                                                            namedColor.color
+                                                                        )
+                                                                    )
                                                                 }
                                                             } else if (namedColor is Int) {
                                                                 val rawColor = RawColor(namedColor.toHexString(), Color(namedColor))
@@ -336,22 +356,27 @@ fun NewThemeSettingsPage(
                                                                     currentStyle = state.paletteStyle,
                                                                     isSelected = state.seedColor == rawColor.color
                                                                 ) {
-                                                                    viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
+                                                                    viewModel.dispatch(
+                                                                        PreferredViewAction.SetSeedColor(
+                                                                            rawColor.color
+                                                                        )
+                                                                    )
                                                                 }
                                                             }
                                                         }
                                                     }
 
-                                                    val remaining = columns - rowItems.size
-                                                    if (remaining > 0) {
-                                                        repeat(remaining) {
-                                                            Spacer(Modifier.weight(1f))
+                                                            val remaining = columns - rowItems.size
+                                                            if (remaining > 0) {
+                                                                repeat(remaining) {
+                                                                    Spacer(Modifier.weight(1f))
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
-                                        }
-                                    }
+                                        })
                                 }
                         )
                     }
@@ -401,6 +426,7 @@ fun NewThemeSettingsPage(
                     }
                 )
             }
+            item { Spacer(modifier = Modifier.height(12.dp)) }
         }
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.Manufacturer
@@ -50,8 +51,6 @@ import com.rosan.installer.ui.page.main.widget.dialog.UninstallConfirmationDialo
 import kotlinx.coroutines.delay
 import timber.log.Timber
 import kotlin.reflect.KClass
-
-// Assume errorText is accessible
 
 @Composable
 fun installFailedDialog( // 小写开头
@@ -88,7 +87,7 @@ fun installFailedDialog( // 小写开头
                 ErrorTextBlock(
                     installer.error,
                     suggestions = {
-                        if (viewModel.showSmartSuggestion)
+                        if (viewModel.viewSettings.showSmartSuggestion)
                             ErrorSuggestions(
                                 error = installer.error,
                                 viewModel = viewModel,
@@ -123,6 +122,8 @@ private fun ErrorSuggestions(
     val context = LocalContext.current
     var showUninstallConfirmDialog by remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
+
+    val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
     class SuggestionChipInfo(
         vararg val errorClasses: KClass<out Throwable>,
@@ -201,19 +202,34 @@ private fun ErrorSuggestions(
                     )
                 )
             }
-            add(
-                SuggestionChipInfo(
-                    InstallFailedHyperOSIsolationViolationException::class,
-                    selected = { true }, // This is an action, not a state toggle.
-                    onClick = {
-                        installer.config.installer = "com.miui.packageinstaller"
-                        viewModel.toast("可在设置中配置一个有效的安装来源")
-                        viewModel.dispatch(InstallerViewAction.Install)
-                    },
-                    labelRes = R.string.suggestion_mi_isolation,
-                    icon = AppIcons.InstallSource
+            if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku)
+                add(
+                    SuggestionChipInfo(
+                        InstallFailedHyperOSIsolationViolationException::class,
+                        selected = { true },
+                        onClick = {
+                            installer.config.installer = "com.miui.packageinstaller"
+                            // viewModel.toast("可在设置中配置一个有效的安装来源")
+                            viewModel.dispatch(InstallerViewAction.Install)
+                        },
+                        labelRes = R.string.suggestion_mi_isolation,
+                        icon = AppIcons.InstallSource
+                    )
                 )
-            )
+            else
+                add(
+                    SuggestionChipInfo(
+                        InstallFailedHyperOSIsolationViolationException::class,
+                        selected = { true },
+                        onClick = {
+                            installer.config.installer = "com.miui.packageinstaller"
+                            installer.config.authorizer = ConfigEntity.Authorizer.Shizuku
+                            viewModel.dispatch(InstallerViewAction.Install)
+                        },
+                        labelRes = R.string.suggestion_shizuku_isolation,
+                        icon = shizukuIcon
+                    )
+                )
             add(
                 SuggestionChipInfo(
                     InstallFailedUserRestrictedException::class,

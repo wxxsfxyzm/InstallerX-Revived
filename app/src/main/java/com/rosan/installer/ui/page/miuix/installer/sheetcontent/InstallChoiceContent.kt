@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,12 +47,15 @@ import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun InstallChoiceContent(
+    colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     installer: InstallerRepo,
     viewModel: InstallerViewModel,
     onCancel: () -> Unit
@@ -84,11 +87,12 @@ fun InstallChoiceContent(
         if (isMixedModuleZip && selectionMode == MmzSelectionMode.INITIAL_CHOICE) {
             Box(modifier = Modifier.weight(1f, fill = false)) {
                 MixedModuleZip_InitialChoice(
+                    colorScheme = colorScheme,
+                    isDarkMode = isDarkMode,
                     analysisResults = analysisResults,
                     viewModel = viewModel,
-                    onSelectModule = { viewModel.dispatch(InstallerViewAction.InstallPrepare) },
-                    onSelectApk = { selectionMode = MmzSelectionMode.APK_CHOICE }
-                )
+                    onSelectModule = { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
+                ) { selectionMode = MmzSelectionMode.APK_CHOICE }
             }
         } else {
             val resultsForList = if (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE) {
@@ -105,6 +109,8 @@ fun InstallChoiceContent(
 
             Box(modifier = Modifier.weight(1f, fill = false)) {
                 ChoiceLazyList(
+                    colorScheme = colorScheme,
+                    isDarkMode = isDarkMode,
                     analysisResults = resultsForList,
                     viewModel = viewModel,
                     isModuleApk = isModuleApk,
@@ -160,12 +166,15 @@ fun InstallChoiceContent(
 
 @Composable
 private fun ChoiceLazyList(
+    colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     analysisResults: List<PackageAnalysisResult>,
     viewModel: InstallerViewModel,
     isModuleApk: Boolean,
     isMultiApk: Boolean
 ) {
-    val cardColor = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White
+    val cardColor = if (isDynamicColor) colorScheme.surfaceContainer else
+        if (isDarkMode) miuixSheetCardColorDark else Color.White
 
     if (isModuleApk) {
         val allSelectableEntities = analysisResults.flatMap { it.appEntities }
@@ -443,12 +452,15 @@ private fun ChoiceLazyList(
 
 @Composable
 private fun MixedModuleZip_InitialChoice(
+    colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     analysisResults: List<PackageAnalysisResult>,
     viewModel: InstallerViewModel,
     onSelectModule: () -> Unit,
     onSelectApk: () -> Unit
 ) {
-    val cardColor = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White
+    val cardColor = if (isDynamicColor) colorScheme.surfaceContainer else
+        if (isDarkMode) miuixSheetCardColorDark else Color.White
 
     val allSelectableEntities = analysisResults.flatMap { it.appEntities }
     val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }

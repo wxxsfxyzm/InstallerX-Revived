@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -28,6 +30,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.miuix.widgets.MiuixAutoClearNotificationTimeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAuthorizerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
@@ -35,12 +38,18 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixIntNumberPickerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixManagedPackagesWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixManagedUidsWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -51,10 +60,25 @@ fun MiuixInstallerGlobalSettingsPage(
 ) {
     val state = viewModel.state
     val scrollBehavior = MiuixScrollBehavior()
+    val hazeState = remember { HazeState() }
+    val hazeStyle = HazeStyle(
+        backgroundColor = MiuixTheme.colorScheme.surface,
+        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
+    )
+
+    val isDialogMode = state.installMode == ConfigEntity.InstallMode.Dialog ||
+            state.installMode == ConfigEntity.InstallMode.AutoDialog
+    val isNotificationMode = state.installMode == ConfigEntity.InstallMode.Notification ||
+            state.installMode == ConfigEntity.InstallMode.AutoNotification
 
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.hazeEffect(hazeState) {
+                    style = hazeStyle
+                    blurRadius = 30.dp
+                    noiseFactor = 0f
+                },
                 title = stringResource(R.string.installer_settings),
                 navigationIcon = {
                     MiuixBackButton(modifier = Modifier.padding(start = 16.dp), onClick = { navController.navigateUp() })
@@ -66,6 +90,7 @@ fun MiuixInstallerGlobalSettingsPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .hazeSource(hazeState)
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -84,40 +109,57 @@ fun MiuixInstallerGlobalSettingsPage(
                         currentAuthorizer = state.authorizer,
                         changeAuthorizer = { newAuthorizer ->
                             viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(newAuthorizer))
-                        },
-                        trailingContent = {
-                            AnimatedVisibility(
-                                visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
+                        }
+                    ) {
+                        AnimatedVisibility(
+                            visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            MiuixIntNumberPickerWidget(
+                                title = stringResource(R.string.set_countdown),
+                                description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
+                                value = state.dhizukuAutoCloseCountDown,
+                                startInt = 1,
+                                endInt = 10
                             ) {
-                                MiuixIntNumberPickerWidget(
-                                    title = stringResource(R.string.set_countdown),
-                                    description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                                    value = state.dhizukuAutoCloseCountDown,
-                                    startInt = 1,
-                                    endInt = 10
-                                ) {
-                                    viewModel.dispatch(
-                                        PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
-                                    )
-                                }
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
+                                )
                             }
                         }
-                    )
+                    }
                     MiuixDataInstallModeWidget(
                         currentInstallMode = state.installMode,
                         changeInstallMode = { newMode ->
                             viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(newMode))
                         }
-                    )
+                    ) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.theme_settings_use_live_activity),
+                                description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                                checked = state.showLiveActivity,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeShowLiveActivity(it)
+                                    )
+                                }
+                            )
+                        MiuixAutoClearNotificationTimeWidget(
+                            currentValue = state.notificationSuccessAutoClearSeconds,
+                            onValueChange = { seconds ->
+                                viewModel.dispatch(
+                                    PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(
+                                        seconds
+                                    )
+                                )
+                            }
+                        )
+                    }
                 }
             }
 
-            val isDialogMode = state.installMode == ConfigEntity.InstallMode.Dialog ||
-                    state.installMode == ConfigEntity.InstallMode.AutoDialog
-            val isNotificationMode = state.installMode == ConfigEntity.InstallMode.Notification ||
-                    state.installMode == ConfigEntity.InstallMode.AutoNotification
             item {
                 AnimatedContent(
                     targetState = if (isDialogMode) {
@@ -179,23 +221,6 @@ fun MiuixInstallerGlobalSettingsPage(
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
-                                )
-                            }
-                        )
-                    }
-
-                    AnimatedVisibility(
-                        visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.theme_settings_use_live_activity),
-                            description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                            checked = state.showLiveActivity,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowLiveActivity(it)
                                 )
                             }
                         )
@@ -363,6 +388,7 @@ fun MiuixInstallerGlobalSettingsPage(
                     }
                 }
             }
+            item { Spacer(Modifier.height(12.dp)) }
         }
     }
 }

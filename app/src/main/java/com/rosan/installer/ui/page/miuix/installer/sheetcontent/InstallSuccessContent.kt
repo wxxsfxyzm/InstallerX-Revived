@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -29,6 +30,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun InstallSuccessContent(
+    colorScheme: ColorScheme,
     baseEntity: AppEntity.BaseEntity?,
     installer: InstallerRepo,
     appIcon: Drawable?,

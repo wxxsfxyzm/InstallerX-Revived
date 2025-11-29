@@ -32,6 +32,7 @@ import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
 import com.rosan.installer.data.app.model.impl.ModuleInstallerRepoImpl
+import com.rosan.installer.data.app.util.IconColorExtractor
 import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
@@ -51,6 +52,9 @@ import com.rosan.installer.util.isSystemInstaller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -82,6 +86,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val context by inject<Context>()
     private val reflect by inject<ReflectRepo>()
     private val appDataStore by inject<AppDataStore>()
+    private val iconColorExtractor by inject<IconColorExtractor>()
     private val cacheParcelFileDescriptors = mutableListOf<ParcelFileDescriptor>()
     private val cacheDirectory = "${context.externalCacheDir?.absolutePath}/${installer.id}".apply {
         File(this).mkdirs()
@@ -210,7 +215,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun analyse() {
         Timber.d("[id=${installer.id}] analyse: Starting. Emitting ProgressEntity.Analysing.")
         installer.progress.emit(ProgressEntity.InstallAnalysing)
-        val analysisResults = runCatching {
+        val initialAnalysisResults = runCatching {
             analyseEntities(installer.data)
         }.getOrElse {
             Timber.e(it, "[id=${installer.id}] analyse: Failed.")
@@ -218,25 +223,50 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             installer.progress.emit(ProgressEntity.InstallAnalysedFailed)
             return
         }
-        // --- Add a check here for empty results. ---
-        if (analysisResults.isEmpty()) {
+        if (initialAnalysisResults.isEmpty()) {
             Timber.w("[id=${installer.id}] analyse: Analysis resulted in an empty list. No valid apps found.")
             installer.error = AnalyseFailedAllFilesUnsupportedException("No valid files were found in the selection.")
             installer.progress.emit(ProgressEntity.InstallAnalysedFailed)
             return
         }
 
-        // --- REFACTORED LOGIC ---
-        // The complex logic for deduplication and optimal split selection has been moved to AnalyserRepoImpl.
-        // This method now receives a complete, UI-ready result.
-        // Its only job is to commit this result to the repository's state.
+        // --- Start of Color Extraction logic ---
+        val useDynamicColor = appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+        val useDynamicColorForLiveActivity =
+            appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+        val preferSystemIcon = appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first()
 
-        // 1. Store the final, complete result in the repository. This is now the single source of truth.
-        installer.analysisResults = analysisResults
+        val finalAnalysisResults = if (useDynamicColor || useDynamicColorForLiveActivity) {
+            Timber.d("[id=${installer.id}] analyse: Dynamic color is enabled. Extracting colors from icons.")
+            coroutineScope {
+                initialAnalysisResults.map { result ->
+                    async {
+                        val entityToInstall = result.appEntities
+                            .map { it.app }
+                            .filterIsInstance<AppEntity.BaseEntity>()
+                            .firstOrNull()
 
-        // 2. Perform final checks based on the result.
+                        val color = iconColorExtractor.extractColorFromApp(
+                            sessionId = installer.id,
+                            packageName = result.packageName,
+                            entityToInstall = entityToInstall,
+                            preferSystemIcon = preferSystemIcon
+                        )
+                        result.copy(seedColor = color)
+                    }
+                }.awaitAll()
+            }
+        } else {
+            Timber.d("[id=${installer.id}] analyse: Dynamic color is disabled. Skipping color extraction.")
+            initialAnalysisResults
+        }
+
+        // Store the final, complete result in the repository. This is now the single source of truth.
+        installer.analysisResults = finalAnalysisResults
+
+        // Perform final checks based on the result.
         // Get the containerType from the first entity in the result to check the session type.
-        val containerType = analysisResults.firstOrNull()
+        val containerType = finalAnalysisResults.firstOrNull()
             ?.appEntities?.firstOrNull()
             ?.app?.containerType
 
@@ -448,12 +478,23 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) packageInfo.longVersionCode else packageInfo.versionCode.toLong()
             val appIcon = pm.getApplicationIcon(packageName)
 
+            val useDynamicColor = appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+            val seedColor = if (useDynamicColor) {
+                Timber.d("[id=${installer.id}] resolveUninstall: Dynamic color enabled, extracting color.")
+                // We can reuse the same extractor. The parameters for uninstall are simpler.
+                iconColorExtractor.extractColorFromDrawable(appIcon)
+            } else {
+                Timber.d("[id=${installer.id}] resolveUninstall: Dynamic color disabled.")
+                null
+            }
+
             val uninstallDetails = UninstallInfo(
                 packageName = packageName,
                 appLabel = appLabel,
                 versionName = versionName,
                 versionCode = versionCode,
-                appIcon = appIcon
+                appIcon = appIcon,
+                seedColor = seedColor
             )
 
             // Update the repo with the fetched information
@@ -957,8 +998,19 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         })
     }
 
-    private suspend fun analyseEntities(data: List<DataEntity>): List<PackageAnalysisResult> =
-        AnalyserRepoImpl.doWork(installer.config, data, AnalyseExtraEntity(cacheDirectory))
+    private suspend fun analyseEntities(data: List<DataEntity>): List<PackageAnalysisResult> {
+        val isModuleFlashEnabled = appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false).first()
+        Timber.d("[id=${installer.id}] Module flashing enabled: $isModuleFlashEnabled")
+
+        return AnalyserRepoImpl.doWork(
+            config = installer.config,
+            data = data,
+            extra = AnalyseExtraEntity(
+                cacheDirectory = cacheDirectory,
+                isModuleFlashEnabled = isModuleFlashEnabled
+            )
+        )
+    }
 
     private suspend fun installEntities(
         config: ConfigEntity,

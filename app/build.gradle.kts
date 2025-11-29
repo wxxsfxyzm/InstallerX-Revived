@@ -1,4 +1,3 @@
-import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
@@ -14,11 +13,22 @@ plugins {
 
 android {
     compileSdk = 36
-    // 加载 keystore.properties
+
+    val properties = Properties()
     val keystorePropertiesFile = rootProject.file("keystore.properties")
-    val keystoreProps = Properties().apply {
-        load(FileInputStream(keystorePropertiesFile))
+    if (keystorePropertiesFile.exists()) {
+        try {
+            properties.load(keystorePropertiesFile.inputStream())
+        } catch (e: Exception) {
+            println("Warning: Could not load keystore.properties file: ${e.message}")
+        }
     }
+    val storeFile = properties.getProperty("storeFile") ?: System.getenv("KEYSTORE_FILE")
+    val storePassword = properties.getProperty("storePassword") ?: System.getenv("KEYSTORE_PASSWORD")
+    val keyAlias = properties.getProperty("keyAlias") ?: System.getenv("KEY_ALIAS")
+    val keyPassword = properties.getProperty("keyPassword") ?: System.getenv("KEY_PASSWORD")
+    val hasCustomSigning = storeFile != null && storePassword != null && keyAlias != null && keyPassword != null
+
     defaultConfig {
         // 你如果根据InstallerX的源码进行打包成apk或其他安装包格式
         // 请换一个applicationId，不要和官方的任何发布版本产生冲突。
@@ -48,28 +58,30 @@ android {
     }
 
     signingConfigs {
-        getByName("debug") {
-            keyAlias = keystoreProps.getProperty("keyAlias")
-            keyPassword = keystoreProps.getProperty("keyPassword")
-            storeFile = rootProject.file(keystoreProps["storeFile"] as String)
-            storePassword = keystoreProps.getProperty("storePassword")
-            enableV1Signing = true
-            enableV2Signing = true
-        }
-
-        create("release") {
-            keyAlias = keystoreProps.getProperty("keyAlias")
-            keyPassword = keystoreProps.getProperty("keyPassword")
-            storeFile = rootProject.file(keystoreProps["storeFile"] as String)
-            storePassword = keystoreProps.getProperty("storePassword")
-            enableV1Signing = true
-            enableV2Signing = true
+        if (hasCustomSigning) {
+            register("releaseCustom") {
+                this.storeFile = rootProject.file(storeFile)
+                this.storePassword = storePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = false
+            }
         }
     }
 
     buildTypes {
         getByName("debug") {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig =
+                if (hasCustomSigning) {
+                    println("Applying 'releaseCustom' signing to debug build.")
+                    signingConfigs.getByName("releaseCustom")
+                } else {
+                    println("No custom signing info. Debug build will use the default debug keystore.")
+                    signingConfigs.getByName("debug")
+                }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -78,7 +90,14 @@ android {
         }
 
         getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig =
+                if (hasCustomSigning) {
+                    println("Applying 'releaseCustom' signing to release build.")
+                    signingConfigs.getByName("releaseCustom")
+                } else {
+                    println("No custom signing info. Debug build will use the default debug keystore.")
+                    signingConfigs.getByName("debug")
+                }
             isShrinkResources = true
             isMinifyEnabled = true
             proguardFiles(
@@ -239,6 +258,8 @@ dependencies {
 
     // miuix
     implementation(libs.miuix)
+    implementation(libs.haze)
+    implementation(libs.haze.materials)
     implementation(libs.capsule)
 
     // m3color

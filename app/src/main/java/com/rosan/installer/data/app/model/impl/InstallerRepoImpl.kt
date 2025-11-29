@@ -9,6 +9,7 @@ import com.rosan.installer.data.app.model.impl.installer.ProcessInstallerRepoImp
 import com.rosan.installer.data.app.model.impl.installer.ShizukuInstallerRepoImpl
 import com.rosan.installer.data.app.model.impl.installer.SystemInstallerRepoImpl
 import com.rosan.installer.data.app.repo.InstallerRepo
+import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -36,7 +37,17 @@ object InstallerRepoImpl : InstallerRepo, KoinComponent {
             config.authorizer == ConfigEntity.Authorizer.None -> NoneInstallerRepoImpl
             else -> ProcessInstallerRepoImpl
         }
-        repo.doInstallWork(config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
+        try {
+            repo.doInstallWork(config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
+        } catch (e: IllegalStateException) {
+            // Check if the exception is the specific one from Shizuku a runtime connection failure.
+            if (repo is ShizukuInstallerRepoImpl && e.message?.contains("binder haven't been received") == true) {
+                // If it is, wrap it in our custom ShizukuNotWorkException to provide better context.
+                throw ShizukuNotWorkException("Shizuku service connection lost during operation.", e)
+            }
+            // Re-throw any other IllegalStateException that we are not specifically handling.
+            throw e
+        }
     }
 
     override suspend fun doUninstallWork(
@@ -52,6 +63,13 @@ object InstallerRepoImpl : InstallerRepo, KoinComponent {
             config.authorizer == ConfigEntity.Authorizer.None -> NoneInstallerRepoImpl
             else -> ProcessInstallerRepoImpl
         }
-        repo.doUninstallWork(config, packageName, extra)
+        try {
+            repo.doUninstallWork(config, packageName, extra)
+        } catch (e: IllegalStateException) {
+            if (repo is ShizukuInstallerRepoImpl && e.message?.contains("binder haven't been received") == true) {
+                throw ShizukuNotWorkException("Shizuku service connection lost during operation.", e)
+            }
+            throw e
+        }
     }
 }

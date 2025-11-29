@@ -67,7 +67,14 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
             if (state.showMiuixUI) {
-                InstallerMiuixTheme {
+                InstallerMiuixTheme(
+                    darkTheme = useDarkTheme,
+                    themeMode = state.themeMode,
+                    useDynamicColor = state.useDynamicColor,
+                    useMiuixMonet = state.useMiuixMonet,
+                    compatStatusBarColor = true,
+                    seedColor = state.seedColor
+                ) {
                     MiuixSurface(modifier = Modifier.fillMaxSize()) {
                         MiuixSettingsPage(preferredViewModel)
                     }

@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,9 +30,12 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun UninstallPrepareContent(
+    colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     viewModel: InstallerViewModel,
     onCancel: () -> Unit,
     onUninstall: () -> Unit
@@ -67,7 +70,8 @@ fun UninstallPrepareContent(
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
             colors = CardColors(
-                color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
+                color = if (isDynamicColor) colorScheme.surfaceContainer else
+                    if (isDarkMode) miuixSheetCardColorDark else Color.White,
                 contentColor = MiuixTheme.colorScheme.onSurface
             )
         ) {

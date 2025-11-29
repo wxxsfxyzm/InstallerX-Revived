@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,6 +24,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun UninstallSuccessContent(
+    colorScheme: ColorScheme,
     viewModel: InstallerViewModel,
     onClose: () -> Unit
 ) {

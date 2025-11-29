@@ -33,19 +33,30 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationS
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
+@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun MiuixPreferredPage(
     navController: NavController,
     viewModel: PreferredViewModel = koinViewModel(),
-    scrollBehavior: ScrollBehavior,
-    paddingValues: PaddingValues
+    hazeState: HazeState,
+    title: String,
+    outerPadding: PaddingValues
 ) {
     val state = viewModel.state
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -61,97 +72,121 @@ fun MiuixPreferredPage(
         Level.PREVIEW -> stringResource(id = R.string.preview)
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
     }
+    val scrollBehavior = MiuixScrollBehavior()
+    val hazeStyle = HazeStyle(
+        backgroundColor = MiuixTheme.colorScheme.surface,
+        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(alpha = 0.8f))
+    )
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .scrollEndHaptic()
-            .overScrollVertical()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentPadding = paddingValues,
-        overscrollEffect = null
-    ) {
-        item { Spacer(modifier = Modifier.size(12.dp)) }
-        item { SmallTitle(stringResource(R.string.global)) }
-        item {
-            Card(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
-            ) {
-                MiuixNavigationItemWidget(
-                    icon = AppIcons.Theme,
-                    title = stringResource(R.string.theme_settings),
-                    description = stringResource(R.string.theme_settings_desc),
-                    onClick = {
-                        navController.navigate(MiuixSettingsScreen.MiuixTheme.route)
-                    }
-                )
-                MiuixNavigationItemWidget(
-                    icon = AppIcons.InstallMode,
-                    title = stringResource(R.string.installer_settings),
-                    description = stringResource(R.string.installer_settings_desc),
-                    onClick = {
-                        navController.navigate(MiuixSettingsScreen.MiuixInstallerGlobal.route)
-                    }
-                )
-            }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                modifier = Modifier.hazeEffect(hazeState) {
+                    style = hazeStyle
+                    blurRadius = 30.dp
+                    noiseFactor = 0f
+                },
+                title = title,
+                scrollBehavior = scrollBehavior
+            )
         }
-        if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) item { MiuixSettingsTipCard(stringResource(R.string.config_authorizer_none_tips)) }
-        item { SmallTitle(stringResource(R.string.basic)) }
-        item {
-            Card(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
-            ) {
-                MiuixDisableAdbVerify(
-                    checked = !state.adbVerifyEnabled,
-                    isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                    enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
-                            state.authorizer != ConfigEntity.Authorizer.None,
-                    onCheckedChange = { isDisabled ->
-                        viewModel.dispatch(
-                            PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
-                        )
-                    }
-                )
-                MiuixIgnoreBatteryOptimizationSetting(
-                    checked = state.isIgnoringBatteryOptimizations,
-                    enabled = !state.isIgnoringBatteryOptimizations,
-                ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
-                MiuixAutoLockInstaller(
-                    checked = state.autoLockInstaller,
-                    enabled = state.authorizer != ConfigEntity.Authorizer.None,
-                ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
-                MiuixDefaultInstaller(
-                    lock = true,
-                    enabled = state.authorizer != ConfigEntity.Authorizer.None,
-                ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
-                MiuixDefaultInstaller(
-                    lock = false,
-                    enabled = state.authorizer != ConfigEntity.Authorizer.None,
-                ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
-                MiuixClearCache()
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .hazeSource(hazeState)
+                .scrollEndHaptic()
+                .overScrollVertical()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = outerPadding.calculateBottomPadding()
+            ),
+            overscrollEffect = null
+        ) {
+            item { Spacer(modifier = Modifier.size(12.dp)) }
+            item { SmallTitle(stringResource(R.string.global)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixNavigationItemWidget(
+                        icon = AppIcons.Theme,
+                        title = stringResource(R.string.theme_settings),
+                        description = stringResource(R.string.theme_settings_desc),
+                        onClick = {
+                            navController.navigate(MiuixSettingsScreen.MiuixTheme.route)
+                        }
+                    )
+                    MiuixNavigationItemWidget(
+                        icon = AppIcons.InstallMode,
+                        title = stringResource(R.string.installer_settings),
+                        description = stringResource(R.string.installer_settings_desc),
+                        onClick = {
+                            navController.navigate(MiuixSettingsScreen.MiuixInstallerGlobal.route)
+                        }
+                    )
+                }
             }
-        }
-        item { SmallTitle(stringResource(R.string.other)) }
-        item {
-            Card(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
-            ) {
-                MiuixSettingsAboutItemWidget(
-                    headlineContentText = stringResource(R.string.lab),
-                    supportingContentText = stringResource(R.string.lab_desc),
-                    onClick = { navController.navigate(SettingsScreen.Lab.route) }
-                )
-                MiuixSettingsAboutItemWidget(
-                    headlineContentText = stringResource(R.string.about_detail),
-                    supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
-                    onClick = { navController.navigate(MiuixSettingsScreen.MiuixAbout.route) }
-                )
+            if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) item { MiuixSettingsTipCard(stringResource(R.string.config_authorizer_none_tips)) }
+            item { SmallTitle(stringResource(R.string.basic)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixDisableAdbVerify(
+                        checked = !state.adbVerifyEnabled,
+                        isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                        enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
+                                state.authorizer != ConfigEntity.Authorizer.None,
+                        onCheckedChange = { isDisabled ->
+                            viewModel.dispatch(
+                                PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
+                            )
+                        }
+                    )
+                    MiuixIgnoreBatteryOptimizationSetting(
+                        checked = state.isIgnoringBatteryOptimizations,
+                        enabled = !state.isIgnoringBatteryOptimizations,
+                    ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
+                    MiuixAutoLockInstaller(
+                        checked = state.autoLockInstaller,
+                        enabled = state.authorizer != ConfigEntity.Authorizer.None,
+                    ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
+                    MiuixDefaultInstaller(
+                        lock = true,
+                        enabled = state.authorizer != ConfigEntity.Authorizer.None,
+                    ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
+                    MiuixDefaultInstaller(
+                        lock = false,
+                        enabled = state.authorizer != ConfigEntity.Authorizer.None,
+                    ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
+                    MiuixClearCache()
+                }
+            }
+            item { SmallTitle(stringResource(R.string.other)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixSettingsAboutItemWidget(
+                        headlineContentText = stringResource(R.string.lab),
+                        supportingContentText = stringResource(R.string.lab_desc),
+                        onClick = { navController.navigate(SettingsScreen.Lab.route) }
+                    )
+                    MiuixSettingsAboutItemWidget(
+                        headlineContentText = stringResource(R.string.about_detail),
+                        supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
+                        onClick = { navController.navigate(MiuixSettingsScreen.MiuixAbout.route) }
+                    )
+                }
             }
         }
     }

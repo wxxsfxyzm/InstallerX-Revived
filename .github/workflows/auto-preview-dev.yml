@@ -5,6 +5,7 @@ on:
   push:
     branches-ignore:
       - 'main'
+      - 'weblate-dev'
 
 jobs:
   build_and_upload_artifact:

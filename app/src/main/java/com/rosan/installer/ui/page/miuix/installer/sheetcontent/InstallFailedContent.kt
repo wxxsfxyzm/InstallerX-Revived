@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +58,7 @@ import kotlin.reflect.KClass
 
 @Composable
 fun InstallFailedContent(
+    colorScheme: ColorScheme,
     baseEntity: AppEntity.BaseEntity?,
     appIcon: Drawable?,
     installer: InstallerRepo,
@@ -180,18 +182,32 @@ private fun MiuixErrorSuggestions(
                     )
                 )
             }
-            add(
-                SuggestionItem(
-                    errorClasses = listOf(InstallFailedHyperOSIsolationViolationException::class),
-                    onClick = {
-                        installer.config.installer = "com.miui.packageinstaller"
-                        viewModel.toast("可在设置中配置一个有效的安装来源")
-                        viewModel.dispatch(InstallerViewAction.Install)
-                    },
-                    labelRes = R.string.suggestion_mi_isolation,
-                    descriptionRes = R.string.suggestion_mi_isolation_desc
+            if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku)
+                add(
+                    SuggestionItem(
+                        errorClasses = listOf(InstallFailedHyperOSIsolationViolationException::class),
+                        onClick = {
+                            installer.config.installer = "com.miui.packageinstaller"
+                            // viewModel.toast("可在设置中配置一个有效的安装来源")
+                            viewModel.dispatch(InstallerViewAction.Install)
+                        },
+                        labelRes = R.string.suggestion_mi_isolation,
+                        descriptionRes = R.string.suggestion_mi_isolation_desc
+                    )
                 )
-            )
+            else
+                add(
+                    SuggestionItem(
+                        errorClasses = listOf(InstallFailedHyperOSIsolationViolationException::class),
+                        onClick = {
+                            installer.config.installer = "com.miui.packageinstaller"
+                            installer.config.authorizer = ConfigEntity.Authorizer.Shizuku
+                            viewModel.dispatch(InstallerViewAction.Install)
+                        },
+                        labelRes = R.string.suggestion_shizuku_isolation,
+                        descriptionRes = R.string.suggestion_shizuku_isolation_desc
+                    )
+                )
             add(
                 SuggestionItem(
                     errorClasses = listOf(InstallFailedUserRestrictedException::class),

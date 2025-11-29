@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.miuix.widgets
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,10 +12,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -143,9 +142,8 @@ fun MiuixErrorTextBlock(
     error: Throwable,
     modifier: Modifier = Modifier
 ) {
-    val isDark = isSystemInDarkTheme()
-    val cardBackgroundColor = if (isDark) Color(0xCC8C2323) else Color(0xCCFBEAEA)
-    val errorColor = if (isDark) Color.White else Color(0xFF601A15)
+    val cardBackgroundColor = MiuixTheme.colorScheme.errorContainer// if (isDark) Color(0xCC8C2323) else Color(0xCCFBEAEA)
+    val errorColor = MiuixTheme.colorScheme.error//if (isDark) Color.White else Color(0xFF601A15)
 
     Card(
         modifier = modifier,
@@ -167,7 +165,8 @@ fun MiuixErrorTextBlock(
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.outline
             )
 
             val textToShow = if (RsConfig.isDebug) {

@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -55,6 +57,7 @@ import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.m3color.PresetColors
 import com.rosan.installer.ui.theme.m3color.RawColor
 import com.rosan.installer.ui.theme.m3color.ThemeMode
+import com.rosan.installer.ui.theme.none
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,6 +105,7 @@ fun LegacyThemeSettingsPage(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.theme_settings)) },
@@ -200,18 +204,30 @@ fun LegacyThemeSettingsPage(
                     }
                 )
             }
-            if (!state.showMiuixUI) {
-                val showColorGrid = !state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S
-                if (showColorGrid)
-                    item { LabelWidget(stringResource(R.string.theme_settings_theme_color)) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && state.showLiveActivity)
                 item {
-                    AnimatedVisibility(
-                        visible = showColorGrid,
-                        enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
-                                expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
-                        exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
-                                shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
-                    ) {
+                    SwitchWidget(
+                        icon = Icons.TwoTone.Colorize,
+                        title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
+                        description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
+                        isM3E = false,
+                        checked = state.useDynColorFollowPkgIconForLiveActivity,
+                        onCheckedChange = {
+                            viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity(it))
+                        }
+                    )
+                }
+            val showColorGrid = !state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+            item {
+                AnimatedVisibility(
+                    visible = showColorGrid,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
+                            expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
+                            shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
+                ) {
+                    Column {
+                        LabelWidget(stringResource(R.string.theme_settings_theme_color))
                         BoxWithConstraints(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -278,8 +294,6 @@ fun LegacyThemeSettingsPage(
                         }
                     }
                 }
-
-
             }
             item { LabelWidget(stringResource(R.string.theme_settings_package_icons)) }
             item {
@@ -313,6 +327,7 @@ fun LegacyThemeSettingsPage(
                     }
                 )
             }
+            item { Spacer(modifier = Modifier.height(12.dp)) }
         }
     }
 }

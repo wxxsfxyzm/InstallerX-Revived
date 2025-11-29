@@ -19,6 +19,7 @@ sealed class PreferredViewAction {
     data class ChangeShowDisableNotification(val showDisableNotification: Boolean) : PreferredViewAction()
     data class ChangeShowDialogWhenPressingNotification(val showDialog: Boolean) : PreferredViewAction()
     data class ChangeDhizukuAutoCloseCountDown(val countDown: Int) : PreferredViewAction()
+    data class ChangeNotificationSuccessAutoClearSeconds(val seconds: Int) : PreferredViewAction()
     data class ChangeShowExpressiveUI(val showRefreshedUI: Boolean) : PreferredViewAction()
     data class ChangeShowLiveActivity(val showLiveActivity: Boolean) : PreferredViewAction()
     data class ChangeUseMiuix(val useMiuix: Boolean) : PreferredViewAction()
@@ -51,6 +52,8 @@ sealed class PreferredViewAction {
     data class SetThemeMode(val mode: ThemeMode) : PreferredViewAction()
     data class SetPaletteStyle(val style: PaletteStyle) : PreferredViewAction()
     data class SetUseDynamicColor(val use: Boolean) : PreferredViewAction()
+    data class SetUseMiuixMonet(val use: Boolean) : PreferredViewAction()
     data class SetSeedColor(val color: Color) : PreferredViewAction()
     data class SetDynColorFollowPkgIcon(val follow: Boolean) : PreferredViewAction()
+    data class SetDynColorFollowPkgIconForLiveActivity(val follow: Boolean) : PreferredViewAction()
 }

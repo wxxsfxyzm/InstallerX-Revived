@@ -28,6 +28,7 @@ fun installSuccessDialog( // 小写开头
     val context = LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val settings = viewModel.viewSettings
 
     // Collect preInstallAppInfo (represents the state *before* the successful install)
     // val currentPreInstallInfo by viewModel.preInstallAppInfo.collectAsState()
@@ -69,7 +70,7 @@ fun installSuccessDialog( // 小写开头
                             context = context,
                             config = installer.config,
                             packageName = packageName,
-                            dhizukuAutoCloseSeconds = viewModel.autoCloseCountDown,
+                            dhizukuAutoCloseSeconds = settings.autoCloseCountDown,
                             onSuccess = { viewModel.dispatch(InstallerViewAction.Close) }
                         )
                     }

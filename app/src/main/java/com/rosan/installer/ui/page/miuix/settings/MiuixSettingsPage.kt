@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -54,20 +55,23 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.Mi
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.lab.MiuixLabPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
+@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
     val context = LocalContext.current
@@ -122,7 +126,12 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             val pagerState = rememberPagerState(pageCount = { navigationItems.size })
             val coroutineScope = rememberCoroutineScope()
             val snackBarHostState = remember { SnackbarHostState() }
-            val scrollBehaviors = List(navigationItems.size) { MiuixScrollBehavior() }
+            val hazeState = remember { HazeState() }
+            val hazeStyle = HazeStyle(
+                backgroundColor = MiuixTheme.colorScheme.surface,
+                tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
+            )
+
             // LaunchedEffect to handle snackbar events from AllViewModel
             LaunchedEffect(Unit) {
                 allViewModel.eventFlow.collectLatest { event ->
@@ -169,15 +178,14 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
 
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
-                topBar = {
-                    TopAppBar(
-                        title = navigationItems[pagerState.currentPage].label,
-                        // Use the shared scroll behavior
-                        scrollBehavior = scrollBehaviors[pagerState.currentPage]
-                    )
-                },
                 bottomBar = {
                     NavigationBar(
+                        modifier = Modifier.hazeEffect(hazeState) {
+                            style = hazeStyle
+                            blurRadius = 30.dp
+                            noiseFactor = 0f
+                        },
+                        color = Color.Transparent,
                         items = navigationItems,
                         selected = pagerState.currentPage,
                         showDivider = true,
@@ -188,8 +196,8 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                         }
                     )
                 },
+                snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
                 floatingActionButton = {
-                    // Conditionally show FAB only on the first page
                     AnimatedVisibility(
                         visible = pagerState.currentPage == 0,
                         enter = scaleIn(),
@@ -197,7 +205,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                     ) {
                         FloatingActionButton(
                             modifier = Modifier.padding(end = 16.dp),
-                            containerColor = MiuixTheme.colorScheme.surface,
+                            containerColor = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.background,
                             shadowElevation = 2.dp,
                             onClick = { navController.navigate(MiuixSettingsScreen.Builder.MiuixEditConfig(null).route) }
                         ) {
@@ -205,22 +213,24 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                                 imageVector = AppIcons.Add,
                                 modifier = Modifier.size(40.dp),
                                 contentDescription = stringResource(id = R.string.add),
-                                tint = MiuixTheme.colorScheme.primary
+                                tint = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.primary
                             )
                         }
                     }
-                },
-                snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
+                }
             ) { paddingValues ->
                 InstallerPagerContent(
+                    hazeState = hazeState,
                     pagerState = pagerState,
                     navController = navController,
                     allViewModel = allViewModel,
                     preferredViewModel = preferredViewModel,
-                    scrollBehaviors = scrollBehaviors,
-                    paddingValues = paddingValues
+                    navigationItems = navigationItems,
+                    modifier = Modifier.fillMaxSize(),
+                    outerPadding = paddingValues
                 )
             }
+
             errorDialogInfo?.let { dialogInfo ->
                 ErrorDisplaySheet(
                     showState = showErrorSheetState,
@@ -283,31 +293,35 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
 
 @Composable
 private fun InstallerPagerContent(
+    hazeState: HazeState,
     pagerState: PagerState,
     navController: NavController,
     allViewModel: AllViewModel,
     preferredViewModel: PreferredViewModel,
-    scrollBehaviors: List<ScrollBehavior>,
-    paddingValues: PaddingValues
+    navigationItems: List<NavigationItem>,
+    modifier: Modifier = Modifier,
+    outerPadding: PaddingValues
 ) {
     HorizontalPager(
         state = pagerState,
-        userScrollEnabled = false,
-        modifier = Modifier.fillMaxSize()
+        userScrollEnabled = true,
+        modifier = modifier
     ) { page ->
         when (page) {
             0 -> MiuixAllPage(
                 navController = navController,
                 viewModel = allViewModel,
-                scrollBehavior = scrollBehaviors[page],
-                paddingValues = paddingValues
+                hazeState = hazeState,
+                title = navigationItems[page].label,
+                outerPadding = outerPadding
             )
 
             1 -> MiuixPreferredPage(
                 navController = navController,
                 viewModel = preferredViewModel,
-                scrollBehavior = scrollBehaviors[page],
-                paddingValues = paddingValues
+                hazeState = hazeState,
+                title = navigationItems[page].label,
+                outerPadding = outerPadding
             )
         }
     }

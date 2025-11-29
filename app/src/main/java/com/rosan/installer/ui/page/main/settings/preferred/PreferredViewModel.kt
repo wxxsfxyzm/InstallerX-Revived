@@ -76,6 +76,7 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeShowDisableNotification -> changeDisableNotificationState(action.showDisableNotification)
             is PreferredViewAction.ChangeShowDialogWhenPressingNotification -> changeShowDialog(action.showDialog)
             is PreferredViewAction.ChangeDhizukuAutoCloseCountDown -> changeDhizukuAutoCloseCountDown(action.countDown)
+            is PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds -> changeNotificationSuccessAutoClearSeconds(action.seconds)
             is PreferredViewAction.ChangeShowExpressiveUI -> changeUseExpressiveUI(action.showRefreshedUI)
             is PreferredViewAction.ChangeShowLiveActivity -> changeUseLiveActivity(action.showLiveActivity)
             is PreferredViewAction.ChangeUseMiuix -> changeUseMiuix(action.useMiuix)
@@ -151,8 +152,10 @@ class PreferredViewModel(
             is PreferredViewAction.SetThemeMode -> setThemeMode(action.mode)
             is PreferredViewAction.SetPaletteStyle -> setPaletteStyle(action.style)
             is PreferredViewAction.SetUseDynamicColor -> setUseDynamicColor(action.use)
+            is PreferredViewAction.SetUseMiuixMonet -> setUsemiuixMonet(action.use)
             is PreferredViewAction.SetSeedColor -> setSeedColor(action.color)
             is PreferredViewAction.SetDynColorFollowPkgIcon -> setDynColorFollowPkgIcon(action.follow)
+            is PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity -> setDynColorFollowPkgIconForLiveActivity(action.follow)
         }
 
 
@@ -181,6 +184,8 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true)
             val dhizukuAutoCloseCountDownFlow =
                 appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
+            val notificationSuccessAutoClearSecondsFlow =
+                appDataStore.getInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, 0)
             val versionCompareInSingleLineFlow =
                 appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
             val sdkCompareInSingleLineFlow =
@@ -224,11 +229,15 @@ class PreferredViewModel(
                     .map { runCatching { PaletteStyle.valueOf(it) }.getOrDefault(PaletteStyle.TonalSpot) }
             val useDynamicColorFlow =
                 appDataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            val useMiuixMonetFlow =
+                appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false)
             val seedColorFlow =
                 appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
                     .map { Color(it) }
             val useDynColorFollowPkgIconFlow =
                 appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false)
+            val useDynColorFollowPkgIconForLiveActivityFlow =
+                appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false)
 
             combine(
                 authorizerFlow,
@@ -239,6 +248,7 @@ class PreferredViewModel(
                 showNotificationForDialogInstallFlow,
                 showDialogWhenPressingNotificationFlow,
                 dhizukuAutoCloseCountDownFlow,
+                notificationSuccessAutoClearSecondsFlow,
                 versionCompareInSingleLineFlow,
                 sdkCompareInSingleLineFlow,
                 showOPPOSpecialFlow,
@@ -261,8 +271,10 @@ class PreferredViewModel(
                 themeModeFlow,
                 paletteStyleFlow,
                 useDynamicColorFlow,
+                useMiuixMonetFlow,
                 seedColorFlow,
-                useDynColorFollowPkgIconFlow
+                useDynColorFollowPkgIconFlow,
+                useDynColorFollowPkgIconForLiveActivityFlow
             ) { values: Array<Any?> ->
                 var idx = 0
                 val authorizer = values[idx++] as ConfigEntity.Authorizer
@@ -273,6 +285,7 @@ class PreferredViewModel(
                 val showNotification = values[idx++] as Boolean
                 val showDialog = values[idx++] as Boolean
                 val countDown = values[idx++] as Int
+                val notificationSuccessAutoClearSeconds = values[idx++] as Int
                 val versionCompareInMultiLine = values[idx++] as Boolean
                 val sdkCompareInSingleLine = values[idx++] as Boolean
                 val showOPPOSpecial = values[idx++] as Boolean
@@ -299,8 +312,10 @@ class PreferredViewModel(
                 val themeMode = values[idx++] as ThemeMode
                 val paletteStyle = values[idx++] as PaletteStyle
                 val useDynamicColor = values[idx++] as Boolean
+                val useMiuixMonet = values[idx++] as Boolean
                 val seedColor = values[idx++] as Color
-                val useDynColorFollowPkgIcon = values[idx] as Boolean
+                val useDynColorFollowPkgIcon = values[idx++] as Boolean
+                val useDynColorFollowPkgIconForLiveActivity = values[idx] as Boolean
                 val customizeAuthorizer =
                     if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
 
@@ -317,6 +332,7 @@ class PreferredViewModel(
                     disableNotificationForDialogInstall = showNotification,
                     showDialogWhenPressingNotification = showDialog,
                     dhizukuAutoCloseCountDown = countDown,
+                    notificationSuccessAutoClearSeconds = notificationSuccessAutoClearSeconds,
                     versionCompareInSingleLine = versionCompareInMultiLine,
                     sdkCompareInMultiLine = sdkCompareInSingleLine,
                     showOPPOSpecial = showOPPOSpecial,
@@ -339,8 +355,10 @@ class PreferredViewModel(
                     themeMode = themeMode,
                     paletteStyle = paletteStyle,
                     useDynamicColor = useDynamicColor,
+                    useMiuixMonet = useMiuixMonet,
                     seedColor = seedColor,
-                    useDynColorFollowPkgIcon = useDynColorFollowPkgIcon
+                    useDynColorFollowPkgIcon = useDynColorFollowPkgIcon,
+                    useDynColorFollowPkgIconForLiveActivity = useDynColorFollowPkgIconForLiveActivity
                 )
             }.collectLatest { state = it }
         }
@@ -390,6 +408,11 @@ class PreferredViewModel(
             if (countDown in 1..10) {
                 appDataStore.putInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, countDown)
             }
+        }
+
+    private fun changeNotificationSuccessAutoClearSeconds(seconds: Int) =
+        viewModelScope.launch {
+            appDataStore.putInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, seconds)
         }
 
     private fun changeUseExpressiveUI(showRefreshedUI: Boolean) =
@@ -521,7 +544,7 @@ class PreferredViewModel(
         } catch (e: Exception) {
             Timber.e(e, "Could not start activity to request ignore battery optimizations")
             viewModelScope.launch {
-                _uiEvents.send(PreferredViewEvent.ShowSnackbar("无法打开电池优化设置"))
+                _uiEvents.send(PreferredViewEvent.ShowSnackbar("Could not start activity to request ignore battery optimizations"))
             }
         }
 
@@ -623,6 +646,10 @@ class PreferredViewModel(
         }
     }
 
+    private fun setUsemiuixMonet(use: Boolean) = viewModelScope.launch {
+        appDataStore.putBoolean(AppDataStore.UI_USE_MIUIX_MONET, use)
+    }
+
     private fun setSeedColor(color: Color) = viewModelScope.launch {
         appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, color.toArgb())
     }
@@ -630,6 +657,11 @@ class PreferredViewModel(
     private fun setDynColorFollowPkgIcon(enable: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, enable)
+        }
+
+    private fun setDynColorFollowPkgIconForLiveActivity(enable: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, enable)
         }
 
     private suspend fun runPrivilegedAction(

@@ -9,7 +9,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.build.Manufacturer
@@ -30,6 +34,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.AutoClearNotificationTimeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
@@ -37,6 +42,7 @@ import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.ManagedPackagesWidget
 import com.rosan.installer.ui.page.main.widget.setting.ManagedUidsWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
+import com.rosan.installer.ui.theme.none
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +55,7 @@ fun LegacyInstallerGlobalSettingsPage(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.installer_settings)) },
@@ -101,6 +108,31 @@ fun LegacyInstallerGlobalSettingsPage(
                     }
                 )
             }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                item {
+                    SwitchWidget(
+                        icon = AppIcons.LiveActivity,
+                        title = stringResource(R.string.theme_settings_use_live_activity),
+                        description = stringResource(R.string.theme_settings_use_live_activity_desc),
+                        checked = state.showLiveActivity,
+                        isM3E = false,
+                        onCheckedChange = {
+                            viewModel.dispatch(PreferredViewAction.ChangeShowLiveActivity(it))
+                        }
+                    )
+                }
+            item {
+                AutoClearNotificationTimeWidget(
+                    currentValue = state.notificationSuccessAutoClearSeconds,
+                    onValueChange = { seconds ->
+                        viewModel.dispatch(
+                            PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(
+                                seconds
+                            )
+                        )
+                    }
+                )
+            }
             item {
                 val isDialogMode =
                     state.installMode == ConfigEntity.InstallMode.Dialog || state.installMode == ConfigEntity.InstallMode.AutoDialog
@@ -123,7 +155,6 @@ fun LegacyInstallerGlobalSettingsPage(
                         ) { targetTitleRes ->
                             LabelWidget(label = stringResource(id = targetTitleRes))
                         }
-
                         AnimatedVisibility(visible = isDialogMode) {
                             SwitchWidget(
                                 icon = AppIcons.MultiLineSettingIcon,
@@ -188,7 +219,6 @@ fun LegacyInstallerGlobalSettingsPage(
                                 }
                             )
                         }
-
                         AnimatedVisibility(visible = isNotificationMode) {
                             SwitchWidget(
                                 icon = AppIcons.Dialog,
@@ -203,23 +233,6 @@ fun LegacyInstallerGlobalSettingsPage(
                                 }
                             )
                         }
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                            AnimatedVisibility(visible = isDialogMode || isNotificationMode) {
-                                SwitchWidget(
-                                    icon = AppIcons.LiveActivity,
-                                    title = stringResource(R.string.theme_settings_use_live_activity),
-                                    description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                                    checked = state.showLiveActivity,
-                                    isM3E = false,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.ChangeShowLiveActivity(it)
-                                        )
-                                    }
-                                )
-                            }
-
                         AnimatedVisibility(isDialogMode) {
                             SwitchWidget(
                                 icon = AppIcons.Silent,
@@ -231,7 +244,6 @@ fun LegacyInstallerGlobalSettingsPage(
                                 }
                             )
                         }
-
                         AnimatedVisibility(visible = isDialogMode) {
                             SwitchWidget(
                                 icon = AppIcons.NotificationDisabled,
@@ -246,7 +258,6 @@ fun LegacyInstallerGlobalSettingsPage(
                                 }
                             )
                         }
-
                         AnimatedVisibility(
                             visible = isNotificationMode && viewModel.state.showDialogWhenPressingNotification,
                             enter = fadeIn(),
@@ -344,6 +355,7 @@ fun LegacyInstallerGlobalSettingsPage(
                     )
                 }
             }
+            item { Spacer(modifier = Modifier.height(12.dp)) }
         }
     }
 }

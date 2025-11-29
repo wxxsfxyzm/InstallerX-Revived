@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -57,10 +57,13 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun InstallPrepareContent(
+    colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     installer: InstallerRepo,
     viewModel: InstallerViewModel,
     onCancel: () -> Unit,
@@ -70,6 +73,7 @@ fun InstallPrepareContent(
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
     val displayIcons by viewModel.displayIcons.collectAsState()
+    val settings = viewModel.viewSettings
 
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -83,7 +87,7 @@ fun InstallPrepareContent(
     } else {
         currentPackage.appEntities
     }).map { it.app }
-    
+
     val primaryEntity = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
         ?: allEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
         ?: allEntities.sortedBest().firstOrNull()
@@ -168,7 +172,8 @@ fun InstallPrepareContent(
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
                 colors = CardColors(
-                    color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
+                    color = if (isDynamicColor) colorScheme.surfaceContainer else
+                        if (isDarkMode) miuixSheetCardColorDark else Color.White,
                     contentColor = MiuixTheme.colorScheme.onSurface
                 )
             ) {
@@ -197,7 +202,7 @@ fun InstallPrepareContent(
                                 installer = installer
                             )
                             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                                AnimatedVisibility(visible = viewModel.showOPPOSpecial && primaryEntity.containerType == DataType.APK) {
+                                AnimatedVisibility(visible = settings.showOPPOSpecial && primaryEntity.containerType == DataType.APK) {
                                     primaryEntity.minOsdkVersion?.let {
                                         AdaptiveInfoRow(
                                             labelResId = R.string.installer_package_minOsdkVersion_label,
@@ -252,7 +257,8 @@ fun InstallPrepareContent(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     colors = CardColors(
-                        color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
+                        color = if (isDynamicColor) colorScheme.surfaceContainer else
+                            if (isDarkMode) miuixSheetCardColorDark else Color.White,
                         contentColor = MiuixTheme.colorScheme.onSurface
                     )
                 ) {
@@ -297,12 +303,12 @@ fun InstallPrepareContent(
         } ?: false
 
         val canInstallModuleEntity = (primaryEntity as? AppEntity.ModuleEntity)?.let {
-            viewModel.enableModuleInstall
+            settings.enableModuleInstall
         } ?: false
 
         val canInstall = canInstallBaseEntity || canInstallModuleEntity
 
-        val showExpandButton = canInstallBaseEntity && viewModel.showExtendedMenu
+        val showExpandButton = canInstallBaseEntity && settings.showExtendedMenu
 
         if (showExpandButton)
             item {
