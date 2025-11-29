@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.settings.model.room.dao.AppDao
 import com.rosan.installer.data.settings.model.room.dao.ConfigDao
 import com.rosan.installer.data.settings.model.room.entity.AppEntity

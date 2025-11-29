@@ -26,39 +26,39 @@ jobs:
         language: [ 'java-kotlin' ]
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      # 1. Set up JDK 21
-      # Basis: jvmToolchain(21) requirement in build.gradle.kts
-      # Also consistent with your pr-check.yml
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '21'
-          cache: 'gradle'
+    # 1. Set up JDK 21
+    # Basis: jvmToolchain(21) requirement in build.gradle.kts
+    # Also consistent with your pr-check.yml
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '21'
+        cache: 'gradle'
 
-      # 2. Initialize CodeQL
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: ${{ matrix.language }}
-          # Optional: Uncomment below for stricter scanning
-          # queries: security-extended,security-and-quality
+    # 2. Initialize CodeQL
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        # Optional: Uncomment below for stricter scanning
+        # queries: security-extended,security-and-quality
 
-      # 3. Grant execute permission for gradlew
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+    # 3. Grant execute permission for gradlew
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
 
-      # 4. Manual Build
-      # Basis: Use the specific variant 'assembleOnlinePreviewDebug' verified in pr-check.yml
-      # This avoids memory issues from building all flavors and skips release signing steps (no keystore needed)
-      - name: Build Android Project
-        run: ./gradlew assembleOnlinePreviewDebug --no-daemon
+    # 4. Manual Build
+    # Basis: Use the specific variant 'assembleOnlinePreviewDebug' verified in pr-check.yml
+    # This avoids memory issues from building all flavors and skips release signing steps (no keystore needed)
+    - name: Build Android Project
+      run: ./gradlew assembleOnlinePreviewDebug --no-daemon
 
-      # 5. Perform Analysis
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: "/language:${{matrix.language}}"
+    # 5. Perform Analysis
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"

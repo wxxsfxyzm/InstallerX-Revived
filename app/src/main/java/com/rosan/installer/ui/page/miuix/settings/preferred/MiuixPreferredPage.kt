@@ -17,8 +17,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
@@ -40,6 +40,7 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import org.koin.androidx.compose.koinViewModel
+import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -177,15 +178,20 @@ fun MiuixPreferredPage(
                         .padding(bottom = 12.dp)
                 ) {
                     MiuixSettingsAboutItemWidget(
-                        headlineContentText = stringResource(R.string.lab),
-                        supportingContentText = stringResource(R.string.lab_desc),
-                        onClick = { navController.navigate(SettingsScreen.Lab.route) }
-                    )
+                        title = stringResource(R.string.lab),
+                        summary = stringResource(R.string.lab_desc)
+                    ) { navController.navigate(SettingsScreen.Lab.route) }
                     MiuixSettingsAboutItemWidget(
-                        headlineContentText = stringResource(R.string.about_detail),
-                        supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
-                        onClick = { navController.navigate(MiuixSettingsScreen.MiuixAbout.route) }
-                    )
+                        title = stringResource(R.string.about_detail),
+                        summary = if (state.hasUpdate) stringResource(
+                            R.string.update_available,
+                            state.remoteVersion
+                        ) else "$revLevel ${RsConfig.VERSION_NAME}",
+                        summaryColor = BasicComponentColors(
+                            color = if (state.hasUpdate) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                            disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                        )
+                    ) { navController.navigate(MiuixSettingsScreen.MiuixAbout.route) }
                 }
             }
         }

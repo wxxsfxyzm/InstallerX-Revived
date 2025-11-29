@@ -20,7 +20,7 @@ import android.os.IInterface
 import android.os.ServiceManager
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.BuildConfig
-import com.rosan.installer.build.Architecture
+import com.rosan.installer.build.model.entity.Architecture
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
@@ -40,7 +40,6 @@ import com.rosan.installer.util.isSystemInstaller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -236,7 +235,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         packageInstaller: PackageInstaller,
         packageName: String
     ): Session {
-        val containerType = entities.first().containerType
+        val containerType = entities.first().sourceType
         val params = if (containerType == DataType.MULTI_APK_ZIP || containerType == DataType.MULTI_APK)
             PackageInstaller.SessionParams(
                 // Always use full mode when apk is definite
@@ -323,21 +322,26 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         for (entity in entities) installIt(config, entity, extra, session)
     }
 
-    private suspend fun installIt(
+    private fun installIt(
         config: ConfigEntity, entity: InstallEntity, extra: InstallExtraInfoEntity, session: Session
     ) {
         Timber.d("Installing entity: ${entity.name}, data path: ${entity.data}, top source: ${entity.data.getSourceTop()}")
         val inputStream = entity.data.getInputStreamWhileNotEmpty()
             ?: throw Exception("can't open input stream for this data: '${entity.data}'")
-        session.openWrite(
-            entity.name, 0,
-            withContext(Dispatchers.IO) {
-                inputStream.available()
-            }.toUInt().toLong()
-        ).use {
-            inputStream.copyTo(it)
-            session.fsync(it)
+        val sizeBytes = entity.data.getSize()
+
+        if (sizeBytes <= 0) {
+            throw Exception("Invalid data size: $sizeBytes. Content-Length is required for stream installation.")
         }
+        session.openWrite(
+            entity.name,
+            0,
+            sizeBytes // Use the explicit size
+        ).use { outputStream ->
+            inputStream.copyTo(outputStream)
+            session.fsync(outputStream)
+        }
+        inputStream.close()
     }
 
     @SuppressLint("RequestInstallPackagesPolicy")
@@ -425,7 +429,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
 
             // Never Delete Multi-APK-ZIP files automatically
             // Enable autoDelete only when the containerType is not MULTI_APK_ZIP
-            if (config.autoDelete && entities.first().containerType != DataType.MULTI_APK_ZIP) {
+            if (config.autoDelete && entities.first().sourceType != DataType.MULTI_APK_ZIP) {
                 Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
                 // Improve logging for better debugging
                 coroutineScope.launch {

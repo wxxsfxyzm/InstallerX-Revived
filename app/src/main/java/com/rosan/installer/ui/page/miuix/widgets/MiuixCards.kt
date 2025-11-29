@@ -71,7 +71,7 @@ private fun TipCard(
 @Composable
 fun MiuixScopeTipCard(viewModel: AllViewModel) {
     TipCard(
-        //modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        // modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         tipContent = {
             Text(
                 text = stringResource(R.string.scope_tips),
@@ -112,7 +112,7 @@ fun MiuixSettingsTipCard(text: String) {
 }
 
 @Composable
-fun MiuixInstallChoiceTipCard(text: String) {
+fun MiuixInstallerTipCard(text: String) {
     TipCard(
         modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp),
         tipContent = {
@@ -184,7 +184,7 @@ fun MiuixErrorTextBlock(
                     value = textToShow,
                     onValueChange = {},
                     readOnly = true,
-                    textStyle = LocalTextStyle.current.copy(color = errorColor),
+                    textStyle = LocalTextStyle.current.copy(color = MiuixTheme.colorScheme.onErrorContainer),
                     modifier = Modifier
                         .fillMaxWidth()
                         // Allow vertical scrolling for long stack traces

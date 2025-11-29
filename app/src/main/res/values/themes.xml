@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Installer" parent="Theme.Material3.DayNight" />
+    <style name="Theme.Installer" parent="android:Theme.Material.Light.NoActionBar" />
 
     <style name="Theme.Installer.Translucent" parent="Theme.Installer">
         <item name="android:windowIsTranslucent">true</item>
         <!--沉浸状态栏和导航栏-->
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
-
-    <!--<style name="Theme.Installer.Starting" parent="Theme.SplashScreen">
-        <item name="postSplashScreenTheme">@style/Theme.Installer</item>
-    </style>-->
 </resources>

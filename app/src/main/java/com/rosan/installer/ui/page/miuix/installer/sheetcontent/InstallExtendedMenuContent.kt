@@ -29,13 +29,14 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction.SetInstaller
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction.SetTargetUser
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction.SetInstaller
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction.SetTargetUser
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallExtendedMenuAction
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
@@ -143,7 +144,7 @@ fun InstallExtendedMenuContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp),
+                .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

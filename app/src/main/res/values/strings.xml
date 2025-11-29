@@ -21,8 +21,12 @@
     <string name="lab">Laboratory</string>
     <string name="lab_desc">Access experimental and developer features</string>
     <string name="about_detail">About InstallerX Revived</string>
+    <string name="updating">Updating...</string>
     <string name="get_update">Get update</string>
     <string name="get_update_detail">Check for software updates and new features</string>
+    <string name="update_available">Update Available: %1$s</string>
+    <string name="get_update_directly">Get update directly</string>
+    <string name="get_update_directly_desc">Get update directly from GitHub and install, no cache will be left</string>
     <string name="get_source_code">Check for source code</string>
     <string name="get_source_code_detail">Check for source code on GitHub</string>
     <string name="internet_access_enabled">Online</string>
@@ -289,6 +293,7 @@
     <string name="installer_prepare_signature_unknown">Unable to verify app signature, please proceed with caution.</string>
     <string name="installer_install_app">Install App</string>
     <string name="installer_install_module">Install Module</string>
+    <string name="installer_install_confirm">Install Confirm</string>
     <string name="installer_installing">Installing…</string>
     <string name="installer_installing_module">Installing Module</string>
     <string name="installer_install_failed">Install failed</string>
@@ -353,12 +358,15 @@
     <string name="permission_read_media_video">Read media video</string>
     <string name="permission_read_media_audio">Read media audio</string>
     <string name="permission_access_notification_policy">Access notification policy</string>
+    <string name="permission_flashlight">Control flashlight</string>
     <string name="permission_foreground_service">Foreground service</string>
     <string name="permission_request_install_packages">Request install packages</string>
     <string name="permission_write_settings">Write settings</string>
+    <string name="permission_write_secure_settings">Write secure settings</string>
     <string name="permission_get_accounts">Get accounts</string>
     <string name="permission_use_credentials">Use credentials</string>
     <string name="permission_manage_accounts">Manage accounts</string>
+    <string name="permission_manage_external_storage">Manage external storage</string>
     <string name="permission_read_sync_settings">Read sync settings</string>
     <string name="permission_write_sync_settings">Write sync settings</string>
     <string name="permission_read_call_log">Read call log</string>

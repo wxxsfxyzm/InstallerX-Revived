@@ -27,18 +27,19 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.MmzSelectionMode
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
+import com.rosan.installer.data.app.model.entity.SessionMode
+import com.rosan.installer.data.app.util.getDisplayName
+import com.rosan.installer.data.app.util.getSplitDisplayName
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCheckboxWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallChoiceTipCard
+import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixMultiApkCheckboxWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.getSupportSubtitle
-import com.rosan.installer.util.asUserReadableSplitName
-import com.rosan.installer.util.getDisplayName
-import com.rosan.installer.util.getSplitType
+import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -61,12 +62,12 @@ fun InstallChoiceContent(
     onCancel: () -> Unit
 ) {
     val analysisResults = installer.analysisResults
-    val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
-    val isMultiApk = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
-    val isModuleApk = containerType == DataType.MIXED_MODULE_APK
-    val isMixedModuleZip = containerType == DataType.MIXED_MODULE_ZIP
-
-    var selectionMode by remember(containerType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
+    val sourceType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
+    val currentSessionMode = analysisResults.firstOrNull()?.sessionMode ?: SessionMode.Single
+    val isMultiApk = currentSessionMode == SessionMode.Batch
+    val isModuleApk = sourceType == DataType.MIXED_MODULE_APK
+    val isMixedModuleZip = sourceType == DataType.MIXED_MODULE_ZIP
+    var selectionMode by remember(sourceType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
 
     val primaryButtonTextRes = if (isMultiApk) R.string.install else R.string.next
     val primaryButtonAction = if (isMultiApk) {
@@ -79,10 +80,10 @@ fun InstallChoiceContent(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val cardText = containerType.getSupportSubtitle(selectionMode = selectionMode)
+        val cardText = sourceType.getSupportSubtitle(selectionMode = selectionMode)
 
         if (cardText != null)
-            MiuixInstallChoiceTipCard(cardText)
+            MiuixInstallerTipCard(cardText)
 
         if (isMixedModuleZip && selectionMode == MmzSelectionMode.INITIAL_CHOICE) {
             Box(modifier = Modifier.weight(1f, fill = false)) {
@@ -122,7 +123,7 @@ fun InstallChoiceContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp),
+                .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -336,7 +337,7 @@ private fun ChoiceLazyList(
 
         // Group splits by type
         val groupedSplits = splitEntities
-            .groupBy { (it.app as AppEntity.SplitEntity).splitName.getSplitType() }
+            .groupBy { (it.app as AppEntity.SplitEntity).type }
             .toSortedMap(compareBy { it.ordinal }) // Sort groups by enum order
 
         LazyColumn(
@@ -424,7 +425,11 @@ private fun ChoiceLazyList(
                         Column {
                             entitiesInGroup.forEach { item ->
                                 val app = item.app as AppEntity.SplitEntity
-                                val title = app.splitName.asUserReadableSplitName()
+                                val title = getSplitDisplayName(
+                                    type = app.type,
+                                    configValue = app.configValue,
+                                    fallbackName = app.splitName
+                                )
                                 val description = stringResource(R.string.installer_file_name, app.name)
 
                                 MiuixCheckboxWidget(

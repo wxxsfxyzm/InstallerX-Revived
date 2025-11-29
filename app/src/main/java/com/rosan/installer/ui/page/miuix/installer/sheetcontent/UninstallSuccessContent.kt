@@ -17,7 +17,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -55,7 +56,7 @@ fun UninstallSuccessContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp),
+                .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

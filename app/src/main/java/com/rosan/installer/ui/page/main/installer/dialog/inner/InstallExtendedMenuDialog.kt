@@ -55,11 +55,11 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.util.getBestPermissionLabel
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -69,7 +69,7 @@ fun installExtendedMenuDialog(
 ): DialogParams {
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val containerType =
-        installer.analysisResults.find { it.packageName == currentPackageName }?.appEntities?.first()?.app?.containerType
+        installer.analysisResults.find { it.packageName == currentPackageName }?.appEntities?.first()?.app?.sourceType
     val installOptions = rememberInstallOptions(installer.config.authorizer)
     val installFlags by viewModel.installFlags.collectAsState()
     val managedPackages by viewModel.managedInstallerPackages.collectAsState()
@@ -537,14 +537,13 @@ fun installExtendedMenuSubMenuDialog(
 
 @Composable
 fun PermissionCard(
-    permission: String,         // 当前权限字符串
-    isHighlight: Boolean,        // 是否被选中
+    permission: String,
+    isHighlight: Boolean,
 ) {
     val context = LocalContext.current
-    // 使用 remember(key) 记住计算结果。
-    // 只有当 permission 这个 key 变化时，才会重新计算标签。
+
     val permissionLabel = remember(permission) {
-        getBestPermissionLabel(context, permission)
+        context.getBestPermissionLabel(permission)
     }
 
     Card(

@@ -18,12 +18,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -50,7 +51,7 @@ fun PrepareSettingsContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
+            .padding(top = 16.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Card(

@@ -3,8 +3,8 @@ package com.rosan.installer.ui.page.main.settings.preferred.subpage.home
 import android.os.Build
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toUpperCase
-import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Level
 
 /**
  * just constant data, so just use it without ViewModel.

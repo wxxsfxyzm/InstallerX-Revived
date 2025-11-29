@@ -151,17 +151,17 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                     }
                 }
             }
-            var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowErrorDialog?>(null) }
+            var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(null) }
             val showErrorSheetState = remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
                 preferredViewModel.uiEvents.collect { event ->
                     snackBarHostState.currentSnackbarData?.dismiss()
                     when (event) {
-                        is PreferredViewEvent.ShowSnackbar -> {
+                        is PreferredViewEvent.ShowDefaultInstallerResult -> {
                             snackBarHostState.showSnackbar(event.message)
                         }
 
-                        is PreferredViewEvent.ShowErrorDialog -> {
+                        is PreferredViewEvent.ShowDefaultInstallerErrorDetail -> {
                             val snackbarResult = snackBarHostState.showSnackbar(
                                 message = event.title,
                                 actionLabel = context.getString(R.string.details),
@@ -172,6 +172,8 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                                 showErrorSheetState.value = true
                             }
                         }
+
+                        else -> {}
                     }
                 }
             }
@@ -242,7 +244,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                             preferredViewModel.dispatch(retryAction) // Then execute retry action
                         }
                     },
-                    title = errorDialogInfo?.title ?: ""
+                    title = dialogInfo.title
                 )
             }
         }
@@ -276,7 +278,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             )
         }
         composable(route = MiuixSettingsScreen.MiuixAbout.route) {
-            MiuixHomePage(navController)
+            MiuixHomePage(navController = navController, viewModel = preferredViewModel)
         }
         composable(route = MiuixSettingsScreen.MiuixTheme.route) {
             MiuixThemeSettingsPage(navController = navController, viewModel = preferredViewModel)

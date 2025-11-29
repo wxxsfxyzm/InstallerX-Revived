@@ -7,14 +7,15 @@ import com.rosan.installer.R
 import timber.log.Timber
 
 /**
- * 获取权限标签的资源ID。
- * 如果权限在自定义列表中，则返回对应的资源ID，否则返回未知权限的资源ID。
+ * Retrieves the resource ID for the permission label.
  *
- * @param permission 权限字符串
- * @return 权限标签的资源ID
+ * If the permission is defined in the custom list, returns the corresponding resource ID;
+ * otherwise, returns the resource ID for an unknown permission.
+ *
+ * @return The resource ID of the permission label.
  */
 @StringRes
-private fun getPermissionLabelRes(permission: String): Int = when (permission) {
+private fun String.getPermissionLabelRes(): Int = when (this) {
     "android.permission.ACCESS_BACKGROUND_LOCATION" -> R.string.permission_access_background_location
     "android.permission.ACCESS_COARSE_LOCATION" -> R.string.permission_access_coarse_location
     "android.permission.ACCESS_FINE_LOCATION" -> R.string.permission_access_fine_location
@@ -31,10 +32,12 @@ private fun getPermissionLabelRes(permission: String): Int = when (permission) {
     "android.permission.BLUETOOTH_SCAN" -> R.string.permission_bluetooth_scan
     "android.permission.CALL_PHONE" -> R.string.permission_call_phone
     "android.permission.CAMERA" -> R.string.permission_camera
+    "android.permission.FLASHLIGHT" -> R.string.permission_flashlight
     "android.permission.FOREGROUND_SERVICE" -> R.string.permission_foreground_service
     "android.permission.GET_ACCOUNTS" -> R.string.permission_get_accounts
     "android.permission.INTERNET" -> R.string.permission_internet
     "android.permission.MANAGE_ACCOUNTS" -> R.string.permission_manage_accounts
+    "android.permission.MANAGE_EXTERNAL_STORAGE" -> R.string.permission_manage_external_storage
     "android.permission.NFC" -> R.string.permission_nfc
     "android.permission.POST_NOTIFICATIONS" -> R.string.permission_post_notifications
     "android.permission.READ_CALENDAR" -> R.string.permission_read_calendar
@@ -63,34 +66,34 @@ private fun getPermissionLabelRes(permission: String): Int = when (permission) {
     "android.permission.WRITE_CONTACTS" -> R.string.permission_write_contacts
     "android.permission.WRITE_EXTERNAL_STORAGE" -> R.string.permission_write_external_storage
     "android.permission.WRITE_SETTINGS" -> R.string.permission_write_settings
+    "android.permission.WRITE_SECURE_SETTINGS" -> R.string.permission_write_secure_settings
     "android.permission.WRITE_SYNC_SETTINGS" -> R.string.permission_write_sync_settings
     "com.rosan.dhizuku.permission.API" -> R.string.permission_dhizuku
     else -> R.string.permission_unknown
 }
 
 /**
- * 获取权限标签的最佳方法。
- * 优先从我们自定义的列表中查找，如果找不到，再向系统查询。
+ * Retrieves the best available label for a permission.
  *
- * @param context 上下文
- * @param permission 权限字符串
- * @return 最佳的权限标签字符串
+ * This method prioritizes the lookup from the custom defined list. If the permission
+ * is not found there, it falls back to querying the system for the label.
+ *
+ * @param permission The permission string to look up.
+ * @return The most appropriate label string for the permission.
  */
-fun getBestPermissionLabel(context: Context, permission: String): String {
-    val customResId = getPermissionLabelRes(permission)
+fun Context.getBestPermissionLabel(permission: String): String {
+    val customResId = permission.getPermissionLabelRes()
 
     return if (customResId != R.string.permission_unknown)
-        context.getString(customResId)
+        this.getString(customResId)
     else try {
-        val pm = context.packageManager
+        val pm = this.packageManager
         val permissionInfo = pm.getPermissionInfo(permission, 0)
         if (permission == permissionInfo.loadLabel(pm).toString())
-            context.getString(R.string.permission_unknown)
-        else permissionInfo.loadLabel(pm)
-            .toString()
+            this.getString(R.string.permission_unknown)
+        else permissionInfo.loadLabel(pm).toString()
     } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e.printStackTrace().toString())
-        // 如果系统中也没有这个权限，返回一个默认的“未知”标签
-        context.getString(R.string.permission_unknown)
+        this.getString(R.string.permission_unknown)
     }
 }

@@ -27,47 +27,57 @@ import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
+import com.rosan.installer.data.updater.repo.AppUpdater
+import com.rosan.installer.data.updater.repo.UpdateChecker
 import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.ui.theme.m3color.PaletteStyle
 import com.rosan.installer.ui.theme.m3color.PresetColors
+import com.rosan.installer.ui.theme.m3color.RawColor
 import com.rosan.installer.ui.theme.m3color.ThemeMode
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 
 class PreferredViewModel(
+    private val context: Context,
     private val appDataStore: AppDataStore,
-    private val paRepo: PrivilegedActionRepo
+    private val paRepo: PrivilegedActionRepo,
+    private val updateChecker: UpdateChecker,
+    private val appUpdater: AppUpdater
 ) : ViewModel(), KoinComponent {
-    private val context by inject<Context>()
-
-    private val adbVerifyEnabledFlow = MutableStateFlow(true) // refresh default value at init
-    private val isIgnoringBatteryOptFlow = MutableStateFlow(true)
     var state by mutableStateOf(PreferredViewState())
         private set
 
-    private val _uiEvents = Channel<PreferredViewEvent>()
-    val uiEvents = _uiEvents.receiveAsFlow()
+    private val updateResultFlow = MutableStateFlow<UpdateChecker.CheckResult?>(null)
+    private val adbVerifyEnabledFlow = MutableStateFlow(true) // refresh default value at init
+    private val isIgnoringBatteryOptFlow = MutableStateFlow(true)
+
+    private val _uiEvents = MutableSharedFlow<PreferredViewEvent>(
+        replay = 0,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val uiEvents = _uiEvents.asSharedFlow()
 
     private var initialized = false
 
     fun dispatch(action: PreferredViewAction) =
         when (action) {
             is PreferredViewAction.Init -> init()
+            is PreferredViewAction.Update -> performInAppUpdate()
             is PreferredViewAction.ChangeGlobalAuthorizer -> changeGlobalAuthorizer(action.authorizer)
             is PreferredViewAction.ChangeGlobalCustomizeAuthorizer -> changeGlobalCustomizeAuthorizer(action.customizeAuthorizer)
             is PreferredViewAction.ChangeGlobalInstallMode -> changeGlobalInstallMode(action.installMode)
@@ -152,14 +162,12 @@ class PreferredViewModel(
             is PreferredViewAction.SetThemeMode -> setThemeMode(action.mode)
             is PreferredViewAction.SetPaletteStyle -> setPaletteStyle(action.style)
             is PreferredViewAction.SetUseDynamicColor -> setUseDynamicColor(action.use)
-            is PreferredViewAction.SetUseMiuixMonet -> setUsemiuixMonet(action.use)
+            is PreferredViewAction.SetUseMiuixMonet -> setUseMiuixMonet(action.use)
             is PreferredViewAction.SetSeedColor -> setSeedColor(action.color)
             is PreferredViewAction.SetDynColorFollowPkgIcon -> setDynColorFollowPkgIcon(action.follow)
             is PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity -> setDynColorFollowPkgIconForLiveActivity(action.follow)
         }
 
-
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun init() {
         // DataStore async initialization
         if (initialized) return
@@ -167,200 +175,31 @@ class PreferredViewModel(
 
         refreshIgnoreBatteryOptStatus()
         refreshAdbVerifyStatus()
+        checkUpdate()
+        getAndCombineState()
+    }
 
-        viewModelScope.launch {
-            val authorizerFlow = appDataStore.getString(AppDataStore.AUTHORIZER)
-                .map { AuthorizerConverter.revert(it) }
-            val customizeAuthorizerFlow = appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER)
-            val installModeFlow = appDataStore.getString(AppDataStore.INSTALL_MODE)
-                .map { InstallModeConverter.revert(it) }
-            val showDialogInstallExtendedMenuFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU)
-            val showIntelligentSuggestionFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true)
-            val showNotificationForDialogInstallFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false)
-            val showDialogWhenPressingNotificationFlow =
-                appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true)
-            val dhizukuAutoCloseCountDownFlow =
-                appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
-            val notificationSuccessAutoClearSecondsFlow =
-                appDataStore.getInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, 0)
-            val versionCompareInSingleLineFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
-            val sdkCompareInSingleLineFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false)
-            val showOPPOSpecialFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false)
-            val showExpressiveUIFlow =
-                appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
-            val showLiveActivityFlow =
-                appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false)
-            val autoLockInstallerFlow =
-                appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER, false)
-            val autoSilentInstallFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false)
-            val showMiuixUIFlow =
-                appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
-            val preferSystemIconFlow =
-                appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false)
-            val showLauncherIconFlow =
-                appDataStore.getBoolean(AppDataStore.SHOW_LAUNCHER_ICON, true)
-            val managedInstallerPackagesFlow =
-                appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST)
-            val managedBlacklistPackagesFlow =
-                appDataStore.getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
-            val managedSharedUserIdBlacklistFlow =
-                appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
-            val managedSharedUserIdExemptPkgFlow =
-                appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
-            val labShizukuHookModeFlow =
-                appDataStore.getBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, false)
-            val labRootModuleFlashFlow =
-                appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false)
-            val labRootImplementationFlow =
-                appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
-                    .map { RootImplementation.fromString(it) }
-            val themeModeFlow =
-                appDataStore.getString(AppDataStore.THEME_MODE, ThemeMode.SYSTEM.name)
-                    .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
-            val paletteStyleFlow =
-                appDataStore.getString(AppDataStore.THEME_PALETTE_STYLE, PaletteStyle.TonalSpot.name)
-                    .map { runCatching { PaletteStyle.valueOf(it) }.getOrDefault(PaletteStyle.TonalSpot) }
-            val useDynamicColorFlow =
-                appDataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            val useMiuixMonetFlow =
-                appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false)
-            val seedColorFlow =
-                appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
-                    .map { Color(it) }
-            val useDynColorFollowPkgIconFlow =
-                appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false)
-            val useDynColorFollowPkgIconForLiveActivityFlow =
-                appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false)
+    private fun performInAppUpdate() = viewModelScope.launch(Dispatchers.IO) {
+        val updateInfo = updateResultFlow.value
+        if (updateInfo == null || !updateInfo.hasUpdate || updateInfo.downloadUrl.isEmpty()) {
+            Timber.w("No valid update info found when performing in-app update.")
+            return@launch
+        }
 
-            combine(
-                authorizerFlow,
-                customizeAuthorizerFlow,
-                installModeFlow,
-                showDialogInstallExtendedMenuFlow,
-                showIntelligentSuggestionFlow,
-                showNotificationForDialogInstallFlow,
-                showDialogWhenPressingNotificationFlow,
-                dhizukuAutoCloseCountDownFlow,
-                notificationSuccessAutoClearSecondsFlow,
-                versionCompareInSingleLineFlow,
-                sdkCompareInSingleLineFlow,
-                showOPPOSpecialFlow,
-                showExpressiveUIFlow,
-                showLiveActivityFlow,
-                autoLockInstallerFlow,
-                autoSilentInstallFlow,
-                showMiuixUIFlow,
-                preferSystemIconFlow,
-                showLauncherIconFlow,
-                managedInstallerPackagesFlow,
-                managedBlacklistPackagesFlow,
-                managedSharedUserIdBlacklistFlow,
-                managedSharedUserIdExemptPkgFlow,
-                adbVerifyEnabledFlow,
-                isIgnoringBatteryOptFlow,
-                labShizukuHookModeFlow,
-                labRootModuleFlashFlow,
-                labRootImplementationFlow,
-                themeModeFlow,
-                paletteStyleFlow,
-                useDynamicColorFlow,
-                useMiuixMonetFlow,
-                seedColorFlow,
-                useDynColorFollowPkgIconFlow,
-                useDynColorFollowPkgIconForLiveActivityFlow
-            ) { values: Array<Any?> ->
-                var idx = 0
-                val authorizer = values[idx++] as ConfigEntity.Authorizer
-                val customize = values[idx++] as String
-                val installMode = values[idx++] as ConfigEntity.InstallMode
-                val showMenu = values[idx++] as Boolean
-                val showSuggestion = values[idx++] as Boolean
-                val showNotification = values[idx++] as Boolean
-                val showDialog = values[idx++] as Boolean
-                val countDown = values[idx++] as Int
-                val notificationSuccessAutoClearSeconds = values[idx++] as Int
-                val versionCompareInMultiLine = values[idx++] as Boolean
-                val sdkCompareInSingleLine = values[idx++] as Boolean
-                val showOPPOSpecial = values[idx++] as Boolean
-                val showExpressiveUI = values[idx++] as Boolean
-                val showLiveActivity = values[idx++] as Boolean
-                val autoLockInstaller = values[idx++] as Boolean
-                val autoSilentInstall = values[idx++] as Boolean
-                val showMiuixUI = values[idx++] as Boolean
-                val preferSystemIcon = values[idx++] as Boolean
-                val showLauncherIcon = values[idx++] as Boolean
-                val managedInstallerPackages =
-                    (values[idx++] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedBlacklistPackages =
-                    (values[idx++] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val managedSharedUserIdBlacklist =
-                    (values[idx++] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
-                val managedSharedUserIdExemptPkg =
-                    (values[idx++] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
-                val adbVerifyEnabled = values[idx++] as Boolean
-                val isIgnoringBatteryOptimizations = values[idx++] as Boolean
-                val labShizukuHookMode = values[idx++] as Boolean
-                val labRootModuleFlash = values[idx++] as Boolean
-                val labRootImplementation = values[idx++] as RootImplementation
-                val themeMode = values[idx++] as ThemeMode
-                val paletteStyle = values[idx++] as PaletteStyle
-                val useDynamicColor = values[idx++] as Boolean
-                val useMiuixMonet = values[idx++] as Boolean
-                val seedColor = values[idx++] as Color
-                val useDynColorFollowPkgIcon = values[idx++] as Boolean
-                val useDynColorFollowPkgIconForLiveActivity = values[idx] as Boolean
-                val customizeAuthorizer =
-                    if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
+        _uiEvents.emit(PreferredViewEvent.ShowUpdateLoading)
 
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-                    MonetCompat.getInstance().updateMonetColors()
+        try {
+            val config = ConfigEntity.default.copy(authorizer = state.authorizer)
 
-                PreferredViewState(
-                    progress = PreferredViewState.Progress.Loaded,
-                    authorizer = authorizer,
-                    customizeAuthorizer = customizeAuthorizer,
-                    installMode = installMode,
-                    showDialogInstallExtendedMenu = showMenu,
-                    showSmartSuggestion = showSuggestion,
-                    disableNotificationForDialogInstall = showNotification,
-                    showDialogWhenPressingNotification = showDialog,
-                    dhizukuAutoCloseCountDown = countDown,
-                    notificationSuccessAutoClearSeconds = notificationSuccessAutoClearSeconds,
-                    versionCompareInSingleLine = versionCompareInMultiLine,
-                    sdkCompareInMultiLine = sdkCompareInSingleLine,
-                    showOPPOSpecial = showOPPOSpecial,
-                    showExpressiveUI = showExpressiveUI,
-                    showLiveActivity = showLiveActivity,
-                    autoLockInstaller = autoLockInstaller,
-                    autoSilentInstall = autoSilentInstall,
-                    showMiuixUI = showMiuixUI,
-                    preferSystemIcon = preferSystemIcon,
-                    showLauncherIcon = showLauncherIcon,
-                    managedInstallerPackages = managedInstallerPackages,
-                    managedBlacklistPackages = managedBlacklistPackages,
-                    managedSharedUserIdBlacklist = managedSharedUserIdBlacklist,
-                    managedSharedUserIdExemptedPackages = managedSharedUserIdExemptPkg,
-                    adbVerifyEnabled = adbVerifyEnabled,
-                    isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations,
-                    labShizukuHookMode = labShizukuHookMode,
-                    labRootEnableModuleFlash = labRootModuleFlash,
-                    labRootImplementation = labRootImplementation,
-                    themeMode = themeMode,
-                    paletteStyle = paletteStyle,
-                    useDynamicColor = useDynamicColor,
-                    useMiuixMonet = useMiuixMonet,
-                    seedColor = seedColor,
-                    useDynColorFollowPkgIcon = useDynColorFollowPkgIcon,
-                    useDynColorFollowPkgIconForLiveActivity = useDynColorFollowPkgIconForLiveActivity
-                )
-            }.collectLatest { state = it }
+            Timber.d("Starting in-app update using cached URL: ${updateInfo.downloadUrl}")
+
+            appUpdater.performInAppUpdate(updateInfo.downloadUrl, config)
+        } catch (e: Exception) {
+            Timber.e(e, "In-app update failed")
+            _uiEvents.emit(PreferredViewEvent.ShowInAppUpdateErrorDetail("Update Failed", e))
+        } finally {
+            // Hide loading indicator regardless of success or failure
+            _uiEvents.emit(PreferredViewEvent.HideUpdateLoading)
         }
     }
 
@@ -544,7 +383,7 @@ class PreferredViewModel(
         } catch (e: Exception) {
             Timber.e(e, "Could not start activity to request ignore battery optimizations")
             viewModelScope.launch {
-                _uiEvents.send(PreferredViewEvent.ShowSnackbar("Could not start activity to request ignore battery optimizations"))
+                _uiEvents.emit(PreferredViewEvent.ShowDefaultInstallerResult("Could not start activity to request ignore battery optimizations"))
             }
         }
 
@@ -596,6 +435,14 @@ class PreferredViewModel(
             adbVerifyEnabledFlow.value = enabled
         }
 
+    private fun checkUpdate() =
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = updateChecker.check()
+            if (result != null) {
+                updateResultFlow.value = result
+            }
+        }
+
     private suspend fun setDefaultInstaller(lock: Boolean, action: PreferredViewAction) {
         val authorizer = state.authorizer
         val component = ComponentName(context, InstallerActivity::class.java)
@@ -635,18 +482,21 @@ class PreferredViewModel(
 
     private fun setUseDynamicColor(use: Boolean) = viewModelScope.launch {
         appDataStore.putBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, use)
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             if (use) {
-                MonetCompat.getInstance().getAvailableWallpaperColors()?.let {
-                    appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, it.first())
+                val availableColors = MonetCompat.getInstance().getAvailableWallpaperColors()
+                if (!availableColors.isNullOrEmpty()) {
+                    val bestColor = availableColors.first()
+                    appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, bestColor)
+                } else {
+                    appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
                 }
-            } else {
-                appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
             }
         }
     }
 
-    private fun setUsemiuixMonet(use: Boolean) = viewModelScope.launch {
+    private fun setUseMiuixMonet(use: Boolean) = viewModelScope.launch {
         appDataStore.putBoolean(AppDataStore.UI_USE_MIUIX_MONET, use)
     }
 
@@ -676,10 +526,240 @@ class PreferredViewModel(
     }.onSuccess {
         Timber.d("Privileged action succeeded")
         if (successMessage != null)
-            _uiEvents.send(PreferredViewEvent.ShowSnackbar(successMessage))
+            _uiEvents.emit(PreferredViewEvent.ShowDefaultInstallerResult(successMessage))
     }.onFailure { exception ->
         Timber.e(exception, "Privileged action failed")
-        _uiEvents.send(PreferredViewEvent.ShowErrorDialog(titleForError, exception, action))
+        _uiEvents.emit(PreferredViewEvent.ShowDefaultInstallerErrorDetail(titleForError, exception, action))
     }
 
+    private fun getWallpaperColorsFlow(): Flow<List<Int>?> = flow {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            // MonetCompat operations should be done safely
+            val colors = try {
+                MonetCompat.getInstance().getAvailableWallpaperColors()
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to get Monet colors")
+                null
+            }
+            emit(colors)
+        } else {
+            emit(null)
+        }
+    }.flowOn(Dispatchers.IO)
+
+    private fun getAndCombineState() =
+        viewModelScope.launch {
+            val authorizerFlow = appDataStore.getString(AppDataStore.AUTHORIZER)
+                .map { AuthorizerConverter.revert(it) }
+            val customizeAuthorizerFlow = appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER)
+            val installModeFlow = appDataStore.getString(AppDataStore.INSTALL_MODE)
+                .map { InstallModeConverter.revert(it) }
+            val showDialogInstallExtendedMenuFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU)
+            val showIntelligentSuggestionFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true)
+            val showNotificationForDialogInstallFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false)
+            val showDialogWhenPressingNotificationFlow =
+                appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true)
+            val dhizukuAutoCloseCountDownFlow =
+                appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
+            val notificationSuccessAutoClearSecondsFlow =
+                appDataStore.getInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, 0)
+            val versionCompareInSingleLineFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
+            val sdkCompareInSingleLineFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false)
+            val showOPPOSpecialFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false)
+            val showExpressiveUIFlow =
+                appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
+            val showLiveActivityFlow =
+                appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false)
+            val autoLockInstallerFlow =
+                appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER, false)
+            val autoSilentInstallFlow =
+                appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false)
+            val showMiuixUIFlow =
+                appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
+            val preferSystemIconFlow =
+                appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false)
+            val showLauncherIconFlow =
+                appDataStore.getBoolean(AppDataStore.SHOW_LAUNCHER_ICON, true)
+            val managedInstallerPackagesFlow =
+                appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST)
+            val managedBlacklistPackagesFlow =
+                appDataStore.getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
+            val managedSharedUserIdBlacklistFlow =
+                appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
+            val managedSharedUserIdExemptPkgFlow =
+                appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
+            val labShizukuHookModeFlow =
+                appDataStore.getBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, false)
+            val labRootModuleFlashFlow =
+                appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false)
+            val labRootImplementationFlow =
+                appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
+                    .map { RootImplementation.fromString(it) }
+            val themeModeFlow =
+                appDataStore.getString(AppDataStore.THEME_MODE, ThemeMode.SYSTEM.name)
+                    .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
+            val paletteStyleFlow =
+                appDataStore.getString(AppDataStore.THEME_PALETTE_STYLE, PaletteStyle.TonalSpot.name)
+                    .map { runCatching { PaletteStyle.valueOf(it) }.getOrDefault(PaletteStyle.TonalSpot) }
+            val useDynamicColorFlow =
+                appDataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            val useMiuixMonetFlow =
+                appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false)
+            val seedColorFlow =
+                appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
+                    .map { Color(it) }
+            val wallpaperColorsFlow = getWallpaperColorsFlow()
+            val useDynColorFollowPkgIconFlow =
+                appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false)
+            val useDynColorFollowPkgIconForLiveActivityFlow =
+                appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false)
+
+            combine(
+                authorizerFlow,
+                customizeAuthorizerFlow,
+                installModeFlow,
+                showDialogInstallExtendedMenuFlow,
+                showIntelligentSuggestionFlow,
+                showNotificationForDialogInstallFlow,
+                showDialogWhenPressingNotificationFlow,
+                dhizukuAutoCloseCountDownFlow,
+                notificationSuccessAutoClearSecondsFlow,
+                versionCompareInSingleLineFlow,
+                sdkCompareInSingleLineFlow,
+                showOPPOSpecialFlow,
+                showExpressiveUIFlow,
+                showLiveActivityFlow,
+                autoLockInstallerFlow,
+                autoSilentInstallFlow,
+                showMiuixUIFlow,
+                preferSystemIconFlow,
+                showLauncherIconFlow,
+                managedInstallerPackagesFlow,
+                managedBlacklistPackagesFlow,
+                managedSharedUserIdBlacklistFlow,
+                managedSharedUserIdExemptPkgFlow,
+                adbVerifyEnabledFlow,
+                isIgnoringBatteryOptFlow,
+                labShizukuHookModeFlow,
+                labRootModuleFlashFlow,
+                labRootImplementationFlow,
+                themeModeFlow,
+                paletteStyleFlow,
+                useDynamicColorFlow,
+                useMiuixMonetFlow,
+                seedColorFlow,
+                wallpaperColorsFlow,
+                useDynColorFollowPkgIconFlow,
+                useDynColorFollowPkgIconForLiveActivityFlow,
+                updateResultFlow
+            ) { values: Array<Any?> ->
+                var idx = 0
+                val authorizer = values[idx++] as ConfigEntity.Authorizer
+                val customize = values[idx++] as String
+                val installMode = values[idx++] as ConfigEntity.InstallMode
+                val showMenu = values[idx++] as Boolean
+                val showSuggestion = values[idx++] as Boolean
+                val showNotification = values[idx++] as Boolean
+                val showDialog = values[idx++] as Boolean
+                val countDown = values[idx++] as Int
+                val notificationSuccessAutoClearSeconds = values[idx++] as Int
+                val versionCompareInMultiLine = values[idx++] as Boolean
+                val sdkCompareInSingleLine = values[idx++] as Boolean
+                val showOPPOSpecial = values[idx++] as Boolean
+                val showExpressiveUI = values[idx++] as Boolean
+                val showLiveActivity = values[idx++] as Boolean
+                val autoLockInstaller = values[idx++] as Boolean
+                val autoSilentInstall = values[idx++] as Boolean
+                val showMiuixUI = values[idx++] as Boolean
+                val preferSystemIcon = values[idx++] as Boolean
+                val showLauncherIcon = values[idx++] as Boolean
+                val managedInstallerPackages =
+                    (values[idx++] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedBlacklistPackages =
+                    (values[idx++] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val managedSharedUserIdBlacklist =
+                    (values[idx++] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
+                val managedSharedUserIdExemptPkg =
+                    (values[idx++] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val adbVerifyEnabled = values[idx++] as Boolean
+                val isIgnoringBatteryOptimizations = values[idx++] as Boolean
+                val labShizukuHookMode = values[idx++] as Boolean
+                val labRootModuleFlash = values[idx++] as Boolean
+                val labRootImplementation = values[idx++] as RootImplementation
+                val themeMode = values[idx++] as ThemeMode
+                val paletteStyle = values[idx++] as PaletteStyle
+                val useDynamicColor = values[idx++] as Boolean
+                val useMiuixMonet = values[idx++] as Boolean
+                val seedColor = values[idx++] as Color
+                @Suppress("UNCHECKED_CAST") val wallpaperColors = values[idx++] as? List<Int>
+                val useDynColorFollowPkgIcon = values[idx++] as Boolean
+                val useDynColorFollowPkgIconForLiveActivity = values[idx++] as Boolean
+                val updateResult = values[idx] as UpdateChecker.CheckResult?
+
+                // If using dynamic color on legacy Android (< S), use wallpaper colors.
+                // Otherwise (Dynamic Color off OR Android 12+), use PresetColors.
+                val availableColors: List<RawColor> = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                    if (!wallpaperColors.isNullOrEmpty()) {
+                        // Transform Int colors to RawColor for type safety in UI
+                        wallpaperColors.map { colorInt ->
+                            RawColor(
+                                key = colorInt.toHexString(),
+                                color = Color(colorInt)
+                            )
+                        }
+                    } else PresetColors
+                else PresetColors
+                val hasUpdate = updateResult?.hasUpdate ?: false
+                val remoteVersion = updateResult?.remoteVersion ?: ""
+                val customizeAuthorizer =
+                    if (authorizer == ConfigEntity.Authorizer.Customize) customize else ""
+                PreferredViewState(
+                    progress = PreferredViewState.Progress.Loaded,
+                    authorizer = authorizer,
+                    customizeAuthorizer = customizeAuthorizer,
+                    installMode = installMode,
+                    showDialogInstallExtendedMenu = showMenu,
+                    showSmartSuggestion = showSuggestion,
+                    disableNotificationForDialogInstall = showNotification,
+                    showDialogWhenPressingNotification = showDialog,
+                    dhizukuAutoCloseCountDown = countDown,
+                    notificationSuccessAutoClearSeconds = notificationSuccessAutoClearSeconds,
+                    versionCompareInSingleLine = versionCompareInMultiLine,
+                    sdkCompareInMultiLine = sdkCompareInSingleLine,
+                    showOPPOSpecial = showOPPOSpecial,
+                    showExpressiveUI = showExpressiveUI,
+                    showLiveActivity = showLiveActivity,
+                    autoLockInstaller = autoLockInstaller,
+                    autoSilentInstall = autoSilentInstall,
+                    showMiuixUI = showMiuixUI,
+                    preferSystemIcon = preferSystemIcon,
+                    showLauncherIcon = showLauncherIcon,
+                    managedInstallerPackages = managedInstallerPackages,
+                    managedBlacklistPackages = managedBlacklistPackages,
+                    managedSharedUserIdBlacklist = managedSharedUserIdBlacklist,
+                    managedSharedUserIdExemptedPackages = managedSharedUserIdExemptPkg,
+                    adbVerifyEnabled = adbVerifyEnabled,
+                    isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations,
+                    labShizukuHookMode = labShizukuHookMode,
+                    labRootEnableModuleFlash = labRootModuleFlash,
+                    labRootImplementation = labRootImplementation,
+                    themeMode = themeMode,
+                    paletteStyle = paletteStyle,
+                    useDynamicColor = useDynamicColor,
+                    useMiuixMonet = useMiuixMonet,
+                    seedColor = seedColor,
+                    availableColors = availableColors,
+                    useDynColorFollowPkgIcon = useDynColorFollowPkgIcon,
+                    useDynColorFollowPkgIconForLiveActivity = useDynColorFollowPkgIconForLiveActivity,
+                    hasUpdate = hasUpdate,
+                    remoteVersion = remoteVersion
+                )
+            }.collectLatest { state = it }
+        }
 }

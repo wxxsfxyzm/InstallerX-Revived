@@ -168,7 +168,7 @@ internal fun ErrorTextBlock(
  * @param modifier Modifier for the root Column.
  */
 @Composable
-internal fun WarningTextBlock(
+fun WarningTextBlock(
     warnings: List<Pair<String, Color>>,
     modifier: Modifier = Modifier,
 ) {

@@ -512,12 +512,14 @@ fun SettingsAboutItemWidget(
     imageContentDescription: String? = null,
     headlineContentText: String,
     supportingContentText: String? = null,
+    supportingContentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     onClick: () -> Unit
 ) {
     BaseWidget(
         icon = imageVector,
         title = headlineContentText,
         description = supportingContentText,
+        descriptionColor = supportingContentColor,
         onClick = onClick
     ) {
         // This pkg has no trailing content, so this lambda is empty.
@@ -597,39 +599,59 @@ fun SelectableSettingItem(
 
 @Composable
 fun BottomSheetContent(
-    title: String
+    title: String,
+    hasUpdate: Boolean,
+    canDirectUpdate: Boolean,
+    onDirectUpdateClick: () -> Unit
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     Column(
         modifier = Modifier
-            .fillMaxWidth() // 填充横向宽度
-            .padding(16.dp, 0.dp, 16.dp, 16.dp), // 整体内边距
-        horizontalAlignment = Alignment.CenterHorizontally // 左对齐内容
+            .fillMaxWidth()
+            .padding(16.dp, 0.dp, 16.dp, 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 标题
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineMedium, // 使用合适的标题样式
-            modifier = Modifier.padding(bottom = 20.dp) // 标题下方留白
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        // GitHub 按钮
+        if (hasUpdate && canDirectUpdate) {
+            Button(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    onDirectUpdateClick()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = AppIcons.Update,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.get_update_directly),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                // 点击按钮时调用 openUrl 工具函数
                 context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
             },
-            modifier = Modifier.fillMaxWidth() // 按钮填充横向宽度
+            modifier = Modifier.fillMaxWidth()
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_github),
-                contentDescription = "GitHub Icon", // 辅助功能描述
-                modifier = Modifier.size(24.dp) // 图标大小
+                contentDescription = "GitHub Icon",
+                modifier = Modifier.size(24.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp)) // 图标与文字之间的间隔
-            Text(text = "GitHub") // 按钮文本
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "GitHub")
         }
         Button(
             onClick = {
@@ -644,11 +666,12 @@ fun BottomSheetContent(
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Telegram") // 按钮文本
+            Text(text = "Telegram")
         }
-        Spacer(modifier = Modifier.size(60.dp)) // 按钮下方留白
+        Spacer(modifier = Modifier.size(60.dp))
     }
 }
+
 
 /**
  * A reusable widget to display and manage a list of NamedPackage items.

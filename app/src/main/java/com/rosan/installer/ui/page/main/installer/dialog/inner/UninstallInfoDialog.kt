@@ -35,11 +35,11 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
 
 /**
  * Provides a base dialog structure for the uninstall process.

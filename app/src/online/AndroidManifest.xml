@@ -4,4 +4,5 @@
     <!-- only in online flavor -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <application android:networkSecurityConfig="@xml/network_security_config" />
 </manifest>

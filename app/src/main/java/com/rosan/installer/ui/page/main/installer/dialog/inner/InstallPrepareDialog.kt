@@ -26,19 +26,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import timber.log.Timber
 
@@ -122,7 +122,7 @@ fun installPrepareDialog( // 小写开头
 
     val primaryEntity = selectedEntities.first()
     val entityToInstall = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-    val containerType = primaryEntity.containerType
+    val containerType = primaryEntity.sourceType
     val preInstallAppInfo = currentPackage.installedAppInfo // Get pre-install info from the new model
 
     Timber.tag("AppEntity")
@@ -304,6 +304,7 @@ fun installPrepareDialog( // 小写开头
                 if (canInstall) {
                     add(DialogButton(stringResource(buttonTextId), 1f) {
                         viewModel.dispatch(InstallerViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Background)
                     })
                 }
                 // else if app can be installed and extended menu is shown

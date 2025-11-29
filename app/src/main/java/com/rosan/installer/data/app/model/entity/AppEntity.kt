@@ -1,26 +1,23 @@
 package com.rosan.installer.data.app.model.entity
 
 import android.graphics.drawable.Drawable
-import com.rosan.installer.build.Architecture
+import com.rosan.installer.build.model.entity.Architecture
+import com.rosan.installer.data.app.util.FilterType
+import com.rosan.installer.data.app.util.SplitType
 
 sealed class AppEntity {
     abstract val packageName: String
-
     abstract val name: String
-
+    abstract val data: DataEntity
     abstract val targetSdk: String?
-
     abstract val minSdk: String?
-
     abstract val arch: Architecture?
-
-    // each app entity may have a container type, such as a split APK or a collection
-    abstract val containerType: DataType?
+    abstract val sourceType: DataType?
 
     data class BaseEntity(
         override val packageName: String,
         val sharedUserId: String?,
-        val data: DataEntity,
+        override val data: DataEntity,
         val versionCode: Long,
         val versionName: String,
         val label: String?,
@@ -31,7 +28,7 @@ sealed class AppEntity {
         // Only available for oppo apk
         val minOsdkVersion: String? = null,
         override val arch: Architecture? = null,
-        override val containerType: DataType? = null,
+        override val sourceType: DataType? = null,
         // Get from AndroidManifest.xml
         val permissions: List<String>? = null,
         val signatureHash: String? = null,
@@ -40,35 +37,42 @@ sealed class AppEntity {
 
     data class SplitEntity(
         override val packageName: String,
-        val data: DataEntity,
+        override val data: DataEntity,
         val splitName: String,
         override val targetSdk: String?,
         override val minSdk: String?,
         override val arch: Architecture?,
-        override val containerType: DataType? = null,
+        override val sourceType: DataType? = null,
+        // Split Type: 用于 UI 分组 (显示在哪个标题下)
+        val type: SplitType = SplitType.FEATURE,
+        // Filter Type: 用于 安装选择策略 (如何过滤)
+        // 默认是 NONE，表示这个 Split 没有特殊的硬件/语言限制，只要用户想要就能装
+        val filterType: FilterType = FilterType.NONE,
+        // Extracted config value ("zh", "xhdpi", "arm64-v8a")
+        val configValue: String? = null
     ) : AppEntity() {
         override val name = "$splitName.apk"
     }
 
     data class DexMetadataEntity(
         override val packageName: String,
-        val data: DataEntity,
+        override val data: DataEntity,
         val dmName: String,
         override val targetSdk: String?,
         override val minSdk: String?,
         override val arch: Architecture? = null,
-        override val containerType: DataType? = null,
+        override val sourceType: DataType? = null,
     ) : AppEntity() {
         override val name = "base.dm"
     }
 
     data class CollectionEntity(
         override val packageName: String = "com.rosan.installer.collection.${System.nanoTime()}",
-        val data: DataEntity,
+        override val data: DataEntity,
         override val targetSdk: String? = null,
         override val minSdk: String? = null,
         override val arch: Architecture? = null,
-        override val containerType: DataType? = null,
+        override val sourceType: DataType? = null,
         val label: String = "Collection of APKs",
         val versionCode: Long = -1,
         val versionName: String = "",
@@ -83,8 +87,8 @@ sealed class AppEntity {
         val versionCode: Long,
         val author: String,
         val description: String,
-        val data: DataEntity,
-        override val containerType: DataType? = null
+        override val data: DataEntity,
+        override val sourceType: DataType? = null
     ) : AppEntity() {
         override val packageName: String
             get() = id

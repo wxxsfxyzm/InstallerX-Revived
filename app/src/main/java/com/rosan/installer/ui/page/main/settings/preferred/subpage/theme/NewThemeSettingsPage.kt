@@ -8,8 +8,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,16 +19,13 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.twotone.Colorize
@@ -38,7 +33,6 @@ import androidx.compose.material.icons.twotone.InvertColors
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -55,20 +49,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
@@ -76,12 +66,8 @@ import com.rosan.installer.ui.page.main.widget.setting.SelectableSettingItem
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.m3color.PaletteStyle
-import com.rosan.installer.ui.theme.m3color.PresetColors
-import com.rosan.installer.ui.theme.m3color.RawColor
 import com.rosan.installer.ui.theme.m3color.ThemeMode
-import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
 import com.rosan.installer.ui.theme.none
-import com.rosan.installer.ui.util.getDisplayName
 
 // This is now a top-level composable, likely in its own file.
 // It takes NavController instead of an onBack lambda.
@@ -286,101 +272,77 @@ fun NewThemeSettingsPage(
                 }
             }
 
-            if (!state.showMiuixUI) {
-                item {
-                    // Define the visibility logic based on Android version and the dynamic color switch state
-                    val showColorGrid = !state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+            item {
+                AnimatedVisibility(
+                    visible = !state.useDynamicColor,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
+                            expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
+                            shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
+                ) {
+                    SplicedColumnGroup(
+                        title = stringResource(R.string.theme_settings_theme_color),
+                        content =
+                            buildList {
+                                add(
+                                    @Composable {
+                                        BoxWithConstraints(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 12.dp, vertical = 16.dp)
+                                        ) {
+                                            val itemMinWidth = 88.dp
+                                            val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
+                                            val chunkedColors = state.availableColors.chunked(columns)
 
-                    AnimatedVisibility(
-                        visible = showColorGrid,
-                        enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
-                                expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
-                        exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
-                                shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
-                    ) {
-                        SplicedColumnGroup(
-                            title = stringResource(R.string.theme_settings_theme_color),
-                            content =
-                                buildList {
-                                    add(
-                                        @Composable {
-                                            BoxWithConstraints(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(horizontal = 12.dp, vertical = 16.dp)
+                                            Column(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                verticalArrangement = Arrangement.spacedBy(8.dp)
                                             ) {
-                                                val itemMinWidth = 88.dp
-
-                                                val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
-
-                                                val chunkedColors: List<List<Any>> = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                                    var wallpaperColors by remember { mutableStateOf<List<Int>?>(null) }
-
-                                                    LaunchedEffect(Unit) {
-                                                        wallpaperColors = MonetCompat.getInstance().getAvailableWallpaperColors()
-                                                    }
-
-                                                    wallpaperColors?.chunked(columns) ?: PresetColors.chunked(columns)
-                                                } else PresetColors.chunked(columns)
-
-                                                Column(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                                ) {
-                                                    chunkedColors.forEach { rowItems ->
-                                                        Row(
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            horizontalArrangement = Arrangement.Center
-                                                        ) {
-                                                            rowItems.forEach { namedColor ->
-                                                                Box(
-                                                                    modifier = Modifier.weight(1f),
-                                                                    contentAlignment = Alignment.Center
+                                                chunkedColors.forEach { rowItems ->
+                                                    Row(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        horizontalArrangement = Arrangement.Center
+                                                    ) {
+                                                        rowItems.forEach { rawColor ->
+                                                            Box(
+                                                                modifier = Modifier.weight(1f),
+                                                                contentAlignment = Alignment.Center
+                                                            ) {
+                                                                ColorSwatchPreview(
+                                                                    rawColor = rawColor,
+                                                                    currentStyle = state.paletteStyle,
+                                                                    textStyle = MaterialTheme.typography.labelMedium.copy(
+                                                                        fontSize = 13.sp
+                                                                    ),
+                                                                    textColor = MaterialTheme.colorScheme.onSurface,
+                                                                    isSelected = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                                                                        state.seedColor == rawColor.color
+                                                                    else !state.useDynamicColor && state.seedColor == rawColor.color,
                                                                 ) {
-                                                                    if (namedColor is RawColor) {
-                                                                        ColorSwatchPreview(
-                                                                            rawColor = namedColor,
-                                                                            currentStyle = state.paletteStyle,
-                                                                            isSelected = !state.useDynamicColor && state.seedColor == namedColor.color
-                                                                        ) {
-                                                                            viewModel.dispatch(
-                                                                                PreferredViewAction.SetSeedColor(
-                                                                                    namedColor.color
-                                                                                )
-                                                                            )
-                                                                        }
-                                                                    } else if (namedColor is Int) {
-                                                                        val rawColor = RawColor(namedColor.toHexString(), Color(namedColor))
-                                                                        ColorSwatchPreview(
-                                                                            rawColor,
-                                                                            currentStyle = state.paletteStyle,
-                                                                            isSelected = state.seedColor == rawColor.color
-                                                                        ) {
-                                                                            viewModel.dispatch(
-                                                                                PreferredViewAction.SetSeedColor(
-                                                                                    rawColor.color
-                                                                                )
-                                                                            )
-                                                                        }
-                                                                    }
+                                                                    viewModel.dispatch(
+                                                                        PreferredViewAction.SetSeedColor(
+                                                                            rawColor.color
+                                                                        )
+                                                                    )
                                                                 }
                                                             }
+                                                        }
 
-                                                            val remaining = columns - rowItems.size
-                                                            if (remaining > 0) {
-                                                                repeat(remaining) {
-                                                                    Spacer(Modifier.weight(1f))
-                                                                }
+                                                        val remaining = columns - rowItems.size
+                                                        if (remaining > 0) {
+                                                            repeat(remaining) {
+                                                                Spacer(Modifier.weight(1f))
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
                                         }
-                                    )
-                                }
-                        )
-                    }
+                                    }
+                                )
+                            }
+                    )
                 }
             }
 
@@ -427,7 +389,7 @@ fun NewThemeSettingsPage(
                     }
                 )
             }
-            item { Spacer(modifier = Modifier.height(12.dp)) }
+            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }
@@ -509,100 +471,4 @@ internal fun ThemeModeDialog(
             }
         }
     )
-}
-
-
-@Composable
-internal fun ColorSwatchPreview(
-    rawColor: RawColor,
-    currentStyle: PaletteStyle,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val isDarkForPreview = false
-    val scheme = remember(rawColor.color, currentStyle, isDarkForPreview) {
-        dynamicColorScheme(
-            keyColor = rawColor.color,
-            isDark = isDarkForPreview,
-            style = currentStyle
-        )
-    }
-
-    val primaryForSwatch = scheme.primaryContainer.copy(alpha = 0.9f)
-    val secondaryForSwatch = scheme.secondaryContainer.copy(alpha = 0.6f)
-    val tertiaryForSwatch = scheme.tertiaryContainer.copy(alpha = 0.9f)
-
-    val squircleBackgroundColor = scheme.primary.copy(alpha = 0.3f)
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .background(color = squircleBackgroundColor, shape = RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    drawArc(
-                        color = primaryForSwatch,
-                        startAngle = 180f,
-                        sweepAngle = 180f,
-                        useCenter = true
-                    )
-                    drawArc(
-                        color = tertiaryForSwatch,
-                        startAngle = 90f,
-                        sweepAngle = 90f,
-                        useCenter = true
-                    )
-                    drawArc(
-                        color = secondaryForSwatch,
-                        startAngle = 0f,
-                        sweepAngle = 90f,
-                        useCenter = true
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(scheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isSelected) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Selected",
-                            tint = scheme.inversePrimary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-            }
-        }
-
-        val displayName = rawColor.getDisplayName(LocalContext.current)
-        if (displayName != rawColor.key) {
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = displayName,
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
 }

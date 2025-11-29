@@ -3,10 +3,13 @@ package com.rosan.installer.ui.page.main.installer.dialog
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.inner.analyseFailedDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.analysingDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.installChoiceDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.installCompletedDialog
+import com.rosan.installer.ui.page.main.installer.dialog.inner.installConfirmDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.installExtendedMenuDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.installExtendedMenuSubMenuDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.installFailedDialog
@@ -64,6 +67,7 @@ fun dialogGenerateParams(
             (viewModel.state as InstallerViewState.InstallCompleted).results
         )
 
+        is InstallerViewState.InstallConfirm -> installConfirmDialog(viewModel)
         is InstallerViewState.InstallRetryDowngradeUsingUninstall -> installingDialog(installer, viewModel)
         is InstallerViewState.UninstallReady -> uninstallReadyDialog(viewModel)
         is InstallerViewState.UninstallSuccess -> uninstallSuccessDialog(viewModel)

@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
-import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.HomeCardItem
 
 /**

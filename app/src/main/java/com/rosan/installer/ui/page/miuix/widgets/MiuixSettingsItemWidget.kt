@@ -56,6 +56,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Text
@@ -398,17 +399,17 @@ fun MiuixClearCache() {
 @Composable
 fun MiuixSettingsAboutItemWidget(
     modifier: Modifier = Modifier,
-    imageVector: ImageVector? = null,
-    imageContentDescription: String? = null,
-    headlineContentText: String,
-    supportingContentText: String? = null,
+    title: String,
+    summary: String? = null,
+    summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     onClick: () -> Unit
 ) {
     // Use the library's BasicComponent as the foundation.
     BasicComponent(
         modifier = modifier, // Pass the modifier to the root component.
-        title = headlineContentText,
-        summary = supportingContentText,
+        title = title,
+        summary = summary,
+        summaryColor = summaryColor,
         onClick = onClick
         // No rightActions are needed as this item has no trailing content.
     )

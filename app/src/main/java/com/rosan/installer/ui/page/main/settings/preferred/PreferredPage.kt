@@ -37,8 +37,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
@@ -82,18 +82,18 @@ fun PreferredPage(
     }
 
     val snackBarHostState = remember { SnackbarHostState() }
-    var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowErrorDialog?>(null) }
+    var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             snackBarHostState.currentSnackbarData?.dismiss() // Dismiss any existing snackbar
             when (event) {
-                is PreferredViewEvent.ShowSnackbar -> {
+                is PreferredViewEvent.ShowDefaultInstallerResult -> {
                     snackBarHostState.showSnackbar(event.message)
                 }
 
-                is PreferredViewEvent.ShowErrorDialog -> {
+                is PreferredViewEvent.ShowDefaultInstallerErrorDetail -> {
                     val snackbarResult = snackBarHostState.showSnackbar(
                         message = event.title,
                         actionLabel = context.getString(R.string.details),
@@ -103,6 +103,8 @@ fun PreferredPage(
                         errorDialogInfo = event
                     }
                 }
+
+                else -> null
             }
         }
     }
@@ -158,7 +160,6 @@ fun PreferredPage(
                         .padding(paddingValues)
                 ) {
                     item { LabelWidget(stringResource(R.string.global)) }
-                    // pkg { DataAuthorizerWidget(viewModel) }
                     item {
                         SettingsNavigationItemWidget(
                             icon = AppIcons.Theme,
@@ -233,10 +234,14 @@ fun PreferredPage(
                         )
                     }
                     item {
+                        val updateSummary =
+                            if (state.hasUpdate) stringResource(R.string.update_available, state.remoteVersion)
+                            else stringResource(R.string.get_update_detail)
                         SettingsAboutItemWidget(
                             imageVector = AppIcons.Update,
                             headlineContentText = stringResource(R.string.get_update),
-                            supportingContentText = stringResource(R.string.get_update_detail),
+                            supportingContentText = updateSummary,
+                            supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             onClick = { showBottomSheet = true }
                         )
                     }
@@ -266,9 +271,16 @@ fun PreferredPage(
             title = dialogInfo.title
         )
     }
-    if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-        BottomSheetContent(
-            title = stringResource(R.string.get_update)
-        )
-    }
+    if (showBottomSheet)
+        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+            BottomSheetContent(
+                title = stringResource(R.string.get_update),
+                hasUpdate = state.hasUpdate,
+                canDirectUpdate = state.authorizer != ConfigEntity.Authorizer.None,
+                onDirectUpdateClick = {
+                    showBottomSheet = false
+                    viewModel.dispatch(PreferredViewAction.Update)
+                }
+            )
+        }
 }

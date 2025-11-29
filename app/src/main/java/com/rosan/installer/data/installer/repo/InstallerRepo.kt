@@ -8,7 +8,7 @@ import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
 
 interface InstallerRepo : Closeable {
@@ -19,8 +19,8 @@ interface InstallerRepo : Closeable {
     var analysisResults: List<PackageAnalysisResult>
     val progress: Flow<ProgressEntity>
     val background: Flow<Boolean>
-    val uninstallInfo: MutableStateFlow<UninstallInfo?>
-    val confirmationDetails: Flow<ConfirmationDetails?>
+    val uninstallInfo: StateFlow<UninstallInfo?>
+    val confirmationDetails: StateFlow<ConfirmationDetails?>
 
     /**
      * Resolves information for a package to be installed.
@@ -39,8 +39,8 @@ interface InstallerRepo : Closeable {
 
     fun resolveConfirmInstall(activity: Activity, sessionId: Int)
     fun approveConfirmation(sessionId: Int, granted: Boolean)
-    
-    fun background(value: Boolean)
 
+    fun background(value: Boolean)
+    fun cancel()
     override fun close()
 }

@@ -3,8 +3,8 @@ package com.rosan.installer
 import android.app.Application
 import android.os.Build
 import com.kieronquinn.monetcompat.core.MonetCompat
-import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.di.init.appModules
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger

@@ -3,10 +3,12 @@ package com.rosan.installer.ui.page.main.settings.preferred
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,8 +41,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.build.Level
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
@@ -68,14 +70,10 @@ fun NewPreferredPage(
     val state = viewModel.state
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
-
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(lifecycleOwner) {
-        // repeatOnLifecycle will ensure that the action is dispatched only when the lifecycle is in RESUMED state
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            // Dispatch the action to refresh the ignore battery optimization status
-            // This will be called when the lifecycle is resumed, ensuring the status is up-to-date
             viewModel.dispatch(PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus)
         }
     }
@@ -86,19 +84,20 @@ fun NewPreferredPage(
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
     }
 
+    var updateErrorInfo by remember { mutableStateOf<PreferredViewEvent.ShowInAppUpdateErrorDetail?>(null) }
     val snackBarHostState = remember { SnackbarHostState() }
-    var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowErrorDialog?>(null) }
+    var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
-            snackBarHostState.currentSnackbarData?.dismiss() // Dismiss any existing snackbar
+            snackBarHostState.currentSnackbarData?.dismiss()
             when (event) {
-                is PreferredViewEvent.ShowSnackbar -> {
+                is PreferredViewEvent.ShowDefaultInstallerResult -> {
                     snackBarHostState.showSnackbar(event.message)
                 }
 
-                is PreferredViewEvent.ShowErrorDialog -> {
+                is PreferredViewEvent.ShowDefaultInstallerErrorDetail -> {
                     val snackbarResult = snackBarHostState.showSnackbar(
                         message = event.title,
                         actionLabel = context.getString(R.string.details),
@@ -108,6 +107,12 @@ fun NewPreferredPage(
                         errorDialogInfo = event
                     }
                 }
+
+                is PreferredViewEvent.ShowInAppUpdateErrorDetail -> {
+                    updateErrorInfo = event
+                }
+
+                else -> null
             }
         }
     }
@@ -172,7 +177,6 @@ fun NewPreferredPage(
                                         title = stringResource(R.string.theme_settings),
                                         description = stringResource(R.string.theme_settings_desc),
                                         onClick = {
-                                            // Navigate using NavController instead of changing state
                                             navController.navigate(SettingsScreen.Theme.route)
                                         }
                                     )
@@ -183,7 +187,6 @@ fun NewPreferredPage(
                                         title = stringResource(R.string.installer_settings),
                                         description = stringResource(R.string.installer_settings_desc),
                                         onClick = {
-                                            // Navigate using NavController
                                             navController.navigate(SettingsScreen.InstallerGlobal.route)
                                         }
                                     )
@@ -192,7 +195,9 @@ fun NewPreferredPage(
                         )
                     }
 
-                    if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) item { NoneInstallerTipCard() }
+                    if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) {
+                        item { NoneInstallerTipCard() }
+                    }
 
                     // --- Basic Settings Group ---
                     item {
@@ -225,18 +230,12 @@ fun NewPreferredPage(
                                 },
                                 {
                                     DefaultInstaller(true) {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.SetDefaultInstaller(true)
-                                        )
+                                        viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true))
                                     }
                                 },
                                 {
                                     DefaultInstaller(false) {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.SetDefaultInstaller(
-                                                false
-                                            )
-                                        )
+                                        viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false))
                                     }
                                 },
                                 { ClearCache() }
@@ -266,34 +265,58 @@ fun NewPreferredPage(
                                     )
                                 }
                                 add {
+                                    val updateSummary =
+                                        if (state.hasUpdate) stringResource(R.string.update_available, state.remoteVersion)
+                                        else stringResource(R.string.get_update_detail)
                                     SettingsAboutItemWidget(
                                         imageVector = AppIcons.Update,
                                         headlineContentText = stringResource(R.string.get_update),
-                                        supportingContentText = stringResource(R.string.get_update_detail),
+                                        supportingContentText = updateSummary,
+                                        supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                         onClick = { showBottomSheet = true }
                                     )
                                 }
                             }
                         )
                     }
+                    item { Spacer(modifier = Modifier.size(6.dp)) }
                 }
             }
         }
     }
+
+    // Dialogs and bottom sheets stay outside the main Box
     errorDialogInfo?.let { dialogInfo ->
         ErrorDisplayDialog(
             exception = dialogInfo.exception,
             onDismissRequest = { errorDialogInfo = null },
             onRetry = {
-                errorDialogInfo = null // Dismiss dialog
-                viewModel.dispatch(dialogInfo.retryAction) // Dispatch the retry action
+                errorDialogInfo = null
+                viewModel.dispatch(dialogInfo.retryAction)
             },
             title = dialogInfo.title
         )
     }
-    if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-        BottomSheetContent(
-            title = stringResource(R.string.get_update)
+
+    updateErrorInfo?.let { info ->
+        ErrorDisplayDialog(
+            title = info.title,
+            exception = info.exception,
+            onDismissRequest = { updateErrorInfo = null }
         )
+    }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+            BottomSheetContent(
+                title = stringResource(R.string.get_update),
+                hasUpdate = state.hasUpdate,
+                canDirectUpdate = state.authorizer != ConfigEntity.Authorizer.None,
+                onDirectUpdateClick = {
+                    showBottomSheet = false
+                    viewModel.dispatch(PreferredViewAction.Update)
+                }
+            )
+        }
     }
 }

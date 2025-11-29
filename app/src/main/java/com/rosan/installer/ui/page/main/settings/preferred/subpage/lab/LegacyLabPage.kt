@@ -1,6 +1,8 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.lab
 
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -59,6 +61,7 @@ fun LegacyLabPage(
                     onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
                 )
             }
+            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

@@ -36,8 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstalledAppInfo
@@ -46,10 +46,12 @@ import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
@@ -97,7 +99,7 @@ fun InstallPrepareContent(
         return
     }
 
-    val containerType = primaryEntity.containerType
+    val containerType = primaryEntity.sourceType
     val entityToInstall = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val displayIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
 
@@ -125,7 +127,7 @@ fun InstallPrepareContent(
                 }
             }
         }
-        if (primaryEntity.containerType == DataType.APK || primaryEntity.containerType == DataType.APKS)
+        if (primaryEntity.sourceType == DataType.APK || primaryEntity.sourceType == DataType.APKS)
             when (signatureStatus) {
                 SignatureMatchStatus.MISMATCH -> {
                     warnings.add(0, context.getString(R.string.installer_prepare_signature_mismatch) to errorColor)
@@ -163,7 +165,7 @@ fun InstallPrepareContent(
         }
 
         item {
-            WarningTextBlock(warnings = warningMessages)
+            MiuixWarningTextBlock(warnings = warningMessages)
         }
 
         item {
@@ -202,7 +204,7 @@ fun InstallPrepareContent(
                                 installer = installer
                             )
                             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                                AnimatedVisibility(visible = settings.showOPPOSpecial && primaryEntity.containerType == DataType.APK) {
+                                AnimatedVisibility(visible = settings.showOPPOSpecial && primaryEntity.sourceType == DataType.APK) {
                                     primaryEntity.minOsdkVersion?.let {
                                         AdaptiveInfoRow(
                                             labelResId = R.string.installer_package_minOsdkVersion_label,
@@ -248,7 +250,7 @@ fun InstallPrepareContent(
 
         item {
             AnimatedVisibility(
-                visible = isExpanded,
+                visible = (primaryEntity is AppEntity.BaseEntity) && isExpanded,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
@@ -298,6 +300,18 @@ fun InstallPrepareContent(
             }
         }
 
+        item {
+            AnimatedVisibility(
+                visible = (primaryEntity is AppEntity.ModuleEntity) &&
+                        primaryEntity.description.isNotBlank() &&
+                        installer.config.displaySdk,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                MiuixInstallerTipCard((primaryEntity as AppEntity.ModuleEntity).description)
+            }
+        }
+
         val canInstallBaseEntity = (primaryEntity as? AppEntity.BaseEntity)?.let {
             it.minSdk?.toIntOrNull()?.let { sdk -> sdk <= Build.VERSION.SDK_INT } ?: true
         } ?: false
@@ -325,7 +339,7 @@ fun InstallPrepareContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 24.dp),
+                    .padding(top = 16.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -442,7 +456,7 @@ private fun AdaptiveInfoRow(
 }
 
 @Composable
-private fun WarningTextBlock(warnings: List<Pair<String, Color>>) {
+private fun MiuixWarningTextBlock(warnings: List<Pair<String, Color>>) {
     AnimatedVisibility(visible = warnings.isNotEmpty()) {
         Column(
             modifier = Modifier.padding(bottom = 16.dp),

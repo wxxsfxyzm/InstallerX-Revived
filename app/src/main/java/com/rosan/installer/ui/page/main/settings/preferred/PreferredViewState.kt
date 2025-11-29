@@ -7,6 +7,7 @@ import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.theme.m3color.PaletteStyle
 import com.rosan.installer.ui.theme.m3color.PresetColors
+import com.rosan.installer.ui.theme.m3color.RawColor
 import com.rosan.installer.ui.theme.m3color.ThemeMode
 
 data class PreferredViewState(
@@ -44,8 +45,11 @@ data class PreferredViewState(
     val useDynamicColor: Boolean = true,
     val useMiuixMonet: Boolean = false,
     val seedColor: Color = PresetColors.first().color,
+    val availableColors: List<RawColor> = PresetColors,
     val useDynColorFollowPkgIcon: Boolean = false,
-    val useDynColorFollowPkgIconForLiveActivity: Boolean = false
+    val useDynColorFollowPkgIconForLiveActivity: Boolean = false,
+    val hasUpdate: Boolean = false,
+    val remoteVersion: String = ""
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 

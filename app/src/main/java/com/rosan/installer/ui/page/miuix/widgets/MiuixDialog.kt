@@ -29,8 +29,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.util.openUrl
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -296,7 +296,7 @@ fun ErrorDisplaySheet(
     showState: MutableState<Boolean>,
     exception: Throwable,
     onDismissRequest: () -> Unit,
-    onRetry: (() -> Unit)?,
+    onRetry: (() -> Unit)? = null,
     title: String
 ) {
     SuperBottomSheet(

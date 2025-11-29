@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.ui.page.main.installer.dialog.inner.UiText
+import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
@@ -26,10 +28,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun InstallingContent(
+    colorScheme: ColorScheme,
     baseEntity: AppEntity.BaseEntity?,
     appIcon: Drawable?,
-    progressTextRes: UiText?,
-    onButtonClick: () -> Unit
+    progressTextRes: UiText?
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -62,8 +64,8 @@ fun InstallingContent(
         Button(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp),
-            onClick = onButtonClick,
+                .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
+            onClick = {},
             colors = ButtonDefaults.buttonColors(
                 color = MiuixTheme.colorScheme.secondaryVariant,
                 disabledColor = MiuixTheme.colorScheme.disabledSecondaryVariant

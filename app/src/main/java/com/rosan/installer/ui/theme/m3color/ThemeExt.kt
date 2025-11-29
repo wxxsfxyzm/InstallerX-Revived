@@ -66,12 +66,12 @@ fun dynamicColorScheme(
         outlineVariant = scheme.outlineVariant.toColor(),
         scrim = scheme.scrim.toColor(),
         surfaceBright = scheme.surfaceBright.toColor(),
+        surfaceDim = scheme.surfaceDim.toColor(),
         surfaceContainer = scheme.surfaceContainer.toColor(),
         surfaceContainerHigh = scheme.surfaceContainerHigh.toColor(),
         surfaceContainerHighest = scheme.surfaceContainerHighest.toColor(),
         surfaceContainerLow = scheme.surfaceContainerLow.toColor(),
         surfaceContainerLowest = scheme.surfaceContainerLowest.toColor(),
-        surfaceDim = scheme.surfaceDim.toColor()
     )
 }
 

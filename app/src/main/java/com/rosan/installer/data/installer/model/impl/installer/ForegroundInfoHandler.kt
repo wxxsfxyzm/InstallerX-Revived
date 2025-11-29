@@ -74,6 +74,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     @SuppressLint("MissingPermission")
     override suspend fun onStart() {
         Timber.d("[id=${installer.id}] onStart: Starting to combine and collect flows.")
+
+        createNotificationChannels()
+
         sessionStartTime = System.currentTimeMillis()
 
         val settings = NotificationSettings(
@@ -90,7 +93,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 installer.background
             ) { progress, background ->
 
-                Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=$settings.showDialog")
+                Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=${settings.showDialog}")
 
                 if (progress is ProgressEntity.InstallAnalysedUnsupported) {
                     Timber.w("[id=${installer.id}] AnalysedUnsupported: ${progress.reason}")
@@ -102,10 +105,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 }
 
                 if (background) {
-                    // --- VERSION CHECK & DISPATCH ---
-                    // This is the main branching point. It decides which notification style to use.
+                    val isModernEligible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
+
                     val notification =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && settings.showLiveActivity) {
+                        if (isModernEligible && settings.showLiveActivity) {
                             buildModernNotification(
                                 progress = progress,
                                 showDialog = settings.showDialog,
@@ -145,10 +148,32 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
     }
 
+    private fun createNotificationChannels() {
+        // Batch create channels
+        val channels = listOf(
+            NotificationChannelCompat.Builder(
+                Channel.InstallerChannel.value,
+                NotificationManagerCompat.IMPORTANCE_HIGH
+            ).setName(getString(R.string.installer_channel_name)).build(),
+
+            NotificationChannelCompat.Builder(
+                Channel.InstallerProgressChannel.value,
+                NotificationManagerCompat.IMPORTANCE_LOW
+            ).setName(getString(R.string.installer_progress_channel_name)).build(),
+
+            NotificationChannelCompat.Builder(
+                Channel.InstallerLiveChannel.value,
+                NotificationManagerCompat.IMPORTANCE_HIGH
+            ).setName(getString(R.string.installer_live_channel_name)).build()
+        )
+        channels.forEach { channel ->
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override suspend fun onFinish() {
         Timber.d("[id=${installer.id}] onFinish: Cancelling notification and job.")
-        // Clear icon cache for all involved packages to ensure freshness on next install
         installer.analysisResults
             .flatMap { it.appEntities }
             .filter { it.selected }
@@ -161,25 +186,20 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         job?.cancel()
     }
 
-    // A data class to hold information about each installation stage.
     private data class InstallStageInfo(
         val progressClass: KClass<out ProgressEntity>,
-        val weight: Float // Represents the relative length of this stage's segment.
+        val weight: Float
     )
 
     private val installStages = listOf(
-        InstallStageInfo(ProgressEntity.InstallResolving::class, 1f),    // Short
-        InstallStageInfo(ProgressEntity.InstallPreparing::class, 4f),    // Long, with sub-progress
-        InstallStageInfo(ProgressEntity.InstallAnalysing::class, 1f),     // Short
-        InstallStageInfo(ProgressEntity.Installing::class, 4f)         // Long
+        InstallStageInfo(ProgressEntity.InstallResolving::class, 1f),
+        InstallStageInfo(ProgressEntity.InstallPreparing::class, 4f),
+        InstallStageInfo(ProgressEntity.InstallAnalysing::class, 1f),
+        InstallStageInfo(ProgressEntity.Installing::class, 4f)
     )
 
     private val totalProgressWeight = installStages.sumOf { it.weight.toDouble() }.toFloat()
 
-    /**
-     * Builds and returns a Notification for Android 15+ devices.
-     * This is the entry point for the modern notification logic.
-     */
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     private suspend fun buildModernNotification(
         progress: ProgressEntity,
@@ -192,7 +212,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
         val builder = newModernNotificationBuilder(progress, showDialog, preferSystemIcon, preferDynamicColor)
 
-        // Finalize notification content for terminal states, which might require async operations.
         return when (progress) {
             is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
             is ProgressEntity.InstallSuccess -> onInstallSuccess(builder, preferSystemIcon).build()
@@ -200,9 +219,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
     }
 
-    /**
-     * Creates and configures a NotificationCompat.Builder using rich ProgressStyle.
-     */
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     private suspend fun newModernNotificationBuilder(
         progress: ProgressEntity,
@@ -210,11 +226,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         preferSystemIcon: Boolean = false,
         preferDynamicColor: Boolean = false
     ): NotificationCompat.Builder {
-        val channel = NotificationChannelCompat.Builder(
-            Channel.InstallerLiveChannel.value,
-            NotificationManagerCompat.IMPORTANCE_MAX
-        ).setName(getString(R.string.installer_live_channel_name)).build()
-        notificationManager.createNotificationChannel(channel)
         val contentIntent = when (installer.config.installMode) {
             ConfigEntity.InstallMode.Notification,
             ConfigEntity.InstallMode.AutoNotification -> if (showDialog) openIntent else null
@@ -224,7 +235,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val isDarkTheme = context.resources.configuration.uiMode and
                 Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
         val brandColor = if (isDarkTheme) primaryDark else primaryLight
-        val baseBuilder = NotificationCompat.Builder(context, channel.id)
+
+        val baseBuilder = NotificationCompat.Builder(context, Channel.InstallerLiveChannel.value)
             .setSmallIcon(Icon.LOGO.resId)
             .setColor(brandColor.toArgb())
             .setContentIntent(contentIntent)
@@ -233,11 +245,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .setOngoing(true)
             .setRequestPromotedOngoing(true)
 
-        // Find the first available seed color from the analysis results.
-        // This safely handles single and multi-app scenarios.
         val seedColorInt = installer.analysisResults.firstNotNullOfOrNull { it.seedColor }
 
-        // Generate a dynamic color scheme if a seed color was found
         val dynamicColorScheme = if (preferDynamicColor) {
             seedColorInt?.let { color ->
                 dynamicColorScheme(
@@ -248,19 +257,15 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
         } else null
 
-        // --- New Weighted & Dynamic Progress Logic ---
-        // Find the current stage's information.
         val currentStageIndex = installStages.indexOfFirst { it.progressClass.isInstance(progress) }
-        // Create the raw, uncolored segments with correct lengths.
         val segments = createInstallSegments(installStages, dynamicColorScheme)
-        // Create the ProgressStyle.
+
         val progressStyle = NotificationCompat.ProgressStyle()
             .setProgressSegments(segments)
             .setStyledByProgress(true)
-        // Calculate the precise progress value.
+
         var contentTitle: String
         var shortText: String? = null
-        // Calculate the total weight of all stages *before* the current one.
         val previousStagesWeight = if (currentStageIndex > 0) {
             installStages.subList(0, currentStageIndex).sumOf { it.weight.toDouble() }.toFloat()
         } else {
@@ -271,7 +276,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallResolving, is ProgressEntity.InstallResolveSuccess -> {
                 contentTitle = getString(R.string.installer_resolving)
                 shortText = getString(R.string.installer_live_channel_short_text_resolving)
-                // Progress is half of the current (first) segment's weight.
                 val progressValue = previousStagesWeight + (installStages[0].weight / 2f)
                 progressStyle.setProgress(progressValue.toInt())
             }
@@ -279,7 +283,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallPreparing -> {
                 contentTitle = getString(R.string.installer_preparing)
                 shortText = getString(R.string.installer_live_channel_short_text_preparing)
-                // Real-time progress within this segment.
                 val progressInCurrentSegment = installStages[1].weight * progress.progress
                 val progressValue = previousStagesWeight + progressInCurrentSegment
                 progressStyle.setProgress(progressValue.toInt())
@@ -288,7 +291,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallResolvedFailed -> {
                 contentTitle = getString(R.string.installer_resolve_failed)
                 shortText = getString(R.string.installer_live_channel_short_text_resolve_failed)
-
                 baseBuilder.setContentText(installer.error.getErrorMessage(context)).setOnlyAlertOnce(false)
                     .addAction(0, getString(R.string.cancel), finishIntent)
             }
@@ -296,33 +298,25 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallAnalysing -> {
                 contentTitle = getString(R.string.installer_analysing)
                 shortText = getString(R.string.installer_live_channel_short_text_analysing)
-                // Progress is the sum of previous segments + half of the current one.
                 val progressValue = previousStagesWeight + (installStages[2].weight / 2f)
                 progressStyle.setProgress(progressValue.toInt())
             }
 
             is ProgressEntity.InstallAnalysedSuccess -> {
-                // Get all entities from analysis result, not just selected ones, for the check.
                 val allEntities = installer.analysisResults.flatMap { it.appEntities }
                 contentTitle = allEntities.map { it.app }.getInfo(context).title
                 shortText = getString(R.string.installer_live_channel_short_text_pending)
-
-                // Progress is now at the end of the Analysing stage.
                 val progressValue = installStages.subList(0, 3).sumOf { it.weight.toDouble() }.toFloat()
                 progressStyle.setProgress(progressValue.toInt())
 
-                // Check for the specific Mixed Module/APK case first, just like in the legacy notification.
                 val isMixedType = allEntities.any {
-                    it.app.containerType == DataType.MIXED_MODULE_APK
+                    it.app.sourceType == DataType.MIXED_MODULE_APK
                 }
 
                 if (isMixedType) {
-                    // For mixed types, we must prompt the user to open the app for selection.
-                    // We only provide a "Cancel" action, not an "Install" action.
                     baseBuilder.setContentText(getString(R.string.installer_mixed_module_apk_description_notification))
                         .addAction(0, getString(R.string.cancel), finishIntent)
                 } else {
-                    // This is the original logic for standard installs.
                     baseBuilder.setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
                         .addAction(0, getString(R.string.install), installIntent)
                         .addAction(0, getString(R.string.cancel), finishIntent)
@@ -334,7 +328,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 contentTitle = installer.analysisResults.flatMap { it.appEntities }
                     .filter { it.selected }.map { it.app }.getInfo(context).title
                 shortText = getString(R.string.installer_live_channel_short_text_installing)
-                // Progress is the sum of previous segments + half of the current one.
                 val progressValue = previousStagesWeight + (installStages[3].weight / 2f)
                 progressStyle.setProgress(progressValue.toInt())
                 baseBuilder.setContentText(getString(R.string.installer_installing))
@@ -367,11 +360,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return baseBuilder
     }
 
-    /**
-     * Creates a list of styled segments for the notification progress bar based on the current install stage.
-     * @param stages The ordered list of installation stages.
-     * @return A list of NotificationCompat.ProgressStyle.Segment objects.
-     */
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     private fun createInstallSegments(
         stages: List<InstallStageInfo>,
@@ -379,25 +367,19 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     ): List<NotificationCompat.ProgressStyle.Segment> {
         return stages.map { stageInfo ->
             val segment = NotificationCompat.ProgressStyle.Segment(stageInfo.weight.toInt())
-
-            // If a color scheme is available, apply colors based on the stage type.
             colorScheme?.let {
                 val color = when (stageInfo.progressClass) {
-                    // Main "work" stages get the primary color
                     ProgressEntity.InstallPreparing::class,
                     ProgressEntity.Installing::class -> it.primary.toArgb()
 
-                    // Transitional/quick stages get the tertiary color
                     ProgressEntity.InstallResolving::class,
                     ProgressEntity.InstallAnalysing::class -> it.tertiary.toArgb()
 
-                    // Fallback for any other stages, though unlikely
                     else -> it.primary.toArgb()
                 }
                 segment.setColor(color)
             }
-
-            segment // Return the configured segment
+            segment
         }
     }
 
@@ -408,8 +390,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             notificationManager.cancel(notificationId)
             return
         }
-        Timber
-            .d("[id=${installer.id}] setNotification: Posting/Updating notification with id: $notificationId")
         notificationManager.notify(notificationId, notification)
     }
 
@@ -421,25 +401,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     enum class Icon(@param:DrawableRes val resId: Int) {
         LOGO(R.drawable.ic_notification_logo),
-        Working(R.drawable.round_hourglass_empty_black_24),
-        Pausing(R.drawable.round_hourglass_disabled_black_24)
+        Working(R.drawable.round_hourglass_empty_24),
+        Pausing(R.drawable.round_hourglass_disabled_24)
     }
 
-    private val notificationChannels = mapOf(
-        Channel.InstallerChannel to NotificationChannelCompat.Builder(
-            Channel.InstallerChannel.value,
-            NotificationManagerCompat.IMPORTANCE_HIGH // Use HIGH for final pop-up
-        ).setName(getString(R.string.installer_channel_name)).build(),
-
-        Channel.InstallerProgressChannel to NotificationChannelCompat.Builder(
-            Channel.InstallerProgressChannel.value,
-            NotificationManagerCompat.IMPORTANCE_LOW // Use LOW to be less intrusive
-        ).setName(getString(R.string.installer_progress_channel_name)).build(),
-
-        Channel.InstallerLiveChannel to NotificationChannelCompat.Builder(
-            Channel.InstallerLiveChannel.value, NotificationManagerCompat.IMPORTANCE_HIGH
-        ).setName(getString(R.string.installer_live_channel_name)).build()
-    )
+    // Removed duplicate notificationChannels map as it is now handled in createNotificationChannels
 
     private val workingProgresses = listOf(
         ProgressEntity.Ready,
@@ -465,9 +431,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         ProgressEntity.Installing to 80
     )
 
-    /**
-     * Gets the large icon for notifications as a Bitmap by fetching it from the AppIconRepository.
-     */
     private suspend fun getLargeIconBitmap(preferSystemIcon: Boolean): Bitmap? {
         val entities = installer.analysisResults
             .flatMap { it.appEntities }
@@ -475,13 +438,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .map { it.app }
         val entityToInstall = entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
             ?: entities.sortedBest().firstOrNull()
-            ?: return null // Return null if no suitable entity is found
+            ?: return null
 
-        // Use standard notification large icon dimensions
         val iconSizePx =
             context.resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_width)
 
-        // Get the drawable from the central repository
         val drawable = appIconRepo.getIcon(
             sessionId = installer.id,
             packageName = entityToInstall.packageName,
@@ -490,14 +451,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             preferSystemIcon = preferSystemIcon
         )
 
-        // Convert the drawable to a bitmap of the correct size
         return drawable?.toBitmapOrNull(width = iconSizePx, height = iconSizePx)
     }
 
-    /**
-     * (Renamed from newNotification)
-     * Builds and returns a Notification for legacy Android versions.
-     */
     private suspend fun buildLegacyNotification(
         progress: ProgressEntity,
         background: Boolean,
@@ -518,14 +474,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
             is ProgressEntity.InstallSuccess -> onInstallSuccess(builder, preferSystemIcon).build()
             is ProgressEntity.Finish, is ProgressEntity.Error, is ProgressEntity.InstallAnalysedUnsupported -> null
-            else -> null // TODO temporarily disable uninstall notification
+            else -> null
         }
     }
 
-    /**
-     * (Renamed from newNotificationBuilder)
-     * Creates and configures a standard NotificationCompat.Builder for legacy Android versions.
-     */
     private fun newLegacyNotificationBuilder(
         progress: ProgressEntity,
         background: Boolean,
@@ -534,16 +486,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val isWorking = workingProgresses.contains(progress)
         val isImportance = importanceProgresses.contains(progress)
 
-        // 1. Determine the correct enum constant directly. This is safe and reliable.
         val channelEnum = if (isImportance && background) {
             Channel.InstallerChannel
         } else {
             Channel.InstallerProgressChannel
         }
-
-        // 2. Get the actual NotificationChannelCompat object from the map using the enum as the key.
-        val channel = notificationChannels[channelEnum]!!
-        notificationManager.createNotificationChannel(channel)
 
         val icon = (if (isWorking) Icon.Working else Icon.Pausing).resId
 
@@ -555,7 +502,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             else -> openIntent
         }
 
-        val builder = NotificationCompat.Builder(context, channel.id)
+        val builder = NotificationCompat.Builder(context, channelEnum.value)
             .setSmallIcon(icon)
             .setContentIntent(contentIntent)
             .setDeleteIntent(finishIntent)
@@ -573,7 +520,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         return builder
     }
-
 
     private fun getString(@StringRes resId: Int): String = context.getString(resId)
     private val openIntent = BroadcastHandler.openIntent(context, installer)
@@ -621,18 +567,15 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun onAnalysedSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): Notification {
         val selectedEntities = installer.analysisResults
             .flatMap { it.appEntities }
-        // In notification mode, nothing is pre-selected, so we consider all entities.
-        // .filter { it.selected }
+
         val selectedApps = selectedEntities.map { it.app }
         val info = selectedApps.getInfo(context)
 
-        // Check for the specific Mixed Module/APK case first. This is the highest priority.
         val isMixedType = selectedEntities.any {
-            it.app.containerType == DataType.MIXED_MODULE_APK
+            it.app.sourceType == DataType.MIXED_MODULE_APK
         }
 
         if (isMixedType) {
-            // If it's a mixed type, always show the specific description and install options.
             return builder.setContentTitle(info.title)
                 .setContentText(getString(R.string.installer_mixed_module_apk_description_notification))
                 .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
@@ -640,13 +583,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 .build()
         }
 
-        // Fallback to the original logic for standard single or multi-app installs.
         return (if (selectedApps.groupBy { it.packageName }.size != 1) {
-            // This is for true multi-APK installs (e.g., sharing 3 different APKs).
             builder.setContentTitle(getString(R.string.installer_prepare_install))
                 .addAction(0, getString(R.string.cancel), finishIntent)
         } else {
-            // This is for a standard single APK install.
             builder.setContentTitle(info.title)
                 .setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
                 .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
@@ -682,7 +622,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .bigText(
                 "$contentText\n" + reason
             )
-        return builder.setContentTitle(info.title) // Return builder directly
+        return builder.setContentTitle(info.title)
             .setContentText(contentText)
             .setStyle(bigTextStyle)
             .setLargeIcon(getLargeIconBitmap(preferSystemIcon))

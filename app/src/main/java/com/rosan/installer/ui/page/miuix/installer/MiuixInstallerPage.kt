@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
@@ -35,11 +36,12 @@ import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitExceptio
 import com.rosan.installer.data.app.model.exception.ModuleInstallException
 import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewState
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallChoiceContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallCompletedContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallConfirmContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallExtendedMenuContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallFailedContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallModuleContent
@@ -96,6 +98,7 @@ fun MiuixInstallerPage(
     val showPermissions = viewModel.showMiuixPermissionList
     val temporarySeedColor by viewModel.seedColor.collectAsState()
     val colorScheme = activeColorSchemeState.value
+
     LaunchedEffect(temporarySeedColor, globalColorScheme, isDarkMode, basePaletteStyle) {
         if (temporarySeedColor == null) {
             activeColorSchemeState.value = globalColorScheme
@@ -107,7 +110,8 @@ fun MiuixInstallerPage(
             )
         }
     }
-    val containerType = installer.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.containerType ?: DataType.NONE
+
+    val sourceType = installer.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
     val displayIcons by viewModel.displayIcons.collectAsState()
@@ -135,7 +139,7 @@ fun MiuixInstallerPage(
 
     val sheetTitle = when (currentState) {
         is InstallerViewState.Preparing -> stringResource(R.string.installer_preparing)
-        is InstallerViewState.InstallChoice -> stringResource(containerType.getSupportTitle())
+        is InstallerViewState.InstallChoice -> stringResource(sourceType.getSupportTitle())
         is InstallerViewState.InstallExtendedMenu -> stringResource(R.string.config_label_install_options)
         is InstallerViewState.InstallPrepare -> when {
             showSettings -> stringResource(R.string.installer_settings)
@@ -152,6 +156,7 @@ fun MiuixInstallerPage(
             stringResource(R.string.installer_installing_module)
         }
 
+        is InstallerViewState.InstallConfirm -> stringResource(R.string.installer_install_confirm)
         is InstallerViewState.Installing -> stringResource(R.string.installer_installing)
         is InstallerViewState.InstallCompleted -> stringResource(R.string.installer_install_success)
         is InstallerViewState.InstallSuccess -> stringResource(R.string.installer_install_success)
@@ -201,6 +206,15 @@ fun MiuixInstallerPage(
                             onClick = closeSheet
                         )
                     }
+                }
+
+                is InstallerViewState.InstallConfirm -> {
+                    MiuixBackButton(
+                        icon = MiuixIcons.Useful.Cancel,
+                        onClick = {
+                            viewModel.dispatch(InstallerViewAction.ApproveSession(currentState.sessionId, false))
+                        }
+                    )
                 }
 
                 is InstallerViewState.InstallCompleted,
@@ -323,6 +337,38 @@ fun MiuixInstallerPage(
             }
         ) { _ ->
             when (viewModel.state) {
+                is InstallerViewState.InstallConfirm -> {
+                    InstallConfirmContent(
+                        colorScheme = colorScheme,
+                        isDarkMode = isDarkMode,
+                        viewModel = viewModel,
+                        onCancel = {
+                            showBottomSheet.value = false
+                            scope.launch {
+                                delay(SHEET_ANIMATION_DURATION)
+                                viewModel.dispatch(
+                                    InstallerViewAction.ApproveSession(
+                                        (viewModel.state as InstallerViewState.InstallConfirm).sessionId,
+                                        false
+                                    )
+                                )
+                            }
+                        },
+                        onConfirm = {
+                            showBottomSheet.value = false
+                            scope.launch {
+                                delay(SHEET_ANIMATION_DURATION)
+                                viewModel.dispatch(
+                                    InstallerViewAction.ApproveSession(
+                                        (viewModel.state as InstallerViewState.InstallConfirm).sessionId,
+                                        true
+                                    )
+                                )
+                            }
+                        }
+                    )
+                }
+
                 is InstallerViewState.InstallChoice -> {
                     InstallChoiceContent(
                         colorScheme = colorScheme,
@@ -343,7 +389,17 @@ fun MiuixInstallerPage(
                 }
 
                 is InstallerViewState.Preparing -> {
-                    InstallPreparingContent(colorScheme, viewModel = viewModel)
+                    InstallPreparingContent(
+                        colorScheme,
+                        viewModel = viewModel,
+                        onCancel = {
+                            showBottomSheet.value = false
+                            scope.launch {
+                                delay(SHEET_ANIMATION_DURATION)
+                                viewModel.dispatch(InstallerViewAction.Cancel)
+                            }
+                        }
+                    )
                 }
 
                 is InstallerViewState.InstallPrepare -> {
@@ -406,16 +462,11 @@ fun MiuixInstallerPage(
                 is InstallerViewState.Installing -> {
                     // TODO Show a progress indicator during installation.
                     InstallingContent(
+                        colorScheme = colorScheme,
                         baseEntity = baseEntity,
                         appIcon = appIcon,
                         // progress = installProgress,
-                        progressTextRes = installProgressTextRes,
-                        onButtonClick = {
-                            scope.launch {
-                                delay(SHEET_ANIMATION_DURATION)
-                                viewModel.dispatch(InstallerViewAction.Background)
-                            }
-                        }
+                        progressTextRes = installProgressTextRes
                     )
                 }
 
@@ -452,6 +503,7 @@ fun MiuixInstallerPage(
                     else
                         InstallFailedContent(
                             colorScheme = colorScheme,
+                            isDarkMode = isDarkMode,
                             baseEntity = baseEntity,
                             appIcon = appIcon,
                             installer = installer,
@@ -516,5 +568,9 @@ fun MiuixInstallerPage(
                 }
             }
         }
+        Spacer(
+            modifier = Modifier
+                .navigationBarsPadding()
+        )
     }
 }

@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -26,36 +26,34 @@ import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.twotone.Colorize
 import androidx.compose.material.icons.twotone.InvertColors
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SelectableSettingItem
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
-import com.rosan.installer.ui.theme.m3color.PresetColors
-import com.rosan.installer.ui.theme.m3color.RawColor
 import com.rosan.installer.ui.theme.m3color.ThemeMode
 import com.rosan.installer.ui.theme.none
 
@@ -217,10 +215,10 @@ fun LegacyThemeSettingsPage(
                         }
                     )
                 }
-            val showColorGrid = !state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+
             item {
                 AnimatedVisibility(
-                    visible = showColorGrid,
+                    visible = !state.useDynamicColor,
                     enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
                             expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
                     exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
@@ -234,18 +232,8 @@ fun LegacyThemeSettingsPage(
                                 .padding(horizontal = 12.dp, vertical = 16.dp)
                         ) {
                             val itemMinWidth = 88.dp
-
                             val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
-
-                            val chunkedColors = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                var wallpaperColors by remember { mutableStateOf<List<Int>?>(null) }
-
-                                LaunchedEffect(Unit) {
-                                    wallpaperColors = MonetCompat.getInstance().getAvailableWallpaperColors()
-                                }
-
-                                wallpaperColors?.chunked(columns) ?: PresetColors.chunked(columns)
-                            } else PresetColors.chunked(columns)
+                            val chunkedColors = state.availableColors.chunked(columns)
 
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
@@ -261,23 +249,16 @@ fun LegacyThemeSettingsPage(
                                                 modifier = Modifier.weight(1f),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                if (rawColor is RawColor) {
-                                                    ColorSwatchPreview(
-                                                        rawColor,
-                                                        currentStyle = state.paletteStyle,
-                                                        isSelected = !state.useDynamicColor && state.seedColor == rawColor.color
-                                                    ) {
-                                                        viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
-                                                    }
-                                                } else if (rawColor is Int) {
-                                                    val rawColor = RawColor(rawColor.toHexString(), Color(rawColor))
-                                                    ColorSwatchPreview(
-                                                        rawColor,
-                                                        currentStyle = state.paletteStyle,
-                                                        isSelected = state.seedColor == rawColor.color
-                                                    ) {
-                                                        viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
-                                                    }
+                                                ColorSwatchPreview(
+                                                    rawColor,
+                                                    currentStyle = state.paletteStyle,
+                                                    textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
+                                                    textColor = MaterialTheme.colorScheme.onSurface,
+                                                    isSelected = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                                                        state.seedColor == rawColor.color
+                                                    else !state.useDynamicColor && state.seedColor == rawColor.color,
+                                                ) {
+                                                    viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
                                                 }
                                             }
                                         }
@@ -327,7 +308,7 @@ fun LegacyThemeSettingsPage(
                     }
                 )
             }
-            item { Spacer(modifier = Modifier.height(12.dp)) }
+            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.StringRes
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,8 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.Manufacturer
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
@@ -43,22 +42,25 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngrad
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.dialog.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUninstallConfirmationDialog
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import kotlin.reflect.KClass
 
 @Composable
 fun InstallFailedContent(
     colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     baseEntity: AppEntity.BaseEntity?,
     appIcon: Drawable?,
     installer: InstallerRepo,
@@ -84,6 +86,8 @@ fun InstallFailedContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
         MiuixErrorSuggestions(
+            colorScheme = colorScheme,
+            isDarkMode = isDarkMode,
             error = installer.error,
             viewModel = viewModel,
             installer = installer
@@ -91,7 +95,7 @@ fun InstallFailedContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 24.dp),
+                .padding(top = 8.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
         ) {
             TextButton(
                 onClick = onClose,
@@ -104,6 +108,8 @@ fun InstallFailedContent(
 
 @Composable
 private fun MiuixErrorSuggestions(
+    colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     error: Throwable,
     viewModel: InstallerViewModel,
     installer: InstallerRepo
@@ -277,7 +283,8 @@ private fun MiuixErrorSuggestions(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 colors = CardColors(
-                    color = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White,
+                    color = if (isDynamicColor) colorScheme.surfaceContainer else
+                        if (isDarkMode) miuixSheetCardColorDark else Color.White,
                     contentColor = MiuixTheme.colorScheme.onSurface
                 )
             ) {
