@@ -57,7 +57,6 @@ import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowAllRequestedPermissionsWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowDowngradeWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataAllowRestrictedPermissionsWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowTestOnlyWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAutoDeleteWidget
@@ -70,8 +69,10 @@ import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataPackageSourceWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataSplitChooseAllWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
+import com.rosan.installer.ui.page.main.widget.setting.DisplaySizeWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
@@ -299,6 +300,7 @@ fun NewEditPage(
                         add { DataManualDexoptWidget(viewModel) }
                         add { DataAutoDeleteWidget(viewModel) }
                         add { DisplaySdkWidget(viewModel) }
+                        add { DisplaySizeWidget(viewModel) }
                     }
                 )
             }
@@ -313,12 +315,20 @@ fun NewEditPage(
                         add { DataAllowDowngradeWidget(viewModel) }
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
                             add { DataBypassLowTargetSdkWidget(viewModel) }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                            add { DataAllowRestrictedPermissionsWidget(viewModel) }
                         add { DataAllowAllRequestedPermissionsWidget(viewModel) }
                     }
                 )
             }
+
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.config_label_app_bundle_settings),
+                    content = buildList {
+                        add { DataSplitChooseAllWidget(viewModel) }
+                    }
+                )
+            }
+
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }

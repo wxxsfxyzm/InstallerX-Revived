@@ -5,34 +5,34 @@ import android.content.Intent
 import android.content.res.AssetFileDescriptor
 import android.net.Uri
 import android.os.Build
-import android.os.SystemClock
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.system.Os
+import android.system.OsConstants
 import androidx.core.net.toUri
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.exception.ResolveException
 import com.rosan.installer.data.installer.model.exception.ResolvedFailedNoInternetAccessException
+import com.rosan.installer.data.installer.repo.NetworkResolver
+import com.rosan.installer.data.installer.util.copyToWithProgress
 import com.rosan.installer.data.installer.util.getRealPathFromUri
 import com.rosan.installer.data.installer.util.pathUnify
+import com.rosan.installer.data.installer.util.transferWithProgress
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
 import java.io.RandomAccessFile
 import java.util.UUID
 
@@ -41,9 +41,7 @@ class SourceResolver(
     private val progressFlow: MutableSharedFlow<ProgressEntity>
 ) : KoinComponent {
     private val context by inject<Context>()
-    private val okHttpClient by inject<OkHttpClient>()
     private val closeables = mutableListOf<Closeable>()
-    private val COPY_BUFFER_SIZE = 1 * 1024 * 1024 // 1MB
 
     fun getTrackedCloseables(): List<Closeable> = closeables
 
@@ -62,36 +60,91 @@ class SourceResolver(
 
     private fun extractUris(intent: Intent): List<Uri> {
         val action = intent.action
-        val uris = when (action) {
+        val uris = mutableListOf<Uri>()
+
+        when (action) {
             Intent.ACTION_SEND -> {
-                if (intent.type?.startsWith("text/") == true) {
-                    if (!RsConfig.isInternetAccessEnabled) {
-                        Timber.d("Internet access is disabled in the app settings.")
-                        throw ResolvedFailedNoInternetAccessException("No internet access to download files.")
-                    }
-                    intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()?.takeIf { it.isNotBlank() }?.let { listOf(it.toUri()) }
-                        ?: emptyList()
+                // 1. Prioritize EXTRA_STREAM (Handles file sharing, including text files like logcat.txt)
+                val streamUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
                 } else {
-                    val uri = if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-                    else @Suppress("DEPRECATION") intent.getParcelableExtra(Intent.EXTRA_STREAM)
-                    listOfNotNull(uri)
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                }
+
+                if (streamUri != null) uris.add(streamUri)
+
+                // 2. Check ClipData (Common in modern Android sharing)
+                if (uris.isEmpty()) {
+                    intent.clipData?.let { clip ->
+                        for (i in 0 until clip.itemCount) {
+                            clip.getItemAt(i).uri?.let { uris.add(it) }
+                        }
+                    }
+                }
+
+                // 3. Fallback to EXTRA_TEXT only if no file stream was found and type indicates text
+                if (uris.isEmpty() && intent.type?.startsWith("text/") == true) {
+                    val text = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()
+                    if (!text.isNullOrBlank()) {
+                        try {
+                            // Attempt to parse text as a URI
+                            val textUri = text.toUri()
+                            // Simple check to see if it looks like a valid URI scheme (http, file, content, etc.)
+                            if (!textUri.scheme.isNullOrBlank()) {
+                                uris.add(textUri)
+                            } else {
+                                Timber.w("Ignored plain text extra (no scheme): $text")
+                            }
+                        } catch (_: Exception) {
+                            Timber.w("Failed to parse EXTRA_TEXT as URI: $text")
+                        }
+                    }
                 }
             }
 
             Intent.ACTION_SEND_MULTIPLE -> {
-                (if (Build.VERSION.SDK_INT >= 33) intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
-                else @Suppress("DEPRECATION") intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)) ?: emptyList()
+                // Handle multiple streams
+                val streams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)
+                }
+                streams?.filterNotNull()?.let { uris.addAll(it) }
+
+                // Check ClipData for multiple items
+                if (uris.isEmpty()) {
+                    intent.clipData?.let { clip ->
+                        for (i in 0 until clip.itemCount) {
+                            clip.getItemAt(i).uri?.let { uris.add(it) }
+                        }
+                    }
+                }
             }
 
-            else -> listOfNotNull(intent.data)
+            else -> {
+                // Handle ACTION_VIEW and others
+                intent.data?.let { uris.add(it) }
+                if (uris.isEmpty()) {
+                    intent.clipData?.let { clip ->
+                        if (clip.itemCount > 0) clip.getItemAt(0).uri?.let { uris.add(it) }
+                    }
+                }
+            }
         }
+
         if (uris.isEmpty()) throw ResolveException(action, uris)
         return uris
     }
 
     private suspend fun resolveSingleUri(uri: Uri): List<DataEntity> {
         Timber.d("Source URI: $uri")
-        return when (uri.scheme?.lowercase()) {
+
+        // Handle null scheme (unlikely but safe to handle)
+        val scheme = uri.scheme?.lowercase() ?: return emptyList()
+
+        return when (scheme) {
             "file" -> {
                 val path = uri.path ?: throw Exception("Invalid file URI: $uri")
                 Timber.d("Resolving direct file URI: $path")
@@ -99,8 +152,17 @@ class SourceResolver(
             }
 
             "content" -> resolveContentUri(uri)
-            "http", "https" -> downloadHttpUri(uri)
-            else -> throw ResolveException("Unsupported scheme: ${uri.scheme}", listOf(uri))
+
+            "http", "https" -> {
+                if (!RsConfig.isInternetAccessEnabled) {
+                    Timber.d("Internet access is disabled in app settings. Aborting network request.")
+                    throw ResolvedFailedNoInternetAccessException("No internet access to download files.")
+                }
+
+                get<NetworkResolver>().resolve(uri, cacheDirectory, progressFlow)
+            }
+
+            else -> throw ResolveException("Unsupported scheme: $scheme", listOf(uri))
         }
     }
 
@@ -136,180 +198,123 @@ class SourceResolver(
     private suspend fun cacheStream(uri: Uri, afd: AssetFileDescriptor, sourcePath: String): List<DataEntity> =
         withContext(Dispatchers.IO) {
             val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
-            val totalSize = guessContentLength(uri, afd)
+            // We trust afd.length first for NIO operations
+            val knownLength =
+                if (afd.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) afd.declaredLength else guessContentLength(uri, afd)
 
-            Timber.d("Caching content to: ${tempFile.absolutePath}, Size: $totalSize")
+            Timber.d("Caching content to: ${tempFile.absolutePath}, Size: $knownLength")
 
-            afd.use { descriptor ->
-                descriptor.createInputStream().use { input ->
-                    tempFile.outputStream().use { output ->
-                        copyStreamWithProgress(input, output, totalSize)
-                    }
-                }
-            }
-            listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
-        }
+            var nioSuccess = false
 
-    private suspend fun downloadHttpUri(uri: Uri): List<DataEntity> = withContext(Dispatchers.IO) {
-        Timber.d("Starting download for HTTP URI: $uri using OkHttp")
-        progressFlow.emit(ProgressEntity.InstallPreparing(-1f))
-
-        val request = Request.Builder()
-            .url(uri.toString())
-            .header(
-                "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
-            )
-            .header(
-                "Accept",
-                "application/vnd.android.package-archive, application/octet-stream, */*"
-            )
-            .build()
-        val call = okHttpClient.newCall(request)
-
-        try {
-            val response = call.execute()
-            if (!response.isSuccessful) {
-                Timber.e("HTTP Request failed. Code: ${response.code}")
-                throw IOException("HTTP ${response.code}")
-            }
-
-            val body = response.body
-
-            // 1. Check Extension
-            val path = uri.path ?: ""
-            Timber.d("[Validation] Checking URI path: $path")
-
-            val isSupportedExtension = listOf(".apk", ".xapk", ".apkm", ".apks", ".zip").any { ext ->
-                path.endsWith(ext, ignoreCase = true)
-            }
-            Timber.d("[Validation] Extension check passed: $isSupportedExtension")
-
-            // 2. Check Content-Type
-            // Get MediaType object from OkHttp
-            val mediaType = body.contentType()
-            // Get raw header as fallback
-            val headerContentType = response.header("Content-Type")
-
-            // Determine which string we are checking
-            val contentTypeToCheck = mediaType?.toString() ?: headerContentType
-
-            Timber.d("[Validation] Server Content-Type (MediaType): ${mediaType?.toString()}")
-            Timber.d("[Validation] Server Content-Type (Header): $headerContentType")
-            Timber.d("[Validation] Final Content-Type string used for check: $contentTypeToCheck")
-
-            val isSupportedMimeType = contentTypeToCheck != null && (
-                    contentTypeToCheck.equals("application/vnd.android.package-archive", ignoreCase = true) ||
-                            contentTypeToCheck.equals("application/octet-stream", ignoreCase = true) ||
-                            contentTypeToCheck.equals("application/vnd.apkm", ignoreCase = true) ||
-                            contentTypeToCheck.equals("application/vnd.apks", ignoreCase = true) ||
-                            contentTypeToCheck.equals("application/xapk-package-archive", ignoreCase = true)
+            // Try NIO FileChannel transfer first
+            try {
+                val fd = afd.fileDescriptor
+                // Only use NIO if we have a valid FD and a known length.
+                // transferTo requires a specific count, so we can't use it effectively for unknown stream lengths.
+                if (fd != null && fd.valid() && knownLength > 0) {
+                    Timber.d("Attempting NIO FileChannel transfer for optimal speed.")
+                    transferWithProgress(
+                        sourceFd = fd,
+                        sourceOffset = afd.startOffset, // Handle offset for embedded assets
+                        destFile = tempFile,
+                        totalSize = knownLength,
+                        progressFlow = progressFlow
                     )
-            Timber.d("[Validation] MIME type check passed: $isSupportedMimeType")
-
-            // 3. Final Decision
-            if (!isSupportedExtension && !isSupportedMimeType) {
-                Timber.w("[Validation] Validation FAILED. Neither extension nor MIME type is supported.")
-                // Close body before throwing to avoid connection leaks
-                body.close()
-                throw ResolveException(
-                    action = "Unsupported file type from URL. Path: $path, Content-Type: $contentTypeToCheck",
-                    uris = listOf(uri)
-                )
-            } else {
-                Timber.d("[Validation] Validation SUCCESS. Proceeding with download.")
-            }
-            // --- End Validation Logic ---
-
-            val totalSize = body.contentLength()
-            val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".apk_cache", File(cacheDirectory))
-            Timber.d("Downloading $totalSize bytes to ${tempFile.absolutePath}")
-
-            body.byteStream().use { input ->
-                tempFile.outputStream().use { output ->
-                    copyStreamWithProgress(input, output, totalSize)
+                    nioSuccess = true
+                    Timber.d("NIO transfer successful.")
                 }
+            } catch (e: Exception) {
+                Timber.w(e, "NIO transfer failed, falling back to legacy stream copy.")
+                // Clean up the potentially corrupted temp file before fallback
+                if (tempFile.exists()) tempFile.delete()
+                tempFile.createNewFile()
+                nioSuccess = false
             }
 
-            Timber.d("URL download and caching complete.")
-            listOf(DataEntity.FileEntity(tempFile.absolutePath))
-
-        } catch (e: Exception) {
-            Timber.e(e, "Download failed or cancelled")
-            call.cancel()
-            throw e
-        }
-    }
-
-    private suspend fun copyStreamWithProgress(input: InputStream, output: OutputStream, totalSize: Long) {
-        var bytesCopied = 0L
-        val buf = ByteArray(COPY_BUFFER_SIZE)
-        val step = if (totalSize > 0) (totalSize * 0.01f).toLong().coerceAtLeast(128 * 1024) else Long.MAX_VALUE
-        var nextEmit = step
-        var lastEmitTime = 0L
-
-        if (totalSize > 0) progressFlow.emit(ProgressEntity.InstallPreparing(0f))
-
-        // Check for cancellation before starting loop
-        if (!currentCoroutineContext().isActive) throw CancellationException()
-
-        var read = input.read(buf)
-        while (read >= 0) {
-            output.write(buf, 0, read)
-            bytesCopied += read
-
-            val now = SystemClock.uptimeMillis()
-            if (totalSize > 0 && bytesCopied >= nextEmit && now - lastEmitTime >= 200) {
-                // Check cancellation during progress updates
-                if (!currentCoroutineContext().isActive) throw CancellationException()
-
-                progressFlow.tryEmit(ProgressEntity.InstallPreparing(bytesCopied.toFloat() / totalSize))
-                lastEmitTime = now
-                nextEmit = (bytesCopied / step + 1) * step
-            }
-            read = input.read(buf)
-        }
-        if (totalSize > 0) progressFlow.emit(ProgressEntity.InstallPreparing(1f))
-    }
-
-    private fun guessContentLength(uri: Uri, afd: AssetFileDescriptor?): Long {
-        if (afd != null && afd.declaredLength > 0) return afd.declaredLength
-
-        runCatching {
-            context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-                if (pfd.statSize > 0) return pfd.statSize
-            }
-        }
-
-        fun queryLong(projection: Array<String>): Long {
-            context.contentResolver.query(uri, projection, null, null, null)?.use { c ->
-                if (c.moveToFirst()) {
-                    for (col in projection) {
-                        val idx = c.getColumnIndex(col)
-                        if (idx != -1) {
-                            val v = c.getLong(idx)
-                            if (v > 0) return v
+            // Fallback: Legacy Stream Copy
+            // Used if NIO fails or if the stream size is unknown (e.g., generic input streams, pipes)
+            if (!nioSuccess) {
+                Timber.d("Using legacy Stream copy.")
+                afd.use { descriptor ->
+                    descriptor.createInputStream().use { input ->
+                        tempFile.outputStream().use { output ->
+                            // Use the input stream's copy logic
+                            input.copyToWithProgress(output, knownLength, progressFlow)
                         }
                     }
                 }
             }
-            return -1L
+
+            listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
         }
 
-        val fromOpenable = queryLong(arrayOf(OpenableColumns.SIZE))
-        if (fromOpenable > 0) return fromOpenable
-
-        if (DocumentsContract.isDocumentUri(context, uri)) {
-            val fromDoc = queryLong(arrayOf(DocumentsContract.Document.COLUMN_SIZE))
-            if (fromDoc > 0) return fromDoc
+    /**
+     * Optimally guesses the content length.
+     * Priority:
+     * 1. AssetFileDescriptor (Zero overhead)
+     * 2. ContentResolver Query (IPC overhead, but standard)
+     * 3. Syscall fstat (Zero overhead, but only works for raw files)
+     */
+    private fun guessContentLength(uri: Uri, afd: AssetFileDescriptor?): Long {
+        // 1. Trust AssetFileDescriptor first.
+        // If it has a declared length (not UNKNOWN), it's the most accurate source.
+        if (afd != null && afd.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) {
+            return afd.declaredLength
         }
 
-        runCatching {
-            afd?.parcelFileDescriptor?.fileDescriptor?.let { fd ->
-                val st = Os.fstat(fd)
-                if (st.st_size > 0) return st.st_size
+        // 2. Try ContentResolver Query.
+        // We combine OpenableColumns.SIZE and Document.COLUMN_SIZE into a single query to minimize IPC calls.
+        // This is the standard way to get size for content URIs.
+        try {
+            context.contentResolver.query(
+                uri,
+                arrayOf(OpenableColumns.SIZE, DocumentsContract.Document.COLUMN_SIZE),
+                null, null, null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    // Check OpenableColumns.SIZE first
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    if (sizeIndex != -1 && !cursor.isNull(sizeIndex)) {
+                        val size = cursor.getLong(sizeIndex)
+                        if (size > 0) return size
+                    }
+
+                    // Fallback to DocumentsContract.Document.COLUMN_SIZE
+                    val docSizeIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_SIZE)
+                    if (docSizeIndex != -1 && !cursor.isNull(docSizeIndex)) {
+                        val size = cursor.getLong(docSizeIndex)
+                        if (size > 0) return size
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Ignore query failures (e.g., SecurityException or remote provider crash)
+            Timber.w(e, "Failed to query content length from ContentResolver.")
+        }
+
+        // 3. Last Resort: fstat on the existing FileDescriptor.
+        // We strictly use the passed 'afd' instead of opening a new one to save resources.
+        if (afd != null) {
+            try {
+                val fd = afd.fileDescriptor
+                if (fd.valid()) {
+                    val st = Os.fstat(fd)
+                    // Only return size if it is a regular file (S_ISREG).
+                    // Avoid using fstat on pipes/sockets as st_size might be undefined or 0.
+                    if (OsConstants.S_ISREG(st.st_mode) && st.st_size > 0) {
+                        // For AssetFileDescriptor, if startOffset is 0, st_size represents the full file.
+                        // If startOffset > 0, we can't trust st_size to be the content length of the stream alone
+                        // (it might be the whole APK size), so we only use this if we are reading the whole file.
+                        if (afd.startOffset == 0L) {
+                            return st.st_size
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Ignore syscall failures
             }
         }
+
         return -1L
     }
 }

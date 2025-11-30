@@ -11,19 +11,20 @@ import timber.log.Timber
 object SelectionStrategy {
 
     fun select(
+        splitChooseAll: Boolean,
         entities: List<AppEntity>,
-        containerType: DataType
+        sessionType: DataType
     ): List<SelectInstallEntity> {
-        Timber.d("SelectionStrategy: Starting selection for ${entities.size} entities. ContainerType: $containerType")
+        Timber.d("SelectionStrategy: Starting selection for ${entities.size} entities. ContainerType: $sessionType")
 
         // 1. Mixed Modules: Default unselected
-        if (containerType == DataType.MIXED_MODULE_APK || containerType == DataType.MIXED_MODULE_ZIP) {
+        if (sessionType == DataType.MIXED_MODULE_APK || sessionType == DataType.MIXED_MODULE_ZIP) {
             Timber.d("Mixed Module detected. All entities deselected by default.")
             return entities.map { SelectInstallEntity(it, selected = false) }
         }
 
         // 2. Multi-App Mode: Best Base only
-        val isMultiAppMode = containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP
+        val isMultiAppMode = sessionType == DataType.MULTI_APK || sessionType == DataType.MULTI_APK_ZIP
         if (isMultiAppMode) {
             Timber.d("Multi-App Mode detected. Selecting best base entity.")
             val bases = entities.filterIsInstance<AppEntity.BaseEntity>()
@@ -45,7 +46,13 @@ object SelectionStrategy {
 
         // Extract all splits to analyze them globally
         val allSplits = entities.filterIsInstance<AppEntity.SplitEntity>()
-        val selectedSplits = selectOptimalSplits(allSplits)
+        val selectedSplits = if (splitChooseAll) {
+            Timber.d("Split Selection: Config 'splitChooseAll' is TRUE. Selecting all ${allSplits.size} splits.")
+            allSplits.toSet()
+        } else {
+            Timber.d("Split Selection: Config 'splitChooseAll' is FALSE. Calculating optimal splits.")
+            selectOptimalSplits(allSplits)
+        }
 
         Timber.d("Selected ${selectedSplits.size} splits out of ${allSplits.size} available.")
 
@@ -54,7 +61,6 @@ object SelectionStrategy {
                 is AppEntity.BaseEntity -> true // Base APK is always selected
                 is AppEntity.DexMetadataEntity -> true // Metadata is always selected
                 is AppEntity.SplitEntity -> entity in selectedSplits // Only optimal splits are selected
-                is AppEntity.CollectionEntity -> false // Collections (e.g., internal parts) usually skipped
                 is AppEntity.ModuleEntity -> true // Modules are usually selected
             }
             SelectInstallEntity(entity, selected = isSelected)

@@ -29,7 +29,6 @@ import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowAllRequestedPermissionsWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowDowngradeWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowRestrictedPermissionsWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowTestOnlyWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAuthorizerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAutoDeleteWidget
@@ -42,8 +41,10 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataManualDexoptWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataNameWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataPackageSourceWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixDataSplitChooseAllWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySdkWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySizeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
 import dev.chrisbanes.haze.HazeState
@@ -204,6 +205,7 @@ fun MiuixEditPage(
                     MiuixDataManualDexoptWidget(viewModel)
                     MiuixDataAutoDeleteWidget(viewModel = viewModel)
                     MiuixDisplaySdkWidget(viewModel = viewModel)
+                    MiuixDisplaySizeWidget(viewModel = viewModel)
                 }
             }
             item { SmallTitle(stringResource(R.string.config_label_install_options)) }
@@ -218,9 +220,17 @@ fun MiuixEditPage(
                     MiuixDataAllowDowngradeWidget(viewModel = viewModel)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
                         MiuixDataBypassLowTargetSdkWidget(viewModel = viewModel)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                        MiuixDataAllowRestrictedPermissionsWidget(viewModel = viewModel)
                     MiuixDataAllowAllRequestedPermissionsWidget(viewModel = viewModel)
+                }
+            }
+            item { SmallTitle(stringResource(R.string.config_label_app_bundle_settings)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 16.dp)
+                ) {
+                    MiuixDataSplitChooseAllWidget(viewModel = viewModel)
                 }
             }
             item { Spacer(Modifier.navigationBarsPadding()) }

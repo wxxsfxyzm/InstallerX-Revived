@@ -65,13 +65,14 @@ object AnalyserRepoImpl : AnalyserRepo {
         }
         // Step 3: Determine Session Context
         val sessionDataType = PackagePreprocessor.determineSessionType(processedGroups, rawEntities)
-        Timber.d("AnalyserRepo: Step 3 SessionType -> ${sessionDataType.containerType}")
+        Timber.d("AnalyserRepo: Step 3 SessionType -> ${sessionDataType.sessionType}")
 
         // Step 4: Apply Selection Strategy and Build Result
         val finalResults = processedGroups.map { group ->
             val selectableEntities = SelectionStrategy.select(
-                group.entities,
-                sessionDataType.containerType
+                splitChooseAll = config.splitChooseAll,
+                entities = group.entities,
+                sessionDataType.sessionType
             )
 
             Timber.d("AnalyserRepo: Step 4 Strategy for ${group.packageName} -> Input: ${group.entities.size}, Selected: ${selectableEntities.size}")

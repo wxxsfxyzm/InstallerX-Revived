@@ -197,10 +197,13 @@
     <string name="config_auto_delete_desc">Automatically delete the apk after it\'s been installed</string>
     <string name="config_display_sdk_version">Display SDK information</string>
     <string name="config_display_sdk_version_desc">Show target and min information on the installation interface</string>
+    <string name="config_display_size">Display package size</string>
+    <string name="config_display_size_desc">Show package size on the installation interface</string>
     <string name="config_label_main_settings">Main Settings</string>
     <string name="config_label_installer_settings">Installer Settings</string>
     <string name="config_label_install_options">Install Options</string>
     <string name="config_label_install_options_desc">Configure installation parameters such as source, user</string>
+    <string name="config_label_app_bundle_settings">Split APK Packages</string>
     <string name="config_dialog_title_invalid">Invalid Input</string>
     <string name="config_dialog_title_unsaved_changes">Unsaved changes</string>
     <string name="config_dialog_message_unsaved_changes">Quit without saving?</string>
@@ -394,6 +397,7 @@
     <string name="installer_package_target_sdk_label_short" translatable="false">Target: %1$s</string>
     <string name="installer_package_minOsdkVersion_label" translatable="false">MinOsdkVersion: </string>
     <string name="installer_package_minOsdkVersion" translatable="false">MinOsdkVersion: %1$s</string>
+    <string name="installer_package_size_label">Size: </string>
     <string name="installer_module_author_label">Author: </string>
     <string name="installer_file_path">Path: %1$s</string>
     <string name="exception_install_failed_unknown">Unknown error</string>
@@ -497,6 +501,8 @@
     <string name="config_allow_downgrade_desc">Attempts to downgrade the currently-installed version of the package (Android 15+ need ROOT)</string>
     <string name="config_grant_all_permissions">Grant All Requested Permissions</string>
     <string name="config_grant_all_permissions_desc">Automatically grant all permissions the package is requesting. Note that this only applies to runtime permissions. Special permissions like All Files Access or Accessibility won\'t be automatically granted</string>
+    <string name="config_split_choose_all">Select all splits by default</string>
+    <string name="config_split_choose_all_desc">Select all splits by default instead of selecting best suitable</string>
     <string name="force_volume_uuid">Force Volume UUID</string>
     <string name="force_volume_uuid_desc">Allows specifying a volume UUID to install the package to</string>
     <string name="force_permission_prompt">Force Permission Prompt</string>

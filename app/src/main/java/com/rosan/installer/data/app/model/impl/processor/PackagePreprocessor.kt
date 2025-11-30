@@ -24,7 +24,7 @@ object PackagePreprocessor {
 
     data class SessionTypeInfo(
         val isMultiAppSession: Boolean,
-        val containerType: DataType,
+        val sessionType: DataType,
         val isFromSingleFile: Boolean
     )
 

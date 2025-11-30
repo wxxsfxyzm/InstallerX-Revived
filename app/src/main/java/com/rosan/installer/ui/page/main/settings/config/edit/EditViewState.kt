@@ -25,12 +25,13 @@ data class EditViewState(
         val dexoptMode: ConfigEntity.DexoptMode,
         val autoDelete: Boolean,
         val displaySdk: Boolean,
+        val displaySize: Boolean,
         val forAllUser: Boolean,
         val allowTestOnly: Boolean,
         val allowDowngrade: Boolean,
-        val allowRestrictedPermissions: Boolean,
         val bypassLowTargetSdk: Boolean,
-        val allowAllRequestedPermissions: Boolean
+        val allowAllRequestedPermissions: Boolean,
+        val splitChooseAll: Boolean
     ) {
         val errorName = name.isEmpty()// || name == "Default"
 
@@ -56,12 +57,13 @@ data class EditViewState(
             forceDexopt = this.forceDexopt,
             autoDelete = this.autoDelete,
             displaySdk = this.displaySdk,
+            displaySize = this.displaySize,
             forAllUser = this.forAllUser,
             allowTestOnly = this.allowTestOnly,
             allowDowngrade = this.allowDowngrade,
-            allowRestrictedPermissions = this.allowRestrictedPermissions,
             bypassLowTargetSdk = this.bypassLowTargetSdk,
             allowAllRequestedPermissions = this.allowAllRequestedPermissions,
+            splitChooseAll = this.splitChooseAll
         )
 
         companion object {
@@ -82,12 +84,13 @@ data class EditViewState(
                 dexoptMode = config.dexoptMode,
                 autoDelete = config.autoDelete,
                 displaySdk = config.displaySdk,
+                displaySize = config.displaySize,
                 forAllUser = config.forAllUser,
                 allowTestOnly = config.allowTestOnly,
                 allowDowngrade = config.allowDowngrade,
-                allowRestrictedPermissions = config.allowRestrictedPermissions,
                 bypassLowTargetSdk = config.bypassLowTargetSdk,
-                allowAllRequestedPermissions = config.allowAllRequestedPermissions
+                allowAllRequestedPermissions = config.allowAllRequestedPermissions,
+                splitChooseAll = config.splitChooseAll
             )
         }
     }

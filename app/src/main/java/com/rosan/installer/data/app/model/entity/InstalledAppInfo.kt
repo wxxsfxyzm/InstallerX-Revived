@@ -10,6 +10,7 @@ import com.rosan.installer.data.common.util.compatVersionCode
 import com.rosan.installer.data.common.util.isPackageArchivedCompat
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import java.io.File
 
 data class InstalledAppInfo(
     val packageName: String,
@@ -22,7 +23,8 @@ data class InstalledAppInfo(
     val targetSdk: Int?,
     val signatureHash: String? = null,
     val isSystemApp: Boolean = false,
-    val isArchived: Boolean = false
+    val isArchived: Boolean = false,
+    val packageSize: Long = 0L
 ) {
     companion object : KoinComponent {
         fun buildByPackageName(packageName: String): InstalledAppInfo? {
@@ -42,6 +44,20 @@ data class InstalledAppInfo(
 
                 val applicationInfo = packageInfo.applicationInfo
 
+                val packageSize = if (applicationInfo != null) {
+                    // 1. Calculate Base APK size
+                    val baseFile = File(applicationInfo.sourceDir)
+                    var totalSize = if (baseFile.exists()) baseFile.length() else 0L
+
+                    // 2. Calculate Split APKs size (if any)
+                    applicationInfo.splitSourceDirs?.forEach { path ->
+                        val splitFile = File(path)
+                        if (splitFile.exists()) {
+                            totalSize += splitFile.length()
+                        }
+                    }
+                    totalSize
+                } else 0L
 
                 InstalledAppInfo(
                     packageName = packageName,
@@ -56,9 +72,10 @@ data class InstalledAppInfo(
                     targetSdk = applicationInfo?.targetSdkVersion,
                     signatureHash = signatureHash,
                     isSystemApp = ((applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_SYSTEM) != 0,
-                    isArchived = packageManager.isPackageArchivedCompat(packageName)
+                    isArchived = packageManager.isPackageArchivedCompat(packageName),
+                    packageSize = packageSize
                 )
-            } catch (e: PackageManager.NameNotFoundException) {
+            } catch (_: PackageManager.NameNotFoundException) {
                 // This is an expected failure, no need to print stack trace in production.
                 null
             }

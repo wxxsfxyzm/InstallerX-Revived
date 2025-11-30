@@ -40,6 +40,7 @@ fun PrepareSettingsContent(
     val settings = viewModel.viewSettings
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
+    var displaySize by remember { mutableStateOf(installer.config.displaySize) }
     var showOPPOSpecial by remember { mutableStateOf(settings.showOPPOSpecial) }
 
     LaunchedEffect(autoDelete, displaySdk) {
@@ -70,6 +71,16 @@ fun PrepareSettingsContent(
                     val newValue = !displaySdk
                     displaySdk = newValue
                     installer.config.displaySdk = newValue
+                }
+            )
+            MiuixSwitchWidget(
+                title = stringResource(R.string.config_display_size),
+                description = stringResource(R.string.config_display_size_desc),
+                checked = displaySize,
+                onCheckedChange = {
+                    val newValue = !displaySize
+                    displaySize = newValue
+                    installer.config.displaySize = newValue
                 }
             )
             MiuixSwitchWidget(

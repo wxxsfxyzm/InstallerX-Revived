@@ -131,6 +131,7 @@ fun installPrepareDialog( // 小写开头
     var showChips by remember { mutableStateOf(false) }
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
+    var displaySize by remember { mutableStateOf(installer.config.displaySize) }
     var showOPPOSpecial by remember { mutableStateOf(settings.showOPPOSpecial) }
 
     LaunchedEffect(autoDelete, displaySdk) {
@@ -266,6 +267,16 @@ fun installPrepareDialog( // 小写开头
                                 },
                                 label = stringResource(id = R.string.config_display_sdk_version),
                                 icon = AppIcons.Info
+                            )
+                            Chip(
+                                selected = displaySize,
+                                onClick = {
+                                    val newValue = !displaySize
+                                    displaySize = newValue
+                                    installer.config.displaySize = newValue
+                                },
+                                label = stringResource(id = R.string.config_display_size),
+                                icon = AppIcons.ShowSize
                             )
                             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
                                 Chip(

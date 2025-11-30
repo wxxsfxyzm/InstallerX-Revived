@@ -12,6 +12,7 @@ sealed class AppEntity {
     abstract val targetSdk: String?
     abstract val minSdk: String?
     abstract val arch: Architecture?
+    abstract val size: Long
     abstract val sourceType: DataType?
 
     data class BaseEntity(
@@ -28,6 +29,7 @@ sealed class AppEntity {
         // Only available for oppo apk
         val minOsdkVersion: String? = null,
         override val arch: Architecture? = null,
+        override val size: Long = data.getSize(),
         override val sourceType: DataType? = null,
         // Get from AndroidManifest.xml
         val permissions: List<String>? = null,
@@ -42,11 +44,13 @@ sealed class AppEntity {
         override val targetSdk: String?,
         override val minSdk: String?,
         override val arch: Architecture?,
+        override val size: Long = data.getSize(),
         override val sourceType: DataType? = null,
-        // Split Type: 用于 UI 分组 (显示在哪个标题下)
+        // Split Type: Used for UI grouping (determines under which header it's displayed)
         val type: SplitType = SplitType.FEATURE,
-        // Filter Type: 用于 安装选择策略 (如何过滤)
-        // 默认是 NONE，表示这个 Split 没有特殊的硬件/语言限制，只要用户想要就能装
+        // Filter Type: Used for installation selection strategies (how to filter)
+        // The default is NONE, meaning this Split has no special hardware/language constraints
+        // and can be installed as long as the user wants it.
         val filterType: FilterType = FilterType.NONE,
         // Extracted config value ("zh", "xhdpi", "arm64-v8a")
         val configValue: String? = null
@@ -61,23 +65,10 @@ sealed class AppEntity {
         override val targetSdk: String?,
         override val minSdk: String?,
         override val arch: Architecture? = null,
+        override val size: Long = data.getSize(),
         override val sourceType: DataType? = null,
     ) : AppEntity() {
         override val name = "base.dm"
-    }
-
-    data class CollectionEntity(
-        override val packageName: String = "com.rosan.installer.collection.${System.nanoTime()}",
-        override val data: DataEntity,
-        override val targetSdk: String? = null,
-        override val minSdk: String? = null,
-        override val arch: Architecture? = null,
-        override val sourceType: DataType? = null,
-        val label: String = "Collection of APKs",
-        val versionCode: Long = -1,
-        val versionName: String = "",
-    ) : AppEntity() {
-        override val name: String = "collection.zip" // 使用一个通用的名称
     }
 
     data class ModuleEntity(
@@ -88,6 +79,7 @@ sealed class AppEntity {
         val author: String,
         val description: String,
         override val data: DataEntity,
+        override val size: Long = data.getSize(),
         override val sourceType: DataType? = null
     ) : AppEntity() {
         override val packageName: String

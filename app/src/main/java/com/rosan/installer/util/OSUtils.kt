@@ -14,6 +14,10 @@ object OSUtils : KoinComponent {
     // Key for HyperOS version name
     private const val KEY_HYPEROS_VERSION_NAME = "ro.hyperos.version.name"
 
+    // Keys for OPPO OSdkVersion
+    private const val KEY_OPLUS_API = "ro.build.version.oplus.api"
+    private const val KEY_OPLUS_SUB_API = "ro.build.version.oplus.sub_api"
+
     /**
      * Checks if the device is running HyperOS.
      */
@@ -26,6 +30,28 @@ object OSUtils : KoinComponent {
      */
     fun isMIUI(): Boolean {
         return !getSystemProperty(KEY_MIUI_VERSION_NAME).isNullOrEmpty()
+    }
+
+    /**
+     * Get OPPO OSdkVersion.
+     * The value is composed of "ro.build.version.oplus.api" and "ro.build.version.oplus.sub_api" joined by a dot.
+     * e.g., if api is "30" and sub_api is "1", returns "30.1".
+     */
+    fun getOplusOSdkVersion(): String? {
+        val api = getSystemProperty(KEY_OPLUS_API)
+        // If the main API version is missing, it's likely not an applicable device or the property doesn't exist.
+        if (api.isNullOrEmpty()) {
+            return null
+        }
+
+        val subApi = getSystemProperty(KEY_OPLUS_SUB_API)
+
+        // Concatenate with a dot if subApi exists, otherwise return just the api version.
+        return if (!subApi.isNullOrEmpty()) {
+            "$api.$subApi"
+        } else {
+            api
+        }
     }
 
     /**

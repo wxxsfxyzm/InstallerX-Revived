@@ -2,9 +2,11 @@ package com.rosan.installer.data.settings.model.room
 
 import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.DeleteColumn
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.AutoMigrationSpec
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
@@ -24,13 +26,14 @@ import org.koin.core.component.get
 
 @Database(
     entities = [AppEntity::class, ConfigEntity::class],
-    version = 7,
+    version = 8,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 5, to = 6),
         AutoMigration(from = 6, to = 7),
+        AutoMigration(from = 7, to = 8, spec = InstallerRoom.Migration7To8::class),
     ]
 )
 @TypeConverters(
@@ -66,5 +69,8 @@ abstract class InstallerRoom : RoomDatabase() {
     abstract val appDao: AppDao
 
     abstract val configDao: ConfigDao
+
+    @DeleteColumn(tableName = "config", columnName = "allow_restricted_permissions")
+    class Migration7To8 : AutoMigrationSpec
 }
 

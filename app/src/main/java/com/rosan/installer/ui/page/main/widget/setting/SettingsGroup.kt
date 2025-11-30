@@ -76,7 +76,7 @@ fun SplicedColumnGroup(
                 Column(
                     modifier = Modifier
                         .clip(shape)
-                        .background(MaterialTheme.colorScheme.surfaceBright, shape)
+                        .background(MaterialTheme.colorScheme.surfaceBright)
                 ) {
                     itemContent()
                 }

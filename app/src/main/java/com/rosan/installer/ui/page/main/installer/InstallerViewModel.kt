@@ -168,11 +168,12 @@ class InstallerViewModel(
     private var loadingStateJob: Job? = null
     private val iconJobs = mutableMapOf<String, Job>()
     private var autoInstallJob: Job? = null
+    private val settingsLoadingJob: Job
     private var collectRepoJob: Job? = null
 
     init {
         Timber.d("DialogViewModel init")
-        loadInitialSettings()
+        settingsLoadingJob = loadInitialSettings()
         viewModelScope.launch {
             // Load managed packages for installer selection.
             appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
@@ -444,7 +445,6 @@ class InstallerViewModel(
             repo.config.allowTestOnly.takeIf { it }?.let { InstallOption.AllowTest.value },
             repo.config.allowDowngrade.takeIf { it }?.let { InstallOption.AllowDowngrade.value },
             repo.config.forAllUser.takeIf { it }?.let { InstallOption.AllUsers.value },
-            repo.config.allowRestrictedPermissions.takeIf { it }?.let { InstallOption.AllWhitelistRestrictedPermissions.value },
             repo.config.bypassLowTargetSdk.takeIf { it }?.let { InstallOption.BypassLowTargetSdkBlock.value },
             repo.config.allowAllRequestedPermissions.takeIf { it }?.let { InstallOption.GrantAllRequestedPermissions.value }
         ).fold(0) { acc, flag -> acc or flag }
@@ -458,6 +458,7 @@ class InstallerViewModel(
         autoInstallJob?.cancel()
 
         collectRepoJob = viewModelScope.launch {
+            settingsLoadingJob.join()
             repo.progress.collect { progress ->
                 // --- Stage 1: Handle high-priority, blocking states first ---
                 if (multiInstallQueue.isNotEmpty()) {

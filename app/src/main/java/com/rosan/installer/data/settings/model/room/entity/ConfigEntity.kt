@@ -13,8 +13,7 @@ import org.koin.core.component.KoinComponent
 )
 data class ConfigEntity(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
-    var id: Long = 0L,
+    @ColumnInfo(name = "id") var id: Long = 0L,
     @ColumnInfo(name = "name", defaultValue = "'Default'") var name: String = "Default",
     @ColumnInfo(name = "description") var description: String,
     @ColumnInfo(name = "authorizer") var authorizer: Authorizer,
@@ -36,13 +35,14 @@ data class ConfigEntity(
         defaultValue = "'speed-profile'"
     ) var dexoptMode: DexoptMode = DexoptMode.SpeedProfile,
     @ColumnInfo(name = "auto_delete") var autoDelete: Boolean,
+    @ColumnInfo(name = "display_size", defaultValue = "0") var displaySize: Boolean = false,
     @ColumnInfo(name = "display_sdk", defaultValue = "0") var displaySdk: Boolean = false,
     @ColumnInfo(name = "for_all_user") var forAllUser: Boolean,
     @ColumnInfo(name = "allow_test_only") var allowTestOnly: Boolean,
     @ColumnInfo(name = "allow_downgrade") var allowDowngrade: Boolean,
-    @ColumnInfo(name = "allow_restricted_permissions", defaultValue = "0") var allowRestrictedPermissions: Boolean,
     @ColumnInfo(name = "bypass_low_target_sdk", defaultValue = "0") var bypassLowTargetSdk: Boolean,
     @ColumnInfo(name = "allow_all_requested_permissions", defaultValue = "0") var allowAllRequestedPermissions: Boolean,
+    @ColumnInfo(name = "split_choose_all", defaultValue = "0") var splitChooseAll: Boolean,
     @ColumnInfo(name = "created_at") var createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "modified_at") var modifiedAt: Long = System.currentTimeMillis(),
 ) {
@@ -61,12 +61,14 @@ data class ConfigEntity(
             forceDexopt = false,
             dexoptMode = DexoptMode.SpeedProfile,
             autoDelete = false,
+            displaySize = false,
+            displaySdk = false,
             forAllUser = false,
             allowTestOnly = false,
             allowDowngrade = false,
-            allowRestrictedPermissions = false,
             bypassLowTargetSdk = false,
             allowAllRequestedPermissions = false,
+            splitChooseAll = false,
         )
 
         val XiaomiDefault = ConfigEntity(
@@ -83,12 +85,14 @@ data class ConfigEntity(
             forceDexopt = false,
             dexoptMode = DexoptMode.SpeedProfile,
             autoDelete = false,
+            displaySize = false,
+            displaySdk = false,
             forAllUser = false,
             allowTestOnly = false,
             allowDowngrade = false,
-            allowRestrictedPermissions = false,
             bypassLowTargetSdk = false,
             allowAllRequestedPermissions = false,
+            splitChooseAll = false,
         )
     }
 

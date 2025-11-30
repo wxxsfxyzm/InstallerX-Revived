@@ -1,5 +1,7 @@
 package com.rosan.installer.di
 
+import com.rosan.installer.data.installer.model.impl.installer.helper.OkHttpNetworkResolver
+import com.rosan.installer.data.installer.repo.NetworkResolver
 import com.rosan.installer.data.updater.model.impl.OnlineAppUpdater
 import com.rosan.installer.data.updater.model.impl.OnlineUpdateChecker
 import com.rosan.installer.data.updater.repo.AppUpdater
@@ -25,6 +27,8 @@ val networkModule = module {
             )
             .build()
     }
+
+    single<NetworkResolver> { OkHttpNetworkResolver() }
 }
 
 val updateModule = module {
