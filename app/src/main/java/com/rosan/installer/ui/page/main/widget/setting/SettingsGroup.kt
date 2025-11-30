@@ -74,7 +74,9 @@ fun SplicedColumnGroup(
 
                 // Apply background with the correct shape to the pkg.
                 Column(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceBright, shape)
+                    modifier = Modifier
+                        .clip(shape)
+                        .background(MaterialTheme.colorScheme.surfaceBright, shape)
                 ) {
                     itemContent()
                 }
