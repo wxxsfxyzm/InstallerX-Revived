@@ -52,6 +52,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
     companion object {
         private const val MINIMUM_VISIBILITY_DURATION_MS = 400L
+
+        // Throttle notification updates to prevent system rate limiting
+        private const val NOTIFICATION_UPDATE_INTERVAL_MS = 500L
+
+        // For progress updates, use a slightly higher threshold
+        private const val PROGRESS_UPDATE_THRESHOLD = 0.03f // Update every 3% change
     }
 
     private data class NotificationSettings(
@@ -70,6 +76,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private val notificationManager = NotificationManagerCompat.from(context)
     private val notificationId = installer.id.hashCode() and Int.MAX_VALUE
+
+    // Throttling state
+    private var lastNotificationUpdateTime = 0L
+    private var lastProgressValue = -1f
 
     @SuppressLint("MissingPermission")
     override suspend fun onStart() {
@@ -118,7 +128,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                         } else {
                             buildLegacyNotification(progress, true, settings.showDialog, settings.preferSystemIcon)
                         }
-                    setNotification(notification)
+
+                    // Use throttled update for notification
+                    setNotificationThrottled(notification, progress)
 
                     if (progress is ProgressEntity.InstallSuccess) {
                         scope.launch {
@@ -142,7 +154,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     }
                 } else {
                     Timber.d("[id=${installer.id}] Foreground mode. Cancelling notification.")
-                    setNotification(null)
+                    setNotificationImmediate(null)
                 }
             }.collect()
         }
@@ -171,6 +183,60 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
     }
 
+    /**
+     * Throttled notification update that respects system rate limits
+     * - For critical states (success, failure): update immediately
+     * - For progress updates: throttle to avoid rate limiting
+     */
+    private fun setNotificationThrottled(notification: Notification?, progress: ProgressEntity) {
+        if (notification == null) {
+            setNotificationImmediate(null)
+            lastProgressValue = -1f // Reset state
+            return
+        }
+
+        val currentTime = System.currentTimeMillis()
+        val timeSinceLastUpdate = currentTime - lastNotificationUpdateTime
+
+        // Critical states that should update immediately
+        val isCriticalState = progress is ProgressEntity.InstallSuccess ||
+                progress is ProgressEntity.InstallFailed ||
+                progress is ProgressEntity.InstallAnalysedSuccess ||
+                progress is ProgressEntity.InstallResolvedFailed ||
+                progress is ProgressEntity.InstallAnalysedFailed
+
+        val currentProgress = (progress as? ProgressEntity.InstallPreparing)?.progress ?: -1f
+
+        val shouldUpdate = when {
+            isCriticalState -> true
+            timeSinceLastUpdate < NOTIFICATION_UPDATE_INTERVAL_MS -> false
+            currentProgress < 0 -> true  // Not progress
+            else -> {
+                val progressIncreased = currentProgress > lastProgressValue
+                val significantChange = (currentProgress - lastProgressValue) >= PROGRESS_UPDATE_THRESHOLD
+                progressIncreased && (significantChange || currentProgress >= 0.99f)
+            }
+        }
+
+        if (shouldUpdate) {
+            setNotificationImmediate(notification)
+            lastNotificationUpdateTime = currentTime
+            if (currentProgress >= 0) {
+                lastProgressValue = currentProgress
+            }
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    private fun setNotificationImmediate(notification: Notification?) {
+        if (notification == null) {
+            Timber.d("[id=${installer.id}] setNotification: Cancelling notification with id: $notificationId")
+            notificationManager.cancel(notificationId)
+            return
+        }
+        notificationManager.notify(notificationId, notification)
+    }
+
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override suspend fun onFinish() {
         Timber.d("[id=${installer.id}] onFinish: Cancelling notification and job.")
@@ -182,7 +248,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .forEach {
                 appIconRepo.clearCacheForPackage(it)
             }
-        setNotification(null)
+        setNotificationImmediate(null)
         job?.cancel()
     }
 
@@ -383,16 +449,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
             segment
         }
-    }
-
-    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-    private fun setNotification(notification: Notification? = null) {
-        if (notification == null) {
-            Timber.d("[id=${installer.id}] setNotification: Cancelling notification with id: $notificationId")
-            notificationManager.cancel(notificationId)
-            return
-        }
-        notificationManager.notify(notificationId, notification)
     }
 
     enum class Channel(val value: String) {
