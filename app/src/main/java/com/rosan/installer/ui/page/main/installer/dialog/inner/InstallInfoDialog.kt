@@ -12,7 +12,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -67,14 +66,15 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.toAndroidVersionName
+import kotlin.math.abs
 
 
 /**
  * Provides info display: Icon, Title, Subtitle (with version logic).
  * Shows comparison if preInstallAppInfo is provided, otherwise shows only new version.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun installInfoDialog(
     installer: InstallerRepo,
@@ -92,6 +92,7 @@ fun installInfoDialog(
     val selectableEntities = currentPackage.appEntities
 
     val selectedApps = selectableEntities.filter { it.selected }.map { it.app }
+    val totalSize = selectedApps.sumOf { it.size }
     // If no apps are selected, return empty DialogParams
     val entityToInstall = selectedApps.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
         ?: selectedApps.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
@@ -371,6 +372,15 @@ fun installInfoDialog(
                         }
                     }
                 }
+                // -- Size Display
+                if (totalSize > 0L) {
+                    Spacer(modifier = Modifier.size(8.dp))
+                    SizeInfoDisplay(
+                        oldSize = preInstallAppInfo?.packageSize ?: 0L,
+                        newSize = totalSize
+                    )
+                }
+                // --- OPPO Info Display
                 if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
                     AnimatedVisibility(settings.showOPPOSpecial && entityToInstall.sourceType == DataType.APK) {
                         Column {
@@ -384,6 +394,7 @@ fun installInfoDialog(
                             }
                         }
                     }
+
             }
         }
     )
@@ -393,7 +404,6 @@ fun installInfoDialog(
 /**
  * Composable for displaying version comparison in multiple lines (the original style).
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun VersionCompareMultiLine(
     preInstallAppInfo: InstalledAppInfo,
@@ -448,7 +458,6 @@ private fun VersionCompareMultiLine(
 /**
  * Composable for displaying version comparison in a single line (e.g., "1.0 (1) -> 2.0 (2)").
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun VersionCompareSingleLine(
     preInstallAppInfo: InstalledAppInfo,
@@ -486,7 +495,6 @@ private fun VersionCompareSingleLine(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SdkInfoCompact(
     @StringRes shortLabelResId: Int,
@@ -551,7 +559,6 @@ private fun SdkInfoCompact(
  * - labelPrefixResId: label only, e.g. "minSDK:" (no value placeholders)
  * - valueFormatResId: value format, e.g. "%1$s (Android %2$s)"
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SdkInfoExpanded(
     @StringRes labelPrefixResId: Int,
@@ -588,7 +595,7 @@ private fun SdkInfoExpanded(
                     style = MaterialTheme.typography.bodyMedium
                 )
             } else {
-                SdkValueWithIcon(sdk = oldSdk!!, color = MaterialTheme.colorScheme.onSurface)
+                SdkValueWithIcon(sdk = oldSdk, color = MaterialTheme.colorScheme.onSurface)
             }
 
             Icon(
@@ -650,6 +657,104 @@ private fun SdkValueWithIcon(
                 color = color,
                 style = MaterialTheme.typography.bodySmall
             )
+        }
+    }
+}
+
+@Composable
+private fun SizeInfoDisplay(
+    oldSize: Long,
+    newSize: Long
+) {
+    val showComparison = oldSize > 0L && oldSize != newSize
+    var showDiffOnly by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .clickable(
+                enabled = showComparison,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                showDiffOnly = !showDiffOnly
+            }
+    ) {
+        AnimatedContent(
+            targetState = showComparison && showDiffOnly,
+            transitionSpec = {
+                fadeIn(tween(200)) togetherWith fadeOut(tween(200)) using
+                        SizeTransform { _, _ -> tween(250) }
+            },
+            label = "SizeDisplayAnimation"
+        ) { isDiffMode ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+            ) {
+                // Label: "Size:"
+                Text(
+                    text = stringResource(R.string.installer_package_size_label),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                if (isDiffMode) {
+                    // --- Diff Mode ---
+                    val diff = newSize - oldSize
+
+                    // 1. Get absolute value for formatting (ensure formatSize receives a positive number)
+                    val absDiff = abs(diff)
+                    val diffString = absDiff.formatSize()
+
+                    // 2. Manually append the sign based on whether diff is positive or negative
+                    val finalString = when {
+                        diff > 0 -> "+$diffString" // Increased
+                        diff < 0 -> "-$diffString" // Decreased
+                        else -> diffString         // Unchanged (0 B)
+                    }
+
+                    // Color logic: Use Primary color for both increase and decrease
+                    val color = MaterialTheme.colorScheme.primary
+
+                    Text(
+                        text = finalString,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = color,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                } else {
+                    // --- Full Mode: "35.2 MB -> 42.0 MB" ---
+                    if (showComparison) {
+                        // Old size
+                        Text(
+                            text = oldSize.formatSize(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+
+                        Icon(
+                            imageVector = AppIcons.ArrowRight,
+                            contentDescription = "to",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                                .size(24.dp)
+                        )
+                    } else {
+                        // Add a spacer to separate the new size from the label when there is no old version
+                        Spacer(modifier = Modifier.size(4.dp))
+                    }
+
+                    // New size
+                    Text(
+                        text = newSize.formatSize(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
     }
 }

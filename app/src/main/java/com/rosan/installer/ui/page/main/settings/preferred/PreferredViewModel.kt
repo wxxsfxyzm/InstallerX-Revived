@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
+import com.rosan.installer.data.app.model.entity.HttpProfile
 import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.app.repo.PrivilegedActionRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
@@ -49,15 +50,16 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 
 class PreferredViewModel(
-    private val context: Context,
     private val appDataStore: AppDataStore,
     private val paRepo: PrivilegedActionRepo,
     private val updateChecker: UpdateChecker,
     private val appUpdater: AppUpdater
 ) : ViewModel(), KoinComponent {
+    private val context by inject<Context>()
     var state by mutableStateOf(PreferredViewState())
         private set
 
@@ -158,6 +160,8 @@ class PreferredViewModel(
             is PreferredViewAction.LabChangeShizukuHookMode -> labChangeShizukuHookMode(action.enable)
             is PreferredViewAction.LabChangeRootModuleFlash -> labChangeRootModuleFlash(action.enable)
             is PreferredViewAction.LabChangeRootImplementation -> labChangeRootImplementation(action.implementation)
+            is PreferredViewAction.LabChangeHttpProfile -> labChangeHttpProfile(action.profile)
+            is PreferredViewAction.LabChangeHttpSaveFile -> labChangeHttpSaveFile(action.enable)
 
             is PreferredViewAction.SetThemeMode -> setThemeMode(action.mode)
             is PreferredViewAction.SetPaletteStyle -> setPaletteStyle(action.style)
@@ -472,6 +476,17 @@ class PreferredViewModel(
             )
         }
 
+    private fun labChangeHttpProfile(profile: HttpProfile) =
+        viewModelScope.launch {
+            appDataStore.putString(AppDataStore.LAB_HTTP_PROFILE, profile.name)
+        }
+
+    // [New Function 2]
+    private fun labChangeHttpSaveFile(enable: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.LAB_HTTP_SAVE_FILE, enable)
+        }
+
     private fun setThemeMode(mode: ThemeMode) = viewModelScope.launch {
         appDataStore.putString(AppDataStore.THEME_MODE, mode.name)
     }
@@ -589,6 +604,11 @@ class PreferredViewModel(
             val labRootImplementationFlow =
                 appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
                     .map { RootImplementation.fromString(it) }
+            val labHttpProfileFlow =
+                appDataStore.getString(AppDataStore.LAB_HTTP_PROFILE)
+                    .map { HttpProfile.fromString(it) }
+            val labHttpSaveFileFlow =
+                appDataStore.getBoolean(AppDataStore.LAB_HTTP_SAVE_FILE, false)
             val themeModeFlow =
                 appDataStore.getString(AppDataStore.THEME_MODE, ThemeMode.SYSTEM.name)
                     .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
@@ -637,6 +657,8 @@ class PreferredViewModel(
                 labShizukuHookModeFlow,
                 labRootModuleFlashFlow,
                 labRootImplementationFlow,
+                labHttpProfileFlow,
+                labHttpSaveFileFlow,
                 themeModeFlow,
                 paletteStyleFlow,
                 useDynamicColorFlow,
@@ -680,6 +702,8 @@ class PreferredViewModel(
                 val labShizukuHookMode = values[idx++] as Boolean
                 val labRootModuleFlash = values[idx++] as Boolean
                 val labRootImplementation = values[idx++] as RootImplementation
+                val labHttpProfile = values[idx++] as HttpProfile
+                val labHttpSaveFile = values[idx++] as Boolean
                 val themeMode = values[idx++] as ThemeMode
                 val paletteStyle = values[idx++] as PaletteStyle
                 val useDynamicColor = values[idx++] as Boolean
@@ -744,6 +768,8 @@ class PreferredViewModel(
                     labShizukuHookMode = labShizukuHookMode,
                     labRootEnableModuleFlash = labRootModuleFlash,
                     labRootImplementation = labRootImplementation,
+                    labHttpProfile = labHttpProfile,
+                    labHttpSaveFile = labHttpSaveFile,
                     themeMode = themeMode,
                     paletteStyle = paletteStyle,
                     useDynamicColor = useDynamicColor,

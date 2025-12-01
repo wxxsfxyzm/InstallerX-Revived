@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -62,6 +63,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.data.app.model.entity.HttpProfile
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -918,6 +920,38 @@ fun ManagedUidsWidget(
             }
         )
     }
+}
+
+@Composable
+fun LabHttpProfileWidget(viewModel: PreferredViewModel) {
+    val profiles = remember {
+        listOf(
+            HttpProfile.ALLOW_SECURE,
+            HttpProfile.ALLOW_LOCAL,
+            HttpProfile.ALLOW_ALL
+        )
+    }
+    val options = profiles.map { profile ->
+        when (profile) {
+            HttpProfile.ALLOW_SECURE -> stringResource(R.string.lab_http_profile_secure)
+            HttpProfile.ALLOW_LOCAL -> stringResource(R.string.lab_http_profile_local)
+            HttpProfile.ALLOW_ALL -> stringResource(R.string.lab_http_profile_all)
+        }
+    }
+
+    val currentIndex = profiles.indexOf(viewModel.state.labHttpProfile).coerceAtLeast(0)
+
+    DropDownMenuWidget(
+        icon = Icons.Default.Security,
+        title = stringResource(R.string.lab_http_profile),
+        description = options.getOrNull(currentIndex),
+        choice = currentIndex,
+        data = options,
+        onChoiceChange = { index ->
+            val selectedProfile = profiles.getOrElse(index) { HttpProfile.ALLOW_SECURE }
+            viewModel.dispatch(PreferredViewAction.LabChangeHttpProfile(selectedProfile))
+        }
+    )
 }
 
 /**

@@ -190,10 +190,13 @@
     <string name="config_auto_delete_desc">安装成功后自动删除安装包</string>
     <string name="config_display_sdk_version">显示 SDK 信息</string>
     <string name="config_display_sdk_version_desc">在安装界面显示 target 与 min 信息</string>
+    <string name="config_display_size">显示安装包大小</string>
+    <string name="config_display_size_desc">在安装界面显示安装包大小信息</string>
     <string name="config_label_main_settings">主要设置</string>
     <string name="config_label_installer_settings">安装器设置</string>
     <string name="config_label_install_options">安装选项</string>
     <string name="config_label_install_options_desc">配置安装参数，如安装来源，安装用户等</string>
+    <string name="config_label_app_bundle_settings">拆分安装包</string>
     <string name="config_dialog_title_invalid">有错误输入项</string>
     <string name="config_dialog_title_unsaved_changes">有未保存的修改</string>
     <string name="config_dialog_message_unsaved_changes">不保存就退出吗？</string>
@@ -378,6 +381,7 @@
     <string name="installer_package_name">包名：%1$s</string>
     <string name="installer_package_min_sdk_label">最小 SDK：</string>
     <string name="installer_package_target_sdk_label">目标 SDK：</string>
+    <string name="installer_package_size_label">大小：</string>
     <string name="installer_module_author_label">作者：</string>
     <string name="installer_file_path">路径：%1$s</string>
     <string name="exception_install_failed_unknown">未知错误</string>
@@ -430,6 +434,8 @@
     <string name="exception_module_cmd_init_failed">模块安装命令执行失败</string>
     <string name="exception_module_install_failed">模块安装失败</string>
     <string name="exception_module_install_failed_incompatible_authorizer">不兼容的授权器</string>
+    <string name="exception_http_not_allowed">当前配置不允许明文 HTTP</string>
+    <string name="exception_http_restricted_for_localhost">仅允许在本地网络使用明文 HTTP</string>
     <string name="old_version_prefix">当前</string>
     <string name="old_version_archived">已归档</string>
     <string name="upgrade_version_prefix">升级</string>
@@ -483,6 +489,8 @@
     <string name="config_allow_downgrade_desc">允许降级安装低版本的安装包（Android 15+ 需要 ROOT 权限）</string>
     <string name="config_grant_all_permissions">授予所有请求权限</string>
     <string name="config_grant_all_permissions_desc">自动授予包请求的所有权限。请注意只适用于运行时权限，特殊权限如所有文件访问或无障碍不会自动授予</string>
+    <string name="config_split_choose_all">默认选中所有分包</string>
+    <string name="config_split_choose_all_desc">安装时默认选中所有分包而不是选中最合适的</string>
     <string name="force_volume_uuid">指定卷 UUID</string>
     <string name="force_volume_uuid_desc">允许指定卷 UUID 并将软件包安装到该卷</string>
     <string name="force_permission_prompt">强制权限提示</string>
@@ -588,4 +596,11 @@
     <string name="lab_module_flashing">启用模块刷写</string>
     <string name="lab_module_flashing_desc">在刷写任何模块前务必再次确认！</string>
     <string name="lab_module_select_root_impl">选择 Root 实现方式</string>
+    <string name="lab_http_save_file">保存下载文件</string>
+    <string name="lab_http_save_file_desc">下载完成后将文件保存到系统下载目录</string>
+    <string name="lab_http_profile">HTTP 安全策略</string>
+    <string name="lab_http_profile_desc">出于安全性限制 HTTP 明文连接</string>
+    <string name="lab_http_profile_secure">仅允许安全连接 (HTTPS)</string>
+    <string name="lab_http_profile_local">允许本地明文 (Localhost)</string>
+    <string name="lab_http_profile_all">允许所有 (不安全)</string>
 </resources>

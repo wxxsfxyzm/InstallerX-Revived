@@ -47,7 +47,6 @@ import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowAllRequestedPermissionsWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowDowngradeWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataAllowRestrictedPermissionsWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowTestOnlyWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAutoDeleteWidget
@@ -60,8 +59,10 @@ import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataPackageSourceWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataSplitChooseAllWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
+import com.rosan.installer.ui.page.main.widget.setting.DisplaySizeWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
@@ -229,6 +230,7 @@ fun EditPage(
             item { DataCustomizeAuthorizerWidget(viewModel = viewModel) }
             item { DataInstallModeWidget(viewModel = viewModel) }
             if (isNone) item { NoneInstallerTipCard() }
+
             item { LabelWidget(label = stringResource(R.string.config_label_installer_settings)) }
             item { DataUserWidget(viewModel = viewModel, isM3E = false) }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) item { DataPackageSourceWidget(viewModel, isM3E = false) }
@@ -236,15 +238,19 @@ fun EditPage(
             item { DataManualDexoptWidget(viewModel, isM3E = false) }
             item { DataAutoDeleteWidget(viewModel = viewModel, isM3E = false) }
             item { DisplaySdkWidget(viewModel = viewModel, isM3E = false) }
+            item { DisplaySizeWidget(viewModel, isM3E = false) }
+
             item { LabelWidget(label = stringResource(R.string.config_label_install_options)) }
             item { DataForAllUserWidget(viewModel = viewModel, isM3E = false) }
             item { DataAllowTestOnlyWidget(viewModel = viewModel, isM3E = false) }
             item { DataAllowDowngradeWidget(viewModel = viewModel, isM3E = false) }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
                 item { DataBypassLowTargetSdkWidget(viewModel = viewModel, isM3E = false) }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                item { DataAllowRestrictedPermissionsWidget(viewModel = viewModel, isM3E = false) }
             item { DataAllowAllRequestedPermissionsWidget(viewModel = viewModel, isM3E = false) }
+
+            item { LabelWidget(label = stringResource(R.string.config_label_app_bundle_settings)) }
+            item { DataSplitChooseAllWidget(viewModel = viewModel, isM3E = false) }
+
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }

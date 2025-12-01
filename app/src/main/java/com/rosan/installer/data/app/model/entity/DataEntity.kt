@@ -8,7 +8,7 @@ import java.util.zip.ZipInputStream
 sealed class DataEntity(open var source: DataEntity? = null) {
     abstract fun getInputStream(): InputStream?
 
-    open fun getSize(): Long = getInputStream()?.available()?.toLong() ?: 0L
+    abstract fun getSize(): Long
 
     fun getInputStreamWhileNotEmpty(): InputStream? = getInputStream() ?: source?.getInputStream()
 
@@ -16,6 +16,8 @@ sealed class DataEntity(open var source: DataEntity? = null) {
 
     class FileEntity(val path: String) : DataEntity() {
         override fun getInputStream() = File(path).inputStream()
+
+        override fun getSize(): Long = File(path).length()
 
         override fun toString() = path
     }
@@ -25,6 +27,25 @@ sealed class DataEntity(open var source: DataEntity? = null) {
             val entry = it.getEntry(name) ?: return@let null
             it.getInputStream(entry)
         }
+
+        private val cachedSize: Long by lazy {
+            try {
+                // Open the parent file (e.g., .xapk or .apks archive)
+                ZipFile(parent.path).use { zip ->
+                    // Get the entry with the specified name (e.g., split_config.arm64_v8a.apk)
+                    val entry = zip.getEntry(name)
+                    // entry.size returns -1 when unknown, so handle that case
+                    val size = entry?.size ?: 0L
+
+                    // If the uncompressed size is unknown (rare), fall back to compressed size or return 0
+                    if (size == -1L) entry?.compressedSize ?: 0L else size
+                }
+            } catch (e: Exception) {
+                0L
+            }
+        }
+
+        override fun getSize(): Long = cachedSize
 
         override var source: DataEntity? = parent.source?.let { ZipInputStreamEntity(name, it) }
 
@@ -72,6 +93,8 @@ sealed class DataEntity(open var source: DataEntity? = null) {
             }
             return result
         }
+
+        override fun getSize(): Long = -1L
 
         override var source: DataEntity? = parent.source?.let { ZipInputStreamEntity(name, it) }
 

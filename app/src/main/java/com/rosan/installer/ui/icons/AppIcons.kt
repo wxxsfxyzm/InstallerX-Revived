@@ -1,16 +1,17 @@
 package com.rosan.installer.ui.icons
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
+import androidx.compose.material.icons.automirrored.twotone.PlaylistAdd
 import androidx.compose.material.icons.automirrored.twotone.Rule
 import androidx.compose.material.icons.automirrored.twotone.Send
 import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
-import androidx.compose.material.icons.outlined.NotInterested
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.NotificationsOff
@@ -118,7 +119,8 @@ object AppIcons {
     val Notification = Icons.Outlined.Notifications
     val NotificationDisabled = Icons.Outlined.NotificationsOff
     val AutoNotification = Icons.Outlined.NotificationsActive
-    val Ignore = Icons.Outlined.NotInterested
+
+    // val Ignore = Icons.Outlined.NotInterested
     val Timer = Icons.TwoTone.Timer
     // --- 安装方式图标结束 ---
 
@@ -137,6 +139,7 @@ object AppIcons {
     val IconPack = Icons.TwoTone.Widgets
     val Silent = Icons.TwoTone.DoNotDisturbOnTotalSilence
     val OEMSpecial = Icons.TwoTone.FindInPage
+    val ShowSize = Icons.AutoMirrored.Filled.CompareArrows
     // --- 设置图标结束 ---
 
     // --- Profile pkg 图标集合 ---
@@ -149,6 +152,8 @@ object AppIcons {
     val InstallBypassLowTargetSdk = Icons.TwoTone.SecurityUpdateWarning
     val InstallAllowRestrictedPermissions = Icons.TwoTone.AdminPanelSettings
     val InstallAllowAllRequestedPermissions = Icons.TwoTone.LibraryAddCheck
+
+    val InstallSplitChooseAll = Icons.AutoMirrored.TwoTone.PlaylistAdd
     // --- 结束 ---
 
     // --- 箭头图标集合 ---

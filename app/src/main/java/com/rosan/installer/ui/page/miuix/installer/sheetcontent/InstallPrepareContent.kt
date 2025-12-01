@@ -51,6 +51,7 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -84,11 +85,9 @@ fun InstallPrepareContent(
         return
     }
 
-    val allEntities = (if (installer.analysisResults.size > 1) {
-        currentPackage.appEntities.filter { it.selected }
-    } else {
-        currentPackage.appEntities
-    }).map { it.app }
+    val allEntities = currentPackage.appEntities
+        .filter { it.selected } // Always include selected entities
+        .map { it.app }
 
     val primaryEntity = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
         ?: allEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
@@ -101,6 +100,7 @@ fun InstallPrepareContent(
 
     val containerType = primaryEntity.sourceType
     val entityToInstall = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+    val totalSelectedSize = allEntities.sumOf { it.size }
     val displayIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
 
     val errorColor = MaterialTheme.colorScheme.error
@@ -203,6 +203,21 @@ fun InstallPrepareContent(
                                 preInstallAppInfo = currentPackage.installedAppInfo,
                                 installer = installer
                             )
+
+                            AnimatedVisibility(visible = installer.config.displaySize && primaryEntity.size > 0) {
+                                val oldSize = currentPackage.installedAppInfo?.packageSize ?: 0L
+
+                                val oldSizeStr = if (oldSize > 0) oldSize.formatSize() else null
+                                val newSizeStr = totalSelectedSize.formatSize()
+
+                                AdaptiveInfoRow(
+                                    labelResId = R.string.installer_package_size_label,
+                                    newValue = newSizeStr,
+                                    oldValue = oldSizeStr,
+                                    isArchived = false
+                                )
+                            }
+
                             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
                                 AnimatedVisibility(visible = settings.showOPPOSpecial && primaryEntity.sourceType == DataType.APK) {
                                     primaryEntity.minOsdkVersion?.let {

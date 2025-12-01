@@ -97,17 +97,17 @@ class EditViewModel(
                     is EditViewAction.ChangeDataDexoptMode -> changeDataDexoptMode(action.mode)
                     is EditViewAction.ChangeDataAutoDelete -> changeDataAutoDelete(action.autoDelete)
                     is EditViewAction.ChangeDisplaySdk -> changeDisplaySdk(action.displaySdk)
+                    is EditViewAction.ChangeDisplaySize -> changeDisplaySize(action.displaySize)
                     is EditViewAction.ChangeDataForAllUser -> changeDataForAllUser(action.forAllUser)
                     is EditViewAction.ChangeDataAllowTestOnly -> changeDataAllowTestOnly(action.allowTestOnly)
                     is EditViewAction.ChangeDataAllowDowngrade -> changeDataAllowDowngrade(action.allowDowngrade)
                     is EditViewAction.ChangeDataBypassLowTargetSdk -> changeDataBypassLowTargetSdk(action.bypassLowTargetSdk)
-                    is EditViewAction.ChangeDataAllowRestrictedPermissions -> changeDataAllowRestrictedPermissions(
-                        action.allowRestrictedPermissions
-                    )
 
                     is EditViewAction.ChangeDataAllowAllRequestedPermissions -> changeDataAllowAllRequestedPermissions(
                         action.allowAllRequestedPermissions
                     )
+
+                    is EditViewAction.ChangeSplitChooseAll -> changeSplitChooseAll(action.splitChooseAll)
 
                     is EditViewAction.LoadData -> loadData()
                     is EditViewAction.SaveData -> saveData()
@@ -304,6 +304,14 @@ class EditViewModel(
         )
     }
 
+    private fun changeDisplaySize(displaySize: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                displaySize = displaySize
+            )
+        )
+    }
+
     private fun changeDataForAllUser(forAllUser: Boolean) {
         state = state.copy(
             data = state.data.copy(
@@ -328,14 +336,6 @@ class EditViewModel(
         )
     }
 
-    private fun changeDataAllowRestrictedPermissions(allowRestrictedPermissions: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                allowRestrictedPermissions = allowRestrictedPermissions
-            )
-        )
-    }
-
     private fun changeDataBypassLowTargetSdk(bypassLowTargetSdk: Boolean) {
         state = state.copy(
             data = state.data.copy(
@@ -348,6 +348,14 @@ class EditViewModel(
         state = state.copy(
             data = state.data.copy(
                 allowAllRequestedPermissions = allowAllRequestedPermissions
+            )
+        )
+    }
+
+    private fun changeSplitChooseAll(splitChooseAll: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                splitChooseAll = splitChooseAll
             )
         )
     }

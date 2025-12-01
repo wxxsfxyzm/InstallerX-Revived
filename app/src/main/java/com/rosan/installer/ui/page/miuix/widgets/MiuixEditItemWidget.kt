@@ -9,8 +9,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Speed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -205,7 +203,6 @@ fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
 
     Column {
         MiuixSwitchWidget(
-            icon = AppIcons.InstallPackageSource,
             title = stringResource(id = R.string.config_customize_package_source),
             description = description,
             checked = enableCustomizePackageSource,
@@ -278,7 +275,6 @@ fun MiuixDataDeclareInstallerWidget(viewModel: EditViewModel) {
         else null // 其他模式下没有特殊描述
 
     MiuixSwitchWidget(
-        icon = AppIcons.InstallSource,
         title = stringResource(id = R.string.config_declare_installer),
         checked = viewModel.state.data.declareInstaller,
         onCheckedChange = {
@@ -357,7 +353,6 @@ fun MiuixDataUserWidget(viewModel: EditViewModel) {
     Column {
         // This switch controls the visibility of the user selection spinner.
         MiuixSwitchWidget(
-            icon = AppIcons.InstallUser,
             title = stringResource(id = R.string.config_customize_user),
             description = description,
             checked = enableCustomizeUser,
@@ -419,7 +414,6 @@ fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
         else stringResource(R.string.config_manual_dexopt_desc)
 
     MiuixSwitchWidget(
-        icon = Icons.TwoTone.Speed,
         title = stringResource(id = R.string.config_manual_dexopt),
         description = description,
         checked = viewModel.state.data.enableManualDexopt,
@@ -487,7 +481,6 @@ fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
 @Composable
 fun MiuixDataAutoDeleteWidget(viewModel: EditViewModel) {
     MiuixSwitchWidget(
-        icon = AppIcons.Delete,
         title = stringResource(id = R.string.config_auto_delete),
         description = stringResource(id = R.string.config_auto_delete_desc),
         checked = viewModel.state.data.autoDelete,
@@ -500,7 +493,6 @@ fun MiuixDataAutoDeleteWidget(viewModel: EditViewModel) {
 @Composable
 fun MiuixDisplaySdkWidget(viewModel: EditViewModel) {
     MiuixSwitchWidget(
-        icon = AppIcons.Info,
         title = stringResource(id = R.string.config_display_sdk_version),
         description = stringResource(id = R.string.config_display_sdk_version_desc),
         checked = viewModel.state.data.displaySdk,
@@ -511,9 +503,20 @@ fun MiuixDisplaySdkWidget(viewModel: EditViewModel) {
 }
 
 @Composable
+fun MiuixDisplaySizeWidget(viewModel: EditViewModel) {
+    MiuixSwitchWidget(
+        title = stringResource(id = R.string.config_display_size),
+        description = stringResource(id = R.string.config_display_size_desc),
+        checked = viewModel.state.data.displaySize,
+        onCheckedChange = {
+            viewModel.dispatch(EditViewAction.ChangeDisplaySize(it))
+        }
+    )
+}
+
+@Composable
 fun MiuixDataForAllUserWidget(viewModel: EditViewModel) {
     MiuixSwitchWidget(
-        icon = AppIcons.InstallForAllUsers,
         title = stringResource(id = R.string.config_all_users),
         description = stringResource(id = R.string.config_all_users_desc),
         checked = viewModel.state.data.forAllUser,
@@ -524,7 +527,6 @@ fun MiuixDataForAllUserWidget(viewModel: EditViewModel) {
 @Composable
 fun MiuixDataAllowTestOnlyWidget(viewModel: EditViewModel) {
     MiuixSwitchWidget(
-        icon = AppIcons.BugReport,
         title = stringResource(id = R.string.config_allow_test),
         description = stringResource(id = R.string.config_allow_test_desc),
         checked = viewModel.state.data.allowTestOnly,
@@ -537,7 +539,6 @@ fun MiuixDataAllowTestOnlyWidget(viewModel: EditViewModel) {
 @Composable
 fun MiuixDataAllowDowngradeWidget(viewModel: EditViewModel) {
     MiuixSwitchWidget(
-        icon = AppIcons.InstallAllowDowngrade,
         title = stringResource(id = R.string.config_allow_downgrade),
         description = stringResource(id = R.string.config_allow_downgrade_desc),
         checked = viewModel.state.data.allowDowngrade,
@@ -559,20 +560,8 @@ fun MiuixDataBypassLowTargetSdkWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun MiuixDataAllowRestrictedPermissionsWidget(viewModel: EditViewModel) {
-    MiuixSwitchWidget(
-        icon = AppIcons.InstallAllowRestrictedPermissions,
-        title = stringResource(id = R.string.config_all_whitelist_restricted_permissions),
-        description = stringResource(id = R.string.config_all_whitelist_restricted_permissions_desc),
-        checked = viewModel.state.data.allowRestrictedPermissions,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowRestrictedPermissions(it)) }
-    )
-}
-
-@Composable
 fun MiuixDataAllowAllRequestedPermissionsWidget(viewModel: EditViewModel) {
     MiuixSwitchWidget(
-        icon = AppIcons.InstallAllowAllRequestedPermissions,
         title = stringResource(id = R.string.config_grant_all_permissions),
         description = stringResource(id = R.string.config_grant_all_permissions_desc),
         checked = viewModel.state.data.allowAllRequestedPermissions,
@@ -580,3 +569,12 @@ fun MiuixDataAllowAllRequestedPermissionsWidget(viewModel: EditViewModel) {
     )
 }
 
+@Composable
+fun MiuixDataSplitChooseAllWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+    MiuixSwitchWidget(
+        title = stringResource(id = R.string.config_split_choose_all),
+        description = stringResource(id = R.string.config_split_choose_all_desc),
+        checked = viewModel.state.data.splitChooseAll,
+        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeSplitChooseAll(it)) }
+    )
+}

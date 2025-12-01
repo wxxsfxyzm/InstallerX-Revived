@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
 import androidx.compose.ui.graphics.Color
+import com.rosan.installer.data.app.model.entity.HttpProfile
 import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
@@ -40,6 +41,8 @@ data class PreferredViewState(
     val labShizukuHookMode: Boolean = false,
     val labRootEnableModuleFlash: Boolean = false,
     val labRootImplementation: RootImplementation = RootImplementation.Magisk,
+    val labHttpSaveFile: Boolean = false,
+    val labHttpProfile: HttpProfile = HttpProfile.ALLOW_SECURE,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val useDynamicColor: Boolean = true,

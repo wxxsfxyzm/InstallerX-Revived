@@ -508,6 +508,18 @@ fun DisplaySdkWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
 }
 
 @Composable
+fun DisplaySizeWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+    SwitchWidget(
+        icon = AppIcons.ShowSize,
+        title = stringResource(id = R.string.config_display_size),
+        description = stringResource(id = R.string.config_display_size_desc),
+        checked = viewModel.state.data.displaySize,
+        isM3E = isM3E,
+        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDisplaySize(it)) }
+    )
+}
+
+@Composable
 fun DataForAllUserWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.InstallForAllUsers,
@@ -556,18 +568,6 @@ fun DataBypassLowTargetSdkWidget(viewModel: EditViewModel, isM3E: Boolean = true
 }
 
 @Composable
-fun DataAllowRestrictedPermissionsWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
-    SwitchWidget(
-        icon = AppIcons.InstallAllowRestrictedPermissions,
-        title = stringResource(id = R.string.config_all_whitelist_restricted_permissions),
-        description = stringResource(id = R.string.config_all_whitelist_restricted_permissions_desc),
-        checked = viewModel.state.data.allowRestrictedPermissions,
-        isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowRestrictedPermissions(it)) }
-    )
-}
-
-@Composable
 fun DataAllowAllRequestedPermissionsWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.InstallAllowAllRequestedPermissions,
@@ -576,5 +576,17 @@ fun DataAllowAllRequestedPermissionsWidget(viewModel: EditViewModel, isM3E: Bool
         checked = viewModel.state.data.allowAllRequestedPermissions,
         isM3E = isM3E,
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowAllRequestedPermissions(it)) }
+    )
+}
+
+@Composable
+fun DataSplitChooseAllWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+    SwitchWidget(
+        icon = AppIcons.InstallSplitChooseAll,
+        title = stringResource(id = R.string.config_split_choose_all),
+        description = stringResource(id = R.string.config_split_choose_all_desc),
+        checked = viewModel.state.data.splitChooseAll,
+        isM3E = isM3E,
+        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeSplitChooseAll(it)) }
     )
 }

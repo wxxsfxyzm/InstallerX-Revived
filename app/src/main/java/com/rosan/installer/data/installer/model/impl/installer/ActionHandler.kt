@@ -187,6 +187,11 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         // 1. Resolve Config
         installer.config = ConfigResolver.resolve(activity)
 
+        if (installer.config.installMode.isNotification) {
+            Timber.d("[id=$installerId] Notification mode detected. Switching to background.")
+            installer.background(true)
+        }
+
         // 2. Resolve Data (IO Heavy - Cancellable via SourceResolver)
         Timber.d("[id=$installerId] resolve: Resolving data URIs...")
         val data = sourceResolver.resolve(activity.intent)
@@ -218,6 +223,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
 
         Timber.d("[id=$installerId] resolve: Emitting ProgressEntity.InstallResolveSuccess.")
+        Timber.d("[id=$installerId] Final InstallMode before emitting success: ${installer.config.installMode}")
         installer.progress.emit(ProgressEntity.InstallResolveSuccess)
     }
 
@@ -358,14 +364,16 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
     }
 
-    private suspend fun autoLockInstallerIfNeeded() {
-        if (appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER).first()) {
-            Timber.d("[id=$installerId] resolve: Attempting to auto-lock default installer.")
-            runCatching {
-                setInstallerDefaultPrivileged(context, installer.config, true)
-                Timber.d("[id=$installerId] resolve: Auto-lock attempt finished successfully.")
-            }.onFailure {
-                Timber.w(it, "[id=$installerId] resolve: Failed to auto-lock default installer. This is non-fatal.")
+    private fun autoLockInstallerIfNeeded() {
+        scope.launch {
+            if (appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER).first()) {
+                Timber.d("[id=$installerId] resolve: Attempting to auto-lock default installer.")
+                runCatching {
+                    setInstallerDefaultPrivileged(context, installer.config, true)
+                    Timber.d("[id=$installerId] resolve: Auto-lock attempt finished successfully.")
+                }.onFailure {
+                    Timber.w(it, "[id=$installerId] resolve: Failed to auto-lock default installer. This is non-fatal.")
+                }
             }
         }
     }

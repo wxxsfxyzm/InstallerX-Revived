@@ -48,6 +48,8 @@ import com.rosan.installer.data.app.model.exception.ModuleInstallException
 import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.data.app.model.exception.UninstallFailedHyperOSSystemAppException
 import com.rosan.installer.data.app.model.exception.UninstallFailedInternalErrorException
+import com.rosan.installer.data.installer.model.exception.HttpNotAllowedException
+import com.rosan.installer.data.installer.model.exception.HttpRestrictedForLocalhostException
 import com.rosan.installer.data.installer.model.exception.ResolveException
 import com.rosan.installer.data.installer.model.exception.ResolvedFailedNoInternetAccessException
 import com.rosan.installer.data.recycle.model.exception.AppProcessNotWorkException
@@ -118,6 +120,8 @@ private fun Throwable.getStringResourceId() =
         is ModuleInstallException -> R.string.exception_module_install_failed
         is ModuleInstallCmdInitException -> R.string.exception_module_cmd_init_failed
         is ModuleInstallFailedIncompatibleAuthorizerException -> R.string.exception_module_install_failed_incompatible_authorizer
+        is HttpNotAllowedException -> R.string.exception_http_not_allowed
+        is HttpRestrictedForLocalhostException -> R.string.exception_http_restricted_for_localhost
 
         else -> R.string.exception_install_failed_unknown
     }

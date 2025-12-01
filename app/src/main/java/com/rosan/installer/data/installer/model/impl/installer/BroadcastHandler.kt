@@ -111,6 +111,7 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 Name.Analyse -> installer.analyse()
                 Name.Install -> installer.install()
                 Name.Finish -> installer.close()
+                Name.Cancel -> installer.cancel()
                 Name.PrivilegedLaunchAndFinish -> handlePrivilegedLaunchAndFinish(context)
                 else -> {
                     Timber.d("[id=${installer.id}] Receiver: No action for broadcast name: $name")
@@ -131,7 +132,7 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
 
             Timber.d("[id=${installer.id}] Starting privileged launch for $packageName")
-            
+
             val autoCloseSeconds = appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first()
 
             openAppPrivileged(
@@ -154,6 +155,7 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Analyse("analyse"),
         Install("install"),
         Finish("finish"),
+        Cancel("cancel"),
         Launch("launch"),
         PrivilegedLaunchAndFinish("privileged_launch_and_finish");
 
