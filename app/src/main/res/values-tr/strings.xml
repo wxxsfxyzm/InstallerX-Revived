@@ -568,4 +568,12 @@
     <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">Anlık etkinliğin ilerleme bölümü, paketin simgesinden çıkarılan renkleri kullanacaktır</string>
     <string name="config_install_mode_desc">Varsayılan Yükleme Modu ve ilgili ayarlar</string>
     <string name="installer_install_complete">Yükleme tamamlandı</string>
+    <string name="updating">Güncelleniyor...</string>
+    <string name="update_available">Güncelleme Mevcut: %1$s</string>
+    <string name="get_update_directly">Güncellemeyi direkt al</string>
+    <string name="get_update_directly_desc">Güncellemeyi direkt GitHub\'dan alın ve yükleyin, önbellek kalmayacak</string>
+    <string name="installer_install_confirm">Yüklemeyi Onayla</string>
+    <string name="permission_flashlight">El fenerini erişimi</string>
+    <string name="permission_write_secure_settings">Güvenli ayarları değiştirme</string>
+    <string name="permission_manage_external_storage">Harici depolama alanını yönet</string>
 </resources>
