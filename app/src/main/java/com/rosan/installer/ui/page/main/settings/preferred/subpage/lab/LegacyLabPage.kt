@@ -18,9 +18,11 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
+import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.LabHttpProfileWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 
@@ -60,6 +62,24 @@ fun LegacyLabPage(
                     isM3E = false,
                     onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
                 )
+            }
+
+            if (RsConfig.isInternetAccessEnabled) {
+                item { LabelWidget(stringResource(R.string.internet_access_enabled)) }
+                // TODO
+                /*item {
+                    SwitchWidget(
+                        icon = Icons.Default.Download,
+                        title = stringResource(R.string.lab_http_save_file),
+                        description = stringResource(R.string.lab_http_save_file_desc),
+                        checked = state.labHttpSaveFile,
+                        isM3E = false,
+                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeHttpSaveFile(it)) }
+                    )
+                }*/
+
+                // HTTP Profile DropDown
+                item { LabHttpProfileWidget(viewModel) }
             }
             item { Spacer(Modifier.navigationBarsPadding()) }
         }

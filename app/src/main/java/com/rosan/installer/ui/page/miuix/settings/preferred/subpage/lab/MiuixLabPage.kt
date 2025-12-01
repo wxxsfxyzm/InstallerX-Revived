@@ -17,10 +17,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
+import com.rosan.installer.build.RsConfig
+import com.rosan.installer.data.app.model.entity.HttpProfile
 import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -163,6 +166,56 @@ fun MiuixLabPage(
                             onSelectedIndexChange = { newIndex ->
                                 data.keys.elementAtOrNull(newIndex)?.let { impl ->
                                     viewModel.dispatch(PreferredViewAction.LabChangeRootImplementation(impl))
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+            if (RsConfig.isInternetAccessEnabled) {
+                item { SmallTitle(stringResource(R.string.internet_access_enabled)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp)
+                    ) {
+                        // TODO
+                        /*MiuixSwitchWidget(
+                            title = stringResource(R.string.lab_http_save_file),
+                            description = stringResource(R.string.lab_http_save_file_desc),
+                            checked = state.labHttpSaveFile,
+                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeHttpSaveFile(it)) }
+                        )*/
+
+                        val context = LocalContext.current
+                        val currentProfile = state.labHttpProfile
+
+                        val profileData = remember {
+                            mapOf(
+                                HttpProfile.ALLOW_SECURE to context.getString(R.string.lab_http_profile_secure),
+                                HttpProfile.ALLOW_LOCAL to context.getString(R.string.lab_http_profile_local),
+                                HttpProfile.ALLOW_ALL to context.getString(R.string.lab_http_profile_all)
+                            )
+                        }
+
+                        val profileEntries = remember(profileData) {
+                            profileData.values.map { name ->
+                                SpinnerEntry(title = name)
+                            }
+                        }
+
+                        val profileIndex = remember(currentProfile, profileData) {
+                            profileData.keys.toList().indexOf(currentProfile).coerceAtLeast(0)
+                        }
+
+                        SuperSpinner(
+                            title = stringResource(R.string.lab_http_profile),
+                            items = profileEntries,
+                            selectedIndex = profileIndex,
+                            onSelectedIndexChange = { newIndex ->
+                                profileData.keys.elementAtOrNull(newIndex)?.let { profile ->
+                                    viewModel.dispatch(PreferredViewAction.LabChangeHttpProfile(profile))
                                 }
                             }
                         )

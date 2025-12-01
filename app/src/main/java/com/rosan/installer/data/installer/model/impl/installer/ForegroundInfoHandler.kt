@@ -286,6 +286,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 val progressInCurrentSegment = installStages[1].weight * progress.progress
                 val progressValue = previousStagesWeight + progressInCurrentSegment
                 progressStyle.setProgress(progressValue.toInt())
+
+                baseBuilder.addAction(0, getString(R.string.cancel), cancelIntent)
             }
 
             is ProgressEntity.InstallResolvedFailed -> {
@@ -530,6 +532,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val installIntent =
         BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Install)
 
+    private val cancelIntent =
+        BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Cancel)
+
     private val finishIntent =
         BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Finish)
 
@@ -546,6 +551,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     ) =
         builder.setContentTitle(getString(R.string.installer_prepare_install))
             .setProgress(100, (progress.progress * 100).toInt(), progress.progress < 0)
+            .addAction(0, getString(R.string.cancel), cancelIntent)
             .build()
 
     private fun onResolvedFailed(builder: NotificationCompat.Builder) =

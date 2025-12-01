@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
 import androidx.compose.ui.graphics.Color
+import com.rosan.installer.data.app.model.entity.HttpProfile
 import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
@@ -50,6 +51,8 @@ sealed class PreferredViewAction {
     data class LabChangeShizukuHookMode(val enable: Boolean) : PreferredViewAction()
     data class LabChangeRootModuleFlash(val enable: Boolean) : PreferredViewAction()
     data class LabChangeRootImplementation(val implementation: RootImplementation) : PreferredViewAction()
+    data class LabChangeHttpProfile(val profile: HttpProfile) : PreferredViewAction()
+    data class LabChangeHttpSaveFile(val enable: Boolean) : PreferredViewAction()
     data class SetThemeMode(val mode: ThemeMode) : PreferredViewAction()
     data class SetPaletteStyle(val style: PaletteStyle) : PreferredViewAction()
     data class SetUseDynamicColor(val use: Boolean) : PreferredViewAction()

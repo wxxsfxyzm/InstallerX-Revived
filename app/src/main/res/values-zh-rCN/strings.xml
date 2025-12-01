@@ -434,6 +434,8 @@
     <string name="exception_module_cmd_init_failed">模块安装命令执行失败</string>
     <string name="exception_module_install_failed">模块安装失败</string>
     <string name="exception_module_install_failed_incompatible_authorizer">不兼容的授权器</string>
+    <string name="exception_http_not_allowed">当前配置不允许明文 HTTP</string>
+    <string name="exception_http_restricted_for_localhost">仅允许在本地网络使用明文 HTTP</string>
     <string name="old_version_prefix">当前</string>
     <string name="old_version_archived">已归档</string>
     <string name="upgrade_version_prefix">升级</string>
@@ -594,4 +596,11 @@
     <string name="lab_module_flashing">启用模块刷写</string>
     <string name="lab_module_flashing_desc">在刷写任何模块前务必再次确认！</string>
     <string name="lab_module_select_root_impl">选择 Root 实现方式</string>
+    <string name="lab_http_save_file">保存下载文件</string>
+    <string name="lab_http_save_file_desc">下载完成后将文件保存到系统下载目录</string>
+    <string name="lab_http_profile">HTTP 安全策略</string>
+    <string name="lab_http_profile_desc">出于安全性限制 HTTP 明文连接</string>
+    <string name="lab_http_profile_secure">仅允许安全连接 (HTTPS)</string>
+    <string name="lab_http_profile_local">允许本地明文 (Localhost)</string>
+    <string name="lab_http_profile_all">允许所有 (不安全)</string>
 </resources>

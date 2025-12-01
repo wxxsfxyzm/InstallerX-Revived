@@ -2,46 +2,74 @@ package com.rosan.installer.data.installer.model.impl.installer.helper
 
 import android.net.Uri
 import com.rosan.installer.data.app.model.entity.DataEntity
+import com.rosan.installer.data.app.model.entity.HttpProfile
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
+import com.rosan.installer.data.installer.model.exception.HttpNotAllowedException
+import com.rosan.installer.data.installer.model.exception.HttpRestrictedForLocalhostException
 import com.rosan.installer.data.installer.model.exception.ResolveException
 import com.rosan.installer.data.installer.repo.NetworkResolver
 import com.rosan.installer.data.installer.util.copyToWithProgress
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
-import java.net.URLDecoder
+import java.util.UUID
 
 class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
 
     private val okHttpClient by inject<OkHttpClient>()
+    private val appDataStore by inject<AppDataStore>()
 
     override suspend fun resolve(
         uri: Uri,
         cacheDirectory: String,
         progressFlow: MutableSharedFlow<ProgressEntity>
     ): List<DataEntity> = withContext(Dispatchers.IO) {
-        Timber.d("Starting download for HTTP URI: $uri using OkHttp")
+        Timber.d("Starting download for HTTP URI: $uri")
         progressFlow.emit(ProgressEntity.InstallPreparing(-1f))
+
+        // Load Profile Config (Only Profile, no path config here)
+        val httpProfileName = appDataStore.getString(AppDataStore.LAB_HTTP_PROFILE).first()
+        val httpProfile = HttpProfile.fromString(httpProfileName)
+
+        // Validate Security Profile
+        val scheme = uri.scheme?.lowercase()
+        val host = uri.host?.lowercase() ?: ""
+        if (scheme == "http") validateHttpProfile(httpProfile, host)
+
+        // Configure Client
+        val client = if (scheme == "http" && httpProfile != HttpProfile.ALLOW_SECURE) {
+            okHttpClient.newBuilder()
+                .connectionSpecs(listOf(ConnectionSpec.MODERN_TLS, ConnectionSpec.CLEARTEXT))
+                .build()
+        } else {
+            okHttpClient
+        }
 
         val request = Request.Builder()
             .url(uri.toString())
-            .header("User-Agent", "Mozilla/5.0 (Android) SourceResolver/1.0")
-            .header("Accept", "application/vnd.android.package-archive, application/octet-stream, */*")
+            .header(
+                "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+            )
+            .header(
+                "Accept",
+                "application/vnd.android.package-archive, application/octet-stream, */*"
+            )
             .build()
 
-        val call = okHttpClient.newCall(request)
+        val call = client.newCall(request)
 
         try {
-            // Use 'use' block to automatically close the response (and its body)
-            // regardless of success or exceptions to prevent connection leaks.
             call.execute().use { response ->
                 if (!response.isSuccessful) {
                     Timber.e("HTTP Request failed. Code: ${response.code}")
@@ -50,10 +78,14 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
 
                 val body = response.body
 
-                // 1. Validation Logic
-                val path = uri.path ?: ""
+                // Validation Logic
+                // Use the final URL to handle redirects correctly
+                val finalUrlPath = response.request.url.encodedPath
+                val originalPath = uri.path ?: ""
+
+                // Check extension on BOTH original and final URL
                 val isSupportedExtension = listOf(".apk", ".xapk", ".apkm", ".apks", ".zip").any { ext ->
-                    path.endsWith(ext, ignoreCase = true)
+                    originalPath.endsWith(ext, ignoreCase = true) || finalUrlPath.endsWith(ext, ignoreCase = true)
                 }
 
                 val mediaType = body.contentType()
@@ -67,34 +99,36 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
                                 contentTypeToCheck.contains("application/xapk-package-archive", ignoreCase = true)
                         )
 
+                // Validation: Must be a supported extension OR a supported MIME type.
+                // This allows generic URLs if the server returns correct MIME,
+                // and allows bad MIME servers if the URL extension is correct.
                 if (!isSupportedExtension && !isSupportedMimeType) {
-                    // No need to manually close body here, the 'use' block handles it.
                     throw ResolveException(
-                        action = "Unsupported file type. Path: $path, Content-Type: $contentTypeToCheck",
+                        action = "Unsupported file type. Path: $originalPath, Final: $finalUrlPath, Type: $contentTypeToCheck",
                         uris = listOf(uri)
                     )
                 }
 
-                // 2. Determine file name and create file
-                val fileName = getFileNameFromResponse(response, uri)
-                var targetFile = File(cacheDirectory, fileName)
-                if (targetFile.exists()) targetFile.delete()
-                if (!targetFile.createNewFile()) {
-                    targetFile = File.createTempFile("dl_", "_$fileName", File(cacheDirectory))
+                // Create Temp File (UUID)
+                // Download directly to cache using a random UUID. Analysis will handle identification.
+                val tempFile = File(cacheDirectory, UUID.randomUUID().toString())
+
+                // Ensure directory exists
+                tempFile.parentFile?.let { parent ->
+                    if (!parent.exists()) parent.mkdirs()
                 }
 
-                // 3. Download and Write
                 val totalSize = body.contentLength()
-                Timber.d("Downloading $totalSize bytes to ${targetFile.absolutePath}")
+                Timber.d("Downloading to temp file: ${tempFile.absolutePath}, Size: $totalSize")
 
-                // Nested 'use' ensures the stream is closed eagerly after copying.
                 body.byteStream().use { input ->
-                    targetFile.outputStream().use { output ->
+                    tempFile.outputStream().use { output ->
                         input.copyToWithProgress(output, totalSize, progressFlow)
                     }
                 }
 
-                return@use listOf(DataEntity.FileEntity(targetFile.absolutePath))
+                // Return the temp file entity
+                return@use listOf(DataEntity.FileEntity(tempFile.absolutePath))
             }
         } catch (e: Exception) {
             if (!call.isCanceled()) call.cancel()
@@ -102,28 +136,17 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
         }
     }
 
-    private fun getFileNameFromResponse(response: Response, uri: Uri): String {
-        var fileName: String? = null
-        val contentDisposition = response.header("Content-Disposition")
-
-        if (contentDisposition != null) {
-            val dispositionHeader = contentDisposition.lowercase()
-            if (dispositionHeader.contains("filename=")) {
-                val split = contentDisposition.split("filename=")
-                if (split.size > 1) {
-                    fileName = split[1].trim().replace("\"", "")
+    private fun validateHttpProfile(profile: HttpProfile, host: String) {
+        when (profile) {
+            HttpProfile.ALLOW_SECURE -> throw HttpNotAllowedException("Cleartext HTTP not allowed.")
+            HttpProfile.ALLOW_LOCAL -> {
+                if (host != "localhost" && host != "127.0.0.1" && host != "::1") {
+                    throw HttpRestrictedForLocalhostException("Cleartext HTTP allowed only for localhost.")
                 }
             }
+
+            HttpProfile.ALLOW_ALL -> { /* Allowed */
+            }
         }
-
-        if (fileName.isNullOrBlank()) fileName = uri.lastPathSegment
-        if (fileName.isNullOrBlank()) fileName = "downloaded_file.apk"
-
-        try {
-            fileName = URLDecoder.decode(fileName, "UTF-8")
-        } catch (_: Exception) {
-        }
-
-        return fileName!!.replace("/", "_").replace("\\", "_")
     }
 }
