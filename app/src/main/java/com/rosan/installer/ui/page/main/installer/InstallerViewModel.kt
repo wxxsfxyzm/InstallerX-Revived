@@ -17,7 +17,6 @@ import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.data.app.repo.AppIconRepo
-import com.rosan.installer.data.app.repo.PARepo
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.installer.model.entity.InstallResult
@@ -25,6 +24,7 @@ import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -49,8 +49,7 @@ import timber.log.Timber
 class InstallerViewModel(
     private var repo: InstallerRepo,
     private val appDataStore: AppDataStore,
-    private val appIconRepo: AppIconRepo,
-    private val paRepo: PARepo
+    private val appIconRepo: AppIconRepo
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
@@ -200,6 +199,7 @@ class InstallerViewModel(
             is InstallerViewAction.InstallMultiple -> installMultiple()
             is InstallerViewAction.Install -> install()
             is InstallerViewAction.Background -> background()
+            is InstallerViewAction.Reboot -> rebootDevice(action.reason)
             is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData)
             is InstallerViewAction.Uninstall -> {
                 // Trigger uninstall using the package name from the collected info
@@ -379,9 +379,8 @@ class InstallerViewModel(
      *
      * @param newPackageName The package name derived from the new state, if any.
      * @param newState The newly calculated InstallerViewState.
-     * @param progress The original ProgressEntity that triggered the update.
      */
-    private fun handleStateSideEffects(newPackageName: String?, newState: InstallerViewState, progress: ProgressEntity) {
+    private fun handleStateSideEffects(newPackageName: String?, newState: InstallerViewState) {
         // --- Update current package name ---
         if (newPackageName != _currentPackageName.value) {
             _currentPackageName.value = newPackageName
@@ -507,7 +506,7 @@ class InstallerViewModel(
                 }
 
                 // --- Stage 4: Handle all side effects based on the new state and progress ---
-                handleStateSideEffects(newPackageName, newState, progress)
+                handleStateSideEffects(newPackageName, newState)
 
                 // --- Stage 5: Apply the final state change if necessary ---
                 if (newState != state) {
@@ -570,7 +569,7 @@ class InstallerViewModel(
             // Proceed with fetching users for other authorizers.
             runCatching {
                 withContext(Dispatchers.IO) {
-                    paRepo.getUsers(effectiveAuthorizer)
+                    PrivilegedManager.getUsers(effectiveAuthorizer)
                 }
             }.onSuccess { users ->
                 _availableUsers.value = users
@@ -605,7 +604,6 @@ class InstallerViewModel(
         val mapSnapshot = _displayIcons.value
         val currentValue = mapSnapshot[packageName]
         val existingJob = iconJobs[packageName]
-        val isLoaded = currentValue != null
         val isJobActive = existingJob?.isActive == true
 
         if (currentValue != null || isJobActive) {
@@ -653,6 +651,24 @@ class InstallerViewModel(
                     currentMap
                 }
             }
+        }
+    }
+
+    private fun rebootDevice(reason: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val cmd = if (reason == "recovery") {
+                // KEYCODE_POWER = 26. This hides the incorrect "Factory data reset" message
+                // on some devices when booting into recovery.
+                "input keyevent 26 ; svc power reboot $reason || reboot $reason"
+            } else {
+                val reasonArg = if (reason.isNotEmpty()) " $reason" else ""
+                // Try "svc power reboot" first (soft reboot), fallback to "reboot" (hard reboot)
+                "svc power reboot$reasonArg || reboot$reasonArg"
+            }
+
+            val commandArray = arrayOf("sh", "-c", cmd)
+
+            PrivilegedManager.execArr(repo.config, commandArray)
         }
     }
 

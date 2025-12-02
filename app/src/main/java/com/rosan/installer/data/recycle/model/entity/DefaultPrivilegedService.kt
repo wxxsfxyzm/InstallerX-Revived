@@ -33,10 +33,8 @@ import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.inject
 import timber.log.Timber
-import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.io.InputStreamReader
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.nio.charset.StandardCharsets
@@ -163,24 +161,6 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             component,
             userId
         )
-    }
-
-    @Throws(RemoteException::class)
-    override fun execLine(command: String): String {
-        return try {
-            // 执行 shell 命令
-            val process = Runtime.getRuntime().exec(command)
-            // 读取执行结果
-            readResult(process)
-        } catch (e: IOException) {
-            // 将 IOException 包装成 RemoteException 抛出
-            throw RemoteException(e.message)
-        } catch (e: InterruptedException) {
-            // 恢复线程的中断状态
-            Thread.currentThread().interrupt()
-            // 将 InterruptedException 包装成 RemoteException 抛出
-            throw RemoteException(e.message)
-        }
     }
 
     @Throws(RemoteException::class)

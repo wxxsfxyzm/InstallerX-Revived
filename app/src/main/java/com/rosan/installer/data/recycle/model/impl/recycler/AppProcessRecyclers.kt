@@ -1,4 +1,4 @@
-package com.rosan.installer.data.recycle.model.impl
+package com.rosan.installer.data.recycle.model.impl.recycler
 
 object AppProcessRecyclers {
     private val map = mutableMapOf<String, AppProcessRecycler>()

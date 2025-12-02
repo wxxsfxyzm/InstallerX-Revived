@@ -1,14 +1,12 @@
 package com.rosan.installer.data.recycle.util
 
-import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
-import com.rosan.installer.data.app.model.impl.PARepoImpl
+import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -86,8 +84,7 @@ suspend fun openAppPrivileged(
     if (config.authorizer == ConfigEntity.Authorizer.Root || config.authorizer == ConfigEntity.Authorizer.Shizuku) {
         // timeoutResult will be Boolean? (true/false on completion, or null on timeout)
         val timeoutResult = withTimeoutOrNull(PRIVILEGED_START_TIMEOUT_MS) {
-            // PARepoImpl.startActivityPrivileged 内部有 try-catch，只会返回 true/false
-            PARepoImpl.startActivityPrivileged(config, intent)
+            PrivilegedManager.startActivityPrivileged(config, intent)
         }
 
         // Check if the operation timed out.
@@ -129,23 +126,10 @@ suspend fun openAppPrivileged(
     }
 }
 
-suspend fun setInstallerDefaultPrivileged(
-    context: Context,
-    config: ConfigEntity,
-    lock: Boolean
-) {
-    // The privileged action itself should be on the IO dispatcher.
-    withContext(Dispatchers.IO) {
-        Timber.d("Setting default installer (lock=$lock) using authorizer: ${config.authorizer}")
-        val component = ComponentName(context, InstallerActivity::class.java)
-        PARepoImpl.setDefaultInstaller(config.authorizer, component, lock)
-    }
-}
-
 val InstallIntentFilter = IntentFilter().apply {
     addAction(Intent.ACTION_MAIN)
     addAction(Intent.ACTION_VIEW)
-    addAction(Intent.ACTION_INSTALL_PACKAGE)
+    @Suppress("Deprecation") addAction(Intent.ACTION_INSTALL_PACKAGE)
     addCategory(Intent.CATEGORY_DEFAULT)
     addDataScheme(ContentResolver.SCHEME_CONTENT)
     addDataScheme(ContentResolver.SCHEME_FILE)

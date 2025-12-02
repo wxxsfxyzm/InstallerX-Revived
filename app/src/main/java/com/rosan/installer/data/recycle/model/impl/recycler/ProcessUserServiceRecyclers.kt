@@ -1,4 +1,4 @@
-package com.rosan.installer.data.recycle.model.impl
+package com.rosan.installer.data.recycle.model.impl.recycler
 
 object ProcessUserServiceRecyclers {
     private val map =

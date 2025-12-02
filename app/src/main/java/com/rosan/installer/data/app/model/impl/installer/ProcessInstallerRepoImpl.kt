@@ -4,7 +4,7 @@ import android.os.IBinder
 import com.rosan.app_process.AppProcess
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
-import com.rosan.installer.data.recycle.model.impl.AppProcessRecyclers
+import com.rosan.installer.data.recycle.model.impl.recycler.AppProcessRecyclers
 import com.rosan.installer.data.recycle.repo.Recyclable
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 

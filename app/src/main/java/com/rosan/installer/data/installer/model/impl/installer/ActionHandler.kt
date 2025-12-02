@@ -1,6 +1,7 @@
 package com.rosan.installer.data.installer.model.impl.installer
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.os.Build
 import android.system.Os
@@ -20,12 +21,14 @@ import com.rosan.installer.data.installer.model.impl.installer.helper.SourceReso
 import com.rosan.installer.data.installer.model.impl.installer.processor.InstallationProcessor
 import com.rosan.installer.data.installer.model.impl.installer.processor.SessionProcessor
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.recycle.util.setInstallerDefaultPrivileged
+import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -37,6 +40,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -369,7 +373,14 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             if (appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER).first()) {
                 Timber.d("[id=$installerId] resolve: Attempting to auto-lock default installer.")
                 runCatching {
-                    setInstallerDefaultPrivileged(context, installer.config, true)
+                    withContext(Dispatchers.IO) {
+                        val component = ComponentName(context, InstallerActivity::class.java)
+                        PrivilegedManager.setDefaultInstaller(
+                            installer.config.authorizer,
+                            component,
+                            true // enable = true (Lock)
+                        )
+                    }
                     Timber.d("[id=$installerId] resolve: Auto-lock attempt finished successfully.")
                 }.onFailure {
                     Timber.w(it, "[id=$installerId] resolve: Failed to auto-lock default installer. This is non-fatal.")

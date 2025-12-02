@@ -3,10 +3,10 @@ package com.rosan.installer.data.recycle.util
 import com.rosan.installer.IPrivilegedService
 import com.rosan.installer.data.recycle.model.entity.DefaultPrivilegedService
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
-import com.rosan.installer.data.recycle.model.impl.DhizukuUserServiceRecycler
-import com.rosan.installer.data.recycle.model.impl.ProcessUserServiceRecyclers
-import com.rosan.installer.data.recycle.model.impl.ShizukuHookRecycler
-import com.rosan.installer.data.recycle.model.impl.ShizukuUserServiceRecycler
+import com.rosan.installer.data.recycle.model.impl.recycler.DhizukuUserServiceRecycler
+import com.rosan.installer.data.recycle.model.impl.recycler.ProcessUserServiceRecyclers
+import com.rosan.installer.data.recycle.model.impl.recycler.ShizukuHookRecycler
+import com.rosan.installer.data.recycle.model.impl.recycler.ShizukuUserServiceRecycler
 import com.rosan.installer.data.recycle.repo.Recyclable
 import com.rosan.installer.data.recycle.repo.recyclable.UserService
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity

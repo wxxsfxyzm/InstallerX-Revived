@@ -15,8 +15,8 @@ sealed class InstallerViewAction {
     data object Install : InstallerViewAction()
     data object Background : InstallerViewAction()
     data object Cancel : InstallerViewAction()
+    data class Reboot(val reason: String) : InstallerViewAction()
 
-    /** Triggers the uninstallation process. */
     data object Uninstall : InstallerViewAction()
 
     data object ShowMiuixSheetRightActionSettings : InstallerViewAction()

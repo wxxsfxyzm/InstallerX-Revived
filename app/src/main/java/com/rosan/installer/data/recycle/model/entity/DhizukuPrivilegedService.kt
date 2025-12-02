@@ -42,12 +42,6 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
         }
     }
 
-    override fun execLine(command: String): String {
-        // Device Owner Privileged Service does not support shell access
-        throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
-    }
-
-
     override fun execArr(command: Array<String>): String {
         // Device Owner Privileged Service does not support shell access
         throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
@@ -140,12 +134,10 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
     }
 
     override fun getSessionDetails(sessionId: Int): Bundle? {
-        // TODO
         throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
     }
 
     override fun approveSession(sessionId: Int, granted: Boolean) {
-        // TODO
         throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
     }
 }

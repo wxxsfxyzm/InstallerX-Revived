@@ -488,6 +488,12 @@
     <string name="installer_oppo_related">OPPO related</string>
     <string name="installer_show_oem_special">Show OEM extra info</string>
     <string name="installer_show_oem_special_desc">Analyse and show some specific value for oem apk(s) on install dialog</string>
+    <string name="reboot">Reboot</string>
+    <string name="reboot_userspace">Reboot userspace</string>
+    <string name="reboot_recovery">Reboot to Recovery</string>
+    <string name="reboot_bootloader">Reboot to Bootloader</string>
+    <string name="reboot_edl">Reboot to EDL</string>
+    <string name="reboot_download">Reboot to Download</string>
     <!--  InstallOptions Start  -->
     <string name="config_allow_test">Allow Test</string>
     <string name="config_allow_test_desc">If the package being installed is a test-only app, allow it to be installed</string>

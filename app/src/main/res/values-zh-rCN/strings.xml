@@ -474,6 +474,12 @@
     <string name="installer_oppo_related">OPPO 相关</string>
     <string name="installer_show_oem_special">展示 OEM 附加信息</string>
     <string name="installer_show_oem_special_desc">分析并在安装对话框展示 OEM 的 apk 附加信息</string>
+    <string name="reboot">重启</string>
+    <string name="reboot_userspace">软重启</string>
+    <string name="reboot_recovery">重启到 Recovery</string>
+    <string name="reboot_bootloader">重启到 Bootloader</string>
+    <string name="reboot_edl">重启到 9008 (EDL)</string>
+    <string name="reboot_download">重启到 Download</string>
     <!--  InstallOptions Start  -->
     <string name="config_allow_test">允许测试包</string>
     <string name="config_allow_test_desc">允许安装带 TestOnly 标签的安装包</string>
