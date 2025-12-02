@@ -55,17 +55,29 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
             okHttpClient
         }
 
-        val request = Request.Builder()
+        val requestBuilder = Request.Builder()
             .url(uri.toString())
             .header(
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
             )
-            .header(
+
+        // MiXplorer 特殊处理
+        if (uri.toString().startsWith("http://127.0.0.1:34859")) {
+            // MiXplorer 不能设置为 application/vnd.android.package-archive
+            requestBuilder.header(
+                "Accept",
+                "application/octet-stream, */*"
+            )
+        } else {
+            // 默认的 Accept 头
+            requestBuilder.header(
                 "Accept",
                 "application/vnd.android.package-archive, application/octet-stream, */*"
             )
-            .build()
+        }
+
+        val request = requestBuilder.build()
 
         val call = client.newCall(request)
 
@@ -89,6 +101,8 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
                 }
 
                 val mediaType = body.contentType()
+                val responseHeader = response.header("Content-Type")
+                Timber.d("responseHeader is:", responseHeader)
                 val contentTypeToCheck = mediaType?.toString() ?: response.header("Content-Type")
 
                 val isSupportedMimeType = contentTypeToCheck != null && (
