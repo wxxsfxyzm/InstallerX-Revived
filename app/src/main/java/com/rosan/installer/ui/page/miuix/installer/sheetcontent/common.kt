@@ -15,7 +15,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-internal fun AppInfoSlot(
+fun AppInfoSlot(
     icon: Drawable?,
     label: String,
     packageName: String

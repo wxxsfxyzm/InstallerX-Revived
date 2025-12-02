@@ -489,10 +489,17 @@ class InstallerViewModel(
 
                 // --- Stage 3: Determine context (like the current package name) from the new state ---
                 val newPackageName = when (newState) {
+                    // For these states, we need to ensure a specific package name is focused.
                     is InstallerViewState.InstallPrepare,
                     is InstallerViewState.Installing,
                     is InstallerViewState.InstallFailed,
-                    is InstallerViewState.InstallSuccess -> repo.analysisResults.firstOrNull()?.packageName
+                    is InstallerViewState.InstallSuccess -> {
+                        // Prioritize the existing currentPackageName (correctly set by installPrepare).
+                        // This ensures that in Mixed Module/APK scenarios, the entity selected by the user
+                        // (e.g., the APK) remains focused instead of reverting to the first item (e.g., the Module).
+                        // Fallback to the first result only if currentPackageName is null.
+                        _currentPackageName.value ?: repo.analysisResults.firstOrNull()?.packageName
+                    }
                     // For choice/multi-app states, there is no single focused package.
                     is InstallerViewState.InstallChoice, is InstallerViewState.Ready -> null
                     // For other states, keep the current package name unless explicitly cleared.

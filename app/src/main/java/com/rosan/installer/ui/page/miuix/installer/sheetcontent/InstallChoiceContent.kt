@@ -510,6 +510,13 @@ private fun MixedModuleZip_InitialChoice(
                         title = stringResource(R.string.installer_choice_install_as_app),
                         description = stringResource(R.string.installer_choice_install_as_app_desc),
                         onClick = {
+                            viewModel.dispatch(
+                                InstallerViewAction.ToggleSelection(
+                                    packageName = baseSelectableEntity.app.packageName,
+                                    entity = baseSelectableEntity,
+                                    isMultiSelect = false
+                                )
+                            )
                             onSelectApk()
                         }
                     )
