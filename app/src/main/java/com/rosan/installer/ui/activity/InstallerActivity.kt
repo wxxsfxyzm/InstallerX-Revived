@@ -40,6 +40,7 @@ import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -185,7 +186,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             installer?.let { repo ->
                 // Since the interface defines 'progress' as Flow, we need to cast it to SharedFlow
                 // to access the replayCache. We know InstallerRepoImpl uses MutableStateFlow.
-                val sharedFlow = repo.progress as? kotlinx.coroutines.flow.SharedFlow<*>
+                val sharedFlow = repo.progress as? SharedFlow<*>
                 val currentProgress = sharedFlow?.replayCache?.lastOrNull()
 
                 // If the task is still running and hasn't finished or errored
