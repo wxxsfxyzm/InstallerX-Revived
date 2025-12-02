@@ -314,16 +314,20 @@ fun MiuixInstallerPage(
                 showBottomSheet.value = !showBottomSheet.value
                 scope.launch {
                     delay(SHEET_ANIMATION_DURATION) // Wait for sheet animation
-                    val isModuleInstall = viewModel.state is InstallerViewState.InstallingModule
 
-                    // If it's a module install OR the "disable notification" setting is on,
-                    // the dismiss action should be a full close.
-                    if (isModuleInstall || settings.disableNotificationOnDismiss) {
-                        viewModel.dispatch(InstallerViewAction.Close)
+                    val state = viewModel.state
+                    val disableNotif = settings.disableNotificationOnDismiss
+                    val isModule = state is InstallerViewState.InstallingModule
+                    
+                    // 1. If it's a module install OR the "disable notification" setting is on -> Close
+                    // 2. Otherwise (including Preparing, Standard APK install) -> Background
+                    val action = if (isModule || disableNotif) {
+                        InstallerViewAction.Close
                     } else {
-                        // Otherwise (for standard APKs), the dismiss action sends it to the background.
-                        viewModel.dispatch(InstallerViewAction.Background)
+                        InstallerViewAction.Background
                     }
+
+                    viewModel.dispatch(action)
                 }
             }
         }

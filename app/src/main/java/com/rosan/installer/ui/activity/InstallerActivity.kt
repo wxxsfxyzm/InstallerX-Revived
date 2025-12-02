@@ -178,6 +178,30 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        // Only strictly interpret as user leaving when not finishing and not changing configurations (e.g., rotation)
+        if (!isFinishing && !isChangingConfigurations) {
+            installer?.let { repo ->
+                // Since the interface defines 'progress' as Flow, we need to cast it to SharedFlow
+                // to access the replayCache. We know InstallerRepoImpl uses MutableStateFlow.
+                val sharedFlow = repo.progress as? kotlinx.coroutines.flow.SharedFlow<*>
+                val currentProgress = sharedFlow?.replayCache?.lastOrNull()
+
+                // If the task is still running and hasn't finished or errored
+                if (currentProgress !is ProgressEntity.Finish &&
+                    currentProgress !is ProgressEntity.Error
+                ) {
+
+                    Timber.d("onStop: User left activity. Triggering background mode.")
+
+                    // Trigger background mode
+                    repo.background(true)
+                }
+            }
+        }
+    }
+
     override fun onDestroy() {
         job?.cancel()
         job = null

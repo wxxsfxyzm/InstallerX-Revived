@@ -100,14 +100,14 @@ class InstallerViewModel(
         get() = when (state) {
             is InstallerViewState.Analysing,
             is InstallerViewState.Resolving,
-            is InstallerViewState.Preparing,
             is InstallerViewState.InstallExtendedMenu,
             is InstallerViewState.InstallChoice -> false
 
             is InstallerViewState.InstallingModule -> (state as InstallerViewState.InstallingModule).isFinished
-
             is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
+            is InstallerViewState.Preparing,
             is InstallerViewState.Installing -> !viewSettings.disableNotificationOnDismiss
+
             else -> true
         }
 
