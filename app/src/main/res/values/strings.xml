@@ -567,6 +567,8 @@
     <string name="installer_select_from_mixed_module_apk">Select install type</string>
     <string name="installer_mixed_module_apk_description">Select file type you want to install</string>
     <string name="installer_mixed_module_apk_description_notification">Please click on the notification to select the installation type</string>
+    <string name="installer_error_mixed_selection">Cannot install apps and modules simultaneously in batch</string>
+    <string name="installer_error_multiple_modules">Cannot install multiple modules in batch</string>
     <!-- MixedModuleApk End -->
 
     <!-- SplitNameUtil Start -->

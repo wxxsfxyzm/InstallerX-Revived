@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,6 +36,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 private fun TipCard(
@@ -46,7 +49,7 @@ private fun TipCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.defaultColors(
-            color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+            color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
             contentColor = MiuixTheme.colorScheme.onSurface
         ),
     ) {
@@ -64,6 +67,39 @@ private fun TipCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 actionContent()
             }
+        }
+    }
+}
+
+@Composable
+fun WarningCard(
+    isDarkMode: Boolean,
+    colorScheme: ColorScheme,
+    message: String,
+) {
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 0.dp, vertical = 8.dp)
+            .fillMaxWidth(),
+        colors = CardDefaults.defaultColors(
+            color = when {
+                isDynamicColor -> colorScheme.errorContainer
+                isDarkMode -> Color(0XFF310808)
+                else -> Color(0xFFF8E2E2)
+            }
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        ) {
+            Text(
+                text = message,
+                style = MiuixTheme.textStyles.body2,
+                color = if (isDynamicColor) colorScheme.onErrorContainer else Color(0xFFF72727),
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }

@@ -600,7 +600,7 @@ fun MiuixInstallerPage(
 }
 
 @Composable
-fun RebootListPopup(
+private fun RebootListPopup(
     modifier: Modifier = Modifier,
     alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.TopRight,
     onReboot: (String) -> Unit

@@ -539,6 +539,8 @@
     <string name="installer_select_from_mixed_module_apk">选择安装类型</string>
     <string name="installer_mixed_module_apk_description">请选择安装类型</string>
     <string name="installer_mixed_module_apk_description_notification">请点开通知选择要安装的类型</string>
+    <string name="installer_error_mixed_selection">无法批量混合安装应用和模块</string>
+    <string name="installer_error_multiple_modules">无法批量安装多个模块</string>
     <!-- MixedModuleApk End -->
 
     <!-- MultiApkZip Installer -->
