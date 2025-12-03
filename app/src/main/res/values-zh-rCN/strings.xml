@@ -190,6 +190,7 @@
     <string name="config_auto_delete_desc">安装成功后自动删除安装包</string>
     <string name="config_display_sdk_version">显示 SDK 信息</string>
     <string name="config_display_sdk_version_desc">在安装界面显示 target 与 min 信息</string>
+    <string name="config_display_module_extra_info_desc">如果是模块则显示额外信息</string>
     <string name="config_display_size">显示安装包大小</string>
     <string name="config_display_size_desc">在安装界面显示安装包大小信息</string>
     <string name="config_label_main_settings">主要设置</string>
@@ -457,8 +458,8 @@
     <string name="extended_menu">扩展菜单</string>
     <string name="auto_silent_install">自动静默安装</string>
     <string name="auto_silent_install_desc">对话框安装开始时自动静默安装</string>
-    <string name="disable_notification">无通知前台安装</string>
-    <string name="close_immediately_on_dialog_dismiss">安装过程中对话框将保持前台显示，点击空白处直接结束安装会话，不弹出安装通知</string>
+    <string name="disable_notification">安装过程保持前台显示</string>
+    <string name="close_immediately_on_dialog_dismiss">安装过程中对话框将保持前台显示，不弹出安装通知</string>
     <string name="disable_notification_on_dismiss">对话框关闭时退出</string>
     <string name="close_notification_immediately_on_dialog_dismiss">关闭对话框将静默退出</string>
     <string name="set_countdown">设定倒计时</string>
@@ -549,6 +550,7 @@
     <string name="installer_select_multi_apk">批量安装</string>
     <string name="installer_multi_apk_zip_description">该文件包含多个应用程序，请选择想要安装的应用</string>
     <string name="installer_multi_apk_description">请选择要安装的应用</string>
+    <string name="installer_multi_apk_description_notification">请点击通知选择要安装的项目</string>
     <string name="installing_progress_text">正在安装 %1$s (%2$d/%3$d)</string>
     <string name="installer_completed">安装完成</string>
     <string name="installer_completed_subtitle">成功 %1$s 个，失败 %2$s 个</string>

@@ -85,13 +85,13 @@ class InstallerViewModel(
     val isDismissible
         get() = when (state) {
             is InstallerViewState.Analysing,
-            is InstallerViewState.Resolving,
-            is InstallerViewState.InstallExtendedMenu,
-            is InstallerViewState.InstallChoice -> false
+            is InstallerViewState.Resolving -> false
 
             is InstallerViewState.InstallingModule -> (state as InstallerViewState.InstallingModule).isFinished
-            is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
+            is InstallerViewState.InstallPrepare,
+            is InstallerViewState.InstallExtendedMenu,
             is InstallerViewState.Preparing,
+            is InstallerViewState.InstallChoice,
             is InstallerViewState.Installing -> !viewSettings.disableNotificationOnDismiss
 
             else -> true

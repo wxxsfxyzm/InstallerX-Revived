@@ -391,24 +391,37 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             is ProgressEntity.InstallAnalysedSuccess -> {
                 val allEntities = installer.analysisResults.flatMap { it.appEntities }
-                contentTitle = allEntities.map { it.app }.getInfo(context).title
+                val selectedApps = allEntities.map { it.app }
+                val hasComplexType = allEntities.any {
+                    it.app.sourceType == DataType.MIXED_MODULE_APK ||
+                            it.app.sourceType == DataType.MIXED_MODULE_ZIP
+                }
+                val isMultiPackage = selectedApps.groupBy { it.packageName }.size > 1
+
                 shortText = getString(R.string.installer_live_channel_short_text_pending)
                 val progressValue = installStages.subList(0, 3).sumOf { it.weight.toDouble() }.toFloat()
                 progressStyle.setProgress(progressValue.toInt())
 
-                val isMixedType = allEntities.any {
-                    it.app.sourceType == DataType.MIXED_MODULE_APK
-                }
-
-                if (isMixedType) {
+                if (hasComplexType) {
+                    contentTitle = getString(R.string.installer_prepare_install)
                     baseBuilder.setContentText(getString(R.string.installer_mixed_module_apk_description_notification))
                         .addAction(0, getString(R.string.cancel), finishIntent)
+                } else if (isMultiPackage) {
+                    // Multiple packages: Show generic title and require user interaction to select.
+                    // Consistent with legacy onAnalysedSuccess logic.
+                    contentTitle = getString(R.string.installer_prepare_install)
+                    // Do not add 'Install' action here. User must click the notification content to open the dialog.
+                    baseBuilder
+                        .setContentText(getString(R.string.installer_multi_apk_description_notification))
+                        .addAction(0, getString(R.string.cancel), finishIntent)
                 } else {
+                    // Single package: Show specific app info and install action.
+                    contentTitle = selectedApps.getInfo(context).title
                     baseBuilder.setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
                         .addAction(0, getString(R.string.install), installIntent)
                         .addAction(0, getString(R.string.cancel), finishIntent)
+                    baseBuilder.setLargeIcon(getLargeIconBitmap(preferSystemIcon))
                 }
-                baseBuilder.setLargeIcon(getLargeIconBitmap(preferSystemIcon))
             }
 
             // === Modified: Handle Batch and Detailed Installing ===
@@ -715,7 +728,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         builder: NotificationCompat.Builder,
         progress: ProgressEntity.InstallPreparing
     ) =
-        builder.setContentTitle(getString(R.string.installer_prepare_install))
+        builder.setContentTitle(getString(R.string.installer_preparing))
+            .setContentText(getString(R.string.installer_preparing_desc))
             .setProgress(100, (progress.progress * 100).toInt(), progress.progress < 0)
             .addAction(0, getString(R.string.cancel), cancelIntent)
             .build()
@@ -737,29 +751,28 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .addAction(0, getString(R.string.cancel), finishIntent).build()
 
     private suspend fun onAnalysedSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): Notification {
-        val selectedEntities = installer.analysisResults
-            .flatMap { it.appEntities }
-
-        val selectedApps = selectedEntities.map { it.app }
-        val info = selectedApps.getInfo(context)
-
-        val isMixedType = selectedEntities.any {
-            it.app.sourceType == DataType.MIXED_MODULE_APK
+        val allEntities = installer.analysisResults.flatMap { it.appEntities }
+        val selectedApps = allEntities.map { it.app }
+        val hasComplexType = allEntities.any {
+            it.app.sourceType == DataType.MIXED_MODULE_APK ||
+                    it.app.sourceType == DataType.MIXED_MODULE_ZIP
         }
+        val isMultiPackage = selectedApps.groupBy { it.packageName }.size > 1
 
-        if (isMixedType) {
-            return builder.setContentTitle(info.title)
+        if (hasComplexType) {
+            return builder.setContentTitle(getString(R.string.installer_prepare_install))
                 .setContentText(getString(R.string.installer_mixed_module_apk_description_notification))
                 .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
                 .addAction(0, getString(R.string.cancel), finishIntent)
                 .build()
         }
 
-        return (if (selectedApps.groupBy { it.packageName }.size != 1) {
+        return (if (isMultiPackage) {
             builder.setContentTitle(getString(R.string.installer_prepare_install))
+                .setContentText(getString(R.string.installer_multi_apk_description_notification))
                 .addAction(0, getString(R.string.cancel), finishIntent)
         } else {
-            builder.setContentTitle(info.title)
+            builder.setContentTitle(selectedApps.getInfo(context).title)
                 .setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
                 .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
                 .addAction(0, getString(R.string.install), installIntent)

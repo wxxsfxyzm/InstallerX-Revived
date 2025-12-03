@@ -43,6 +43,7 @@
     <string name="telegram_group_desc">Join the group!</string>
     <string name="telegram_channel">Telegram Channel</string>
     <string name="telegram_channel_desc">Join the channel to receive news and updates!</string>
+    <string name="combined_description_format" translatable="false">%1$s\n%2$s</string>
     <string name="theme_settings">Theme Settings</string>
     <string name="theme_settings_ui_style">UI Style</string>
     <string name="theme_settings_desc">Change the theme of the app</string>
@@ -197,6 +198,7 @@
     <string name="config_auto_delete_desc">Automatically delete the apk after it\'s been installed</string>
     <string name="config_display_sdk_version">Display SDK information</string>
     <string name="config_display_sdk_version_desc">Show target and min information on the installation interface</string>
+    <string name="config_display_module_extra_info_desc">Show extra infos if is module</string>
     <string name="config_display_size">Display package size</string>
     <string name="config_display_size_desc">Show package size on the installation interface</string>
     <string name="config_label_main_settings">Main Settings</string>
@@ -471,8 +473,8 @@
     <string name="extended_menu">Extended Menu</string>
     <string name="auto_silent_install">Auto Silent Install</string>
     <string name="auto_silent_install_desc">Auto silent install on dialog install start</string>
-    <string name="disable_notification">Foreground Install without Notification</string>
-    <string name="close_immediately_on_dialog_dismiss">Dialog remains foreground while installing, clicking blank area will silently exit</string>
+    <string name="disable_notification">Keep Foreground During Install</string>
+    <string name="close_immediately_on_dialog_dismiss">Dialog remains foreground while installing, not posting notifications</string>
     <string name="disable_notification_on_dismiss">Close On Dialog Dismiss</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Dismiss Dialog will silently exit</string>
     <string name="set_countdown">Set countdown</string>
@@ -556,6 +558,7 @@
     <string name="installer_select_multi_apk">Batch install</string>
     <string name="installer_multi_apk_zip_description">This file contains multiple separate applications, please select the applications you want to install</string>
     <string name="installer_multi_apk_description">Please select the applications you want to install</string>
+    <string name="installer_multi_apk_description_notification">Please click on the notification to select items to install</string>
     <string name="installing_progress_text">Installing %1$s (%2$d/%3$d)</string>
     <string name="installer_completed">Install complete</string>
     <string name="installer_completed_subtitle">Successful %1$s, failed %2$s</string>

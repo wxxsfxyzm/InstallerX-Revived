@@ -65,7 +65,11 @@ fun PrepareSettingsContent(
         ) {
             MiuixSwitchWidget(
                 title = stringResource(R.string.config_display_sdk_version),
-                description = stringResource(R.string.config_display_sdk_version_desc),
+                description = stringResource(
+                    id = R.string.combined_description_format,
+                    stringResource(id = R.string.config_display_sdk_version_desc),
+                    stringResource(id = R.string.config_display_module_extra_info_desc)
+                ),
                 checked = displaySdk,
                 onCheckedChange = {
                     val newValue = !displaySdk

@@ -32,7 +32,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun InstallingContent(
     state: InstallerViewState.Installing,
     baseEntity: AppEntity.BaseEntity?,
-    appIcon: Drawable?
+    appIcon: Drawable?,
+    onButtonClick: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -85,7 +86,7 @@ fun InstallingContent(
 
         ProgressButton(
             progress = animatedProgress,
-            onClick = {}, // Action is disabled during installation
+            onClick = onButtonClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
