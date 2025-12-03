@@ -37,12 +37,14 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun InstallCompletedContent(
     colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     results: List<InstallResult>,
     onClose: () -> Unit
 ) {
@@ -61,7 +63,11 @@ fun InstallCompletedContent(
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(results, key = { it.entity.app.packageName + it.entity.app.name }) { result ->
-                    MiuixResultItemCard(result = result)
+                    MiuixResultItemCard(
+                        colorScheme = colorScheme,
+                        isDarkMode = isDarkMode,
+                        result = result
+                    )
                 }
             }
         }
@@ -82,10 +88,15 @@ fun InstallCompletedContent(
 }
 
 @Composable
-private fun MiuixResultItemCard(result: InstallResult) {
+private fun MiuixResultItemCard(
+    result: InstallResult,
+    colorScheme: ColorScheme,
+    isDarkMode: Boolean
+) {
     val app = result.entity.app
     val appLabel = (app as? AppEntity.BaseEntity)?.label ?: app.packageName
-    val cardColor = if (isSystemInDarkTheme()) miuixSheetCardColorDark else Color.White
+    val cardColor = if (isDynamicColor) colorScheme.surfaceContainer else
+        if (isDarkMode) miuixSheetCardColorDark else Color.White
 
     Card(
         modifier = Modifier.fillMaxWidth(),

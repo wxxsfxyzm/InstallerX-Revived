@@ -19,7 +19,7 @@ sealed class InstallerViewState {
     data object InstallPrepare : InstallerViewState()
     data object InstallExtendedMenu : InstallerViewState()
     data object InstallExtendedSubMenu : InstallerViewState()
-    data object Installing : InstallerViewState()
+    data class Installing(val progress: Float, val current: Int, val total: Int, val appLabel: String?) : InstallerViewState()
     data class InstallingModule(val output: List<String>, val isFinished: Boolean = false) : InstallerViewState()
     data object InstallSuccess : InstallerViewState()
     data object InstallFailed : InstallerViewState()

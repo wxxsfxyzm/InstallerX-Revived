@@ -452,6 +452,7 @@
     <string name="exception_module_cmd_init_failed">Module installation command init failed</string>
     <string name="exception_module_install_failed">Module install failed</string>
     <string name="exception_module_install_failed_incompatible_authorizer">Incompatible authorizer</string>
+    <string name="exception_module_install_exit_code_non_zero">Exit code non zero!</string>
     <string name="exception_http_not_allowed">Cleartext HTTP not allowed</string>
     <string name="exception_http_restricted_for_localhost">Cleartext HTTP restricted to localhost</string>
     <string name="old_version_prefix">Current</string>

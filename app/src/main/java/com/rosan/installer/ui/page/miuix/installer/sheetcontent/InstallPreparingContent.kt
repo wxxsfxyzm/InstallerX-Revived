@@ -66,6 +66,11 @@ fun InstallPreparingContent(
             )
         }
 
+        val contentColor = if (animatedProgress < 0.45f)
+            MiuixTheme.colorScheme.onSecondaryVariant
+        else
+            MiuixTheme.colorScheme.onPrimary
+
         ProgressButton(
             progress = animatedProgress,
             onClick = onCancel,
@@ -76,11 +81,11 @@ fun InstallPreparingContent(
             colors = ProgressButtonDefaults.progressButtonColors(
                 trackColor = MiuixTheme.colorScheme.secondaryVariant,
                 progressColor = MiuixTheme.colorScheme.primary,
-                contentColor = if (animatedProgress < 0.45f) MiuixTheme.colorScheme.onSecondaryVariant else MiuixTheme.colorScheme.onPrimary
+                contentColor = contentColor
             )
         ) {
             Text(
-                color = if (animatedProgress < 0.45f) MiuixTheme.colorScheme.onSecondaryVariant else MiuixTheme.colorScheme.onPrimary,
+                color = contentColor,
                 text = stringResource(R.string.loading)
             )
         }

@@ -20,7 +20,8 @@ sealed class ProgressEntity {
     data class InstallAnalysedUnsupported(val reason: String) : ProgressEntity()
     data object InstallAnalysedSuccess : ProgressEntity()
 
-    data object Installing : ProgressEntity()
+    data class Installing(val current: Int = 1, val total: Int = 1, val appLabel: String? = null) : ProgressEntity()
+    data class InstallCompleted(val results: List<InstallResult>) : ProgressEntity()
     data object InstallConfirming : ProgressEntity()
     data class InstallingModule(val output: List<String>) : ProgressEntity()
     data object InstallFailed : ProgressEntity()

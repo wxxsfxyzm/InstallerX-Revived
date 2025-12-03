@@ -434,6 +434,7 @@
     <string name="exception_module_cmd_init_failed">模块安装命令执行失败</string>
     <string name="exception_module_install_failed">模块安装失败</string>
     <string name="exception_module_install_failed_incompatible_authorizer">不兼容的授权器</string>
+    <string name="exception_module_install_exit_code_non_zero">退出状态码非零！</string>
     <string name="exception_http_not_allowed">当前配置不允许明文 HTTP</string>
     <string name="exception_http_restricted_for_localhost">仅允许在本地网络使用明文 HTTP</string>
     <string name="old_version_prefix">当前</string>

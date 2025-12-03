@@ -9,6 +9,7 @@ import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.app.model.impl.ModuleInstallerRepoImpl
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
+import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,14 +20,24 @@ import timber.log.Timber
 import com.rosan.installer.data.app.model.impl.InstallerRepoImpl as CoreInstaller
 
 class InstallationProcessor(
+    private val repo: InstallerRepo,
     private val progressFlow: MutableSharedFlow<ProgressEntity>
 ) : KoinComponent {
     private val appDataStore by inject<AppDataStore>()
 
+    /**
+     * Performs the installation.
+     * Updated to accept progress indicators for batch installations.
+     *
+     * @param current The current index (1-based) in the batch queue. Default is 1.
+     * @param total The total number of items in the batch queue. Default is 1.
+     */
     suspend fun install(
         config: ConfigEntity,
         analysisResults: List<PackageAnalysisResult>,
-        cacheDirectory: String
+        cacheDirectory: String,
+        current: Int = 1,
+        total: Int = 1
     ) {
         val selected = analysisResults.flatMap { it.appEntities }.filter { it.selected }
         if (selected.isEmpty()) {
@@ -35,24 +46,37 @@ class InstallationProcessor(
         }
 
         val firstApp = selected.first().app
+
+        // For standard apps, we need to pass the progress info down.
+        // For modules, the progress is tracked via log output lines.
         if (firstApp is AppEntity.ModuleEntity) {
             installModule(config, firstApp)
         } else {
-            installApp(config, selected, cacheDirectory)
+            installApp(config, selected, cacheDirectory, current, total)
         }
     }
 
     private suspend fun installModule(config: ConfigEntity, module: AppEntity.ModuleEntity) {
         Timber.d("installModule: Starting module installation for ${module.name}")
+
+        // Initialize output list
         val output = mutableListOf("Starting installation...")
+        // Sync to Repo immediately so it persists
+        repo.moduleLog = output.toList()
+        // Emit the initial state with the current log.
         progressFlow.emit(ProgressEntity.InstallingModule(output.toList()))
 
         val rootImpl = RootImplementation.fromString(appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION).first())
 
-        ModuleInstallerRepoImpl.doInstallWork(config, module, rootImpl).collect {
-            output.add(it)
+        // Collect logs from the underlying implementation and emit full updates.
+        ModuleInstallerRepoImpl.doInstallWork(config, module, rootImpl).collect { line ->
+            output.add(line)
+            // Sync to Repo: This ensures logs are saved even if UI is destroyed
+            repo.moduleLog = output.toList()
+            // Always emit the full list so UI gets the complete history upon reconnection.
             progressFlow.emit(ProgressEntity.InstallingModule(output.toList()))
         }
+
         Timber.d("installModule: Succeeded. Emitting ProgressEntity.InstallSuccess.")
         progressFlow.emit(ProgressEntity.InstallSuccess)
     }
@@ -60,10 +84,25 @@ class InstallationProcessor(
     private suspend fun installApp(
         config: ConfigEntity,
         selectedEntities: List<SelectInstallEntity>,
-        cacheDirectory: String
+        cacheDirectory: String,
+        current: Int,
+        total: Int
     ) {
-        Timber.d("install: Starting. Emitting ProgressEntity.Installing.")
-        progressFlow.emit(ProgressEntity.Installing)
+        val appLabel = selectedEntities.firstOrNull()?.app?.let {
+            (it as? AppEntity.BaseEntity)?.label ?: it.packageName
+        }
+
+        Timber.d("install: Starting. Emitting ProgressEntity.Installing ($current/$total).")
+
+        // CORRECTION: Use the data class format with progress info.
+        // This ensures the UI displays "Installing 1/5" instead of a generic message.
+        progressFlow.emit(
+            ProgressEntity.Installing(
+                current = current,
+                total = total,
+                appLabel = appLabel
+            )
+        )
 
         Timber.d("install: Loading package name blacklist from AppDataStore.")
         val blacklist = appDataStore.getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
@@ -97,6 +136,7 @@ class InstallationProcessor(
             uid
         }
 
+        // Perform the blocking install work.
         CoreInstaller.doInstallWork(
             config,
             installEntities,
@@ -105,7 +145,17 @@ class InstallationProcessor(
             sharedUidBlacklist,
             sharedUidWhitelist
         )
-        Timber.d("install: Succeeded. Emitting ProgressEntity.InstallSuccess.")
-        progressFlow.emit(ProgressEntity.InstallSuccess)
+
+        Timber.d("install: Single unit of work succeeded.")
+
+        // FIX: Only emit InstallSuccess if this is a single install task.
+        // In batch mode (total > 1), we must NOT emit Success here, as it would
+        // prematurely signal completion to the UI while the ActionHandler loop is still running.
+        if (total <= 1) {
+            Timber.d("install: Total is $total, emitting ProgressEntity.InstallSuccess.")
+            progressFlow.emit(ProgressEntity.InstallSuccess)
+        } else {
+            Timber.d("install: Total is $total (Batch Mode), skipping InstallSuccess emission.")
+        }
     }
 }

@@ -126,7 +126,6 @@ fun MiuixInstallerPage(
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
     val displayIcons by viewModel.displayIcons.collectAsState()
-    val installProgressTextRes by viewModel.installProgressText.collectAsState()
 
     val analysisResult =
         if (currentPackageName != null) installer.analysisResults.find { it.packageName == currentPackageName } else null
@@ -488,11 +487,9 @@ fun MiuixInstallerPage(
                 is InstallerViewState.Installing -> {
                     // TODO Show a progress indicator during installation.
                     InstallingContent(
-                        colorScheme = colorScheme,
+                        state = viewModel.state as InstallerViewState.Installing,
                         baseEntity = baseEntity,
-                        appIcon = appIcon,
-                        // progress = installProgress,
-                        progressTextRes = installProgressTextRes
+                        appIcon = appIcon
                     )
                 }
 
@@ -511,6 +508,7 @@ fun MiuixInstallerPage(
                 is InstallerViewState.InstallCompleted -> {
                     InstallCompletedContent(
                         colorScheme = colorScheme,
+                        isDarkMode = isDarkMode,
                         results = (viewModel.state as InstallerViewState.InstallCompleted).results,
                         onClose = closeSheet
                     )
