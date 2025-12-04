@@ -7,10 +7,30 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -24,6 +44,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -64,12 +86,24 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.VerticalDivider
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.getWindowSize
+
+private object UIConstants {
+    val WIDE_SCREEN_THRESHOLD = 840.dp
+    val MEDIUM_WIDTH_THRESHOLD = 600.dp
+    const val PORTRAIT_ASPECT_RATIO_THRESHOLD = 1.2f
+}
 
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
@@ -127,10 +161,6 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             val coroutineScope = rememberCoroutineScope()
             val snackBarHostState = remember { SnackbarHostState() }
             val hazeState = remember { HazeState() }
-            val hazeStyle = HazeStyle(
-                backgroundColor = MiuixTheme.colorScheme.surface,
-                tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
-            )
 
             // LaunchedEffect to handle snackbar events from AllViewModel
             LaunchedEffect(Unit) {
@@ -151,8 +181,10 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                     }
                 }
             }
+
             var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(null) }
             val showErrorSheetState = remember { mutableStateOf(false) }
+
             LaunchedEffect(Unit) {
                 preferredViewModel.uiEvents.collect { event ->
                     snackBarHostState.currentSnackbarData?.dismiss()
@@ -178,76 +210,52 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                 }
             }
 
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                bottomBar = {
-                    NavigationBar(
-                        modifier = Modifier.hazeEffect(hazeState) {
-                            style = hazeStyle
-                            blurRadius = 30.dp
-                            noiseFactor = 0f
-                        },
-                        color = Color.Transparent,
-                        items = navigationItems,
-                        selected = pagerState.currentPage,
-                        showDivider = true,
-                        onClick = { index ->
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(index)
-                            }
-                        }
+            // --- Layout Decision Logic ---
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val isDefinitelyWide = maxWidth > UIConstants.WIDE_SCREEN_THRESHOLD
+                val isWideByShape =
+                    maxWidth > UIConstants.MEDIUM_WIDTH_THRESHOLD && (maxHeight.value / maxWidth.value < UIConstants.PORTRAIT_ASPECT_RATIO_THRESHOLD)
+                val isWideScreen = isDefinitelyWide || isWideByShape
+
+                if (isWideScreen) {
+                    SettingsWideScreenLayout(
+                        navController = navController,
+                        pagerState = pagerState,
+                        navigationItems = navigationItems,
+                        allViewModel = allViewModel,
+                        preferredViewModel = preferredViewModel,
+                        snackBarHostState = snackBarHostState,
+                        hazeState = hazeState
                     )
-                },
-                snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-                floatingActionButton = {
-                    AnimatedVisibility(
-                        visible = pagerState.currentPage == 0,
-                        enter = scaleIn(),
-                        exit = scaleOut()
-                    ) {
-                        FloatingActionButton(
-                            modifier = Modifier.padding(end = 16.dp),
-                            containerColor = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.background,
-                            shadowElevation = 2.dp,
-                            onClick = { navController.navigate(MiuixSettingsScreen.Builder.MiuixEditConfig(null).route) }
-                        ) {
-                            Icon(
-                                imageVector = AppIcons.Add,
-                                modifier = Modifier.size(40.dp),
-                                contentDescription = stringResource(id = R.string.add),
-                                tint = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.primary
-                            )
-                        }
-                    }
+                } else {
+                    SettingsCompactLayout(
+                        navController = navController,
+                        pagerState = pagerState,
+                        navigationItems = navigationItems,
+                        allViewModel = allViewModel,
+                        preferredViewModel = preferredViewModel,
+                        snackBarHostState = snackBarHostState,
+                        hazeState = hazeState
+                    )
                 }
-            ) { paddingValues ->
-                InstallerPagerContent(
-                    hazeState = hazeState,
-                    pagerState = pagerState,
-                    navController = navController,
-                    allViewModel = allViewModel,
-                    preferredViewModel = preferredViewModel,
-                    navigationItems = navigationItems,
-                    modifier = Modifier.fillMaxSize(),
-                    outerPadding = paddingValues
-                )
             }
 
             errorDialogInfo?.let { dialogInfo ->
                 ErrorDisplaySheet(
                     showState = showErrorSheetState,
                     exception = dialogInfo.exception,
-                    onDismissRequest = { showErrorSheetState.value = false }, // Hide sheet on dismiss
+                    onDismissRequest = { showErrorSheetState.value = false },
                     onRetry = errorDialogInfo?.retryAction?.let { retryAction ->
                         {
-                            showErrorSheetState.value = false // Hide sheet
-                            preferredViewModel.dispatch(retryAction) // Then execute retry action
+                            showErrorSheetState.value = false
+                            preferredViewModel.dispatch(retryAction)
                         }
                     },
                     title = dialogInfo.title
                 )
             }
         }
+
         composable(
             route = MiuixSettingsScreen.MiuixEditConfig.route,
             arguments = listOf(
@@ -282,7 +290,6 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
         }
         composable(route = MiuixSettingsScreen.MiuixTheme.route) {
             MiuixThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
-
         }
         composable(route = MiuixSettingsScreen.MiuixInstallerGlobal.route) {
             MiuixInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
@@ -290,6 +297,267 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
         composable(route = MiuixSettingsScreen.MiuixLab.route) {
             MiuixLabPage(navController = navController, viewModel = preferredViewModel)
         }
+    }
+}
+
+/**
+ * Compact Screen Layout (Portrait/Phone)
+ */
+@OptIn(ExperimentalHazeMaterialsApi::class)
+@Composable
+private fun SettingsCompactLayout(
+    navController: NavController,
+    pagerState: PagerState,
+    navigationItems: List<NavigationItem>,
+    allViewModel: AllViewModel,
+    preferredViewModel: PreferredViewModel,
+    snackBarHostState: SnackbarHostState,
+    hazeState: HazeState
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val hazeStyle = HazeStyle(
+        backgroundColor = MiuixTheme.colorScheme.surface,
+        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
+    )
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            NavigationBar(
+                modifier = Modifier.hazeEffect(hazeState) {
+                    style = hazeStyle
+                    blurRadius = 30.dp
+                    noiseFactor = 0f
+                },
+                color = Color.Transparent,
+                items = navigationItems,
+                selected = pagerState.currentPage,
+                showDivider = true,
+                onClick = { index ->
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
+                }
+            )
+        },
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        floatingActionButton = {
+            // FAB logic specifically tied to the first page (Config)
+            AnimatedVisibility(
+                visible = pagerState.currentPage == 0,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                FloatingActionButton(
+                    modifier = Modifier.padding(end = 16.dp),
+                    containerColor = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.background,
+                    shadowElevation = 2.dp,
+                    onClick = { navController.navigate(MiuixSettingsScreen.Builder.MiuixEditConfig(null).route) }
+                ) {
+                    Icon(
+                        imageVector = AppIcons.Add,
+                        modifier = Modifier.size(40.dp),
+                        contentDescription = stringResource(id = R.string.add),
+                        tint = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        InstallerPagerContent(
+            hazeState = hazeState,
+            pagerState = pagerState,
+            navController = navController,
+            allViewModel = allViewModel,
+            preferredViewModel = preferredViewModel,
+            navigationItems = navigationItems,
+            modifier = Modifier.fillMaxSize(),
+            outerPadding = paddingValues
+        )
+    }
+}
+
+/**
+ * Wide Screen Layout (Tablet/Landscape)
+ * Uses a Row to split the View into a Side Panel and Main Content.
+ */
+@Composable
+private fun SettingsWideScreenLayout(
+    navController: NavController,
+    pagerState: PagerState,
+    navigationItems: List<NavigationItem>,
+    allViewModel: AllViewModel,
+    preferredViewModel: PreferredViewModel,
+    snackBarHostState: SnackbarHostState,
+    hazeState: HazeState
+) {
+    val layoutDirection = LocalLayoutDirection.current
+    val windowWidth = getWindowSize().width
+
+    // Draggable Divider Logic
+    var weight by remember(windowWidth) { mutableStateOf(0.3f) } // Default narrower sidebar for settings
+    var potentialWeight by remember { mutableFloatStateOf(weight) }
+    val dragState = rememberDraggableState { delta ->
+        val nextPotentialWeight = potentialWeight + delta / windowWidth
+        potentialWeight = nextPotentialWeight
+        val clampedWeight = nextPotentialWeight.coerceIn(0.2f, 0.4f) // Restrict sidebar width
+        if (clampedWeight == nextPotentialWeight) {
+            weight = clampedWeight
+        }
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize()
+    ) { padding ->
+        Row(
+            modifier = Modifier
+                .background(MiuixTheme.colorScheme.surface)
+                .padding(
+                    top = padding.calculateTopPadding(),
+                    bottom = padding.calculateBottomPadding(),
+                    start = padding.calculateStartPadding(layoutDirection),
+                    end = padding.calculateEndPadding(layoutDirection)
+                )
+        ) {
+            // Left Panel: Navigation Menu
+            Box(modifier = Modifier.weight(weight)) {
+                SettingsSidePanel(
+                    pagerState = pagerState,
+                    navigationItems = navigationItems
+                )
+            }
+
+            // Draggable Divider
+            VerticalDivider(
+                modifier = Modifier
+                    .draggable(
+                        state = dragState,
+                        orientation = Orientation.Horizontal
+                    )
+                    .padding(horizontal = 6.dp)
+            )
+
+            // Right Panel: Content + FAB + Snackbar
+            Box(modifier = Modifier.weight(1f - weight)) {
+                SettingsWideContent(
+                    navController = navController,
+                    pagerState = pagerState,
+                    navigationItems = navigationItems,
+                    allViewModel = allViewModel,
+                    preferredViewModel = preferredViewModel,
+                    snackBarHostState = snackBarHostState,
+                    hazeState = hazeState
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsSidePanel(
+    pagerState: PagerState,
+    navigationItems: List<NavigationItem>
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val scrollBehavior = MiuixScrollBehavior()
+    val layoutDirection = LocalLayoutDirection.current
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets.systemBars.union(
+            WindowInsets.displayCutout.exclude(
+                WindowInsets.displayCutout.only(WindowInsetsSides.End)
+            )
+        ),
+        topBar = {
+            TopAppBar(
+                title = stringResource(R.string.app_name),
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(start = padding.calculateStartPadding(layoutDirection))
+                .fillMaxHeight(),
+            contentPadding = PaddingValues(
+                top = padding.calculateTopPadding(),
+                bottom = padding.calculateBottomPadding() + 12.dp
+            )
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+                Card(
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                ) {
+                    navigationItems.forEachIndexed { index, item ->
+                        BasicComponent(
+                            title = item.label,
+                            onClick = {
+                                coroutineScope.launch {
+                                    pagerState.scrollToPage(index)
+                                }
+                            },
+                            // Highlight selected item
+                            holdDownState = pagerState.currentPage == index
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsWideContent(
+    navController: NavController,
+    pagerState: PagerState,
+    navigationItems: List<NavigationItem>,
+    allViewModel: AllViewModel,
+    preferredViewModel: PreferredViewModel,
+    snackBarHostState: SnackbarHostState,
+    hazeState: HazeState
+) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets.systemBars.union(
+            WindowInsets.displayCutout.exclude(
+                WindowInsets.displayCutout.only(WindowInsetsSides.Start)
+            )
+        ),
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = pagerState.currentPage == 0,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                FloatingActionButton(
+                    modifier = Modifier.padding(end = 16.dp),
+                    containerColor = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.background,
+                    shadowElevation = 2.dp,
+                    onClick = { navController.navigate(MiuixSettingsScreen.Builder.MiuixEditConfig(null).route) }
+                ) {
+                    Icon(
+                        imageVector = AppIcons.Add,
+                        modifier = Modifier.size(40.dp),
+                        contentDescription = stringResource(id = R.string.add),
+                        tint = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        InstallerPagerContent(
+            hazeState = hazeState,
+            pagerState = pagerState,
+            navController = navController,
+            allViewModel = allViewModel,
+            preferredViewModel = preferredViewModel,
+            navigationItems = navigationItems,
+            modifier = Modifier.fillMaxSize(),
+            outerPadding = paddingValues
+        )
     }
 }
 
@@ -307,6 +575,7 @@ private fun InstallerPagerContent(
     HorizontalPager(
         state = pagerState,
         userScrollEnabled = true,
+        overscrollEffect = null,
         modifier = modifier
     ) { page ->
         when (page) {
