@@ -77,6 +77,7 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.Mi
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.lab.MiuixLabPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
+import com.rosan.installer.ui.theme.none
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -413,8 +414,6 @@ private fun SettingsWideScreenLayout(
             modifier = Modifier
                 .background(MiuixTheme.colorScheme.surface)
                 .padding(
-                    top = padding.calculateTopPadding(),
-                    bottom = padding.calculateBottomPadding(),
                     start = padding.calculateStartPadding(layoutDirection),
                     end = padding.calculateEndPadding(layoutDirection)
                 )
@@ -464,11 +463,7 @@ private fun SettingsSidePanel(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets.systemBars.union(
-            WindowInsets.displayCutout.exclude(
-                WindowInsets.displayCutout.only(WindowInsetsSides.End)
-            )
-        ),
+        contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
                 title = stringResource(R.string.app_name),
