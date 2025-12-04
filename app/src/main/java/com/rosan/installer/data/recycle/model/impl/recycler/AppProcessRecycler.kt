@@ -1,4 +1,4 @@
-package com.rosan.installer.data.recycle.model.impl
+package com.rosan.installer.data.recycle.model.impl.recycler
 
 import com.rosan.app_process.AppProcess
 import com.rosan.installer.data.recycle.model.exception.AppProcessNotWorkException

@@ -1,10 +1,14 @@
 package com.rosan.installer.ui.page.miuix.installer
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -57,6 +61,7 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallFailedC
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallPrepareContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallSuccessContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallingContent
+import com.rosan.installer.ui.page.miuix.widgets.DropdownItem
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.theme.m3color.PaletteStyle
 import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
@@ -67,13 +72,19 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.ListPopup
+import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.ListPopupDefaults
+import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Back
 import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 import top.yukonga.miuix.kmp.icon.icons.useful.Info
+import top.yukonga.miuix.kmp.icon.icons.useful.Reboot
 import top.yukonga.miuix.kmp.icon.icons.useful.Settings
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 private const val SHEET_ANIMATION_DURATION = 200L
@@ -115,7 +126,6 @@ fun MiuixInstallerPage(
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
     val displayIcons by viewModel.displayIcons.collectAsState()
-    val installProgressTextRes by viewModel.installProgressText.collectAsState()
 
     val analysisResult =
         if (currentPackageName != null) installer.analysisResults.find { it.packageName == currentPackageName } else null
@@ -266,7 +276,7 @@ fun MiuixInstallerPage(
                     )
                 }
 
-                else -> null
+                else -> {}
             }
         },
         rightAction = {
@@ -302,7 +312,18 @@ fun MiuixInstallerPage(
                     }
                 }
 
-                else -> null
+                is InstallerViewState.InstallingModule -> {
+                    // Only show the reboot menu when the installation is finished
+                    if (currentState.isFinished) {
+                        RebootListPopup(
+                            onReboot = { reason ->
+                                viewModel.dispatch(InstallerViewAction.Reboot(reason))
+                            }
+                        )
+                    }
+                }
+
+                else -> {}
             }
         },
         title = sheetTitle, // DYNAMIC TITLE
@@ -318,7 +339,7 @@ fun MiuixInstallerPage(
                     val state = viewModel.state
                     val disableNotif = settings.disableNotificationOnDismiss
                     val isModule = state is InstallerViewState.InstallingModule
-                    
+
                     // 1. If it's a module install OR the "disable notification" setting is on -> Close
                     // 2. Otherwise (including Preparing, Standard APK install) -> Background
                     val action = if (isModule || disableNotif) {
@@ -464,13 +485,16 @@ fun MiuixInstallerPage(
                 }
 
                 is InstallerViewState.Installing -> {
-                    // TODO Show a progress indicator during installation.
                     InstallingContent(
-                        colorScheme = colorScheme,
+                        state = viewModel.state as InstallerViewState.Installing,
                         baseEntity = baseEntity,
                         appIcon = appIcon,
-                        // progress = installProgress,
-                        progressTextRes = installProgressTextRes
+                        onButtonClick = {
+                            scope.launch {
+                                delay(SHEET_ANIMATION_DURATION)
+                                viewModel.dispatch(InstallerViewAction.Background)
+                            }
+                        }
                     )
                 }
 
@@ -489,6 +513,7 @@ fun MiuixInstallerPage(
                 is InstallerViewState.InstallCompleted -> {
                     InstallCompletedContent(
                         colorScheme = colorScheme,
+                        isDarkMode = isDarkMode,
                         results = (viewModel.state as InstallerViewState.InstallCompleted).results,
                         onClose = closeSheet
                     )
@@ -577,4 +602,88 @@ fun MiuixInstallerPage(
                 .navigationBarsPadding()
         )
     }
+}
+
+@Composable
+private fun RebootListPopup(
+    modifier: Modifier = Modifier,
+    alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.TopRight,
+    onReboot: (String) -> Unit
+) {
+    val showTopPopup = remember { mutableStateOf(false) }
+
+    IconButton(
+        modifier = modifier,
+        onClick = { showTopPopup.value = true },
+        holdDownState = showTopPopup.value
+    ) {
+        Icon(
+            imageVector = MiuixIcons.Useful.Reboot,
+            contentDescription = stringResource(id = R.string.reboot),
+            tint = MiuixTheme.colorScheme.onBackground
+        )
+    }
+
+    ListPopup(
+        show = showTopPopup,
+        popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
+        alignment = alignment,
+        onDismissRequest = {
+            showTopPopup.value = false
+        }
+    ) {
+        val context = LocalContext.current
+        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager?
+
+        @Suppress("DEPRECATION")
+        val isRebootingUserspaceSupported =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && pm?.isRebootingUserspaceSupported == true
+
+        ListPopupColumn {
+            val rebootOptions = remember {
+                val options = mutableListOf(
+                    Pair(R.string.reboot, ""),
+                    Pair(R.string.reboot_recovery, "recovery"),
+                    Pair(R.string.reboot_bootloader, "bootloader"),
+                    Pair(R.string.reboot_download, "download"),
+                    Pair(R.string.reboot_edl, "edl")
+                )
+                if (isRebootingUserspaceSupported) {
+                    options.add(1, Pair(R.string.reboot_userspace, "userspace"))
+                }
+                options
+            }
+
+            rebootOptions.forEachIndexed { idx, (id, reason) ->
+                RebootDropdownItem(
+                    id = id,
+                    reason = reason,
+                    showTopPopup = showTopPopup,
+                    optionSize = rebootOptions.size,
+                    index = idx,
+                    onReboot = onReboot
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun RebootDropdownItem(
+    @StringRes id: Int,
+    reason: String = "",
+    showTopPopup: MutableState<Boolean>,
+    optionSize: Int,
+    index: Int,
+    onReboot: (String) -> Unit
+) {
+    DropdownItem(
+        text = stringResource(id),
+        optionSize = optionSize,
+        index = index,
+        onSelectedIndexChange = {
+            onReboot(reason)
+            showTopPopup.value = false
+        }
+    )
 }

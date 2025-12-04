@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -42,16 +41,6 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.util.help
-
-/**
- * 一个封装了字符串资源及其格式化参数的数据类。
- * @param id 字符串资源的 ID
- * @param formatArgs 填充字符串中占位符 (如 %1$s, %2$d) 所需的参数列表.
- */
-data class UiText(
-    @param:StringRes val id: Int,
-    val formatArgs: List<Any> = emptyList()
-)
 
 val pausingIcon: @Composable () -> Unit = {
     Icon(

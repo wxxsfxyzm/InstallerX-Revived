@@ -51,7 +51,7 @@ fun dialogGenerateParams(
         is InstallerViewState.Ready -> readyDialog(viewModel)
         is InstallerViewState.Resolving -> resolvingDialog(installer, viewModel)
         is InstallerViewState.ResolveFailed -> resolveFailedDialog(installer, viewModel)
-        is InstallerViewState.Preparing -> preparingDialog(installer, viewModel)
+        is InstallerViewState.Preparing -> preparingDialog(viewModel)
         is InstallerViewState.Analysing -> analysingDialog(installer, viewModel)
         is InstallerViewState.AnalyseFailed -> analyseFailedDialog(installer, viewModel)
         is InstallerViewState.InstallChoice -> installChoiceDialog(installer, viewModel)

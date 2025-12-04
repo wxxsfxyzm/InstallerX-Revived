@@ -39,14 +39,6 @@ interface IPrivilegedService {
     boolean startActivityPrivileged(in Intent intent);
 
     /**
-     * Executes a shell command as a single-line string.
-     *
-     * @param command the command to execute
-     * @return the standard output of the executed command
-     */
-    String execLine(String command);
-
-    /**
      * Executes a shell command with arguments.
      *
      * @param command an array of strings representing the command and its arguments

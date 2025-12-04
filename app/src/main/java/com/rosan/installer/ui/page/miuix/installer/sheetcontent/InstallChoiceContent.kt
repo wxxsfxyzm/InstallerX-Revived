@@ -1,5 +1,10 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,9 +42,11 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixCheckboxWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixMultiApkCheckboxWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
+import com.rosan.installer.ui.page.miuix.widgets.WarningCard
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.getSupportSubtitle
 import com.rosan.installer.ui.util.isGestureNavigation
+import timber.log.Timber
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -76,14 +83,51 @@ fun InstallChoiceContent(
         { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
     }
 
+    // Flatten all selected entities across all package results
+    val allSelectedEntities = analysisResults.flatMap { it.appEntities }.filter { it.selected }
+
+    // Count modules and apps separately
+    val selectedModuleCount = allSelectedEntities.count { it.app is AppEntity.ModuleEntity }
+    val selectedAppCount = allSelectedEntities.count { it.app !is AppEntity.ModuleEntity }
+
+    // Define error conditions
+    val isMixedError = selectedModuleCount > 0 && selectedAppCount > 0
+    // Error: Cannot select multiple modules
+    val isMultiModuleError = selectedModuleCount > 1
+
+    // Determine error message
+    val errorMessage = when {
+        isMixedError -> stringResource(R.string.installer_error_mixed_selection)
+        isMultiModuleError -> stringResource(R.string.installer_error_multiple_modules)
+        else -> null
+    }
+
+    // Determine if the primary action should be enabled
+    // Must have at least one selection, and no errors
+    val isPrimaryActionEnabled = allSelectedEntities.isNotEmpty() && !isMixedError && !isMultiModuleError
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val cardText = sourceType.getSupportSubtitle(selectionMode = selectionMode)
+        Timber.tag("InstallChoice").d(sourceType.toString())
 
-        if (cardText != null)
-            MiuixInstallerTipCard(cardText)
+        val cardText = sourceType.getSupportSubtitle(selectionMode = selectionMode)
+        cardText?.let { MiuixInstallerTipCard(it) }
+
+        AnimatedVisibility(
+            visible = errorMessage != null,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            errorMessage?.let { msg ->
+                WarningCard(
+                    isDarkMode = isDarkMode,
+                    colorScheme = colorScheme,
+                    message = msg
+                )
+            }
+        }
 
         if (isMixedModuleZip && selectionMode == MmzSelectionMode.INITIAL_CHOICE) {
             Box(modifier = Modifier.weight(1f, fill = false)) {
@@ -157,7 +201,7 @@ fun InstallChoiceContent(
                     onClick = currentPrimaryAction,
                     text = stringResource(currentPrimaryTextRes),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
-                    enabled = analysisResults.any { it.appEntities.any { it.selected } },
+                    enabled = isPrimaryActionEnabled,
                     modifier = Modifier.weight(1f)
                 )
             }

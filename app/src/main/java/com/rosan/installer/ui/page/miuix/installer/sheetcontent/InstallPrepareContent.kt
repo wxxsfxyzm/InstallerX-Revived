@@ -281,7 +281,7 @@ fun InstallPrepareContent(
                 ) {
                     Column {
                         // Permissions List
-                        if (containerType == DataType.APK)
+                        if ((primaryEntity as AppEntity.BaseEntity).permissions?.isNotEmpty() ?: false)
                             MiuixNavigationItemWidget(
                                 title = stringResource(R.string.permission_list),
                                 description = stringResource(R.string.permission_list_desc),

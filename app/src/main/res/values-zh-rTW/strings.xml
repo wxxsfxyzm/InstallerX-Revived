@@ -399,8 +399,8 @@
     <string name="show_dialog_install_extended_menu">顯示擴展選單</string>
     <string name="show_dialog_install_extended_menu_desc">在安裝對話框中顯示更多操作選項</string>
     <string name="extended_menu">擴展選單</string>
-    <string name="disable_notification">無通知前景安裝</string>
-    <string name="close_immediately_on_dialog_dismiss">安裝過程中對話框將保持前景顯示，點擊空白處直接結束安裝工作階段，不彈出安裝通知</string>
+    <string name="disable_notification">安裝過程保持前台顯示</string>
+    <string name="close_immediately_on_dialog_dismiss">安裝過程中對話框將保持前景顯示，不彈出安裝通知</string>
     <string name="disable_notification_on_dismiss">對話框關閉時退出</string>
     <string name="close_notification_immediately_on_dialog_dismiss">關閉對話框將靜默退出</string>
     <string name="set_countdown">設定倒數計時</string>

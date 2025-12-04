@@ -1,4 +1,4 @@
-package com.rosan.installer.data.recycle.model.impl
+package com.rosan.installer.data.recycle.model.impl.recycler
 
 import android.content.ComponentName
 import android.content.Context

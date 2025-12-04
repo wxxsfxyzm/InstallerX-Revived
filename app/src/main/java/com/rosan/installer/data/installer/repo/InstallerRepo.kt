@@ -4,7 +4,9 @@ import android.app.Activity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
+import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
+import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +21,10 @@ interface InstallerRepo : Closeable {
     var analysisResults: List<PackageAnalysisResult>
     val progress: Flow<ProgressEntity>
     val background: Flow<Boolean>
+    var multiInstallQueue: List<SelectInstallEntity>
+    var multiInstallResults: MutableList<InstallResult>
+    var currentMultiInstallIndex: Int
+    var moduleLog: List<String>
     val uninstallInfo: StateFlow<UninstallInfo?>
     val confirmationDetails: StateFlow<ConfirmationDetails?>
 
@@ -29,6 +35,7 @@ interface InstallerRepo : Closeable {
     fun resolveInstall(activity: Activity)
     fun analyse()
     fun install()
+    fun installMultiple(entities: List<SelectInstallEntity>)
 
     /**
      * Resolves information for a package to be uninstalled.

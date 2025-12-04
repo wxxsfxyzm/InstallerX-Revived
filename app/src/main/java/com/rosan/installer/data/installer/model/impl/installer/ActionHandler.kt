@@ -1,18 +1,22 @@
 package com.rosan.installer.data.installer.model.impl.installer
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.os.Build
 import android.system.Os
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
+import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.entity.SessionMode
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
 import com.rosan.installer.data.app.util.IconColorExtractor
 import com.rosan.installer.data.app.util.sourcePath
+import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
+import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.model.impl.InstallerRepoImpl
 import com.rosan.installer.data.installer.model.impl.installer.helper.ConfigResolver
@@ -20,12 +24,14 @@ import com.rosan.installer.data.installer.model.impl.installer.helper.SourceReso
 import com.rosan.installer.data.installer.model.impl.installer.processor.InstallationProcessor
 import com.rosan.installer.data.installer.model.impl.installer.processor.SessionProcessor
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.recycle.util.setInstallerDefaultPrivileged
+import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -37,6 +43,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -44,7 +51,6 @@ import java.io.File
 
 class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
-
     override val installer: InstallerRepoImpl = super.installer as InstallerRepoImpl
     private val mutableProgressFlow: MutableSharedFlow<ProgressEntity>
         get() = installer.progress
@@ -66,7 +72,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     // Initializing helpers without passing ID
     private val sourceResolver = SourceResolver(cacheDirectory, mutableProgressFlow)
     private val sessionProcessor = SessionProcessor()
-    private val installationProcessor = InstallationProcessor(mutableProgressFlow)
+    private val installationProcessor = InstallationProcessor(installer, mutableProgressFlow)
 
     override suspend fun onStart() {
         Timber.d("[id=$installerId] onStart: Starting to collect actions.")
@@ -158,7 +164,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         when (action) {
             is InstallerRepoImpl.Action.ResolveInstall -> resolve(action.activity)
             is InstallerRepoImpl.Action.Analyse -> analyse()
-            is InstallerRepoImpl.Action.Install -> install()
+            is InstallerRepoImpl.Action.Install -> handleSingleInstall()
+            is InstallerRepoImpl.Action.InstallMultiple -> handleMultiInstall()
             is InstallerRepoImpl.Action.ResolveUninstall -> resolveUninstall(action.activity, action.packageName)
             is InstallerRepoImpl.Action.Uninstall -> uninstall(action.packageName)
             is InstallerRepoImpl.Action.ResolveConfirmInstall -> resolveConfirm(action.activity, action.sessionId)
@@ -276,7 +283,81 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.InstallAnalysedSuccess)
     }
 
-    private suspend fun install() {
+    private suspend fun handleSingleInstall() {
+        installer.moduleLog = emptyList()
+        performInstallLogic()
+    }
+
+    private suspend fun handleMultiInstall() {
+        val queue = installer.multiInstallQueue
+        if (queue.isEmpty()) return
+
+        // Clear previous logs
+        installer.moduleLog = emptyList()
+
+        // Loop through the queue
+        while (installer.currentMultiInstallIndex < queue.size) {
+            if (!currentCoroutineContext().isActive) break
+
+            val entity = queue[installer.currentMultiInstallIndex]
+            val appLabel = (entity.app as? AppEntity.BaseEntity)?.label ?: entity.app.packageName
+
+            val currentProgressIndex = installer.currentMultiInstallIndex + 1
+            val totalCount = queue.size
+
+            // 1. Emit progress to UI
+            installer.progress.emit(
+                ProgressEntity.Installing(
+                    current = currentProgressIndex,
+                    total = totalCount,
+                    appLabel = appLabel
+                )
+            )
+
+            try {
+                // Construct a temporary single-item result list for the processor
+                val originalResults = installer.analysisResults
+                val targetResult = findResultForEntity(entity, originalResults)
+
+                if (targetResult != null) {
+                    val tempResults = listOf(targetResult.copy(appEntities = listOf(entity.copy(selected = true))))
+
+                    // 2. Perform install.
+                    // CRITICAL FIX: Pass 'current' and 'total' so the processor knows this is part of a batch.
+                    installationProcessor.install(
+                        config = installer.config,
+                        analysisResults = tempResults,
+                        cacheDirectory = cacheDirectory,
+                        current = currentProgressIndex,
+                        total = totalCount
+                    )
+
+                    installer.multiInstallResults.add(InstallResult(entity, true))
+                } else {
+                    throw IllegalStateException("Original package info not found")
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Batch install failed for ${entity.app.packageName}")
+                installer.multiInstallResults.add(InstallResult(entity, false, e))
+                // Continue to next item even if one fails
+            }
+
+            installer.currentMultiInstallIndex++
+        }
+
+        // Emit final completion state with results
+        installer.progress.emit(ProgressEntity.InstallCompleted(installer.multiInstallResults.toList()))
+    }
+
+    // 辅助方法：从全量结果中提取单个安装项
+    private fun findResultForEntity(
+        target: SelectInstallEntity,
+        allResults: List<PackageAnalysisResult>
+    ): PackageAnalysisResult? {
+        return allResults.find { it.packageName == target.app.packageName }
+    }
+
+    private suspend fun performInstallLogic() {
         Timber.d("[id=$installerId] install: Starting installation process via InstallationProcessor.")
         installationProcessor.install(installer.config, installer.analysisResults, cacheDirectory)
 
@@ -369,7 +450,14 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             if (appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER).first()) {
                 Timber.d("[id=$installerId] resolve: Attempting to auto-lock default installer.")
                 runCatching {
-                    setInstallerDefaultPrivileged(context, installer.config, true)
+                    withContext(Dispatchers.IO) {
+                        val component = ComponentName(context, InstallerActivity::class.java)
+                        PrivilegedManager.setDefaultInstaller(
+                            installer.config.authorizer,
+                            component,
+                            true // enable = true (Lock)
+                        )
+                    }
                     Timber.d("[id=$installerId] resolve: Auto-lock attempt finished successfully.")
                 }.onFailure {
                     Timber.w(it, "[id=$installerId] resolve: Failed to auto-lock default installer. This is non-fatal.")

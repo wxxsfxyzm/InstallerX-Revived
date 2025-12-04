@@ -1,4 +1,4 @@
-package com.rosan.installer.data.recycle.model.impl
+package com.rosan.installer.data.recycle.model.impl.recycler
 
 import com.rosan.installer.IPrivilegedService
 import com.rosan.installer.data.recycle.model.entity.DefaultPrivilegedService

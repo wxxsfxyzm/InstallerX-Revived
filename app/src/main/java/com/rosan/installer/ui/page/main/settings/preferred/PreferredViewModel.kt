@@ -21,7 +21,7 @@ import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.HttpProfile
 import com.rosan.installer.data.app.model.entity.RootImplementation
-import com.rosan.installer.data.app.repo.PrivilegedActionRepo
+import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
@@ -55,7 +55,6 @@ import timber.log.Timber
 
 class PreferredViewModel(
     private val appDataStore: AppDataStore,
-    private val paRepo: PrivilegedActionRepo,
     private val updateChecker: UpdateChecker,
     private val appUpdater: AppUpdater
 ) : ViewModel(), KoinComponent {
@@ -410,13 +409,13 @@ class PreferredViewModel(
             successMessage = null, // No success snackbar message for this action type
             block = {
                 Timber.d("Changing ADB Verify Enabled to: $enabled")
-                val isPermissionGranted = paRepo.isPermissionGranted(
+                val isPermissionGranted = PrivilegedManager.isPermissionGranted(
                     state.authorizer,
                     context.packageName, "android.permission.WRITE_SECURE_SETTINGS"
                 )
                 if (!isPermissionGranted) {
                     Timber.w("WRITE_SECURE_SETTINGS permission not granted, attempting to grant it...")
-                    paRepo.grantRuntimePermission(
+                    PrivilegedManager.grantRuntimePermission(
                         state.authorizer,
                         context.packageName,
                         "android.permission.WRITE_SECURE_SETTINGS"
@@ -454,7 +453,7 @@ class PreferredViewModel(
             action = action,
             titleForError = context.getString(if (lock) R.string.lock_default_installer_failed else R.string.unlock_default_installer_failed),
             successMessage = context.getString(if (lock) R.string.lock_default_installer_success else R.string.unlock_default_installer_success),
-            block = { paRepo.setDefaultInstaller(authorizer, component, lock) }
+            block = { PrivilegedManager.setDefaultInstaller(authorizer, component, lock) }
         )
     }
 

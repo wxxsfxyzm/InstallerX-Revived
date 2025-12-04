@@ -80,6 +80,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     // Throttling state
     private var lastNotificationUpdateTime = 0L
     private var lastProgressValue = -1f
+    private var lastLogLine: String? = null // 用于模块安装去重
 
     @SuppressLint("MissingPermission")
     override suspend fun onStart() {
@@ -103,7 +104,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 installer.background
             ) { progress, background ->
 
-                Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=${settings.showDialog}")
+                // Log reduction for specific high-frequency states
+                if (progress !is ProgressEntity.InstallingModule) {
+                    Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=${settings.showDialog}")
+                }
 
                 if (progress is ProgressEntity.InstallAnalysedUnsupported) {
                     Timber.w("[id=${installer.id}] AnalysedUnsupported: ${progress.reason}")
@@ -132,7 +136,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     // Use throttled update for notification
                     setNotificationThrottled(notification, progress)
 
-                    if (progress is ProgressEntity.InstallSuccess) {
+                    if (progress is ProgressEntity.InstallSuccess || (progress is ProgressEntity.InstallCompleted && progress.results.all { it.success })) {
                         scope.launch {
                             val clearTimeSeconds = settings.autoCloseNotification
                             if (clearTimeSeconds > 0) {
@@ -148,7 +152,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
                     val elapsedTime = System.currentTimeMillis() - sessionStartTime
                     if (elapsedTime < MINIMUM_VISIBILITY_DURATION_MS) {
-                        if (progress !is ProgressEntity.Finish && progress !is ProgressEntity.InstallSuccess) {
+                        if (progress !is ProgressEntity.Finish && progress !is ProgressEntity.InstallSuccess && progress !is ProgressEntity.InstallCompleted) {
                             delay(MINIMUM_VISIBILITY_DURATION_MS - elapsedTime)
                         }
                     }
@@ -192,6 +196,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         if (notification == null) {
             setNotificationImmediate(null)
             lastProgressValue = -1f // Reset state
+            lastLogLine = null
             return
         }
 
@@ -201,15 +206,28 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         // Critical states that should update immediately
         val isCriticalState = progress is ProgressEntity.InstallSuccess ||
                 progress is ProgressEntity.InstallFailed ||
+                progress is ProgressEntity.InstallCompleted || // Added for batch
                 progress is ProgressEntity.InstallAnalysedSuccess ||
                 progress is ProgressEntity.InstallResolvedFailed ||
                 progress is ProgressEntity.InstallAnalysedFailed
+
+        // Specific logic for Module Install (Log based throttling)
+        if (progress is ProgressEntity.InstallingModule) {
+            val currentLine = progress.output.lastOrNull()
+            if (currentLine != lastLogLine && timeSinceLastUpdate > NOTIFICATION_UPDATE_INTERVAL_MS) {
+                lastLogLine = currentLine
+                setNotificationImmediate(notification)
+                lastNotificationUpdateTime = currentTime
+            }
+            return
+        }
 
         val currentProgress = (progress as? ProgressEntity.InstallPreparing)?.progress ?: -1f
 
         val shouldUpdate = when {
             isCriticalState -> true
             timeSinceLastUpdate < NOTIFICATION_UPDATE_INTERVAL_MS -> false
+            progress is ProgressEntity.Installing -> true // Installing state (batch or single) should update per item or progress
             currentProgress < 0 -> true  // Not progress
             else -> {
                 val progressIncreased = currentProgress > lastProgressValue
@@ -281,6 +299,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return when (progress) {
             is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
             is ProgressEntity.InstallSuccess -> onInstallSuccess(builder, preferSystemIcon).build()
+            is ProgressEntity.InstallCompleted -> onInstallCompleted(builder, progress).build()
             else -> builder.build()
         }
     }
@@ -311,7 +330,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .setOngoing(true)
             .setRequestPromotedOngoing(true)
 
-        val seedColorInt = installer.analysisResults.firstNotNullOfOrNull { it.seedColor }
+        val seedColorInt = getCurrentSeedColor(progress)
 
         val dynamicColorScheme = if (preferDynamicColor) {
             seedColorInt?.let { color ->
@@ -372,40 +391,115 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             is ProgressEntity.InstallAnalysedSuccess -> {
                 val allEntities = installer.analysisResults.flatMap { it.appEntities }
-                contentTitle = allEntities.map { it.app }.getInfo(context).title
+                val selectedApps = allEntities.map { it.app }
+                val hasComplexType = allEntities.any {
+                    it.app.sourceType == DataType.MIXED_MODULE_APK ||
+                            it.app.sourceType == DataType.MIXED_MODULE_ZIP
+                }
+                val isMultiPackage = selectedApps.groupBy { it.packageName }.size > 1
+
                 shortText = getString(R.string.installer_live_channel_short_text_pending)
                 val progressValue = installStages.subList(0, 3).sumOf { it.weight.toDouble() }.toFloat()
                 progressStyle.setProgress(progressValue.toInt())
 
-                val isMixedType = allEntities.any {
-                    it.app.sourceType == DataType.MIXED_MODULE_APK
-                }
-
-                if (isMixedType) {
+                if (hasComplexType) {
+                    contentTitle = getString(R.string.installer_prepare_install)
                     baseBuilder.setContentText(getString(R.string.installer_mixed_module_apk_description_notification))
                         .addAction(0, getString(R.string.cancel), finishIntent)
+                } else if (isMultiPackage) {
+                    // Multiple packages: Show generic title and require user interaction to select.
+                    // Consistent with legacy onAnalysedSuccess logic.
+                    contentTitle = getString(R.string.installer_prepare_install)
+                    // Do not add 'Install' action here. User must click the notification content to open the dialog.
+                    baseBuilder
+                        .setContentText(getString(R.string.installer_multi_apk_description_notification))
+                        .addAction(0, getString(R.string.cancel), finishIntent)
                 } else {
+                    // Single package: Show specific app info and install action.
+                    contentTitle = selectedApps.getInfo(context).title
                     baseBuilder.setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
                         .addAction(0, getString(R.string.install), installIntent)
                         .addAction(0, getString(R.string.cancel), finishIntent)
+                    baseBuilder.setLargeIcon(getLargeIconBitmap(preferSystemIcon))
                 }
-                baseBuilder.setLargeIcon(getLargeIconBitmap(preferSystemIcon))
             }
 
+            // === Modified: Handle Batch and Detailed Installing ===
             is ProgressEntity.Installing -> {
-                contentTitle = installer.analysisResults.flatMap { it.appEntities }
-                    .filter { it.selected }.map { it.app }.getInfo(context).title
+                val isBatch = progress.total > 1
+                val appLabel = progress.appLabel ?: getString(R.string.installer_installing)
+
+                contentTitle = if (isBatch) {
+                    // E.g. "Installing (1/5): My App"
+                    getString(R.string.installer_installing) + " (${progress.current}/${progress.total}): $appLabel"
+                } else {
+                    appLabel
+                }
+
                 shortText = getString(R.string.installer_live_channel_short_text_installing)
-                val progressValue = previousStagesWeight + (installStages[3].weight / 2f)
+
+                // Calculate progress based on current/total
+                val segmentWeight = installStages[3].weight
+                val batchFraction = if (progress.total > 0) progress.current.toFloat() / progress.total.toFloat() else 0.5f
+                val progressValue = previousStagesWeight + (segmentWeight * batchFraction)
+
                 progressStyle.setProgress(progressValue.toInt())
                 baseBuilder.setContentText(getString(R.string.installer_installing))
+
+                // Pass current index for correct icon in batch mode
+                val currentBatchIndex = if (isBatch) progress.current - 1 else null
+                baseBuilder.setLargeIcon(getLargeIconBitmap(preferSystemIcon, currentBatchIndex))
+            }
+
+            // === Added: Handle Module Installation ===
+            is ProgressEntity.InstallingModule -> {
+                contentTitle = getString(R.string.installer_installing) // Or "Installing Module"
+                shortText = getString(R.string.installer_live_channel_short_text_installing)
+
+                // Module installs don't have percentage, so we set it to the start of the "Installing" segment
+                // to show we are in the active installation phase.
+                val progressValue = previousStagesWeight + (installStages[3].weight * 0.1f)
+                progressStyle.setProgress(progressValue.toInt())
+
+                val lastLog = progress.output.lastOrNull() ?: getString(R.string.installer_installing)
+                baseBuilder.setContentText(lastLog)
+
+                baseBuilder.setLargeIcon(getLargeIconBitmap(preferSystemIcon))
             }
 
             is ProgressEntity.InstallSuccess -> {
                 contentTitle = getString(R.string.installer_install_success)
                 shortText = getString(R.string.installer_live_channel_short_text_success)
                 progressStyle.setProgress(totalProgressWeight.toInt())
-                baseBuilder.setOnlyAlertOnce(false).setLargeIcon(getLargeIconBitmap(preferSystemIcon))
+
+                // Show icon for single install
+                baseBuilder.setOnlyAlertOnce(false)
+                    .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
+            }
+
+            // Case 2: Batch Install Completed
+            is ProgressEntity.InstallCompleted -> {
+                val successCount = progress.results.count { it.success }
+                val totalCount = progress.results.size
+
+                // Calculate title with ratio
+                contentTitle = if (successCount == totalCount) {
+                    getString(R.string.installer_install_success)
+                } else {
+                    "${getString(R.string.installer_install_success)}: $successCount/$totalCount"
+                }
+
+                // Calculate short text with ratio for Live Activity / Capsule view
+                shortText = if (successCount == totalCount) {
+                    getString(R.string.installer_live_channel_short_text_success)
+                } else {
+                    "$successCount/$totalCount ${getString(R.string.installer_live_channel_short_text_success)}"
+                }
+
+                progressStyle.setProgress(totalProgressWeight.toInt())
+
+                // Do not set large icon for batch completion
+                baseBuilder.setOnlyAlertOnce(false)
             }
 
             is ProgressEntity.InstallFailed -> {
@@ -463,44 +557,30 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Pausing(R.drawable.round_hourglass_disabled_24)
     }
 
-    // Removed duplicate notificationChannels map as it is now handled in createNotificationChannels
+    // === Modified: Support fetching specific icon from Multi-Install Queue ===
+    private suspend fun getLargeIconBitmap(preferSystemIcon: Boolean, currentBatchIndex: Int? = null): Bitmap? {
+        // Priority 1: If explicit batch index provided and queue is valid
+        val entityFromQueue = if (currentBatchIndex != null && installer.multiInstallQueue.isNotEmpty()) {
+            installer.multiInstallQueue.getOrNull(currentBatchIndex)?.app
+        } else null
 
-    private val workingProgresses = listOf(
-        ProgressEntity.Ready,
-        ProgressEntity.InstallResolving,
-        ProgressEntity.InstallResolveSuccess,
-        ProgressEntity.InstallAnalysing,
-        ProgressEntity.InstallAnalysedSuccess,
-        ProgressEntity.Installing,
-        ProgressEntity.InstallSuccess
-    )
-
-    private val importanceProgresses = listOf(
-        ProgressEntity.InstallResolvedFailed,
-        ProgressEntity.InstallAnalysedFailed,
-        ProgressEntity.InstallAnalysedSuccess,
-        ProgressEntity.InstallFailed,
-        ProgressEntity.InstallSuccess
-    )
-
-    private val installProgresses = mapOf(
-        ProgressEntity.InstallResolving to 0,
-        ProgressEntity.InstallAnalysing to 40,
-        ProgressEntity.Installing to 80
-    )
-
-    private suspend fun getLargeIconBitmap(preferSystemIcon: Boolean): Bitmap? {
-        val entities = installer.analysisResults
-            .flatMap { it.appEntities }
-            .filter { it.selected }
-            .map { it.app }
-        val entityToInstall = entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-            ?: entities.sortedBest().firstOrNull()
-            ?: return null
+        // Priority 2: Standard selection (Single install or fallback)
+        val entityToInstall = if (entityFromQueue != null) {
+            entityFromQueue
+        } else {
+            val entities = installer.analysisResults
+                .flatMap { it.appEntities }
+                .filter { it.selected }
+                .map { it.app }
+            entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+                ?: entities.sortedBest().firstOrNull()
+        } ?: return null
 
         val iconSizePx =
             context.resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_width)
 
+        // Note: For multi-install, the packageName might not be in analysisResults map keys effectively if handled via temp results,
+        // but AppIconRepo should handle it via the AppEntity.
         val drawable = appIconRepo.getIcon(
             sessionId = installer.id,
             packageName = entityToInstall.packageName,
@@ -528,9 +608,15 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             is ProgressEntity.InstallAnalysing -> onAnalysing(builder)
             is ProgressEntity.InstallAnalysedFailed -> onAnalysedFailed(builder)
             is ProgressEntity.InstallAnalysedSuccess -> onAnalysedSuccess(builder, preferSystemIcon)
-            is ProgressEntity.Installing -> onInstalling(builder, preferSystemIcon)
+            // Modified: Pass progress to onInstalling
+            is ProgressEntity.Installing -> onInstalling(builder, progress, preferSystemIcon)
+            // Added: Module support
+            is ProgressEntity.InstallingModule -> onInstallingModule(builder, progress, preferSystemIcon)
             is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
             is ProgressEntity.InstallSuccess -> onInstallSuccess(builder, preferSystemIcon).build()
+            // Added: Batch Completed
+            is ProgressEntity.InstallCompleted -> onInstallCompleted(builder, progress).build()
+
             is ProgressEntity.Finish, is ProgressEntity.Error, is ProgressEntity.InstallAnalysedUnsupported -> null
             else -> null
         }
@@ -541,8 +627,30 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         background: Boolean,
         showDialog: Boolean
     ): NotificationCompat.Builder {
-        val isWorking = workingProgresses.contains(progress)
-        val isImportance = importanceProgresses.contains(progress)
+        val isWorking = when (progress) {
+            is ProgressEntity.Ready,
+            is ProgressEntity.InstallResolving,
+            is ProgressEntity.InstallResolveSuccess,
+            is ProgressEntity.InstallAnalysing,
+            is ProgressEntity.InstallAnalysedSuccess,
+            is ProgressEntity.Installing,
+            is ProgressEntity.InstallingModule, // Added
+            is ProgressEntity.InstallSuccess,
+            is ProgressEntity.InstallCompleted -> true // Added
+
+            else -> false
+        }
+
+        val isImportance = when (progress) {
+            is ProgressEntity.InstallResolvedFailed,
+            is ProgressEntity.InstallAnalysedFailed,
+            is ProgressEntity.InstallAnalysedSuccess,
+            is ProgressEntity.InstallFailed,
+            is ProgressEntity.InstallSuccess,
+            is ProgressEntity.InstallCompleted -> true
+
+            else -> false
+        }
 
         val channelEnum = if (isImportance && background) {
             Channel.InstallerChannel
@@ -567,12 +675,27 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .setOnlyAlertOnce(true)
             .setOngoing(true)
 
-        if (progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallFailed) {
+        if (progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallCompleted) {
             builder.setOngoing(false)
                 .setOnlyAlertOnce(false)
         }
 
-        installProgresses[progress]?.let {
+        val legacyProgressValue = when (progress) {
+            is ProgressEntity.InstallResolving -> 0
+            is ProgressEntity.InstallAnalysing -> 40
+            is ProgressEntity.Installing -> {
+                // Map Installing phase (single or batch) to 50-90 range
+                val base = 50
+                val range = 40
+                val fraction = if (progress.total > 0) progress.current.toFloat() / progress.total.toFloat() else 0.5f
+                base + (range * fraction).toInt()
+            }
+
+            is ProgressEntity.InstallingModule -> 70 // Arbitrary working state
+            else -> null
+        }
+
+        legacyProgressValue?.let {
             builder.setProgress(100, it, false)
         }
 
@@ -605,7 +728,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         builder: NotificationCompat.Builder,
         progress: ProgressEntity.InstallPreparing
     ) =
-        builder.setContentTitle(getString(R.string.installer_prepare_install))
+        builder.setContentTitle(getString(R.string.installer_preparing))
+            .setContentText(getString(R.string.installer_preparing_desc))
             .setProgress(100, (progress.progress * 100).toInt(), progress.progress < 0)
             .addAction(0, getString(R.string.cancel), cancelIntent)
             .build()
@@ -627,29 +751,28 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .addAction(0, getString(R.string.cancel), finishIntent).build()
 
     private suspend fun onAnalysedSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): Notification {
-        val selectedEntities = installer.analysisResults
-            .flatMap { it.appEntities }
-
-        val selectedApps = selectedEntities.map { it.app }
-        val info = selectedApps.getInfo(context)
-
-        val isMixedType = selectedEntities.any {
-            it.app.sourceType == DataType.MIXED_MODULE_APK
+        val allEntities = installer.analysisResults.flatMap { it.appEntities }
+        val selectedApps = allEntities.map { it.app }
+        val hasComplexType = allEntities.any {
+            it.app.sourceType == DataType.MIXED_MODULE_APK ||
+                    it.app.sourceType == DataType.MIXED_MODULE_ZIP
         }
+        val isMultiPackage = selectedApps.groupBy { it.packageName }.size > 1
 
-        if (isMixedType) {
-            return builder.setContentTitle(info.title)
+        if (hasComplexType) {
+            return builder.setContentTitle(getString(R.string.installer_prepare_install))
                 .setContentText(getString(R.string.installer_mixed_module_apk_description_notification))
                 .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
                 .addAction(0, getString(R.string.cancel), finishIntent)
                 .build()
         }
 
-        return (if (selectedApps.groupBy { it.packageName }.size != 1) {
+        return (if (isMultiPackage) {
             builder.setContentTitle(getString(R.string.installer_prepare_install))
+                .setContentText(getString(R.string.installer_multi_apk_description_notification))
                 .addAction(0, getString(R.string.cancel), finishIntent)
         } else {
-            builder.setContentTitle(info.title)
+            builder.setContentTitle(selectedApps.getInfo(context).title)
                 .setContentText(getString(R.string.installer_prepare_type_unknown_confirm))
                 .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
                 .addAction(0, getString(R.string.install), installIntent)
@@ -657,15 +780,44 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }).build()
     }
 
-    private suspend fun onInstalling(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): Notification {
-        val info = installer.analysisResults
-            .flatMap { it.appEntities }
-            .filter { it.selected }
-            .map { it.app }
-            .getInfo(context)
-        return builder.setContentTitle(info.title)
-            .setContentText(getString(R.string.installer_installing))
-            .setLargeIcon(getLargeIconBitmap(preferSystemIcon)).build()
+    // === Modified: Handle detailed batch install info ===
+    private suspend fun onInstalling(
+        builder: NotificationCompat.Builder,
+        progress: ProgressEntity.Installing,
+        preferSystemIcon: Boolean
+    ): Notification {
+        val isBatch = progress.total > 1
+        val appLabel = progress.appLabel ?: getString(R.string.installer_installing)
+
+        val title = if (isBatch) {
+            "${getString(R.string.installer_installing)} (${progress.current}/${progress.total})"
+        } else {
+            appLabel
+        }
+
+        val content = if (isBatch) appLabel else getString(R.string.installer_installing)
+
+        val currentBatchIndex = if (isBatch) progress.current - 1 else null
+
+        return builder.setContentTitle(title)
+            .setContentText(content)
+            .setLargeIcon(getLargeIconBitmap(preferSystemIcon, currentBatchIndex))
+            .build()
+    }
+
+    // === Added: Handle Module install ===
+    private suspend fun onInstallingModule(
+        builder: NotificationCompat.Builder,
+        progress: ProgressEntity.InstallingModule,
+        preferSystemIcon: Boolean
+    ): Notification {
+        val lastLog = progress.output.lastOrNull() ?: getString(R.string.installer_installing)
+
+        return builder.setContentTitle(getString(R.string.installer_installing))
+            .setContentText(lastLog)
+            .setProgress(100, 50, true) // Indeterminate progress for modules usually
+            .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
+            .build()
     }
 
     private suspend fun onInstallFailed(
@@ -727,5 +879,50 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             newBuilder = newBuilder.addAction(0, getString(R.string.open), openPendingIntent)
 
         return newBuilder.addAction(0, getString(R.string.finish), finishIntent)
+    }
+
+    // === Added: Handle Batch Completion ===
+    private fun onInstallCompleted(
+        builder: NotificationCompat.Builder,
+        progress: ProgressEntity.InstallCompleted
+    ): NotificationCompat.Builder {
+        val successCount = progress.results.count { it.success }
+        val totalCount = progress.results.size
+
+        val title = if (successCount == totalCount) {
+            getString(R.string.installer_install_success)
+        } else {
+            // E.g. "Completed: 3 success, 1 failed"
+            // You might want to add a specific resource string for this
+            "${getString(R.string.installer_install_success)}: $successCount/$totalCount"
+        }
+
+        return builder.setContentTitle(title)
+            .setContentText(getString(R.string.installer_live_channel_short_text_success))
+            .addAction(0, getString(R.string.finish), finishIntent)
+    }
+
+    /**
+     * Helper to retrieve the seed color dynamically.
+     * If in batch install mode, it fetches the color of the app currently being installed.
+     * Otherwise, it falls back to the first available color in the results.
+     */
+    private fun getCurrentSeedColor(progress: ProgressEntity): Int? {
+        if (progress is ProgressEntity.Installing && progress.total > 1) {
+            // 0-based index for the queue
+            val index = progress.current - 1
+            val currentEntity = installer.multiInstallQueue.getOrNull(index)
+
+            if (currentEntity != null) {
+                // Find the analysis result for the current package to get its specific color
+                val result = installer.analysisResults.find { it.packageName == currentEntity.app.packageName }
+                if (result?.seedColor != null) {
+                    return result.seedColor
+                }
+            }
+        }
+
+        // Fallback: Use the first available color (default behavior for single install or unknown state)
+        return installer.analysisResults.firstNotNullOfOrNull { it.seedColor }
     }
 }

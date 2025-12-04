@@ -11,25 +11,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.data.app.repo.AppIconRepo
-import com.rosan.installer.data.app.repo.PARepo
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageManagerUtil
-import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil.Companion.readGlobal
-import com.rosan.installer.ui.page.main.installer.dialog.inner.UiText
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -49,8 +45,7 @@ import timber.log.Timber
 class InstallerViewModel(
     private var repo: InstallerRepo,
     private val appDataStore: AppDataStore,
-    private val appIconRepo: AppIconRepo,
-    private val paRepo: PARepo
+    private val appIconRepo: AppIconRepo
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
@@ -79,18 +74,9 @@ class InstallerViewModel(
     var navigatedFromPrepareToChoice by mutableStateOf(false)
         private set
 
-    // Text to show in the progress bar
-    private val _installProgressText = MutableStateFlow<UiText?>(null)
-    val installProgressText: StateFlow<UiText?> = _installProgressText.asStateFlow()
-
     // Progress to drive the progress bar
     private val _installProgress = MutableStateFlow<Float?>(null)
     val installProgress: StateFlow<Float?> = _installProgress.asStateFlow()
-
-    // Queue and result for multi-install scenarios
-    private var multiInstallQueue: List<SelectInstallEntity> = emptyList()
-    private val multiInstallResults = mutableListOf<InstallResult>()
-    private var currentMultiInstallIndex = 0
 
     /**
      * Determines if the dialog can be dismissed by tapping the scrim.
@@ -99,13 +85,13 @@ class InstallerViewModel(
     val isDismissible
         get() = when (state) {
             is InstallerViewState.Analysing,
-            is InstallerViewState.Resolving,
-            is InstallerViewState.InstallExtendedMenu,
-            is InstallerViewState.InstallChoice -> false
+            is InstallerViewState.Resolving -> false
 
             is InstallerViewState.InstallingModule -> (state as InstallerViewState.InstallingModule).isFinished
-            is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
+            is InstallerViewState.InstallPrepare,
+            is InstallerViewState.InstallExtendedMenu,
             is InstallerViewState.Preparing,
+            is InstallerViewState.InstallChoice,
             is InstallerViewState.Installing -> !viewSettings.disableNotificationOnDismiss
 
             else -> true
@@ -172,7 +158,7 @@ class InstallerViewModel(
     private var collectRepoJob: Job? = null
 
     init {
-        Timber.d("DialogViewModel init")
+        Timber.d("InstallerViewModel init")
         settingsLoadingJob = loadInitialSettings()
         viewModelScope.launch {
             // Load managed packages for installer selection.
@@ -200,6 +186,7 @@ class InstallerViewModel(
             is InstallerViewAction.InstallMultiple -> installMultiple()
             is InstallerViewAction.Install -> install()
             is InstallerViewAction.Background -> background()
+            is InstallerViewAction.Reboot -> rebootDevice(action.reason)
             is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData)
             is InstallerViewAction.Uninstall -> {
                 // Trigger uninstall using the package name from the collected info
@@ -294,14 +281,42 @@ class InstallerViewModel(
                 if (isMultiAppMode) InstallerViewState.InstallChoice else InstallerViewState.InstallPrepare
             }
 
-            is ProgressEntity.Installing -> InstallerViewState.Installing
+            is ProgressEntity.Installing -> {
+                // Calculate float progress for ProgressBar
+                val floatProgress = if (progress.total > 1) {
+                    progress.current.toFloat() / progress.total.toFloat()
+                } else 0f
+
+                InstallerViewState.Installing(
+                    progress = floatProgress,
+                    current = progress.current,
+                    total = progress.total,
+                    appLabel = progress.appLabel
+                )
+            }
+
+            // Explicit mapping for batch completion
+            is ProgressEntity.InstallCompleted -> {
+                InstallerViewState.InstallCompleted(progress.results)
+            }
 
             is ProgressEntity.InstallFailed -> {
-                if (state is InstallerViewState.InstallingModule && repo.error is ModuleInstallExitCodeNonZeroException) {
-                    // If a module install fails with a specific error, update the existing state instead of replacing it.
-                    val currentOutput = (state as InstallerViewState.InstallingModule).output.toMutableList()
-                    repo.error.message?.let { currentOutput.add("ERROR: $it") }
-                    (state as InstallerViewState.InstallingModule).copy(
+                //  Check if it's a module install using the persistent Repo data
+                if (isInstallingModule) {
+                    // Load the full log history from the Repo, ensuring data persists across ViewModel recreations
+                    val currentOutput = repo.moduleLog.toMutableList()
+
+                    // Append the error message to the terminal output for visibility
+                    repo.error.message?.let { msg ->
+                        val errorLine = "ERROR: $msg"
+                        // Prevent duplicate error lines
+                        if (currentOutput.lastOrNull() != errorLine) {
+                            currentOutput.add(errorLine)
+                        }
+                    }
+
+                    // Return the terminal view state with isFinished = true
+                    InstallerViewState.InstallingModule(
                         output = currentOutput,
                         isFinished = true
                     )
@@ -311,9 +326,13 @@ class InstallerViewModel(
             }
 
             is ProgressEntity.InstallSuccess -> {
-                // If a module install succeeds, just mark it as finished.
-                if (state is InstallerViewState.InstallingModule) {
-                    (state as InstallerViewState.InstallingModule).copy(isFinished = true)
+                // Check if it's a module install
+                if (isInstallingModule) {
+                    // Load the full log history from the Repo and keep the terminal view open
+                    InstallerViewState.InstallingModule(
+                        output = repo.moduleLog,
+                        isFinished = true
+                    )
                 } else {
                     InstallerViewState.InstallSuccess
                 }
@@ -379,9 +398,8 @@ class InstallerViewModel(
      *
      * @param newPackageName The package name derived from the new state, if any.
      * @param newState The newly calculated InstallerViewState.
-     * @param progress The original ProgressEntity that triggered the update.
      */
-    private fun handleStateSideEffects(newPackageName: String?, newState: InstallerViewState, progress: ProgressEntity) {
+    private fun handleStateSideEffects(newPackageName: String?, newState: InstallerViewState) {
         // --- Update current package name ---
         if (newPackageName != _currentPackageName.value) {
             _currentPackageName.value = newPackageName
@@ -460,12 +478,6 @@ class InstallerViewModel(
         collectRepoJob = viewModelScope.launch {
             settingsLoadingJob.join()
             repo.progress.collect { progress ->
-                // --- Stage 1: Handle high-priority, blocking states first ---
-                if (multiInstallQueue.isNotEmpty()) {
-                    handleMultiInstallProgress(progress)
-                    return@collect // Multi-install has its own state machine
-                }
-
                 // Handle transient "loading" states separately, as they don't always cause a full state change.
                 if (progress is ProgressEntity.InstallResolving || progress is ProgressEntity.InstallPreparing || progress is ProgressEntity.InstallAnalysing) {
                     if (loadingStateJob == null || !loadingStateJob!!.isActive) {
@@ -489,9 +501,22 @@ class InstallerViewModel(
 
                 // --- Stage 3: Determine context (like the current package name) from the new state ---
                 val newPackageName = when (newState) {
+                    // For the Installing state, we need to differentiate between single and batch install
+                    is InstallerViewState.Installing -> {
+                        if (newState.total > 1) {
+                            // In batch mode, retrieve the specific package name from the queue using the current index.
+                            // The 'current' field in progress is 1-based, while the list is 0-based.
+                            val index = newState.current - 1
+                            repo.multiInstallQueue.getOrNull(index)?.app?.packageName
+                                ?: _currentPackageName.value // Fallback to current if index is out of bounds
+                        } else {
+                            // For single install, use the selected entity.
+                            _currentPackageName.value ?: repo.analysisResults.firstOrNull()?.packageName
+                        }
+                    }
+
                     // For these states, we need to ensure a specific package name is focused.
                     is InstallerViewState.InstallPrepare,
-                    is InstallerViewState.Installing,
                     is InstallerViewState.InstallFailed,
                     is InstallerViewState.InstallSuccess -> {
                         // Prioritize the existing currentPackageName (correctly set by installPrepare).
@@ -507,7 +532,7 @@ class InstallerViewModel(
                 }
 
                 // --- Stage 4: Handle all side effects based on the new state and progress ---
-                handleStateSideEffects(newPackageName, newState, progress)
+                handleStateSideEffects(newPackageName, newState)
 
                 // --- Stage 5: Apply the final state change if necessary ---
                 if (newState != state) {
@@ -570,7 +595,7 @@ class InstallerViewModel(
             // Proceed with fetching users for other authorizers.
             runCatching {
                 withContext(Dispatchers.IO) {
-                    paRepo.getUsers(effectiveAuthorizer)
+                    PrivilegedManager.getUsers(effectiveAuthorizer)
                 }
             }.onSuccess { users ->
                 _availableUsers.value = users
@@ -605,7 +630,6 @@ class InstallerViewModel(
         val mapSnapshot = _displayIcons.value
         val currentValue = mapSnapshot[packageName]
         val existingJob = iconJobs[packageName]
-        val isLoaded = currentValue != null
         val isJobActive = existingJob?.isActive == true
 
         if (currentValue != null || isJobActive) {
@@ -656,6 +680,24 @@ class InstallerViewModel(
         }
     }
 
+    private fun rebootDevice(reason: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val cmd = if (reason == "recovery") {
+                // KEYCODE_POWER = 26. This hides the incorrect "Factory data reset" message
+                // on some devices when booting into recovery.
+                "input keyevent 26 ; svc power reboot $reason || reboot $reason"
+            } else {
+                val reasonArg = if (reason.isNotEmpty()) " $reason" else ""
+                // Try "svc power reboot" first (soft reboot), fallback to "reboot" (hard reboot)
+                "svc power reboot$reasonArg || reboot$reasonArg"
+            }
+
+            val commandArray = arrayOf("sh", "-c", cmd)
+
+            PrivilegedManager.execArr(repo.config, commandArray)
+        }
+    }
+
     fun toast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
@@ -675,17 +717,6 @@ class InstallerViewModel(
     }
 
     private fun cancel() {
-        // 1. 如果正在进行批量安装，必须清空队列，否则 Repo 取消完当前任务后，
-        // ViewModel 的 triggerNextMultiInstall 会被 InstallFailed/Ready 再次触发，导致无限循环或继续安装下一个。
-        if (multiInstallQueue.isNotEmpty()) {
-            Timber.d("Cancelling multi-install queue.")
-            multiInstallQueue = emptyList()
-            multiInstallResults.clear()
-            currentMultiInstallIndex = 0
-            _installProgress.value = null
-            _installProgressText.value = null
-        }
-
         // 2. 取消自动安装任务（如果存在）
         autoInstallJob?.cancel()
 
@@ -819,112 +850,10 @@ class InstallerViewModel(
     }
 
     /**
-     * 处理批量安装过程中的进度更新
-     *
-     * @param progress 当前进度
-     */
-    private fun handleMultiInstallProgress(progress: ProgressEntity) {
-        when (progress) {
-            is ProgressEntity.InstallSuccess -> {
-                val currentEntity = multiInstallQueue[currentMultiInstallIndex]
-                // Clear the icon cache for the installed package
-                // appIconRepo.clearCacheForPackage(currentEntity.app.packageName)
-                multiInstallResults.add(InstallResult(entity = currentEntity, success = true))
-                currentMultiInstallIndex++
-                triggerNextMultiInstall()
-            }
-
-            is ProgressEntity.InstallFailed -> {
-                val currentEntity = multiInstallQueue[currentMultiInstallIndex]
-                // 捕获 repo 中当前的错误信息
-                multiInstallResults.add(InstallResult(entity = currentEntity, success = false, error = repo.error))
-                currentMultiInstallIndex++
-                triggerNextMultiInstall()
-            }
-            // 在批量安装过程中，我们只关心最终的成功或失败状态，其他状态可以忽略
-            else -> {}
-        }
-    }
-
-    /**
      * Starts the multi-package installation process.
      */
     private fun installMultiple() {
-        multiInstallQueue = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
-        multiInstallResults.clear()
-        currentMultiInstallIndex = 0
-        _installProgress.value = 0f // Initialize progress to 0 at the start of multi-install.
-        triggerNextMultiInstall()
-    }
-
-    /**
-     * Triggers the next installation task in the queue.
-     * This method temporarily modifies the repo's state to isolate the single app
-     * being installed, then triggers the install action.
-     */
-    private fun triggerNextMultiInstall() {
-        if (currentMultiInstallIndex < multiInstallQueue.size) {
-            val entityToInstall = multiInstallQueue[currentMultiInstallIndex]
-
-            // Find the original PackageAnalysisResult that the current entity belongs to.
-            // We search in 'originalAnalysisResults' which holds the complete, unmodified analysis.
-            val originalPackageResult =
-                originalAnalysisResults.find { it.packageName == entityToInstall.app.packageName }
-
-            if (originalPackageResult == null) {
-                // This is a safeguard. If the original package can't be found, skip to the next.
-                Timber.e("Could not find original package for ${entityToInstall.app.packageName}. Skipping.")
-                multiInstallResults.add(
-                    InstallResult(
-                        entity = entityToInstall,
-                        success = false,
-                        error = IllegalStateException("Original package info not found.")
-                    )
-                )
-                currentMultiInstallIndex++
-                triggerNextMultiInstall()
-                return
-            }
-
-            // Create a new, temporary PackageAnalysisResult containing ONLY the current entity to be installed.
-            // We ensure it's marked as 'selected = true'.
-            val tempPackageResult = originalPackageResult.copy(
-                appEntities = listOf(entityToInstall.copy(selected = true))
-            )
-
-            // Set the repository's state to this temporary, single-pkg state.
-            // The 'ActionHandler.install()' method will read this state.
-            repo.analysisResults = listOf(tempPackageResult)
-
-            val appLabel = (entityToInstall.app as? AppEntity.BaseEntity)?.label ?: entityToInstall.app.packageName
-
-            // Update progress text (this logic remains the same)
-            _installProgressText.value = UiText(
-                id = R.string.installing_progress_text,
-                formatArgs = listOf(appLabel, currentMultiInstallIndex + 1, multiInstallQueue.size)
-            )
-            _currentPackageName.value = entityToInstall.app.packageName // Update current package name for the UI
-
-            // Update numeric progress (this logic remains the same)
-            _installProgress.value = currentMultiInstallIndex.toFloat() / multiInstallQueue.size.toFloat()
-
-            // Switch to the 'Installing' state
-            state = InstallerViewState.Installing
-
-            // Call the repo's install method. It will now operate on the temporary state we just set.
-            repo.install()
-        } else {
-            // All installation tasks are complete.
-            state = InstallerViewState.InstallCompleted(multiInstallResults.toList())
-
-            // Clean up and restore the original state.
-            multiInstallQueue = emptyList()
-            _installProgressText.value = null
-            _currentPackageName.value = null
-
-            // Restore the repo's original, full analysis results.
-            repo.analysisResults = originalAnalysisResults
-            originalAnalysisResults = emptyList()
-        }
+        val selectedEntities = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
+        repo.installMultiple(selectedEntities)
     }
 }

@@ -494,7 +494,11 @@ fun MiuixDataAutoDeleteWidget(viewModel: EditViewModel) {
 fun MiuixDisplaySdkWidget(viewModel: EditViewModel) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_display_sdk_version),
-        description = stringResource(id = R.string.config_display_sdk_version_desc),
+        description = stringResource(
+            id = R.string.combined_description_format,
+            stringResource(id = R.string.config_display_sdk_version_desc),
+            stringResource(id = R.string.config_display_module_extra_info_desc)
+        ),
         checked = viewModel.state.data.displaySdk,
         onCheckedChange = {
             viewModel.dispatch(EditViewAction.ChangeDisplaySdk(it))
