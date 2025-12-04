@@ -97,35 +97,35 @@
 > 在反馈问题之前请先阅读常见问题。
 > 反馈时请详细说明自己的手机品牌，系统版本，使用的软件版本以及操作。
 
-- Dhizuku无法使用怎么办
+### - Dhizuku无法使用怎么办
     - 目前仅对**官方Dhizuku**提供最低限度的支持，在SDK34以上AVD均有测试，SDK34以下无法保证
     - 使用`OwnDroid`时可能无法正确调用`安装完成后自动删除`功能
     - 国产ROM遇到偶发性报错一般是Dhizuku被系统限制了后台，请优先重启Dhizuku应用后再试
     - Dhizuku的权限不够大，很多操作无法完成，例如绕过系统intent拦截，指定安装来源等，有条件建议使用Shizuku
 
-- 没法锁定安装器怎么办
+### - 没法锁定安装器怎么办
     - 部分系统严格限制安装器，需要使用LSP模块拦截intent并转发给安装器
     - 和[Chimioo/InxLocker](https://github.com/Chimioo/InxLocker)一起使用时效果最佳
     - 不再推荐使用其他锁定器模块
 
-- 分析阶段报错`No Content Provider`或`reading provider`报错`Permission Denial`
+### - 分析阶段报错`No Content Provider`或`reading provider`报错`Permission Denial`
     - 你启用了`隐藏应用列表`或类似功能，请配置白名单
 
-- HyperOS/Vivo更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
+### - HyperOS/Vivo更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
     - 系统安全限制，需要在配置中声明安装者为系统app，HyperOS推荐 `com.android.fileexplorer` 或 `com.android.vending`，Vivo推荐应用商店
     - Shizuku/Root有效，Dhizuku不支持
     - 本应用在HyperOS上启动时会自动添加配置，默认为`com.miui.packageinstaller`，如果需要更改请在设置中修改
 
-- HyperOS无法锁定安装器/锁定失效变回系统默认安装器怎么办
+### - HyperOS无法锁定安装器/锁定失效变回系统默认安装器怎么办
     - 请尝试打开设置中的“自动锁定安装器”功能
     - 某些HyperOS版本无法锁定是正常的
     - HyperOS会以对话框形式拦截USB安装请求(adb/shizuku)，若用户在全新安装一款应用时点击拒绝安装，系统会撤销其安装器设定并强行改回默认安装器，若出现这种情况请重新锁定
     
-- 使用通知安装的时候，通知进度条卡住怎么办
+### - 使用通知安装的时候，通知进度条卡住怎么办
     - 一些定制系统对应用后台管控非常严格，如果遇到这种情况请设置后台无限制
     - 应用已经对后台管理做了优化，在完成安装任务（用户点击完成或清理通知）后延时1秒自动清理所有后台服务并退出，因此可以放心启用无限制后台，不会造成额外耗电，前台服务通知可以保留，以便观察服务运行状态
 
-- Oppo/Vivo/联想/...的系统用不了了怎么办
+### - Oppo/Vivo/联想/...的系统用不了了怎么办
     - 手头没有这些品牌的手机以供测试，遇到问题可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)或[Telegram 频道](https://t.me/installerx_revived)进行讨论
     - Oppo，Vivo锁定安装器请使用锁定器
     - 荣耀机型使用shizuku安装需要关闭开发者选项中的 `监控ADB安装应用`，否则安装会卡住
