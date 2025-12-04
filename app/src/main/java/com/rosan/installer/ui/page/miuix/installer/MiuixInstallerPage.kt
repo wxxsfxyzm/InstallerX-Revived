@@ -257,12 +257,10 @@ fun MiuixInstallerPage(
                             } else if (showPermissions) {
                                 viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList)
                             } else {
-                                if (viewModel.isDismissible) {
-                                    showBottomSheet.value = !showBottomSheet.value
-                                    scope.launch {
-                                        delay(SHEET_ANIMATION_DURATION)
-                                        viewModel.dispatch(InstallerViewAction.Close)
-                                    }
+                                showBottomSheet.value = !showBottomSheet.value
+                                scope.launch {
+                                    delay(SHEET_ANIMATION_DURATION)
+                                    viewModel.dispatch(InstallerViewAction.Close)
                                 }
                             }
                         }
