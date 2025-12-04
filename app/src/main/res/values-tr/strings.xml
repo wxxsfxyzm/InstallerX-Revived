@@ -576,4 +576,19 @@
     <string name="permission_flashlight">El fenerini erişimi</string>
     <string name="permission_write_secure_settings">Güvenli ayarları değiştirme</string>
     <string name="permission_manage_external_storage">Harici depolama alanını yönet</string>
+    <string name="config_display_size">Paket boyutunu göster</string>
+    <string name="config_display_size_desc">Yükleme arayüzünde paket boyutunu gösterir</string>
+    <string name="config_label_app_bundle_settings">APK Paketlerini Ayır</string>
+    <string name="installer_package_size_label">Boyut:</string>
+    <string name="exception_http_not_allowed">Açık metin HTTP\'ye izin verilmiyor</string>
+    <string name="exception_http_restricted_for_localhost">Yerel ana bilgisayarla sınırlı açık metin HTTP</string>
+    <string name="config_split_choose_all">Varsayılan olarak tüm ayrıkları seç</string>
+    <string name="config_split_choose_all_desc">En uygun olanı seçmek yerine varsayılan olarak tüm ayrıkları seçer</string>
+    <string name="lab_http_save_file">İndirilen dosyaları kaydet</string>
+    <string name="lab_http_save_file_desc">İndirme tamamlandıktan sonra dosyaları İndirilenler klasörüne kaydeder</string>
+    <string name="lab_http_profile">HTTP Güvenlik Politikası</string>
+    <string name="lab_http_profile_desc">Güvenlik için açık metin HTTP erişimini kısıtlayın</string>
+    <string name="lab_http_profile_secure">Yalnızca güvenli bağlantılar (HTTPS)</string>
+    <string name="lab_http_profile_local">Yerel açık metine izin ver (Localhost)</string>
+    <string name="lab_http_profile_all">Tümüne izin ver (Güvenli değil)</string>
 </resources>
