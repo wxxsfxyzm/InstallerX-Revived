@@ -33,5 +33,5 @@ jobs:
       # We choose 'onlinePreviewDebug' as a representative build variant.
       # This task will compile the code and run associated unit tests without
       # building all possible APKs, which is faster.
-      - name: Build Single Variant (onlinePreviewDebug)
-        run: ./gradlew assembleOnlinePreviewDebug
+      - name: Build Both Variant (onlinePreviewDebug/offlinePreviewDebug)
+        run: ./gradlew assembleOnlinePreviewDebug assembleOnlinePreviewDebug
