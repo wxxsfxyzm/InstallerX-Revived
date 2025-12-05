@@ -204,7 +204,6 @@ fun installInfoDialog(
                 )
 
                 Spacer(modifier = Modifier.size(8.dp))
-
                 // --- Version Info Display ---
                 when (entityToInstall) {
                     is AppEntity.BaseEntity -> {
@@ -290,91 +289,98 @@ fun installInfoDialog(
                 // --- SDK Information Showcase ---
                 val defaultSdkSingleLine = !settings.sdkCompareInMultiLine
                 var sdkContentState by remember { mutableStateOf(Pair(defaultSdkSingleLine, false)) }
-
-                AnimatedVisibility(visible = installer.config.displaySdk && entityToInstall.sourceType != DataType.MODULE_ZIP) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
+                when (entityToInstall) {
+                    is AppEntity.ModuleEntity ->
+                        AnimatedVisibility(
+                            visible = installer.config.displaySdk
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp)
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        sdkContentState = Pair(!sdkContentState.first, true)
+                                    }
                             ) {
-                                sdkContentState = Pair(!sdkContentState.first, true)
-                            }
-                    ) {
-                        AnimatedContent(
-                            targetState = sdkContentState,
-                            transitionSpec = {
-                                if (targetState.second) {
-                                    fadeIn(tween(200)) togetherWith fadeOut(tween(200)) using
-                                            SizeTransform { _, _ -> tween(250) }
-                                } else {
-                                    fadeIn(tween(0)) togetherWith fadeOut(tween(0))
-                                }
-                            },
-                            label = "SdkViewAnimation"
-                        ) { state ->
-                            if (state.first) {
-                                // compact single-line: 使用已有的短标签资源
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    entityToInstall.minSdk?.let { newMinSdk ->
-                                        SdkInfoCompact(
-                                            shortLabelResId = R.string.installer_package_min_sdk_label_short,
-                                            newSdk = newMinSdk,
-                                            oldSdk = preInstallAppInfo?.minSdk?.toString(),
-                                            isArchived = preInstallAppInfo?.isArchived ?: false,
-                                            type = "min"
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.size(16.dp))
-                                    entityToInstall.targetSdk?.let { newTargetSdk ->
-                                        SdkInfoCompact(
-                                            shortLabelResId = R.string.installer_package_target_sdk_label_short,
-                                            newSdk = newTargetSdk,
-                                            oldSdk = preInstallAppInfo?.targetSdk?.toString(),
-                                            isArchived = preInstallAppInfo?.isArchived ?: false,
-                                            type = "target"
-                                        )
-                                    }
-                                }
-                            } else {
-                                // expanded multi-line: 每个 SDK 独占一行，label 只出现一次（左侧），值使用 value-format 显示带 "(Android N)"
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    entityToInstall.minSdk?.let { newMinSdk ->
-                                        SdkInfoExpanded(
-                                            labelPrefixResId = R.string.installer_package_min_label,
-                                            newSdk = newMinSdk,
-                                            oldSdk = preInstallAppInfo?.minSdk?.toString(),
-                                            isArchived = preInstallAppInfo?.isArchived ?: false,
-                                            type = "min"
-                                        )
-                                    }
-                                    entityToInstall.targetSdk?.let { newTargetSdk ->
-                                        SdkInfoExpanded(
-                                            labelPrefixResId = R.string.installer_package_target_label,
-                                            newSdk = newTargetSdk,
-                                            oldSdk = preInstallAppInfo?.targetSdk?.toString(),
-                                            isArchived = preInstallAppInfo?.isArchived ?: false,
-                                            type = "target"
-                                        )
+                                AnimatedContent(
+                                    targetState = sdkContentState,
+                                    transitionSpec = {
+                                        if (targetState.second) {
+                                            fadeIn(tween(200)) togetherWith fadeOut(tween(200)) using
+                                                    SizeTransform { _, _ -> tween(250) }
+                                        } else {
+                                            fadeIn(tween(0)) togetherWith fadeOut(tween(0))
+                                        }
+                                    },
+                                    label = "SdkViewAnimation"
+                                ) { state ->
+                                    if (state.first) {
+                                        // compact single-line: 使用已有的短标签资源
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            entityToInstall.minSdk?.let { newMinSdk ->
+                                                SdkInfoCompact(
+                                                    shortLabelResId = R.string.installer_package_min_sdk_label_short,
+                                                    newSdk = newMinSdk,
+                                                    oldSdk = preInstallAppInfo?.minSdk?.toString(),
+                                                    isArchived = preInstallAppInfo?.isArchived ?: false,
+                                                    type = "min"
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.size(16.dp))
+                                            entityToInstall.targetSdk?.let { newTargetSdk ->
+                                                SdkInfoCompact(
+                                                    shortLabelResId = R.string.installer_package_target_sdk_label_short,
+                                                    newSdk = newTargetSdk,
+                                                    oldSdk = preInstallAppInfo?.targetSdk?.toString(),
+                                                    isArchived = preInstallAppInfo?.isArchived ?: false,
+                                                    type = "target"
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        // expanded multi-line: 每个 SDK 独占一行，label 只出现一次（左侧），值使用 value-format 显示带 "(Android N)"
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            entityToInstall.minSdk?.let { newMinSdk ->
+                                                SdkInfoExpanded(
+                                                    labelPrefixResId = R.string.installer_package_min_label,
+                                                    newSdk = newMinSdk,
+                                                    oldSdk = preInstallAppInfo?.minSdk?.toString(),
+                                                    isArchived = preInstallAppInfo?.isArchived ?: false,
+                                                    type = "min"
+                                                )
+                                            }
+                                            entityToInstall.targetSdk?.let { newTargetSdk ->
+                                                SdkInfoExpanded(
+                                                    labelPrefixResId = R.string.installer_package_target_label,
+                                                    newSdk = newTargetSdk,
+                                                    oldSdk = preInstallAppInfo?.targetSdk?.toString(),
+                                                    isArchived = preInstallAppInfo?.isArchived ?: false,
+                                                    type = "target"
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
+
+                    else -> {}
                 }
+
+                Spacer(modifier = Modifier.size(8.dp))
                 // -- Size Display
-                if (totalSize > 0L) {
-                    Spacer(modifier = Modifier.size(8.dp))
+                AnimatedVisibility(visible = installer.config.displaySize && totalSize > 0L) {
                     SizeInfoDisplay(
                         oldSize = preInstallAppInfo?.packageSize ?: 0L,
                         newSize = totalSize

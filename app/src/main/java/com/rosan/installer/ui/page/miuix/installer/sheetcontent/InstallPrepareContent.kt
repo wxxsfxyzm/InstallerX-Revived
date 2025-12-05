@@ -42,7 +42,6 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstalledAppInfo
 import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
-import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
@@ -69,13 +68,13 @@ fun InstallPrepareContent(
     isDarkMode: Boolean,
     installer: InstallerRepo,
     viewModel: InstallerViewModel,
+    appInfo: AppInfoState,
     onCancel: () -> Unit,
     onInstall: () -> Unit
 ) {
     val context = LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
-    val displayIcons by viewModel.displayIcons.collectAsState()
     val settings = viewModel.viewSettings
 
     var isExpanded by remember { mutableStateOf(false) }
@@ -89,19 +88,24 @@ fun InstallPrepareContent(
         .filter { it.selected } // Always include selected entities
         .map { it.app }
 
-    val primaryEntity = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-        ?: allEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
-        ?: allEntities.sortedBest().firstOrNull()
+    val selectedEntities = currentPackage.appEntities
+        .filter { it.selected }
+        .map { it.app }
 
+    val primaryEntity = appInfo.primaryEntity
     if (primaryEntity == null) {
         LoadingContent(statusText = "No main app entity found")
         return
     }
 
-    val containerType = primaryEntity.sourceType
     val entityToInstall = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val totalSelectedSize = allEntities.sumOf { it.size }
-    val displayIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
+
+    val isPureSplit = primaryEntity is AppEntity.SplitEntity
+    val isBundleSplitUpdate = primaryEntity is AppEntity.BaseEntity &&
+            entityToInstall == null &&
+            selectedEntities.isNotEmpty()
+    val isSplitUpdateMode = (isBundleSplitUpdate || isPureSplit) && currentPackage.installedAppInfo != null
 
     val errorColor = MaterialTheme.colorScheme.error
     val tertiaryColor = MiuixTheme.colorScheme.primary
@@ -127,7 +131,7 @@ fun InstallPrepareContent(
                 }
             }
         }
-        if (primaryEntity.sourceType == DataType.APK || primaryEntity.sourceType == DataType.APKS)
+        if (!isSplitUpdateMode && (primaryEntity.sourceType == DataType.APK || primaryEntity.sourceType == DataType.APKS))
             when (signatureStatus) {
                 SignatureMatchStatus.MISMATCH -> {
                     warnings.add(0, context.getString(R.string.installer_prepare_signature_mismatch) to errorColor)
@@ -150,23 +154,11 @@ fun InstallPrepareContent(
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val displayLabel = when (primaryEntity) {
-            is AppEntity.BaseEntity -> primaryEntity.label ?: primaryEntity.packageName
-            is AppEntity.ModuleEntity -> primaryEntity.name
-            else -> primaryEntity.packageName
-        }
-        item {
-            AppInfoSlot(
-                icon = displayIcon,
-                label = displayLabel,
-                packageName = primaryEntity.packageName
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        item { AppInfoSlot(appInfo = appInfo) }
 
-        item {
-            MiuixWarningTextBlock(warnings = warningMessages)
-        }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+
+        item { MiuixWarningTextBlock(warnings = warningMessages) }
 
         item {
             Card(
@@ -206,8 +198,7 @@ fun InstallPrepareContent(
 
                             AnimatedVisibility(visible = installer.config.displaySize && primaryEntity.size > 0) {
                                 val oldSize = currentPackage.installedAppInfo?.packageSize ?: 0L
-
-                                val oldSizeStr = if (oldSize > 0) oldSize.formatSize() else null
+                                val oldSizeStr = if (oldSize > 0 && !isSplitUpdateMode) oldSize.formatSize() else null
                                 val newSizeStr = totalSelectedSize.formatSize()
 
                                 AdaptiveInfoRow(
@@ -257,7 +248,35 @@ fun InstallPrepareContent(
                             }
                         }
 
-                        else -> null
+                        is AppEntity.SplitEntity -> {
+                            // Split Name
+                            AdaptiveInfoRow(
+                                labelResId = R.string.installer_split_name_label,
+                                newValue = primaryEntity.splitName,
+                                oldValue = null,
+                                isArchived = false
+                            )
+
+                            // SDK Comparison (If splits define min/target SDK)
+                            SDKComparison(
+                                entityToInstall = primaryEntity,
+                                preInstallAppInfo = currentPackage.installedAppInfo,
+                                installer = installer
+                            )
+
+                            // Size
+                            AnimatedVisibility(visible = installer.config.displaySize) {
+                                val newSizeStr = totalSelectedSize.formatSize()
+                                AdaptiveInfoRow(
+                                    labelResId = R.string.installer_package_size_label,
+                                    newValue = newSizeStr,
+                                    oldValue = null, // Don't compare with full app size, meaningless
+                                    isArchived = false
+                                )
+                            }
+                        }
+
+                        else -> {}
                     }
                 }
             }
@@ -317,6 +336,16 @@ fun InstallPrepareContent(
 
         item {
             AnimatedVisibility(
+                visible = isSplitUpdateMode,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                MiuixInstallerTipCard(text = stringResource(R.string.installer_splits_only_tip))
+            }
+        }
+
+        item {
+            AnimatedVisibility(
                 visible = (primaryEntity is AppEntity.ModuleEntity) &&
                         primaryEntity.description.isNotBlank() &&
                         installer.config.displaySdk,
@@ -327,15 +356,25 @@ fun InstallPrepareContent(
             }
         }
 
-        val canInstallBaseEntity = (primaryEntity as? AppEntity.BaseEntity)?.let {
-            it.minSdk?.toIntOrNull()?.let { sdk -> sdk <= Build.VERSION.SDK_INT } ?: true
+        val canInstallBaseEntity = (primaryEntity as? AppEntity.BaseEntity)?.let { base ->
+            if (entityToInstall != null) {
+                // Installing Base: Check SDK
+                base.minSdk?.toIntOrNull()?.let { sdk -> sdk <= Build.VERSION.SDK_INT } ?: true
+            } else {
+                // Bundle Split Update: Allowed if installed
+                isSplitUpdateMode
+            }
         } ?: false
 
         val canInstallModuleEntity = (primaryEntity as? AppEntity.ModuleEntity)?.let {
             settings.enableModuleInstall
         } ?: false
 
-        val canInstall = canInstallBaseEntity || canInstallModuleEntity
+        val canInstallSplitEntity = (primaryEntity as? AppEntity.SplitEntity)?.let {
+            currentPackage.installedAppInfo != null
+        } ?: false
+
+        val canInstall = canInstallBaseEntity || canInstallModuleEntity || canInstallSplitEntity
 
         val showExpandButton = canInstallBaseEntity && settings.showExtendedMenu
 

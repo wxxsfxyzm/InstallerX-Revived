@@ -46,7 +46,6 @@ import com.rosan.installer.ui.page.miuix.widgets.WarningCard
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.getSupportSubtitle
 import com.rosan.installer.ui.util.isGestureNavigation
-import timber.log.Timber
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -75,7 +74,9 @@ fun InstallChoiceContent(
     val isModuleApk = sourceType == DataType.MIXED_MODULE_APK
     val isMixedModuleZip = sourceType == DataType.MIXED_MODULE_ZIP
     var selectionMode by remember(sourceType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
-
+    // Timber.d("analysisResults: $analysisResults,sourceType: $sourceType, selectionMode: $selectionMode,isMultiApk: $isMultiApk, isModuleApk: $isModuleApk, isMixedModuleZip: $isMixedModuleZip")
+    val totalModuleCount = analysisResults.flatMap { it.appEntities }
+        .count { it.app is AppEntity.ModuleEntity }
     val primaryButtonTextRes = if (isMultiApk) R.string.install else R.string.next
     val primaryButtonAction = if (isMultiApk) {
         { viewModel.dispatch(InstallerViewAction.InstallMultiple) }
@@ -110,8 +111,6 @@ fun InstallChoiceContent(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Timber.tag("InstallChoice").d(sourceType.toString())
-
         val cardText = sourceType.getSupportSubtitle(selectionMode = selectionMode)
         cardText?.let { MiuixInstallerTipCard(it) }
 
@@ -120,16 +119,14 @@ fun InstallChoiceContent(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            errorMessage?.let { msg ->
-                WarningCard(
-                    isDarkMode = isDarkMode,
-                    colorScheme = colorScheme,
-                    message = msg
-                )
-            }
+            WarningCard(
+                isDarkMode = isDarkMode,
+                colorScheme = colorScheme,
+                message = errorMessage ?: ""
+            )
         }
 
-        if (isMixedModuleZip && selectionMode == MmzSelectionMode.INITIAL_CHOICE) {
+        if (isMixedModuleZip && selectionMode == MmzSelectionMode.INITIAL_CHOICE && totalModuleCount == 1) {
             Box(modifier = Modifier.weight(1f, fill = false)) {
                 MixedModuleZip_InitialChoice(
                     colorScheme = colorScheme,
@@ -176,6 +173,19 @@ fun InstallChoiceContent(
                 TextButton(
                     onClick = {
                         if (isBack) {
+                            // Clear selected APK entities when going back to initial choice
+                            // This prevents "Mixed Selection" error when subsequently selecting a module
+                            analysisResults.flatMap { it.appEntities }
+                                .filter { it.selected && it.app !is AppEntity.ModuleEntity }
+                                .forEach { entity ->
+                                    viewModel.dispatch(
+                                        InstallerViewAction.ToggleSelection(
+                                            packageName = entity.app.packageName,
+                                            entity = entity,
+                                            isMultiSelect = true
+                                        )
+                                    )
+                                }
                             selectionMode = MmzSelectionMode.INITIAL_CHOICE
                         } else {
                             onCancel()
@@ -186,8 +196,13 @@ fun InstallChoiceContent(
                 )
             }
 
-            val showPrimaryButton =
-                (!isModuleApk && !isMixedModuleZip) || (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE)
+            // Determine if primary button should be shown
+            // 1. MultiApk mode (always show)
+            // 2. Normal mode (not module, not mixed zip)
+            // 3. Mixed zip in APK choice mode
+            val showPrimaryButton = isMultiApk ||
+                    (!isModuleApk && !isMixedModuleZip) ||
+                    (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE)
 
             if (showPrimaryButton) {
                 val (currentPrimaryTextRes, currentPrimaryAction) =
@@ -292,6 +307,14 @@ private fun ChoiceLazyList(
         ) {
             itemsIndexed(analysisResults, key = { _, it -> it.packageName }) { _, packageResult ->
                 val itemsInGroup = packageResult.appEntities
+                // Filter specifically for Base entities to determine display logic
+                val baseEntities = remember(itemsInGroup) {
+                    itemsInGroup.filter { it.app is AppEntity.BaseEntity }
+                }
+                // Treat as single item if there is at most 1 Base APK,
+                // even if there are multiple files (splits) in the group.
+                val isTreatAsSingle = baseEntities.size <= 1
+
                 val baseInfo = remember(itemsInGroup) {
                     itemsInGroup.firstNotNullOfOrNull { it.app as? AppEntity.BaseEntity }
                 }
@@ -304,23 +327,26 @@ private fun ChoiceLazyList(
                         contentColor = MiuixTheme.colorScheme.onSurface
                     )
                 ) {
-                    if (itemsInGroup.size == 1) {
-                        // --- Only one option - Use MiuixCheckboxWidget inside Card ---
-                        val item = itemsInGroup.first()
-                        val app = item.app
+                    if (isTreatAsSingle) {
+                        // --- Single Base (possibly with Splits) - Use MiuixCheckboxWidget inside Card ---
+                        // We prefer the Base entity for display, fallback to the first item if no base found (rare)
+                        val displayItem = baseEntities.firstOrNull() ?: itemsInGroup.first()
+                        val app = displayItem.app
                         val versionText = (app as? AppEntity.BaseEntity)?.let {
                             stringResource(R.string.installer_version, it.versionName, it.versionCode)
+                        } ?: (app as? AppEntity.ModuleEntity)?.let {
+                            stringResource(R.string.installer_version_code_label) + it.versionCode
                         } ?: ""
 
                         MiuixCheckboxWidget(
                             title = appLabel,
                             description = "${packageResult.packageName}\n$versionText",
-                            checked = item.selected,
+                            checked = displayItem.selected,
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     InstallerViewAction.ToggleSelection(
                                         packageName = packageResult.packageName,
-                                        entity = item,
+                                        entity = displayItem,
                                         isMultiSelect = true
                                     )
                                 )
@@ -554,13 +580,17 @@ private fun MixedModuleZip_InitialChoice(
                         title = stringResource(R.string.installer_choice_install_as_app),
                         description = stringResource(R.string.installer_choice_install_as_app_desc),
                         onClick = {
-                            viewModel.dispatch(
-                                InstallerViewAction.ToggleSelection(
-                                    packageName = baseSelectableEntity.app.packageName,
-                                    entity = baseSelectableEntity,
-                                    isMultiSelect = false
-                                )
-                            )
+                            analysisResults.flatMap { it.appEntities }
+                                .filter { it.app !is AppEntity.ModuleEntity }
+                                .forEach { entity ->
+                                    viewModel.dispatch(
+                                        InstallerViewAction.ToggleSelection(
+                                            packageName = entity.app.packageName,
+                                            entity = entity,
+                                            isMultiSelect = true
+                                        )
+                                    )
+                                }
                             onSelectApk()
                         }
                     )

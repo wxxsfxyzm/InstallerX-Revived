@@ -296,6 +296,7 @@
     <string name="installer_prepare_type_unknown_confirm">Are you sure you want to install?</string>
     <string name="installer_prepare_signature_mismatch">Signature mismatch! Continuing installation may cause data loss or security risks.</string>
     <string name="installer_prepare_signature_unknown">Unable to verify app signature, please proceed with caution.</string>
+    <string name="installer_splits_only_tip">Only split APKs are selected. They will be added to the existing application</string>
     <string name="installer_install_app">Install App</string>
     <string name="installer_install_module">Install Module</string>
     <string name="installer_install_confirm">Install Confirm</string>
@@ -389,6 +390,7 @@
     <string name="installer_version_code_label">Version Code:</string>
     <string name="installer_version">Version: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
+    <string name="installer_split_name_label">Split Name:</string>
     <string name="installer_package_name">Package: %1$s</string>
     <string name="installer_package_min_sdk_label">Min SDK:</string>
     <string name="installer_package_target_sdk_label">Target SDK:</string>

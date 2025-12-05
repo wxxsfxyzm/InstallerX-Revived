@@ -60,7 +60,6 @@ import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWid
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.util.getSupportSubtitle
 import com.rosan.installer.ui.util.getSupportTitle
-import timber.log.Timber
 
 @Composable
 fun installChoiceDialog(
@@ -138,13 +137,6 @@ private fun ChoiceContent(
         bottomEnd = cornerRadius
     )
     val singleShape = RoundedCornerShape(cornerRadius)
-
-    val allAppEntities = analysisResults.flatMap { it.appEntities }.map { it.app }
-    val baseEntityInfo = allAppEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-    val moduleEntityInfo = allAppEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
-
-    Timber.tag("InstallChoice").d("baseEntityInfo: $baseEntityInfo")
-    Timber.tag("InstallChoice").d("moduleEntityInfo: $moduleEntityInfo")
 
     if (isModuleApk) {
         val allSelectableEntities = analysisResults.flatMap { it.appEntities }

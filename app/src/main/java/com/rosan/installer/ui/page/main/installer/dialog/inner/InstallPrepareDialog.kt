@@ -117,13 +117,26 @@ fun installPrepareDialog( // 小写开头
         }
     }
 
-    val selectedEntities = currentPackage.appEntities.filter { it.selected }.map { it.app }.sortedBest()
+    val allAvailableApps = currentPackage.appEntities.map { it.app }
+
+    val selectedEntities = currentPackage.appEntities.filter { it.selected }.map { it.app }
     if (selectedEntities.isEmpty()) return installPrepareEmptyDialog(viewModel)
 
-    val primaryEntity = selectedEntities.first()
+    val primaryEntity = allAvailableApps.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+        ?: allAvailableApps.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
+        ?: allAvailableApps.filterIsInstance<AppEntity.SplitEntity>().firstOrNull()
+        ?: allAvailableApps.sortedBest().firstOrNull() ?: selectedEntities.first()
+
     val entityToInstall = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val containerType = primaryEntity.sourceType
     val preInstallAppInfo = currentPackage.installedAppInfo // Get pre-install info from the new model
+
+    val isPureSplit = primaryEntity is AppEntity.SplitEntity
+    val isBundleSplitUpdate = primaryEntity is AppEntity.BaseEntity &&
+            entityToInstall == null &&
+            selectedEntities.isNotEmpty()
+
+    val isSplitUpdateMode = (isBundleSplitUpdate || isPureSplit) && preInstallAppInfo != null
 
     Timber.tag("AppEntity")
         .d("Package: ${primaryEntity.packageName}, Container: $containerType, Total files: ${installer.analysisResults.size}")
@@ -193,7 +206,7 @@ fun installPrepareDialog( // 小写开头
 
         // Check for signature status. This has HIGHER priority and can OVERRIDE the button text.
         // Currently only enable for APK and APKS
-        if (containerType == DataType.APK || containerType == DataType.APKS)
+        if (!isSplitUpdateMode && (containerType == DataType.APK || containerType == DataType.APKS))
             when (signatureStatus) {
                 SignatureMatchStatus.MISMATCH -> {
                     // Add the signature warning to the top of the list for prominence.
@@ -230,7 +243,6 @@ fun installPrepareDialog( // 小写开头
         Pair(warnings, finalButtonTextId)
     }
 
-    // Override text and buttons
     return baseParams.copy(
         // Subtitle is inherited from InstallInfoDialog (shows new version + package name)
         text = DialogInnerParams(
@@ -238,12 +250,11 @@ fun installPrepareDialog( // 小写开头
         ) {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
                 item { WarningTextBlock(warnings = warningMessages) }
-                // Show package name and version with animation
                 item {
                     AnimatedVisibility(
                         visible = showChips,
-                        enter = fadeIn() + expandVertically(), // 进入动画：淡入 + 垂直展开
-                        exit = fadeOut() + shrinkVertically()  // 退出动画：淡出 + 垂直收起
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
                     ) {
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -273,7 +284,7 @@ fun installPrepareDialog( // 小写开头
                                 onClick = {
                                     val newValue = !displaySize
                                     displaySize = newValue
-                                    installer.config.displaySize = newValue
+                                    installer.config.displaySize = displaySize
                                 },
                                 label = stringResource(id = R.string.config_display_size),
                                 icon = AppIcons.ShowSize
@@ -299,9 +310,13 @@ fun installPrepareDialog( // 小写开头
         ) {
             // --- Use buildList to dynamically create buttons ---
             buildList {
-                // Install button is shown if the entity's minSdk is compatible
-                val canInstall = entityToInstall != null &&
+                // Base Install: Entity exists AND SDK compatible
+                val canInstallBase = entityToInstall != null &&
                         (entityToInstall.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true)
+                // Split Install: Mode valid (implies app installed)
+                val canInstallSplit = isSplitUpdateMode
+
+                val canInstall = canInstallBase || canInstallSplit
                 val isAPK =
                     containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK
 

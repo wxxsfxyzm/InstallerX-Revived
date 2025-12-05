@@ -60,9 +60,11 @@ fun UninstallPrepareContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppInfoSlot(
-            icon = info.appIcon,
-            label = info.appLabel ?: "Unknown App",
-            packageName = info.packageName
+            AppInfoState(
+                icon = info.appIcon,
+                label = info.appLabel ?: "Unknown App",
+                packageName = info.packageName
+            )
         )
         Spacer(modifier = Modifier.height(24.dp))
 

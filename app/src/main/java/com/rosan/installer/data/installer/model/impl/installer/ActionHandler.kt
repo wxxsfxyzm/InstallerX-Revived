@@ -191,7 +191,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Timber.d("[id=$installerId] resolve: State has been reset. Emitting ProgressEntity.InstallResolving.")
         installer.progress.emit(ProgressEntity.InstallResolving)
 
-        // 1. Resolve Config
+        // Resolve Config
         installer.config = ConfigResolver.resolve(activity)
 
         if (installer.config.installMode.isNotification) {
@@ -199,7 +199,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             installer.background(true)
         }
 
-        // 2. Resolve Data (IO Heavy - Cancellable via SourceResolver)
+        // Resolve Data (IO Heavy - Cancellable via SourceResolver)
         Timber.d("[id=$installerId] resolve: Resolving data URIs...")
         val data = sourceResolver.resolve(activity.intent)
 
@@ -209,7 +209,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.data = data
         Timber.d("[id=$installerId] resolve: Data resolved successfully (${installer.data.size} items).")
 
-        // 3. Post-Resolution Logic
+        // Post-Resolution Logic
         val forceDialog = data.size > 1 || data.any { it.sourcePath()?.endsWith(".zip", true) == true }
         if (forceDialog) {
             Timber.d("[id=$installerId] resolve: Batch share or module file detected. Forcing install mode to Dialog.")
@@ -292,20 +292,28 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val queue = installer.multiInstallQueue
         if (queue.isEmpty()) return
 
+        val groupedQueue: List<List<SelectInstallEntity>> = queue
+            .groupBy { it.app.packageName }
+            .values
+            .toList()
+
         // Clear previous logs
         installer.moduleLog = emptyList()
 
         // Loop through the queue
-        while (installer.currentMultiInstallIndex < queue.size) {
+        while (installer.currentMultiInstallIndex < groupedQueue.size) {
             if (!currentCoroutineContext().isActive) break
 
-            val entity = queue[installer.currentMultiInstallIndex]
-            val appLabel = (entity.app as? AppEntity.BaseEntity)?.label ?: entity.app.packageName
+            val appEntities = groupedQueue[installer.currentMultiInstallIndex]
+            val firstEntity = appEntities.first()
+
+            val appLabel = (firstEntity.app as? AppEntity.BaseEntity)?.label
+                ?: firstEntity.app.packageName
 
             val currentProgressIndex = installer.currentMultiInstallIndex + 1
-            val totalCount = queue.size
+            val totalCount = groupedQueue.size
 
-            // 1. Emit progress to UI
+            // Emit progress to UI
             installer.progress.emit(
                 ProgressEntity.Installing(
                     current = currentProgressIndex,
@@ -315,15 +323,16 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             )
 
             try {
-                // Construct a temporary single-item result list for the processor
+                // Construct a temporary result list for the processor
                 val originalResults = installer.analysisResults
-                val targetResult = findResultForEntity(entity, originalResults)
+                val targetResult = findResultForEntity(firstEntity, originalResults)
 
                 if (targetResult != null) {
-                    val tempResults = listOf(targetResult.copy(appEntities = listOf(entity.copy(selected = true))))
+                    val entitiesToInstall = appEntities.map { it.copy(selected = true) }
 
-                    // 2. Perform install.
-                    // CRITICAL FIX: Pass 'current' and 'total' so the processor knows this is part of a batch.
+                    val tempResults = listOf(targetResult.copy(appEntities = entitiesToInstall))
+
+                    // Perform install.
                     installationProcessor.install(
                         config = installer.config,
                         analysisResults = tempResults,
@@ -332,14 +341,18 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                         total = totalCount
                     )
 
-                    installer.multiInstallResults.add(InstallResult(entity, true))
+                    appEntities.forEach { entity ->
+                        installer.multiInstallResults.add(InstallResult(entity, true))
+                    }
                 } else {
                     throw IllegalStateException("Original package info not found")
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Batch install failed for ${entity.app.packageName}")
-                installer.multiInstallResults.add(InstallResult(entity, false, e))
-                // Continue to next item even if one fails
+                Timber.e(e, "Batch install failed for ${firstEntity.app.packageName}")
+                appEntities.forEach { entity ->
+                    installer.multiInstallResults.add(InstallResult(entity, false, e))
+                }
+                // Continue to next app even if one fails
             }
 
             installer.currentMultiInstallIndex++
