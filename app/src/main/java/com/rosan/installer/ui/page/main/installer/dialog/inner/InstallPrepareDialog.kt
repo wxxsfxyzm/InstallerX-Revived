@@ -147,10 +147,11 @@ fun installPrepareDialog( // 小写开头
     var displaySize by remember { mutableStateOf(installer.config.displaySize) }
     var showOPPOSpecial by remember { mutableStateOf(settings.showOPPOSpecial) }
 
-    LaunchedEffect(autoDelete, displaySdk) {
+    LaunchedEffect(autoDelete, displaySdk, displaySize) {
         val currentConfig = installer.config
         if (currentConfig.autoDelete != autoDelete) installer.config.autoDelete = autoDelete
         if (currentConfig.displaySdk != displaySdk) installer.config.displaySdk = displaySdk
+        if (currentConfig.displaySize != displaySize) installer.config.displaySize = displaySize
     }
 
     // Call InstallInfoDialog for base structure
@@ -269,22 +270,23 @@ fun installPrepareDialog( // 小写开头
                                 label = stringResource(id = R.string.config_auto_delete),
                                 icon = AppIcons.Delete
                             )
-                            Chip(
-                                selected = displaySdk,
-                                onClick = {
-                                    val newValue = !displaySdk
-                                    displaySdk = newValue
-                                    installer.config.displaySdk = newValue
-                                },
-                                label = stringResource(id = R.string.config_display_sdk_version),
-                                icon = AppIcons.Info
-                            )
+                            if (primaryEntity !is AppEntity.ModuleEntity)
+                                Chip(
+                                    selected = displaySdk,
+                                    onClick = {
+                                        val newValue = !displaySdk
+                                        displaySdk = newValue
+                                        installer.config.displaySdk = newValue
+                                    },
+                                    label = stringResource(id = R.string.config_display_sdk_version),
+                                    icon = AppIcons.Info
+                                )
                             Chip(
                                 selected = displaySize,
                                 onClick = {
                                     val newValue = !displaySize
                                     displaySize = newValue
-                                    installer.config.displaySize = displaySize
+                                    installer.config.displaySize = newValue
                                 },
                                 label = stringResource(id = R.string.config_display_size),
                                 icon = AppIcons.ShowSize

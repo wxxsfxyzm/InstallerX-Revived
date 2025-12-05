@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.DoneAll
-import androidx.compose.material.icons.twotone.SmsFailed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,10 +48,10 @@ fun installCompletedDialog(
         icon = DialogInnerParams(
             DialogParamsType.InstallerInstallCompleted.id,
             {
-                Icon(
-                    imageVector = if (failureCount == 0) Icons.TwoTone.DoneAll/*AppIcons.Success*/ else Icons.TwoTone.SmsFailed/*AppIcons.Error*/,
+                /*Icon(
+                    imageVector = if (failureCount == 0) Icons.TwoTone.DoneAll*//*AppIcons.Success*//* else Icons.TwoTone.SmsFailed*//*AppIcons.Error*//*,
                     contentDescription = null
-                )
+                )*/
             }
         ),
         title = DialogInnerParams(

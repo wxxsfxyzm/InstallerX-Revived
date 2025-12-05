@@ -290,7 +290,9 @@ fun installInfoDialog(
                 val defaultSdkSingleLine = !settings.sdkCompareInMultiLine
                 var sdkContentState by remember { mutableStateOf(Pair(defaultSdkSingleLine, false)) }
                 when (entityToInstall) {
-                    is AppEntity.ModuleEntity ->
+                    is AppEntity.ModuleEntity -> {}
+
+                    else -> {
                         AnimatedVisibility(
                             visible = installer.config.displaySdk
                         ) {
@@ -374,19 +376,19 @@ fun installInfoDialog(
                                 }
                             }
                         }
-
-                    else -> {}
+                    }
                 }
-
-                Spacer(modifier = Modifier.size(8.dp))
-                // -- Size Display
+                // --- Size Display ---
                 AnimatedVisibility(visible = installer.config.displaySize && totalSize > 0L) {
-                    SizeInfoDisplay(
-                        oldSize = preInstallAppInfo?.packageSize ?: 0L,
-                        newSize = totalSize
-                    )
+                    Column {
+                        Spacer(modifier = Modifier.size(8.dp))
+                        SizeInfoDisplay(
+                            oldSize = preInstallAppInfo?.packageSize ?: 0L,
+                            newSize = totalSize
+                        )
+                    }
                 }
-                // --- OPPO Info Display
+                // --- OPPO Info Display ---
                 if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
                     AnimatedVisibility(settings.showOPPOSpecial && entityToInstall.sourceType == DataType.APK) {
                         Column {

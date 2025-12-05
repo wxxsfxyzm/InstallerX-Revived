@@ -156,7 +156,7 @@ fun installExtendedMenuDialog(
 
 
     return DialogParams(
-        icon = DialogInnerParams(DialogParamsType.IconMenu.id, menuIcon),
+        icon = DialogInnerParams(DialogParamsType.IconMenu.id, /*menuIcon*/{}),
         title = DialogInnerParams(
             DialogParamsType.InstallExtendedMenu.id,
         ) {

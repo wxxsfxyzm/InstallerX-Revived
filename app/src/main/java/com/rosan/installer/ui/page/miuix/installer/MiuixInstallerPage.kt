@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -34,7 +33,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
 import com.rosan.installer.data.app.model.exception.ModuleInstallException
@@ -132,25 +130,10 @@ fun MiuixInstallerPage(
         currentPackageName = currentPackageName,
         displayIcons = displayIcons
     )
-    val analysisResult =
-        if (currentPackageName != null) installer.analysisResults.find { it.packageName == currentPackageName } else null
-    val baseEntity = analysisResult?.appEntities?.map { it.app }?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
-    val appIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
 
     LaunchedEffect(installer.id) {
         viewModel.dispatch(InstallerViewAction.CollectRepo(installer))
     }
-
-    BackHandler(
-        enabled = showSettings || showPermissions,
-        onBack = {
-            if (showSettings) {
-                viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
-            } else if (showPermissions) {
-                viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList)
-            }
-        }
-    )
 
     val sheetTitle = when (currentState) {
         is InstallerViewState.Preparing -> stringResource(R.string.installer_preparing)

@@ -443,7 +443,7 @@ private fun OrderWidget(viewModel: ApplyViewModel) {
 private fun OrderWidget(viewModel: ApplyViewModel) {
     val haptic = LocalHapticFeedback.current
 
-    LabelWidget(stringResource(R.string.sort), 0)
+    LabelWidget(stringResource(R.string.sort), 0.dp)
 
     data class OrderData(val labelResId: Int, val type: ApplyViewState.OrderType)
 
@@ -490,7 +490,7 @@ private fun OrderWidget(viewModel: ApplyViewModel) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ChipsWidget(viewModel: ApplyViewModel) {
-    LabelWidget(stringResource(R.string.more), 0)
+    LabelWidget(stringResource(R.string.more), 0.dp)
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
