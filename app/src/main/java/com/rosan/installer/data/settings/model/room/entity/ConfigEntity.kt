@@ -109,7 +109,7 @@ data class ConfigEntity(
      * 安装/卸载调用的来源方
      */
     @Ignore
-    var callingFromUid: Int? = 0
+    var callingFromUid: Int? = null
 
     val isCustomizeAuthorizer: Boolean
         get() = authorizer == Authorizer.Customize

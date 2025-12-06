@@ -92,6 +92,7 @@ class AppDataStore(
         val LAB_ROOT_IMPLEMENTATION = stringPreferencesKey("lab_root_implementation")
         val LAB_HTTP_PROFILE = stringPreferencesKey("lab_http_profile")
         val LAB_HTTP_SAVE_FILE = booleanPreferencesKey("lab_http_save_file")
+        val LAB_SET_INSTALL_REQUESTER = booleanPreferencesKey("lab_set_install_requester")
     }
 
     suspend fun putString(key: Preferences.Key<String>, value: String) {

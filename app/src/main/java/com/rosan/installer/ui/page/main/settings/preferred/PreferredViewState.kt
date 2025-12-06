@@ -43,6 +43,7 @@ data class PreferredViewState(
     val labRootImplementation: RootImplementation = RootImplementation.Magisk,
     val labHttpSaveFile: Boolean = false,
     val labHttpProfile: HttpProfile = HttpProfile.ALLOW_SECURE,
+    val labSetInstallRequester: Boolean = false,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val useDynamicColor: Boolean = true,

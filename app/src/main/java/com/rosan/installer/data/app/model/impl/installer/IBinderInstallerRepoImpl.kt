@@ -249,9 +249,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                     else -> throw Exception("can't install multiple package name in single session")
                 }
             )
-        config.callingFromUid?.let {
-            params.setOriginatingUid(it)
-        }
+        config.callingFromUid?.let { params.setOriginatingUid(it) }
         params.setAppPackageName(packageName)
         // --- Customize PackageSource ---
         // Only available on Android 13+, Dhizuku need test

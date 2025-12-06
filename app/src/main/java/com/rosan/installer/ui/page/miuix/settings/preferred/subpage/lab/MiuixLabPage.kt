@@ -172,6 +172,21 @@ fun MiuixLabPage(
                     }
                 }
             }
+            item { SmallTitle("Unstable features") }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixSwitchWidget(
+                        title = "Set Install Requester",
+                        description = "Set install requester to match system behavior, please note that third-party apps can't always retrieve this info, will default to null in this case",
+                        checked = state.labSetInstallRequester,
+                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
+                    )
+                }
+            }
             if (RsConfig.isInternetAccessEnabled) {
                 item { SmallTitle(stringResource(R.string.internet_access_enabled)) }
                 item {
@@ -190,12 +205,14 @@ fun MiuixLabPage(
 
                         val context = LocalContext.current
                         val currentProfile = state.labHttpProfile
-
+                        val allowSecureString = stringResource(R.string.lab_http_profile_secure)
+                        val allowLocalString = stringResource(R.string.lab_http_profile_local)
+                        val allowAllString = stringResource(R.string.lab_http_profile_all)
                         val profileData = remember {
                             mapOf(
-                                HttpProfile.ALLOW_SECURE to context.getString(R.string.lab_http_profile_secure),
-                                HttpProfile.ALLOW_LOCAL to context.getString(R.string.lab_http_profile_local),
-                                HttpProfile.ALLOW_ALL to context.getString(R.string.lab_http_profile_all)
+                                HttpProfile.ALLOW_SECURE to allowSecureString,
+                                HttpProfile.ALLOW_LOCAL to allowLocalString,
+                                HttpProfile.ALLOW_ALL to allowAllString
                             )
                         }
 

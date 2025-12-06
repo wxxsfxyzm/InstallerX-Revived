@@ -161,6 +161,7 @@ class PreferredViewModel(
             is PreferredViewAction.LabChangeRootImplementation -> labChangeRootImplementation(action.implementation)
             is PreferredViewAction.LabChangeHttpProfile -> labChangeHttpProfile(action.profile)
             is PreferredViewAction.LabChangeHttpSaveFile -> labChangeHttpSaveFile(action.enable)
+            is PreferredViewAction.LabChangeSetInstallRequester -> labChangeSetInstallRequester(action.enable)
 
             is PreferredViewAction.SetThemeMode -> setThemeMode(action.mode)
             is PreferredViewAction.SetPaletteStyle -> setPaletteStyle(action.style)
@@ -480,10 +481,14 @@ class PreferredViewModel(
             appDataStore.putString(AppDataStore.LAB_HTTP_PROFILE, profile.name)
         }
 
-    // [New Function 2]
     private fun labChangeHttpSaveFile(enable: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.LAB_HTTP_SAVE_FILE, enable)
+        }
+
+    private fun labChangeSetInstallRequester(enable: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER, enable)
         }
 
     private fun setThemeMode(mode: ThemeMode) = viewModelScope.launch {
@@ -608,6 +613,8 @@ class PreferredViewModel(
                     .map { HttpProfile.fromString(it) }
             val labHttpSaveFileFlow =
                 appDataStore.getBoolean(AppDataStore.LAB_HTTP_SAVE_FILE, false)
+            val labSetInstallRequesterFlow =
+                appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER, false)
             val themeModeFlow =
                 appDataStore.getString(AppDataStore.THEME_MODE, ThemeMode.SYSTEM.name)
                     .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
@@ -658,6 +665,7 @@ class PreferredViewModel(
                 labRootImplementationFlow,
                 labHttpProfileFlow,
                 labHttpSaveFileFlow,
+                labSetInstallRequesterFlow,
                 themeModeFlow,
                 paletteStyleFlow,
                 useDynamicColorFlow,
@@ -703,6 +711,7 @@ class PreferredViewModel(
                 val labRootImplementation = values[idx++] as RootImplementation
                 val labHttpProfile = values[idx++] as HttpProfile
                 val labHttpSaveFile = values[idx++] as Boolean
+                val labSetInstallRequester = values[idx++] as Boolean
                 val themeMode = values[idx++] as ThemeMode
                 val paletteStyle = values[idx++] as PaletteStyle
                 val useDynamicColor = values[idx++] as Boolean
@@ -769,6 +778,7 @@ class PreferredViewModel(
                     labRootImplementation = labRootImplementation,
                     labHttpProfile = labHttpProfile,
                     labHttpSaveFile = labHttpSaveFile,
+                    labSetInstallRequester = labSetInstallRequester,
                     themeMode = themeMode,
                     paletteStyle = paletteStyle,
                     useDynamicColor = useDynamicColor,

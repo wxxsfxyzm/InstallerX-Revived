@@ -98,6 +98,22 @@ fun NewLabPage(
                     }
                 )
             }
+            item {
+                SplicedColumnGroup(
+                    title = "Unstable Features",
+                    content = buildList {
+                        add {
+                            SwitchWidget(
+                                icon = Icons.AutoMirrored.Filled.AltRoute,
+                                title = "Set Install Requester",
+                                description = "Set install requester to match system behavior, please note that third-party apps can't always retrieve this info, will default to null in this case",
+                                checked = state.labSetInstallRequester,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
+                            )
+                        }
+                    }
+                )
+            }
             if (RsConfig.isInternetAccessEnabled)
                 item {
                     SplicedColumnGroup(

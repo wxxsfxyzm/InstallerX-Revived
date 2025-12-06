@@ -63,7 +63,17 @@ fun LegacyLabPage(
                     onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
                 )
             }
-
+            item { LabelWidget("Unstable features") }
+            item {
+                SwitchWidget(
+                    icon = Icons.AutoMirrored.Filled.AltRoute,
+                    title = "Set Install Requester",
+                    description = "Set install requester to match system behavior, please note that third-party apps can't always retrieve this info, will default to null in this case",
+                    checked = state.labSetInstallRequester,
+                    isM3E = false,
+                    onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
+                )
+            }
             if (RsConfig.isInternetAccessEnabled) {
                 item { LabelWidget(stringResource(R.string.internet_access_enabled)) }
                 // TODO

@@ -31,7 +31,7 @@ import org.koin.core.component.inject
  **/
 class ConfigUtil {
     companion object : KoinComponent {
-        private val context by inject<Context> ()
+        private val context by inject<Context>()
 
         private val appDataStore by inject<AppDataStore>()
 
@@ -64,13 +64,18 @@ class ConfigUtil {
                 )
             if (entity.installMode == ConfigEntity.InstallMode.Global)
                 entity = entity.copy(installMode = getGlobalInstallMode())
-
-            packageName?.let {
-                entity.callingFromUid = context.packageManager.getPackageUid(packageName, 0)
-            }
-            // 使用 apply 来设置非构造函数属性，代码更紧凑
+            // 使用 apply 来设置非构造函数属性
             return entity.apply {
                 // --- 如果需要获取全局配置的其他字段，可以在这里添加 ---
+                if (appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER).first()) {
+                    packageName?.let { pkg ->
+                        callingFromUid = try {
+                            context.packageManager.getPackageUid(pkg, 0)
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
+                }
             }
         }
 
