@@ -450,8 +450,8 @@
     <string name="extended_menu">Uitgebreid menu</string>
     <string name="auto_silent_install">Automatische stille installatie</string>
     <string name="auto_silent_install_desc">Automatische stille installatie bij het starten van de installatie in de dialoog</string>
-    <string name="disable_notification">Installatie op de voorgrond zonder melding</string>
-    <string name="close_immediately_on_dialog_dismiss">Dialoog blijft op de voorgrond tijdens het installeren, klikken op lege gebieden zal het sluiten</string>
+    <string name="disable_notification">Tijdens de installatie op de voorgrond houden</string>
+    <string name="close_immediately_on_dialog_dismiss">Dialoog blijft op de voorgrond tijdens het installeren, er worden geen meldingen gestuurd</string>
     <string name="disable_notification_on_dismiss">Sluiten bij sluiten van dialoog</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Het sluiten van de dialoog zal de melding sluiten</string>
     <string name="set_countdown">Aftelling instellen</string>
@@ -591,4 +591,15 @@
     <string name="lab_http_profile_secure">Alleen beveiligde verbindingen (HTTPS)</string>
     <string name="lab_http_profile_local">Lokale platte tekst toestaan (localhost)</string>
     <string name="lab_http_profile_all">Alle toestaan (onveilig)</string>
+    <string name="config_display_module_extra_info_desc">Laat extra info zien bij modules</string>
+    <string name="exception_module_install_exit_code_non_zero">Exitcode is niet nul!</string>
+    <string name="reboot">Opnieuw opstarten</string>
+    <string name="reboot_userspace">Gebruikersgebied opnieuw opstarten</string>
+    <string name="reboot_recovery">Opnieuw opstarten naar de herstelmodus</string>
+    <string name="reboot_bootloader">Opnieuw opstarten naar de bootloader</string>
+    <string name="reboot_edl">Opnieuw opstarten naar EDL</string>
+    <string name="reboot_download">Opnieuw opstarten om te downloaden</string>
+    <string name="installer_multi_apk_description_notification">Klik alsjeblieft op de melding om te installeren items te selecteren</string>
+    <string name="installer_error_mixed_selection">Kan niet apps en modules tegelijkertijd installeren</string>
+    <string name="installer_error_multiple_modules">Kan niet meerdere modules samen installeren</string>
 </resources>
