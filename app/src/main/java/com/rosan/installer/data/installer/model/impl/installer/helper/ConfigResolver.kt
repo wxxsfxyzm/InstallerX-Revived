@@ -1,6 +1,7 @@
 package com.rosan.installer.data.installer.model.impl.installer.helper
 
 import android.app.Activity
+import android.content.Intent
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import timber.log.Timber
@@ -25,6 +26,11 @@ object ConfigResolver {
         }
 
         // 2. Check Referrer
+        // Remove custom referer first
+        val intent = activity.intent
+        intent.removeExtra(Intent.EXTRA_REFERRER_NAME)
+        intent.removeExtra(Intent.EXTRA_REFERRER)
+        // Now that the custom referrers are removed, it should return the real referrer.
         val referrer = activity.referrer
         Timber.tag(TAG).d("activity.referrer: $referrer")
         if (referrer?.scheme == "android-app" && referrer.host != null) {
