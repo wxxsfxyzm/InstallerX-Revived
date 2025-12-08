@@ -53,6 +53,7 @@ sealed class PreferredViewAction {
     data class LabChangeRootImplementation(val implementation: RootImplementation) : PreferredViewAction()
     data class LabChangeHttpProfile(val profile: HttpProfile) : PreferredViewAction()
     data class LabChangeHttpSaveFile(val enable: Boolean) : PreferredViewAction()
+    data class LabChangeSetInstallRequester(val enable: Boolean) : PreferredViewAction()
     data class SetThemeMode(val mode: ThemeMode) : PreferredViewAction()
     data class SetPaletteStyle(val style: PaletteStyle) : PreferredViewAction()
     data class SetUseDynamicColor(val use: Boolean) : PreferredViewAction()

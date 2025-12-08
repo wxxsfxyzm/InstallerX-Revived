@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -47,6 +48,7 @@ import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.MmzSelectionMode
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.entity.SessionMode
+import com.rosan.installer.data.app.util.getDisplayName
 import com.rosan.installer.data.app.util.getSplitDisplayName
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
@@ -60,7 +62,6 @@ import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWid
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.util.getSupportSubtitle
 import com.rosan.installer.ui.util.getSupportTitle
-import timber.log.Timber
 
 @Composable
 fun installChoiceDialog(
@@ -82,8 +83,33 @@ fun installChoiceDialog(
         { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
     }
 
+    // Determine if we are in the "Back" scenario for Mixed Module Zip
+    val isMmzBack = isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE
+    val cancelOrBackText = if (isMmzBack) R.string.back else R.string.cancel
+
+    val cancelOrBackAction: () -> Unit = {
+        if (isMmzBack) {
+            // Logic synced from MIUIX: Clear selected APK entities when going back to initial choice.
+            // This prevents "Mixed Selection" errors.
+            analysisResults.flatMap { it.appEntities }
+                .filter { it.selected && it.app !is AppEntity.ModuleEntity }
+                .forEach { entity ->
+                    viewModel.dispatch(
+                        InstallerViewAction.ToggleSelection(
+                            packageName = entity.app.packageName,
+                            entity = entity,
+                            isMultiSelect = true // Toggle acts as unselect here since they are currently selected
+                        )
+                    )
+                }
+            selectionMode = MmzSelectionMode.INITIAL_CHOICE
+        } else {
+            viewModel.dispatch(InstallerViewAction.Close)
+        }
+    }
+
     return DialogParams(
-        icon = DialogInnerParams(DialogParamsType.IconWorking.id, workingIcon),
+        icon = DialogInnerParams(DialogParamsType.IconWorking.id, {}),
         title = DialogInnerParams(DialogParamsType.InstallChoice.id) { Text(stringResource(titleRes)) },
         subtitle = DialogInnerParams(DialogParamsType.InstallChoice.id) {
             sourceType.getSupportSubtitle(selectionMode)?.let { Text(it) }
@@ -105,7 +131,7 @@ fun installChoiceDialog(
                     (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE)
                 )
                     add(DialogButton(stringResource(primaryButtonText), onClick = primaryButtonAction))
-                add(DialogButton(stringResource(R.string.cancel)) { viewModel.dispatch(InstallerViewAction.Close) })
+                add(DialogButton(stringResource(cancelOrBackText), onClick = cancelOrBackAction))
             }
         }
     )
@@ -138,13 +164,6 @@ private fun ChoiceContent(
         bottomEnd = cornerRadius
     )
     val singleShape = RoundedCornerShape(cornerRadius)
-
-    val allAppEntities = analysisResults.flatMap { it.appEntities }.map { it.app }
-    val baseEntityInfo = allAppEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-    val moduleEntityInfo = allAppEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
-
-    Timber.tag("InstallChoice").d("baseEntityInfo: $baseEntityInfo")
-    Timber.tag("InstallChoice").d("moduleEntityInfo: $moduleEntityInfo")
 
     if (isModuleApk) {
         val allSelectableEntities = analysisResults.flatMap { it.appEntities }
@@ -280,37 +299,65 @@ private fun ChoiceContent(
             }
         }
     } else {
-        // --- Single-Package Split Mode ---
-        val entities = analysisResults.firstOrNull()?.appEntities ?: emptyList()
-        val listSize = entities.size
-        if (listSize == 0) return
+        // --- Single-Package Split Mode (Enhanced with Grouping) ---
+        val allEntities = analysisResults.firstOrNull()?.appEntities ?: emptyList()
+        if (allEntities.isEmpty()) return
+
+        val baseEntities =
+            allEntities.filter { it.app is AppEntity.BaseEntity || it.app is AppEntity.DexMetadataEntity }
+        val splitEntities = allEntities.filter { it.app is AppEntity.SplitEntity }
+
+        val groupedSplits = splitEntities
+            .groupBy { (it.app as AppEntity.SplitEntity).type }
+            .toSortedMap(compareBy { it.ordinal })
+
+        val displayGroups = buildList {
+            if (baseEntities.isNotEmpty()) {
+                add(stringResource(R.string.split_name_base_group_title) to baseEntities)
+            }
+            groupedSplits.forEach { (type, entities) ->
+                add(type.getDisplayName() to entities)
+            }
+        }
 
         LazyColumn(
             modifier = Modifier.heightIn(max = 325.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            itemsIndexed(entities, key = { _, it -> it.app.name + it.app.packageName }) { index, item ->
-                val shape = when {
-                    listSize == 1 -> singleShape
-                    index == 0 -> topShape
-                    index == listSize - 1 -> bottomShape
-                    else -> middleShape
+            displayGroups.forEach { (groupTitle, itemsInGroup) ->
+                item {
+                    Text(
+                        text = groupTitle,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 0.dp, bottom = 0.dp, start = 16.dp)
+                    )
                 }
 
-                SingleItemCard(
-                    item = item,
-                    shape = shape,
-                    onClick = {
-                        viewModel.dispatch(
-                            InstallerViewAction.ToggleSelection(
-                                packageName = item.app.packageName,
-                                entity = item,
-                                isMultiSelect = true
-                            )
-                        )
+                itemsIndexed(itemsInGroup) { index, item ->
+                    val shape = when {
+                        itemsInGroup.size == 1 -> singleShape
+                        index == 0 -> topShape
+                        index == itemsInGroup.size - 1 -> bottomShape
+                        else -> middleShape
                     }
-                )
+
+                    SingleItemCard(
+                        item = item,
+                        shape = shape,
+                        onClick = {
+                            viewModel.dispatch(
+                                InstallerViewAction.ToggleSelection(
+                                    packageName = item.app.packageName,
+                                    entity = item,
+                                    isMultiSelect = true
+                                )
+                            )
+                        }
+                    )
+                }
+                item { Spacer(modifier = Modifier.height(4.dp)) }
             }
         }
     }

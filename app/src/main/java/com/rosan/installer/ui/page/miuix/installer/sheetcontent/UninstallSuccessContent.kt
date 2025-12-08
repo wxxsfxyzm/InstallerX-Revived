@@ -38,9 +38,11 @@ fun UninstallSuccessContent(
         verticalArrangement = Arrangement.Center
     ) {
         AppInfoSlot(
-            icon = info.appIcon,
-            label = info.appLabel ?: "Unknown App",
-            packageName = info.packageName
+            AppInfoState(
+                icon = info.appIcon,
+                label = info.appLabel ?: "Unknown App",
+                packageName = info.packageName
+            )
         )
         Spacer(modifier = Modifier.height(32.dp))
 

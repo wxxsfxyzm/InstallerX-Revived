@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -18,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.util.openAppPrivileged
 import com.rosan.installer.ui.util.isGestureNavigation
@@ -31,11 +28,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun InstallSuccessContent(
-    colorScheme: ColorScheme,
-    baseEntity: AppEntity.BaseEntity?,
     installer: InstallerRepo,
-    appIcon: Drawable?,
-    packageName: String,
+    appInfo: AppInfoState,
     dhizukuAutoClose: Int,
     onClose: () -> Unit
 ) {
@@ -46,11 +40,8 @@ fun InstallSuccessContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AppInfoSlot(
-            icon = appIcon,
-            label = baseEntity?.label ?: "Unknown App",
-            packageName = baseEntity?.packageName ?: "unknown.package"
-        )
+        AppInfoSlot(appInfo = appInfo)
+
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
@@ -71,8 +62,8 @@ fun InstallSuccessContent(
         ) {
             val context = LocalContext.current
             val intent =
-                if (packageName.isNotEmpty()) context.packageManager.getLaunchIntentForPackage(
-                    packageName
+                if (appInfo.packageName.isNotEmpty()) context.packageManager.getLaunchIntentForPackage(
+                    appInfo.packageName
                 ) else null
             TextButton(
                 text = stringResource(R.string.finish),
@@ -89,7 +80,7 @@ fun InstallSuccessContent(
                             openAppPrivileged(
                                 context = context,
                                 config = installer.config,
-                                packageName = packageName,
+                                packageName = appInfo.packageName,
                                 dhizukuAutoCloseSeconds = dhizukuAutoClose,
                                 onSuccess = onClose
                             )

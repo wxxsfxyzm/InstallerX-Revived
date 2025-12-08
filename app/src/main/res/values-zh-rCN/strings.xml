@@ -287,6 +287,7 @@
     <string name="installer_prepare_type_unknown_confirm">你确定要安装吗？</string>
     <string name="installer_prepare_signature_mismatch">签名不一致！继续安装可能导致数据丢失或带来安全风险。</string>
     <string name="installer_prepare_signature_unknown">无法验证应用签名，请谨慎操作。</string>
+    <string name="installer_splits_only_tip">仅选择了分包，将把这些分包添加到现有应用中</string>
     <string name="installer_install_app">安装应用</string>
     <string name="installer_install_module">安装模块</string>
     <string name="installer_install_confirm">安装确认</string>
@@ -379,6 +380,7 @@
     <string name="installer_version_code_label">版本代码：</string>
     <string name="installer_version">版本：%1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
+    <string name="installer_split_name_label">分包名称：</string>
     <string name="installer_package_name">包名：%1$s</string>
     <string name="installer_package_min_sdk_label">最小 SDK：</string>
     <string name="installer_package_target_sdk_label">目标 SDK：</string>
@@ -614,4 +616,7 @@
     <string name="lab_http_profile_secure">仅允许安全连接 (HTTPS)</string>
     <string name="lab_http_profile_local">允许本地明文 (Localhost)</string>
     <string name="lab_http_profile_all">允许所有 (不安全)</string>
+    <string name="lab_unstable_features">不稳定功能</string>
+    <string name="lab_set_install_requester">设置安装请求方</string>
+    <string name="lab_set_install_requester_desc">向安装会话填写 originatingUid 字段来记录发起安装的应用，匹配系统包管理器行为</string>
 </resources>

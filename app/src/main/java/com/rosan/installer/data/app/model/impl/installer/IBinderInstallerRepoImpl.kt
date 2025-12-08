@@ -249,8 +249,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                     else -> throw Exception("can't install multiple package name in single session")
                 }
             )
-        // TODO implement this if you want to see who started the install
-        // params.setOriginatingUid()
+        config.callingFromUid?.let { params.setOriginatingUid(it) }
         params.setAppPackageName(packageName)
         // --- Customize PackageSource ---
         // Only available on Android 13+, Dhizuku need test
@@ -427,9 +426,12 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                 }
             }
 
-            // Never Delete Multi-APK-ZIP files automatically
-            // Enable autoDelete only when the containerType is not MULTI_APK_ZIP
-            if (config.autoDelete && entities.first().sourceType != DataType.MULTI_APK_ZIP) {
+            val isDeleteCapable = entities.firstOrNull()?.sourceType != DataType.MULTI_APK_ZIP &&
+                    entities.firstOrNull()?.sourceType != DataType.MIXED_MODULE_APK &&
+                    entities.firstOrNull()?.sourceType != DataType.MIXED_MODULE_ZIP
+            // Never Delete ZIP files automatically
+            // Enable autoDelete only when the sourceType is capable
+            if (config.autoDelete && isDeleteCapable) {
                 Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
                 // Improve logging for better debugging
                 coroutineScope.launch {

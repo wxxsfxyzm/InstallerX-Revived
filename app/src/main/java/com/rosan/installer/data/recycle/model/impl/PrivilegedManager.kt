@@ -21,7 +21,7 @@ import timber.log.Timber
 object PrivilegedManager : KoinComponent {
 
     private val appDataStore by inject<AppDataStore>()
-    private val useShizukuHookModeFlow = appDataStore.getBoolean(LAB_USE_SHIZUKU_HOOK_MODE)
+    private val useShizukuHookModeFlow = appDataStore.getBoolean(LAB_USE_SHIZUKU_HOOK_MODE, true)
 
     /**
      * Helper to retrieve the current Shizuku Hook Mode setting.

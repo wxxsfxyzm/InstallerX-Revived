@@ -2,7 +2,6 @@ package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.StringRes
@@ -29,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
@@ -61,8 +59,7 @@ import kotlin.reflect.KClass
 fun InstallFailedContent(
     colorScheme: ColorScheme,
     isDarkMode: Boolean,
-    baseEntity: AppEntity.BaseEntity?,
-    appIcon: Drawable?,
+    appInfo: AppInfoState,
     installer: InstallerRepo,
     viewModel: InstallerViewModel,
     onClose: () -> Unit
@@ -72,11 +69,7 @@ fun InstallFailedContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AppInfoSlot(
-            icon = appIcon,
-            label = baseEntity?.label ?: "Unknown App",
-            packageName = baseEntity?.packageName ?: "unknown.package"
-        )
+        AppInfoSlot(appInfo = appInfo)
         Spacer(modifier = Modifier.height(32.dp))
         MiuixErrorTextBlock(
             error = installer.error,

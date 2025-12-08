@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,6 +49,22 @@ fun InstallCompletedContent(
     results: List<InstallResult>,
     onClose: () -> Unit
 ) {
+    val filteredResults = remember(results) {
+        results
+            // 1. Group by packageName
+            .groupBy { it.entity.app.packageName }
+            .flatMap { (_, groupResults) ->
+                // Find BaseEntity
+                val baseResult = groupResults.find { it.entity.app is AppEntity.BaseEntity }
+
+                if (baseResult != null) {
+                    listOf(baseResult)
+                } else {
+                    listOfNotNull(groupResults.firstOrNull())
+                }
+            }
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -62,7 +79,7 @@ fun InstallCompletedContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
-                items(results, key = { it.entity.app.packageName + it.entity.app.name }) { result ->
+                items(filteredResults, key = { it.entity.app.packageName + it.entity.app.name }) { result ->
                     MiuixResultItemCard(
                         colorScheme = colorScheme,
                         isDarkMode = isDarkMode,

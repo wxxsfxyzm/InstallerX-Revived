@@ -7,14 +7,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LabelWidget(label: String, horizontalPadding: Int = 56) {
+fun LabelWidget(label: String, horizontalPadding: Dp = 56.dp) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = horizontalPadding.dp)
+            .padding(vertical = 8.dp, horizontal = horizontalPadding)
             .padding(top = 8.dp)
     ) {
         Text(

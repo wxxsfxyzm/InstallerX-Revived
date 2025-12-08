@@ -85,13 +85,13 @@ class InstallerViewModel(
     val isDismissible
         get() = when (state) {
             is InstallerViewState.Analysing,
-            is InstallerViewState.Resolving -> false
+            is InstallerViewState.Resolving,
+            is InstallerViewState.InstallExtendedMenu,
+            is InstallerViewState.InstallChoice -> false
 
             is InstallerViewState.InstallingModule -> (state as InstallerViewState.InstallingModule).isFinished
-            is InstallerViewState.InstallPrepare,
-            is InstallerViewState.InstallExtendedMenu,
+            is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
             is InstallerViewState.Preparing,
-            is InstallerViewState.InstallChoice,
             is InstallerViewState.Installing -> !viewSettings.disableNotificationOnDismiss
 
             else -> true
@@ -504,11 +504,14 @@ class InstallerViewModel(
                     // For the Installing state, we need to differentiate between single and batch install
                     is InstallerViewState.Installing -> {
                         if (newState.total > 1) {
-                            // In batch mode, retrieve the specific package name from the queue using the current index.
-                            // The 'current' field in progress is 1-based, while the list is 0-based.
+                            val selectedEntities = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
+                            val groupedApps = selectedEntities.groupBy { it.app.packageName }.values.toList()
+
                             val index = newState.current - 1
-                            repo.multiInstallQueue.getOrNull(index)?.app?.packageName
-                                ?: _currentPackageName.value // Fallback to current if index is out of bounds
+                            val currentAppGroup = groupedApps.getOrNull(index)
+
+                            currentAppGroup?.firstOrNull()?.app?.packageName
+                                ?: _currentPackageName.value // Fallback
                         } else {
                             // For single install, use the selected entity.
                             _currentPackageName.value ?: repo.analysisResults.firstOrNull()?.packageName

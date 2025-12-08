@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
@@ -93,6 +94,22 @@ fun NewLabPage(
                                 description = stringResource(R.string.lab_use_hook_mode_desc),
                                 checked = state.labShizukuHookMode,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
+                            )
+                        }
+                    }
+                )
+            }
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.lab_unstable_features),
+                    content = buildList {
+                        add {
+                            SwitchWidget(
+                                icon = AppIcons.InstallRequester,
+                                title = stringResource(R.string.lab_set_install_requester),
+                                description = stringResource(R.string.lab_set_install_requester_desc),
+                                checked = state.labSetInstallRequester,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
                             )
                         }
                     }

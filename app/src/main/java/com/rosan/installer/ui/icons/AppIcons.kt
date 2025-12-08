@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
+import androidx.compose.material.icons.automirrored.twotone.FactCheck
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.automirrored.twotone.PlaylistAdd
 import androidx.compose.material.icons.automirrored.twotone.Rule
@@ -183,4 +184,7 @@ object AppIcons {
     // --- 权限图标集合 ---
     val Permission = Icons.TwoTone.PermDeviceInformation
     // --- 权限图标结束 ---
+
+    // Lab Icons
+    val InstallRequester = Icons.AutoMirrored.TwoTone.FactCheck
 }

@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
-import android.graphics.drawable.Drawable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +18,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
@@ -31,8 +29,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 @Composable
 fun InstallingContent(
     state: InstallerViewState.Installing,
-    baseEntity: AppEntity.BaseEntity?,
-    appIcon: Drawable?,
+    appInfo: AppInfoState,
     onButtonClick: () -> Unit
 ) {
     Column(
@@ -40,13 +37,10 @@ fun InstallingContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        val displayLabel = state.appLabel ?: baseEntity?.label ?: "Unknown App"
+        val displayLabel = state.appLabel ?: appInfo.label
 
-        AppInfoSlot(
-            icon = appIcon,
-            label = state.appLabel ?: baseEntity?.label ?: "Unknown App",
-            packageName = baseEntity?.packageName ?: "unknown.package"
-        )
+        AppInfoSlot(appInfo = appInfo)
+
         Spacer(modifier = Modifier.height(32.dp))
 
         val progressText = if (state.total > 1) {

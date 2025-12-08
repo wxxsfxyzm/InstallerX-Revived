@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
@@ -63,7 +64,17 @@ fun LegacyLabPage(
                     onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
                 )
             }
-
+            item { LabelWidget(stringResource(R.string.lab_unstable_features)) }
+            item {
+                SwitchWidget(
+                    icon = AppIcons.InstallRequester,
+                    title = stringResource(R.string.lab_set_install_requester),
+                    description = stringResource(R.string.lab_set_install_requester_desc),
+                    checked = state.labSetInstallRequester,
+                    isM3E = false,
+                    onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
+                )
+            }
             if (RsConfig.isInternetAccessEnabled) {
                 item { LabelWidget(stringResource(R.string.internet_access_enabled)) }
                 // TODO

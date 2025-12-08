@@ -23,11 +23,16 @@ object SelectionStrategy {
             return entities.map { SelectInstallEntity(it, selected = false) }
         }
 
+        // Identify Base entities count
+        val bases = entities.filterIsInstance<AppEntity.BaseEntity>()
+
         // 2. Multi-App Mode: Best Base only
-        val isMultiAppMode = sessionType == DataType.MULTI_APK || sessionType == DataType.MULTI_APK_ZIP
-        if (isMultiAppMode) {
+        // Only trigger "Best Base Selection" if there is actually more than one base to choose from.
+        // If it's MULTI_APK but only has 1 base (e.g. batch installing App Bundles), allow it to fall through to split selection.
+        val isMultiAppMode = (sessionType == DataType.MULTI_APK || sessionType == DataType.MULTI_APK_ZIP)
+        // Only apply strict filtering if we have conflict (multiple bases for same package)
+        if (isMultiAppMode && bases.size > 1) {
             Timber.d("Multi-App Mode detected. Selecting best base entity.")
-            val bases = entities.filterIsInstance<AppEntity.BaseEntity>()
             val bestBase = findBestBase(bases)
 
             if (bestBase != null) {
@@ -39,6 +44,12 @@ object SelectionStrategy {
             return entities.map { entity ->
                 SelectInstallEntity(entity, selected = (entity == bestBase))
             }
+        }
+
+        // Special handling for single Split input
+        if (entities.size == 1 && entities.first() is AppEntity.SplitEntity) {
+            Timber.d("Single Split detected. User explicitly provided this file. Force selecting it.")
+            return listOf(SelectInstallEntity(entities.first(), selected = true))
         }
 
         // 3. Single App Mode: Base + Calculated Splits

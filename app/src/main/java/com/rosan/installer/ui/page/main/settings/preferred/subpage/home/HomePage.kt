@@ -85,7 +85,7 @@ fun HomePage(
             },
             header = {
                 item { StatusWidget() }
-                item { LabelWidget(stringResource(R.string.open_source_license), 18) }
+                item { LabelWidget(stringResource(R.string.open_source_license), 18.dp) }
             }
         )
     }

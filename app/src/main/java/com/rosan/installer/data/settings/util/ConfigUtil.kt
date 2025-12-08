@@ -1,5 +1,6 @@
 package com.rosan.installer.data.settings.util
 
+import android.content.Context
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.AppEntity
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -30,6 +31,7 @@ import org.koin.core.component.inject
  **/
 class ConfigUtil {
     companion object : KoinComponent {
+        private val context by inject<Context>()
 
         private val appDataStore by inject<AppDataStore>()
 
@@ -62,9 +64,18 @@ class ConfigUtil {
                 )
             if (entity.installMode == ConfigEntity.InstallMode.Global)
                 entity = entity.copy(installMode = getGlobalInstallMode())
-            // 使用 apply 来设置非构造函数属性，代码更紧凑
+            // 使用 apply 来设置非构造函数属性
             return entity.apply {
                 // --- 如果需要获取全局配置的其他字段，可以在这里添加 ---
+                if (appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER).first()) {
+                    packageName?.let { pkg ->
+                        callingFromUid = try {
+                            context.packageManager.getPackageUid(pkg, 0)
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
+                }
             }
         }
 

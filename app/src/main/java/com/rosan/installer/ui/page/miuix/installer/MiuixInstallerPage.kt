@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -34,7 +33,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
 import com.rosan.installer.data.app.model.exception.ModuleInstallException
@@ -61,6 +59,7 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallFailedC
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallPrepareContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallSuccessContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallingContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.rememberAppInfoState
 import com.rosan.installer.ui.page.miuix.widgets.DropdownItem
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.theme.m3color.PaletteStyle
@@ -126,26 +125,15 @@ fun MiuixInstallerPage(
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
     val displayIcons by viewModel.displayIcons.collectAsState()
-
-    val analysisResult =
-        if (currentPackageName != null) installer.analysisResults.find { it.packageName == currentPackageName } else null
-    val baseEntity = analysisResult?.appEntities?.map { it.app }?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
-    val appIcon = if (currentPackageName != null) displayIcons[currentPackageName] else null
+    val appInfoState = rememberAppInfoState(
+        installer = installer,
+        currentPackageName = currentPackageName,
+        displayIcons = displayIcons
+    )
 
     LaunchedEffect(installer.id) {
         viewModel.dispatch(InstallerViewAction.CollectRepo(installer))
     }
-
-    BackHandler(
-        enabled = showSettings || showPermissions,
-        onBack = {
-            if (showSettings) {
-                viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
-            } else if (showPermissions) {
-                viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList)
-            }
-        }
-    )
 
     val sheetTitle = when (currentState) {
         is InstallerViewState.Preparing -> stringResource(R.string.installer_preparing)
@@ -465,6 +453,7 @@ fun MiuixInstallerPage(
                                     isDarkMode = isDarkMode,
                                     installer = installer,
                                     viewModel = viewModel,
+                                    appInfo = appInfoState,
                                     onCancel = closeSheet,
                                     onInstall = {
                                         viewModel.dispatch(InstallerViewAction.Install)
@@ -485,8 +474,7 @@ fun MiuixInstallerPage(
                 is InstallerViewState.Installing -> {
                     InstallingContent(
                         state = viewModel.state as InstallerViewState.Installing,
-                        baseEntity = baseEntity,
-                        appIcon = appIcon,
+                        appInfo = appInfoState,
                         onButtonClick = {
                             scope.launch {
                                 delay(SHEET_ANIMATION_DURATION)
@@ -498,11 +486,8 @@ fun MiuixInstallerPage(
 
                 is InstallerViewState.InstallSuccess -> {
                     InstallSuccessContent(
-                        colorScheme = colorScheme,
-                        baseEntity = baseEntity,
+                        appInfo = appInfoState,
                         installer = installer,
-                        packageName = packageName,
-                        appIcon = appIcon,
                         dhizukuAutoClose = settings.autoCloseCountDown,
                         onClose = closeSheet
                     )
@@ -531,8 +516,7 @@ fun MiuixInstallerPage(
                         InstallFailedContent(
                             colorScheme = colorScheme,
                             isDarkMode = isDarkMode,
-                            baseEntity = baseEntity,
-                            appIcon = appIcon,
+                            appInfo = appInfoState,
                             installer = installer,
                             viewModel = viewModel,
                             onClose = closeSheet
@@ -667,7 +651,7 @@ private fun RebootListPopup(
 }
 
 @Composable
-fun RebootDropdownItem(
+private fun RebootDropdownItem(
     @StringRes id: Int,
     reason: String = "",
     showTopPopup: MutableState<Boolean>,
