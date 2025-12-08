@@ -47,6 +47,7 @@ import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitExceptio
 import com.rosan.installer.data.app.model.exception.ModuleInstallException
 import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
+import com.rosan.installer.data.app.model.exception.UninstallFailedAbortedException
 import com.rosan.installer.data.app.model.exception.UninstallFailedHyperOSSystemAppException
 import com.rosan.installer.data.app.model.exception.UninstallFailedInternalErrorException
 import com.rosan.installer.data.installer.model.exception.HttpNotAllowedException
@@ -115,6 +116,7 @@ private fun Throwable.getStringResourceId() =
         is DhizukuDeadServiceException -> R.string.exception_dhizuku_dead_service
         is UninstallFailedHyperOSSystemAppException -> R.string.exception_uninstall_failed_hyperos_system_app
         is UninstallFailedInternalErrorException -> R.string.exception_uninstall_failed_internal_error
+        is UninstallFailedAbortedException -> R.string.exception_uninstall_failed_aborted
         is PackageManager.NameNotFoundException -> R.string.exception_package_manager_name_not_found
         is RootNotWorkException -> R.string.exception_root_not_work
         is AppProcessNotWorkException -> R.string.exception_app_process_not_work

@@ -428,6 +428,7 @@
     <string name="exception_install_failed_user_restricted">系统限制 USB 安装，请启用它</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS 不允许在此处卸载该应用！</string>
     <string name="exception_uninstall_failed_internal_error">包管理服务内部错误</string>
+    <string name="exception_uninstall_failed_aborted">卸载过程被用户取消</string>
     <string name="exception_package_manager_name_not_found">找不到对应包名的应用</string>
     <string name="exception_shizuku_not_work">请激活 Sui 或 Shizuku，并授予权限</string>
     <string name="exception_dhizuku_not_work">请激活 Dhizuku，并授予权限</string>

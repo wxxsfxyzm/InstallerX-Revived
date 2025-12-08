@@ -447,6 +447,7 @@
     <string name="exception_install_failed_user_restricted">System restricted install through USB, please enable it</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS does not allow uninstalling this app!</string>
     <string name="exception_uninstall_failed_internal_error">Package Manager internal error</string>
+    <string name="exception_uninstall_failed_aborted">Uninstallation cancelled by user</string>
     <string name="exception_package_manager_name_not_found">Package name not found</string>
     <string name="exception_shizuku_not_work">Please activate Sui or Shizuku and grant permission</string>
     <string name="exception_dhizuku_not_work">Please activate Dhizuku and grant permission</string>
