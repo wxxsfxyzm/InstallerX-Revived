@@ -8,7 +8,6 @@ import com.rosan.installer.build.model.entity.Architecture
 import com.rosan.installer.build.model.entity.Density
 import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.convertLegacyLanguageCode
 
 object RsConfig {
@@ -44,10 +43,6 @@ object RsConfig {
      */
     val currentManufacturer: Manufacturer by lazy {
         Manufacturer.from(Build.MANUFACTURER)
-    }
-
-    val isMiui: Boolean by lazy {
-        OSUtils.isMIUI() || OSUtils.isHyperOS()
     }
 
     /**

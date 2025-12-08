@@ -36,8 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
@@ -92,6 +92,7 @@ fun DataDescriptionWidget(viewModel: EditViewModel) {
 fun DataAuthorizerWidget(viewModel: EditViewModel) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
+    val isSessionInstallSupported = LocalSessionInstallSupported.current
     val data = buildMap {
         put(
             ConfigEntity.Authorizer.Global, stringResource(
@@ -106,7 +107,7 @@ fun DataAuthorizerWidget(viewModel: EditViewModel) {
                 }
             )
         )
-        if (!RsConfig.isMiui)
+        if (isSessionInstallSupported)
             put(ConfigEntity.Authorizer.None, stringResource(R.string.config_authorizer_none))
         put(ConfigEntity.Authorizer.Root, stringResource(R.string.config_authorizer_root))
         put(ConfigEntity.Authorizer.Shizuku, stringResource(R.string.config_authorizer_shizuku))

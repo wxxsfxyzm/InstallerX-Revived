@@ -8,11 +8,11 @@ import org.koin.core.component.get
 object OSUtils : KoinComponent {
     private val reflect = get<ReflectRepo>()
 
-    // Key for MIUI version name
+    // MIUI legacy key (exists in both MIUI and HyperOS)
     private const val KEY_MIUI_VERSION_NAME = "ro.miui.ui.version.name"
 
-    // Key for HyperOS version name
-    private const val KEY_HYPEROS_VERSION_NAME = "ro.hyperos.version.name"
+    // HyperOS real key (most reliable)
+    private const val KEY_MI_OS_VERSION_NAME = "ro.mi.os.version.name"
 
     // Keys for OPPO OSdkVersion
     private const val KEY_OPLUS_API = "ro.build.version.oplus.api"
@@ -22,14 +22,16 @@ object OSUtils : KoinComponent {
      * Checks if the device is running HyperOS.
      */
     fun isHyperOS(): Boolean {
-        return !getSystemProperty(KEY_HYPEROS_VERSION_NAME).isNullOrEmpty()
+        val osName = getSystemProperty(KEY_MI_OS_VERSION_NAME)
+        return !osName.isNullOrEmpty() && osName.startsWith("OS")
     }
 
     /**
      * Checks if the device is running MIUI.
      */
     fun isMIUI(): Boolean {
-        return !getSystemProperty(KEY_MIUI_VERSION_NAME).isNullOrEmpty()
+        val miuiName = getSystemProperty(KEY_MIUI_VERSION_NAME)
+        return !miuiName.isNullOrEmpty() && !isHyperOS()
     }
 
     /**

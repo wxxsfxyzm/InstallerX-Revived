@@ -62,11 +62,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.HttpProfile
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -126,6 +126,7 @@ fun DataAuthorizerWidget(
     val haptic = LocalHapticFeedback.current
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
+    val isSessionInstallSupported = LocalSessionInstallSupported.current
     val authorizerOptions = mapOf(
         ConfigEntity.Authorizer.None to AuthorizerInfo(
             R.string.config_authorizer_none,
@@ -167,7 +168,7 @@ fun DataAuthorizerWidget(
             authorizerOptions.forEach { (authorizerType, authorizerInfo) ->
                 InputChip(
                     enabled = when (authorizerType) {
-                        ConfigEntity.Authorizer.None -> !RsConfig.isMiui
+                        ConfigEntity.Authorizer.None -> isSessionInstallSupported
                         else -> true
                     } && enabled,
                     selected = currentAuthorizer == authorizerType,

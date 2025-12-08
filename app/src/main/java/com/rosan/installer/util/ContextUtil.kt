@@ -6,6 +6,8 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.net.toUri
 
+private const val SYSTEM_PACKAGE_INSTALLER = "com.android.packageinstaller"
+
 fun Context.openUrl(url: String) =
     try {
         this.startActivity(
@@ -26,4 +28,4 @@ fun Context.toast(@StringRes resId: Int, duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(this, resId, duration).show()
 }
 
-fun Context.isSystemInstaller(): Boolean = this.packageName == "com.android.packageinstaller"
+fun Context.isSystemInstaller(): Boolean = this.packageName == SYSTEM_PACKAGE_INSTALLER

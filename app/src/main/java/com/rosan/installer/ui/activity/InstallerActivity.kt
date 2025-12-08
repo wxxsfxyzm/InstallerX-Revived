@@ -182,6 +182,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     override fun onStop() {
         super.onStop()
         // Only strictly interpret as user leaving when not finishing and not changing configurations (e.g., rotation)
+        // TODO add a flag to handle Session Install Confirmation
         if (!isFinishing && !isChangingConfigurations) {
             installer?.let { repo ->
                 // Since the interface defines 'progress' as Flow, we need to cast it to SharedFlow

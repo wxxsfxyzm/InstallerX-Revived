@@ -42,10 +42,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.theme.m3color.ThemeMode
 import com.rosan.installer.ui.util.MIN_FEEDBACK_DURATION_MS
@@ -88,9 +88,10 @@ fun MiuixDataAuthorizerWidget(
     val context = LocalContext.current
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
+    val isSessionInstallSupported = LocalSessionInstallSupported.current
     val authorizerOptions = remember {
         buildMap {
-            if (!RsConfig.isMiui)
+            if (isSessionInstallSupported)
                 put(
                     ConfigEntity.Authorizer.None,
                     AuthorizerInfo(R.string.config_authorizer_none, AppIcons.None)
