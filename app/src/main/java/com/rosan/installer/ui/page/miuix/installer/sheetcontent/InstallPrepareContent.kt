@@ -309,7 +309,7 @@ fun InstallPrepareContent(
                             )
 
                         // Install Options
-                        if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku ||
+                        if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku &&
                             installer.config.authorizer != ConfigEntity.Authorizer.None
                         )
                             MiuixNavigationItemWidget(
