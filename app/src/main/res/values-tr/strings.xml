@@ -339,8 +339,8 @@
     <string name="show_dialog_install_extended_menu">Genişletilmiş menüyü göster</string>
     <string name="show_dialog_install_extended_menu_desc">Yükleme diyaloğunda daha fazla seçenek gösterir</string>
     <string name="extended_menu">Genişletilmiş Menü</string>
-    <string name="disable_notification">Bildirim olmadan ön planda yükleme</string>
-    <string name="close_immediately_on_dialog_dismiss">Yükleme sırasında diyalog ön planda kalır, boş alana tıklandığında sessizce çıkılır</string>
+    <string name="disable_notification">Yükleme Sırasında Ön Planda Kal</string>
+    <string name="close_immediately_on_dialog_dismiss">Yükleme sırasında diyalog ön planda kalır, bildirim gönderilmez</string>
     <string name="disable_notification_on_dismiss">Diyaloğu Kapat</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Kapatma Diyaloğu sessizce kapanacaktır</string>
     <string name="set_countdown">Geri sayım ayarla</string>
@@ -591,4 +591,15 @@
     <string name="lab_http_profile_secure">Yalnızca güvenli bağlantılar (HTTPS)</string>
     <string name="lab_http_profile_local">Yerel açık metine izin ver (Localhost)</string>
     <string name="lab_http_profile_all">Tümüne izin ver (Güvenli değil)</string>
+    <string name="config_display_module_extra_info_desc">Modüllerde ekstra bilgileri göster</string>
+    <string name="exception_module_install_exit_code_non_zero">Çıkış kodu sıfır değil!</string>
+    <string name="reboot">Yeniden Başlat</string>
+    <string name="reboot_userspace">Kullanıcı alanını yeniden başlat</string>
+    <string name="reboot_recovery">Kurtarmaya Yeniden Başlat</string>
+    <string name="reboot_bootloader">Önyükleyiciyi Yeniden Başlat</string>
+    <string name="reboot_edl">EDL\'ye Yeniden Başlat</string>
+    <string name="reboot_download">İndirmeyi Yeniden Başlat</string>
+    <string name="installer_multi_apk_description_notification">Lütfen yüklenecek öğeleri seçmek için bildirime tıklayın</string>
+    <string name="installer_error_mixed_selection">Uygulamalar ve modüller aynı anda toplu olarak yüklenemez</string>
+    <string name="installer_error_multiple_modules">Toplu olarak birden fazla modül yüklenemez</string>
 </resources>

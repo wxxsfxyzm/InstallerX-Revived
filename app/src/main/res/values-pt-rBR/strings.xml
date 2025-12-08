@@ -591,4 +591,15 @@
     <string name="lab_http_profile_secure">Apenas conexões seguras (HTTPS)</string>
     <string name="lab_http_profile_local">Permitir texto simples em modo local (Localhost)</string>
     <string name="lab_http_profile_all">Permitir tudo (Inseguro)</string>
+    <string name="config_display_module_extra_info_desc">Mostrar informações extras se for módulo</string>
+    <string name="exception_module_install_exit_code_non_zero">Código de saída diferente de zero!</string>
+    <string name="reboot">Reiniciar</string>
+    <string name="reboot_userspace">Reinicializar o espaço do usuário</string>
+    <string name="reboot_recovery">Reinicie para recuperação</string>
+    <string name="reboot_bootloader">Reinicialize para o Bootloader</string>
+    <string name="reboot_edl">Reinicie para EDL</string>
+    <string name="reboot_download">Reinicie para baixar</string>
+    <string name="installer_multi_apk_description_notification">Clique na notificação para selecionar itens para instalar</string>
+    <string name="installer_error_mixed_selection">Não é possível instalar aplicativos e módulos simultaneamente em lote</string>
+    <string name="installer_error_multiple_modules">Não é possível instalar vários módulos em lote</string>
 </resources>
