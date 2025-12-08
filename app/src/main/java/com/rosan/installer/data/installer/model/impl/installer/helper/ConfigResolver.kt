@@ -17,7 +17,6 @@ object ConfigResolver {
 
     suspend fun resolve(activity: Activity): ConfigEntity {
         Timber.tag(TAG).d("resolveConfig: Starting.")
-
         // 1. Check Calling Package
         val callingPackage = activity.callingPackage
         Timber.tag(TAG).d("activity.callingPackage: $callingPackage")
