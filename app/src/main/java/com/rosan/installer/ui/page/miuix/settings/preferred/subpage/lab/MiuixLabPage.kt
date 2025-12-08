@@ -172,7 +172,7 @@ fun MiuixLabPage(
                     }
                 }
             }
-            item { SmallTitle("Unstable features") }
+            item { SmallTitle(stringResource(R.string.lab_unstable_features)) }
             item {
                 Card(
                     modifier = Modifier
@@ -180,8 +180,8 @@ fun MiuixLabPage(
                         .padding(bottom = 12.dp)
                 ) {
                     MiuixSwitchWidget(
-                        title = "Set Install Requester",
-                        description = "Set install requester to match system behavior, please note that third-party apps can't always retrieve this info, will default to null in this case",
+                        title = stringResource(R.string.lab_set_install_requester),
+                        description = stringResource(R.string.lab_set_install_requester_desc),
                         checked = state.labSetInstallRequester,
                         onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
                     )

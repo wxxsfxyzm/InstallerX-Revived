@@ -633,4 +633,7 @@
     <string name="lab_http_profile_secure">Secure connections only (HTTPS)</string>
     <string name="lab_http_profile_local">Allow local cleartext (Localhost)</string>
     <string name="lab_http_profile_all">Allow all (Insecure)</string>
+    <string name="lab_unstable_features">Unstable features</string>
+    <string name="lab_set_install_requester">Set install Requester</string>
+    <string name="lab_set_install_requester_desc">Fill originatingUid field with caller package to match system behavior</string>
 </resources>

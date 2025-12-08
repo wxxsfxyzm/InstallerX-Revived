@@ -602,7 +602,7 @@ class PreferredViewModel(
             val managedSharedUserIdExemptPkgFlow =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
             val labShizukuHookModeFlow =
-                appDataStore.getBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, false)
+                appDataStore.getBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, true)
             val labRootModuleFlashFlow =
                 appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false)
             val labRootImplementationFlow =

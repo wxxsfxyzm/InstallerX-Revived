@@ -616,4 +616,7 @@
     <string name="lab_http_profile_secure">仅允许安全连接 (HTTPS)</string>
     <string name="lab_http_profile_local">允许本地明文 (Localhost)</string>
     <string name="lab_http_profile_all">允许所有 (不安全)</string>
+    <string name="lab_unstable_features">不稳定功能</string>
+    <string name="lab_set_install_requester">设置安装请求方</string>
+    <string name="lab_set_install_requester_desc">向安装会话填写 originatingUid 字段来记录发起安装的应用，匹配系统包管理器行为</string>
 </resources>

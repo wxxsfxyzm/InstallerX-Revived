@@ -38,7 +38,7 @@ data class PreferredViewState(
     val managedBlacklistPackages: List<NamedPackage> = emptyList(),
     val managedSharedUserIdBlacklist: List<SharedUid> = emptyList(),
     val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList(),
-    val labShizukuHookMode: Boolean = false,
+    val labShizukuHookMode: Boolean = true,
     val labRootEnableModuleFlash: Boolean = false,
     val labRootImplementation: RootImplementation = RootImplementation.Magisk,
     val labHttpSaveFile: Boolean = false,

@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
@@ -63,12 +64,12 @@ fun LegacyLabPage(
                     onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
                 )
             }
-            item { LabelWidget("Unstable features") }
+            item { LabelWidget(stringResource(R.string.lab_unstable_features)) }
             item {
                 SwitchWidget(
-                    icon = Icons.AutoMirrored.Filled.AltRoute,
-                    title = "Set Install Requester",
-                    description = "Set install requester to match system behavior, please note that third-party apps can't always retrieve this info, will default to null in this case",
+                    icon = AppIcons.InstallRequester,
+                    title = stringResource(R.string.lab_set_install_requester),
+                    description = stringResource(R.string.lab_set_install_requester_desc),
                     checked = state.labSetInstallRequester,
                     isM3E = false,
                     onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
