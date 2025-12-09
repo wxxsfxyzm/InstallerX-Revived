@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
@@ -109,6 +110,10 @@ fun PrepareSettingsContent(
                     }
                 )
         }
-        Spacer(Modifier.height(24.dp))
+        Spacer(
+            modifier = Modifier
+                .navigationBarsPadding()
+                .height(if (isGestureNavigation()) 24.dp else 0.dp)
+        )
     }
 }

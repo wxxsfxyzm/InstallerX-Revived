@@ -296,6 +296,7 @@
     <string name="installer_prepare_type_unknown_confirm">Are you sure you want to install?</string>
     <string name="installer_prepare_signature_mismatch">Signature mismatch! Continuing installation may cause data loss or security risks.</string>
     <string name="installer_prepare_signature_unknown">Unable to verify app signature, please proceed with caution.</string>
+    <string name="installer_splits_invalid_tip">Cannot add the selected split package to an uninstalled app</string>
     <string name="installer_splits_only_tip">Only split APKs are selected. They will be added to the existing application</string>
     <string name="installer_install_app">Install App</string>
     <string name="installer_install_module">Install Module</string>
