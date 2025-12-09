@@ -425,6 +425,7 @@
     <string name="exception_install_failed_duplicate_permission">该包正在尝试重新声明其他安装包已声明的权限！</string>
     <string name="exception_install_parse_failed_unexpected_exception">解析失败</string>
     <string name="exception_install_parse_failed_no_certificates">证书缺失</string>
+    <string name="exception_install_parse_failed_skipped">该软件包已被系统跳过，应忽略此项</string>
     <string name="exception_install_failed_user_restricted">系统限制 USB 安装，请启用它</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS 不允许在此处卸载该应用！</string>
     <string name="exception_uninstall_failed_internal_error">包管理服务内部错误</string>
