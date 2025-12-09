@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -38,6 +39,7 @@ import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitExceptio
 import com.rosan.installer.data.app.model.exception.ModuleInstallException
 import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.ui.common.HasMiPackageInstaller
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.InstallerViewState
@@ -177,6 +179,8 @@ fun MiuixInstallerPage(
             viewModel.dispatch(InstallerViewAction.Close)
         }
     }
+
+    val isMiInstallerSupported = HasMiPackageInstaller.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -513,14 +517,18 @@ fun MiuixInstallerPage(
                             onClose = closeSheet
                         )
                     else
-                        InstallFailedContent(
-                            colorScheme = colorScheme,
-                            isDarkMode = isDarkMode,
-                            appInfo = appInfoState,
-                            installer = installer,
-                            viewModel = viewModel,
-                            onClose = closeSheet
-                        )
+                        CompositionLocalProvider(
+                            HasMiPackageInstaller provides isMiInstallerSupported
+                        ) {
+                            InstallFailedContent(
+                                colorScheme = colorScheme,
+                                isDarkMode = isDarkMode,
+                                appInfo = appInfoState,
+                                installer = installer,
+                                viewModel = viewModel,
+                                onClose = closeSheet
+                            )
+                        }
                 }
 
                 is InstallerViewState.InstallingModule -> {

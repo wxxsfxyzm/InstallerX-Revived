@@ -27,6 +27,16 @@ class DeviceCapabilityChecker(private val context: Context) {
         calculateSessionInstallSupport()
     }
 
+    /**
+     * Checks if the MIUI package installer is installed on this device.
+     *
+     * Value is cached using `lazy`, ensuring the expensive PackageManager check
+     * runs only once per app lifecycle in a thread-safe manner.
+     */
+    val hasMiPackageInstaller: Boolean by lazy {
+        getMiuiPackageInstallerVersion() != null
+    }
+
     private fun calculateSessionInstallSupport(): Boolean {
         // Reuse the static Manufacturer enum from RsConfig
         val isMi = RsConfig.currentManufacturer == Manufacturer.XIAOMI

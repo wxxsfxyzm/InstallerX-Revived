@@ -4,12 +4,14 @@ import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,11 +24,13 @@ import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
+import com.rosan.installer.build.model.impl.DeviceCapabilityChecker
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.ui.activity.themestate.ThemeUiState
 import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
+import com.rosan.installer.ui.common.HasMiPackageInstaller
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
@@ -42,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -181,10 +186,23 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     override fun onStop() {
         super.onStop()
+        // Check if the screen is currently on.
+        // If the screen is off, onStop is triggered by locking the device.
+        // We explicitly want to ignore this case.
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+        val isScreenOn = powerManager.isInteractive
+
+        if (!isScreenOn) {
+            // The screen is turned off (locked), do nothing.
+            Timber.d("onStop: Screen is turned off. Ignoring.")
+            return
+        }
         // Only strictly interpret as user leaving when not finishing and not changing configurations (e.g., rotation)
         // TODO add a flag to handle Session Install Confirmation
         if (!isFinishing && !isChangingConfigurations) {
             installer?.let { repo ->
+                // If using session install, we don't hide UI since oems have different package installer impls
+                // if (repo.config.authorizer == ConfigEntity.Authorizer.None) return
                 // Since the interface defines 'progress' as Flow, we need to cast it to SharedFlow
                 // to access the replayCache. We know InstallerRepoImpl uses MutableStateFlow.
                 val sharedFlow = repo.progress as? SharedFlow<*>
@@ -259,6 +277,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             val installer = installer ?: return@setContent
             val background by installer.background.collectAsState(false)
             val progress by installer.progress.collectAsState(ProgressEntity.Ready)
+            val capabilityChecker = koinInject<DeviceCapabilityChecker>()
 
             if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.Finish)
             // Return@setContent to show nothing, logs will explain why.
@@ -291,36 +310,40 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 activeColorSchemeState.value = globalColorScheme
             }
 
-            if (uiState.useMiuix) {
-                InstallerMiuixTheme(
-                    darkTheme = useDarkTheme,
-                    themeMode = uiState.themeMode,
-                    useMiuixMonet = uiState.useMiuixMonet,
-                    seedColor = activeColorSchemeState.value.primary
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        MiuixInstallerPage(
-                            installer = installer,
-                            activeColorSchemeState = activeColorSchemeState,
-                            globalColorScheme = globalColorScheme,
-                            isDarkMode = useDarkTheme,
-                            basePaletteStyle = uiState.paletteStyle
-                        )
+            CompositionLocalProvider(
+                HasMiPackageInstaller provides capabilityChecker.hasMiPackageInstaller
+            ) {
+                if (uiState.useMiuix) {
+                    InstallerMiuixTheme(
+                        darkTheme = useDarkTheme,
+                        themeMode = uiState.themeMode,
+                        useMiuixMonet = uiState.useMiuixMonet,
+                        seedColor = activeColorSchemeState.value.primary
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            MiuixInstallerPage(
+                                installer = installer,
+                                activeColorSchemeState = activeColorSchemeState,
+                                globalColorScheme = globalColorScheme,
+                                isDarkMode = useDarkTheme,
+                                basePaletteStyle = uiState.paletteStyle
+                            )
+                        }
                     }
-                }
-            } else {
-                InstallerMaterialExpressiveTheme(
-                    darkTheme = useDarkTheme,
-                    colorScheme = activeColorSchemeState.value,
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        InstallerPage(
-                            installer = installer,
-                            activeColorSchemeState = activeColorSchemeState,
-                            globalColorScheme = globalColorScheme,
-                            isDarkMode = useDarkTheme,
-                            basePaletteStyle = uiState.paletteStyle
-                        )
+                } else {
+                    InstallerMaterialExpressiveTheme(
+                        darkTheme = useDarkTheme,
+                        colorScheme = activeColorSchemeState.value,
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            InstallerPage(
+                                installer = installer,
+                                activeColorSchemeState = activeColorSchemeState,
+                                globalColorScheme = globalColorScheme,
+                                isDarkMode = useDarkTheme,
+                                basePaletteStyle = uiState.paletteStyle
+                            )
+                        }
                     }
                 }
             }

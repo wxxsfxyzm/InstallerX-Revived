@@ -118,9 +118,10 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         super.onStop()
         // Only strictly interpret as user leaving when not finishing and not changing configurations (e.g., rotation)
         if (!isFinishing && !isChangingConfigurations) {
-            Timber.d("onStop: User left UninstallerActivity. Closing repository.")
-
-            installer?.close()
+            installer?.let { repo ->
+                Timber.d("onStop: User left UninstallerActivity. Closing repository.")
+                repo.close()
+            }
         }
     }
 

@@ -5,3 +5,5 @@ import androidx.compose.runtime.staticCompositionLocalOf
 val LocalSessionInstallSupported = staticCompositionLocalOf<Boolean> {
     error("CompositionLocal LocalSessionInstallSupported not present")
 }
+
+val HasMiPackageInstaller = staticCompositionLocalOf { false }
