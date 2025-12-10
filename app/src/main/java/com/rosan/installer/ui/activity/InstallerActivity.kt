@@ -173,7 +173,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             val sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
             if (sessionId != -1) {
                 Timber.d("onNewIntent: Dispatching resolveConfirmInstall for session $sessionId")
-                installer?.resolveConfirmInstall(this, sessionId) // 新方法
+                installer?.resolveConfirmInstall(this, sessionId)
             } else {
                 Timber.e("onNewIntent: CONFIRM_INSTALL intent missing EXTRA_SESSION_ID")
                 finish()
