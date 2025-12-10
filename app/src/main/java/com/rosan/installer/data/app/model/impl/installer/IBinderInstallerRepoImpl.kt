@@ -312,7 +312,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         return session
     }
 
-    private suspend fun installIts(
+    private fun installIts(
         config: ConfigEntity,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -91,7 +92,10 @@ fun InstallPrepareContent(
     val selectedEntities = currentPackage.appEntities
         .filter { it.selected }
         .map { it.app }
-
+    val rawBaseEntity = currentPackage.appEntities
+        .map { it.app }
+        .filterIsInstance<AppEntity.BaseEntity>()
+        .firstOrNull()
     val primaryEntity = appInfo.primaryEntity
     if (primaryEntity == null) {
         LoadingContent(statusText = "No main app entity found")
@@ -284,7 +288,7 @@ fun InstallPrepareContent(
 
         item {
             AnimatedVisibility(
-                visible = (primaryEntity is AppEntity.BaseEntity) && isExpanded,
+                visible = (rawBaseEntity != null) && isExpanded,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
@@ -300,7 +304,7 @@ fun InstallPrepareContent(
                 ) {
                     Column {
                         // Permissions List
-                        if ((primaryEntity as AppEntity.BaseEntity).permissions?.isNotEmpty() ?: false)
+                        if (rawBaseEntity?.permissions?.isNotEmpty() == true)
                             MiuixNavigationItemWidget(
                                 title = stringResource(R.string.permission_list),
                                 description = stringResource(R.string.permission_list_desc),
@@ -309,7 +313,7 @@ fun InstallPrepareContent(
                             )
 
                         // Install Options
-                        if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku ||
+                        if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku &&
                             installer.config.authorizer != ConfigEntity.Authorizer.None
                         )
                             MiuixNavigationItemWidget(
@@ -331,6 +335,20 @@ fun InstallPrepareContent(
                         }
                     }
                 }
+            }
+        }
+
+        val isInvalidSplitInstall = currentPackage.installedAppInfo == null &&
+                entityToInstall == null &&
+                selectedEntities.any { it is AppEntity.SplitEntity }
+
+        item {
+            AnimatedVisibility(
+                visible = isInvalidSplitInstall,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                MiuixInstallerTipCard(text = stringResource(R.string.installer_splits_invalid_tip))
             }
         }
 
@@ -376,7 +394,9 @@ fun InstallPrepareContent(
 
         val canInstall = canInstallBaseEntity || canInstallModuleEntity || canInstallSplitEntity
 
-        val showExpandButton = canInstallBaseEntity && settings.showExtendedMenu
+        // Even if we can't install (e.g. because Base is deselected), we might want to expand the menu to fix the selection.
+        // We show the button if rawBaseEntity exists (Bundle/APK) and settings allow it.
+        val showExpandButton = rawBaseEntity != null && settings.showExtendedMenu
 
         if (showExpandButton)
             item {
@@ -393,7 +413,8 @@ fun InstallPrepareContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
+                    .navigationBarsPadding()
+                    .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -402,14 +423,13 @@ fun InstallPrepareContent(
                     text = stringResource(R.string.cancel),
                     modifier = Modifier.weight(1f),
                 )
-                if (canInstall) {
-                    TextButton(
-                        onClick = onInstall,
-                        text = stringResource(buttonTextId),
-                        colors = ButtonDefaults.textButtonColorsPrimary(),
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                TextButton(
+                    onClick = onInstall,
+                    enabled = canInstall,
+                    text = stringResource(buttonTextId),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }

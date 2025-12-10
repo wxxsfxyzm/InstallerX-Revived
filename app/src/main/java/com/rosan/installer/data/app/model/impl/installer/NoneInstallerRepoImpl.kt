@@ -133,5 +133,24 @@ object NoneInstallerRepoImpl : InstallerRepo, KoinComponent {
         packageName: String,
         extra: InstallExtraInfoEntity
     ) {
+        val result = runCatching {
+            // Get the standard PackageInstaller
+            val packageInstaller = context.packageManager.packageInstaller
+
+            // Create a receiver to handle the result (Reusing the one from IBinderInstallerRepoImpl as you did in doInstallWork)
+            val receiver = IBinderInstallerRepoImpl.LocalIntentReceiver()
+
+            // Request uninstallation using the standard API
+            // This will likely trigger a system dialog asking the user to confirm uninstallation
+            packageInstaller.uninstall(packageName, receiver.getIntentSender())
+
+            // Block and wait for the result verification
+            PackageManagerUtil.uninstallResultVerify(context, receiver)
+        }
+
+        // Handle result failure if needed, similar to install logic
+        result.onFailure {
+            throw it
+        }
     }
 }

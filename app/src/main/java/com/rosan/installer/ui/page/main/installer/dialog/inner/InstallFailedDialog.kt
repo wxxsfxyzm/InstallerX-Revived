@@ -40,6 +40,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngrad
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.common.HasMiPackageInstaller
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -122,7 +123,7 @@ private fun ErrorSuggestions(
     val context = LocalContext.current
     var showUninstallConfirmDialog by remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
-
+    val hasMiPackageInstaller = HasMiPackageInstaller.current
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
     class SuggestionChipInfo(
@@ -147,20 +148,24 @@ private fun ErrorSuggestions(
                     icon = AppIcons.BugReport
                 )
             )
-            add(
-                SuggestionChipInfo(
-                    InstallFailedUpdateIncompatibleException::class,
-                    InstallFailedVersionDowngradeException::class,
-                    InstallFailedConflictingProviderException::class,
-                    selected = { true }, // This is an action, not a state toggle.
-                    onClick = {
-                        confirmKeepData = false
-                        showUninstallConfirmDialog = true
-                    },// onUninstall,
-                    labelRes = R.string.suggestion_uninstall_and_retry,// Not keep data
-                    icon = AppIcons.Delete
-                )
+            if (installer.config.authorizer != ConfigEntity.Authorizer.None ||
+                (installer.config.authorizer == ConfigEntity.Authorizer.None &&
+                        !(RsConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
             )
+                add(
+                    SuggestionChipInfo(
+                        InstallFailedUpdateIncompatibleException::class,
+                        InstallFailedVersionDowngradeException::class,
+                        InstallFailedConflictingProviderException::class,
+                        selected = { true }, // This is an action, not a state toggle.
+                        onClick = {
+                            confirmKeepData = false
+                            showUninstallConfirmDialog = true
+                        },// onUninstall,
+                        labelRes = R.string.suggestion_uninstall_and_retry,// Not keep data
+                        icon = AppIcons.Delete
+                    )
+                )
             if (
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA && // Must be lower than Android 16
 
@@ -208,8 +213,10 @@ private fun ErrorSuggestions(
                         InstallFailedHyperOSIsolationViolationException::class,
                         selected = { true },
                         onClick = {
+                            // Set available installer
                             installer.config.installer = "com.miui.packageinstaller"
-                            // viewModel.toast("可在设置中配置一个有效的安装来源")
+                            // Wipe originatingUid
+                            installer.config.callingFromUid = null
                             viewModel.dispatch(InstallerViewAction.Install)
                         },
                         labelRes = R.string.suggestion_mi_isolation,

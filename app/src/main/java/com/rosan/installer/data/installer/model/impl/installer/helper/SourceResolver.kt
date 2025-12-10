@@ -170,82 +170,83 @@ class SourceResolver(
         val afd = context.contentResolver?.openAssetFileDescriptor(uri, "r")
             ?: throw IOException("Cannot open file descriptor: $uri")
 
-        // Try direct procfs access (Zero-Copy)
-        val procPath = "/proc/${Os.getpid()}/fd/${afd.parcelFileDescriptor.fd}"
-        val file = File(procPath)
-        val sourcePath = runCatching { Os.readlink(procPath).getRealPathFromUri(uri).pathUnify() }.getOrDefault("")
+        // Resolve real path
+        val fd = afd.parcelFileDescriptor.fd
+        val procPath = "/proc/${Os.getpid()}/fd/$fd"
+        // Attempt to resolve the real path, e.g., /storage/... or /data/...
+        val realPath = runCatching {
+            Os.readlink(procPath).getRealPathFromUri(uri).pathUnify()
+        }.getOrDefault("")
 
-        if (file.canRead()) {
-            try {
-                // Validate read access. RandomAccessFile will throw if permission denied.
-                RandomAccessFile(file, "r").use { }
-                if (sourcePath.startsWith('/')) {
-                    Timber.d("Success! Got direct, usable file access through procfs: $sourcePath")
-                    closeables.add(afd) // Keep open until session ends
-                    return listOf(DataEntity.FileEntity(procPath).apply { source = DataEntity.FileEntity(sourcePath) })
-                }
-            } catch (e: Exception) {
-                Timber.w(e, "Direct procfs access test failed. Falling back to cache.")
+        // If the path exists and we have permission to read it directly, detach immediately
+        if (realPath.isNotEmpty() && File(realPath).canRead()) {
+            // Perform a defensive check to prevent File.canRead() from reporting false positives in certain SELinux contexts
+            val detachedSuccess = runCatching {
+                RandomAccessFile(realPath, "r").use { }
+                true
+            }.getOrDefault(false)
+
+            if (detachedSuccess) {
+                Timber.d("Detached mode success! File is directly readable: $realPath")
+                // [Key Point] Close the afd immediately to completely cut off the Binder connection with the ContentProvider (e.g., MT Manager)
+                // This ensures that even if the provider app is killed, the system won't kill this process due to the association mechanism
+                afd.close()
+                return listOf(DataEntity.FileEntity(realPath).apply { source = DataEntity.FileEntity(realPath) })
             }
-        } else {
-            Timber.d("Direct file access failed or file not readable. Falling back to caching with progress.")
         }
 
-        // Fallback: Cache to temp file
-        return cacheStream(uri, afd, sourcePath)
+        // If we reach here, the file is likely in a private directory (EACCES) or the path could not be resolved.
+        // To prevent association killing, we no longer attempt to read via /proc/self/fd/ in a "dependent" manner.
+        // Fall back to caching mode: copy the data out and disconnect.
+        Timber.d("File is private or unreadable ($realPath). Falling back to Cache to avoid dependency kill.")
+
+        return cacheStream(uri, afd, realPath)
     }
 
     private suspend fun cacheStream(uri: Uri, afd: AssetFileDescriptor, sourcePath: String): List<DataEntity> =
         withContext(Dispatchers.IO) {
-            val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
-            // We trust afd.length first for NIO operations
-            val knownLength =
-                if (afd.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) afd.declaredLength else guessContentLength(uri, afd)
-
-            Timber.d("Caching content to: ${tempFile.absolutePath}, Size: $knownLength")
-
-            var nioSuccess = false
-
-            // Try NIO FileChannel transfer first
-            try {
-                val fd = afd.fileDescriptor
-                // Only use NIO if we have a valid FD and a known length.
-                // transferTo requires a specific count, so we can't use it effectively for unknown stream lengths.
-                if (fd != null && fd.valid() && knownLength > 0) {
-                    Timber.d("Attempting NIO FileChannel transfer for optimal speed.")
-                    transferWithProgress(
-                        sourceFd = fd,
-                        sourceOffset = afd.startOffset, // Handle offset for embedded assets
-                        destFile = tempFile,
-                        totalSize = knownLength,
-                        progressFlow = progressFlow
+            afd.use { descriptor ->
+                val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
+                val knownLength =
+                    if (descriptor.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) descriptor.declaredLength else guessContentLength(
+                        uri,
+                        descriptor
                     )
-                    nioSuccess = true
-                    Timber.d("NIO transfer successful.")
-                }
-            } catch (e: Exception) {
-                Timber.w(e, "NIO transfer failed, falling back to legacy stream copy.")
-                // Clean up the potentially corrupted temp file before fallback
-                if (tempFile.exists()) tempFile.delete()
-                tempFile.createNewFile()
-                nioSuccess = false
-            }
 
-            // Fallback: Legacy Stream Copy
-            // Used if NIO fails or if the stream size is unknown (e.g., generic input streams, pipes)
-            if (!nioSuccess) {
-                Timber.d("Using legacy Stream copy.")
-                afd.use { descriptor ->
+                Timber.d("Caching content to: ${tempFile.absolutePath}, Size: $knownLength")
+
+                var nioSuccess = false
+                try {
+                    val fd = descriptor.fileDescriptor
+                    if (fd != null && fd.valid() && knownLength > 0) {
+                        Timber.d("Attempting NIO FileChannel transfer...")
+                        transferWithProgress(
+                            sourceFd = fd,
+                            sourceOffset = descriptor.startOffset,
+                            destFile = tempFile,
+                            totalSize = knownLength,
+                            progressFlow = progressFlow
+                        )
+                        nioSuccess = true
+                        Timber.d("NIO transfer successful.")
+                    }
+                } catch (e: Exception) {
+                    Timber.w(e, "NIO transfer failed, falling back to legacy stream copy.")
+                    if (tempFile.exists()) tempFile.delete()
+                    tempFile.createNewFile()
+                }
+
+                if (!nioSuccess) {
+                    Timber.d("Using legacy Stream copy.")
                     descriptor.createInputStream().use { input ->
                         tempFile.outputStream().use { output ->
-                            // Use the input stream's copy logic
                             input.copyToWithProgress(output, knownLength, progressFlow)
                         }
                     }
                 }
-            }
 
-            listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
+                listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
+            }
         }
 
     /**

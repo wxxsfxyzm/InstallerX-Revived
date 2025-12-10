@@ -38,6 +38,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVerificationFai
 import com.rosan.installer.data.app.model.exception.InstallFailedVerificationTimeoutException
 import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
 import com.rosan.installer.data.app.model.exception.InstallParseFailedNoCertificatesException
+import com.rosan.installer.data.app.model.exception.InstallParseFailedSkippedException
 import com.rosan.installer.data.app.model.exception.InstallParseFailedUnexpectedException
 import com.rosan.installer.data.app.model.exception.UninstallFailedAbortedException
 import com.rosan.installer.data.app.model.exception.UninstallFailedDevicePolicyManagerException
@@ -103,6 +104,7 @@ object PackageManagerUtil {
     const val INSTALL_FAILED_DUPLICATE_PERMISSION = -112
     const val INSTALL_FAILED_NO_MATCHING_ABIS = -113
     const val INSTALL_FAILED_ABORTED = -115
+    const val INSTALL_PARSE_FAILED_SKIPPED = -125
     const val INSTALL_BLACK_LIST = -903
     const val INSTALL_FAILED_HYPEROS_ISOLATION_VIOLATION = -1000
     const val INSTALL_FAILED_REJECTED_BY_BUILDTYPE = -3001
@@ -172,6 +174,7 @@ object PackageManagerUtil {
             INSTALL_FAILED_REJECTED_BY_BUILDTYPE -> InstallFailedRejectedByBuildTypeException(ecpMsg)
             INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION -> InstallParseFailedUnexpectedException(ecpMsg)
             INSTALL_PARSE_FAILED_NO_CERTFICATES -> InstallParseFailedNoCertificatesException(ecpMsg)
+            INSTALL_PARSE_FAILED_SKIPPED -> InstallParseFailedSkippedException(ecpMsg)
             INSTALL_FAILED_USER_RESTRICTED -> InstallFailedUserRestrictedException(ecpMsg)
             else -> IllegalStateException(ecpMsg)
         }

@@ -287,6 +287,7 @@
     <string name="installer_prepare_type_unknown_confirm">你确定要安装吗？</string>
     <string name="installer_prepare_signature_mismatch">签名不一致！继续安装可能导致数据丢失或带来安全风险。</string>
     <string name="installer_prepare_signature_unknown">无法验证应用签名，请谨慎操作。</string>
+    <string name="installer_splits_invalid_tip">无法将所选分包添加至未安装应用</string>
     <string name="installer_splits_only_tip">仅选择了分包，将把这些分包添加到现有应用中</string>
     <string name="installer_install_app">安装应用</string>
     <string name="installer_install_module">安装模块</string>
@@ -425,9 +426,11 @@
     <string name="exception_install_failed_duplicate_permission">该包正在尝试重新声明其他安装包已声明的权限！</string>
     <string name="exception_install_parse_failed_unexpected_exception">解析失败</string>
     <string name="exception_install_parse_failed_no_certificates">证书缺失</string>
+    <string name="exception_install_parse_failed_skipped">该软件包已被系统跳过，应忽略此项</string>
     <string name="exception_install_failed_user_restricted">系统限制 USB 安装，请启用它</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS 不允许在此处卸载该应用！</string>
     <string name="exception_uninstall_failed_internal_error">包管理服务内部错误</string>
+    <string name="exception_uninstall_failed_aborted">卸载过程被用户取消</string>
     <string name="exception_package_manager_name_not_found">找不到对应包名的应用</string>
     <string name="exception_shizuku_not_work">请激活 Sui 或 Shizuku，并授予权限</string>
     <string name="exception_dhizuku_not_work">请激活 Dhizuku，并授予权限</string>

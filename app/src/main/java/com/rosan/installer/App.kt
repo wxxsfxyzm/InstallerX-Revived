@@ -5,6 +5,7 @@ import android.os.Build
 import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
+import com.rosan.installer.data.recycle.model.impl.AutoLockManager
 import com.rosan.installer.di.init.appModules
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -35,5 +36,7 @@ class App : Application() {
             // use modules
             modules(appModules)
         }
+
+        AutoLockManager.init()
     }
 }

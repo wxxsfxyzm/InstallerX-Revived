@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
@@ -40,6 +41,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngrad
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.ui.common.HasMiPackageInstaller
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
@@ -88,6 +90,7 @@ fun InstallFailedContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(top = 8.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
         ) {
             TextButton(
@@ -111,6 +114,7 @@ private fun MiuixErrorSuggestions(
 
     val showUninstallConfirmDialogState = remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
+    val hasMiPackageInstaller = HasMiPackageInstaller.current
 
     data class SuggestionItem(
         val errorClasses: List<KClass<out Throwable>>,
@@ -132,21 +136,25 @@ private fun MiuixErrorSuggestions(
                     descriptionRes = R.string.suggestion_allow_test_app_desc,
                 )
             )
-            add(
-                SuggestionItem(
-                    errorClasses = listOf(
-                        InstallFailedUpdateIncompatibleException::class,
-                        InstallFailedVersionDowngradeException::class,
-                        InstallFailedConflictingProviderException::class
-                    ),
-                    onClick = {
-                        confirmKeepData = false
-                        showUninstallConfirmDialogState.value = true
-                    },
-                    labelRes = R.string.suggestion_uninstall_and_retry,
-                    descriptionRes = R.string.suggestion_uninstall_and_retry_desc
-                )
+            if (installer.config.authorizer != ConfigEntity.Authorizer.None ||
+                (installer.config.authorizer == ConfigEntity.Authorizer.None &&
+                        !(RsConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
             )
+                add(
+                    SuggestionItem(
+                        errorClasses = listOf(
+                            InstallFailedUpdateIncompatibleException::class,
+                            InstallFailedVersionDowngradeException::class,
+                            InstallFailedConflictingProviderException::class
+                        ),
+                        onClick = {
+                            confirmKeepData = false
+                            showUninstallConfirmDialogState.value = true
+                        },
+                        labelRes = R.string.suggestion_uninstall_and_retry,
+                        descriptionRes = R.string.suggestion_uninstall_and_retry_desc
+                    )
+                )
             if (
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA &&
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
@@ -186,8 +194,10 @@ private fun MiuixErrorSuggestions(
                     SuggestionItem(
                         errorClasses = listOf(InstallFailedHyperOSIsolationViolationException::class),
                         onClick = {
+                            // Set available installer
                             installer.config.installer = "com.miui.packageinstaller"
-                            // viewModel.toast("可在设置中配置一个有效的安装来源")
+                            // Wipe originatingUid
+                            installer.config.callingFromUid = null
                             viewModel.dispatch(InstallerViewAction.Install)
                         },
                         labelRes = R.string.suggestion_mi_isolation,
