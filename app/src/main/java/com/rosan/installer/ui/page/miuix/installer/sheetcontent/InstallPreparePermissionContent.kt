@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,7 +40,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 @Composable
 fun InstallPreparePermissionContent(
     colorScheme: ColorScheme,
-    isDarkMode: Boolean = isSystemInDarkTheme(),
+    isDarkMode: Boolean,
     installer: InstallerRepo,
     viewModel: InstallerViewModel,
     onBack: () -> Unit

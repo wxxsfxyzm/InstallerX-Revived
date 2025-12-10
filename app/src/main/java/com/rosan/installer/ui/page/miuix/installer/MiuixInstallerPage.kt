@@ -444,6 +444,7 @@ fun MiuixInstallerPage(
                             "permissions" -> {
                                 InstallPreparePermissionContent(
                                     colorScheme = colorScheme,
+                                    isDarkMode = isDarkMode,
                                     installer = installer,
                                     viewModel = viewModel,
                                     onBack = { viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList) }
