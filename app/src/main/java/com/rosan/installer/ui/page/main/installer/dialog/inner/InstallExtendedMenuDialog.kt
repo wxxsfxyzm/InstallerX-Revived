@@ -168,7 +168,7 @@ fun installExtendedMenuDialog(
         content = DialogInnerParams(DialogParamsType.InstallExtendedMenu.id) {
             MenuItemWidget(menuEntities, viewModel, installFlags, managedPackages, availableUsers)
         },
-        buttons = DialogButtons(
+        buttons = dialogButtons(
             DialogParamsType.InstallExtendedMenu.id
         ) {
             listOf(DialogButton(stringResource(R.string.next)) {
@@ -526,7 +526,7 @@ fun installExtendedMenuSubMenuDialog(
                 item { Spacer(modifier = Modifier.size(1.dp)) }
             }
         },
-        buttons = DialogButtons(
+        buttons = dialogButtons(
             DialogParamsType.InstallExtendedSubMenu.id
         ) {
             listOf(DialogButton(stringResource(R.string.previous)) {

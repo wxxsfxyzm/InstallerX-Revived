@@ -113,7 +113,7 @@ fun uninstallReadyDialog(
                 }
             }
         },
-        buttons = DialogButtons(DialogParamsType.InstallerUninstallReady.id) {
+        buttons = dialogButtons(DialogParamsType.InstallerUninstallReady.id) {
             listOf(
                 // Uninstall button triggers the uninstall action.
                 DialogButton(stringResource(R.string.uninstall)) {

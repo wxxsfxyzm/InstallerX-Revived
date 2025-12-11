@@ -41,7 +41,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngrad
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.ui.common.HasMiPackageInstaller
+import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
@@ -114,7 +114,7 @@ private fun MiuixErrorSuggestions(
 
     val showUninstallConfirmDialogState = remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
-    val hasMiPackageInstaller = HasMiPackageInstaller.current
+    val hasMiPackageInstaller = LocalMiPackageInstallerPresent.current
 
     data class SuggestionItem(
         val errorClasses: List<KClass<out Throwable>>,

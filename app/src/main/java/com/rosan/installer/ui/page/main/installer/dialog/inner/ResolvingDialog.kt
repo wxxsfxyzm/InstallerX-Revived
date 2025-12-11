@@ -22,7 +22,7 @@ fun resolvingDialog(
             DialogParamsType.InstallerResolving.id,
         ) {
             Text(stringResource(R.string.installer_resolving))
-        }, buttons = DialogButtons(
+        }, buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
             listOf(DialogButton(stringResource(R.string.cancel)) {

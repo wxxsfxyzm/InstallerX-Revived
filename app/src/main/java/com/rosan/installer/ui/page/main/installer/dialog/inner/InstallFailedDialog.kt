@@ -40,7 +40,7 @@ import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngrad
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.ui.common.HasMiPackageInstaller
+import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -98,7 +98,7 @@ fun installFailedDialog( // 小写开头
                 )
             }
         ),
-        buttons = DialogButtons(
+        buttons = dialogButtons(
             DialogParamsType.InstallerInstallFailed.id
         ) {
             listOf(
@@ -123,7 +123,7 @@ private fun ErrorSuggestions(
     val context = LocalContext.current
     var showUninstallConfirmDialog by remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
-    val hasMiPackageInstaller = HasMiPackageInstaller.current
+    val hasMiPackageInstaller = LocalMiPackageInstallerPresent.current
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
     class SuggestionChipInfo(

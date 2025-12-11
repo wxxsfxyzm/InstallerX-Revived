@@ -125,7 +125,7 @@ fun installChoiceDialog(
                 onSetSelectionMode = { selectionMode = it }
             )
         },
-        buttons = DialogButtons(DialogParamsType.InstallChoice.id) {
+        buttons = dialogButtons(DialogParamsType.InstallChoice.id) {
             buildList {
                 if ((!isModuleApk && !isMixedModuleZip) ||
                     (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE)

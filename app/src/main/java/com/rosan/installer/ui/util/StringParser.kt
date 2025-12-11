@@ -107,7 +107,7 @@ fun String.toAndroidVersionName(): String {
         33 -> "13"    // Android 13 Tiramisu
         34 -> "14"    // Android 14 Upside Down Cake
         35 -> "15"    // Android 15 Vanilla Ice Cream
-        36 -> "16"    // Android 16 (Future version)
+        36 -> "16"    // Android 16 Baklava
         // Add more future versions here as they are announced
         // 37 -> "17"
 

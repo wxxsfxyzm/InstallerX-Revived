@@ -21,7 +21,7 @@ fun analysingDialog(
             DialogParamsType.InstallerAnalysing.id,
         ) {
             Text(stringResource(R.string.installer_analysing))
-        }, buttons = DialogButtons(
+        }, buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
             // disable the cancel button

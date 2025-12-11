@@ -92,7 +92,7 @@ fun installingDialog(
                 }
             }
         },
-        buttons = DialogButtons(DialogParamsType.ButtonsCancel.id) {
+        buttons = dialogButtons(DialogParamsType.ButtonsCancel.id) {
             // Provides a button to move to background
             listOf(
                 DialogButton(stringResource(R.string.installer_silent_install)) {

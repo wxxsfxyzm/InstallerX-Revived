@@ -30,7 +30,7 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.ui.activity.themestate.ThemeUiState
 import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
-import com.rosan.installer.ui.common.HasMiPackageInstaller
+import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
@@ -311,7 +311,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             }
 
             CompositionLocalProvider(
-                HasMiPackageInstaller provides capabilityChecker.hasMiPackageInstaller
+                LocalMiPackageInstallerPresent provides capabilityChecker.hasMiPackageInstaller
             ) {
                 if (uiState.useMiuix) {
                     InstallerMiuixTheme(

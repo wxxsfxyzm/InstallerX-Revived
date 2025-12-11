@@ -42,7 +42,7 @@ fun uninstallSuccessDialog(
                 textAlign = TextAlign.Center
             )
         },
-        buttons = DialogButtons(
+        buttons = dialogButtons(
             DialogParamsType.InstallerUninstallSuccess.id
         ) {
             // The button list contains only a "Finish" button to close the dialog.

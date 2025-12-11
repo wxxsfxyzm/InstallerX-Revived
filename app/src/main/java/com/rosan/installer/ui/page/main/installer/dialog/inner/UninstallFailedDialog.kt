@@ -38,7 +38,7 @@ fun uninstallFailedDialog(
             // No intelligent suggestions are added here, keeping it focused on displaying the error.
             ErrorTextBlock(installer.error)
         },
-        buttons = DialogButtons(
+        buttons = dialogButtons(
             DialogParamsType.InstallerUninstallFailed.id
         ) {
             listOf(

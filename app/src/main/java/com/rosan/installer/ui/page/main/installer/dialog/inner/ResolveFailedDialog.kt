@@ -24,7 +24,7 @@ fun resolveFailedDialog(
             Text(stringResource(R.string.installer_resolve_failed))
         }, text = DialogInnerParams(
             DialogParamsType.InstallerResolveFailed.id, { ErrorTextBlock(installer.error) }
-        ), buttons = DialogButtons(
+        ), buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
             listOf(DialogButton(stringResource(R.string.cancel)) {

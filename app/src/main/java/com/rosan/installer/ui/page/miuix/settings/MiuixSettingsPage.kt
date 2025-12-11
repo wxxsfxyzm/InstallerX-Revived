@@ -396,7 +396,7 @@ private fun SettingsWideScreenLayout(
     val windowWidth = getWindowSize().width
 
     // Draggable Divider Logic
-    var weight by remember(windowWidth) { mutableStateOf(0.3f) } // Default narrower sidebar for settings
+    var weight by remember(windowWidth) { mutableFloatStateOf(0.3f) } // Default narrower sidebar for settings
     var potentialWeight by remember { mutableFloatStateOf(weight) }
     val dragState = rememberDraggableState { delta ->
         val nextPotentialWeight = potentialWeight + delta / windowWidth

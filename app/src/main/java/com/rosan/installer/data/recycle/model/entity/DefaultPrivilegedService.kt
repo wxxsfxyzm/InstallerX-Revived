@@ -321,6 +321,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         }
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     override fun getSessionDetails(sessionId: Int): Bundle? {
         Log.d("PrivilegedService", "getSessionDetails: sessionId=$sessionId")
         try {

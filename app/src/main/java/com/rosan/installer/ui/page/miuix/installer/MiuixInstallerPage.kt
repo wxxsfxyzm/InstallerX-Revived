@@ -38,7 +38,7 @@ import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitExceptio
 import com.rosan.installer.data.app.model.exception.ModuleInstallException
 import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.ui.common.HasMiPackageInstaller
+import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.InstallerViewState
@@ -179,7 +179,7 @@ fun MiuixInstallerPage(
         }
     }
 
-    val isMiInstallerSupported = HasMiPackageInstaller.current
+    val isMiInstallerSupported = LocalMiPackageInstallerPresent.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -518,7 +518,7 @@ fun MiuixInstallerPage(
                         )
                     else
                         CompositionLocalProvider(
-                            HasMiPackageInstaller provides isMiInstallerSupported
+                            LocalMiPackageInstallerPresent provides isMiInstallerSupported
                         ) {
                             InstallFailedContent(
                                 colorScheme = colorScheme,

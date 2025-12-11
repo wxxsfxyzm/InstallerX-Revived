@@ -59,7 +59,7 @@ fun installConfirmDialog(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         },
-        buttons = DialogButtons(DialogParamsType.InstallerConfirm.id) {
+        buttons = dialogButtons(DialogParamsType.InstallerConfirm.id) {
             listOf(
                 DialogButton(stringResource(R.string.confirm)) {
                     viewModel.dispatch(InstallerViewAction.ApproveSession(state.sessionId, true))

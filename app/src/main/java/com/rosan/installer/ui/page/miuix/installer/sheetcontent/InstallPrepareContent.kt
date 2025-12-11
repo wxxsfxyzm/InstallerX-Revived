@@ -114,6 +114,10 @@ fun InstallPrepareContent(
     val errorColor = MaterialTheme.colorScheme.error
     val tertiaryColor = MiuixTheme.colorScheme.primary
 
+    val downgradeWarning = stringResource(R.string.installer_prepare_type_downgrade)
+    val sigMismatchWarning = stringResource(R.string.installer_prepare_signature_mismatch)
+    val sigUnknownWarning = stringResource(R.string.installer_prepare_signature_unknown)
+    val sdkIncompatibleWarning = stringResource(R.string.installer_prepare_sdk_incompatible)
     val (warningMessages, buttonTextId) = remember(currentPackage, entityToInstall) {
         val oldInfo = currentPackage.installedAppInfo
         val signatureStatus = currentPackage.signatureMatchStatus
@@ -126,7 +130,7 @@ fun InstallPrepareContent(
                 when {
                     entityToInstall.versionCode > oldInfo.versionCode -> finalButtonTextId = R.string.upgrade
                     entityToInstall.versionCode < oldInfo.versionCode -> {
-                        warnings.add(context.getString(R.string.installer_prepare_type_downgrade) to errorColor)
+                        warnings.add(downgradeWarning to errorColor)
                         finalButtonTextId = R.string.install_anyway
                     }
 
@@ -138,19 +142,19 @@ fun InstallPrepareContent(
         if (!isSplitUpdateMode && (primaryEntity.sourceType == DataType.APK || primaryEntity.sourceType == DataType.APKS))
             when (signatureStatus) {
                 SignatureMatchStatus.MISMATCH -> {
-                    warnings.add(0, context.getString(R.string.installer_prepare_signature_mismatch) to errorColor)
+                    warnings.add(0, sigMismatchWarning to errorColor)
                     finalButtonTextId = R.string.install_anyway
                 }
 
                 SignatureMatchStatus.UNKNOWN_ERROR -> {
-                    warnings.add(0, context.getString(R.string.installer_prepare_signature_unknown) to tertiaryColor)
+                    warnings.add(0, sigUnknownWarning to tertiaryColor)
                 }
 
                 else -> {}
             }
         val newMinSdk = entityToInstall?.minSdk?.toIntOrNull()
         if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
-            warnings.add(0, context.getString(R.string.installer_prepare_sdk_incompatible) to errorColor)
+            warnings.add(0, sdkIncompatibleWarning to errorColor)
         }
         Pair(warnings, finalButtonTextId)
     }

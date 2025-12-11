@@ -89,7 +89,7 @@ fun uninstallingDialog(
                 }
             }
         },
-        buttons = DialogButtons(DialogParamsType.ButtonsCancel.id) {
+        buttons = dialogButtons(DialogParamsType.ButtonsCancel.id) {
             emptyList()
         }
     )

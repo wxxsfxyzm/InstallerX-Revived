@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 
 @Composable
-fun DialogButtons(
+fun dialogButtons(
     id: String, content: (@Composable () -> List<DialogButton>)
 ) = DialogInnerParams(id) {
     val buttons = content.invoke()

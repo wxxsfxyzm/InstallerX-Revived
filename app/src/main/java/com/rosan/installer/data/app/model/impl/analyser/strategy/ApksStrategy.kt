@@ -9,6 +9,7 @@ import com.rosan.installer.data.app.util.parseSplitMetadata
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import timber.log.Timber
 import java.io.File
 import java.util.zip.ZipFile
 
@@ -21,31 +22,70 @@ object ApksStrategy : AnalysisStrategy {
     ): List<AppEntity> = coroutineScope {
         requireNotNull(zipFile) { "APKS requires a valid ZipFile" }
 
-        // 1. Identify Base and Splits efficiently
+        Timber.d("ApksStrategy: Starting analysis for source: ${data.source}")
+
         val entries = zipFile.entries().asSequence().toList()
-        val baseEntry = entries.find { it.name.equals("base.apk", true) || it.name.equals("base-master.apk", true) }
-            ?: return@coroutineScope emptyList()
+        Timber.d("ApksStrategy: Zip file contains ${entries.size} entries.")
+
+        // 1. Identify Base and Splits
+        // Use 'File(entry.name).name' to handle nested directories (e.g., "splits/base-master.apk")
+        val baseEntry = entries.find { entry ->
+            val fileName = File(entry.name).name
+            fileName.equals("base.apk", true) || fileName.equals("base-master.apk", true)
+        }
+
+        if (baseEntry == null) {
+            Timber.e("ApksStrategy: CRITICAL - Base APK not found. Checked for 'base.apk' or 'base-master.apk' in all directories.")
+            // Log available entries to help debugging if this still fails
+            entries.take(10).forEach { Timber.d("ApksStrategy: Available entry: ${it.name}") }
+            return@coroutineScope emptyList()
+        }
+
+        Timber.d("ApksStrategy: Base APK identified: ${baseEntry.name}")
 
         // 2. Parse Base APK (Heavy operation - needs Icon/Label)
-        // We must extract base.apk to temp to use AssetManager for full details
         val baseDeferred = async {
+            Timber.d("ApksStrategy: Parsing base entry full details...")
             ApkParser.parseZipEntryFull(config, zipFile, baseEntry, data, extra)
         }
 
         // 3. Process Splits (Lightweight operation)
-        // We infer details from filename where possible to avoid heavy parsing
         val splitEntities = entries
-            .filter { it.name.endsWith(".apk", true) && it != baseEntry }
+            .filter { entry ->
+                val fileName = File(entry.name).name
+
+                // Condition 1: Must end with .apk
+                // Condition 2: Must not be the base entry itself
+                // Condition 3: Filter out files starting with "base-master" (e.g., base-master_2.apk)
+                //              We assume only the exact "base-master.apk" (handled as baseEntry) is valid.
+                val isValidSplit = entry.name.endsWith(".apk", true) &&
+                        entry.name != baseEntry.name &&
+                        !fileName.startsWith("base-master", true)
+
+                if (!isValidSplit && entry.name.endsWith(".apk", true) && entry.name != baseEntry.name) {
+                    Timber.d("ApksStrategy: Skipping invalid split file: ${entry.name}")
+                }
+
+                isValidSplit
+            }
             .map { entry ->
-                val splitName = File(entry.name).nameWithoutExtension.removePrefix("split_")
-                // We defer waiting for the base package name to avoid blocking,
-                // or we pass a "Lazy" builder if strictly needed.
-                // For simplicity here, we wait for base to get packageName/version.
+                // Extract filename without extension, handling paths like "splits/base-xx.apk"
+                val rawName = File(entry.name).nameWithoutExtension
+                val splitName = rawName.removePrefix("split_")
+
+                Timber.d("ApksStrategy: Found split: ${entry.name} -> Name: $splitName")
                 entry to splitName
             }
 
+        Timber.d("ApksStrategy: Waiting for base APK parsing to complete...")
         val baseResult = baseDeferred.await().firstOrNull() as? AppEntity.BaseEntity
-            ?: return@coroutineScope emptyList()
+
+        if (baseResult == null) {
+            Timber.e("ApksStrategy: Base APK parsing returned null or invalid type.")
+            return@coroutineScope emptyList()
+        }
+
+        Timber.d("ApksStrategy: Base parsed. Package: ${baseResult.packageName}, Version: ${baseResult.versionName}")
 
         val finalBase = baseResult.copy(sourceType = extra.dataType)
 
@@ -58,7 +98,7 @@ object ApksStrategy : AnalysisStrategy {
                 splitName = name,
                 targetSdk = finalBase.targetSdk,
                 minSdk = finalBase.minSdk,
-                arch = null, // Can be parsed from name if needed
+                arch = null,
                 sourceType = extra.dataType,
                 type = metadata.type,
                 filterType = metadata.filterType,
@@ -66,6 +106,7 @@ object ApksStrategy : AnalysisStrategy {
             )
         }
 
+        Timber.d("ApksStrategy: Analysis finished. Returning 1 base + ${splits.size} splits.")
         listOf(finalBase) + splits
     }
 }

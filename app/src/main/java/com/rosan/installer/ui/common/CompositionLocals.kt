@@ -6,4 +6,4 @@ val LocalSessionInstallSupported = staticCompositionLocalOf<Boolean> {
     error("CompositionLocal LocalSessionInstallSupported not present")
 }
 
-val HasMiPackageInstaller = staticCompositionLocalOf { false }
+val LocalMiPackageInstallerPresent = staticCompositionLocalOf { false }

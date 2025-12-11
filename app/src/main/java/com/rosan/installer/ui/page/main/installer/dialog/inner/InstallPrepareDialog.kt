@@ -59,7 +59,7 @@ private fun installPrepareEmptyDialog(
             DialogParamsType.InstallerPrepareEmpty.id
         ) {
             Text(stringResource(R.string.installer_prepare_install_empty))
-        }, buttons = DialogButtons(
+        }, buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
             listOf(DialogButton(stringResource(R.string.previous)) {
@@ -85,7 +85,7 @@ private fun installPrepareTooManyDialog(
             DialogParamsType.InstallerPrepareTooMany.id
         ) {
             Text(stringResource(R.string.installer_prepare_install_too_many))
-        }, buttons = DialogButtons(
+        }, buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
             listOf(DialogButton(stringResource(R.string.previous)) {
@@ -164,7 +164,10 @@ fun installPrepareDialog( // 小写开头
     val errorColor = MaterialTheme.colorScheme.error
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
 
-    // This single block calculates all warnings and the final button text based on priority.
+    val downgradeWarning = stringResource(R.string.installer_prepare_type_downgrade)
+    val sigMismatchWarning = stringResource(R.string.installer_prepare_signature_mismatch)
+    val sigUnknownWarning = stringResource(R.string.installer_prepare_signature_unknown)
+    val sdkIncompatibleWarning = stringResource(R.string.installer_prepare_sdk_incompatible)
     val (warningMessages, buttonTextId) = remember(currentPackage, entityToInstall, preInstallAppInfo) {
         val oldInfo = currentPackage.installedAppInfo // Use currentPackage directly
         val signatureStatus = currentPackage.signatureMatchStatus
@@ -184,9 +187,7 @@ fun installPrepareDialog( // 小写开头
                     }
 
                     entityToInstall.versionCode < oldInfo.versionCode -> {
-                        warnings.add(
-                            context.getString(R.string.installer_prepare_type_downgrade) to errorColor
-                        )
+                        warnings.add(downgradeWarning to errorColor)
                         finalButtonTextId = R.string.install_anyway
                     }
 
@@ -213,7 +214,7 @@ fun installPrepareDialog( // 小写开头
                     // Add the signature warning to the top of the list for prominence.
                     warnings.add(
                         0, // Add to the beginning
-                        context.getString(R.string.installer_prepare_signature_mismatch) to errorColor
+                        sigMismatchWarning to errorColor
                     )
                     // CRITICAL: If signatures mismatch, ALWAYS force the button to "Install Anyway".
                     finalButtonTextId = R.string.install_anyway
@@ -222,7 +223,7 @@ fun installPrepareDialog( // 小写开头
                 SignatureMatchStatus.UNKNOWN_ERROR -> {
                     warnings.add(
                         0,
-                        context.getString(R.string.installer_prepare_signature_unknown) to tertiaryColor
+                        sigUnknownWarning to tertiaryColor
                     )
                 }
 
@@ -236,7 +237,7 @@ fun installPrepareDialog( // 小写开头
         if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
             warnings.add(
                 0,
-                context.getString(R.string.installer_prepare_sdk_incompatible) to errorColor
+                sdkIncompatibleWarning to errorColor
             )
         }
 
@@ -307,7 +308,7 @@ fun installPrepareDialog( // 小写开头
                 }
             }
         },
-        buttons = DialogButtons(
+        buttons = dialogButtons(
             DialogParamsType.InstallerPrepareInstall.id
         ) {
             // --- Use buildList to dynamically create buttons ---

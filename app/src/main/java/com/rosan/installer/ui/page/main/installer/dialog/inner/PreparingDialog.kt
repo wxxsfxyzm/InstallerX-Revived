@@ -86,7 +86,7 @@ fun preparingDialog(
                 }
             }
         },
-        buttons = DialogButtons(
+        buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
             listOf(DialogButton(stringResource(R.string.cancel)) {

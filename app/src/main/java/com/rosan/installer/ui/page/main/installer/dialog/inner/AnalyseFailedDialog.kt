@@ -24,7 +24,7 @@ fun analyseFailedDialog(
             Text(stringResource(R.string.installer_analyse_failed))
         }, text = DialogInnerParams(
             DialogParamsType.InstallerAnalyseFailed.id, { ErrorTextBlock(installer.error) }
-        ), buttons = DialogButtons(
+        ), buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
             listOf(DialogButton(stringResource(R.string.cancel)) {

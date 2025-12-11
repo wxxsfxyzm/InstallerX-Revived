@@ -192,6 +192,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
      * - For critical states (success, failure): update immediately
      * - For progress updates: throttle to avoid rate limiting
      */
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun setNotificationThrottled(notification: Notification?, progress: ProgressEntity) {
         if (notification == null) {
             setNotificationImmediate(null)

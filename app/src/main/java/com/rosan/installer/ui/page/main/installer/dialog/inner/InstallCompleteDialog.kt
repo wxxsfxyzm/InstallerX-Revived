@@ -79,7 +79,7 @@ fun installCompletedDialog(
                 item { Spacer(modifier = Modifier.size(1.dp)) }
             }
         },
-        buttons = DialogButtons(DialogParamsType.InstallerInstallCompleted.id) {
+        buttons = dialogButtons(DialogParamsType.InstallerInstallCompleted.id) {
             listOf(
                 DialogButton(stringResource(R.string.finish)) {
                     viewModel.dispatch(InstallerViewAction.Close)
