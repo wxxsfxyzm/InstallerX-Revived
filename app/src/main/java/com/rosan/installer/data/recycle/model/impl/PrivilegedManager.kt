@@ -31,6 +31,16 @@ object PrivilegedManager : KoinComponent {
     }
 
     /**
+     * Helper to generate the special auth command (e.g. "su 1000") for Root mode.
+     * This ensures different methods reuse the same 'su 1000' service process.
+     */
+    private fun getSpecialAuth(authorizer: ConfigEntity.Authorizer): (() -> String?)? {
+        return if (authorizer == ConfigEntity.Authorizer.Root) {
+            { "su 1000" }
+        } else null
+    }
+
+    /**
      * Sets the app as the default installer.
      */
     suspend fun setDefaultInstaller(
@@ -38,17 +48,10 @@ object PrivilegedManager : KoinComponent {
         component: ComponentName,
         enable: Boolean
     ) {
-        val useHook = getHookMode()
-
-        // The special logic for 'su 1000' is specific to this operation when using Root.
-        val specialAuth = if (authorizer == ConfigEntity.Authorizer.Root) {
-            { "su 1000" }
-        } else null
-
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = useHook,
-            special = specialAuth
+            useShizukuHookMode = getHookMode(),
+            special = getSpecialAuth(authorizer)
         ) { userService ->
             userService.privileged.setDefaultInstaller(component, enable)
         }
@@ -62,16 +65,10 @@ object PrivilegedManager : KoinComponent {
         packageName: String,
         permission: String
     ) {
-        val specialAuth = if (authorizer == ConfigEntity.Authorizer.Root) {
-            { "su 1000" }
-        } else null
-
-        val useHook = getHookMode()
-
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = useHook,
-            special = specialAuth
+            useShizukuHookMode = getHookMode(),
+            special = getSpecialAuth(authorizer)
         ) {
             try {
                 it.privileged.grantRuntimePermission(packageName, permission)
@@ -90,17 +87,11 @@ object PrivilegedManager : KoinComponent {
         packageName: String,
         permission: String
     ): Boolean {
-        val specialAuth = if (authorizer == ConfigEntity.Authorizer.Root) {
-            { "su 1000" }
-        } else null
-
-        val useHook = getHookMode()
         var isGranted = false
-
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = useHook,
-            special = specialAuth
+            useShizukuHookMode = getHookMode(),
+            special = getSpecialAuth(authorizer)
         ) {
             try {
                 isGranted = it.privileged.isPermissionGranted(packageName, permission)
@@ -170,13 +161,12 @@ object PrivilegedManager : KoinComponent {
      * Starts an activity using a privileged context.
      */
     suspend fun startActivityPrivileged(config: ConfigEntity, intent: Intent): Boolean {
-        val useHook = getHookMode()
         var success = false
-
         useUserService(
             authorizer = config.authorizer,
             customizeAuthorizer = config.customizeAuthorizer,
-            useShizukuHookMode = useHook
+            useShizukuHookMode = getHookMode(),
+            special = getSpecialAuth(config.authorizer)
         ) {
             try {
                 success = it.privileged.startActivityPrivileged(intent)
@@ -192,10 +182,12 @@ object PrivilegedManager : KoinComponent {
      * Fetches the list of users on the device.
      */
     suspend fun getUsers(authorizer: ConfigEntity.Authorizer): Map<Int, String> {
-        val useHook = getHookMode()
         var users: Map<Int, String> = emptyMap()
-
-        useUserService(authorizer = authorizer, useShizukuHookMode = useHook) {
+        useUserService(
+            authorizer = authorizer,
+            useShizukuHookMode = getHookMode(),
+            special = getSpecialAuth(authorizer)
+        ) {
             try {
                 @Suppress("UNCHECKED_CAST")
                 users = it.privileged.users as? Map<Int, String> ?: emptyMap()

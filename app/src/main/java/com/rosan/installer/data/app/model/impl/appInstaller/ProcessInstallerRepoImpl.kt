@@ -21,7 +21,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     ) {
         recycler = AppProcessRecyclers.get(
             when (config.authorizer) {
-                ConfigEntity.Authorizer.Root -> "su"
+                ConfigEntity.Authorizer.Root -> "su 1000"
                 ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
                 else -> "sh"
             }
@@ -32,7 +32,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     override suspend fun doUninstallWork(config: ConfigEntity, packageName: String, extra: InstallExtraInfoEntity) {
         recycler = AppProcessRecyclers.get(
             when (config.authorizer) {
-                ConfigEntity.Authorizer.Root -> "su"
+                ConfigEntity.Authorizer.Root -> "su 1000"
                 ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
                 else -> "sh"
             }
