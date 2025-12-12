@@ -6,8 +6,8 @@ import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.recycle.model.impl.recycler.AppProcessRecyclers
 import com.rosan.installer.data.recycle.repo.Recyclable
+import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SHELL_SH
-import com.rosan.installer.data.recycle.util.SHELL_SYSTEM
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
@@ -23,7 +23,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     ) {
         recycler = AppProcessRecyclers.get(
             when (config.authorizer) {
-                ConfigEntity.Authorizer.Root -> SHELL_SYSTEM
+                ConfigEntity.Authorizer.Root -> SHELL_ROOT
                 ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
                 else -> SHELL_SH
             }
@@ -34,7 +34,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     override suspend fun doUninstallWork(config: ConfigEntity, packageName: String, extra: InstallExtraInfoEntity) {
         recycler = AppProcessRecyclers.get(
             when (config.authorizer) {
-                ConfigEntity.Authorizer.Root -> SHELL_SYSTEM
+                ConfigEntity.Authorizer.Root -> SHELL_ROOT
                 ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
                 else -> SHELL_SH
             }
