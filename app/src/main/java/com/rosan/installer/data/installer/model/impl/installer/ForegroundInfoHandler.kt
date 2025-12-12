@@ -80,7 +80,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     // Throttling state
     private var lastNotificationUpdateTime = 0L
     private var lastProgressValue = -1f
-    private var lastLogLine: String? = null // 用于模块安装去重
+    private var lastProgressClass: KClass<out ProgressEntity>? = null
+    private var lastLogLine: String? = null
 
     @SuppressLint("MissingPermission")
     override suspend fun onStart() {
@@ -115,6 +116,17 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                         Toast.makeText(context, progress.reason, Toast.LENGTH_LONG).show()
                     }
                     installer.close()
+                    return@combine
+                }
+
+                // --- Skip the "Confirm Install" notification in AutoNotification mode ---
+                // Instead of cancelling it (which causes a blink), we simply return@combine.
+                // This keeps the previous notification (e.g. "Analysing") visible for a split second
+                // until the "Installing" state arrives and overwrites it.
+                if (progress is ProgressEntity.InstallAnalysedSuccess &&
+                    installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
+                ) {
+                    Timber.d("[id=${installer.id}] AutoNotification mode detected. Skipping interactive InstallAnalysedSuccess notification.")
                     return@combine
                 }
 
@@ -196,8 +208,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private fun setNotificationThrottled(notification: Notification?, progress: ProgressEntity) {
         if (notification == null) {
             setNotificationImmediate(null)
-            lastProgressValue = -1f // Reset state
-            lastLogLine = null
+            lastProgressValue = -1f  // Reset state
+            lastProgressClass = null // Reset state class
+            lastLogLine = null       // Reset module log
             return
         }
 
@@ -211,6 +224,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 progress is ProgressEntity.InstallAnalysedSuccess ||
                 progress is ProgressEntity.InstallResolvedFailed ||
                 progress is ProgressEntity.InstallAnalysedFailed
+
+        // Transition Detection (Always Update)
+        // If we are switching from any other state to Installing, this is the "Start" of installation.
+        // We must show this immediately to let the user know installation has begun.
+        // If we are already in Installing (e.g. batch item 1 -> batch item 2), this will be false, allowing throttling.
+        val isEnteringInstalling = progress is ProgressEntity.Installing && lastProgressClass != ProgressEntity.Installing::class
 
         // Specific logic for Module Install (Log based throttling)
         if (progress is ProgressEntity.InstallingModule) {
@@ -227,6 +246,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         val shouldUpdate = when {
             isCriticalState -> true
+            isEnteringInstalling -> true
             timeSinceLastUpdate < NOTIFICATION_UPDATE_INTERVAL_MS -> false
             progress is ProgressEntity.Installing -> true // Installing state (batch or single) should update per item or progress
             currentProgress < 0 -> true  // Not progress
@@ -243,6 +263,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             if (currentProgress >= 0) {
                 lastProgressValue = currentProgress
             }
+            // Update the tracked class only when we actually notify
+            lastProgressClass = progress::class
         }
     }
 
