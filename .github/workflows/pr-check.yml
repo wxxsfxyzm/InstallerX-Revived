@@ -1,7 +1,5 @@
 name: PR Build and Test Check
 
-# This workflow is triggered when a pull request is created or updated
-# that targets the "main" "dev" branch.
 on:
   pull_request:
     branches:
@@ -13,25 +11,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code from the PR branch
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up the JDK environment
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '21'
-          cache: gradle
+          # cache: gradle 已移除
 
-      # Step 3: Grant execute permission for gradlew
+      # 保持只读：PR 不需要产生新的构建缓存，复用 main/dev 的即可
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # Step 4: Run the build for a single variant to check for compilation errors
-      # We choose 'onlinePreviewDebug' as a representative build variant.
-      # This task will compile the code and run associated unit tests without
-      # building all possible APKs, which is faster.
-      - name: Build Both Variant (onlinePreviewDebug/offlinePreviewDebug)
-        run: ./gradlew assembleOnlinePreviewDebug assembleOnlinePreviewDebug
+      # 构建 Online 和 Offline 两个版本的 Debug 包
+      - name: Build Both Variant (onlinePreview/offlinePreview)
+        run: ./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug
+
+      # 上传 APK 供人工测试
+      - name: Upload Debug APKs
+        uses: actions/upload-artifact@v4
+        with:
+          # 使用 PR 的 SHA 作为名称后缀，方便区分
+          name: pr-debug-apks-${{ github.event.pull_request.head.sha }}
+          path: |
+            app/build/outputs/apk/onlinePreview/debug/*.apk
+            app/build/outputs/apk/offlinePreview/debug/*.apk
+          retention-days: 7

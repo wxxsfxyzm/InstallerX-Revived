@@ -3,6 +3,14 @@ name: Automatic Alpha Pre-Release (Latest Only)
 on:
   push:
     branches: [ "main" ]
+    # 仅在以下路径发生变更时触发发布，忽略文档修改
+    paths:
+      - 'app/**'                # 监听 app 模块源码
+      - 'build.gradle.kts'      # 监听根目录构建脚本
+      - 'settings.gradle.kts'   # 监听项目设置
+      - 'gradle.properties'     # 监听 Gradle 属性
+      - 'gradle/**'             # 监听 Gradle Wrapper 和依赖定义
+      - '.github/workflows/auto-preview-release.yml' # 监听工作流文件的修改
 
 jobs:
   build_and_prerelease:
@@ -11,47 +19,41 @@ jobs:
       contents: write
 
     steps:
-      # Step 1: Check out the code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Step 2: Get the short commit SHA
       - name: Get commit short SHA
         id: commit_sha
         run: echo "SHORT_SHA=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
 
-      # Step 3: Set up the JDK environment
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '21'
-          cache: gradle
+          # cache: gradle 已移除
 
-      # Step 4: Update the versionName in build file to format A.B.C.hash
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # 主分支构建允许更新缓存
+          cache-read-only: false
+
       - name: Update versionName format
         id: version
         run: |
-          # Extract A.B.C from build.gradle.kts
           VERSION=$(grep -oP 'versionName = "\K([0-9]+\.[0-9]+\.[0-9]+)' app/build.gradle.kts)
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           A=$(echo $VERSION | cut -d. -f1)
           B=$(echo $VERSION | cut -d. -f2)
           C=$(echo $VERSION | cut -d. -f3)
           C_NEW=$((C + 1))
-          # The new version name written to the gradle file
           NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
           sed -i "s/versionName = \".*\"/versionName = \"${NEW_VERSION}\"/" app/build.gradle.kts
-          # The new version tag for the release (e.g., v1.2.4)
           echo "VNEW_VERSION=v${A}.${B}.${C_NEW}" >> $GITHUB_OUTPUT
 
-      # Step 5: Grant execute permission for gradlew
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-
-      # Step 6: Decode and set up the signing key
       - name: Decode and set up signing key
         run: |
           mkdir -p keystore
@@ -61,11 +63,12 @@ jobs:
           echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> keystore.properties
           echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> keystore.properties
 
-      # Step 7: Build both Preview Release APKs
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
       - name: Build Preview Release APKs
         run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease
 
-      # Step 8: Find and Rename Preview APKs
       - name: Find and Rename Preview APKs
         id: rename_apks
         run: |
@@ -96,7 +99,6 @@ jobs:
           echo "online_apk=${NEW_ONLINE_APK_PATH}" >> $GITHUB_OUTPUT
           echo "offline_apk=${NEW_OFFLINE_APK_PATH}" >> $GITHUB_OUTPUT
 
-      # Step 9: Delete the old alpha release and its corresponding git tag
       - name: Delete old alpha release and tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -109,7 +111,6 @@ jobs:
             echo "No alpha-latest tag to delete."
           fi
 
-      # Step 10: Automatically generate changelog from commit history
       - name: Generate changelog
         id: changelog
         run: |
@@ -122,7 +123,6 @@ jobs:
             LOG_RANGE="$PREV_TAG..HEAD"
           fi
 
-          # Get the last 5 commits, excluding merge commits
           CHANGELOG_LIST=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | head -n 5)
           CHANGELOG_COUNT=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | wc -l)
           
@@ -140,7 +140,6 @@ jobs:
             else
               COMPARE_URL="https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${CURR_TAG}"
             fi
-            # Store the link in its own variable. Note the \n\n for markdown formatting.
             CHANGELOG_LINK_OUTPUT="\n\n**Full Changelog:** [\`${PREV_TAG}...${CURR_TAG}\`]($COMPARE_URL)"
           fi
           
@@ -159,7 +158,6 @@ jobs:
           echo "--- Generated Changelog for Release Body ---"
           echo -e "${CHANGELOG_BODY_OUTPUT}${CHANGELOG_LINK_OUTPUT}"
 
-      # Step 11: Create Latest Alpha Pre-Release with two APKs
       - name: Create Latest Alpha Pre-Release
         uses: softprops/action-gh-release@v2
         with:
@@ -181,9 +179,7 @@ jobs:
           files: |
             ${{ steps.rename_apks.outputs.online_apk }}
             ${{ steps.rename_apks.outputs.offline_apk }}
-      
 
-      # Step 12: Upload the APK to Telegram
       - name: Upload to Telegram
         env:
           API_ID: ${{ secrets.API_ID }}

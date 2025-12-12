@@ -2,12 +2,10 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "main", "dev" ] # Based on pr-check.yml branches
+    branches: [ "main", "dev" ]
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ "main", "dev" ]
   schedule:
-    # Run weekly on Sunday at 01:30
     - cron: '30 1 * * 0'
 
 jobs:
@@ -22,42 +20,37 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Must use 'java-kotlin' to support Android/Kotlin projects
         language: [ 'java-kotlin' ]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. Set up JDK 21
-      # Basis: jvmToolchain(21) requirement in build.gradle.kts
-      # Also consistent with your pr-check.yml
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '21'
-          cache: 'gradle'
+          # cache: gradle 已移除
 
-      # 2. Initialize CodeQL
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
-          # Optional: Uncomment below for stricter scanning
-          # queries: security-extended,security-and-quality
 
-      # 3. Grant execute permission for gradlew
+      # 新增：Gradle 设置与缓存管理
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # CodeQL 分析只读缓存
+          cache-read-only: true
+
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 4. Manual Build
-      # Basis: Use the specific variant 'assembleOnlinePreviewDebug' verified in pr-check.yml
-      # This avoids memory issues from building all flavors and skips release signing steps (no keystore needed)
       - name: Build Android Project
         run: ./gradlew assembleOnlinePreviewDebug --no-daemon
 
-      # 5. Perform Analysis
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
         with:
