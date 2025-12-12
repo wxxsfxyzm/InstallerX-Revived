@@ -480,9 +480,19 @@ class InstallerViewModel(
             repo.progress.collect { progress ->
                 // Handle transient "loading" states separately, as they don't always cause a full state change.
                 if (progress is ProgressEntity.InstallResolving || progress is ProgressEntity.InstallPreparing || progress is ProgressEntity.InstallAnalysing) {
-                    if (loadingStateJob == null || !loadingStateJob!!.isActive) {
+                    // If installing a module, skip the anti-flicker delay to show the sheet immediately.
+                    if (isInstallingModule) {
+                        loadingStateJob?.cancel()
+                        state = if (progress is ProgressEntity.InstallPreparing) {
+                            InstallerViewState.Preparing(progress.progress)
+                        } else {
+                            InstallerViewState.Analysing
+                        }
+                    }
+                    // For regular app installs, keep the 200ms delay to prevent UI flickering.
+                    else if (loadingStateJob == null || !loadingStateJob!!.isActive) {
                         loadingStateJob = viewModelScope.launch {
-                            delay(200L) // Show loading indicator only if the operation is not instant
+                            delay(200L)
                             state = if (progress is ProgressEntity.InstallPreparing) {
                                 InstallerViewState.Preparing(progress.progress)
                             } else {

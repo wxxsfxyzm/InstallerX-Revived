@@ -3,27 +3,37 @@ package com.rosan.installer.ui.page.main.widget.dialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
+import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.util.help
 
@@ -218,4 +228,69 @@ fun HideLauncherIconWarningDialog(
             }
         )
     }
+}
+
+/**
+ * A standard AlertDialog to select Root Implementation.
+ * Used when enabling the "Module Flashing" switch for the first time.
+ */
+@Composable
+fun RootImplementationSelectionDialog(
+    currentSelection: RootImplementation,
+    onDismiss: () -> Unit,
+    onConfirm: (RootImplementation) -> Unit
+) {
+    // Temporary state for the dialog selection
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf(currentSelection) }
+
+    val options = mapOf(
+        RootImplementation.Magisk to "Magisk",
+        RootImplementation.KernelSU to "KernelSU",
+        RootImplementation.APatch to "APatch"
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.lab_module_select_root_impl)) },
+        text = {
+            Column(Modifier.selectableGroup()) {
+                options.forEach { (impl, label) ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .selectable(
+                                selected = (impl == selectedOption),
+                                onClick = { onOptionSelected(impl) },
+                                role = Role.RadioButton
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (impl == selectedOption),
+                            onClick = null // null recommended for accessibility with selectable row
+                        )
+                        Text(
+                            text = label,
+                            style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(selectedOption) }
+            ) {
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }

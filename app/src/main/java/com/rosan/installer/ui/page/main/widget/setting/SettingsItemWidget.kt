@@ -63,6 +63,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.HttpProfile
+import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -921,6 +922,40 @@ fun ManagedUidsWidget(
             }
         )
     }
+}
+
+/**
+ * Widget for selecting the Root Implementation (Magisk/KernelSU/APatch).
+ * Mimics the logic from MiuixRootImplementationDialog but uses DropDownMenuWidget.
+ */
+@Composable
+fun LabRootImplementationWidget(viewModel: PreferredViewModel) {
+    val currentRootImpl = viewModel.state.labRootImplementation
+
+    val data = remember {
+        mapOf(
+            RootImplementation.Magisk to "Magisk",
+            RootImplementation.KernelSU to "KernelSU",
+            RootImplementation.APatch to "APatch"
+        )
+    }
+
+    val options = data.values.toList()
+    val keys = data.keys.toList()
+
+    val selectedIndex = keys.indexOf(currentRootImpl).coerceAtLeast(0)
+
+    DropDownMenuWidget(
+        title = stringResource(R.string.lab_module_select_root_impl),
+        description = options.getOrNull(selectedIndex),
+        choice = selectedIndex,
+        data = options,
+        onChoiceChange = { newIndex ->
+            keys.getOrNull(newIndex)?.let { impl ->
+                viewModel.dispatch(PreferredViewAction.LabChangeRootImplementation(impl))
+            }
+        }
+    )
 }
 
 @Composable

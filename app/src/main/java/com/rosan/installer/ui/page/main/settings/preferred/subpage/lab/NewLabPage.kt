@@ -1,5 +1,10 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.lab
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -21,6 +26,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -31,8 +38,10 @@ import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.widget.dialog.RootImplementationSelectionDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.LabHttpProfileWidget
+import com.rosan.installer.ui.page.main.widget.setting.LabRootImplementationWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.none
@@ -46,6 +55,21 @@ fun NewLabPage(
     val state = viewModel.state
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val showRootImplementationDialog = remember { mutableStateOf(false) }
+
+    if (showRootImplementationDialog.value) {
+        RootImplementationSelectionDialog(
+            currentSelection = state.labRootImplementation,
+            onDismiss = { showRootImplementationDialog.value = false },
+            onConfirm = { selectedImplementation ->
+                showRootImplementationDialog.value = false
+                // 1. Save the selected implementation
+                viewModel.dispatch(PreferredViewAction.LabChangeRootImplementation(selectedImplementation))
+                // 2. Enable the flash module feature
+                viewModel.dispatch(PreferredViewAction.LabChangeRootModuleFlash(true))
+            }
+        )
+    }
 
     Scaffold(
         modifier = Modifier
@@ -98,6 +122,36 @@ fun NewLabPage(
                         }
                     }
                 )
+            }
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.config_authorizer_root),
+                    content = buildList {
+                        add {
+                            SwitchWidget(
+                                icon = AppIcons.Root,
+                                title = stringResource(R.string.lab_module_flashing),
+                                description = stringResource(R.string.lab_module_flashing_desc),
+                                checked = state.labRootEnableModuleFlash,
+                                onCheckedChange = { isChecking ->
+                                    if (isChecking) {
+                                        // If turning ON, show the dialog first (don't enable yet)
+                                        showRootImplementationDialog.value = true
+                                    } else {
+                                        // If turning OFF, disable immediately
+                                        viewModel.dispatch(PreferredViewAction.LabChangeRootModuleFlash(false))
+                                    }
+                                }
+                            )
+                            AnimatedVisibility(
+                                visible = state.labRootEnableModuleFlash,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically()
+                            ) {
+                                LabRootImplementationWidget(viewModel)
+                            }
+                        }
+                    })
             }
             item {
                 SplicedColumnGroup(

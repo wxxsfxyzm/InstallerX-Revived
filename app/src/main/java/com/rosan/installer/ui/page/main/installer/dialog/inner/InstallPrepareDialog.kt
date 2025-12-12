@@ -40,7 +40,6 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.widget.chip.Chip
-import timber.log.Timber
 
 // Assume pausingIcon is accessible
 
@@ -137,9 +136,6 @@ fun installPrepareDialog( // 小写开头
             selectedEntities.isNotEmpty()
 
     val isSplitUpdateMode = (isBundleSplitUpdate || isPureSplit) && preInstallAppInfo != null
-
-    Timber.tag("AppEntity")
-        .d("Package: ${primaryEntity.packageName}, Container: $containerType, Total files: ${installer.analysisResults.size}")
 
     var showChips by remember { mutableStateOf(false) }
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
@@ -313,16 +309,28 @@ fun installPrepareDialog( // 小写开头
         ) {
             // --- Use buildList to dynamically create buttons ---
             buildList {
-                // Base Install: Entity exists AND SDK compatible
-                val canInstallBase = entityToInstall != null &&
-                        (entityToInstall.minSdk?.toIntOrNull()?.let { it <= Build.VERSION.SDK_INT } ?: true)
-                // Split Install: Mode valid (implies app installed)
-                val canInstallSplit = isSplitUpdateMode
-
-                val canInstall = canInstallBase || canInstallSplit
                 val isAPK =
                     containerType == DataType.APKS || containerType == DataType.XAPK || containerType == DataType.APKM || containerType == DataType.MIXED_MODULE_APK
 
+                val canInstallBaseEntity = (primaryEntity as? AppEntity.BaseEntity)?.let { base ->
+                    if (entityToInstall != null) {
+                        // Installing Base: Check SDK
+                        base.minSdk?.toIntOrNull()?.let { sdk -> sdk <= Build.VERSION.SDK_INT } ?: true
+                    } else {
+                        // Bundle Split Update: Allowed if installed
+                        isSplitUpdateMode
+                    }
+                } ?: false
+
+                val canInstallModuleEntity = (primaryEntity as? AppEntity.ModuleEntity)?.let {
+                    settings.enableModuleInstall
+                } ?: false
+
+                val canInstallSplitEntity = (primaryEntity as? AppEntity.SplitEntity)?.let {
+                    currentPackage.installedAppInfo != null
+                } ?: false
+
+                val canInstall = canInstallBaseEntity || canInstallModuleEntity || canInstallSplitEntity
                 // only when the entity is a split APK, XAPK, or APKM
                 if (canInstall && settings.showExtendedMenu && isAPK) {
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
@@ -337,7 +345,7 @@ fun installPrepareDialog( // 小写开头
                     })
                 }
                 // else if app can be installed and extended menu is shown
-                if (canInstall && settings.showExtendedMenu) {
+                if (canInstall && settings.showExtendedMenu && primaryEntity !is AppEntity.ModuleEntity) {
                     add(DialogButton(stringResource(R.string.menu), 2f) {
                         viewModel.dispatch(InstallerViewAction.InstallExtendedMenu)
                     })
