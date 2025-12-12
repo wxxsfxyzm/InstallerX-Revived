@@ -38,7 +38,11 @@ class SessionProcessor : KoinComponent {
         ) {
             Timber.d("Handling CONFIRM_INSTALL using ${config.authorizer} service.")
             var bundle: Bundle? = null
-            useUserService(config) { bundle = it.privileged.getSessionDetails(sessionId) }
+            useUserService(
+                authorizer = config.authorizer,
+                customizeAuthorizer = config.customizeAuthorizer,
+                useShizukuHookMode = false
+            ) { bundle = it.privileged.getSessionDetails(sessionId) }
 
             if (bundle == null) {
                 Timber.e("getSessionDetails() failed via ${config.authorizer}.")
@@ -67,7 +71,11 @@ class SessionProcessor : KoinComponent {
             )
         ) {
             Timber.d("Approving session using ${config.authorizer} service.")
-            useUserService(config) { it.privileged.approveSession(sessionId, granted) }
+            useUserService(
+                authorizer = config.authorizer,
+                customizeAuthorizer = config.customizeAuthorizer,
+                useShizukuHookMode = false
+            ) { it.privileged.approveSession(sessionId, granted) }
         } else {
             Timber.w("approveSession called with unsupported authorizer (${config.authorizer}).")
         }

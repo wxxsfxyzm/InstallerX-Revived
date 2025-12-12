@@ -12,95 +12,76 @@ import com.rosan.installer.data.recycle.repo.recyclable.UserService
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import timber.log.Timber
 
+private const val TAG = "PrivilegedService"
+
 private object DefaultUserService : UserService {
     override val privileged: IPrivilegedService = DefaultPrivilegedService()
-
-    override fun close() {
-    }
+    override fun close() {}
 }
 
-fun useUserService(
-    config: ConfigEntity,
-    useShizukuHookMode: Boolean = false,
-    special: (() -> String?)? = null,
-    action: (UserService) -> Unit
-) {
-    // special为null，或special.invoke()时，遵循config
-    val recycler = getRecyclableInstance(config.authorizer, config.customizeAuthorizer, useShizukuHookMode, special)
-    if (recycler != null) {
-        Timber.tag("useUserService").e("use ${config.authorizer} Privileged Service: $recycler")
-        recycler.use { action.invoke(it.entity) }
-    } else {
-        Timber.tag("useUserService").e("Use Default User Service")
-        action.invoke(DefaultUserService)
-    }
-}
-
-/**
- * Overloaded function that accepts Authorizer type and customize string directly.
- * This is ideal for callers like ViewModels that don't have a full ConfigEntity.
- *
- * @param authorizer The type of authorizer to use.
- * @param customizeAuthorizer The command string for the customize authorizer, used only when authorizer is Customize.
- * @param useShizukuHookMode Whether to use Shizuku hook mode.
- * @param special An optional lambda to override the authorizer logic.
- * @param action The action to perform with the user service.
- */
 fun useUserService(
     authorizer: ConfigEntity.Authorizer,
     customizeAuthorizer: String = "",
-    useShizukuHookMode: Boolean = false,
+    useShizukuHookMode: Boolean = true,
     special: (() -> String?)? = null,
     action: (UserService) -> Unit
 ) {
     val recycler = getRecyclableInstance(authorizer, customizeAuthorizer, useShizukuHookMode, special)
+    processRecycler(authorizer, recycler, action)
+}
+
+/**
+ * Helper to process the recycler execution and error handling
+ */
+private fun processRecycler(
+    authorizer: ConfigEntity.Authorizer,
+    recycler: Recyclable<out UserService>?,
+    action: (UserService) -> Unit
+) {
     try {
         if (recycler != null) {
-            Timber.tag("useUserService").e("use $authorizer Privileged Service: $recycler")
+            Timber.tag(TAG).e("use $authorizer Privileged Service: $recycler")
             recycler.use { action.invoke(it.entity) }
         } else {
-            Timber.tag("useUserService").e("Use Default User Service")
+            Timber.tag(TAG).e("Use Default User Service")
             action.invoke(DefaultUserService)
         }
     } catch (e: IllegalStateException) {
-        // Specifically catch the Shizuku runtime binder error for any privileged action.
         if (authorizer == ConfigEntity.Authorizer.Shizuku && e.message?.contains("binder haven't been received") == true) {
             throw ShizukuNotWorkException("Shizuku service connection lost during privileged action.", e)
         }
-        // Re-throw any other exception.
         throw e
     }
 }
 
-/**
- * Core private function to select the correct recycler based on authorizer type.
- */
 private fun getRecyclableInstance(
     authorizer: ConfigEntity.Authorizer,
     customizeAuthorizer: String,
     useShizukuHookMode: Boolean,
     special: (() -> String?)?
 ): Recyclable<out UserService>? {
-    // special為null，或special.invoke()時，遵循config
-    Timber.tag("PrivilegedService").d("Authorizer: $authorizer")
-    return if (special?.invoke() == null) when (authorizer) {
-        ConfigEntity.Authorizer.Root -> ProcessUserServiceRecyclers.get("su").make()
+    Timber.tag(TAG).d("Authorizer: $authorizer")
+
+    // Check special logic first to reduce nesting
+    val specialShell = special?.invoke()
+    if (specialShell != null) {
+        return ProcessUserServiceRecyclers.get(specialShell).make()
+    }
+
+    return when (authorizer) {
+        ConfigEntity.Authorizer.Root -> ProcessUserServiceRecyclers.get(SHELL_ROOT).make()
         ConfigEntity.Authorizer.Shizuku -> {
             if (useShizukuHookMode) {
-                Timber.tag("PrivilegedService").i("Using Shizuku Hook Mode (Experimental).")
+                Timber.tag(TAG).i("Using Shizuku Hook Mode.")
                 ShizukuHookRecycler.make()
             } else {
-                Timber.tag("PrivilegedService").i("Using Shizuku UserService Mode (Default).")
+                Timber.tag(TAG).i("Using Shizuku UserService Mode (Default).")
                 ShizukuUserServiceRecycler.make()
             }
         }
 
         ConfigEntity.Authorizer.Dhizuku -> DhizukuUserServiceRecycler.make()
         ConfigEntity.Authorizer.Customize -> ProcessUserServiceRecyclers.get(customizeAuthorizer).make()
-        // 其余情况，不使用授权器
         else -> null
-    } else {
-        // special回调null时，不使用授权器
-        ProcessUserServiceRecyclers.get(special.invoke()!!).make()
     }
 }

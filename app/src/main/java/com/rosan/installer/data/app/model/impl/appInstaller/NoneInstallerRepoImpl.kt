@@ -1,5 +1,5 @@
 // 文件: NoneInstallerRepoImpl.kt
-package com.rosan.installer.data.app.model.impl.installer
+package com.rosan.installer.data.app.model.impl.appInstaller
 
 import android.annotation.SuppressLint
 import android.content.Context

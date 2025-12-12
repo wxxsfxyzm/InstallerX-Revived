@@ -2,6 +2,8 @@ package com.rosan.installer.data.recycle.model.impl
 
 import android.content.ComponentName
 import android.content.Intent
+import com.rosan.installer.data.recycle.util.SHELL_ROOT
+import com.rosan.installer.data.recycle.util.SHELL_SYSTEM
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.LAB_USE_SHIZUKU_HOOK_MODE
@@ -31,6 +33,15 @@ object PrivilegedManager : KoinComponent {
     }
 
     /**
+     * Helper to generate the special auth command (e.g. "su 1000") for Root mode.
+     * This ensures different methods reuse the same 'su 1000' service process.
+     */
+    private fun getSpecialAuth(authorizer: ConfigEntity.Authorizer): (() -> String?)? =
+        if (authorizer == ConfigEntity.Authorizer.Root) {
+            { SHELL_SYSTEM }
+        } else null
+
+    /**
      * Sets the app as the default installer.
      */
     suspend fun setDefaultInstaller(
@@ -38,17 +49,10 @@ object PrivilegedManager : KoinComponent {
         component: ComponentName,
         enable: Boolean
     ) {
-        val useHook = getHookMode()
-
-        // The special logic for 'su 1000' is specific to this operation when using Root.
-        val specialAuth = if (authorizer == ConfigEntity.Authorizer.Root) {
-            { "su 1000" }
-        } else null
-
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = useHook,
-            special = specialAuth
+            useShizukuHookMode = getHookMode(),
+            special = getSpecialAuth(authorizer)
         ) { userService ->
             userService.privileged.setDefaultInstaller(component, enable)
         }
@@ -62,16 +66,10 @@ object PrivilegedManager : KoinComponent {
         packageName: String,
         permission: String
     ) {
-        val specialAuth = if (authorizer == ConfigEntity.Authorizer.Root) {
-            { "su 1000" }
-        } else null
-
-        val useHook = getHookMode()
-
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = useHook,
-            special = specialAuth
+            useShizukuHookMode = getHookMode(),
+            special = getSpecialAuth(authorizer)
         ) {
             try {
                 it.privileged.grantRuntimePermission(packageName, permission)
@@ -90,17 +88,11 @@ object PrivilegedManager : KoinComponent {
         packageName: String,
         permission: String
     ): Boolean {
-        val specialAuth = if (authorizer == ConfigEntity.Authorizer.Root) {
-            { "su 1000" }
-        } else null
-
-        val useHook = getHookMode()
         var isGranted = false
-
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = useHook,
-            special = specialAuth
+            useShizukuHookMode = getHookMode(),
+            special = getSpecialAuth(authorizer)
         ) {
             try {
                 isGranted = it.privileged.isPermissionGranted(packageName, permission)
@@ -117,12 +109,49 @@ object PrivilegedManager : KoinComponent {
      * Executes a shell command array (safer).
      */
     fun execArr(config: ConfigEntity, command: Array<String>): String {
+        if (config.authorizer == ConfigEntity.Authorizer.Root || config.authorizer == ConfigEntity.Authorizer.Customize) {
+            return try {
+                val shellBinary = if (config.authorizer == ConfigEntity.Authorizer.Customize) {
+                    config.customizeAuthorizer.ifBlank { SHELL_ROOT }
+                } else {
+                    SHELL_ROOT
+                }
+
+                val escapedCommand = command.joinToString(" ") { arg ->
+                    "'" + arg.replace("'", "'\\''") + "'"
+                }
+
+                Timber.d("Executing local shell command: $shellBinary -c $escapedCommand")
+
+                val process = ProcessBuilder(shellBinary, "-c", escapedCommand)
+                    .redirectErrorStream(true)
+                    .start()
+
+                val output = process.inputStream.bufferedReader().use { it.readText() }
+                val exitCode = process.waitFor()
+
+                if (exitCode != 0) {
+                    Timber.w("Local command failed with exit code $exitCode: $output")
+                    "Exit Code $exitCode: $output"
+                } else {
+                    output
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to execute local array command")
+                e.message ?: "Local execution failed"
+            }
+        }
+
         var result = ""
-        useUserService(config) {
+        useUserService(
+            authorizer = config.authorizer,
+            customizeAuthorizer = config.customizeAuthorizer,
+            useShizukuHookMode = false
+        ) {
             try {
                 result = it.privileged.execArr(command)
             } catch (e: Exception) {
-                Timber.e(e, "Failed to execute array command: ${command.joinToString(" ")}")
+                Timber.e(e, "Failed to execute array command via IPC: ${command.joinToString(" ")}")
                 result = e.message ?: "Execution failed"
             }
         }
@@ -133,10 +162,13 @@ object PrivilegedManager : KoinComponent {
      * Starts an activity using a privileged context.
      */
     suspend fun startActivityPrivileged(config: ConfigEntity, intent: Intent): Boolean {
-        val useHook = getHookMode()
         var success = false
-
-        useUserService(config = config, useShizukuHookMode = useHook) {
+        useUserService(
+            authorizer = config.authorizer,
+            customizeAuthorizer = config.customizeAuthorizer,
+            useShizukuHookMode = getHookMode(),
+            special = getSpecialAuth(config.authorizer)
+        ) {
             try {
                 success = it.privileged.startActivityPrivileged(intent)
             } catch (e: Exception) {
@@ -151,10 +183,12 @@ object PrivilegedManager : KoinComponent {
      * Fetches the list of users on the device.
      */
     suspend fun getUsers(authorizer: ConfigEntity.Authorizer): Map<Int, String> {
-        val useHook = getHookMode()
         var users: Map<Int, String> = emptyMap()
-
-        useUserService(authorizer = authorizer, useShizukuHookMode = useHook) {
+        useUserService(
+            authorizer = authorizer,
+            useShizukuHookMode = getHookMode(),
+            special = getSpecialAuth(authorizer)
+        ) {
             try {
                 @Suppress("UNCHECKED_CAST")
                 users = it.privileged.users as? Map<Int, String> ?: emptyMap()

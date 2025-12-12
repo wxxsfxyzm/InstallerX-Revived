@@ -15,6 +15,10 @@ import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import java.io.File
 
+const val SHELL_ROOT = "su"
+const val SHELL_SYSTEM = "su 1000"
+const val SHELL_SH = "sh"
+
 private const val PRIVILEGED_START_TIMEOUT_MS = 2500L
 
 // Privileged Process is not Main Process, so we use Log.d instead of Timber
