@@ -512,4 +512,17 @@
     <string name="suggestion_bypass_blacklist_set_by_user_desc">Autoriser l\'installation temporairement seulement une fois</string>
     <string name="suggestion_retry_install_desc">Réessayez l\'installation</string>
     <string name="exception_dhizuku_dead_service">Le service Dhizuku s\'est arrêté</string>
+    <string name="lab">Laboratoire</string>
+    <string name="lab_desc">Accédez aux fonctionnalités expérimentales et pour développeurs</string>
+    <string name="updating">Mise à jour…</string>
+    <string name="update_available">Mise à jour disponible : %1$s</string>
+    <string name="get_update_directly">Recevez les mises à jour directement</string>
+    <string name="get_update_directly_desc">Télécharger la mise à jour directement depuis GitHub et l\'installer ; aucun cache ne sera conservé</string>
+    <string name="theme_settings_miuix_custom_colors">Couleurs personnalisées</string>
+    <string name="theme_settings_miuix_custom_colors_desc">Personnalisez les couleurs du thème Miuix</string>
+    <string name="theme_settings_theme_mode_desc">Sélectionnez le thème</string>
+    <string name="theme_settings_theme_mode_light">Thème clair</string>
+    <string name="theme_settings_theme_mode_dark">Thème sombre</string>
+    <string name="theme_settings_theme_mode_system">Suivre le thème système</string>
+    <string name="theme_settings_palette_style">Palette de couleurs</string>
 </resources>

@@ -298,7 +298,7 @@
     <string name="exception_install_failed_rejected_by_build_type">Rejeitado pelo tipo de construção do sistema</string>
     <string name="exception_install_failed_hyperos_isolation_violation">Adicione uma fonte de instalação válida para instalar o app Mi System</string>
     <string name="exception_install_failed_duplicate_permission">O pacote está tentando redeclarar a permissão já declarada por outro aplicativo!</string>
-    <string name="exception_install_failed_user_restricted">Há uma restrição do sistema de Instalação via USB, por gentileza ative-a</string>
+    <string name="exception_install_failed_user_restricted">Há uma restrição do sistema para a instalação via USB, por gentileza desative-a</string>
     <string name="exception_uninstall_failed_hyperos_system_app">O HyperOs não permite desinstalar este app!</string>
     <string name="exception_shizuku_not_work">Por gentileza ative o Sui ou Shizuku e conceda permissão</string>
     <string name="exception_dhizuku_not_work">Por gentileza ative Dhizuku e dê permissão</string>
@@ -602,4 +602,12 @@
     <string name="installer_multi_apk_description_notification">Clique na notificação para selecionar itens para instalar</string>
     <string name="installer_error_mixed_selection">Não é possível instalar aplicativos e módulos simultaneamente em lote</string>
     <string name="installer_error_multiple_modules">Não é possível instalar vários módulos em lote</string>
+    <string name="exception_install_parse_failed_skipped">O pacote foi ignorado e deve ser desconsiderado</string>
+    <string name="installer_splits_invalid_tip">Não é possível adicionar o pacote dividido selecionado a um app desinstalado</string>
+    <string name="installer_splits_only_tip">Apenas os APKs divididos estão selecionados. Eles serão adicionados ao aplicativo existente</string>
+    <string name="installer_split_name_label">Nome da Parte:</string>
+    <string name="exception_uninstall_failed_aborted">Desinstalação cancelada pelo usuário</string>
+    <string name="lab_unstable_features">Características instáveis</string>
+    <string name="lab_set_install_requester">Definir Solicitante de Instalação</string>
+    <string name="lab_set_install_requester_desc">Preencha o campo originatingUid com o pacote do chamador para corresponder ao comportamento do sistema</string>
 </resources>
