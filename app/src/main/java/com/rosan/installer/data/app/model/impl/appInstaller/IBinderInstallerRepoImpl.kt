@@ -1,4 +1,4 @@
-package com.rosan.installer.data.app.model.impl.installer
+package com.rosan.installer.data.app.model.impl.appInstaller
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -456,11 +456,11 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         val authorizer = config.authorizer
 
         useUserService(
-            config = config,
+            authorizer = authorizer,
             special = if (authorizer == ConfigEntity.Authorizer.None
                 || authorizer == ConfigEntity.Authorizer.Dhizuku
-            ) ::special
-            else null
+            ) ::special else null,
+            useShizukuHookMode = false
         ) {
             it.privileged.delete(entities.sourcePath())
         }

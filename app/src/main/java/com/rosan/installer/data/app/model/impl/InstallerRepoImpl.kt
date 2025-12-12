@@ -3,11 +3,11 @@ package com.rosan.installer.data.app.model.impl
 import android.content.Context
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
-import com.rosan.installer.data.app.model.impl.installer.DhizukuInstallerRepoImpl
-import com.rosan.installer.data.app.model.impl.installer.NoneInstallerRepoImpl
-import com.rosan.installer.data.app.model.impl.installer.ProcessInstallerRepoImpl
-import com.rosan.installer.data.app.model.impl.installer.ShizukuInstallerRepoImpl
-import com.rosan.installer.data.app.model.impl.installer.SystemInstallerRepoImpl
+import com.rosan.installer.data.app.model.impl.appInstaller.DhizukuInstallerRepoImpl
+import com.rosan.installer.data.app.model.impl.appInstaller.NoneInstallerRepoImpl
+import com.rosan.installer.data.app.model.impl.appInstaller.ProcessInstallerRepoImpl
+import com.rosan.installer.data.app.model.impl.appInstaller.ShizukuInstallerRepoImpl
+import com.rosan.installer.data.app.model.impl.appInstaller.SystemInstallerRepoImpl
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity

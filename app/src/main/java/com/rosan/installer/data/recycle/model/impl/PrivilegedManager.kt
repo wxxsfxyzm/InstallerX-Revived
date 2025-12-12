@@ -117,12 +117,49 @@ object PrivilegedManager : KoinComponent {
      * Executes a shell command array (safer).
      */
     fun execArr(config: ConfigEntity, command: Array<String>): String {
+        if (config.authorizer == ConfigEntity.Authorizer.Root || config.authorizer == ConfigEntity.Authorizer.Customize) {
+            return try {
+                val shellBinary = if (config.authorizer == ConfigEntity.Authorizer.Customize) {
+                    config.customizeAuthorizer.ifBlank { "su" }
+                } else {
+                    "su"
+                }
+
+                val escapedCommand = command.joinToString(" ") { arg ->
+                    "'" + arg.replace("'", "'\\''") + "'"
+                }
+
+                Timber.d("Executing local shell command: $shellBinary -c $escapedCommand")
+
+                val process = ProcessBuilder(shellBinary, "-c", escapedCommand)
+                    .redirectErrorStream(true)
+                    .start()
+
+                val output = process.inputStream.bufferedReader().use { it.readText() }
+                val exitCode = process.waitFor()
+
+                if (exitCode != 0) {
+                    Timber.w("Local command failed with exit code $exitCode: $output")
+                    "Exit Code $exitCode: $output"
+                } else {
+                    output
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to execute local array command")
+                e.message ?: "Local execution failed"
+            }
+        }
+
         var result = ""
-        useUserService(config) {
+        useUserService(
+            authorizer = config.authorizer,
+            customizeAuthorizer = config.customizeAuthorizer,
+            useShizukuHookMode = false
+        ) {
             try {
                 result = it.privileged.execArr(command)
             } catch (e: Exception) {
-                Timber.e(e, "Failed to execute array command: ${command.joinToString(" ")}")
+                Timber.e(e, "Failed to execute array command via IPC: ${command.joinToString(" ")}")
                 result = e.message ?: "Execution failed"
             }
         }
@@ -136,7 +173,11 @@ object PrivilegedManager : KoinComponent {
         val useHook = getHookMode()
         var success = false
 
-        useUserService(config = config, useShizukuHookMode = useHook) {
+        useUserService(
+            authorizer = config.authorizer,
+            customizeAuthorizer = config.customizeAuthorizer,
+            useShizukuHookMode = useHook
+        ) {
             try {
                 success = it.privileged.startActivityPrivileged(intent)
             } catch (e: Exception) {

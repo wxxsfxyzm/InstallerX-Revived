@@ -46,7 +46,7 @@ import com.rosan.installer.data.app.model.exception.UninstallFailedHyperOSSystem
 import com.rosan.installer.data.app.model.exception.UninstallFailedInternalErrorException
 import com.rosan.installer.data.app.model.exception.UninstallFailedOwnerBlockedException
 import com.rosan.installer.data.app.model.exception.UninstallFailedUserRestrictedException
-import com.rosan.installer.data.app.model.impl.installer.IBinderInstallerRepoImpl
+import com.rosan.installer.data.app.model.impl.appInstaller.IBinderInstallerRepoImpl
 
 object PackageManagerUtil {
     /**

@@ -17,7 +17,9 @@ abstract class Recycler<T : Closeable> {
 
     private var recycleJob: Job? = null
 
-    protected val delayDuration = 15000L
+    // OPTIMIZATION: Made 'open' so subclasses can override the wait time.
+    // Default is 15 seconds.
+    protected open val delayDuration = 15000L
 
     fun make(): Recyclable<T> {
         synchronized(this) {
@@ -35,11 +37,20 @@ abstract class Recycler<T : Closeable> {
         synchronized(this) {
             referenceCount -= 1
             if (referenceCount > 0) return
+
+            // Cancel any existing job to prevent multiple callbacks
             recycleJob?.cancel()
+
             recycleJob = coroutineScope.launch {
                 delay(delayDuration)
-                if (referenceCount > 0) return@launch
-                recycleForcibly()
+
+                // CRITICAL FIX: Synchronize the check and action atomically.
+                // Prevents a race condition where 'make()' increments refCount
+                // right after delay() finishes but before recycleForcibly() runs.
+                synchronized(this@Recycler) {
+                    if (referenceCount > 0) return@synchronized
+                    recycleForcibly()
+                }
             }
         }
     }
@@ -49,9 +60,17 @@ abstract class Recycler<T : Closeable> {
             referenceCount = 0
             entity?.runCatching { close() }
             entity = null
+
+            // CRITICAL FIX: Explicitly call lifecycle callback.
+            // This ensures chained resources (like underlying Shell processes) are released.
+            onRecycle()
         }
     }
 
+    /**
+     * Called when the entity is actually disposed.
+     * Override this to clean up related resources (e.g., child recyclers).
+     */
     open fun onRecycle() {
     }
 }
