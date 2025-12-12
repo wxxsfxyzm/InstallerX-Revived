@@ -69,7 +69,7 @@ private fun getRecyclableInstance(
     }
 
     return when (authorizer) {
-        ConfigEntity.Authorizer.Root -> ProcessUserServiceRecyclers.get("su").make()
+        ConfigEntity.Authorizer.Root -> ProcessUserServiceRecyclers.get(SHELL_ROOT).make()
         ConfigEntity.Authorizer.Shizuku -> {
             if (useShizukuHookMode) {
                 Timber.tag(TAG).i("Using Shizuku Hook Mode.")

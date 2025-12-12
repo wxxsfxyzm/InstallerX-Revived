@@ -2,6 +2,8 @@ package com.rosan.installer.data.recycle.model.impl
 
 import android.content.ComponentName
 import android.content.Intent
+import com.rosan.installer.data.recycle.util.SHELL_ROOT
+import com.rosan.installer.data.recycle.util.SHELL_SYSTEM
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.LAB_USE_SHIZUKU_HOOK_MODE
@@ -34,11 +36,10 @@ object PrivilegedManager : KoinComponent {
      * Helper to generate the special auth command (e.g. "su 1000") for Root mode.
      * This ensures different methods reuse the same 'su 1000' service process.
      */
-    private fun getSpecialAuth(authorizer: ConfigEntity.Authorizer): (() -> String?)? {
-        return if (authorizer == ConfigEntity.Authorizer.Root) {
-            { "su 1000" }
+    private fun getSpecialAuth(authorizer: ConfigEntity.Authorizer): (() -> String?)? =
+        if (authorizer == ConfigEntity.Authorizer.Root) {
+            { SHELL_SYSTEM }
         } else null
-    }
 
     /**
      * Sets the app as the default installer.
@@ -111,9 +112,9 @@ object PrivilegedManager : KoinComponent {
         if (config.authorizer == ConfigEntity.Authorizer.Root || config.authorizer == ConfigEntity.Authorizer.Customize) {
             return try {
                 val shellBinary = if (config.authorizer == ConfigEntity.Authorizer.Customize) {
-                    config.customizeAuthorizer.ifBlank { "su" }
+                    config.customizeAuthorizer.ifBlank { SHELL_ROOT }
                 } else {
-                    "su"
+                    SHELL_ROOT
                 }
 
                 val escapedCommand = command.joinToString(" ") { arg ->

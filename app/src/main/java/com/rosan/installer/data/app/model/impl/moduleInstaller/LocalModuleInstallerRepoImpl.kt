@@ -7,6 +7,7 @@ import com.rosan.installer.data.app.model.exception.ModuleInstallException
 import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.data.app.repo.ModuleInstallerRepo
 import com.rosan.installer.data.app.util.sourcePath
+import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -28,9 +29,9 @@ object LocalModuleInstallerRepoImpl : ModuleInstallerRepo {
 
         // Determine the shell binary
         val shellBinary = if (config.authorizer == ConfigEntity.Authorizer.Customize) {
-            config.customizeAuthorizer.ifBlank { "su" }
+            config.customizeAuthorizer.ifBlank { SHELL_ROOT }
         } else {
-            "su"
+            SHELL_ROOT
         }
 
         // Construct the command string
