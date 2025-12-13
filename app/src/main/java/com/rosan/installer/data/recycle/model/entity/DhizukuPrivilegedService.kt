@@ -17,6 +17,14 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
 
     override fun delete(paths: Array<out String>) = deletePaths(paths)
 
+    override fun performDexOpt(
+        packageName: String,
+        compilerFilter: String,
+        force: Boolean
+    ): Boolean {
+        throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
+    }
+
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
         try {
             val ownerComponent = Dhizuku.getOwnerComponent()

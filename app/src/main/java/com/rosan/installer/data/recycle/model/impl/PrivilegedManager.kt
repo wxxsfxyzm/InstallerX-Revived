@@ -8,7 +8,10 @@ import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.LAB_USE_SHIZUKU_HOOK_MODE
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -21,6 +24,7 @@ import timber.log.Timber
  * flags manually.
  */
 object PrivilegedManager : KoinComponent {
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val appDataStore by inject<AppDataStore>()
     private val useShizukuHookModeFlow = appDataStore.getBoolean(LAB_USE_SHIZUKU_HOOK_MODE, true)
@@ -199,5 +203,85 @@ object PrivilegedManager : KoinComponent {
             }
         }
         return users
+    }
+
+    data class PostInstallTaskConfig(
+        val packageName: String,
+        val enableDexopt: Boolean = false,
+        val dexoptMode: String = "speed-profile",
+        val forceDexopt: Boolean = false,
+        val enableAutoDelete: Boolean = false,
+        val deletePaths: Array<String> = emptyArray()
+    ) {
+        fun hasAnyTask(): Boolean = enableDexopt || (enableAutoDelete && deletePaths.isNotEmpty())
+    }
+
+    /**
+     * 执行安装后处理任务
+     * 在单个 UserService 连接中根据配置执行所有启用的任务
+     */
+    fun executePostInstallTasks(
+        authorizer: ConfigEntity.Authorizer,
+        customizeAuthorizer: String = "",
+        config: PostInstallTaskConfig
+    ) {
+        if (!config.hasAnyTask()) {
+            Timber.d("No post-install tasks to execute")
+            return
+        }
+
+        Timber.d("Executing post-install tasks: $config")
+
+        useUserService(
+            authorizer = authorizer,
+            customizeAuthorizer = customizeAuthorizer,
+            useShizukuHookMode = false,
+            special = null
+        ) { userService ->
+            // Dexopt
+            if (config.enableDexopt) {
+                runCatching {
+                    val result = userService.privileged.performDexOpt(
+                        config.packageName,
+                        config.dexoptMode,
+                        config.forceDexopt
+                    )
+                    Timber.i("Dexopt result: $result")
+                }.onFailure { e ->
+                    Timber.e(e, "Dexopt failed")
+                }
+            }
+
+            // Delete
+            if (config.enableAutoDelete && config.deletePaths.isNotEmpty()) {
+                runCatching {
+                    userService.privileged.delete(config.deletePaths)
+                    Timber.i("Delete completed")
+                }.onFailure { e ->
+                    Timber.e(e, "Delete failed")
+                }
+            }
+        }
+
+        Timber.d("Post-install tasks completed")
+    }
+
+    /**
+     * 异步执行后处理任务
+     */
+    fun executePostInstallTasksAsync(
+        authorizer: ConfigEntity.Authorizer,
+        customizeAuthorizer: String = "",
+        config: PostInstallTaskConfig
+    ) {
+        if (!config.hasAnyTask()) return
+
+        coroutineScope.launch {
+            runCatching {
+                executePostInstallTasks(authorizer, customizeAuthorizer, config)
+            }.onFailure { e ->
+                Timber.e(e, "Async post-install tasks failed")
+            }
+        }
     }
 }

@@ -1,23 +1,26 @@
 package com.rosan.installer.data.recycle.repo
 
 import java.io.Closeable
+import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * 可回收资源的句柄
+ * 线程安全，保证 recycle 只执行一次
+ */
 class Recyclable<T>(
-    // you can't use this after recycle func called
     val entity: T,
-    private val recycler: Recycler<*>,
+    private val onRecycle: () -> Unit,
 ) : Closeable {
-    private var recycled = false
+
+    private val recycled = AtomicBoolean(false)
 
     fun recycle() {
-        synchronized(this) {
-            if (recycled) return
-            recycled = true
-            recycler.recycle()
+        if (recycled.compareAndSet(false, true)) {
+            onRecycle()
         }
     }
 
-    override fun close() {
-        recycle()
-    }
+    override fun close() = recycle()
+
+    val isRecycled: Boolean get() = recycled.get()
 }
