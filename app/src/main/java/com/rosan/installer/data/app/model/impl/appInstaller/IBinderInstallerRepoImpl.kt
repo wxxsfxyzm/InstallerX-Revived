@@ -38,8 +38,6 @@ import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.isSystemInstaller
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -51,8 +49,6 @@ import java.util.concurrent.TimeUnit
 abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     private val context by inject<Context>()
     private val reflect = get<ReflectRepo>()
-
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
 
@@ -457,7 +453,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             special = if (authorizer == ConfigEntity.Authorizer.None
                 || authorizer == ConfigEntity.Authorizer.Dhizuku
             ) ::special else null,
-            useShizukuHookMode = false
+            useHookMode = false
         ) {
             it.privileged.delete(entities.sourcePath())
         }

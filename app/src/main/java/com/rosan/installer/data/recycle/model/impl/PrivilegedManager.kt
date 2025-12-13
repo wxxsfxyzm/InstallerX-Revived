@@ -6,7 +6,7 @@ import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SHELL_SYSTEM
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
-import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.LAB_USE_SHIZUKU_HOOK_MODE
+import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.LAB_USE_HOOK_MODE
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,13 +27,13 @@ object PrivilegedManager : KoinComponent {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val appDataStore by inject<AppDataStore>()
-    private val useShizukuHookModeFlow = appDataStore.getBoolean(LAB_USE_SHIZUKU_HOOK_MODE, true)
+    private val useHookModeFlow = appDataStore.getBoolean(LAB_USE_HOOK_MODE, true)
 
     /**
      * Helper to retrieve the current Shizuku Hook Mode setting.
      */
     private suspend fun getHookMode(): Boolean {
-        return useShizukuHookModeFlow.first()
+        return useHookModeFlow.first()
     }
 
     /**
@@ -55,7 +55,7 @@ object PrivilegedManager : KoinComponent {
     ) {
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = getHookMode(),
+            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) { userService ->
             userService.privileged.setDefaultInstaller(component, enable)
@@ -72,7 +72,7 @@ object PrivilegedManager : KoinComponent {
     ) {
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = getHookMode(),
+            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) {
             try {
@@ -95,7 +95,7 @@ object PrivilegedManager : KoinComponent {
         var isGranted = false
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = getHookMode(),
+            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) {
             try {
@@ -150,7 +150,7 @@ object PrivilegedManager : KoinComponent {
         useUserService(
             authorizer = config.authorizer,
             customizeAuthorizer = config.customizeAuthorizer,
-            useShizukuHookMode = false
+            useHookMode = false
         ) {
             try {
                 result = it.privileged.execArr(command)
@@ -170,7 +170,7 @@ object PrivilegedManager : KoinComponent {
         useUserService(
             authorizer = config.authorizer,
             customizeAuthorizer = config.customizeAuthorizer,
-            useShizukuHookMode = getHookMode(),
+            useHookMode = getHookMode(),
             special = getSpecialAuth(config.authorizer)
         ) {
             try {
@@ -190,7 +190,7 @@ object PrivilegedManager : KoinComponent {
         var users: Map<Int, String> = emptyMap()
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = getHookMode(),
+            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) {
             try {
@@ -235,7 +235,7 @@ object PrivilegedManager : KoinComponent {
         useUserService(
             authorizer = authorizer,
             customizeAuthorizer = customizeAuthorizer,
-            useShizukuHookMode = false,
+            useHookMode = false,
             special = null
         ) { userService ->
             // Dexopt
