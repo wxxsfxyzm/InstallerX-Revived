@@ -58,7 +58,7 @@ object ShizukuModuleInstallerRepoImpl : ModuleInstallerRepo {
             // This goes through the AIDL/Binder service
             useUserService(
                 authorizer = config.authorizer,
-                useShizukuHookMode = false
+                useHookMode = false
             ) { userService ->
                 userService.privileged.execArrWithCallback(command, listener)
             }

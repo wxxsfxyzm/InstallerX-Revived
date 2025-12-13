@@ -41,7 +41,10 @@ import java.nio.charset.StandardCharsets
 import android.os.Process as AndroidProcess
 
 @SuppressLint("LogNotTimber")
-class DefaultPrivilegedService : BasePrivilegedService() {
+class DefaultPrivilegedService(
+    // Add binderWrapper parameter to support Process Hook Mode
+    private val binderWrapper: ((IBinder) -> IBinder)? = null
+) : BasePrivilegedService() {
     companion object {
         private const val TAG = "PrivilegedService"
     }
@@ -76,17 +79,26 @@ class DefaultPrivilegedService : BasePrivilegedService() {
     }
 
     private val iPackageManager: IPackageManager by lazy {
-        if (isHookMode) {
+        // [Mod] Priority: Custom Wrapper (Root Hook) > Shizuku Hook > Direct/Service
+        if (binderWrapper != null) {
+            Log.d(TAG, "Getting IPackageManager in Process Hook Mode.")
+            val original = ServiceManager.getService("package")
+            IPackageManager.Stub.asInterface(binderWrapper.invoke(original))
+        } else if (isHookMode) {
             Log.d(TAG, "Getting IPackageManager in Hook Mode (Directly).")
             ShizukuHook.hookedPackageManager
         } else {
-            Timber.d("Getting IPackageManager in UserService Mode.")
+            Log.d(TAG, "Getting IPackageManager in UserService Mode.")
             IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
         }
     }
 
     private val iActivityManager: IActivityManager by lazy {
-        if (isHookMode) {
+        if (binderWrapper != null) {
+            Log.d(TAG, "Getting IActivityManager in Process Hook Mode.")
+            val original = ServiceManager.getService(Context.ACTIVITY_SERVICE)
+            IActivityManager.Stub.asInterface(binderWrapper.invoke(original))
+        } else if (isHookMode) {
             ShizukuHook.hookedActivityManager
         } else {
             IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
@@ -94,7 +106,11 @@ class DefaultPrivilegedService : BasePrivilegedService() {
     }
 
     private val iUserManager: IUserManager by lazy {
-        if (isHookMode) {
+        if (binderWrapper != null) {
+            Log.d(TAG, "Getting IUserManager in Process Hook Mode.")
+            val original = ServiceManager.getService(Context.USER_SERVICE)
+            IUserManager.Stub.asInterface(binderWrapper.invoke(original))
+        } else if (isHookMode) {
             Log.d("", "Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
             ShizukuHook.hookedUserManager
         } else {

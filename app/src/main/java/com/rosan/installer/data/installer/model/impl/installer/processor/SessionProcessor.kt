@@ -41,7 +41,7 @@ class SessionProcessor : KoinComponent {
             useUserService(
                 authorizer = config.authorizer,
                 customizeAuthorizer = config.customizeAuthorizer,
-                useShizukuHookMode = false
+                useHookMode = false
             ) { bundle = it.privileged.getSessionDetails(sessionId) }
 
             if (bundle == null) {
@@ -74,7 +74,7 @@ class SessionProcessor : KoinComponent {
             useUserService(
                 authorizer = config.authorizer,
                 customizeAuthorizer = config.customizeAuthorizer,
-                useShizukuHookMode = false
+                useHookMode = false
             ) { it.privileged.approveSession(sessionId, granted) }
         } else {
             Timber.w("approveSession called with unsupported authorizer (${config.authorizer}).")
