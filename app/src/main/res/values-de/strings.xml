@@ -602,4 +602,12 @@
     <string name="lab_http_profile_secure">Nur sichere Verbindungen (HTTPS)</string>
     <string name="lab_http_profile_local">Lokalen Klartext zulassen (Localhost)</string>
     <string name="lab_http_profile_all">Alle zulassen (Unsicher</string>
+    <string name="installer_splits_invalid_tip">Das ausgewählte Split-Paket kann nicht zu einer deinstallierten App hinzugefügt werden</string>
+    <string name="installer_splits_only_tip">Nur Split-APKs sind ausgewählt. Sie werden der bestehenden Anwendung hinzugefügt</string>
+    <string name="installer_split_name_label">Split Name:</string>
+    <string name="exception_install_parse_failed_skipped">Das Paket wurde übersprungen und sollte ignoriert werden</string>
+    <string name="exception_uninstall_failed_aborted">Deinstallation vom Benutzer abgebrochen</string>
+    <string name="lab_unstable_features">Instabile Funktionen</string>
+    <string name="lab_set_install_requester">Installationsanforderung festlegen</string>
+    <string name="lab_set_install_requester_desc">Füllen Sie das Feld originatingUid mit dem Aufruferpaket, um das System zu erreichen Verhalten</string>
 </resources>
