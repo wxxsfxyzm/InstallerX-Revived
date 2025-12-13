@@ -9,8 +9,28 @@ on:
     - cron: '30 1 * * 0'
 
 jobs:
+  pre_job:
+    # Schedule 触发时（每周扫描）不要跳过
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          skip_after_successful_duplicate: 'true'
+          concurrent_skipping: 'never'
+
   analyze:
     name: Analyze
+    # 依赖检查
+    needs: pre_job
+    # 如果是定时任务(schedule)直接跑，或者 skip 检查说不跳过才跑
+    if: github.event_name == 'schedule' || needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -40,7 +60,7 @@ jobs:
 
       # 新增：Gradle 设置与缓存管理
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           # CodeQL 分析只读缓存
           cache-read-only: true

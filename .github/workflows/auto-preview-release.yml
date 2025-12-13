@@ -36,7 +36,7 @@ jobs:
           # cache: gradle 已移除
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           # 主分支构建允许更新缓存
           cache-read-only: false

@@ -23,7 +23,7 @@ jobs:
 
       # 保持只读：PR 不需要产生新的构建缓存，复用 main/dev 的即可
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           cache-read-only: true
 

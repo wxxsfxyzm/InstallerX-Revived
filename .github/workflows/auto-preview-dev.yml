@@ -14,7 +14,30 @@ on:
       - '.github/workflows/auto-preview-dev.yml'
 
 jobs:
+  pre_job:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          # 核心参数：如果发现完全相同的 Commit 已经成功跑过，则跳过
+          skip_after_successful_duplicate: 'true'
+          # 可选：如果同一个 Commit 正在跑，是否取消旧的？
+          # 'never' = 不取消，两者都跑（适合 dev 合并场景）
+          # 'same_content' = 内容一样就取消旧的
+          concurrent_skipping: 'never'
+          # 可选：忽略某些路径的变更（因为你已经在 on.push.paths 里配置了，这里通常不需要再配）
+          do_not_skip: '[]'
+
   build_and_upload_artifact:
+    needs: pre_job
+    # 只有当 should_skip 不为 true 时才运行
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -37,7 +60,7 @@ jobs:
           # cache: gradle 已移除，使用下方的 setup-gradle
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           # dev 分支允许写入缓存
           cache-read-only: false
