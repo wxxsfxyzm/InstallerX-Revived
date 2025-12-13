@@ -10,6 +10,7 @@ import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -217,53 +218,64 @@ object PrivilegedManager : KoinComponent {
     }
 
     /**
-     * 执行安装后处理任务
-     * 在单个 UserService 连接中根据配置执行所有启用的任务
+     * Executes post-install tasks.
+     * Concurrently performs Dexopt and file cleanup tasks to improve efficiency.
      */
-    fun executePostInstallTasks(
+    suspend fun executePostInstallTasks(
         authorizer: ConfigEntity.Authorizer,
         customizeAuthorizer: String = "",
         config: PostInstallTaskConfig
-    ) {
+    ) = coroutineScope { // coroutineScope automatically waits for all inner launch blocks to complete
         if (!config.hasAnyTask()) {
             Timber.d("No post-install tasks to execute")
-            return
+            return@coroutineScope
         }
 
         Timber.d("Executing post-install tasks: $config")
 
-        useUserService(
-            authorizer = authorizer,
-            customizeAuthorizer = customizeAuthorizer,
-            useHookMode = false,
-            special = null
-        ) { userService ->
-            // Dexopt
+        // 1. Dexopt Task (Launch directly, no variable needed)
+        launch {
             if (config.enableDexopt) {
                 runCatching {
-                    val result = userService.privileged.performDexOpt(
-                        config.packageName,
-                        config.dexoptMode,
-                        config.forceDexopt
-                    )
-                    Timber.i("Dexopt result: $result")
+                    useUserService(
+                        authorizer = authorizer,
+                        customizeAuthorizer = customizeAuthorizer,
+                        useHookMode = true, // Force Hook Mode for Dexopt (using BinderWrapper)
+                        special = null
+                    ) { userService ->
+                        val result = userService.privileged.performDexOpt(
+                            config.packageName,
+                            config.dexoptMode,
+                            config.forceDexopt
+                        )
+                        Timber.i("Dexopt result: $result")
+                    }
                 }.onFailure { e ->
                     Timber.e(e, "Dexopt failed")
                 }
             }
+        }
 
-            // Delete
+        // 2. Delete Task (Launch directly, no variable needed)
+        launch {
             if (config.enableAutoDelete && config.deletePaths.isNotEmpty()) {
                 runCatching {
-                    userService.privileged.delete(config.deletePaths)
-                    Timber.i("Delete completed")
+                    useUserService(
+                        authorizer = authorizer,
+                        customizeAuthorizer = customizeAuthorizer,
+                        useHookMode = false, // Force Shell Mode for Delete (using remote Shell Service)
+                        special = null
+                    ) { userService ->
+                        userService.privileged.delete(config.deletePaths)
+                        Timber.i("Delete completed")
+                    }
                 }.onFailure { e ->
                     Timber.e(e, "Delete failed")
                 }
             }
         }
 
-        Timber.d("Post-install tasks completed")
+        // Execution pauses here until all children coroutines (launch blocks) are finished
     }
 
     /**
