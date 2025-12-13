@@ -21,6 +21,16 @@ interface IPrivilegedService {
     void delete(in String[] paths);
 
     /**
+    * Performs dex-optimization on a given package using the specified compiler filter.
+    *
+    * @param packageName The package to be optimized.
+    * @param compilerFilter The dex2oat compiler filter (e.g., "speed", "speed-profile").
+    * @param force Whether to force recompilation even if the system thinks it's unnecessary.
+    * @return {@code true} if the dex optimization was successful, {@code false} otherwise.
+    */
+    boolean performDexOpt(String packageName, String compilerFilter, boolean force);
+
+    /**
      * Sets or unsets the default installer component.
      *
      * @param component the {@link ComponentName} of the installer to be set as default

@@ -1,14 +1,11 @@
 package com.rosan.installer.data.recycle.model.impl.recycler
 
-import java.util.concurrent.ConcurrentHashMap
-
 object ProcessUserServiceRecyclers {
-    // Use ConcurrentHashMap for thread safety
-    private val map = ConcurrentHashMap<String, ProcessUserServiceRecycler>()
-
-    fun get(shell: String): ProcessUserServiceRecycler {
-        return map.getOrPut(shell) {
-            ProcessUserServiceRecycler(shell)
-        }
+    private val manager = RecyclerManager { shell: String ->
+        ProcessUserServiceRecycler(shell)
     }
+
+    fun get(shell: String): ProcessUserServiceRecycler = manager.get(shell)
+
+    fun clear() = manager.clear()
 }

@@ -42,6 +42,10 @@ import android.os.Process as AndroidProcess
 
 @SuppressLint("LogNotTimber")
 class DefaultPrivilegedService : BasePrivilegedService() {
+    companion object {
+        private const val TAG = "PrivilegedService"
+    }
+
     private val reflect by inject<ReflectRepo>()
 
     private val isHookMode by lazy {
@@ -52,19 +56,19 @@ class DefaultPrivilegedService : BasePrivilegedService() {
 
             currentProcessNameMethod?.invoke(null) as? String
         } catch (e: Exception) {
-            Log.e("PrivilegedService", "Failed to get current process name reflection setup: ${e.message}")
+            Log.e(TAG, "Failed to get current process name reflection setup: ${e.message}")
             null
         }
 
-        Log.d("PrivilegedService", "Detected process name: '$processName'")
+        Log.d(TAG, "Detected process name: '$processName'")
 
         if (processName == null) {
-            Log.d("PrivilegedService", "Process name is null, assuming UserService Mode.")
+            Log.d(TAG, "Process name is null, assuming UserService Mode.")
             false // isHookMode is false (UserService Mode)
         } else {
             val isShizukuProcess = processName.endsWith(":shizuku_privileged")
             Log.d(
-                "PrivilegedService",
+                TAG,
                 "Process name is '$processName', isShizukuProcess: $isShizukuProcess. Assuming Hook Mode: ${!isShizukuProcess}"
             )
             !isShizukuProcess // isHookMode is true for main process
@@ -73,7 +77,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
 
     private val iPackageManager: IPackageManager by lazy {
         if (isHookMode) {
-            Log.d("PrivilegedService", "Getting IPackageManager in Hook Mode (Directly).")
+            Log.d(TAG, "Getting IPackageManager in Hook Mode (Directly).")
             ShizukuHook.hookedPackageManager
         } else {
             Timber.d("Getting IPackageManager in UserService Mode.")
@@ -91,18 +95,58 @@ class DefaultPrivilegedService : BasePrivilegedService() {
 
     private val iUserManager: IUserManager by lazy {
         if (isHookMode) {
-            Log.d("PrivilegedService", "Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
+            Log.d("", "Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
             ShizukuHook.hookedUserManager
         } else {
-            Log.d("PrivilegedService", "Getting IUserManager in UserService Mode.")
+            Log.d(TAG, "Getting IUserManager in UserService Mode.")
             IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
         }
     }
 
     override fun delete(paths: Array<out String>) = deletePaths(paths)
 
+    override fun performDexOpt(
+        packageName: String,
+        compilerFilter: String,
+        force: Boolean
+    ): Boolean {
+        Timber.tag(TAG).d("performDexOpt: $packageName, filter=$compilerFilter, force=$force")
+
+        return try {
+            val iPackageManager = IPackageManager.Stub.asInterface(
+                ServiceManager.getService("package")
+            )
+
+            val method = iPackageManager::class.java.getDeclaredMethod(
+                "performDexOptMode",
+                String::class.java,
+                Boolean::class.javaPrimitiveType,
+                String::class.java,
+                Boolean::class.javaPrimitiveType,
+                Boolean::class.javaPrimitiveType,
+                String::class.java
+            ).apply { isAccessible = true }
+
+            val result = method.invoke(
+                iPackageManager,
+                packageName,
+                false,           // checkProfiles
+                compilerFilter,
+                force,
+                true,            // bootComplete
+                null             // splitName
+            ) as Boolean
+
+            Timber.tag(TAG).i("performDexOpt result for $packageName: $result")
+            result
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "performDexOpt failed for $packageName")
+            false
+        }
+    }
+
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
-        Log.d("PrivilegedService", "Hook Mode: $isHookMode")
+        Log.d(TAG, "Hook Mode: $isHookMode")
         val uid = AndroidProcess.myUid()
         val userId = uid / 100000
 
@@ -186,7 +230,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         if (listener == null) {
             // If no listener is provided, we can't stream output.
             // You could either throw an exception or just execute without feedback.
-            Log.w("PrivilegedService", "execArrWithCallback called with a null listener.")
+            Log.w(TAG, "execArrWithCallback called with a null listener.")
             return
         }
 
@@ -202,7 +246,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                     }
                 } catch (e: Exception) {
                     if (e is IOException || e is RemoteException) {
-                        Log.e("PrivilegedService", "Error reading stdout or sending callback", e)
+                        Log.e(TAG, "Error reading stdout or sending callback", e)
                     }
                 }
             }
@@ -215,7 +259,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                     }
                 } catch (e: Exception) {
                     if (e is IOException || e is RemoteException) {
-                        Log.e("PrivilegedService", "Error reading stderr or sending callback", e)
+                        Log.e(TAG, "Error reading stderr or sending callback", e)
                     }
                 }
             }
@@ -237,13 +281,13 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         } catch (e: Exception) {
             // If process creation itself fails
             val errorMessage = "Failed to execute command: ${e.message}"
-            Log.e("PrivilegedService", errorMessage, e)
+            Log.e(TAG, errorMessage, e)
             try {
                 listener.onError(errorMessage)
                 listener.onComplete(-1) // Send a failure exit code
             } catch (re: RemoteException) {
                 // The client might be dead, just log it.
-                Log.e("PrivilegedService", "Failed to send execution error to client.", re)
+                Log.e(TAG, "Failed to send execution error to client.", re)
             }
         } finally {
             process?.destroy()
@@ -254,22 +298,22 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         try {
             val userId = AndroidProcess.myUid() / 100000
 
-            Log.d("PrivilegedService", "Granting $permission for $packageName (UID: $userId)")
+            Log.d(TAG, "Granting $permission for $packageName (UID: $userId)")
 
             iPackageManager.grantRuntimePermission(packageName, permission, userId)
 
-            Log.i("PrivilegedService", "Successfully granted $permission to $packageName")
+            Log.i(TAG, "Successfully granted $permission to $packageName")
 
         } catch (e: Exception) {
             // 捕获所有可能的异常 (包括 SecurityException)
-            Log.e("PrivilegedService", "ERROR granting permission", e)
+            Log.e(TAG, "ERROR granting permission", e)
             // 将异常包装成 RemoteException 抛回给客户端
             throw RemoteException("Failed to grant permission via system API: ${e.message}")
         }
     }
 
     override fun isPermissionGranted(packageName: String, permission: String): Boolean {
-        Log.d("PrivilegedService", "Checking permission '$permission' for package '$packageName'")
+        Log.d(TAG, "Checking permission '$permission' for package '$packageName'")
         try {
             // Because this code runs in a privileged context with access to a full Context,
             // we can directly use the standard PackageManager API.
@@ -279,7 +323,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
         } catch (e: Exception) {
             // Catch potential exceptions, e.g., if the package name is invalid,
             // though checkPermission typically returns PERMISSION_DENIED for that.
-            Log.e("PrivilegedService", "Failed to check permission '$permission' for '$packageName'", e)
+            Log.e(TAG, "Failed to check permission '$permission' for '$packageName'", e)
             // It's safer to return false on any error.
             return false
         }
@@ -312,22 +356,22 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             return result >= 0
         } catch (e: SecurityException) {
             // Log security exceptions specifically, as they indicate a permission issue.
-            Log.e("PrivilegedService", "startActivityPrivileged failed due to SecurityException", e)
+            Log.e(TAG, "startActivityPrivileged failed due to SecurityException", e)
             return false
         } catch (e: Exception) {
             // Catch other potential exceptions, such as RemoteException.
-            Log.e("PrivilegedService", "startActivityPrivileged failed with an exception", e)
+            Log.e(TAG, "startActivityPrivileged failed with an exception", e)
             return false
         }
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun getSessionDetails(sessionId: Int): Bundle? {
-        Log.d("PrivilegedService", "getSessionDetails: sessionId=$sessionId")
+        Log.d(TAG, "getSessionDetails: sessionId=$sessionId")
         try {
             val packageInstaller = context.packageManager.packageInstaller
             val sessionInfo = packageInstaller.getSessionInfo(sessionId) ?: run {
-                Log.w("PrivilegedService", "getSessionDetails: SessionInfo is null for id $sessionId")
+                Log.w(TAG, "getSessionDetails: SessionInfo is null for id $sessionId")
                 return null
             }
 
@@ -336,7 +380,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             } else {
                 -1 // Return -1 if SDK too low (Process.INVALID_UID)
             }
-            Log.d("PrivilegedService", "Got originatingUid: $originatingUid")
+            Log.d(TAG, "Got originatingUid: $originatingUid")
 
             var resolvedLabel: CharSequence? = null
             var resolvedIcon: Bitmap? = null
@@ -353,12 +397,12 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                     path = resolvedField.get(sessionInfo) as? String
                 }
             } catch (e: Exception) {
-                Log.e("PrivilegedService", "Failed to reflect resolvedBaseCodePath", e)
+                Log.e(TAG, "Failed to reflect resolvedBaseCodePath", e)
             }
 
             // Load appInfo from path
             if (!path.isNullOrEmpty()) {
-                Log.d("PrivilegedService", "Loading info from APK path: $path")
+                Log.d(TAG, "Loading info from APK path: $path")
                 try {
                     val pm = context.packageManager
                     val pkgInfo = pm.getPackageArchiveInfo(
@@ -372,9 +416,9 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                         // Load Label
                         try {
                             resolvedLabel = appInfo.loadLabel(pm)
-                            Log.d("PrivilegedService", "Label loaded successfully: $resolvedLabel")
+                            Log.d(TAG, "Label loaded successfully: $resolvedLabel")
                         } catch (e: Exception) {
-                            Log.e("PrivilegedService", "Failed to load label", e)
+                            Log.e(TAG, "Failed to load label", e)
                         }
 
                         try {
@@ -384,7 +428,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                             val iconId = appInfo.icon
 
                             if (iconId == 0) {
-                                Log.w("PrivilegedService", "appInfo.icon ID is 0, using default icon.")
+                                Log.w(TAG, "appInfo.icon ID is 0, using default icon.")
                                 // Fallback to default icon
                                 val defaultIcon = pm.defaultActivityIcon
                                 resolvedIcon = (defaultIcon as? BitmapDrawable)?.bitmap
@@ -393,18 +437,18 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                                         defaultIcon.intrinsicHeight.coerceAtLeast(1)
                                     )
                             } else {
-                                Log.d("PrivilegedService", "Loading icon ID $iconId from APK resources.")
+                                Log.d(TAG, "Loading icon ID $iconId from APK resources.")
                                 val drawableIcon = apkResources.getDrawable(iconId, null) // Use null for theme
 
                                 val width = drawableIcon.intrinsicWidth
                                 val height = drawableIcon.intrinsicHeight
                                 Log.d(
-                                    "PrivilegedService",
+                                    TAG,
                                     "Drawable loaded from resources. Class: ${drawableIcon.javaClass.name}, WxH: ${width}x${height}"
                                 )
 
                                 if (width <= 0 || height <= 0) {
-                                    Log.w("PrivilegedService", "Drawable has invalid dimensions, cannot convert.")
+                                    Log.w(TAG, "Drawable has invalid dimensions, cannot convert.")
                                 } else {
                                     // Render Drawable to Bitmap manually
                                     // Handles VectorDrawable, AdaptiveIconDrawable etc.
@@ -413,26 +457,26 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                                     drawableIcon.setBounds(0, 0, canvas.width, canvas.height)
                                     drawableIcon.draw(canvas)
                                     resolvedIcon = bitmap
-                                    Log.d("PrivilegedService", "Manually rendered drawable to bitmap.")
+                                    Log.d(TAG, "Manually rendered drawable to bitmap.")
                                 }
                             }
                         } catch (e: Exception) {
-                            Log.e("PrivilegedService", "Failed to load icon using getResourcesForApplication", e)
+                            Log.e(TAG, "Failed to load icon using getResourcesForApplication", e)
                         }
 
                     }
                 } catch (e: Exception) {
-                    Log.e("PrivilegedService", "Failed to load info from APK path", e)
+                    Log.e(TAG, "Failed to load info from APK path", e)
                 }
             }
 
             // Fallback to sessionInfo (mostly null)
-            Log.d("PrivilegedService", "Icon Decision: resolvedIcon is null: ${resolvedIcon == null}")
-            Log.d("PrivilegedService", "Icon Decision: sessionInfo.appIcon is null: ${sessionInfo.appIcon == null}")
+            Log.d(TAG, "Icon Decision: resolvedIcon is null: ${resolvedIcon == null}")
+            Log.d(TAG, "Icon Decision: sessionInfo.appIcon is null: ${sessionInfo.appIcon == null}")
 
             val finalLabel = resolvedLabel ?: sessionInfo.appLabel ?: "N/A"
             val finalIcon = resolvedIcon ?: sessionInfo.appIcon
-            Log.d("PrivilegedService", "Icon Decision: finalIcon is null: ${finalIcon == null}")
+            Log.d(TAG, "Icon Decision: finalIcon is null: ${finalIcon == null}")
 
             // Package into Bundle
             val bundle = Bundle()
@@ -445,7 +489,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
             bundle.putInt("originatingUid", originatingUid)
             return bundle
         } catch (e: Exception) {
-            Log.e("PrivilegedService", "getSessionDetails failed", e)
+            Log.e(TAG, "getSessionDetails failed", e)
             return null
         }
     }
@@ -463,17 +507,17 @@ class DefaultPrivilegedService : BasePrivilegedService() {
 
             if (method != null) {
                 method.invoke(packageInstaller, sessionId, granted)
-                Log.d("PrivilegedService", "Invoked setPermissionsResult($sessionId, $granted)")
+                Log.d(TAG, "Invoked setPermissionsResult($sessionId, $granted)")
             } else {
                 throw NoSuchMethodException("setPermissionsResult not found")
             }
         } catch (e: Exception) {
-            Log.e("PrivilegedService", "approveSession failed", e)
+            Log.e(TAG, "approveSession failed", e)
             if (!granted) {
                 try {
                     context.packageManager.packageInstaller.abandonSession(sessionId)
                 } catch (e2: Exception) {
-                    Log.e("PrivilegedService", "Fallback abandonSession failed", e2)
+                    Log.e(TAG, "Fallback abandonSession failed", e2)
                 }
             }
         }
@@ -493,7 +537,7 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                 }
 
             if (usersList == null) {
-                Log.e("PrivilegedService", "Failed to get user list, method returned null.")
+                Log.e(TAG, "Failed to get user list, method returned null.")
                 return userMap
             }
 
@@ -501,13 +545,13 @@ class DefaultPrivilegedService : BasePrivilegedService() {
                 userMap[userObject.id] = userObject.name ?: "Unknown User"
             }
 
-            Log.d("PrivilegedService", "Fetched users: $userMap")
+            Log.d(TAG, "Fetched users: $userMap")
         } catch (e: SecurityException) {
-            Log.e("PrivilegedService", "Permission denied for getUsers, falling back to current user", e)
+            Log.e(TAG, "Permission denied for getUsers, falling back to current user", e)
             val userId = AndroidProcess.myUid() / 100000
             userMap[userId] = "Current User"
         } catch (e: Exception) {
-            Log.e("PrivilegedService", "Error getting users", e)
+            Log.e(TAG, "Error getting users", e)
         }
         return userMap
     }

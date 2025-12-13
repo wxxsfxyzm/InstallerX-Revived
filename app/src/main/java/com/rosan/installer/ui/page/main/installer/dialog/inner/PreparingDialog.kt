@@ -39,7 +39,7 @@ fun preparingDialog(
 
     return DialogParams(
         icon = DialogInnerParams(
-            DialogParamsType.IconWorking.id, workingIcon
+            DialogParamsType.IconWorking.id, {}
         ),
         title = DialogInnerParams(
             DialogParamsType.InstallerPreparing.id,
@@ -64,9 +64,7 @@ fun preparingDialog(
                 if (progress < 0f) {
                     // Indeterminate progress
                     LinearWavyProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         amplitude = 0f // not wavy
                     )
                 } else {
@@ -78,9 +76,7 @@ fun preparingDialog(
                     )
                     LinearWavyProgressIndicator(
                         progress = { animatedProgress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         amplitude = { 0f }
                     )
                 }
