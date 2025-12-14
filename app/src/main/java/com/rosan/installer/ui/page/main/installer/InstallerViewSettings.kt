@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.installer
 
 data class InstallerViewSettings(
+    val uiExpressive: Boolean = true,
     val preferSystemIconForUpdates: Boolean = false,
     val autoCloseCountDown: Int = 3,
     val showExtendedMenu: Boolean = false,

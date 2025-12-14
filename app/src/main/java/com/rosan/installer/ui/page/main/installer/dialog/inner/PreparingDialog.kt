@@ -74,11 +74,19 @@ fun preparingDialog(
                         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
                         label = "PreparingProgressAnimation"
                     )
-                    LinearWavyProgressIndicator(
-                        progress = { animatedProgress },
-                        modifier = Modifier.fillMaxWidth(),
-                        amplitude = { 0f }
-                    )
+                    if (viewModel.viewSettings.uiExpressive)
+                        LinearWavyProgressIndicator(
+                            progress = { animatedProgress },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp),
+                        )
+                    else
+                        LinearWavyProgressIndicator(
+                            progress = { animatedProgress },
+                            modifier = Modifier.fillMaxWidth(),
+                            amplitude = { 0f }
+                        )
                 }
             }
         },

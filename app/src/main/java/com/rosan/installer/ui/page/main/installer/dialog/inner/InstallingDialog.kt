@@ -3,6 +3,7 @@ package com.rosan.installer.ui.page.main.installer.dialog.inner
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -77,12 +78,19 @@ fun installingDialog(
                         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
                         label = "ProgressBarAnimation"
                     )
-
-                    LinearWavyProgressIndicator(
-                        progress = { animatedProgress },
-                        modifier = Modifier.fillMaxWidth(),
-                        amplitude = { 0f }
-                    )
+                    if (viewModel.viewSettings.uiExpressive)
+                        LinearWavyProgressIndicator(
+                            progress = { animatedProgress },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp),
+                        )
+                    else
+                        LinearWavyProgressIndicator(
+                            progress = { animatedProgress },
+                            modifier = Modifier.fillMaxWidth(),
+                            amplitude = { 0f }
+                        )
                 } else {
                     // other method have unspecified progress
                     LinearWavyProgressIndicator(

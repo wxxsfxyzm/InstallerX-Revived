@@ -225,6 +225,8 @@ class InstallerViewModel(
     private fun loadInitialSettings() =
         viewModelScope.launch {
             viewSettings = viewSettings.copy(
+                uiExpressive =
+                    appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true).first(),
                 preferSystemIconForUpdates =
                     appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first(),
                 autoCloseCountDown =
