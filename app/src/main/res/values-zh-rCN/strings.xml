@@ -167,6 +167,14 @@
     <string name="config_install_mode_notification">通知栏</string>
     <string name="config_install_mode_auto_notification">通知栏自动</string>
     <string name="config_install_mode_ignore">忽略</string>
+    <string name="config_customize_install_reason">自定义安装原因</string>
+    <string name="config_customize_install_reason_desc">指定安装的原因, 理由为用户将会导致启动器(桌面)App创建新的桌面图标</string>
+    <string name="config_install_reason">安装原因</string>
+    <string name="config_install_reason_unknown">未知</string>
+    <string name="config_install_reason_policy">设备政策</string>
+    <string name="config_install_reason_device_restore">设备还原</string>
+    <string name="config_install_reason_device_setup">设备初始化</string>
+    <string name="config_install_reason_user">用户</string>
     <string name="config_customize_package_source">自定义软件包来源</string>
     <string name="config_customize_package_source_desc">指定软件包的来源，本地文件或下载文件会面临更多限制</string>
     <string name="config_package_source">软件包来源</string>

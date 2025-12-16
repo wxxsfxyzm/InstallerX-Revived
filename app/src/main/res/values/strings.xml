@@ -171,6 +171,14 @@
     <string name="config_install_mode_notification">Notification</string>
     <string name="config_install_mode_auto_notification">Auto notification</string>
     <string name="config_install_mode_ignore">Ignore</string>
+    <string name="config_customize_install_reason">Customize Install Reason</string>
+    <string name="config_customize_install_reason_desc">Specifying the reason for installation, "User" reason will cause the launcher to handle adding the newly installed application icon to the desktop.</string>
+    <string name="config_install_reason">Install Reason</string>
+    <string name="config_install_reason_unknown">Unknown</string>
+    <string name="config_install_reason_policy">Device Policy</string>
+    <string name="config_install_reason_device_restore">Device Restore</string>
+    <string name="config_install_reason_device_setup">Device Setup</string>
+    <string name="config_install_reason_user">User</string>
     <string name="config_customize_package_source">Customize Package Source</string>
     <string name="config_customize_package_source_desc">Specify the source of the package, Local File or Download File will face more restrictions</string>
     <string name="config_package_source">Package Source</string>

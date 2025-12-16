@@ -184,6 +184,68 @@ fun MiuixDataInstallModeWidget(viewModel: EditViewModel) {
 }
 
 @Composable
+fun MiuixInstallReasonWidget(viewModel: EditViewModel) {
+    val enableCustomizeInstallReason = viewModel.state.data.enableCustomizeInstallReason
+    val currentInstallReason = viewModel.state.data.installReason
+
+    val description = stringResource(id = R.string.config_customize_install_reason_desc)
+
+    Column {
+        MiuixSwitchWidget(
+            icon = AppIcons.InstallReason,
+            title = stringResource(id = R.string.config_customize_install_reason),
+            description = description,
+            checked = enableCustomizeInstallReason,
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizeInstallReason(it))
+            }
+        )
+
+        AnimatedVisibility(
+            visible = enableCustomizeInstallReason,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            // A map to associate the enum values with their human-readable string resources.
+            val data = mapOf(
+                ConfigEntity.InstallReason.UNKNOWN to stringResource(R.string.config_install_reason_unknown),
+                ConfigEntity.InstallReason.POLICY to stringResource(R.string.config_install_reason_policy),
+                ConfigEntity.InstallReason.DEVICE_RESTORE to stringResource(R.string.config_install_reason_device_restore),
+                ConfigEntity.InstallReason.DEVICE_SETUP to stringResource(R.string.config_install_reason_device_setup),
+                ConfigEntity.InstallReason.USER to stringResource(R.string.config_install_reason_user)
+            )
+
+            // Convert the data Map to the List<SpinnerEntry> required by SuperSpinner.
+            val spinnerEntries = remember(data) {
+                data.values.map { sourceName -> SpinnerEntry(title = sourceName) }
+            }
+
+            // Find the index of the currently selected package source.
+            val selectedIndex = remember(currentInstallReason, data) {
+                data.keys.toList().indexOf(currentInstallReason).coerceAtLeast(0)
+            }
+
+            // Get the display name for the currently selected source, with a fallback.
+            // val summary = data[currentSource]
+
+            // This spinner allows the user to select the package source.
+            SuperSpinner(
+                title = stringResource(R.string.config_install_reason),
+                // summary = summary,
+                items = spinnerEntries,
+                selectedIndex = selectedIndex,
+                onSelectedIndexChange = { newIndex ->
+                    // When a new source is selected, find the corresponding enum and dispatch an action.
+                    data.keys.elementAtOrNull(newIndex)?.let { reason ->
+                        viewModel.dispatch(EditViewAction.ChangeDataInstallReason(reason))
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
 fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer

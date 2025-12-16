@@ -45,6 +45,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDataSplitChooseAllWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataUserWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySdkWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySizeWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallReasonWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
 import dev.chrisbanes.haze.HazeState
@@ -200,6 +201,7 @@ fun MiuixEditPage(
                         .padding(bottom = 12.dp)
                 ) {
                     MiuixDataUserWidget(viewModel = viewModel)
+                    MiuixInstallReasonWidget(viewModel = viewModel)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) MiuixDataPackageSourceWidget(viewModel = viewModel)
                     MiuixDataDeclareInstallerWidget(viewModel = viewModel)
                     MiuixDataManualDexoptWidget(viewModel)

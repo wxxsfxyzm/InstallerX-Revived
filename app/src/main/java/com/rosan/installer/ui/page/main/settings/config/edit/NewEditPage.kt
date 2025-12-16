@@ -68,6 +68,7 @@ import com.rosan.installer.ui.page.main.widget.setting.DataForAllUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataPackageInstallWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataPackageSourceWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataSplitChooseAllWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
@@ -295,6 +296,7 @@ fun NewEditPage(
                     title = stringResource(R.string.config_label_installer_settings),
                     content = buildList {
                         add { DataUserWidget(viewModel) }
+                        add { DataPackageInstallWidget(viewModel) }
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add { DataPackageSourceWidget(viewModel) }
                         add { DataDeclareInstallerWidget(viewModel) }
                         add { DataManualDexoptWidget(viewModel) }

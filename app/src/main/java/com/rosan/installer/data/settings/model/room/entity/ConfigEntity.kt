@@ -19,6 +19,12 @@ data class ConfigEntity(
     @ColumnInfo(name = "authorizer") var authorizer: Authorizer,
     @ColumnInfo(name = "customize_authorizer") var customizeAuthorizer: String,
     @ColumnInfo(name = "install_mode") var installMode: InstallMode,
+    @ColumnInfo(name = "enable_customize_install_reason", defaultValue = "0")
+    var enableCustomizeInstallReason: Boolean = false,
+    @ColumnInfo(
+        name = "install_reason",
+        defaultValue = "0" // Corresponds to INSTALL_REASON_UNKNOWN
+    ) var installReason: InstallReason = InstallReason.UNKNOWN,
     @ColumnInfo(name = "enable_customize_package_source", defaultValue = "0")
     var enableCustomizePackageSource: Boolean = false,
     @ColumnInfo(
@@ -52,6 +58,8 @@ data class ConfigEntity(
             authorizer = Authorizer.Global,
             customizeAuthorizer = "",
             installMode = InstallMode.Global,
+            enableCustomizeInstallReason = false,
+            installReason = InstallReason.UNKNOWN,
             enableCustomizePackageSource = false,
             packageSource = PackageSource.OTHER,
             installer = null,
@@ -76,6 +84,8 @@ data class ConfigEntity(
             authorizer = Authorizer.Global,
             customizeAuthorizer = "",
             installMode = InstallMode.Global,
+            enableCustomizeInstallReason = false,
+            installReason = InstallReason.UNKNOWN,
             enableCustomizePackageSource = false,
             packageSource = PackageSource.OTHER,
             installer = "com.miui.packageinstaller",
@@ -137,6 +147,49 @@ data class ConfigEntity(
         SpeedProfile("speed-profile"),
         Speed("speed"),
         Everything("everything");
+    }
+
+    /**
+     * Define Install Reasons,
+     * Sync with Android's Install Reason
+     *
+     * @see android.content.pm.PackageInstaller.SessionParams.setInstallReason
+     */
+    enum class InstallReason(val value: Int) {
+        /**
+         * Code indicating that the reason for installing this package is unknown.
+         * @see android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN
+         */
+        UNKNOWN(0),
+
+        /**
+         * Code indicating that this package was installed due to enterprise policy.
+         * @see android.content.pm.PackageManager.INSTALL_REASON_POLICY
+         */
+        POLICY(1),
+
+        /**
+         * Code indicating that this package was installed as part of restoring from another device.
+         * @see android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE
+         */
+        DEVICE_RESTORE(2),
+
+        /**
+         * Code indicating that this package was installed as part of device setup.
+         * @see android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP
+         */
+        DEVICE_SETUP(3),
+
+        /**
+         * Code indicating that the package installation was initiated by the user.
+         * NOTE: this will cause launcher release desktop icon
+         * @see android.content.pm.PackageManager.INSTALL_REASON_USER
+         */
+        USER(4);
+
+        companion object {
+            fun fromInt(value: Int) = InstallReason.entries.find { it.value == value } ?: UNKNOWN
+        }
     }
 
     enum class PackageSource(val value: Int) {

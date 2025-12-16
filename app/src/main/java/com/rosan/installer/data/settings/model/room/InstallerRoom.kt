@@ -17,6 +17,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.DexoptModeConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
+import com.rosan.installer.data.settings.model.room.entity.converter.InstallReasonConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.PackageSourceConverter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ import org.koin.core.component.get
 
 @Database(
     entities = [AppEntity::class, ConfigEntity::class],
-    version = 8,
+    version = 9,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
@@ -34,13 +35,15 @@ import org.koin.core.component.get
         AutoMigration(from = 5, to = 6),
         AutoMigration(from = 6, to = 7),
         AutoMigration(from = 7, to = 8, spec = InstallerRoom.Migration7To8::class),
+        AutoMigration(from = 8, to = 9)
     ]
 )
 @TypeConverters(
     AuthorizerConverter::class,
     InstallModeConverter::class,
     DexoptModeConverter::class,
-    PackageSourceConverter::class
+    PackageSourceConverter::class,
+    InstallReasonConverter::class
 )
 abstract class InstallerRoom : RoomDatabase() {
     companion object : KoinComponent {

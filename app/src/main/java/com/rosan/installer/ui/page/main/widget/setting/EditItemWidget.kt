@@ -185,6 +185,54 @@ fun DataInstallModeWidget(viewModel: EditViewModel) {
 }
 
 @Composable
+fun DataPackageInstallWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+    val enableCustomizeInstallReason = viewModel.state.data.enableCustomizeInstallReason
+    val currentInstallReason = viewModel.state.data.installReason
+
+    val description = stringResource(id = R.string.config_customize_install_reason_desc)
+
+    Column {
+        SwitchWidget(
+            icon = AppIcons.InstallReason,
+            title = stringResource(id = R.string.config_customize_install_reason),
+            description = description,
+            checked = enableCustomizeInstallReason,
+            isM3E = isM3E,
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizeInstallReason(it))
+            }
+        )
+
+        AnimatedVisibility(
+            visible = enableCustomizeInstallReason,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            // A map to associate the enum values with their human-readable string resources.
+            val data = mapOf(
+                ConfigEntity.InstallReason.UNKNOWN to stringResource(R.string.config_install_reason_unknown),
+                ConfigEntity.InstallReason.POLICY to stringResource(R.string.config_install_reason_policy),
+                ConfigEntity.InstallReason.DEVICE_RESTORE to stringResource(R.string.config_install_reason_device_restore),
+                ConfigEntity.InstallReason.DEVICE_SETUP to stringResource(R.string.config_install_reason_device_setup),
+                ConfigEntity.InstallReason.USER to stringResource(R.string.config_install_reason_user)
+            )
+
+            DropDownMenuWidget(
+                title = stringResource(R.string.config_install_reason),
+                description = data[currentInstallReason],
+                choice = data.keys.toList().indexOf(currentInstallReason),
+                data = data.values.toList(),
+            ) { index ->
+                // Dispatch the action to the ViewModel when a new source is selected.
+                data.keys.toList().getOrNull(index)?.let { reason ->
+                    viewModel.dispatch(EditViewAction.ChangeDataInstallReason(reason))
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun DataPackageSourceWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer

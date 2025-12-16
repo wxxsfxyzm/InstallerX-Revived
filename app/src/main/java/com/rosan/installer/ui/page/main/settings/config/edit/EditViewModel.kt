@@ -86,7 +86,9 @@ class EditViewModel(
                     is EditViewAction.ChangeDataCustomizeAuthorizer -> changeDataCustomizeAuthorizer(action.customizeAuthorizer)
                     is EditViewAction.ChangeDataInstallMode -> changeDataInstallMode(action.installMode)
                     is EditViewAction.ChangeDataEnableCustomizePackageSource -> changeDataEnableCustomPackageSource(action.enable)
+                    is EditViewAction.ChangeDataEnableCustomizeInstallReason -> changeDataEnableCustomInstallReason(action.enable)
                     is EditViewAction.ChangeDataPackageSource -> changeDataPackageSource(action.packageSource)
+                    is EditViewAction.ChangeDataInstallReason -> changeDataInstallReason(action.installReason)
                     is EditViewAction.ChangeDataDeclareInstaller -> changeDataDeclareInstaller(action.declareInstaller)
                     is EditViewAction.ChangeDataInstaller -> changeDataInstaller(action.installer)
                     is EditViewAction.ChangeDataCustomizeUser -> changeDataCustomizeUser(action.enable)
@@ -204,6 +206,21 @@ class EditViewModel(
         state = state.copy(
             data = state.data.copy(
                 installMode = installMode
+            )
+        )
+    }
+
+    private fun changeDataEnableCustomInstallReason(enable: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                enableCustomizeInstallReason = enable
+            )
+        )
+    }
+    private fun changeDataInstallReason(installReason: ConfigEntity.InstallReason) {
+        state = state.copy(
+            data = state.data.copy(
+                installReason = installReason
             )
         )
     }

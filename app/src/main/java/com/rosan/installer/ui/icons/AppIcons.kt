@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.FactCheck
+import androidx.compose.material.icons.automirrored.twotone.Article
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.automirrored.twotone.PlaylistAdd
 import androidx.compose.material.icons.automirrored.twotone.Rule
@@ -146,6 +147,7 @@ object AppIcons {
     // --- Profile pkg 图标集合 ---
     val InstallUser = Icons.TwoTone.AccountCircle
     val InstallPackageSource = Icons.TwoTone.Source
+    val InstallReason = Icons.AutoMirrored.TwoTone.Article
     val InstallSource = Icons.TwoTone.Face
     val InstallSourceInput = Icons.TwoTone.Badge
     val InstallForAllUsers = Icons.TwoTone.People
