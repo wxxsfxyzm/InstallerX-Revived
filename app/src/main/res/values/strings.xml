@@ -172,7 +172,7 @@
     <string name="config_install_mode_auto_notification">Auto notification</string>
     <string name="config_install_mode_ignore">Ignore</string>
     <string name="config_customize_install_reason">Customize Install Reason</string>
-    <string name="config_customize_install_reason_desc">Specifying the reason for installation, "User" reason will cause the launcher to handle adding the newly installed application icon to the desktop.</string>
+    <string name="config_customize_install_reason_desc">Specify the install reason. For new installations, selecting "User" usually triggers the launcher to create a desktop icon</string>
     <string name="config_install_reason">Install Reason</string>
     <string name="config_install_reason_unknown">Unknown</string>
     <string name="config_install_reason_policy">Device Policy</string>

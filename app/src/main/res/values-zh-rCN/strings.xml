@@ -168,7 +168,7 @@
     <string name="config_install_mode_auto_notification">通知栏自动</string>
     <string name="config_install_mode_ignore">忽略</string>
     <string name="config_customize_install_reason">自定义安装原因</string>
-    <string name="config_customize_install_reason_desc">指定安装的原因, 理由为用户将会导致启动器(桌面)App创建新的桌面图标</string>
+    <string name="config_customize_install_reason_desc">指定安装原因。对于新安装的应用，选择“用户”原因通常会触发启动器自动创建桌面图标</string>
     <string name="config_install_reason">安装原因</string>
     <string name="config_install_reason_unknown">未知</string>
     <string name="config_install_reason_policy">设备政策</string>
