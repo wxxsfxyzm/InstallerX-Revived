@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -20,9 +21,12 @@ import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
+import com.rosan.installer.ui.util.isDhizukuActive
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
 import top.yukonga.miuix.kmp.extra.SuperSpinner
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun MiuixDataNameWidget(
@@ -252,16 +256,9 @@ fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
     val enableCustomizePackageSource = viewModel.state.data.enableCustomizePackageSource
     val currentSource = viewModel.state.data.packageSource
 
-    // Determine if the Dhizuku authorizer is active, which disables this feature.
-    val isDhizuku = when (stateAuthorizer) {
-        ConfigEntity.Authorizer.Dhizuku -> true
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
-        else -> false
-    }
-
     // Display a different description when the feature is disabled by Dhizuku.
     val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
+        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
         else stringResource(id = R.string.config_customize_package_source_desc)
 
     Column {
@@ -269,7 +266,7 @@ fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
             title = stringResource(id = R.string.config_customize_package_source),
             description = description,
             checked = enableCustomizePackageSource,
-            enabled = !isDhizuku,
+            enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
             onCheckedChange = {
                 viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
             }
@@ -320,33 +317,89 @@ fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
 }
 
 @Composable
+fun MiuixDataInstallRequesterWidget(viewModel: EditViewModel) {
+    val stateData = viewModel.state.data
+    val enableCustomize = stateData.enableCustomizeInstallRequester
+    val packageName = stateData.installRequester
+    val uid = stateData.installRequesterUid
+    val isError = stateData.errorInstallRequester
+
+    val description =
+        if (isError) stringResource(R.string.config_declare_install_requester_error_desc)
+        else stringResource(R.string.config_declare_install_requester_desc)
+
+    MiuixSwitchWidget(
+        title = stringResource(id = R.string.config_declare_install_requester),
+        description = description,
+        checked = enableCustomize,
+        onCheckedChange = {
+            viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizeInstallRequester(it))
+        }
+    )
+
+    AnimatedVisibility(
+        visible = enableCustomize,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
+                    .focusable(),
+                value = packageName,
+                onValueChange = {
+                    viewModel.dispatch(EditViewAction.ChangeDataInstallRequester(it))
+                },
+                borderColor = if (isError) MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.primary,
+                label = stringResource(id = R.string.config_install_requester),
+                useLabelAsPlaceholder = true,
+                singleLine = true
+            )
+
+            val displayText = if (packageName.isNotEmpty()) {
+                if (uid != null) "UID: $uid" else stringResource(R.string.config_error_package_not_found)
+            } else stringResource(R.string.config_error_package_name_empty)
+
+            val textColor = if (packageName.isNotEmpty() && uid == null) {
+                MiuixTheme.colorScheme.error
+            } else {
+                MiuixTheme.colorScheme.onBackgroundVariant
+            }
+
+            Text(
+                text = displayText,
+                fontSize = MiuixTheme.textStyles.subtitle.fontSize,
+                fontWeight = FontWeight.Bold,
+                color = textColor,
+                modifier = Modifier.padding(horizontal = 32.dp)
+            )
+        }
+    }
+}
+
+@Composable
 fun MiuixDataDeclareInstallerWidget(viewModel: EditViewModel) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
 
-    val isDhizuku = when (stateAuthorizer) {
-        // 如果当前授权方式是 Dhizuku，结果直接为 true
-        ConfigEntity.Authorizer.Dhizuku -> true
-        // 如果当前授权方式是 Global，则取决于全局授权方式是否为 Dhizuku
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
-        // 其他任何情况，结果都为 false
-        else -> false
-    }
-
     val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_installer_desc)
-        else null // 其他模式下没有特殊描述
+        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_installer_desc)
+        else stringResource(id = R.string.config_declare_installer_desc)
 
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_declare_installer),
         checked = viewModel.state.data.declareInstaller,
         onCheckedChange = {
-            // 这是该组件唯一允许的 dispatch，即响应用户的直接交互
             viewModel.dispatch(EditViewAction.ChangeDataDeclareInstaller(it))
         },
-        // 将从 ViewModel 获取的状态直接传递给下一层
         description = description,
-        enabled = !isDhizuku,
+        enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
     )
 
     AnimatedVisibility(
@@ -401,16 +454,9 @@ fun MiuixDataUserWidget(viewModel: EditViewModel) {
     val targetUserId = viewModel.state.data.targetUserId
     val availableUsers = viewModel.state.availableUsers
 
-    // Determine if the effective authorizer is Dhizuku to disable the widget.
-    val isDhizuku = when (stateAuthorizer) {
-        ConfigEntity.Authorizer.Dhizuku -> true
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
-        else -> false
-    }
-
     // Determine the description text based on whether Dhizuku is active.
     val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_user_desc)
+        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_user_desc)
         else stringResource(id = R.string.config_customize_user_desc)
 
     Column {
@@ -419,7 +465,7 @@ fun MiuixDataUserWidget(viewModel: EditViewModel) {
             title = stringResource(id = R.string.config_customize_user),
             description = description,
             checked = enableCustomizeUser,
-            enabled = !isDhizuku, // The switch is disabled if Dhizuku is the effective authorizer.
+            enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
             onCheckedChange = {
                 viewModel.dispatch(EditViewAction.ChangeDataCustomizeUser(it))
             }
@@ -466,21 +512,15 @@ fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
 
-    val isDhizuku = when (stateAuthorizer) {
-        ConfigEntity.Authorizer.Dhizuku -> true
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
-        else -> false
-    }
-
     val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
+        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
         else stringResource(R.string.config_manual_dexopt_desc)
 
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_manual_dexopt),
         description = description,
         checked = viewModel.state.data.enableManualDexopt,
-        enabled = !isDhizuku,
+        enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
         onCheckedChange = {
             viewModel.dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))
         }

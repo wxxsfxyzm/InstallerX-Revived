@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "f4c4166e4867316ca90c1e29dcb14dd9",
+    "identityHash": "70e61c5dbf64ee0ec270f0ff6887a4bb",
     "entities": [
       {
         "tableName": "app",
@@ -80,7 +80,7 @@
       },
       {
         "tableName": "config",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL DEFAULT 'Default', `description` TEXT NOT NULL, `authorizer` TEXT NOT NULL, `customize_authorizer` TEXT NOT NULL, `install_mode` TEXT NOT NULL, `enable_customize_install_reason` INTEGER NOT NULL DEFAULT 0, `install_reason` INTEGER NOT NULL DEFAULT 0, `enable_customize_package_source` INTEGER NOT NULL DEFAULT 0, `package_source` INTEGER NOT NULL DEFAULT 1, `installer` TEXT, `enable_customize_user` INTEGER NOT NULL DEFAULT 0, `target_user_id` INTEGER NOT NULL DEFAULT 0, `enable_manual_dexopt` INTEGER NOT NULL DEFAULT 0, `force_dexopt` INTEGER NOT NULL DEFAULT 0, `dexopt_mode` TEXT NOT NULL DEFAULT 'speed-profile', `auto_delete` INTEGER NOT NULL, `display_size` INTEGER NOT NULL DEFAULT 0, `display_sdk` INTEGER NOT NULL DEFAULT 0, `for_all_user` INTEGER NOT NULL, `allow_test_only` INTEGER NOT NULL, `allow_downgrade` INTEGER NOT NULL, `bypass_low_target_sdk` INTEGER NOT NULL DEFAULT 0, `allow_all_requested_permissions` INTEGER NOT NULL DEFAULT 0, `split_choose_all` INTEGER NOT NULL DEFAULT 0, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL DEFAULT 'Default', `description` TEXT NOT NULL, `authorizer` TEXT NOT NULL, `customize_authorizer` TEXT NOT NULL, `install_mode` TEXT NOT NULL, `enable_customize_install_reason` INTEGER NOT NULL DEFAULT 0, `install_reason` INTEGER NOT NULL DEFAULT 0, `enable_customize_package_source` INTEGER NOT NULL DEFAULT 0, `package_source` INTEGER NOT NULL DEFAULT 1, `install_requester` TEXT, `installer` TEXT, `enable_customize_user` INTEGER NOT NULL DEFAULT 0, `target_user_id` INTEGER NOT NULL DEFAULT 0, `enable_manual_dexopt` INTEGER NOT NULL DEFAULT 0, `force_dexopt` INTEGER NOT NULL DEFAULT 0, `dexopt_mode` TEXT NOT NULL DEFAULT 'speed-profile', `auto_delete` INTEGER NOT NULL, `display_size` INTEGER NOT NULL DEFAULT 0, `display_sdk` INTEGER NOT NULL DEFAULT 0, `for_all_user` INTEGER NOT NULL, `allow_test_only` INTEGER NOT NULL, `allow_downgrade` INTEGER NOT NULL, `bypass_low_target_sdk` INTEGER NOT NULL DEFAULT 0, `allow_all_requested_permissions` INTEGER NOT NULL DEFAULT 0, `split_choose_all` INTEGER NOT NULL DEFAULT 0, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -146,6 +146,11 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "1"
+          },
+          {
+            "fieldPath": "installRequester",
+            "columnName": "install_requester",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "installer",
@@ -269,7 +274,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f4c4166e4867316ca90c1e29dcb14dd9')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '70e61c5dbf64ee0ec270f0ff6887a4bb')"
     ]
   }
 }

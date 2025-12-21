@@ -40,7 +40,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.card.NoneInstallerTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
@@ -56,9 +55,10 @@ import com.rosan.installer.ui.page.main.widget.setting.DataDeclareInstallerWidge
 import com.rosan.installer.ui.page.main.widget.setting.DataDescriptionWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataForAllUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataInstallReasonWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataInstallRequesterWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataPackageInstallWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataPackageSourceWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataSplitChooseAllWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
@@ -66,6 +66,7 @@ import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySizeWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.util.isNoneActive
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -93,11 +94,6 @@ fun EditPage(
 
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
-    val isNone = when (stateAuthorizer) {
-        ConfigEntity.Authorizer.None -> true
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.None
-        else -> false
-    }
 
     LaunchedEffect(listState) {
         var previousIndex = listState.firstVisibleItemIndex
@@ -230,12 +226,15 @@ fun EditPage(
             item { DataAuthorizerWidget(viewModel = viewModel) }
             item { DataCustomizeAuthorizerWidget(viewModel = viewModel) }
             item { DataInstallModeWidget(viewModel = viewModel) }
-            if (isNone) item { NoneInstallerTipCard() }
+            if (isNoneActive(stateAuthorizer, globalAuthorizer)) item { NoneInstallerTipCard() }
 
             item { LabelWidget(label = stringResource(R.string.config_label_installer_settings)) }
             item { DataUserWidget(viewModel = viewModel, isM3E = false) }
-            item { DataPackageInstallWidget(viewModel = viewModel, isM3E = false) }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) item { DataPackageSourceWidget(viewModel, isM3E = false) }
+            item { DataInstallReasonWidget(viewModel = viewModel, isM3E = false) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                item { DataPackageSourceWidget(viewModel, isM3E = false) }
+            if (viewModel.state.isCustomInstallRequesterEnabled)
+                item { DataInstallRequesterWidget(viewModel = viewModel, isM3E = false) }
             item { DataDeclareInstallerWidget(viewModel = viewModel, isM3E = false) }
             item { DataManualDexoptWidget(viewModel, isM3E = false) }
             item { DataAutoDeleteWidget(viewModel = viewModel, isM3E = false) }

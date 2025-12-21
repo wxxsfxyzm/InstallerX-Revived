@@ -187,7 +187,12 @@
     <string name="config_package_source_store">Store</string>
     <string name="config_package_source_local_file">Local File</string>
     <string name="config_package_source_downloaded_file">Downloaded File</string>
+    <string name="config_declare_install_requester">Customize install requester</string>
+    <string name="config_declare_install_requester_desc">Defaults to the requesting app when off</string>
+    <string name="config_declare_install_requester_error_desc">The entered package name must be installed</string>
+    <string name="config_install_requester">Install requested by (package name)</string>
     <string name="config_declare_installer">Set install source</string>
+    <string name="config_declare_installer_desc">Defaults to this app when off</string>
     <string name="config_installer">installed by (package name)</string>
     <string name="config_customize_user">Set user to install</string>
     <string name="config_customize_user_desc">Manually set the user you want to install app to</string>
@@ -241,6 +246,8 @@
     <string name="config_error_name">Name can\'t be empty</string>
     <string name="config_error_customize_authorizer">Custom authorizer can\'t be empty</string>
     <string name="config_error_installer">Installer source can\'t be empty</string>
+    <string name="config_error_package_not_found">Package not found</string>
+    <string name="config_error_package_name_empty">Package name can\'t be empty</string>
     <string name="discard">Discard</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>

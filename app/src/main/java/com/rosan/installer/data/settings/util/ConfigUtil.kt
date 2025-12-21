@@ -18,17 +18,24 @@ import org.koin.core.component.inject
 /**
  * Utility class for managing configuration settings.
  *
- * DataStore 迁移注意事项
- * 由于 DataStore 的读写是异步操作，原本通过 `val` 属性（同步获取）的配置项，迁移后需改为 `suspend fun`（挂起函数）。调用时必须在协程或挂起环境下进行，否则会编译报错。
+ * DataStore Migration Notes
+ * Since DataStore read/write operations are asynchronous, configuration items that were previously
+ * accessed synchronously via `val` properties must be migrated to `suspend fun` (suspending functions).
+ * Such functions must be called from within a coroutine or a suspending context; otherwise,
+ * a compilation error will occur.
  *
- * 迁移前（同步）
+ * Before migration (synchronous)
+ * ```
  * val authorizer = ConfigUtil.globalAuthorizer
- *
- * 迁移后（异步）
+ *```
+ * After migration (asynchronous)
+ * ```
  * val authorizer = withContext(Dispatchers.IO) {
  *     ConfigUtil.getGlobalAuthorizer()
  * }
+ * ```
  **/
+
 class ConfigUtil {
     companion object : KoinComponent {
         private val context by inject<Context>()
@@ -57,6 +64,8 @@ class ConfigUtil {
 
         suspend fun getByPackageName(packageName: String? = null): ConfigEntity {
             var entity = getByPackageNameInner(packageName)
+
+            // Handle Global overrides for Authorizer and InstallMode
             if (entity.authorizer == ConfigEntity.Authorizer.Global)
                 entity = entity.copy(
                     authorizer = getGlobalAuthorizer(),
@@ -64,17 +73,31 @@ class ConfigUtil {
                 )
             if (entity.installMode == ConfigEntity.InstallMode.Global)
                 entity = entity.copy(installMode = getGlobalInstallMode())
-            // 使用 apply 来设置非构造函数属性
+
+            // Apply runtime properties
             return entity.apply {
-                // --- 如果需要获取全局配置的其他字段，可以在这里添加 ---
-                if (appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER).first()) {
-                    packageName?.let { pkg ->
-                        callingFromUid = try {
-                            context.packageManager.getPackageUid(pkg, 0)
-                        } catch (_: Exception) {
-                            null
+                // Check if the Install Requester feature is enabled in DataStore
+                val isRequesterEnabled = appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER).first()
+
+                if (isRequesterEnabled) {
+                    // Try to resolve UID from the custom 'installRequester' defined in ConfigEntity
+                    var targetUid: Int? = installRequester?.let { requesterPkg ->
+                        runCatching {
+                            context.packageManager.getPackageUid(requesterPkg, 0)
+                        }.getOrNull()
+                    }
+
+                    // Fallback: If 'installRequester' is not set, or the package is not found on device,
+                    // fall back to the existing logic using the incoming 'packageName'.
+                    if (targetUid == null) {
+                        packageName?.let { pkg ->
+                            targetUid = runCatching {
+                                context.packageManager.getPackageUid(pkg, 0)
+                            }.getOrNull()
                         }
                     }
+
+                    callingFromUid = targetUid
                 }
             }
         }
