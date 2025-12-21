@@ -10,8 +10,8 @@ on:
 
 jobs:
   pre_job:
-    # Schedule 触发时（每周扫描）不要跳过
-    if: github.event_name != 'schedule'
+    # Do not skip if triggered by schedule, AND skip if the PR source branch is 'weblate-dev'
+    if: github.event_name != 'schedule' && github.head_ref != 'weblate-dev'
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -44,14 +44,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: '21'
-          # cache: gradle 已移除
+          java-version: '25'
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
