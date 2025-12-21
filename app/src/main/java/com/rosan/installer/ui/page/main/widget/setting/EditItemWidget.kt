@@ -41,6 +41,7 @@ import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
+import com.rosan.installer.ui.util.isDhizukuActive
 
 @Composable
 fun DataNameWidget(
@@ -185,22 +186,63 @@ fun DataInstallModeWidget(viewModel: EditViewModel) {
 }
 
 @Composable
+fun DataInstallReasonWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+    val enableCustomizeInstallReason = viewModel.state.data.enableCustomizeInstallReason
+    val currentInstallReason = viewModel.state.data.installReason
+
+    val description = stringResource(id = R.string.config_customize_install_reason_desc)
+
+    Column {
+        SwitchWidget(
+            icon = AppIcons.InstallReason,
+            title = stringResource(id = R.string.config_customize_install_reason),
+            description = description,
+            checked = enableCustomizeInstallReason,
+            isM3E = isM3E,
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizeInstallReason(it))
+            }
+        )
+
+        AnimatedVisibility(
+            visible = enableCustomizeInstallReason,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            // A map to associate the enum values with their human-readable string resources.
+            val data = mapOf(
+                ConfigEntity.InstallReason.UNKNOWN to stringResource(R.string.config_install_reason_unknown),
+                ConfigEntity.InstallReason.POLICY to stringResource(R.string.config_install_reason_policy),
+                ConfigEntity.InstallReason.DEVICE_RESTORE to stringResource(R.string.config_install_reason_device_restore),
+                ConfigEntity.InstallReason.DEVICE_SETUP to stringResource(R.string.config_install_reason_device_setup),
+                ConfigEntity.InstallReason.USER to stringResource(R.string.config_install_reason_user)
+            )
+
+            DropDownMenuWidget(
+                title = stringResource(R.string.config_install_reason),
+                description = data[currentInstallReason],
+                choice = data.keys.toList().indexOf(currentInstallReason),
+                data = data.values.toList(),
+            ) { index ->
+                // Dispatch the action to the ViewModel when a new source is selected.
+                data.keys.toList().getOrNull(index)?.let { reason ->
+                    viewModel.dispatch(EditViewAction.ChangeDataInstallReason(reason))
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun DataPackageSourceWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
     val enableCustomizePackageSource = viewModel.state.data.enableCustomizePackageSource
     val currentSource = viewModel.state.data.packageSource
 
-    // Determine if the Dhizuku authorizer is active, which disables this feature.
-    val isDhizuku = when (stateAuthorizer) {
-        ConfigEntity.Authorizer.Dhizuku -> true
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
-        else -> false
-    }
-
     // Display a different description when the feature is disabled by Dhizuku.
     val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
+        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
         else stringResource(id = R.string.config_customize_package_source_desc)
 
     Column {
@@ -209,8 +251,8 @@ fun DataPackageSourceWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
             title = stringResource(id = R.string.config_customize_package_source),
             description = description,
             checked = enableCustomizePackageSource,
-            enabled = !isDhizuku,
-            isError = isDhizuku,
+            enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
+            isError = isDhizukuActive(stateAuthorizer, globalAuthorizer),
             isM3E = isM3E,
             onCheckedChange = {
                 viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
@@ -247,22 +289,83 @@ fun DataPackageSourceWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
 }
 
 @Composable
+fun DataInstallRequesterWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+    val stateData = viewModel.state.data
+    val enableCustomize = stateData.enableCustomizeInstallRequester
+    val packageName = stateData.installRequester
+    val uid = stateData.installRequesterUid
+
+    // Validation state for UI:
+    // It's an error if the field is not empty but no UID was found.
+    // (If it's empty, standard required field error logic applies usually, but here we check existence)
+    val isPackageNotFound = packageName.isNotEmpty() && uid == null
+    val isError = stateData.errorInstallRequester
+
+    val description =
+        if (isError) stringResource(R.string.config_declare_install_requester_error_desc)
+        else stringResource(R.string.config_declare_install_requester_desc)
+
+    Column {
+        SwitchWidget(
+            icon = AppIcons.InstallSource, // Or an appropriate icon for Requester
+            title = stringResource(id = R.string.config_declare_install_requester),
+            description = description,
+            checked = enableCustomize,
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizeInstallRequester(it))
+            },
+            isM3E = isM3E,
+            isError = isError // Highlight the switch if the inner content is invalid when saving
+        )
+
+        AnimatedVisibility(
+            visible = enableCustomize,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
+                    .focusable(),
+                value = packageName,
+                onValueChange = {
+                    viewModel.dispatch(EditViewAction.ChangeDataInstallRequester(it))
+                },
+                label = { Text(text = stringResource(id = R.string.config_install_requester)) },
+                leadingIcon = {
+                    Icon(imageVector = AppIcons.InstallSourceInput, contentDescription = null)
+                },
+                singleLine = true,
+                isError = isPackageNotFound || (isError && packageName.isEmpty()),
+                supportingText = {
+                    if (packageName.isNotEmpty()) {
+                        if (uid != null) {
+                            Text(
+                                text = "UID: $uid",
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.config_error_package_not_found),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    } else stringResource(R.string.config_error_package_name_empty)
+                }
+            )
+        }
+    }
+}
+
+@Composable
 fun DataDeclareInstallerWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
 
-    val isDhizuku = when (stateAuthorizer) {
-        // 如果当前授权方式是 Dhizuku，结果直接为 true
-        ConfigEntity.Authorizer.Dhizuku -> true
-        // 如果当前授权方式是 Global，则取决于全局授权方式是否为 Dhizuku
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
-        // 其他任何情况，结果都为 false
-        else -> false
-    }
-
     val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_installer_desc)
-        else null
+        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_installer_desc)
+        else stringResource(id = R.string.config_declare_installer_desc)
 
     SwitchWidget(
         icon = AppIcons.InstallSource,
@@ -271,8 +374,8 @@ fun DataDeclareInstallerWidget(viewModel: EditViewModel, isM3E: Boolean = true) 
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataDeclareInstaller(it)) },
         isM3E = isM3E,
         description = description,
-        enabled = !isDhizuku,
-        isError = isDhizuku
+        enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
+        isError = isDhizukuActive(stateAuthorizer, globalAuthorizer)
     )
 
     AnimatedVisibility(
@@ -375,14 +478,8 @@ fun DataUserWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     val targetUserId = viewModel.state.data.targetUserId
     val availableUsers = viewModel.state.availableUsers
 
-    val isDhizuku = when (stateAuthorizer) {
-        ConfigEntity.Authorizer.Dhizuku -> true
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
-        else -> false
-    }
-
     val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_user_desc)
+        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_user_desc)
         else stringResource(id = R.string.config_customize_user_desc)
 
     Column {
@@ -391,8 +488,8 @@ fun DataUserWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
             title = stringResource(id = R.string.config_customize_user),
             description = description,
             checked = enableCustomizeUser,
-            enabled = !isDhizuku,
-            isError = isDhizuku,
+            enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
+            isError = isDhizukuActive(stateAuthorizer, globalAuthorizer),
             isM3E = isM3E,
             onCheckedChange = {
                 viewModel.dispatch(EditViewAction.ChangeDataCustomizeUser(it))
@@ -424,14 +521,8 @@ fun DataManualDexoptWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
 
-    val isDhizuku = when (stateAuthorizer) {
-        ConfigEntity.Authorizer.Dhizuku -> true
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
-        else -> false
-    }
-
     val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
+        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
         else stringResource(R.string.config_manual_dexopt_desc)
 
     SwitchWidget(
@@ -439,8 +530,8 @@ fun DataManualDexoptWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
         title = stringResource(id = R.string.config_manual_dexopt),
         description = description,
         checked = viewModel.state.data.enableManualDexopt,
-        enabled = !isDhizuku,
-        isError = isDhizuku,
+        enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
+        isError = isDhizukuActive(stateAuthorizer, globalAuthorizer),
         isM3E = isM3E,
         onCheckedChange = {
             viewModel.dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))

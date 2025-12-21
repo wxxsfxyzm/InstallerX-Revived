@@ -6,7 +6,8 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 data class EditViewState(
     val data: Data = Data.build(ConfigEntity.default),
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
-    val availableUsers: Map<Int, String> = emptyMap()
+    val availableUsers: Map<Int, String> = emptyMap(),
+    val isCustomInstallRequesterEnabled: Boolean = false
 ) {
     data class Data(
         val name: String,
@@ -16,6 +17,11 @@ data class EditViewState(
         val installMode: ConfigEntity.InstallMode,
         val enableCustomizePackageSource: Boolean,
         val packageSource: ConfigEntity.PackageSource,
+        val enableCustomizeInstallReason: Boolean,
+        val installReason: ConfigEntity.InstallReason,
+        val enableCustomizeInstallRequester: Boolean,
+        val installRequester: String,
+        val installRequesterUid: Int? = null,
         val declareInstaller: Boolean,
         val installer: String,
         val enableCustomizeUser: Boolean,
@@ -41,14 +47,20 @@ data class EditViewState(
 
         val errorInstaller = declareInstaller && installer.isEmpty()
 
+        // Validation: Error if enabled but package name is empty OR (package name is not empty but UID not found)
+        val errorInstallRequester = enableCustomizeInstallRequester && (installRequester.isEmpty() || installRequesterUid == null)
+
         fun toConfigEntity(): ConfigEntity = ConfigEntity(
             name = this.name,
             description = this.description,
             authorizer = this.authorizer,
             customizeAuthorizer = if (this.authorizerCustomize) this.customizeAuthorizer else "",
             installMode = this.installMode,
+            enableCustomizeInstallReason = this.enableCustomizeInstallReason,
+            installReason = this.installReason,
             enableCustomizePackageSource = this.enableCustomizePackageSource,
             packageSource = this.packageSource,
+            installRequester = if (this.enableCustomizeInstallRequester) this.installRequester else null,
             installer = if (this.declareInstaller) this.installer else null,
             enableCustomizeUser = this.enableCustomizeUser,
             targetUserId = this.targetUserId,
@@ -74,7 +86,12 @@ data class EditViewState(
                 customizeAuthorizer = config.customizeAuthorizer,
                 installMode = config.installMode,
                 enableCustomizePackageSource = config.enableCustomizePackageSource,
+                enableCustomizeInstallReason = config.enableCustomizeInstallReason,
+                installReason = config.installReason,
                 packageSource = config.packageSource,
+                enableCustomizeInstallRequester = config.installRequester != null,
+                installRequester = config.installRequester ?: "",
+                installRequesterUid = null,
                 declareInstaller = config.installer != null,
                 installer = config.installer ?: "",
                 enableCustomizeUser = config.enableCustomizeUser,

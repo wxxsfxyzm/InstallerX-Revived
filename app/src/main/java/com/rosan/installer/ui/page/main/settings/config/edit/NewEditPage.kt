@@ -50,7 +50,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.card.NoneInstallerTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
@@ -66,6 +65,8 @@ import com.rosan.installer.ui.page.main.widget.setting.DataDeclareInstallerWidge
 import com.rosan.installer.ui.page.main.widget.setting.DataDescriptionWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataForAllUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataInstallReasonWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataInstallRequesterWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataPackageSourceWidget
@@ -75,6 +76,7 @@ import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySizeWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.util.isNoneActive
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -107,12 +109,6 @@ fun NewEditPage(
 
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
-
-    val isNone = when (stateAuthorizer) {
-        ConfigEntity.Authorizer.None -> true
-        ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.None
-        else -> false
-    }
 
     LaunchedEffect(listState) {
         var previousIndex = listState.firstVisibleItemIndex
@@ -227,7 +223,7 @@ fun NewEditPage(
                             ),
                             colors = IconButtonDefaults.iconButtonColors(
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                containerColor = MaterialTheme.colorScheme.primaryContainer, // 标准 IconButton 背景是透明的
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
                             )
                         ) {
                             Icon(
@@ -239,7 +235,7 @@ fun NewEditPage(
                 }
             )
         },
-        // 修改: 只有在未滚动到底部时，才在右下角显示 FAB
+        // 只有在未滚动到底部时，才在右下角显示 FAB
         floatingActionButton = {
             AnimatedVisibility(
                 visible = showFloating, // 在未滚动到底部且 showFloating 为 true 时可见
@@ -255,12 +251,8 @@ fun NewEditPage(
                             contentDescription = text
                         )
                     },
-                    text = {
-                        Text(text)
-                    },
-                    onClick = {
-                        viewModel.dispatch(EditViewAction.SaveData)
-                    }
+                    text = { Text(text) },
+                    onClick = { viewModel.dispatch(EditViewAction.SaveData) }
                 )
             }
         },
@@ -287,7 +279,7 @@ fun NewEditPage(
                 )
             }
 
-            if (isNone) item { NoneInstallerTipCard() }
+            if (isNoneActive(stateAuthorizer, globalAuthorizer)) item { NoneInstallerTipCard() }
 
             // --- Group 2: Installer Settings ---
             item {
@@ -295,7 +287,9 @@ fun NewEditPage(
                     title = stringResource(R.string.config_label_installer_settings),
                     content = buildList {
                         add { DataUserWidget(viewModel) }
+                        add { DataInstallReasonWidget(viewModel) }
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add { DataPackageSourceWidget(viewModel) }
+                        if (viewModel.state.isCustomInstallRequesterEnabled) add { DataInstallRequesterWidget(viewModel) }
                         add { DataDeclareInstallerWidget(viewModel) }
                         add { DataManualDexoptWidget(viewModel) }
                         add { DataAutoDeleteWidget(viewModel) }

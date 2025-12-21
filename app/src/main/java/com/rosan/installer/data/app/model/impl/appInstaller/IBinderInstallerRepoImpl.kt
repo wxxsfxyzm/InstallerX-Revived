@@ -251,6 +251,12 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             )
         config.callingFromUid?.let { params.setOriginatingUid(it) }
         params.setAppPackageName(packageName)
+        // Customize Install Reason
+        if (config.enableCustomizeInstallReason) {
+            Timber.d("Setting installReason to ${config.installReason.name} (${config.installReason.value})")
+            params.setInstallReason(config.installReason.value)
+        } else
+            params.setInstallReason(PackageManager.INSTALL_REASON_UNKNOWN)
         // --- Customize PackageSource ---
         // Only available on Android 13+, Dhizuku need test
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && config.authorizer != ConfigEntity.Authorizer.Dhizuku) {
