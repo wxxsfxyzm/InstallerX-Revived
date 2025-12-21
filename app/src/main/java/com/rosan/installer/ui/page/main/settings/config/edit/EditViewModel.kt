@@ -60,6 +60,9 @@ class EditViewModel(
                 if (errorInstaller) {
                     errors.add(context.getString(R.string.config_error_installer))
                 }
+                if (errorInstallRequester) {
+                    errors.add(context.getString(R.string.config_error_package_not_found))
+                }
             }
             return errors
         }

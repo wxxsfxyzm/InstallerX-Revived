@@ -10,21 +10,21 @@
 [versions]
 agp = "8.13.2"
 capsule = "2.1.2"
-kotlin = "2.2.21"
-ksp = "2.3.3"
-composeBom = "2025.12.00"
+kotlin = "2.3.0"
+ksp = "2.3.4"
+composeBom = "2025.12.01"
 compose = "1.10.0"
 m3color = "2025.4"
 haze = "1.7.1"
 splashScreen = "1.2.0"
-material3 = "1.5.0-alpha10"
+material3 = "1.5.0-alpha11"
 room = "2.8.4"
 ktx-serialization = "1.9.0"
 accompanist = "0.37.3"
 rikka-shizuku = "13.1.5"
 koin-bom = "4.1.1"
 datastoreCoreAndroid = "1.2.0"
-aboutLibraries = "13.1.0"
+aboutLibraries = "13.2.1"
 appiconloader = "1.5.0"
 timber = "5.0.1"
 miuix = "0.7.2"
@@ -46,7 +46,7 @@ aboutLibraries-android = { id = "com.mikepenz.aboutlibraries.plugin.android", ve
 [libraries]
 androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.17.0" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.12.1" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.12.2" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.10.0" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
 androix-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
