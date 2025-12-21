@@ -24,10 +24,12 @@ android {
         }
     }
     val storeFile = properties.getProperty("storeFile") ?: System.getenv("KEYSTORE_FILE")
-    val storePassword = properties.getProperty("storePassword") ?: System.getenv("KEYSTORE_PASSWORD")
+    val storePassword =
+        properties.getProperty("storePassword") ?: System.getenv("KEYSTORE_PASSWORD")
     val keyAlias = properties.getProperty("keyAlias") ?: System.getenv("KEY_ALIAS")
     val keyPassword = properties.getProperty("keyPassword") ?: System.getenv("KEY_PASSWORD")
-    val hasCustomSigning = storeFile != null && storePassword != null && keyAlias != null && keyPassword != null
+    val hasCustomSigning =
+        storeFile != null && storePassword != null && keyAlias != null && keyPassword != null
 
     defaultConfig {
         // 你如果根据InstallerX的源码进行打包成apk或其他安装包格式
@@ -153,12 +155,12 @@ android {
     }
 
     compileOptions {
-        targetCompatibility = JavaVersion.VERSION_21
-        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_25
+        sourceCompatibility = JavaVersion.VERSION_25
     }
 
     kotlin {
-        jvmToolchain(21)
+        jvmToolchain(25)
     }
 
     buildFeatures {

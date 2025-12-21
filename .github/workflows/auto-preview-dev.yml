@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -52,18 +52,17 @@ jobs:
         id: commit_sha
         run: echo "SHORT_SHA=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: '21'
-          # cache: gradle 已移除，使用下方的 setup-gradle
+          java-version: '25'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
           # dev 分支允许写入缓存
-          cache-read-only: false
+          cache-read-only: ${{ github.ref_name != 'dev' }}
 
       - name: Update versionName format
         id: version
