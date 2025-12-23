@@ -8,7 +8,6 @@ import com.rosan.installer.data.recycle.util.SHELL_ROOT
 
 class AppProcessRecycler(private val shell: String) : Recycler<AppProcess>() {
 
-    // 底层资源快速回收
     override val delayDuration: Long = 100L
 
     private class CustomizeAppProcess(private val shell: String) : AppProcess.Terminal() {

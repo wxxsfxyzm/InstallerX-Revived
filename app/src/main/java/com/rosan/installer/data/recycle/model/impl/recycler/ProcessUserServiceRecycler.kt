@@ -28,20 +28,20 @@ class ProcessUserServiceRecycler(private val shell: String) :
     class UserServiceProxy(
         val service: IAppProcessService,
         private val appProcessHandle: Recyclable<AppProcess>,
-        private val binder: IBinder,            // 新增
-        private val deathRecipient: IBinder.DeathRecipient // 新增
+        private val binder: IBinder,
+        private val deathRecipient: IBinder.DeathRecipient
     ) : UserService {
         override val privileged: IPrivilegedService = service.privilegedService
 
         override fun close() {
-            // 关键修复：先解绑监听，防止 quit() 触发 recycleForcibly()
+            // Unlink death recipient to prevent false alarm during normal close
             try {
                 binder.unlinkToDeath(deathRecipient, 0)
             } catch (e: Exception) {
-                // 忽略解绑失败
+                // Ignore if already dead or unlinked
             }
 
-            // 现在可以放心地让它去死了
+            // Quit the remote service gracefully
             runCatching { service.quit() }
             appProcessHandle.recycle()
         }
@@ -61,6 +61,7 @@ class ProcessUserServiceRecycler(private val shell: String) :
 
         override fun quit() {
             try {
+                // Kill parent shell to ensure clean exit (su/sh process)
                 val ppid = android.system.Os.getppid()
                 Timber.i("Quitting... Killing parent shell (PID: $ppid)")
                 android.os.Process.killProcess(ppid)
@@ -74,9 +75,10 @@ class ProcessUserServiceRecycler(private val shell: String) :
         override fun getPrivilegedService(): IPrivilegedService = privileged
 
         override fun registerDeathToken(token: IBinder?) {
+            // This acts as a secondary safety mechanism via Binder
             try {
                 token?.linkToDeath({
-                    Timber.w("Client died. Quitting...")
+                    Timber.w("Client died (Binder notification). Quitting...")
                     quit()
                 }, 0)
             } catch (e: RemoteException) {
@@ -93,9 +95,10 @@ class ProcessUserServiceRecycler(private val shell: String) :
         val appProcessHandle = appProcessRecycler.make()
 
         val maxRetries = 5
-        val initialDelay = 100L // 100ms
+        val initialDelay = 100L
         var currentBinder: IBinder? = null
 
+        // Retry logic for obtaining the binder
         var attempt = 0
         while (attempt < maxRetries) {
             try {
@@ -143,6 +146,7 @@ class ProcessUserServiceRecycler(private val shell: String) :
 
         val serviceInterface = IAppProcessService.Stub.asInterface(binder)
 
+        // Register a token so the server knows if WE (the client) die
         try {
             serviceInterface.registerDeathToken(Binder())
         } catch (e: RemoteException) {
@@ -152,6 +156,4 @@ class ProcessUserServiceRecycler(private val shell: String) :
 
         return UserServiceProxy(serviceInterface, appProcessHandle, binder, deathRecipient)
     }
-
-    // 不再需要 onRecycle，因为 UserServiceProxy.close() 会处理
 }
