@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agree">Accetta</string>
+    <string name="open_source_license">Licenza Open Source</string>
+    <string name="back">Indietro</string>
+    <string name="config">Profili</string>
+    <string name="preferred">Preferenze</string>
+    <string name="personalization">Personalizzazione</string>
+    <string name="search">Cerca</string>
+    <string name="menu">Menu</string>
+    <string name="other">Altro</string>
+    <string name="updating">Aggiornamento...</string>
+    <string name="get_update">Ricevi aggiornamento</string>
+    <string name="update_available">Aggiornamento Disponibile: %1$s</string>
+    <string name="stable">Stabile</string>
+    <string name="preview">Anteprima</string>
+</resources>

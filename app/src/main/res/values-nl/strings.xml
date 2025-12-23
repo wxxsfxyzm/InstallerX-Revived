@@ -602,4 +602,12 @@
     <string name="installer_multi_apk_description_notification">Klik alsjeblieft op de melding om te installeren items te selecteren</string>
     <string name="installer_error_mixed_selection">Kan niet apps en modules tegelijkertijd installeren</string>
     <string name="installer_error_multiple_modules">Kan niet meerdere modules samen installeren</string>
+    <string name="installer_splits_invalid_tip">Kan niet het geselecteerde splitpakket toevoegen aan een verwijderde app</string>
+    <string name="installer_splits_only_tip">Alleen gesplitste APK\'s zijn geselecteerd. Ze zullen toegevoegd worden aan de al bestaande applicatie</string>
+    <string name="installer_split_name_label">Splitsingsnaam:</string>
+    <string name="exception_install_parse_failed_skipped">Het pakket was overgeslagen en zou genegeerd moeten worden</string>
+    <string name="exception_uninstall_failed_aborted">De-installatie afgebroken door gebruiker</string>
+    <string name="lab_unstable_features">Onstabiele functies</string>
+    <string name="lab_set_install_requester">Installatieaanvrager instellen</string>
+    <string name="lab_set_install_requester_desc">Vult het originatingUid veld met het oproeppakket om systeemgedrag te volgen</string>
 </resources>
