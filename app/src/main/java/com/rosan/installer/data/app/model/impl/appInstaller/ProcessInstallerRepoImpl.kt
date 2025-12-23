@@ -9,9 +9,20 @@ import com.rosan.installer.data.recycle.repo.Recyclable
 import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SHELL_SH
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.withContext
 
 object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
-    private lateinit var recycler: Recyclable<AppProcess>
+    private val localRecycler = ThreadLocal<Recyclable<AppProcess>>()
+
+    private fun createRecycler(config: ConfigEntity): Recyclable<AppProcess> =
+        AppProcessRecyclers.get(
+            when (config.authorizer) {
+                ConfigEntity.Authorizer.Root -> SHELL_ROOT
+                ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
+                else -> SHELL_SH
+            }
+        ).make()
 
     override suspend fun doInstallWork(
         config: ConfigEntity,
@@ -21,29 +32,50 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
     ) {
-        recycler = AppProcessRecyclers.get(
-            when (config.authorizer) {
-                ConfigEntity.Authorizer.Root -> SHELL_ROOT
-                ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
-                else -> SHELL_SH
+        val recycler = createRecycler(config)
+
+        withContext(localRecycler.asContextElement(value = recycler)) {
+            try {
+                super.doInstallWork(
+                    config,
+                    entities,
+                    extra,
+                    blacklist,
+                    sharedUserIdBlacklist,
+                    sharedUserIdExemption
+                )
+            } finally {
+                recycler.recycle()
             }
-        ).make()
-        super.doInstallWork(config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
+        }
     }
 
-    override suspend fun doUninstallWork(config: ConfigEntity, packageName: String, extra: InstallExtraInfoEntity) {
-        recycler = AppProcessRecyclers.get(
-            when (config.authorizer) {
-                ConfigEntity.Authorizer.Root -> SHELL_ROOT
-                ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
-                else -> SHELL_SH
+    override suspend fun doUninstallWork(
+        config: ConfigEntity,
+        packageName: String,
+        extra: InstallExtraInfoEntity
+    ) {
+        val recycler = createRecycler(config)
+
+        withContext(localRecycler.asContextElement(value = recycler)) {
+            try {
+                super.doUninstallWork(config, packageName, extra)
+            } finally {
+                recycler.recycle()
             }
-        ).make()
-        super.doUninstallWork(config, packageName, extra)
+        }
     }
 
-    override suspend fun iBinderWrapper(iBinder: IBinder): IBinder =
-        recycler.entity.binderWrapper(iBinder)
+    override suspend fun iBinderWrapper(iBinder: IBinder): IBinder {
+        val recycler = localRecycler.get()
+            ?: throw IllegalStateException(
+                "Recycler is null in iBinderWrapper. " +
+                        "This indicates doInstallWork/doUninstallWork is not properly scoping the ThreadLocal. " +
+                        "Make sure you are calling this within the managed context."
+            )
+
+        return recycler.entity.binderWrapper(iBinder)
+    }
 
     override suspend fun doFinishWork(
         config: ConfigEntity,
@@ -52,6 +84,5 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
         result: Result<Unit>
     ) {
         super.doFinishWork(config, entities, extraInfo, result)
-        recycler.recycle()
     }
 }

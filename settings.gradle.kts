@@ -1,3 +1,5 @@
+import org.gradle.api.initialization.resolve.RepositoriesMode
+
 pluginManagement {
     repositories {
         mavenLocal()
@@ -24,7 +26,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "InstallerX"
+rootProject.name = "InstallerX Revived"
 include(
     ":app",
     ":hidden-api"

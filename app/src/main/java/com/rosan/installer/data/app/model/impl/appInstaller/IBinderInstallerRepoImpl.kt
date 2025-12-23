@@ -32,14 +32,12 @@ import com.rosan.installer.data.app.util.PackageInstallerUtil.installFlags
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
 import com.rosan.installer.data.common.util.isPackageArchivedCompat
+import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.recycle.util.requireDhizukuPermissionGranted
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.isSystemInstaller
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -51,8 +49,6 @@ import java.util.concurrent.TimeUnit
 abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     private val context by inject<Context>()
     private val reflect = get<ReflectRepo>()
-
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
 
@@ -416,40 +412,31 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     ) {
         Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
         if (result.isSuccess) {
-            // Trigger dex optimization after installation
-            if (config.enableManualDexopt) {
-                val packageName = entities.firstOrNull()?.packageName
-                if (packageName != null) {
-                    Timber.tag("doFinishWork")
-                        .d("Manual dexopt is enabled. Triggering with mode: ${config.dexoptMode.value}")
-                    coroutineScope.launch {
-                        performDexOpt(
-                            packageName = packageName,
-                            compilerFilter = config.dexoptMode.value,
-                            force = config.forceDexopt
-                        )
-                    }
-                }
-            }
+            Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
+            if (!result.isSuccess) return
 
-            val isDeleteCapable = entities.firstOrNull()?.sourceType != DataType.MULTI_APK_ZIP &&
-                    entities.firstOrNull()?.sourceType != DataType.MIXED_MODULE_APK &&
-                    entities.firstOrNull()?.sourceType != DataType.MIXED_MODULE_ZIP
-            // Never Delete ZIP files automatically
-            // Enable autoDelete only when the sourceType is capable
-            if (config.autoDelete && isDeleteCapable) {
-                Timber.tag("doFinishWork").d("autoDelete is enabled, do delete work")
-                // Improve logging for better debugging
-                coroutineScope.launch {
-                    runCatching {
-                        Timber.tag("doFinishWork").d("Attempting to call onDeleteWork.")
-                        onDeleteWork(config, entities, extraInfo)
-                        Timber.tag("doFinishWork").d("onDeleteWork call completed successfully.")
-                    }.onFailure { e ->
-                        Timber.tag("doFinishWork").e(e, "onDeleteWork failed with an exception.")
-                    }
-                }
-            }
+            val packageName = entities.firstOrNull()?.packageName ?: return
+
+            val isDeleteCapable = entities.firstOrNull()?.sourceType !in listOf(
+                DataType.MULTI_APK_ZIP,
+                DataType.MIXED_MODULE_APK,
+                DataType.MIXED_MODULE_ZIP
+            )
+
+            val shouldDelete = config.autoDelete && isDeleteCapable
+
+            PrivilegedManager.executePostInstallTasksAsync(
+                authorizer = config.authorizer,
+                customizeAuthorizer = config.customizeAuthorizer,
+                config = PrivilegedManager.PostInstallTaskConfig(
+                    packageName = packageName,
+                    enableDexopt = config.enableManualDexopt,
+                    dexoptMode = config.dexoptMode.value,
+                    forceDexopt = config.forceDexopt,
+                    enableAutoDelete = shouldDelete,
+                    deletePaths = if (shouldDelete) entities.sourcePath() else emptyArray()
+                )
+            )
         }
     }
 
@@ -466,7 +453,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             special = if (authorizer == ConfigEntity.Authorizer.None
                 || authorizer == ConfigEntity.Authorizer.Dhizuku
             ) ::special else null,
-            useShizukuHookMode = false
+            useHookMode = false
         ) {
             it.privileged.delete(entities.sourcePath())
         }

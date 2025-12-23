@@ -1,7 +1,9 @@
 package com.rosan.installer
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.os.Build
+import android.util.Log
 import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
@@ -10,12 +12,21 @@ import com.rosan.installer.di.init.appModules
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 import timber.log.Timber
 
 class App : Application() {
     override fun onCreate() {
         CrashHandler.init()
         super.onCreate()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            try {
+                HiddenApiBypass.addHiddenApiExemptions("")
+            } catch (e: Throwable) {
+                @SuppressLint("LogNotTimber") Log.e("App", "Failed to bypass hidden API restrictions", e)
+            }
+        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             MonetCompat.setup(this)

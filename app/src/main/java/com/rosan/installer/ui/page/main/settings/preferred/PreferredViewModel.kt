@@ -460,7 +460,7 @@ class PreferredViewModel(
 
     private fun labChangeShizukuHookMode(enabled: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, enabled)
+            appDataStore.putBoolean(AppDataStore.LAB_USE_HOOK_MODE, enabled)
         }
 
     private fun labChangeRootModuleFlash(enabled: Boolean) =
@@ -602,7 +602,7 @@ class PreferredViewModel(
             val managedSharedUserIdExemptPkgFlow =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
             val labShizukuHookModeFlow =
-                appDataStore.getBoolean(AppDataStore.LAB_USE_SHIZUKU_HOOK_MODE, true)
+                appDataStore.getBoolean(AppDataStore.LAB_USE_HOOK_MODE, true)
             val labRootModuleFlashFlow =
                 appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false)
             val labRootImplementationFlow =

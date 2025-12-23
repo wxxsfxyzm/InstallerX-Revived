@@ -5,12 +5,12 @@ import android.content.Context
 import android.os.Binder
 import android.os.IBinder
 import android.os.RemoteException
-import android.system.Os
 import androidx.annotation.Keep
 import com.rosan.app_process.AppProcess
 import com.rosan.installer.IAppProcessService
 import com.rosan.installer.IPrivilegedService
 import com.rosan.installer.data.recycle.model.entity.DefaultPrivilegedService
+import com.rosan.installer.data.recycle.repo.Recyclable
 import com.rosan.installer.data.recycle.repo.Recycler
 import com.rosan.installer.data.recycle.repo.recyclable.UserService
 import com.rosan.installer.di.init.processModules
@@ -25,10 +25,26 @@ import kotlin.system.exitProcess
 class ProcessUserServiceRecycler(private val shell: String) :
     Recycler<ProcessUserServiceRecycler.UserServiceProxy>(), KoinComponent {
 
-    class UserServiceProxy(val service: IAppProcessService) : UserService {
+    class UserServiceProxy(
+        val service: IAppProcessService,
+        private val appProcessHandle: Recyclable<AppProcess>,
+        private val binder: IBinder,
+        private val deathRecipient: IBinder.DeathRecipient
+    ) : UserService {
         override val privileged: IPrivilegedService = service.privilegedService
 
-        override fun close() = service.quit()
+        override fun close() {
+            // Unlink death recipient to prevent false alarm during normal close
+            try {
+                binder.unlinkToDeath(deathRecipient, 0)
+            } catch (e: Exception) {
+                // Ignore if already dead or unlinked
+            }
+
+            // Quit the remote service gracefully
+            runCatching { service.quit() }
+            appProcessHandle.recycle()
+        }
     }
 
     class AppProcessService @Keep constructor(context: Context) : IAppProcessService.Stub() {
@@ -43,24 +59,15 @@ class ProcessUserServiceRecycler(private val shell: String) :
 
         private val privileged = DefaultPrivilegedService()
 
-        /**
-         * Quit logic: Kill the JVM and the Parent Shell.
-         */
         override fun quit() {
             try {
-                // Get the Parent Process ID (The Shell/SU process)
-                val ppid = Os.getppid()
-
-                Timber.tag("AppProcessService").i("Quitting... Killing parent shell process (PID: $ppid)")
-
-                // Kill the parent shell first.
-                // Since we are running as Root (via su), we have permission to do this.
-                // This ensures the "smaller PID" process dies.
+                // Kill parent shell to ensure clean exit (su/sh process)
+                val ppid = android.system.Os.getppid()
+                Timber.i("Quitting... Killing parent shell (PID: $ppid)")
                 android.os.Process.killProcess(ppid)
             } catch (e: Exception) {
-                Timber.tag("AppProcessService").e(e, "Failed to kill parent process")
+                Timber.e(e, "Failed to kill parent process")
             } finally {
-                // Kill self (The Java JVM process)
                 exitProcess(0)
             }
         }
@@ -68,13 +75,14 @@ class ProcessUserServiceRecycler(private val shell: String) :
         override fun getPrivilegedService(): IPrivilegedService = privileged
 
         override fun registerDeathToken(token: IBinder?) {
+            // This acts as a secondary safety mechanism via Binder
             try {
                 token?.linkToDeath({
-                    Timber.tag("AppProcessService").w("Client died unexpectedly. Committing suicide.")
+                    Timber.w("Client died (Binder notification). Quitting...")
                     quit()
                 }, 0)
             } catch (e: RemoteException) {
-                Timber.tag("AppProcessService").e(e, "Client already dead during registration.")
+                Timber.e(e, "Client already dead")
                 quit()
             }
         }
@@ -82,34 +90,70 @@ class ProcessUserServiceRecycler(private val shell: String) :
 
     private val context by inject<Context>()
 
-    private lateinit var appProcessRecycler: Recycler<AppProcess>
-
     override fun onMake(): UserServiceProxy {
-        appProcessRecycler = AppProcessRecyclers.get(shell)
-        val binder = appProcessRecycler.make().entity.isolatedServiceBinder(
-            ComponentName(
-                context, AppProcessService::class.java
-            )
-        )
-        binder.linkToDeath({
-            if (entity?.service?.asBinder() == binder) recycleForcibly()
-        }, 0)
-        val serviceInterface = IAppProcessService.Stub.asInterface(binder)
+        val appProcessRecycler = AppProcessRecyclers.get(shell)
+        val appProcessHandle = appProcessRecycler.make()
+
+        val maxRetries = 5
+        val initialDelay = 100L
+        var currentBinder: IBinder? = null
+
+        // Retry logic for obtaining the binder
+        var attempt = 0
+        while (attempt < maxRetries) {
+            try {
+                currentBinder = appProcessHandle.entity.isolatedServiceBinder(
+                    ComponentName(context, AppProcessService::class.java)
+                )
+
+                if (currentBinder != null) {
+                    if (currentBinder.isBinderAlive) {
+                        break
+                    } else {
+                        Timber.w("Attempt ${attempt + 1}: Binder retrieved but dead.")
+                    }
+                } else {
+                    Timber.w("Attempt ${attempt + 1}: isolatedServiceBinder returned null.")
+                }
+            } catch (e: Exception) {
+                Timber.w(e, "Attempt ${attempt + 1}: Exception during bind.")
+            }
+
+            attempt++
+            if (attempt < maxRetries) {
+                Thread.sleep(initialDelay * (1 shl (attempt - 1)))
+            }
+        }
+
+        val binder = currentBinder
+
+        if (binder == null) {
+            appProcessHandle.recycle()
+            throw IllegalStateException("Failed to bind AppProcessService after $maxRetries attempts. Child process may have crashed or timed out.")
+        }
+
+        val deathRecipient = IBinder.DeathRecipient {
+            Timber.w("Remote service died, forcing recycle")
+            recycleForcibly()
+        }
 
         try {
-            serviceInterface.registerDeathToken(Binder())
+            binder.linkToDeath(deathRecipient, 0)
         } catch (e: RemoteException) {
-            recycleForcibly()
+            appProcessHandle.recycle()
             throw e
         }
 
-        return UserServiceProxy(serviceInterface)
-    }
+        val serviceInterface = IAppProcessService.Stub.asInterface(binder)
 
-    override fun onRecycle() {
-        super.onRecycle()
-        if (::appProcessRecycler.isInitialized) {
-            appProcessRecycler.recycle()
+        // Register a token so the server knows if WE (the client) die
+        try {
+            serviceInterface.registerDeathToken(Binder())
+        } catch (e: RemoteException) {
+            appProcessHandle.recycle()
+            throw e
         }
+
+        return UserServiceProxy(serviceInterface, appProcessHandle, binder, deathRecipient)
     }
 }

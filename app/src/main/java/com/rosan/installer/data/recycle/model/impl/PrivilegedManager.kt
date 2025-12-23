@@ -6,9 +6,13 @@ import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SHELL_SYSTEM
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
-import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.LAB_USE_SHIZUKU_HOOK_MODE
+import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.LAB_USE_HOOK_MODE
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -21,15 +25,16 @@ import timber.log.Timber
  * flags manually.
  */
 object PrivilegedManager : KoinComponent {
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val appDataStore by inject<AppDataStore>()
-    private val useShizukuHookModeFlow = appDataStore.getBoolean(LAB_USE_SHIZUKU_HOOK_MODE, true)
+    private val useHookModeFlow = appDataStore.getBoolean(LAB_USE_HOOK_MODE, true)
 
     /**
      * Helper to retrieve the current Shizuku Hook Mode setting.
      */
     private suspend fun getHookMode(): Boolean {
-        return useShizukuHookModeFlow.first()
+        return useHookModeFlow.first()
     }
 
     /**
@@ -51,7 +56,7 @@ object PrivilegedManager : KoinComponent {
     ) {
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = getHookMode(),
+            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) { userService ->
             userService.privileged.setDefaultInstaller(component, enable)
@@ -68,7 +73,7 @@ object PrivilegedManager : KoinComponent {
     ) {
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = getHookMode(),
+            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) {
             try {
@@ -91,7 +96,7 @@ object PrivilegedManager : KoinComponent {
         var isGranted = false
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = getHookMode(),
+            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) {
             try {
@@ -146,7 +151,7 @@ object PrivilegedManager : KoinComponent {
         useUserService(
             authorizer = config.authorizer,
             customizeAuthorizer = config.customizeAuthorizer,
-            useShizukuHookMode = false
+            useHookMode = false
         ) {
             try {
                 result = it.privileged.execArr(command)
@@ -166,7 +171,7 @@ object PrivilegedManager : KoinComponent {
         useUserService(
             authorizer = config.authorizer,
             customizeAuthorizer = config.customizeAuthorizer,
-            useShizukuHookMode = getHookMode(),
+            useHookMode = getHookMode(),
             special = getSpecialAuth(config.authorizer)
         ) {
             try {
@@ -186,7 +191,7 @@ object PrivilegedManager : KoinComponent {
         var users: Map<Int, String> = emptyMap()
         useUserService(
             authorizer = authorizer,
-            useShizukuHookMode = getHookMode(),
+            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) {
             try {
@@ -199,5 +204,96 @@ object PrivilegedManager : KoinComponent {
             }
         }
         return users
+    }
+
+    data class PostInstallTaskConfig(
+        val packageName: String,
+        val enableDexopt: Boolean = false,
+        val dexoptMode: String = "speed-profile",
+        val forceDexopt: Boolean = false,
+        val enableAutoDelete: Boolean = false,
+        val deletePaths: Array<String> = emptyArray()
+    ) {
+        fun hasAnyTask(): Boolean = enableDexopt || (enableAutoDelete && deletePaths.isNotEmpty())
+    }
+
+    /**
+     * Executes post-install tasks.
+     * Concurrently performs Dexopt and file cleanup tasks to improve efficiency.
+     */
+    suspend fun executePostInstallTasks(
+        authorizer: ConfigEntity.Authorizer,
+        customizeAuthorizer: String = "",
+        config: PostInstallTaskConfig
+    ) = coroutineScope { // coroutineScope automatically waits for all inner launch blocks to complete
+        if (!config.hasAnyTask()) {
+            Timber.d("No post-install tasks to execute")
+            return@coroutineScope
+        }
+
+        Timber.d("Executing post-install tasks: $config")
+
+        // 1. Dexopt Task (Launch directly, no variable needed)
+        launch {
+            if (config.enableDexopt) {
+                runCatching {
+                    useUserService(
+                        authorizer = authorizer,
+                        customizeAuthorizer = customizeAuthorizer,
+                        useHookMode = true, // Force Hook Mode for Dexopt (using BinderWrapper)
+                        special = null
+                    ) { userService ->
+                        val result = userService.privileged.performDexOpt(
+                            config.packageName,
+                            config.dexoptMode,
+                            config.forceDexopt
+                        )
+                        Timber.i("Dexopt result: $result")
+                    }
+                }.onFailure { e ->
+                    Timber.e(e, "Dexopt failed")
+                }
+            }
+        }
+
+        // 2. Delete Task (Launch directly, no variable needed)
+        launch {
+            if (config.enableAutoDelete && config.deletePaths.isNotEmpty()) {
+                runCatching {
+                    useUserService(
+                        authorizer = authorizer,
+                        customizeAuthorizer = customizeAuthorizer,
+                        useHookMode = false, // Force Shell Mode for Delete (using remote Shell Service)
+                        special = null
+                    ) { userService ->
+                        userService.privileged.delete(config.deletePaths)
+                        Timber.i("Delete completed")
+                    }
+                }.onFailure { e ->
+                    Timber.e(e, "Delete failed")
+                }
+            }
+        }
+
+        // Execution pauses here until all children coroutines (launch blocks) are finished
+    }
+
+    /**
+     * 异步执行后处理任务
+     */
+    fun executePostInstallTasksAsync(
+        authorizer: ConfigEntity.Authorizer,
+        customizeAuthorizer: String = "",
+        config: PostInstallTaskConfig
+    ) {
+        if (!config.hasAnyTask()) return
+
+        coroutineScope.launch {
+            runCatching {
+                executePostInstallTasks(authorizer, customizeAuthorizer, config)
+            }.onFailure { e ->
+                Timber.e(e, "Async post-install tasks failed")
+            }
+        }
     }
 }
