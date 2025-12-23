@@ -76,7 +76,7 @@ ktx-serializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-seria
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
 # AndroidHiddenApiBypass
 # https://github.com/LSPosed/AndroidHiddenApiBypass
-lsposed-hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version = "6.1" }
+hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version = "6.1" }
 
 # Koin Inject
 # https://insert-koin.io/docs/setup/koin
@@ -102,7 +102,8 @@ iamr0s-dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version
 
 # AndroidAppProcess
 # https://github.com/iamr0s/AndroidAppProcess
-iamr0s-androidAppProcess = { group = "io.github.iamr0s", name = "AndroidAppProcess", version = "1.4.1" }
+# iamr0s-androidAppProcess = { group = "io.github.iamr0s", name = "AndroidAppProcess", version = "1.4.1" }
+iamr0s-androidAppProcess = { group = "com.github.wxxsfxyzm", name = "AndroidAppProcess", version = "v1.4.1-revived" }
 
 # Core module (required for accessing library data)
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }

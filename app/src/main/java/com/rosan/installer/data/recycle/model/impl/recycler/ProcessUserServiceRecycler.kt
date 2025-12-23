@@ -90,17 +90,12 @@ class ProcessUserServiceRecycler(private val shell: String) :
 
     override fun onMake(): UserServiceProxy {
         val appProcessRecycler = AppProcessRecyclers.get(shell)
-        // 注意：make() 可能会启动新进程，这本身就需要时间
         val appProcessHandle = appProcessRecycler.make()
 
-        // 定义重试策略
         val maxRetries = 5
         val initialDelay = 100L // 100ms
         var currentBinder: IBinder? = null
 
-        // 使用 runBlocking 并不是最佳实践，但在 onMake 这种同步上下文中是必要的妥协
-        // 更好的方式是将 onMake 改为 suspend (但这需要修改 Recycler 基类)
-        // 这里我们用简单的 while 循环配合 Thread.sleep 模拟重试，避免引入协程死锁风险
         var attempt = 0
         while (attempt < maxRetries) {
             try {
@@ -110,7 +105,6 @@ class ProcessUserServiceRecycler(private val shell: String) :
 
                 if (currentBinder != null) {
                     if (currentBinder.isBinderAlive) {
-                        // 成功获取且 Binder 存活
                         break
                     } else {
                         Timber.w("Attempt ${attempt + 1}: Binder retrieved but dead.")
@@ -124,29 +118,23 @@ class ProcessUserServiceRecycler(private val shell: String) :
 
             attempt++
             if (attempt < maxRetries) {
-                // 简单的指数退避：100ms, 200ms, 400ms, 800ms...
                 Thread.sleep(initialDelay * (1 shl (attempt - 1)))
             }
         }
 
         val binder = currentBinder
 
-        // 最终检查
         if (binder == null) {
             appProcessHandle.recycle()
-            // 抛出具体异常，方便排查是超时还是彻底失败
             throw IllegalStateException("Failed to bind AppProcessService after $maxRetries attempts. Child process may have crashed or timed out.")
         }
 
-        // 定义 recipient 变量
         val deathRecipient = IBinder.DeathRecipient {
             Timber.w("Remote service died, forcing recycle")
             recycleForcibly()
         }
 
-        // 监听服务端死亡
         try {
-            // 使用变量注册
             binder.linkToDeath(deathRecipient, 0)
         } catch (e: RemoteException) {
             appProcessHandle.recycle()

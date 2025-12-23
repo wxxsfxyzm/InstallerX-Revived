@@ -196,7 +196,6 @@ room {
 
 dependencies {
     compileOnly(project(":hidden-api"))
-
     implementation(libs.androidx.core)
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.activity.compose)
@@ -221,7 +220,7 @@ dependencies {
     implementation(libs.ktx.serializationJson)
     implementation(libs.kotlin.reflect)
 
-    implementation(libs.lsposed.hiddenapibypass)
+    implementation(libs.hiddenapibypass)
 
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
