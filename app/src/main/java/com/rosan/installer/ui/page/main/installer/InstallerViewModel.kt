@@ -188,7 +188,11 @@ class InstallerViewModel(
             is InstallerViewAction.Install -> install()
             is InstallerViewAction.Background -> background()
             is InstallerViewAction.Reboot -> rebootDevice(action.reason)
-            is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData)
+            is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(
+                action.keepData,
+                action.conflictingPackage
+            )
+
             is InstallerViewAction.Uninstall -> {
                 // Trigger uninstall using the package name from the collected info
                 repo.uninstallInfo.value?.packageName?.let { repo.uninstall(it) }
@@ -859,9 +863,9 @@ class InstallerViewModel(
         }
     }
 
-    private fun uninstallAndRetryInstall(keepData: Boolean) {
-        val packageName = _currentPackageName.value
-        if (packageName == null) {
+    private fun uninstallAndRetryInstall(keepData: Boolean, conflictingPackage: String?) {
+        val targetPackageName = conflictingPackage ?: _currentPackageName.value
+        if (targetPackageName == null) {
             toast("R.string.error_no_package_to_uninstall")
             return
         }
@@ -871,7 +875,8 @@ class InstallerViewModel(
 
         // Set the flag before starting the operation
         isRetryingInstall = true
-        repo.uninstall(packageName)
+        Timber.d("Uninstalling conflicting/old package: $targetPackageName for retry")
+        repo.uninstall(targetPackageName)
     }
 
     /**

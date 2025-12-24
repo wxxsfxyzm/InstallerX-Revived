@@ -123,6 +123,7 @@ private fun MiuixErrorSuggestions(
         @param:StringRes val descriptionRes: Int
     )
 
+    var pendingConflictingPackage by remember { mutableStateOf<String?>(null) }
     val possibleSuggestions = remember(installer) {
         buildList {
             add(
@@ -139,13 +140,26 @@ private fun MiuixErrorSuggestions(
             if (installer.config.authorizer != ConfigEntity.Authorizer.None ||
                 (installer.config.authorizer == ConfigEntity.Authorizer.None &&
                         !(RsConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
-            )
+            ) {
+                add(
+                    SuggestionItem(
+                        errorClasses = listOf(InstallFailedConflictingProviderException::class),
+                        onClick = {
+                            val conflictingPkg = Regex("used by ([\\w.]+)")
+                                .find(error.message ?: "")?.groupValues?.get(1)
+                            confirmKeepData = false
+                            pendingConflictingPackage = conflictingPkg
+                            showUninstallConfirmDialogState.value = true
+                        },
+                        labelRes = R.string.suggestion_uninstall_and_retry,
+                        descriptionRes = R.string.suggestion_uninstall_and_retry_desc
+                    )
+                )
                 add(
                     SuggestionItem(
                         errorClasses = listOf(
                             InstallFailedUpdateIncompatibleException::class,
-                            InstallFailedVersionDowngradeException::class,
-                            InstallFailedConflictingProviderException::class
+                            InstallFailedVersionDowngradeException::class
                         ),
                         onClick = {
                             confirmKeepData = false
@@ -155,6 +169,7 @@ private fun MiuixErrorSuggestions(
                         descriptionRes = R.string.suggestion_uninstall_and_retry_desc
                     )
                 )
+            }
             if (
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA &&
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
@@ -307,7 +322,12 @@ private fun MiuixErrorSuggestions(
         showState = showUninstallConfirmDialogState,
         onDismiss = { showUninstallConfirmDialogState.value = false },
         onConfirm = {
-            viewModel.dispatch(InstallerViewAction.UninstallAndRetryInstall(keepData = confirmKeepData))
+            viewModel.dispatch(
+                InstallerViewAction.UninstallAndRetryInstall(
+                    keepData = confirmKeepData,
+                    conflictingPackage = pendingConflictingPackage
+                )
+            )
         },
         keepData = confirmKeepData
     )

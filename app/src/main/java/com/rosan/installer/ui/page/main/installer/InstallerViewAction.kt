@@ -59,6 +59,7 @@ sealed class InstallerViewAction {
     /**
      * Triggers the uninstallation process with the option to keep data.
      * @param keepData true to keep data, false to delete it.
+     * @param conflictingPackage The package name of the conflicting app, if any.
      */
-    data class UninstallAndRetryInstall(val keepData: Boolean) : InstallerViewAction()
+    data class UninstallAndRetryInstall(val keepData: Boolean, val conflictingPackage: String? = null) : InstallerViewAction()
 }
