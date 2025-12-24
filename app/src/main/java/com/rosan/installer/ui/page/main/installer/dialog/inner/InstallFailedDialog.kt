@@ -30,6 +30,7 @@ import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
+import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePermissionException
 import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolationException
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingInstallPermissionException
 import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
@@ -151,6 +152,22 @@ private fun ErrorSuggestions(
                             showUninstallConfirmDialog = true
                         },
                         labelRes = R.string.suggestion_uninstall_and_retry,// Not keep data
+                        icon = AppIcons.Delete
+                    )
+                )
+                add(
+                    SuggestionChipInfo(
+                        InstallFailedDuplicatePermissionException::class,
+                        selected = { true },
+                        onClick = {
+                            val conflictingPkg = Regex("already owned by ([\\w.]+)")
+                                .find(error.message ?: "")?.groupValues?.get(1)
+
+                            confirmKeepData = false
+                            pendingConflictingPackage = conflictingPkg
+                            showUninstallConfirmDialog = true
+                        },
+                        labelRes = R.string.suggestion_uninstall_and_retry,
                         icon = AppIcons.Delete
                     )
                 )

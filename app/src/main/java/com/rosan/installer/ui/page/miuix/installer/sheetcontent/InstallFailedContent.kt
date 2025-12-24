@@ -32,6 +32,7 @@ import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
+import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePermissionException
 import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolationException
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingInstallPermissionException
 import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
@@ -147,6 +148,21 @@ private fun MiuixErrorSuggestions(
                         onClick = {
                             val conflictingPkg = Regex("used by ([\\w.]+)")
                                 .find(error.message ?: "")?.groupValues?.get(1)
+                            confirmKeepData = false
+                            pendingConflictingPackage = conflictingPkg
+                            showUninstallConfirmDialogState.value = true
+                        },
+                        labelRes = R.string.suggestion_uninstall_and_retry,
+                        descriptionRes = R.string.suggestion_uninstall_and_retry_desc
+                    )
+                )
+                add(
+                    SuggestionItem(
+                        errorClasses = listOf(InstallFailedDuplicatePermissionException::class),
+                        onClick = {
+                            val conflictingPkg = Regex("already owned by ([\\w.]+)")
+                                .find(error.message ?: "")?.groupValues?.get(1)
+
                             confirmKeepData = false
                             pendingConflictingPackage = conflictingPkg
                             showUninstallConfirmDialogState.value = true
