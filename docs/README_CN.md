@@ -19,15 +19,17 @@
 在国产系统的魔改下，许多系统的自带安装程序体验并不是很好，你可以使用**InstallerX**来安装应用。
 
 当然，相对于原生系统，**InstallerX Revived**也带来了更多功能：
+
 - [x] 丰富的安装类型：apk apks apkm xapk zip包内任意数量的apk，批量分享传入的apk
+- [x] 支持解析并安装模块
 - [x] 对话框安装、通知栏安装（支持Live Activity API）、自动安装、静默安装
 - [x] 声明安装者
 - [x] 设定安装选项（可配置，可在安装前修改）
 - [x] dex2oat优化
 - [x] 为指定用户ID安装/为所有用户安装
 - [x] 按照包名/SharedUID禁止安装指定应用
-- [x] 安装后自动删除安装包
-- [x] 不使用shell命令，全部使用原生API调用实现
+- [x] 安装后自动删除安装包（Dhizuku/None仅支持删除非私有目录文件）
+- [x] 不使用shell命令，全部使用原生API调用实现（模块安装相关功能除外）
 
 ## 支持版本
 
@@ -53,26 +55,26 @@
 - [x] 为对话框安装提供一个扩展菜单，可以在设置中启用
     - 支持查看应用申明的权限
     - 支持设定InstallFlags（可以继承全局Profile设置）
-       - **注意**：设定InstallFlags并不能保证一定生效，部分选项有可能带来安全风险，具体取决于系统
+        - **注意**：设定InstallFlags并不能保证一定生效，部分选项有可能带来安全风险，具体取决于系统
 - [x] 支持在设置中预设安装来源的包名，并可以在配置文件和对话框安装菜单中快速选择
-- [x] 支持安装zip压缩包内的apk文件，用 InstallerX 打开zip压缩包即可 
+- [x] 支持安装zip压缩包内的apk文件，用 InstallerX 打开zip压缩包即可
     - 仅支持对话框安装
     - 不限制数量，支持同时传入多个zip，支持zip内嵌套目录中的apk文件，**不仅限于根目录**
     - 支持自动处理相同包名的多版本
-       - 支持去重
-       - 支持智能地选择最佳安装包
+        - 支持去重
+        - 支持智能地选择最佳安装包
 - [x] 支持批量安装（多选然后共享到InstallerX）
     - 仅支持对话框安装
     - 不限制数量
     - 仅支持apk文件
     - 支持自动处理相同包名的多版本
-       - 支持去重
-       - 支持智能地选择最佳安装包
+        - 支持去重
+        - 支持智能地选择最佳安装包
 - [x] APKS/APKM/XAPK文件支持自动选择最佳分包
     - 同时支持状态栏通知安装&对话框安装
         - 通知栏点击安装即是最优选择
         - 对话框默认选中最优选择，仍可以通过菜单自由选择分包
-    - 分包选择界面支持用户友好描述 
+    - 分包选择界面支持用户友好描述
 - [x] 支持在arm64-v8a/X86_64 only的系统中安装armeabi-v7a,armeabi/X86架构的安装包（实际能否运行取决于系统是否提供运行时转译器）
 - [x] 支持在部分oem（开启系统优化的HyperOS）的Android15/16系统上保留数据降级安装/不保留数据降级安装
     - 该功能仅支持Android15，Android14请尝试安装选项中的`允许降级安装`。
@@ -81,7 +83,7 @@
     - 不适用于OneUI7.0、RealmeUI、部分ColorOS（AOSP已经修复），已经针对性屏蔽。如果只看见不保留数据降级安装选项，说明你的系统不支持保留数据降级安装
 - [x] 支持在设置中设定禁止安装的包名列表，设定在列表中的应用将被拒绝安装
     - 支持禁止安装指定包名app
-    - 支持按照sharedUid禁止安装，支持在此模式下设定排除项，也允许通过智能建议临时绕过一次（这在HyperOS阻止错误地安装不同机型的系统软件时格外有用） 
+    - 支持按照sharedUid禁止安装，支持在此模式下设定排除项，也允许通过智能建议临时绕过一次（这在HyperOS阻止错误地安装不同机型的系统软件时格外有用）
 - [x] 在安装完后可以自动根据配置设定对安装应用进行dex2oat
     - 不支持Dhizuku
 - [x] 支持在安装前验证签名，若不匹配会给出警告
@@ -91,49 +93,65 @@
 - [x] 申明自身为卸载工具，可以接受并执行系统卸载请求（绝大多数系统写死卸载器，需要搭配锁定器模块一起使用）
 - [x] [实验性] 联网版本支持直接分享安装包文件的下载直链到InstallerX进行安装，目前使用单线程下载，安装包不会保留在本地，以后会加入保留安装包选项
 
-## 常见问题
+## 常见问题 FAQ
 
 > [!NOTE]
 > 在反馈问题之前请先阅读常见问题。
-> 反馈时请详细说明自己的手机品牌，系统版本，使用的软件版本以及操作。
+> 反馈时请详细说明自己的手机品牌，系统版本，使用的软件版本，授权器种类以及操作。
+> 如果可能请附上日志（使用 logcat/logfox 抓取）
 
-### - Dhizuku无法使用怎么办
-- 目前仅对**官方Dhizuku**提供最低限度的支持，在SDK34以上AVD均有测试，SDK34以下无法保证
-- 使用`OwnDroid`时可能无法正确调用`安装完成后自动删除`功能
-- 国产ROM遇到偶发性报错一般是Dhizuku被系统限制了后台，请优先重启Dhizuku应用后再试
-- Dhizuku的权限不够大，很多操作无法完成，例如绕过系统intent拦截，指定安装来源等，有条件建议使用Shizuku
+### Dhizuku无法使用怎么办
 
-### - 没法锁定安装器怎么办
+- 请更新到最新版本的 Dhizuku
+- 国产ROM遇到偶发性报错一般是 Dhizuku 被系统限制了后台，请优先重启 Dhizuku 应用后再试
+- Dhizuku 的权限不够大，很多操作无法完成，例如绕过系统 intent 拦截，指定安装来源等，有条件建议使用 Shizuku
+
+### 没法锁定安装器怎么办
+
 - 部分系统严格限制安装器，需要使用LSP模块拦截intent并转发给安装器
 - 和[Chimioo/InxLocker](https://github.com/Chimioo/InxLocker)一起使用时效果最佳
 - 不再推荐使用其他锁定器模块
 
-### - 分析阶段报错`No Content Provider`或`reading provider`报错`Permission Denial`
+### 分析阶段报错`No Content Provider`或`reading provider`报错`Permission Denial`
+
 - 你启用了`隐藏应用列表`或类似功能，请配置白名单
 
-### - HyperOS/Vivo更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
+### HyperOS/Vivo更新系统应用提示 `安装系统app需要申明有效安装者` 怎么办？
+
 - 系统安全限制，需要在配置中声明安装者为系统app，HyperOS推荐 `com.android.fileexplorer` 或 `com.android.vending`，Vivo推荐应用商店
 - Shizuku/Root有效，Dhizuku不支持
 - 本应用在HyperOS上启动时会自动添加配置，默认为`com.miui.packageinstaller`，如果需要更改请在设置中修改
+- 如果打开智能建议可以在失败时点击建议选项继续安装
 
-### - HyperOS无法锁定安装器/锁定失效变回系统默认安装器怎么办
+### HyperOS无法锁定安装器/锁定失效变回系统默认安装器怎么办
+
 - 请尝试打开设置中的“自动锁定安装器”功能
-- 某些HyperOS版本无法锁定是正常的
-- HyperOS会以对话框形式拦截USB安装请求(adb/shizuku)，若用户在全新安装一款应用时点击拒绝安装，系统会撤销其安装器设定并强行改回默认安装器，若出现这种情况请重新锁定
-    
-### - 使用通知安装的时候，通知进度条卡住怎么办
+- 某些 HyperOS 版本无法锁定是正常的
+- HyperOS 会以对话框形式拦截USB安装请求(adb/shizuku)，若用户在全新安装一款应用时点击拒绝安装，系统可能会撤销其安装器设定并强行改回默认安装器，若出现这种情况请重新锁定
+
+### 使用通知安装的时候，通知进度条卡住怎么办
+
 - 一些定制系统对应用后台管控非常严格，如果遇到这种情况请设置后台无限制
 - 应用已经对后台管理做了优化，在完成安装任务（用户点击完成或清理通知）后延时1秒自动清理所有后台服务并退出，因此可以放心启用无限制后台，不会造成额外耗电，前台服务通知可以保留，以便观察服务运行状态
 
-### - Oppo/Vivo/联想/...的系统用不了了怎么办
-- 手头没有这些品牌的手机以供测试，遇到问题可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)或[Telegram 频道](https://t.me/installerx_revived)进行讨论
-    - Oppo，Vivo锁定安装器请使用锁定器
-    - 荣耀机型使用shizuku安装需要关闭开发者选项中的 `监控ADB安装应用`，否则安装会卡住
+### Oppo/Vivo/联想/...的系统用不了了怎么办
 
-### - 为什么不能安装模块/如何使用安装模块功能
-- 目前仅在 Miuix 主题下支持
+- 手头没有这些品牌的手机以供测试，遇到问题可以前往 [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)
+  或[Telegram 频道](https://t.me/installerx_revived)进行讨论
+    - Oppo，Vivo锁定安装器请使用锁定器
+    - 荣耀机型使用 Shizuku 安装需要关闭开发者选项中的 `监控ADB安装应用`，否则安装会卡住
+
+### 为什么不能安装模块/如何使用安装模块功能
+
 - 需要去实验室中开启选项`启用模块刷写`，
-- 需要使用 `Installerx-Revived` 打开压缩包或是通过分享来打开
+- 需要使用 `Installerx-Revived` 打开压缩包或是通过分享来打开压缩包
+
+### 如何替换系统包管理器？
+
+- ColorOS请修改包名为 `com.android.packageinstaller` 并做成模块刷入
+- 原生/类原生系统除了要修改包名，还需要参考[这个issue](https://github.com/wxxsfxyzm/InstallerX-Revived/issues/349#issuecomment-3621922034)
+  ，在 `/system/etc/permissions/privapp-permissions-platform.xml` 中补上权限，
+- 作为系统包管理器工作时，**不支持**自定义部分设置，例如安装来源
 
 ## 关于版本发布
 
@@ -145,8 +163,8 @@
 - 开发完成的功能会合并到`main`分支，CI/CD会自动构建并发布为最新alpha版本
 - 稳定版会在一个阶段的开发/测试结束时手动触发构建并由CI/CD自动发布为release
 - 关于联网权限：由于功能扩展，引入了联网相关功能，然而许多用户希望安装器保持纯粹的本地安装，不需要联网权限。因此发布时会打包成online和offline两个版本，两个版本的包名、版本号、签名完全相同，可以混装，请按需下载。
-  - `online版` 支持分享下载直链到InstallerX进行安装，以后可能会添加更多联网相关的实用功能，**永远**不会将联网权限用于非安装用途，请放心使用
-  - `offline版` 完全不申请联网权限，尝试online版功能时会得到明确的出错提示，做一个纯粹的本地安装器
+    - `online版` 支持分享下载直链到InstallerX进行安装，v2.3.1 版本起支持在线更新，**永远**不会将联网权限用于非安装用途，请放心使用
+    - `offline版` 完全不申请联网权限，尝试online版功能时会得到明确的出错提示，做一个纯粹的本地安装器
 
 ## 关于本地化
 
@@ -158,7 +176,8 @@
 
 ## 开源协议
 
-Copyright (C)  [iamr0s](https://github.com/iamr0s) and [Contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
+Copyright (C)  [iamr0s](https://github.com/iamr0s)
+and [Contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
 
 InstallerX目前基于 [**GNU General Public License v3 (GPL-3)**](http://www.gnu.org/copyleft/gpl.html)
 开源，但不保证未来依然继续遵循此协议或开源，有权更改开源协议或开源状态。
