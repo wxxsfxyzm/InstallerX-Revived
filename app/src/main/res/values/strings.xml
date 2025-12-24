@@ -350,7 +350,7 @@
     <string name="uninstall_all_users_disabled">Uninstall for all users was disabled</string>
     <string name="uninstall_delete_system_app">Delete SystemApp</string>
     <string name="uninstall_delete_system_app_desc">Allow deleting system apps for current user</string>
-    <string name="uninstall_system_app_updates_disabled">System app update removal was disabled</string>
+    <string name="uninstall_system_app_disabled">System app removal was disabled</string>
     <string name="uninstall_success_message">Uninstall Success</string>
     <string name="uninstall_failed_message">Uninstall Failed</string>
     <string name="uninstall_call_uninstaller">Call uninstaller</string>

@@ -843,7 +843,7 @@ class InstallerViewModel(
             if (flag == PackageManagerUtil.DELETE_ALL_USERS) {
                 if ((currentFlags and PackageManagerUtil.DELETE_SYSTEM_APP) != 0) {
                     newFlags = newFlags and PackageManagerUtil.DELETE_SYSTEM_APP.inv()
-                    toast(R.string.uninstall_system_app_updates_disabled)
+                    toast(R.string.uninstall_system_app_disabled)
                 }
             } else if (flag == PackageManagerUtil.DELETE_SYSTEM_APP) {
                 if ((currentFlags and PackageManagerUtil.DELETE_ALL_USERS) != 0) {

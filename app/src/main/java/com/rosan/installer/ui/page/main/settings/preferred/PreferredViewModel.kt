@@ -590,10 +590,10 @@ class PreferredViewModel(
     private fun notifyMutualExclusion(disabledFlag: Int) {
         val resId = when (disabledFlag) {
             PackageManagerUtil.DELETE_ALL_USERS ->
-                R.string.uninstall_all_users_disabled
+                R.string.uninstall_system_app_disabled
 
             PackageManagerUtil.DELETE_SYSTEM_APP ->
-                R.string.uninstall_system_app_updates_disabled
+                R.string.uninstall_all_users_disabled
 
             else -> return
         }

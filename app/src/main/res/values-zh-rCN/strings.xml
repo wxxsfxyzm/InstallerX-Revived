@@ -340,7 +340,7 @@
     <string name="uninstall_all_users_disabled">已禁用为所有用户卸载</string>
     <string name="uninstall_delete_system_app">卸载系统应用</string>
     <string name="uninstall_delete_system_app_desc">允许为当前用户卸载系统应用</string>
-    <string name="uninstall_system_app_updates_disabled">已禁用卸载系统应用更新</string>
+    <string name="uninstall_system_app_disabled">已禁用卸载系统应用</string>
     <string name="uninstall_success_message">卸载成功</string>
     <string name="uninstall_failed_message">卸载失败</string>
     <string name="uninstall_call_uninstaller">调用卸载器</string>
