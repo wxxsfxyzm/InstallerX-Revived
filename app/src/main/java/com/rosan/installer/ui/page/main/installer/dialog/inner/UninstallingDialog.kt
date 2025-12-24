@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.rosan.installer.R
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
@@ -41,24 +43,8 @@ fun uninstallingDialog(
             DialogParamsType.InstallerInstalling.id
         ) {
             Column {
-                /*// Show the progress text if available
-                progressTextResource?.let { uiText ->
-                    // use stringResource to format the text
-                    val formattedText = stringResource(
-                        id = uiText.id,
-                        *uiText.formatArgs.toTypedArray() // spread operator (*)
-                    )
-                    Text(
-                        text = formattedText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                }*/
                 Text(
-                    text = "Uninstalling...", //stringResource(R.string.install_progress_text_uninstalling),
+                    text = stringResource(R.string.uninstall_progress_text),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier

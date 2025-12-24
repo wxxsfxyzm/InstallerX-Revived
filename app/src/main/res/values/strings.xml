@@ -356,6 +356,7 @@
     <string name="uninstall_call_uninstaller">Call uninstaller</string>
     <string name="uninstall_call_uninstaller_manually">Call uninstaller manually</string>
     <string name="uninstall_call_uninstaller_manually_desc">Uninstall app by given package name</string>
+    <string name="uninstall_progress_text">Uninstalling...</string>
     <string name="uninstall_enter_package_name">Enter package name to uninstall</string>
     <string name="permission_read_external_storage">Read external storage</string>
     <string name="permission_write_external_storage">Write external storage</string>

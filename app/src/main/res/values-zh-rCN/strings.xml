@@ -346,6 +346,7 @@
     <string name="uninstall_call_uninstaller">调用卸载器</string>
     <string name="uninstall_call_uninstaller_manually">手动调用卸载器</string>
     <string name="uninstall_call_uninstaller_manually_desc">通过指定的包名卸载应用</string>
+    <string name="uninstall_progress_text">正在卸载...</string>
     <string name="uninstall_enter_package_name">输入要卸载的应用包名</string>
     <string name="permission_read_external_storage">读取外部存储</string>
     <string name="permission_write_external_storage">写入外部存储</string>
