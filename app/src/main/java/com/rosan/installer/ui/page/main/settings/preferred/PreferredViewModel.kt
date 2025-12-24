@@ -21,6 +21,7 @@ import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.HttpProfile
 import com.rosan.installer.data.app.model.entity.RootImplementation
+import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
@@ -143,6 +144,7 @@ class PreferredViewModel(
                 action.pkg
             )
 
+            is PreferredViewAction.ToggleGlobalUninstallFlag -> toggleGlobalUninstallFlag(action.flag, action.enable)
             is PreferredViewAction.SetAdbVerifyEnabledState -> viewModelScope.launch {
                 setAdbVerifyEnabled(
                     action.enabled,
@@ -366,6 +368,37 @@ class PreferredViewModel(
             appDataStore.putSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST, newList)
         }
 
+    private fun toggleGlobalUninstallFlag(flag: Int, enable: Boolean) = viewModelScope.launch {
+        appDataStore.updateUninstallFlags { currentFlags ->
+            var newFlags = currentFlags
+
+            if (enable) {
+                // 1. Add the flag being enabled
+                newFlags = newFlags or flag
+
+                // 2. Handle mutual exclusivity
+                if (flag == PackageManagerUtil.DELETE_ALL_USERS) {
+                    if (currentFlags and PackageManagerUtil.DELETE_SYSTEM_APP != 0) {
+                        // Notify user about forced change
+                        notifyMutualExclusion(flag)
+                        newFlags = newFlags and PackageManagerUtil.DELETE_SYSTEM_APP.inv()
+                    }
+                } else if (flag == PackageManagerUtil.DELETE_SYSTEM_APP) {
+                    if (currentFlags and PackageManagerUtil.DELETE_ALL_USERS != 0) {
+                        // Notify user about forced change
+                        notifyMutualExclusion(flag)
+                        newFlags = newFlags and PackageManagerUtil.DELETE_ALL_USERS.inv()
+                    }
+                }
+            } else {
+                // Disable: just remove the flag
+                newFlags = newFlags and flag.inv()
+            }
+
+            newFlags
+        }
+    }
+
     private fun getIsIgnoreBatteryOptAsFlow(): Flow<Boolean> = flow {
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         emit(pm.isIgnoringBatteryOptimizations(context.packageName))
@@ -554,6 +587,22 @@ class PreferredViewModel(
         }
     }.flowOn(Dispatchers.IO)
 
+    private fun notifyMutualExclusion(disabledFlag: Int) {
+        val resId = when (disabledFlag) {
+            PackageManagerUtil.DELETE_ALL_USERS ->
+                R.string.uninstall_all_users_disabled
+
+            PackageManagerUtil.DELETE_SYSTEM_APP ->
+                R.string.uninstall_system_app_updates_disabled
+
+            else -> return
+        }
+
+        _uiEvents.tryEmit(
+            PreferredViewEvent.ShowMessage(resId)
+        )
+    }
+
     private fun getAndCombineState() =
         viewModelScope.launch {
             val authorizerFlow = appDataStore.getString(AppDataStore.AUTHORIZER)
@@ -601,6 +650,8 @@ class PreferredViewModel(
                 appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
             val managedSharedUserIdExemptPkgFlow =
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
+            val uninstallFlagsFlow =
+                appDataStore.getInt(AppDataStore.UNINSTALL_FLAGS, 0)
             val labShizukuHookModeFlow =
                 appDataStore.getBoolean(AppDataStore.LAB_USE_HOOK_MODE, true)
             val labRootModuleFlashFlow =
@@ -658,6 +709,7 @@ class PreferredViewModel(
                 managedBlacklistPackagesFlow,
                 managedSharedUserIdBlacklistFlow,
                 managedSharedUserIdExemptPkgFlow,
+                uninstallFlagsFlow,
                 adbVerifyEnabledFlow,
                 isIgnoringBatteryOptFlow,
                 labShizukuHookModeFlow,
@@ -704,6 +756,7 @@ class PreferredViewModel(
                     (values[idx++] as? List<*>)?.filterIsInstance<SharedUid>() ?: emptyList()
                 val managedSharedUserIdExemptPkg =
                     (values[idx++] as? List<*>)?.filterIsInstance<NamedPackage>() ?: emptyList()
+                val uninstallFlags = values[idx++] as Int
                 val adbVerifyEnabled = values[idx++] as Boolean
                 val isIgnoringBatteryOptimizations = values[idx++] as Boolean
                 val labShizukuHookMode = values[idx++] as Boolean
@@ -788,7 +841,8 @@ class PreferredViewModel(
                     useDynColorFollowPkgIcon = useDynColorFollowPkgIcon,
                     useDynColorFollowPkgIconForLiveActivity = useDynColorFollowPkgIconForLiveActivity,
                     hasUpdate = hasUpdate,
-                    remoteVersion = remoteVersion
+                    remoteVersion = remoteVersion,
+                    uninstallFlags = uninstallFlags
                 )
             }.collectLatest { state = it }
         }

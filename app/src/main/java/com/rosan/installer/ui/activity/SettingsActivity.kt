@@ -9,10 +9,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.build.model.impl.DeviceCapabilityChecker
 import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.page.main.settings.SettingsPage
@@ -23,9 +21,6 @@ import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsPage
 import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import com.rosan.installer.ui.theme.InstallerMiuixTheme
 import com.rosan.installer.ui.theme.m3color.ThemeMode
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.koinInject
 import org.koin.core.component.KoinComponent
@@ -42,19 +37,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             window.isNavigationBarContrastEnforced = false
         // Keep splash screen visible until data (theme setting) is loaded.
-        // We use a flag that will be updated by observing the ViewModel state.
-        var isLoading = true
-        splashScreen.setKeepOnScreenCondition { isLoading }
-
-        // Observe ViewModel loading state to dismiss the splash screen.
-        lifecycleScope.launch {
-            snapshotFlow { preferredViewModel.state.progress } // 监听 state.progress 属性
-                .map { it == PreferredViewState.Progress.Loaded }
-                .distinctUntilChanged()
-                .collect { isLoaded ->
-                    isLoading = !isLoaded // 当 progress变为Loaded时，isLoaded为true，isLoading变为false
-                }
-        }
+        splashScreen.setKeepOnScreenCondition { preferredViewModel.state.progress != PreferredViewState.Progress.Loaded }
 
         super.onCreate(savedInstanceState)
         setContent {

@@ -74,6 +74,7 @@ import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPreferredPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home.MiuixHomePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.MiuixInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.MiuixUninstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.lab.MiuixLabPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
@@ -159,7 +160,6 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             )
 
             val pagerState = rememberPagerState(pageCount = { navigationItems.size })
-            val coroutineScope = rememberCoroutineScope()
             val snackBarHostState = remember { SnackbarHostState() }
             val hazeState = remember { HazeState() }
 
@@ -294,6 +294,9 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
         }
         composable(route = MiuixSettingsScreen.MiuixInstallerGlobal.route) {
             MiuixInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
+        }
+        composable(route = MiuixSettingsScreen.MiuixUninstallerGlobal.route) {
+            MiuixUninstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
         }
         composable(route = MiuixSettingsScreen.MiuixLab.route) {
             MiuixLabPage(navController = navController, viewModel = preferredViewModel)

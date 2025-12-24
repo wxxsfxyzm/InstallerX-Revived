@@ -20,6 +20,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
@@ -109,20 +110,25 @@ fun ScopeTipCard(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun NoneInstallerTipCard() {
+fun InfoTipCard(
+    text: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector = AppIcons.Tip
+) {
     TipCard(
+        modifier = modifier,
         tipContent = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
-                    imageVector = AppIcons.Tip,
+                    imageVector = icon,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onTertiary
                 )
                 Text(
-                    text = stringResource(R.string.config_authorizer_none_tips),
+                    text = text,
                     style = MaterialTheme.typography.bodyMediumEmphasized,
                     color = MaterialTheme.colorScheme.onTertiary
                 )

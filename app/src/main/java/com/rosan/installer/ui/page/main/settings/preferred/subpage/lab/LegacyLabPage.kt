@@ -29,6 +29,7 @@ import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.RootImplementationSelectionDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.LabHttpProfileWidget
@@ -77,6 +78,7 @@ fun LegacyLabPage(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
             // --- Shizuku Section ---
             item { LabelWidget(stringResource(R.string.config_authorizer_shizuku)) }
             item {

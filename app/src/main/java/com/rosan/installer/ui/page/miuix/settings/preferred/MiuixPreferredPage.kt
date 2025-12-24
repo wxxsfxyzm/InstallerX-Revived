@@ -130,6 +130,14 @@ fun MiuixPreferredPage(
                             navController.navigate(MiuixSettingsScreen.MiuixInstallerGlobal.route)
                         }
                     )
+                    MiuixNavigationItemWidget(
+                        icon = AppIcons.InstallMode,
+                        title = stringResource(R.string.uninstaller_settings),
+                        description = stringResource(R.string.uninstaller_settings_desc),
+                        onClick = {
+                            navController.navigate(MiuixSettingsScreen.MiuixUninstallerGlobal.route)
+                        }
+                    )
                 }
             }
             if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) item { MiuixSettingsTipCard(stringResource(R.string.config_authorizer_none_tips)) }

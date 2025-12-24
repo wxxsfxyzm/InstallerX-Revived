@@ -104,7 +104,7 @@ fun PreferredPage(
                     }
                 }
 
-                else -> null
+                else -> Unit
             }
         }
     }
@@ -179,6 +179,16 @@ fun PreferredPage(
                             onClick = {
                                 // Navigate using NavController
                                 navController.navigate(SettingsScreen.InstallerGlobal.route)
+                            }
+                        )
+                    }
+                    item {
+                        SettingsNavigationItemWidget(
+                            icon = AppIcons.Delete,
+                            title = stringResource(R.string.uninstaller_settings),
+                            description = stringResource(R.string.uninstaller_settings_desc),
+                            onClick = {
+                                navController.navigate(SettingsScreen.UninstallerGlobal.route)
                             }
                         )
                     }

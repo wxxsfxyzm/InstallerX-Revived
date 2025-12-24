@@ -43,6 +43,8 @@ sealed class PreferredViewAction {
     data class AddManagedSharedUserIdExemptedPackages(val pkg: NamedPackage) : PreferredViewAction()
     data class RemoveManagedSharedUserIdExemptedPackages(val pkg: NamedPackage) : PreferredViewAction()
 
+    data class ToggleGlobalUninstallFlag(val flag: Int, val enable: Boolean) : PreferredViewAction()
+
     data class SetAdbVerifyEnabledState(val enabled: Boolean) : PreferredViewAction()
     data object RequestIgnoreBatteryOptimization : PreferredViewAction()
     data object RefreshIgnoreBatteryOptimizationStatus : PreferredViewAction()

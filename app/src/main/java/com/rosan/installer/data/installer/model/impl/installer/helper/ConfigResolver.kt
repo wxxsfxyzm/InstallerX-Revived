@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.ui.activity.UninstallerActivity
 import timber.log.Timber
 
 object ConfigResolver {
@@ -17,6 +18,12 @@ object ConfigResolver {
 
     suspend fun resolve(activity: Activity): ConfigEntity {
         Timber.tag(TAG).d("resolveConfig: Starting.")
+        // 0. Special Check: Is this UninstallerActivity?
+        if (activity is UninstallerActivity) {
+            Timber.tag(TAG).d("Activity is UninstallerActivity. Returning default config immediately.")
+            return getConfigForPackage(null)
+        }
+
         // 1. Check Calling Package
         val callingPackage = activity.callingPackage
         Timber.tag(TAG).d("activity.callingPackage: $callingPackage")

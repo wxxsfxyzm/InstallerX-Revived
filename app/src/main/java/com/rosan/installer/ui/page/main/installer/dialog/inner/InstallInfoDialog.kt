@@ -87,7 +87,7 @@ fun installInfoDialog(
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
     // If there's no current package to display, return empty params.
     if (currentPackage == null) return DialogParams()
-    // The pre-install info is now directly available within our main data model.
+    // The pre-install info is now directly available within main data model.
     val preInstallAppInfo = currentPackage.installedAppInfo
     val selectableEntities = currentPackage.appEntities
 
@@ -100,8 +100,6 @@ fun installInfoDialog(
         ?: return DialogParams()
     val isModule = entityToInstall is AppEntity.ModuleEntity
 
-    // 为当前应用的所有 UI 部件创建一个唯一的 ID
-    // 确保 AnimatedContent 能够检测到内容变化
     val uniqueContentKey = "${DialogParamsType.InstallerInfo.id}_${entityToInstall.packageName}"
 
     val displayLabel: String =

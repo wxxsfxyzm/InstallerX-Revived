@@ -46,7 +46,7 @@ import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
-import com.rosan.installer.ui.page.main.widget.card.NoneInstallerTipCard
+import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.main.widget.setting.AutoLockInstaller
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
@@ -170,8 +170,8 @@ fun NewPreferredPage(
                     item {
                         SplicedColumnGroup(
                             title = stringResource(R.string.personalization),
-                            content = listOf(
-                                {
+                            content = buildList {
+                                add {
                                     SettingsNavigationItemWidget(
                                         icon = AppIcons.Theme,
                                         title = stringResource(R.string.theme_settings),
@@ -180,8 +180,8 @@ fun NewPreferredPage(
                                             navController.navigate(SettingsScreen.Theme.route)
                                         }
                                     )
-                                },
-                                {
+                                }
+                                add {
                                     SettingsNavigationItemWidget(
                                         icon = AppIcons.InstallMode,
                                         title = stringResource(R.string.installer_settings),
@@ -191,13 +191,22 @@ fun NewPreferredPage(
                                         }
                                     )
                                 }
-                            )
+                                add {
+                                    SettingsNavigationItemWidget(
+                                        icon = AppIcons.Delete,
+                                        title = stringResource(R.string.uninstaller_settings),
+                                        description = stringResource(R.string.uninstaller_settings_desc),
+                                        onClick = {
+                                            navController.navigate(SettingsScreen.UninstallerGlobal.route)
+                                        }
+                                    )
+                                }
+                            }
                         )
                     }
 
-                    if (viewModel.state.authorizer == ConfigEntity.Authorizer.None) {
-                        item { NoneInstallerTipCard() }
-                    }
+                    if (viewModel.state.authorizer == ConfigEntity.Authorizer.None)
+                        item { InfoTipCard(text = stringResource(R.string.config_authorizer_none_tips)) }
 
                     // --- Basic Settings Group ---
                     item {

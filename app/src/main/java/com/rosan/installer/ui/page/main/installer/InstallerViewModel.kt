@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
@@ -25,7 +26,7 @@ import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.util.ConfigUtil.Companion.readGlobal
+import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -198,24 +199,8 @@ class InstallerViewModel(
             is InstallerViewAction.ShowMiuixPermissionList -> showMiuixPermissionList = true
             is InstallerViewAction.HideMiuixPermissionList -> showMiuixPermissionList = false
 
-            is InstallerViewAction.ToggleSelection -> toggleSelection(
-                action.packageName,
-                action.entity,
-                action.isMultiSelect
-            )
-
-            is InstallerViewAction.ToggleUninstallFlag -> {
-                // Update the uninstall flags bitmask
-                val currentFlags = _uninstallFlags.value
-                _uninstallFlags.value = if (action.enable) {
-                    currentFlags or action.flag
-                } else {
-                    currentFlags and action.flag.inv()
-                }
-                // Sync to the repo config so the backend uses the flags
-                repo.config.uninstallFlags = _uninstallFlags.value
-            }
-
+            is InstallerViewAction.ToggleSelection -> toggleSelection(action.packageName, action.entity, action.isMultiSelect)
+            is InstallerViewAction.ToggleUninstallFlag -> toggleUninstallFlag(action.flag, action.enable)
             is InstallerViewAction.SetInstaller -> selectInstaller(action.installer)
             is InstallerViewAction.SetTargetUser -> selectTargetUser(action.userId)
             is InstallerViewAction.ApproveSession -> repo.approveConfirmation(action.sessionId, action.granted)
@@ -381,8 +366,7 @@ class InstallerViewModel(
             is ProgressEntity.UninstallReady -> {
                 // This state has side effects (updating UI-specific state), so they are handled here.
                 _uiUninstallInfo.value = repo.uninstallInfo.value
-                _uninstallFlags.value = 0
-                repo.config.uninstallFlags = 0
+                _uninstallFlags.value = repo.config.uninstallFlags
                 InstallerViewState.UninstallReady
             }
 
@@ -714,11 +698,11 @@ class InstallerViewModel(
     }
 
     fun toast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun toast(@StringRes resId: Int) {
-        Toast.makeText(context, resId, Toast.LENGTH_LONG).show()
+        Toast.makeText(context, resId, Toast.LENGTH_SHORT).show()
     }
 
     private fun close() {
@@ -846,6 +830,32 @@ class InstallerViewModel(
 
             currentResults[packageIndex] = packageToUpdate.copy(appEntities = updatedEntities)
             repo.analysisResults = currentResults
+        }
+    }
+
+    private fun toggleUninstallFlag(flag: Int, enable: Boolean) {
+        val currentFlags = _uninstallFlags.value
+        var newFlags = currentFlags
+
+        if (enable) {
+            newFlags = newFlags or flag
+
+            if (flag == PackageManagerUtil.DELETE_ALL_USERS) {
+                if ((currentFlags and PackageManagerUtil.DELETE_SYSTEM_APP) != 0) {
+                    newFlags = newFlags and PackageManagerUtil.DELETE_SYSTEM_APP.inv()
+                    toast(R.string.uninstall_system_app_updates_disabled)
+                }
+            } else if (flag == PackageManagerUtil.DELETE_SYSTEM_APP) {
+                if ((currentFlags and PackageManagerUtil.DELETE_ALL_USERS) != 0) {
+                    newFlags = newFlags and PackageManagerUtil.DELETE_ALL_USERS.inv()
+                    toast(R.string.uninstall_all_users_disabled)
+                }
+            }
+        } else newFlags = newFlags and flag.inv()
+
+        if (newFlags != currentFlags) {
+            _uninstallFlags.value = newFlags
+            repo.config.uninstallFlags = newFlags
         }
     }
 

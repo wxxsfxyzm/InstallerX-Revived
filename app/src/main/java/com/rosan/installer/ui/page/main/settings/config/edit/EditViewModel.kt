@@ -11,9 +11,9 @@ import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.repo.ConfigRepo
-import com.rosan.installer.data.settings.util.ConfigUtil.Companion.getGlobalAuthorizer
-import com.rosan.installer.data.settings.util.ConfigUtil.Companion.getGlobalInstallMode
-import com.rosan.installer.data.settings.util.ConfigUtil.Companion.readGlobal
+import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalAuthorizer
+import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalInstallMode
+import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

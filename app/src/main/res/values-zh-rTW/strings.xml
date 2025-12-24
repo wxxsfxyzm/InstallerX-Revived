@@ -91,7 +91,9 @@
     <string name="installer_settings_auto_clear_success_notification">自動清除通知</string>
     <string name="installer_settings_auto_clear_success_notification_desc">安裝成功後自動清理通知</string>
     <string name="installer_settings_auto_clear_time_never">從不</string>
+    <string name="installer_settings_auto_clear_time_never_desc">從不清理安裝成功通知</string>
     <string name="installer_settings_auto_clear_time_seconds_format">%1$d 秒</string>
+    <string name="installer_settings_auto_clear_time_seconds_format_desc">%1$d 秒後自動清理安裝成功通知</string>
     <string name="basic">一般</string>
     <string name="disable_adb_install_verify">停用系統安裝驗證</string>
     <string name="disable_adb_install_verify_desc">在某些系統上可以禁止安裝掃描 (Play 安全防護機制等)</string>

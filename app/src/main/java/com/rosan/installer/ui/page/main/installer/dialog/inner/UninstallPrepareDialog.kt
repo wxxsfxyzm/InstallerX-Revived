@@ -46,15 +46,9 @@ fun uninstallReadyDialog(
 
     // Collect uninstall flags to manage the state of the "keep data" chip.
     val uninstallFlags by viewModel.uninstallFlags.collectAsState()
-    val deleteKeepData = remember(uninstallFlags) {
-        (uninstallFlags and PackageManagerUtil.DELETE_KEEP_DATA) != 0
-    }
-    val deleteAllUsers = remember(uninstallFlags) {
-        (uninstallFlags and PackageManagerUtil.DELETE_ALL_USERS) != 0
-    }
-    val deleteSystemApp = remember(uninstallFlags) {
-        (uninstallFlags and PackageManagerUtil.DELETE_SYSTEM_APP) != 0
-    }
+    val deleteKeepData = (uninstallFlags and PackageManagerUtil.DELETE_KEEP_DATA) != 0
+    val deleteAllUsers = (uninstallFlags and PackageManagerUtil.DELETE_ALL_USERS) != 0
+    val deleteSystemApp = (uninstallFlags and PackageManagerUtil.DELETE_SYSTEM_APP) != 0
 
     // Override the 'text' and 'buttons' sections of the base parameters.
     return baseParams.copy(
@@ -66,7 +60,7 @@ fun uninstallReadyDialog(
                 exit = fadeOut() + shrinkVertically()  // Fade out + shrink
             ) {
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(0.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Chip(
                         selected = deleteKeepData,

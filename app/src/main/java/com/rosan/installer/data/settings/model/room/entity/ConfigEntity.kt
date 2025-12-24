@@ -189,7 +189,7 @@ data class ConfigEntity(
         USER(4);
 
         companion object {
-            fun fromInt(value: Int) = InstallReason.entries.find { it.value == value } ?: UNKNOWN
+            fun fromInt(value: Int) = entries.find { it.value == value } ?: UNKNOWN
         }
     }
 

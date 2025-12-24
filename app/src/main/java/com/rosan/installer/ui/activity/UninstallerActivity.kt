@@ -94,7 +94,8 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
             if (packageName.isNullOrBlank()) {
                 Timber.e("UninstallerActivity started without a package name.")
-                finish()
+                installer?.close()
+                this.finish()
                 return
             }
 
@@ -193,7 +194,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) colorResource(id = android.R.color.system_accent1_500) else primaryLight
             val globalColorScheme = remember(uiState, useDarkTheme) {
                 // 1. If A12+ and Dynamic -> Use System Resource
-                // 2. Otherwise -> Use uiState.seedColor (which is now either Manual Color OR Wallpaper Color for A11)
+                // 2. Otherwise -> Use uiState.seedColor (which is now either Manual Color OR Wallpaper Color for A11-)
                 val keyColor =
                     if (uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) colorRes else uiState.seedColor
 

@@ -49,6 +49,7 @@ class AppDataStore(
         val AUTHORIZER = stringPreferencesKey("authorizer")
         val CUSTOMIZE_AUTHORIZER = stringPreferencesKey("customize_authorizer")
         val INSTALL_MODE = stringPreferencesKey("install_mode")
+        val UNINSTALL_FLAGS = intPreferencesKey("uninstall_flags")
 
         // ApplyViewModel
         val USER_READ_SCOPE_TIPS = booleanPreferencesKey("user_read_scope_tips")
@@ -99,25 +100,22 @@ class AppDataStore(
         dataStore.edit { it[key] = value }
     }
 
-    fun getString(key: Preferences.Key<String>, default: String = ""): Flow<String> {
-        return dataStore.data.map { it[key] ?: default }
-    }
+    fun getString(key: Preferences.Key<String>, default: String = ""): Flow<String> =
+        dataStore.data.map { it[key] ?: default }
 
     suspend fun putInt(key: Preferences.Key<Int>, value: Int) {
         dataStore.edit { it[key] = value }
     }
 
-    fun getInt(key: Preferences.Key<Int>, default: Int = 0): Flow<Int> {
-        return dataStore.data.map { it[key] ?: default }
-    }
+    fun getInt(key: Preferences.Key<Int>, default: Int = 0): Flow<Int> =
+        dataStore.data.map { it[key] ?: default }
 
     suspend fun putBoolean(key: Preferences.Key<Boolean>, value: Boolean) {
         dataStore.edit { it[key] = value }
     }
 
-    fun getBoolean(key: Preferences.Key<Boolean>, default: Boolean = false): Flow<Boolean> {
-        return dataStore.data.map { it[key] ?: default }
-    }
+    fun getBoolean(key: Preferences.Key<Boolean>, default: Boolean = false): Flow<Boolean> =
+        dataStore.data.map { it[key] ?: default }
 
     /**
      * Saves a list of NamedPackage objects to DataStore after converting it to a JSON string.
@@ -182,4 +180,16 @@ class AppDataStore(
                 emptyList()
             }
         }
+
+    /**
+     * Updates the uninstall flags in DataStore using the provided transform function.
+     * @param transform A function that takes the current uninstall flags and returns a new set of flags.
+     * @return A Flow emitting the updated uninstall flags.
+     */
+    suspend fun updateUninstallFlags(transform: (Int) -> Int) {
+        dataStore.edit { preferences ->
+            val current = preferences[UNINSTALL_FLAGS] ?: 0
+            preferences[UNINSTALL_FLAGS] = transform(current)
+        }
+    }
 }

@@ -395,7 +395,7 @@ fun NewThemeSettingsPage(
 }
 
 @Composable
-internal fun PaletteStyleDialog(
+fun PaletteStyleDialog(
     currentStyle: PaletteStyle,
     onDismiss: () -> Unit,
     onSelect: (PaletteStyle) -> Unit
@@ -432,7 +432,7 @@ internal fun PaletteStyleDialog(
 }
 
 @Composable
-internal fun ThemeModeDialog(
+fun ThemeModeDialog(
     currentMode: ThemeMode,
     onDismiss: () -> Unit,
     onSelect: (ThemeMode) -> Unit

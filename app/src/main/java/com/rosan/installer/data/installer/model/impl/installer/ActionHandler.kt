@@ -415,7 +415,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 packageName,
                 pm.getApplicationLabel(appInfo).toString(),
                 pInfo.versionName,
-                if (Build.VERSION.SDK_INT >= 28) pInfo.longVersionCode else pInfo.versionCode.toLong(),
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pInfo.longVersionCode else pInfo.versionCode.toLong(),
                 icon,
                 color
             )

@@ -188,7 +188,7 @@ class SourceResolver(
 
             if (detachedSuccess) {
                 Timber.d("Detached mode success! File is directly readable: $realPath")
-                // [Key Point] Close the afd immediately to completely cut off the Binder connection with the ContentProvider (e.g., MT Manager)
+                // Close the afd immediately to completely cut off the Binder connection with the ContentProvider (e.g., MT Manager)
                 // This ensures that even if the provider app is killed, the system won't kill this process due to the association mechanism
                 afd.close()
                 return listOf(DataEntity.FileEntity(realPath).apply { source = DataEntity.FileEntity(realPath) })

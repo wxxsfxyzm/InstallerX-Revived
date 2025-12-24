@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.HttpProfile
 import com.rosan.installer.data.app.model.entity.RootImplementation
+import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -324,37 +325,38 @@ fun AutoClearNotificationTimeWidget(
     currentValue: Int,
     onValueChange: (Int) -> Unit
 ) {
-    val context = LocalContext.current
-    // Define the options for consistency
     val options = remember { listOf(0, 3, 5, 10, 15, 20, 30) }
 
-    // Create display strings for the dropdown menu
-    val displayStrings = remember(options) {
-        options.map { time ->
-            if (time == 0) {
-                context.getString(R.string.installer_settings_auto_clear_time_never)
-            } else {
-                context.getString(R.string.installer_settings_auto_clear_time_seconds_format, time)
-            }
-        }
-    }
-
-    // Find the index of the current value
     val selectedIndex = remember(currentValue, options) {
         options.indexOf(currentValue).coerceAtLeast(0)
     }
+    val currentOption = options.getOrElse(selectedIndex) { 0 }
 
-    // Determine the description text based on the current value
-    val descriptionText = displayStrings.getOrElse(selectedIndex) { "" }
+    val descriptionText = if (currentOption == 0) {
+        stringResource(R.string.installer_settings_auto_clear_time_never_desc)
+    } else {
+        stringResource(
+            R.string.installer_settings_auto_clear_time_seconds_format_desc,
+            currentOption
+        )
+    }
+
+    val dropdownItems = options.map { time ->
+        if (time == 0) {
+            stringResource(R.string.installer_settings_auto_clear_time_never)
+        } else {
+            stringResource(R.string.installer_settings_auto_clear_time_seconds_format, time)
+        }
+    }
 
     DropDownMenuWidget(
         icon = AppIcons.Timer,
         title = stringResource(id = R.string.installer_settings_auto_clear_success_notification),
         description = descriptionText,
         choice = selectedIndex,
-        data = displayStrings,
+        data = dropdownItems,
         onChoiceChange = { newIndex ->
-            val newValue = options.getOrElse(newIndex) { 0 } // Safe access
+            val newValue = options.getOrElse(newIndex) { 0 }
             if (currentValue != newValue) {
                 onValueChange(newValue)
             }
@@ -1141,5 +1143,52 @@ private fun DeleteSharedUidConfirmationDialog(
                 Text(stringResource(R.string.cancel))
             }
         }
+    )
+}
+
+@Composable
+fun UninstallKeepDataWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+    SwitchWidget(
+        icon = AppIcons.Save,
+        title = stringResource(id = R.string.uninstall_keep_data),
+        description = stringResource(id = R.string.uninstall_keep_data_desc),
+        checked = (viewModel.state.uninstallFlags and PackageManagerUtil.DELETE_KEEP_DATA) != 0,
+        onCheckedChange = {
+            viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_KEEP_DATA, it))
+        },
+        isM3E = isM3E
+    )
+}
+
+@Composable
+fun UninstallForAllUsersWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+    SwitchWidget(
+        icon = AppIcons.InstallForAllUsers,
+        title = stringResource(id = R.string.uninstall_all_users),
+        description = stringResource(id = R.string.uninstall_all_users_desc),
+        checked = (viewModel.state.uninstallFlags and PackageManagerUtil.DELETE_ALL_USERS) != 0,
+        onCheckedChange = {
+            viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_ALL_USERS, it))
+        },
+        isM3E = isM3E
+    )
+}
+
+@Composable
+fun UninstallSystemAppWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+    SwitchWidget(
+        icon = AppIcons.BugReport,
+        title = stringResource(id = R.string.uninstall_delete_system_app),
+        description = stringResource(id = R.string.uninstall_delete_system_app_desc),
+        checked = (viewModel.state.uninstallFlags and PackageManagerUtil.DELETE_SYSTEM_APP) != 0,
+        onCheckedChange = {
+            viewModel.dispatch(
+                PreferredViewAction.ToggleGlobalUninstallFlag(
+                    PackageManagerUtil.DELETE_SYSTEM_APP,
+                    it
+                )
+            )
+        },
+        isM3E = isM3E
     )
 }

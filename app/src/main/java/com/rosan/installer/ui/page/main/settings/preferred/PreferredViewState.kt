@@ -53,7 +53,8 @@ data class PreferredViewState(
     val useDynColorFollowPkgIcon: Boolean = false,
     val useDynColorFollowPkgIconForLiveActivity: Boolean = false,
     val hasUpdate: Boolean = false,
-    val remoteVersion: String = ""
+    val remoteVersion: String = "",
+    val uninstallFlags: Int = 0
 ) {
     val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
 

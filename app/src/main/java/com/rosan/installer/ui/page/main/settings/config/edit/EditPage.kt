@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.widget.card.NoneInstallerTipCard
+import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowAllRequestedPermissionsWidget
@@ -226,7 +226,8 @@ fun EditPage(
             item { DataAuthorizerWidget(viewModel = viewModel) }
             item { DataCustomizeAuthorizerWidget(viewModel = viewModel) }
             item { DataInstallModeWidget(viewModel = viewModel) }
-            if (isNoneActive(stateAuthorizer, globalAuthorizer)) item { NoneInstallerTipCard() }
+            if (isNoneActive(stateAuthorizer, globalAuthorizer))
+                item { InfoTipCard(text = stringResource(R.string.config_authorizer_none_tips)) }
 
             item { LabelWidget(label = stringResource(R.string.config_label_installer_settings)) }
             item { DataUserWidget(viewModel = viewModel, isM3E = false) }

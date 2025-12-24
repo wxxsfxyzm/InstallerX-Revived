@@ -111,7 +111,8 @@ fun AppInfoSlot(
         )
         Text(
             text = appInfo.packageName,
-            style = MiuixTheme.textStyles.subtitle
+            style = MiuixTheme.textStyles.subtitle,
+            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
         )
     }
 }

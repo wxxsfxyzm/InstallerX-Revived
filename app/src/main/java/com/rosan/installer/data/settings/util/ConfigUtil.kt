@@ -36,91 +36,91 @@ import org.koin.core.component.inject
  * ```
  **/
 
-class ConfigUtil {
-    companion object : KoinComponent {
-        private val context by inject<Context>()
+object ConfigUtil : KoinComponent {
+    private val context by inject<Context>()
 
-        private val appDataStore by inject<AppDataStore>()
+    private val appDataStore by inject<AppDataStore>()
 
-        suspend fun getGlobalAuthorizer(): ConfigEntity.Authorizer {
-            val str = appDataStore.getString(AppDataStore.AUTHORIZER, "").first()
-            return AuthorizerConverter.revert(str)
-        }
+    suspend fun getGlobalAuthorizer(): ConfigEntity.Authorizer {
+        val str = appDataStore.getString(AppDataStore.AUTHORIZER, "").first()
+        return AuthorizerConverter.revert(str)
+    }
 
-        suspend fun ConfigEntity.Authorizer.readGlobal() =
-            if (this == ConfigEntity.Authorizer.Global)
-                getGlobalAuthorizer()
-            else
-                this
+    suspend fun ConfigEntity.Authorizer.readGlobal() =
+        if (this == ConfigEntity.Authorizer.Global)
+            getGlobalAuthorizer()
+        else
+            this
 
-        suspend fun getGlobalCustomizeAuthorizer(): String {
-            return appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER, "").first()
-        }
+    suspend fun getGlobalCustomizeAuthorizer(): String {
+        return appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER, "").first()
+    }
 
-        suspend fun getGlobalInstallMode(): ConfigEntity.InstallMode {
-            val str = appDataStore.getString(AppDataStore.INSTALL_MODE, "").first()
-            return InstallModeConverter.revert(str)
-        }
+    suspend fun getGlobalInstallMode(): ConfigEntity.InstallMode {
+        val str = appDataStore.getString(AppDataStore.INSTALL_MODE, "").first()
+        return InstallModeConverter.revert(str)
+    }
 
-        suspend fun getByPackageName(packageName: String? = null): ConfigEntity {
-            var entity = getByPackageNameInner(packageName)
+    suspend fun getByPackageName(packageName: String? = null): ConfigEntity {
+        var entity = getByPackageNameInner(packageName)
 
-            // Handle Global overrides for Authorizer and InstallMode
-            if (entity.authorizer == ConfigEntity.Authorizer.Global)
-                entity = entity.copy(
-                    authorizer = getGlobalAuthorizer(),
-                    customizeAuthorizer = getGlobalCustomizeAuthorizer()
-                )
-            if (entity.installMode == ConfigEntity.InstallMode.Global)
-                entity = entity.copy(installMode = getGlobalInstallMode())
+        // Handle Global overrides for Authorizer and InstallMode
+        if (entity.authorizer == ConfigEntity.Authorizer.Global)
+            entity = entity.copy(
+                authorizer = getGlobalAuthorizer(),
+                customizeAuthorizer = getGlobalCustomizeAuthorizer()
+            )
+        if (entity.installMode == ConfigEntity.InstallMode.Global)
+            entity = entity.copy(installMode = getGlobalInstallMode())
 
-            // Apply runtime properties
-            return entity.apply {
-                // Check if the Install Requester feature is enabled in DataStore
-                val isRequesterEnabled = appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER).first()
+        // Apply runtime properties
+        return entity.apply {
+            // Resolve uninstallFlags set by user
+            uninstallFlags = appDataStore.getInt(AppDataStore.UNINSTALL_FLAGS, 0).first()
+            // Check if the Install Requester feature is enabled in DataStore
+            val isRequesterEnabled = appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER).first()
 
-                if (isRequesterEnabled) {
-                    // Try to resolve UID from the custom 'installRequester' defined in ConfigEntity
-                    var targetUid: Int? = installRequester?.let { requesterPkg ->
-                        runCatching {
-                            context.packageManager.getPackageUid(requesterPkg, 0)
+            if (isRequesterEnabled) {
+                // Try to resolve UID from the custom 'installRequester' defined in ConfigEntity
+                var targetUid: Int? = installRequester?.let { requesterPkg ->
+                    runCatching {
+                        context.packageManager.getPackageUid(requesterPkg, 0)
+                    }.getOrNull()
+                }
+
+                // Fallback: If 'installRequester' is not set, or the package is not found on device,
+                // fall back to the existing logic using the incoming 'packageName'.
+                if (targetUid == null) {
+                    packageName?.let { pkg ->
+                        targetUid = runCatching {
+                            context.packageManager.getPackageUid(pkg, 0)
                         }.getOrNull()
                     }
-
-                    // Fallback: If 'installRequester' is not set, or the package is not found on device,
-                    // fall back to the existing logic using the incoming 'packageName'.
-                    if (targetUid == null) {
-                        packageName?.let { pkg ->
-                            targetUid = runCatching {
-                                context.packageManager.getPackageUid(pkg, 0)
-                            }.getOrNull()
-                        }
-                    }
-
-                    callingFromUid = targetUid
                 }
+
+                callingFromUid = targetUid
             }
         }
+    }
 
-        private suspend fun getByPackageNameInner(packageName: String? = null): ConfigEntity =
-            withContext(Dispatchers.IO) {
-                val repo = get<ConfigRepo>()
-                val app = getAppByPackageName(packageName)
-                var config: ConfigEntity? = null
-                if (app != null) config = repo.find(app.configId)
-                if (config != null) return@withContext config
-                config = repo.all().firstOrNull()
-                if (config != null) return@withContext config
-                return@withContext ConfigEntity.default
-            }
-
-        private fun getAppByPackageName(packageName: String? = null): AppEntity? {
-            val repo = get<AppRepo>()
-            var app: AppEntity? = repo.findByPackageName(packageName)
-            if (app != null) return app
-            if (packageName != null) app = repo.findByPackageName(null)
-            if (app != null) return app
-            return null
+    private suspend fun getByPackageNameInner(packageName: String? = null): ConfigEntity =
+        withContext(Dispatchers.IO) {
+            val repo = get<ConfigRepo>()
+            val app = getAppByPackageName(packageName)
+            var config: ConfigEntity? = null
+            if (app != null) config = repo.find(app.configId)
+            if (config != null) return@withContext config
+            config = repo.all().firstOrNull()
+            if (config != null) return@withContext config
+            return@withContext ConfigEntity.default
         }
+
+    private fun getAppByPackageName(packageName: String? = null): AppEntity? {
+        val repo = get<AppRepo>()
+        var app: AppEntity? = repo.findByPackageName(packageName)
+        if (app != null) return app
+        if (packageName != null) app = repo.findByPackageName(null)
+        if (app != null) return app
+        return null
     }
 }

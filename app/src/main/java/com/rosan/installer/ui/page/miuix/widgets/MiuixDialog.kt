@@ -40,6 +40,7 @@ import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -460,4 +461,54 @@ private fun SelectableRow(
             tint = indicatorColor
         )
     }
+}
+
+@Composable
+fun MiuixUninstallPackageDialog(
+    showState: MutableState<Boolean>,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var packageName by remember { mutableStateOf("") }
+    val isConfirmEnabled = packageName.isNotBlank()
+
+    SuperDialog(
+        show = showState,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.uninstall_enter_package_name),
+        content = {
+            Column {
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = packageName,
+                    onValueChange = { packageName = it },
+                    label = stringResource(R.string.config_package_name),
+                    useLabelAsPlaceholder = true,
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.cancel),
+                        onClick = onDismiss
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.confirm),
+                        onClick = {
+                            onConfirm(packageName)
+                            packageName = ""
+                        },
+                        enabled = isConfirmEnabled,
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
+                }
+            }
+        }
+    )
 }
