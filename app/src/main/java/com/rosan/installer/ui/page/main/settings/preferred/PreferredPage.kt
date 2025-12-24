@@ -286,7 +286,6 @@ fun PreferredPage(
             BottomSheetContent(
                 title = stringResource(R.string.get_update),
                 hasUpdate = state.hasUpdate,
-                canDirectUpdate = state.authorizer != ConfigEntity.Authorizer.None,
                 onDirectUpdateClick = {
                     showBottomSheet = false
                     viewModel.dispatch(PreferredViewAction.Update)

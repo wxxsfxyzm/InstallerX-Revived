@@ -607,7 +607,7 @@ fun SelectableSettingItem(
 fun BottomSheetContent(
     title: String,
     hasUpdate: Boolean,
-    canDirectUpdate: Boolean,
+    canDirectUpdate: Boolean = true,
     onDirectUpdateClick: () -> Unit
 ) {
     val context = LocalContext.current

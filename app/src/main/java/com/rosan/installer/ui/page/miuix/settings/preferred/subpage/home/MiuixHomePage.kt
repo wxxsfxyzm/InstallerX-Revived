@@ -27,7 +27,6 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -163,7 +162,7 @@ fun MiuixHomePage(
                     description = stringResource(R.string.get_update_detail),
                     onClick = { showUpdateDialog.value = true }
                 )
-                if (state.hasUpdate && state.authorizer != ConfigEntity.Authorizer.None)
+                if (state.hasUpdate)
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.get_update_directly),
                         description = stringResource(R.string.get_update_directly_desc),
