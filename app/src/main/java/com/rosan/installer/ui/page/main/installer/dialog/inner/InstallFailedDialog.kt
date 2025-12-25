@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +30,7 @@ import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
 import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
+import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePermissionException
 import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolationException
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingInstallPermissionException
 import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
@@ -57,33 +57,20 @@ import kotlin.reflect.KClass
 fun installFailedDialog( // 小写开头
     installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
-    val context = LocalContext.current
-    val currentPackageName by viewModel.currentPackageName.collectAsState()
     // val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
-
-    val packageName = currentPackageName ?: // Fallback logic is now simpler
     installer.analysisResults.firstOrNull()?.packageName ?: ""
 
     // Call InstallInfoDialog for base structure
     val baseParams = installInfoDialog(
         installer = installer,
         viewModel = viewModel,
-        onTitleExtraClick = {
-            /* if (packageName.isNotEmpty()) {
-                 context.startActivity(
-                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                         .setData(Uri.fromParts("package", packageName, null))
-                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                 )
-             }*/
-        }
+        onTitleExtraClick = {}
     )
 
     // Override text and buttons
     return baseParams.copy(
         text = DialogInnerParams(
             DialogParamsType.InstallerInstallFailed.id,
-            // errorTextBlock(installer.error)
             {
                 ErrorTextBlock(
                     installer.error,
@@ -134,6 +121,7 @@ private fun ErrorSuggestions(
         val icon: ImageVector
     )
 
+    var pendingConflictingPackage by remember { mutableStateOf<String?>(null) }
     val possibleSuggestions = remember(installer) {
         buildList {
             add(
@@ -151,12 +139,42 @@ private fun ErrorSuggestions(
             if (installer.config.authorizer != ConfigEntity.Authorizer.None ||
                 (installer.config.authorizer == ConfigEntity.Authorizer.None &&
                         !(RsConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
-            )
+            ) {
+                add(
+                    SuggestionChipInfo(
+                        InstallFailedConflictingProviderException::class,
+                        selected = { true }, // This is an action, not a state toggle.
+                        onClick = {
+                            val conflictingPkg = Regex("used by ([\\w.]+)")
+                                .find(error.message ?: "")?.groupValues?.get(1)
+                            confirmKeepData = false
+                            pendingConflictingPackage = conflictingPkg
+                            showUninstallConfirmDialog = true
+                        },
+                        labelRes = R.string.suggestion_uninstall_and_retry,// Not keep data
+                        icon = AppIcons.Delete
+                    )
+                )
+                add(
+                    SuggestionChipInfo(
+                        InstallFailedDuplicatePermissionException::class,
+                        selected = { true },
+                        onClick = {
+                            val conflictingPkg = Regex("already owned by ([\\w.]+)")
+                                .find(error.message ?: "")?.groupValues?.get(1)
+
+                            confirmKeepData = false
+                            pendingConflictingPackage = conflictingPkg
+                            showUninstallConfirmDialog = true
+                        },
+                        labelRes = R.string.suggestion_uninstall_and_retry,
+                        icon = AppIcons.Delete
+                    )
+                )
                 add(
                     SuggestionChipInfo(
                         InstallFailedUpdateIncompatibleException::class,
                         InstallFailedVersionDowngradeException::class,
-                        InstallFailedConflictingProviderException::class,
                         selected = { true }, // This is an action, not a state toggle.
                         onClick = {
                             confirmKeepData = false
@@ -166,6 +184,7 @@ private fun ErrorSuggestions(
                         icon = AppIcons.Delete
                     )
                 )
+            }
             if (
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA && // Must be lower than Android 16
 
@@ -339,7 +358,12 @@ private fun ErrorSuggestions(
             onDismiss = { showUninstallConfirmDialog = false },
             onConfirm = {
                 // When the user confirms, we dispatch the action to the ViewModel.
-                viewModel.dispatch(InstallerViewAction.UninstallAndRetryInstall(keepData = confirmKeepData))
+                viewModel.dispatch(
+                    InstallerViewAction.UninstallAndRetryInstall(
+                        keepData = confirmKeepData,
+                        conflictingPackage = pendingConflictingPackage
+                    )
+                )
             },
             keepData = confirmKeepData
         )
