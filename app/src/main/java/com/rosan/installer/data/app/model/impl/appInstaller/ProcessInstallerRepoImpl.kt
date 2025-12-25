@@ -1,11 +1,9 @@
 package com.rosan.installer.data.app.model.impl.appInstaller
 
 import android.os.IBinder
-import com.rosan.app_process.AppProcess
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
-import com.rosan.installer.data.recycle.model.impl.recycler.AppProcessRecyclers
-import com.rosan.installer.data.recycle.repo.Recyclable
+import com.rosan.installer.data.recycle.model.impl.recycler.ProcessHookRecycler
 import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SHELL_SH
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -13,16 +11,7 @@ import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 
 object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
-    private val localRecycler = ThreadLocal<Recyclable<AppProcess>>()
-
-    private fun createRecycler(config: ConfigEntity): Recyclable<AppProcess> =
-        AppProcessRecyclers.get(
-            when (config.authorizer) {
-                ConfigEntity.Authorizer.Root -> SHELL_ROOT
-                ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
-                else -> SHELL_SH
-            }
-        ).make()
+    private val localService = ThreadLocal<ProcessHookRecycler.HookedUserService>()
 
     override suspend fun doInstallWork(
         config: ConfigEntity,
@@ -32,9 +21,16 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
     ) {
-        val recycler = createRecycler(config)
+        val shell = when (config.authorizer) {
+            ConfigEntity.Authorizer.Root -> SHELL_ROOT
+            ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
+            else -> SHELL_SH
+        }
 
-        withContext(localRecycler.asContextElement(value = recycler)) {
+        val recycler = ProcessHookRecycler(shell)
+        val recyclableHandle = recycler.make()
+
+        withContext(localService.asContextElement(value = recyclableHandle.entity)) {
             try {
                 super.doInstallWork(
                     config,
@@ -45,7 +41,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
                     sharedUserIdExemption
                 )
             } finally {
-                recycler.recycle()
+                recyclableHandle.recycle()
             }
         }
     }
@@ -55,26 +51,32 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
         packageName: String,
         extra: InstallExtraInfoEntity
     ) {
-        val recycler = createRecycler(config)
+        val shell = when (config.authorizer) {
+            ConfigEntity.Authorizer.Root -> SHELL_ROOT
+            ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
+            else -> SHELL_SH
+        }
 
-        withContext(localRecycler.asContextElement(value = recycler)) {
+        val recycler = ProcessHookRecycler(shell)
+        val recyclableHandle = recycler.make()
+
+        withContext(localService.asContextElement(value = recyclableHandle.entity)) {
             try {
                 super.doUninstallWork(config, packageName, extra)
             } finally {
-                recycler.recycle()
+                recyclableHandle.recycle()
             }
         }
     }
 
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder {
-        val recycler = localRecycler.get()
+        val service = localService.get()
             ?: throw IllegalStateException(
-                "Recycler is null in iBinderWrapper. " +
-                        "This indicates doInstallWork/doUninstallWork is not properly scoping the ThreadLocal. " +
-                        "Make sure you are calling this within the managed context."
+                "Service is null in iBinderWrapper. " +
+                        "Make sure doInstallWork/doUninstallWork calls are properly scoped."
             )
 
-        return recycler.entity.binderWrapper(iBinder)
+        return service.binderWrapper(iBinder)
     }
 
     override suspend fun doFinishWork(
