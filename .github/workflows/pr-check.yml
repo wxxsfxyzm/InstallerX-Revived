@@ -31,6 +31,9 @@ jobs:
 
       # 构建 Online 和 Offline 两个版本的 Debug 包
       - name: Build Both Variant (onlinePreview/offlinePreview)
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug
 
       # 上传 APK 供人工测试

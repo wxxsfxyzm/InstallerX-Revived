@@ -66,6 +66,9 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build Preview Release APKs
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease
 
       - name: Find and Rename Preview APKs

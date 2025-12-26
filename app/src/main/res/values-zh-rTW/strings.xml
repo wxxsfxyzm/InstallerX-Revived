@@ -563,7 +563,7 @@
     <string name="split_name_feature_group_title">功能分包</string>
     <string name="lab_tip">實驗室中的功能可能不穩定或存在風險，隨時可能被修改或移除，請自行承擔使用風險</string>
     <string name="lab_use_hook_mode">使用 BinderWrapper 模式</string>
-    <string name="lab_use_hook_mode_desc">使用 BinderWrapper 模式取代 UserService，以獲得更好的效能</string>
+    <string name="lab_use_hook_mode_desc">使用 BinderWrapper 取代 UserService，以獲得更好的效能</string>
     <string name="lab_module_flashing">啟用模組刷寫</string>
     <string name="lab_module_flashing_desc">在刷寫任何模組前務必再次確認！</string>
     <string name="lab_module_flashing_show_art">顯示字元畫</string>

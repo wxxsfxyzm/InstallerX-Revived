@@ -72,18 +72,18 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.ListPopup
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
+import top.yukonga.miuix.kmp.extra.SuperListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Back
-import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
-import top.yukonga.miuix.kmp.icon.icons.useful.Info
-import top.yukonga.miuix.kmp.icon.icons.useful.Reboot
-import top.yukonga.miuix.kmp.icon.icons.useful.Settings
+import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.Info
+import top.yukonga.miuix.kmp.icon.extended.Refresh
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
@@ -197,13 +197,13 @@ fun MiuixInstallerPage(
                     if (viewModel.navigatedFromPrepareToChoice) {
                         // Came from Prepare (re-selecting splits) -> Show Back icon, go back to Prepare
                         MiuixBackButton(
-                            icon = MiuixIcons.Useful.Back,
+                            icon = MiuixIcons.Regular.Back,
                             onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
                         )
                     } else {
                         // Initial choice or other origin -> Show Cancel icon, force close
                         MiuixBackButton(
-                            icon = MiuixIcons.Useful.Cancel,
+                            icon = MiuixIcons.Regular.Close,
                             onClick = closeSheet
                         )
                     }
@@ -211,7 +211,7 @@ fun MiuixInstallerPage(
 
                 is InstallerViewState.InstallConfirm -> {
                     MiuixBackButton(
-                        icon = MiuixIcons.Useful.Cancel,
+                        icon = MiuixIcons.Regular.Close,
                         onClick = {
                             viewModel.dispatch(InstallerViewAction.ApproveSession(currentState.sessionId, false))
                         }
@@ -227,7 +227,7 @@ fun MiuixInstallerPage(
                 is InstallerViewState.AnalyseFailed,
                 is InstallerViewState.ResolveFailed -> {
                     MiuixBackButton(
-                        icon = MiuixIcons.Useful.Cancel,
+                        icon = MiuixIcons.Regular.Close,
                         onClick = {
                             showBottomSheet.value = !showBottomSheet.value
                             scope.launch {
@@ -241,7 +241,7 @@ fun MiuixInstallerPage(
 
                 is InstallerViewState.InstallPrepare -> {
                     MiuixBackButton(
-                        icon = if (showSettings || showPermissions) MiuixIcons.Useful.Back else MiuixIcons.Useful.Cancel,
+                        icon = if (showSettings || showPermissions) MiuixIcons.Regular.Back else MiuixIcons.Regular.Close,
                         onClick = {
                             if (showSettings) {
                                 viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
@@ -260,7 +260,7 @@ fun MiuixInstallerPage(
 
                 is InstallerViewState.InstallExtendedMenu -> {
                     MiuixBackButton(
-                        icon = MiuixIcons.Useful.Back,
+                        icon = MiuixIcons.Regular.Back,
                         onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
                     )
                 }
@@ -274,7 +274,7 @@ fun MiuixInstallerPage(
                     if (!showSettings && !showPermissions) {
                         IconButton(onClick = { viewModel.dispatch(InstallerViewAction.ShowMiuixSheetRightActionSettings) }) {
                             Icon(
-                                imageVector = MiuixIcons.Useful.Settings,
+                                imageVector = MiuixIcons.Regular.Settings,
                                 contentDescription = stringResource(R.string.installer_settings)
                             )
                         }
@@ -295,7 +295,7 @@ fun MiuixInstallerPage(
                             viewModel.dispatch(InstallerViewAction.Close)
                         }) {
                         Icon(
-                            imageVector = MiuixIcons.Useful.Info,
+                            imageVector = MiuixIcons.Regular.Info,
                             contentDescription = stringResource(R.string.installer_settings)
                         )
                     }
@@ -605,13 +605,13 @@ private fun RebootListPopup(
         holdDownState = showTopPopup.value
     ) {
         Icon(
-            imageVector = MiuixIcons.Useful.Reboot,
+            imageVector = MiuixIcons.Regular.Refresh,
             contentDescription = stringResource(id = R.string.reboot),
             tint = MiuixTheme.colorScheme.onBackground
         )
     }
 
-    ListPopup(
+    SuperListPopup(
         show = showTopPopup,
         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
         alignment = alignment,

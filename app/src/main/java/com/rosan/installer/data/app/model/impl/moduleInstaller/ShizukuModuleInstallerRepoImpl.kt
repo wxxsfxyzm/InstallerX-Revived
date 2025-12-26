@@ -4,10 +4,9 @@ import com.rosan.installer.ICommandOutputListener
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
-import com.rosan.installer.data.app.model.exception.ModuleInstallException
 import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.data.app.repo.ModuleInstallerRepo
-import com.rosan.installer.data.app.util.sourcePath
+import com.rosan.installer.data.app.util.ModuleInstallerUtils
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.channels.awaitClose
@@ -17,7 +16,6 @@ import timber.log.Timber
 
 /**
  * A module installer that works by executing shell commands via a REMOTE privileged process (Binder).
- * Required for Shizuku mode where the main process has no direct shell access.
  */
 object ShizukuModuleInstallerRepoImpl : ModuleInstallerRepo {
     override fun doInstallWork(
@@ -25,14 +23,11 @@ object ShizukuModuleInstallerRepoImpl : ModuleInstallerRepo {
         module: AppEntity.ModuleEntity,
         rootImplementation: RootImplementation
     ): Flow<String> = callbackFlow {
-        val modulePath = module.data.sourcePath()
-            ?: throw ModuleInstallException("Could not resolve module file path for ${module.name}")
+        // 1. Resolve Path using Helper
+        val modulePath = ModuleInstallerUtils.getModulePathOrThrow(module)
 
-        val command = when (rootImplementation) {
-            RootImplementation.Magisk -> arrayOf("magisk", "--install-module", modulePath)
-            RootImplementation.KernelSU -> arrayOf("ksud", "module", "install", modulePath)
-            RootImplementation.APatch -> arrayOf("apd", "module", "install", modulePath)
-        }
+        // 2. Get Command Array using Helper (Best for IPC/exec)
+        val command = ModuleInstallerUtils.getInstallCommandArgs(rootImplementation, modulePath)
 
         Timber.d("Executing remote module install command via IPC: ${command.joinToString(" ")}")
 
@@ -55,7 +50,6 @@ object ShizukuModuleInstallerRepoImpl : ModuleInstallerRepo {
         }
 
         try {
-            // This goes through the AIDL/Binder service
             useUserService(
                 authorizer = config.authorizer,
                 useHookMode = false
@@ -69,7 +63,6 @@ object ShizukuModuleInstallerRepoImpl : ModuleInstallerRepo {
 
         awaitClose {
             Timber.d("Remote module installation flow cancelled.")
-            // Ideally, we would notify the remote service to cancel, but the binder death recipient handles cleanup mostly.
         }
     }
 }

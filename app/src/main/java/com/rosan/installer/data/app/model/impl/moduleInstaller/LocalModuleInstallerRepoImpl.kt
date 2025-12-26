@@ -3,10 +3,9 @@ package com.rosan.installer.data.app.model.impl.moduleInstaller
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.RootImplementation
 import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
-import com.rosan.installer.data.app.model.exception.ModuleInstallException
 import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.data.app.repo.ModuleInstallerRepo
-import com.rosan.installer.data.app.util.sourcePath
+import com.rosan.installer.data.app.util.ModuleInstallerUtils
 import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.channels.awaitClose
@@ -16,7 +15,6 @@ import timber.log.Timber
 
 /**
  * A module installer that executes commands DIRECTLY in the local process via `su`.
- * Best for Root/Customize modes to avoid Binder overhead.
  */
 object LocalModuleInstallerRepoImpl : ModuleInstallerRepo {
     override fun doInstallWork(
@@ -24,22 +22,18 @@ object LocalModuleInstallerRepoImpl : ModuleInstallerRepo {
         module: AppEntity.ModuleEntity,
         rootImplementation: RootImplementation
     ): Flow<String> = callbackFlow {
-        val modulePath = module.data.sourcePath()
-            ?: throw ModuleInstallException("Could not resolve module file path for ${module.name}")
+        // 1. Resolve Path using Helper
+        val modulePath = ModuleInstallerUtils.getModulePathOrThrow(module)
 
-        // Determine the shell binary
+        // 2. Determine Shell Binary
         val shellBinary = if (config.authorizer == ConfigEntity.Authorizer.Customize) {
             config.customizeAuthorizer.ifBlank { SHELL_ROOT }
         } else {
             SHELL_ROOT
         }
 
-        // Construct the command string
-        val installCmd = when (rootImplementation) {
-            RootImplementation.Magisk -> "magisk --install-module \"$modulePath\""
-            RootImplementation.KernelSU -> "ksud module install \"$modulePath\""
-            RootImplementation.APatch -> "apd module install \"$modulePath\""
-        }
+        // 3. Construct Command String using Helper (Safe for Shell)
+        val installCmd = ModuleInstallerUtils.buildShellCommandString(rootImplementation, modulePath)
 
         val commandList = listOf(shellBinary, "-c", installCmd)
         Timber.d("Locally executing module install: $commandList")
@@ -47,7 +41,7 @@ object LocalModuleInstallerRepoImpl : ModuleInstallerRepo {
         var process: Process? = null
         try {
             process = ProcessBuilder(commandList)
-                .redirectErrorStream(true) // Merge stdout and stderr
+                .redirectErrorStream(true)
                 .start()
 
             // Read output stream

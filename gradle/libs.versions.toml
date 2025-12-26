@@ -27,7 +27,7 @@ datastoreCoreAndroid = "1.2.0"
 aboutLibraries = "13.2.1"
 appiconloader = "1.5.0"
 timber = "5.0.1"
-miuix = "0.7.2"
+miuix = "0.7.3-791a5f4-SNAPSHOT"
 okhttp = "5.3.2"
 monetcompat = "0.4.1"
 
@@ -115,6 +115,7 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 
 # miuix
 miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version.ref = "miuix" }
+miuix-icons = { group = "top.yukonga.miuix.kmp", name = "miuix-icons-android", version.ref = "miuix" }
 
 # okhttp
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }

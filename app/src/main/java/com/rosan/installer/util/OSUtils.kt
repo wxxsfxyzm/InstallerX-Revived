@@ -18,6 +18,8 @@ object OSUtils : KoinComponent {
     private const val KEY_OPLUS_API = "ro.build.version.oplus.api"
     private const val KEY_OPLUS_SUB_API = "ro.build.version.oplus.sub_api"
 
+    const val SYSTEM_PACKAGE_INSTALLER = "com.android.packageinstaller"
+
     /**
      * Checks if the device is running HyperOS.
      */

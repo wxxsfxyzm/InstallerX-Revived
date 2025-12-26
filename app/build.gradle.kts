@@ -248,6 +248,7 @@ dependencies {
 
     // miuix
     implementation(libs.miuix)
+    implementation(libs.miuix.icons)
     implementation(libs.capsule)
     // haze
     implementation(libs.haze)

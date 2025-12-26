@@ -66,7 +66,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     // Helper property to get ID for logging
     private val installerId get() = installer.id
 
-    // Components
+    // Cache directory
     private val cacheDirectory = "${context.externalCacheDir?.absolutePath}/$installerId".apply { File(this).mkdirs() }
 
     // Initializing helpers without passing ID

@@ -41,6 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
 
     steps:
       - name: Checkout code
@@ -90,6 +91,9 @@ jobs:
           echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> keystore.properties
 
       - name: Build Dev Release APK
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease
 
       - name: Upload APK as Artifact

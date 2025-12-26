@@ -36,8 +36,8 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
-import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
+import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -156,7 +156,7 @@ private fun MiuixSuccessRow() {
         modifier = Modifier.fillMaxWidth()
     ) {
         Icon(
-            imageVector = MiuixIcons.Useful.Confirm,
+            imageVector = MiuixIcons.Regular.Ok,
             contentDescription = "Success",
             tint = MiuixTheme.colorScheme.primary
         )
@@ -185,7 +185,7 @@ private fun MiuixCompletedErrorCardContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(
-                imageVector = MiuixIcons.Useful.Cancel,
+                imageVector = MiuixIcons.Regular.Close,
                 contentDescription = stringResource(R.string.installer_install_failed),
                 tint = contentColor
             )

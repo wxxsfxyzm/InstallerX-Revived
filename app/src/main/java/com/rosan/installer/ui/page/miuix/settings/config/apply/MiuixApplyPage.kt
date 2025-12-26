@@ -60,12 +60,12 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.InputField
-import top.yukonga.miuix.kmp.basic.ListPopup
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -75,10 +75,10 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.DropdownImpl
+import top.yukonga.miuix.kmp.extra.SuperListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
-import top.yukonga.miuix.kmp.icon.icons.useful.ImmersionMore
+import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -110,7 +110,7 @@ fun MiuixApplyPage(
                     navigationIcon = {
                         MiuixBackButton(
                             modifier = Modifier.padding(start = 16.dp),
-                            icon = MiuixIcons.Useful.Cancel,
+                            icon = MiuixIcons.Regular.Close,
                             onClick = { navController.navigateUp() })
                     },
                     actions = { TopAppBarActions(viewModel = viewModel) }
@@ -374,7 +374,7 @@ private fun TopAppBarActions(viewModel: ApplyViewModel) {
     }
 
     // Popup menu that appears when the button is clicked.
-    ListPopup(
+    SuperListPopup(
         show = showMenu,
         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
         alignment = PopupPositionProvider.Align.TopRight,
@@ -418,7 +418,7 @@ private fun TopAppBarActions(viewModel: ApplyViewModel) {
         holdDownState = showMenu.value
     ) {
         Icon(
-            imageVector = MiuixIcons.Useful.ImmersionMore,
+            imageVector = MiuixIcons.Regular.More,
             tint = MiuixTheme.colorScheme.onBackground,
             contentDescription = "More Options"
         )

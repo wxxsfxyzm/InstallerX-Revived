@@ -86,13 +86,11 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         fun remove(id: String) {
             synchronized(this) {
                 Timber.d("remove() called for id: $id")
-                // REMOVED: No more special handling for the anonymous instance.
                 impls.remove(id)
             }
         }
     }
 
-    // 添加原子关闭标志
     private val isClosed = AtomicBoolean(false)
 
     override var error: Throwable = Throwable()
