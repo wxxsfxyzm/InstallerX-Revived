@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: read
 
     steps:
       - name: Checkout code
@@ -57,6 +58,9 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build Stable Release APKs
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease
 
       - name: Find and Rename Universal APKs

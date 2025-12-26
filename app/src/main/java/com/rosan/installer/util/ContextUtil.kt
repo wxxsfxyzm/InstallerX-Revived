@@ -5,8 +5,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.net.toUri
-
-private const val SYSTEM_PACKAGE_INSTALLER = "com.android.packageinstaller"
+import com.rosan.installer.util.OSUtils.SYSTEM_PACKAGE_INSTALLER
 
 fun Context.openUrl(url: String) =
     try {

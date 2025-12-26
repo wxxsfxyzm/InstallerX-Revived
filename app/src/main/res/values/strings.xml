@@ -329,6 +329,7 @@
     <string name="installer_silent_install">Silent Install</string>
     <string name="installer_error_reason">Error Reason</string>
     <string name="installer_unknown_error">Unknown Error</string>
+    <string name="installer_notification_tap_to_disable">Foreground service notification, tap to disable.</string>
     <string name="installer_channel_name">Install Notification</string>
     <string name="installer_progress_channel_name">Install Process Notification</string>
     <string name="installer_background_channel_name">Background Notification</string>

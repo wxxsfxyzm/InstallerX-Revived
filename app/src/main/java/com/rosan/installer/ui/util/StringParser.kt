@@ -108,8 +108,8 @@ fun String.toAndroidVersionName(): String {
         34 -> "14"    // Android 14 Upside Down Cake
         35 -> "15"    // Android 15 Vanilla Ice Cream
         36 -> "16"    // Android 16 Baklava
+        37 -> "17"    // Android 17
         // Add more future versions here as they are announced
-        // 37 -> "17"
 
         // If the API level doesn't match any of the above cases,
         // return the original string.

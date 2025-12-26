@@ -36,6 +36,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
+      packages: read
 
     strategy:
       fail-fast: false
@@ -68,6 +69,9 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build Android Project
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew assembleOnlinePreviewDebug --no-daemon
 
       - name: Perform CodeQL Analysis
