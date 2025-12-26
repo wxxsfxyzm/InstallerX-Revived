@@ -598,7 +598,6 @@
     <string name="installer_install_complete">Instalación Completada</string>
     <string name="uninstall_authorizer_tip">El desinstalador siempre usa el autorizador establecido en el perfil predeterminado</string>
     <string name="uninstall_all_users_disabled">La desinstalación para todos los usuarios fue desactivada</string>
-    <string name="uninstall_system_app_updates_disabled">Se deshabilitó la eliminación de actualizaciones de la app del sistema</string>
     <string name="uninstall_call_uninstaller">Llamar al desinstalador</string>
     <string name="uninstall_call_uninstaller_manually">Llamar a desinstalador manualmente</string>
     <string name="uninstall_call_uninstaller_manually_desc">Desinstalar la app por nombre de paquete</string>
