@@ -16,6 +16,7 @@
     <string name="menu">選單</string>
     <string name="about">關於</string>
     <string name="other">其他</string>
+    <string name="performance">效能</string>
     <string name="about_detail">關於 InstallerX Revived</string>
     <string name="get_update_detail">檢查軟體更新和新功能</string>
     <string name="get_source_code">查看原始碼</string>
@@ -561,10 +562,12 @@
     <string name="split_name_density_group_title">螢幕密度分包</string>
     <string name="split_name_feature_group_title">功能分包</string>
     <string name="lab_tip">實驗室中的功能可能不穩定或存在風險，隨時可能被修改或移除，請自行承擔使用風險</string>
-    <string name="lab_use_hook_mode">使用 Hook 模式</string>
-    <string name="lab_use_hook_mode_desc">使用 Hook 模式取代 userService，以獲得更好的效能</string>
+    <string name="lab_use_hook_mode">使用 BinderWrapper 模式</string>
+    <string name="lab_use_hook_mode_desc">使用 BinderWrapper 模式取代 UserService，以獲得更好的效能</string>
     <string name="lab_module_flashing">啟用模組刷寫</string>
     <string name="lab_module_flashing_desc">在刷寫任何模組前務必再次確認！</string>
+    <string name="lab_module_flashing_show_art">顯示字元畫</string>
+    <string name="lab_module_flashing_show_art_desc">安裝開始時顯示 InstallerX 字元畫</string>
     <string name="lab_module_select_root_impl">選擇 Root 實現方式</string>
     <string name="lab">實驗室</string>
     <string name="lab_desc">訪問實驗性或開發中的新功能</string>

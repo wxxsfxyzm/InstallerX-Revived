@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -101,7 +102,7 @@ fun MiuixLabPage(
         ) {
             item { MiuixSettingsTipCard(stringResource(R.string.lab_tip)) }
             item { Spacer(modifier = Modifier.size(12.dp)) }
-            item { SmallTitle(stringResource(R.string.config_authorizer_shizuku)) }
+            item { SmallTitle(stringResource(R.string.performance)) }
             item {
                 Card(
                     modifier = Modifier
@@ -159,16 +160,24 @@ fun MiuixLabPage(
                             data.keys.toList().indexOf(currentRootImpl).coerceAtLeast(0)
                         }
 
-                        SuperSpinner(
-                            title = stringResource(R.string.lab_module_select_root_impl),
-                            items = spinnerEntries,
-                            selectedIndex = selectedIndex,
-                            onSelectedIndexChange = { newIndex ->
-                                data.keys.elementAtOrNull(newIndex)?.let { impl ->
-                                    viewModel.dispatch(PreferredViewAction.LabChangeRootImplementation(impl))
+                        Column {
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.lab_module_flashing_show_art),
+                                description = stringResource(R.string.lab_module_flashing_show_art_desc),
+                                checked = state.labRootShowModuleArt,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
+                            )
+                            SuperSpinner(
+                                title = stringResource(R.string.lab_module_select_root_impl),
+                                items = spinnerEntries,
+                                selectedIndex = selectedIndex,
+                                onSelectedIndexChange = { newIndex ->
+                                    data.keys.elementAtOrNull(newIndex)?.let { impl ->
+                                        viewModel.dispatch(PreferredViewAction.LabChangeRootImplementation(impl))
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }

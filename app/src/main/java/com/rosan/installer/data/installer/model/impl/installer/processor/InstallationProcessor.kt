@@ -23,6 +23,22 @@ class InstallationProcessor(
     private val repo: InstallerRepo,
     private val progressFlow: MutableSharedFlow<ProgressEntity>
 ) : KoinComponent {
+    companion object {
+        private const val MODULE_INSTALL_BANNER = """
+              ___           _        _ _         __  __ 
+             |_ _|_ __  ___| |_ __ _| | | ___ _ _\ \/ / 
+              | || '_ \/ __| __/ _` | | |/ _ \ '__\  /  
+              | || | | \__ \ || (_| | | |  __/ |  /  \  
+             |___|_| |_|___/\__\__,_|_|_|\___|_| /_/\_\ 
+
+              ____            _               _ 
+             |  _ \ _____   _(_)_   _____  __| | 
+             | |_) / _ \ \ / / \ \ / / _ \/ _` | 
+             |  _ <  __/\ V /| |\ V /  __/ (_| | 
+             |_| \_\___| \_/ |_| \_/ \___|\__,_| 
+            """
+    }
+
     private val appDataStore by inject<AppDataStore>()
 
     /**
@@ -58,9 +74,20 @@ class InstallationProcessor(
 
     private suspend fun installModule(config: ConfigEntity, module: AppEntity.ModuleEntity) {
         Timber.d("installModule: Starting module installation for ${module.name}")
-
         // Initialize output list
-        val output = mutableListOf("Starting installation...")
+        val output = mutableListOf<String>()
+        // Check if user enabled the ASCII art display in settings
+        val showArt = appDataStore.getBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART).first()
+
+        if (showArt) {
+            val banner = MODULE_INSTALL_BANNER.trimIndent()
+
+            output.addAll(banner.lines())
+            // Add an empty line for better separation
+            output.add("")
+        }
+
+        output.add("Starting installation...")
         // Sync to Repo immediately so it persists
         repo.moduleLog = output.toList()
         // Emit the initial state with the current log.
@@ -94,7 +121,7 @@ class InstallationProcessor(
 
         Timber.d("install: Starting. Emitting ProgressEntity.Installing ($current/$total).")
 
-        // CORRECTION: Use the data class format with progress info.
+        // Use the data class format with progress info.
         // This ensures the UI displays "Installing 1/5" instead of a generic message.
         progressFlow.emit(
             ProgressEntity.Installing(
@@ -148,7 +175,7 @@ class InstallationProcessor(
 
         Timber.d("install: Single unit of work succeeded.")
 
-        // FIX: Only emit InstallSuccess if this is a single install task.
+        // Only emit InstallSuccess if this is a single install task.
         // In batch mode (total > 1), we must NOT emit Success here, as it would
         // prematurely signal completion to the UI while the ActionHandler loop is still running.
         if (total <= 1) {

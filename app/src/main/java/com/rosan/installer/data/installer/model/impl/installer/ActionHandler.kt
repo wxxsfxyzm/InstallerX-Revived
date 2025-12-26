@@ -362,7 +362,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.InstallCompleted(installer.multiInstallResults.toList()))
     }
 
-    // 辅助方法：从全量结果中提取单个安装项
+    /**
+     * Finds the [PackageAnalysisResult] for a given [SelectInstallEntity].
+     * Returns null if not found.
+     * @param target The [SelectInstallEntity] to search for.
+     * @param allResults The list of [PackageAnalysisResult] to search in.
+     * @return The [PackageAnalysisResult] if found, null otherwise.
+     */
     private fun findResultForEntity(
         target: SelectInstallEntity,
         allResults: List<PackageAnalysisResult>
@@ -370,6 +376,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         return allResults.find { it.packageName == target.app.packageName }
     }
 
+    /**
+     * Performs the installation logic.
+     */
     private suspend fun performInstallLogic() {
         Timber.d("[id=$installerId] install: Starting installation process via InstallationProcessor.")
         installationProcessor.install(installer.config, installer.analysisResults, cacheDirectory)
@@ -458,6 +467,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
     }
 
+    /**
+     * * Automatically locks the default installer if enabled.
+     */
     private fun autoLockInstallerIfNeeded() {
         scope.launch {
             if (appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER).first()) {

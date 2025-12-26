@@ -609,5 +609,5 @@
     <string name="exception_uninstall_failed_aborted">Desinstalação cancelada pelo usuário</string>
     <string name="lab_unstable_features">Características instáveis</string>
     <string name="lab_set_install_requester">Definir Solicitante de Instalação</string>
-    <string name="lab_set_install_requester_desc">Preencha o campo originatingUid com o pacote do chamador para corresponder ao comportamento do sistema</string>
+    <string name="lab_set_install_requester_desc">Preencha o campo OriginatingUid com o pacote do chamador para corresponder ao comportamento do sistema</string>
 </resources>

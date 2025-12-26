@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -79,8 +80,8 @@ fun LegacyLabPage(
                 .padding(paddingValues)
         ) {
             item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
-            // --- Shizuku Section ---
-            item { LabelWidget(stringResource(R.string.config_authorizer_shizuku)) }
+            // --- Performance Section ---
+            item { LabelWidget(stringResource(R.string.performance)) }
             item {
                 SwitchWidget(
                     icon = Icons.AutoMirrored.Filled.AltRoute,
@@ -118,7 +119,17 @@ fun LegacyLabPage(
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    LabRootImplementationWidget(viewModel)
+                    Column {
+                        SwitchWidget(
+                            icon = AppIcons.Terminal,
+                            title = stringResource(R.string.lab_module_flashing_show_art),
+                            description = stringResource(R.string.lab_module_flashing_show_art_desc),
+                            isM3E = false,
+                            checked = state.labRootShowModuleArt,
+                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
+                        )
+                        LabRootImplementationWidget(viewModel)
+                    }
                 }
             }
             // --- Unstable Features Section ---

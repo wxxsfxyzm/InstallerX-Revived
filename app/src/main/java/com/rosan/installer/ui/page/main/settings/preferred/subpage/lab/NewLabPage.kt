@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -111,7 +112,7 @@ fun NewLabPage(
             item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.config_authorizer_shizuku),
+                    title = stringResource(R.string.performance),
                     content = buildList {
                         add {
                             SwitchWidget(
@@ -150,7 +151,22 @@ fun NewLabPage(
                                 enter = fadeIn() + expandVertically(),
                                 exit = fadeOut() + shrinkVertically()
                             ) {
-                                LabRootImplementationWidget(viewModel)
+                                Column {
+                                    SwitchWidget(
+                                        icon = AppIcons.Terminal,
+                                        title = stringResource(R.string.lab_module_flashing_show_art),
+                                        description = stringResource(R.string.lab_module_flashing_show_art_desc),
+                                        checked = state.labRootShowModuleArt,
+                                        onCheckedChange = {
+                                            viewModel.dispatch(
+                                                PreferredViewAction.LabChangeRootShowModuleArt(
+                                                    it
+                                                )
+                                            )
+                                        }
+                                    )
+                                    LabRootImplementationWidget(viewModel)
+                                }
                             }
                         }
                     })

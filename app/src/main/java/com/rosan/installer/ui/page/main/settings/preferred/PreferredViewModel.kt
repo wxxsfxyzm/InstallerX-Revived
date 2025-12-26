@@ -160,6 +160,7 @@ class PreferredViewModel(
 
             is PreferredViewAction.LabChangeShizukuHookMode -> labChangeShizukuHookMode(action.enable)
             is PreferredViewAction.LabChangeRootModuleFlash -> labChangeRootModuleFlash(action.enable)
+            is PreferredViewAction.LabChangeRootShowModuleArt -> labChangeRootShowModuleArt(action.enable)
             is PreferredViewAction.LabChangeRootImplementation -> labChangeRootImplementation(action.implementation)
             is PreferredViewAction.LabChangeHttpProfile -> labChangeHttpProfile(action.profile)
             is PreferredViewAction.LabChangeHttpSaveFile -> labChangeHttpSaveFile(action.enable)
@@ -501,6 +502,11 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, enabled)
         }
 
+    private fun labChangeRootShowModuleArt(enabled: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART, enabled)
+        }
+
     private fun labChangeRootImplementation(implementation: RootImplementation) =
         viewModelScope.launch {
             appDataStore.putString(
@@ -656,6 +662,8 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.LAB_USE_HOOK_MODE, true)
             val labRootModuleFlashFlow =
                 appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false)
+            val labRootShowModuleArtFlow =
+                appDataStore.getBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART, true)
             val labRootImplementationFlow =
                 appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
                     .map { RootImplementation.fromString(it) }
@@ -714,6 +722,7 @@ class PreferredViewModel(
                 isIgnoringBatteryOptFlow,
                 labShizukuHookModeFlow,
                 labRootModuleFlashFlow,
+                labRootShowModuleArtFlow,
                 labRootImplementationFlow,
                 labHttpProfileFlow,
                 labHttpSaveFileFlow,
@@ -761,6 +770,7 @@ class PreferredViewModel(
                 val isIgnoringBatteryOptimizations = values[idx++] as Boolean
                 val labShizukuHookMode = values[idx++] as Boolean
                 val labRootModuleFlash = values[idx++] as Boolean
+                val labRootShowModuleArt = values[idx++] as Boolean
                 val labRootImplementation = values[idx++] as RootImplementation
                 val labHttpProfile = values[idx++] as HttpProfile
                 val labHttpSaveFile = values[idx++] as Boolean
@@ -828,6 +838,7 @@ class PreferredViewModel(
                     isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations,
                     labShizukuHookMode = labShizukuHookMode,
                     labRootEnableModuleFlash = labRootModuleFlash,
+                    labRootShowModuleArt = labRootShowModuleArt,
                     labRootImplementation = labRootImplementation,
                     labHttpProfile = labHttpProfile,
                     labHttpSaveFile = labHttpSaveFile,

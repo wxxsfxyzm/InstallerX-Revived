@@ -3,9 +3,10 @@ package com.rosan.installer.ui.icons
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
-import androidx.compose.material.icons.automirrored.twotone.FactCheck
 import androidx.compose.material.icons.automirrored.twotone.Article
+import androidx.compose.material.icons.automirrored.twotone.FactCheck
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.automirrored.twotone.PlaylistAdd
 import androidx.compose.material.icons.automirrored.twotone.Rule
@@ -25,7 +26,6 @@ import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.AdminPanelSettings
 import androidx.compose.material.icons.twotone.Android
-import androidx.compose.material.icons.twotone.ArrowBackIosNew
 import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.ArrowUpward
 import androidx.compose.material.icons.twotone.AutoAwesome
@@ -104,7 +104,7 @@ object AppIcons {
     // --- 导航图标集合 ---
     val RoomPreferences = Icons.TwoTone.RoomPreferences
     val SettingsSuggest = Icons.TwoTone.SettingsSuggest
-    val ArrowBack = Icons.TwoTone.ArrowBackIosNew
+    val ArrowBack = Icons.AutoMirrored.TwoTone.ArrowBack
     // --- 导航图标结束 ---
 
     // --- 授权器图标集合 ---

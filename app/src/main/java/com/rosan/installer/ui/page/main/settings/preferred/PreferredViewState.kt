@@ -40,6 +40,7 @@ data class PreferredViewState(
     val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList(),
     val labShizukuHookMode: Boolean = true,
     val labRootEnableModuleFlash: Boolean = false,
+    val labRootShowModuleArt: Boolean = true,
     val labRootImplementation: RootImplementation = RootImplementation.Magisk,
     val labHttpSaveFile: Boolean = false,
     val labHttpProfile: HttpProfile = HttpProfile.ALLOW_SECURE,

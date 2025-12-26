@@ -38,7 +38,6 @@ fun AppBackButton(
         modifier = modifier,
         // Consistent shapes for the button.
         shapes = IconButtonDefaults.shapes(
-            // You can use the default standard shapes directly if they fit your needs
             // shape = CircleShape
         ),
         // Consistent colors for the button.

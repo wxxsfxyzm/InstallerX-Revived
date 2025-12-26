@@ -90,6 +90,7 @@ class AppDataStore(
         // Lab
         val LAB_USE_HOOK_MODE = booleanPreferencesKey("use_shizuku_hook_mode")
         val LAB_ENABLE_MODULE_FLASH = booleanPreferencesKey("enable_module_flash")
+        val LAB_MODULE_FLASH_SHOW_ART = booleanPreferencesKey("module_flash_show_art")
         val LAB_ROOT_IMPLEMENTATION = stringPreferencesKey("lab_root_implementation")
         val LAB_HTTP_PROFILE = stringPreferencesKey("lab_http_profile")
         val LAB_HTTP_SAVE_FILE = booleanPreferencesKey("lab_http_save_file")

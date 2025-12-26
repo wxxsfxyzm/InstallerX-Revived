@@ -535,6 +535,7 @@ fun MiuixInstallerPage(
                     val moduleState = viewModel.state as InstallerViewState.InstallingModule
                     InstallModuleContent(
                         colorScheme = colorScheme,
+                        isDarkMode = isDarkMode,
                         outputLines = moduleState.output,
                         isFinished = moduleState.isFinished,
                         onClose = closeSheet

@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,12 +34,15 @@ import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 /**
  * A Composable that displays the real-time output of a module installation process.
  * It features a scrollable log area that automatically follows new output,
  * and a close button.
  *
+ * @param colorScheme The color scheme for the UI.
+ * @param isDarkMode Whether the UI is in dark mode.
  * @param outputLines The list of log lines to display.
  * @param isFinished Whether the installation process has completed.
  * @param onClose Lambda to be invoked when the close button is clicked.
@@ -48,6 +50,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 @Composable
 fun InstallModuleContent(
     colorScheme: ColorScheme,
+    isDarkMode: Boolean,
     outputLines: List<String>,
     isFinished: Boolean,
     onClose: () -> Unit
@@ -65,6 +68,9 @@ fun InstallModuleContent(
         }
     }
 
+    val cardColor = if (isDynamicColor) colorScheme.surfaceContainer else
+        if (isDarkMode) Color.Black else Color.White
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -77,7 +83,7 @@ fun InstallModuleContent(
                 .heightIn(min = 300.dp)
                 .weight(1f, fill = false),
             colors = CardColors(
-                color = if (isSystemInDarkTheme()) Color.Black else Color.White,
+                color = cardColor,
                 contentColor = MiuixTheme.colorScheme.onSurface
             )
         ) {

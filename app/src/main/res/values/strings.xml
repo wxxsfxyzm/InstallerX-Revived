@@ -18,6 +18,7 @@
     <string name="menu">Menu</string>
     <string name="about">About</string>
     <string name="other">Other</string>
+    <string name="performance">Performance</string>
     <string name="lab">Laboratory</string>
     <string name="lab_desc">Access experimental and developer features</string>
     <string name="about_detail">About InstallerX Revived</string>
@@ -651,10 +652,12 @@
     <string name="suggestion_retry_install_desc">Try install again</string>
 
     <string name="lab_tip">Experimental features in the lab may be unstable or risky and could change or be removed at any time. Use at your own risk</string>
-    <string name="lab_use_hook_mode">Use hook mode</string>
-    <string name="lab_use_hook_mode_desc">Use hook mode instead of userService to get better performance</string>
+    <string name="lab_use_hook_mode">Use BinderWrapper mode</string>
+    <string name="lab_use_hook_mode_desc">Use BinderWrapper instead of UserService to get better performance, works both for Shizuku and Root</string>
     <string name="lab_module_flashing">Enable module flashing</string>
     <string name="lab_module_flashing_desc">Always check twice before flashing any modules!</string>
+    <string name="lab_module_flashing_show_art">Display ASCII art</string>
+    <string name="lab_module_flashing_show_art_desc">Display InstallerX ASCII art when installation starts"</string>
     <string name="lab_module_select_root_impl">Choose root implementation</string>
     <string name="lab_http_save_file">Save downloaded files</string>
     <string name="lab_http_save_file_desc">Save files to the Downloads folder after download is complete</string>
@@ -664,6 +667,6 @@
     <string name="lab_http_profile_local">Allow local cleartext (Localhost)</string>
     <string name="lab_http_profile_all">Allow all (Insecure)</string>
     <string name="lab_unstable_features">Unstable features</string>
-    <string name="lab_set_install_requester">Set install Requester</string>
-    <string name="lab_set_install_requester_desc">Fill originatingUid field with caller package to match system behavior</string>
+    <string name="lab_set_install_requester">Set Install Requester</string>
+    <string name="lab_set_install_requester_desc">Fill OriginatingUid field with caller package to match system behavior</string>
 </resources>
