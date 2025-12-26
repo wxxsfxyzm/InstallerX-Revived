@@ -112,10 +112,6 @@ fun String.parseSplitMetadata(): SplitMetadata {
  */
 @Composable
 fun getSplitDisplayName(type: SplitType, configValue: String?, fallbackName: String): String {
-    if (type == SplitType.FEATURE) {
-        return fallbackName
-    }
-
     val qualifier = configValue ?: fallbackName
     return when (type) {
         SplitType.ARCHITECTURE -> {
