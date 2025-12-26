@@ -44,8 +44,8 @@ import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.Check
-import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
+import top.yukonga.miuix.kmp.icon.basic.Check
+import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -306,7 +306,7 @@ fun ErrorDisplaySheet(
         title = title,
         leftAction = {
             MiuixBackButton(
-                icon = MiuixIcons.Useful.Cancel,
+                icon = MiuixIcons.Regular.Close,
                 onClick = onDismissRequest
             )
         }

@@ -8,7 +8,7 @@ import com.rosan.installer.R
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Back
+import top.yukonga.miuix.kmp.icon.extended.Back
 
 /**
  * A standardized back button for the application, styled for MIUIX.
@@ -21,7 +21,7 @@ import top.yukonga.miuix.kmp.icon.icons.useful.Back
 @Composable
 fun MiuixBackButton(
     modifier: Modifier = Modifier,
-    icon: ImageVector = MiuixIcons.Useful.Back,
+    icon: ImageVector = MiuixIcons.Regular.Back,
     contentDescription: String = stringResource(id = R.string.back),
     onClick: () -> Unit,
 ) {

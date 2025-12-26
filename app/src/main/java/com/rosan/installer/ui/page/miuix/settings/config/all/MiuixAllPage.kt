@@ -50,9 +50,9 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Delete
-import top.yukonga.miuix.kmp.icon.icons.useful.Edit
-import top.yukonga.miuix.kmp.icon.icons.useful.SelectAll
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Edit
+import top.yukonga.miuix.kmp.icon.extended.SelectAll
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
@@ -227,7 +227,7 @@ private fun DataItemWidget(
                 onClick = { viewModel.dispatch(AllViewAction.MiuixEditDataConfig(entity)) }) {
                 Icon(
                     modifier = Modifier.size(20.dp),
-                    imageVector = MiuixIcons.Useful.Edit,
+                    imageVector = MiuixIcons.Regular.Edit,
                     tint = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
                     contentDescription = stringResource(id = R.string.edit)
                 )
@@ -240,7 +240,7 @@ private fun DataItemWidget(
                     onClick = { viewModel.dispatch(AllViewAction.DeleteDataConfig(entity)) }) {
                     Icon(
                         modifier = Modifier.size(20.dp),
-                        imageVector = MiuixIcons.Useful.Delete,
+                        imageVector = MiuixIcons.Regular.Delete,
                         tint = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
                         contentDescription = stringResource(id = R.string.delete)
                     )
@@ -261,7 +261,7 @@ private fun DataItemWidget(
                 ) {
                     Icon(
                         modifier = Modifier.size(20.dp),
-                        imageVector = MiuixIcons.Useful.SelectAll,
+                        imageVector = MiuixIcons.Regular.SelectAll,
                         tint = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
                         contentDescription = stringResource(id = R.string.apply)
                     )

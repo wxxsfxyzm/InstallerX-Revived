@@ -32,7 +32,7 @@ import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.extra.SuperListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.ArrowUpDownIntegrated
+import top.yukonga.miuix.kmp.icon.basic.ArrowUpDown
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -104,7 +104,7 @@ fun MiuixDropdown(
             }
             Image(
                 modifier = Modifier.size(10.dp, 16.dp),
-                imageVector = MiuixIcons.Basic.ArrowUpDownIntegrated,
+                imageVector = MiuixIcons.Basic.ArrowUpDown,
                 colorFilter = ColorFilter.tint(iconColor),
                 contentDescription = "Toggle Dropdown"
             )

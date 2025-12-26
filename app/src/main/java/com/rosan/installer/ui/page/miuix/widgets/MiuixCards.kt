@@ -34,7 +34,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
+import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
@@ -124,7 +124,7 @@ fun MiuixScopeTipCard(viewModel: AllViewModel) {
             onClick = { viewModel.dispatch(AllViewAction.UserReadScopeTips) },
         ) {
             Icon(
-                imageVector = MiuixIcons.Useful.Cancel,
+                imageVector = MiuixIcons.Regular.Close,
                 contentDescription = null,
                 tint = MiuixTheme.colorScheme.primary
             )

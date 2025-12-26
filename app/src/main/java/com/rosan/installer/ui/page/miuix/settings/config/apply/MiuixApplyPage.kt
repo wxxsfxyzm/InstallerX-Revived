@@ -77,8 +77,8 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
-import top.yukonga.miuix.kmp.icon.icons.useful.ImmersionMore
+import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -110,7 +110,7 @@ fun MiuixApplyPage(
                     navigationIcon = {
                         MiuixBackButton(
                             modifier = Modifier.padding(start = 16.dp),
-                            icon = MiuixIcons.Useful.Cancel,
+                            icon = MiuixIcons.Regular.Close,
                             onClick = { navController.navigateUp() })
                     },
                     actions = { TopAppBarActions(viewModel = viewModel) }
@@ -418,7 +418,7 @@ private fun TopAppBarActions(viewModel: ApplyViewModel) {
         holdDownState = showMenu.value
     ) {
         Icon(
-            imageVector = MiuixIcons.Useful.ImmersionMore,
+            imageVector = MiuixIcons.Regular.More,
             tint = MiuixTheme.colorScheme.onBackground,
             contentDescription = "More Options"
         )

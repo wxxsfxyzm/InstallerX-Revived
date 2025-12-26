@@ -65,8 +65,8 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
-import top.yukonga.miuix.kmp.icon.icons.useful.Confirm
+import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -143,7 +143,7 @@ fun MiuixEditPage(
                 navigationIcon = {
                     MiuixBackButton(
                         modifier = Modifier.padding(start = 16.dp),
-                        icon = MiuixIcons.Useful.Cancel,
+                        icon = MiuixIcons.Regular.Close,
                         onClick = { navController.navigateUp() }
                     )
                 },
@@ -153,7 +153,7 @@ fun MiuixEditPage(
                         onClick = { viewModel.dispatch(EditViewAction.SaveData) },
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Useful.Confirm,
+                            imageVector = MiuixIcons.Regular.Ok,
                             contentDescription = stringResource(R.string.save)
                         )
                     }
