@@ -77,7 +77,7 @@ class InstallationProcessor(
         // Initialize output list
         val output = mutableListOf<String>()
         // Check if user enabled the ASCII art display in settings
-        val showArt = appDataStore.getBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART).first()
+        val showArt = appDataStore.getBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART, true).first()
 
         if (showArt) {
             val banner = MODULE_INSTALL_BANNER.trimIndent()
