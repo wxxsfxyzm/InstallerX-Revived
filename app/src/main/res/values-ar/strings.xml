@@ -113,7 +113,7 @@
     <string name="config_no_preset_install_sources">لا توجد مصادر تثبيت مُعدة مسبقًا</string>
     <string name="config_no_managed_blacklist">أدخل أسماء حزم التطبيقات المحظورة هنا</string>
     <string name="config_managed_packages_desc">إضافة أو إزالة الحزم المُدارة</string>
-    <string name="config_add_one_to_get_started">انقر على "إضافة" أدناه للبدء</string>
+    <string name="config_add_one_to_get_started">انقر على إضافة أدناه للبدء</string>
     <string name="config_add_new_package">إضافة حزمة جديدة</string>
     <string name="config_package_name">اسم الحزمة</string>
     <string name="config_confirm_deletion">تأكيد الحذف</string>

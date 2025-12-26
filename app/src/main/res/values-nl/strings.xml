@@ -610,4 +610,19 @@
     <string name="lab_unstable_features">Onstabiele functies</string>
     <string name="lab_set_install_requester">Installatieaanvrager instellen</string>
     <string name="lab_set_install_requester_desc">Vult het originatingUid veld met het oproeppakket om systeemgedrag te volgen</string>
+    <string name="config_error_package_not_found">Pakket niet gevonden</string>
+    <string name="config_customize_install_reason_desc">Stel de installatiereden in. Voor nieuwe installaties zal het selecteren van de gebruiker er normaal voor zorgen dat er een icoon op het startscherm komt</string>
+    <string name="config_install_reason_unknown">Onbekend</string>
+    <string name="config_install_reason_policy">Systeembeleid</string>
+    <string name="config_install_reason">Installatiereden</string>
+    <string name="config_error_package_name_empty">Pakketnaam kan niet leeg zijn</string>
+    <string name="config_declare_install_requester_desc">Gebruikt standaard de aanvragende app wanneer uitgeschakeld</string>
+    <string name="config_install_reason_device_restore">Systeemherstel</string>
+    <string name="config_install_reason_device_setup">Instellen systeem</string>
+    <string name="config_customize_install_reason">Installatiereden aanpassen</string>
+    <string name="config_install_reason_user">Gebruiker</string>
+    <string name="config_declare_install_requester_error_desc">De ingevoerde pakketnaam moet reeds geïnstalleerd zijn</string>
+    <string name="config_install_requester">Installatie aangevraagd door (pakketnaam)</string>
+    <string name="config_declare_install_requester">Installatieaanvrager aanpassen</string>
+    <string name="config_declare_installer_desc">Gebruikt standaard deze app wanneer uitgeschakeld</string>
 </resources>
