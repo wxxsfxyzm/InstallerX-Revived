@@ -637,7 +637,7 @@
     <string name="suggestion_retry_install_desc">重新尝试安装</string>
     <string name="lab_tip">实验室中的功能可能不稳定或存在风险，随时可能被修改或移除，请自行承担使用风险</string>
     <string name="lab_use_hook_mode">使用 BinderWrapper 模式</string>
-    <string name="lab_use_hook_mode_desc">以 BinderWrapper 取代 UserService，提升效能並支援 Shizuku／Root 模式</string>
+    <string name="lab_use_hook_mode_desc">以 BinderWrapper 取代 UserService，以获得更好的性能。同时支持 Shizuku 和 Root</string>
     <string name="lab_module_flashing">启用模块刷写</string>
     <string name="lab_module_flashing_desc">在刷写任何模块前务必再次确认！</string>
     <string name="lab_module_flashing_show_art">显示字符画</string>
