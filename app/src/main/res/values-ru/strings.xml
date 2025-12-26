@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="about">О приложении </string>
+    <string name="about">О приложении</string>
     <string name="about_detail">Об InstallerX Revived</string>
     <string name="add">Добавить</string>
     <string name="allocate_aggressive">Выделять Агрессивные</string>
@@ -12,11 +12,11 @@
     <string name="basic">Основные</string>
     <string name="cancel">Отмена</string>
     <string name="change_notification_touch_behavior">Изменить поведение касания уведомлений</string>
-    <string name="clear">Очистка </string>
+    <string name="clear">Очистка</string>
     <string name="clear_cache">Очистить кэш</string>
     <string name="close">Закрыть</string>
     <string name="close_immediately_on_dialog_dismiss">Диалоговое окно остается на переднем плане во время установки, щелчок по пустой области автоматически завершит работу</string>
-    <string name="close_notification_immediately_on_dialog_dismiss">Диалоговое окно "Отклонить" автоматически закроется</string>
+    <string name="close_notification_immediately_on_dialog_dismiss">Диалоговое окно Отклонить автоматически закроется</string>
     <string name="config">Профили</string>
     <string name="config_add_new_package">Добавить новый пакет</string>
     <string name="config_add_one_to_get_started">Нажмите «Добавить» ниже, чтобы начать</string>
@@ -56,7 +56,7 @@
     <string name="config_follow_settings">Следить за профилем</string>
     <string name="config_grant_all_permissions">Предоставьте все запрошенные разрешения</string>
     <string name="config_grant_all_permissions_desc">Автоматически предоставляйте все разрешения, запрашиваемые пакетом. Обратите внимание, что это относится только к разрешениям во время выполнения. Специальные разрешения, такие как доступ ко всем файлам или специальные возможности, автоматически предоставляться не будут</string>
-    <string name="config_info">Информация </string>
+    <string name="config_info">Информация</string>
     <string name="config_install_mode">Режим установки</string>
     <string name="config_install_mode_auto_dialog">Автоматический диалог</string>
     <string name="config_install_mode_auto_notification">Автоматическое уведомление</string>
@@ -108,7 +108,7 @@
     <string name="enable_storage_permission_hint">Для установки необходимо включить доступ ко всем файлам!</string>
     <string name="exception_analyse_failed_all_files_unsupported">Файл не поддерживается</string>
     <string name="exception_app_process_not_work">Не удалось подключить авторизатор</string>
-    <string name="exception_dhizuku_not_work">Пожалуйста, активируйте Dhizuku  и дайте разрешение</string>
+    <string name="exception_dhizuku_not_work">Пожалуйста, активируйте Dhizuku и дайте разрешение</string>
     <string name="exception_install_failed_already_exists">Эта версия приложения уже установлена, пожалуйста, удалите ее и повторите попытку</string>
     <string name="exception_install_failed_blacklisted_package">Вы не разрешаете установку приложения!</string>
     <string name="exception_install_failed_conflicting_provider">Существует ContentProvider с таким же именем</string>
@@ -147,7 +147,7 @@
     <string name="external">Внешнее хранилище</string>
     <string name="external_desc">Принудительно установите пакет на внешнее хранилище</string>
     <string name="filter">Фильтр</string>
-    <string name="finish">Готово </string>
+    <string name="finish">Готово</string>
     <string name="force_permission_prompt">Принудительный запрос разрешения</string>
     <string name="force_permission_prompt_desc">Заставляет даже системных установщиков показывать запрос на подтверждение установки</string>
     <string name="force_volume_uuid">Force Volume UUID</string>
@@ -223,8 +223,8 @@
     <string name="lock_default_installer_failed">Не удалось установить программу установки по умолчанию</string>
     <string name="lock_default_installer_success">Успешно установлен в качестве установщика по умолчанию</string>
     <string name="menu">Menu</string>
-    <string name="more">Ещё </string>
-    <string name="next">Дальше </string>
+    <string name="more">Ещё</string>
+    <string name="next">Дальше</string>
     <string name="old_version_archived">Архивировано</string>
     <string name="old_version_prefix">Текущий</string>
     <string name="open">Открыть</string>
@@ -250,7 +250,7 @@
     <string name="permission_camera">Камера</string>
     <string name="permission_dhizuku">Используй Dhizuku</string>
     <string name="permission_foreground_service">Обслуживание на переднем плане</string>
-    <string name="permission_get_accounts">Получить аккаунт </string>
+    <string name="permission_get_accounts">Получить аккаунт</string>
     <string name="permission_internet">Интернет</string>
     <string name="permission_list">Список разрешений</string>
     <string name="permission_list_desc">Список разрешений, запрашиваемых устанавливаемым пакетом</string>
@@ -324,7 +324,7 @@
     <string name="stable">Стабильный</string>
     <string name="staged">Поэтапный</string>
     <string name="staged_desc">Указывает, что этот пакет устанавливается в рамках поэтапной установки</string>
-    <string name="success">Успешно </string>
+    <string name="success">Успешно</string>
     <string name="suggestion_allow_downgrade">Разрешить даунгрейд</string>
     <string name="suggestion_allow_test_app">Разрешить тестирование</string>
     <string name="suggestion_bypass_low_target_sdk">Разрешить обходить ограничения.</string>

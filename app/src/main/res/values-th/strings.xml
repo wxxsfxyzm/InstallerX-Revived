@@ -19,7 +19,7 @@
     <string name="close_notification_immediately_on_dialog_dismiss">ปิดไดอะล็อกจะออกจากโปรแกรมอย่างเงียบ ๆ</string>
     <string name="config">โปรไฟล์</string>
     <string name="config_add_new_package">เพิ่มแพ็คเกจใหม่</string>
-    <string name="config_add_one_to_get_started">"คลิก 'เพิ่ม' ด้านล่างเพื่อเริ่มต้น"</string>
+    <string name="config_add_one_to_get_started">คลิก \'เพิ่ม\' ด้านล่างเพื่อเริ่มต้น</string>
     <string name="config_all_users">ติดตั้งสำหรับผู้ใช้ทั้งหมด</string>
     <string name="config_all_users_desc">ติดตั้งแพ็คเกจสำหรับผู้ใช้ทั้งหมดในระบบ แทนที่จะเป็นแค่ผู้ใช้ที่ระบุหรือผู้ใช้เริ่มต้น</string>
     <string name="config_all_whitelist_restricted_permissions">อนุญาตสิทธิ์ที่จำกัด</string>
@@ -41,7 +41,7 @@
     <string name="config_bypass_low_target_sdk">ข้ามการบล็อก SDK เป้าหมายต่ำ</string>
     <string name="config_bypass_low_target_sdk_desc">อนุญาตให้แอปที่กำหนดเป้าหมาย SDK เวอร์ชันเก่าสามารถติดตั้งได้</string>
     <string name="config_confirm_deletion">ยืนยันการลบ</string>
-    <string name="config_confirm_deletion_desc">"คุณต้องการลบ '%1$s' หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้"</string>
+    <string name="config_confirm_deletion_desc">คุณต้องการลบ \'%1$s\' หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้</string>
     <string name="config_customize_authorizer">ผู้ให้สิทธิ์แบบกำหนดเอง</string>
     <string name="config_declare_installer">ตั้งค่าแหล่งที่มาการติดตั้ง</string>
     <string name="config_description">คำอธิบายโปรไฟล์</string>
