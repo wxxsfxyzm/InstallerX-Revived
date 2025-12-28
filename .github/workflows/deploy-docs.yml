@@ -2,7 +2,7 @@ name: Deploy Documentation
 
 on:
   push:
-    branches: [website]
+    branches: [ website, main ]
     paths:
       - 'website/**'         # Only trigger when files in website/ change
       - '.github/workflows/deploy-docs.yml'
