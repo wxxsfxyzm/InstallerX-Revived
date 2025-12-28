@@ -36,6 +36,7 @@ import com.rosan.installer.ui.theme.m3color.PaletteStyle
 import com.rosan.installer.ui.theme.m3color.PresetColors
 import com.rosan.installer.ui.theme.m3color.RawColor
 import com.rosan.installer.ui.theme.m3color.ThemeMode
+import com.rosan.installer.ui.util.doBiometricAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -91,6 +92,7 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds -> changeNotificationSuccessAutoClearSeconds(action.seconds)
             is PreferredViewAction.ChangeShowExpressiveUI -> changeUseExpressiveUI(action.showRefreshedUI)
             is PreferredViewAction.ChangeShowLiveActivity -> changeUseLiveActivity(action.showLiveActivity)
+            is PreferredViewAction.ChangeBiometricAuth -> changeBiometricAuth(action.biometricAuth, action.isInstaller)
             is PreferredViewAction.ChangeUseMiuix -> changeUseMiuix(action.useMiuix)
             is PreferredViewAction.ChangePreferSystemIcon -> changePreferSystemIcon(action.preferSystemIcon)
             is PreferredViewAction.ChangeShowLauncherIcon -> changeShowLauncherIcon(action.showLauncherIcon)
@@ -270,6 +272,21 @@ class PreferredViewModel(
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, showLiveActivity)
         }
+
+    private fun changeBiometricAuth(biometricAuth: Boolean, installer: Boolean) {
+        viewModelScope.launch {
+            if (!doBiometricAuth(
+                context = context,
+                title = context.getString(R.string.use_biometric_confirm_change_auth_settings),
+                subTitle = context.getString(R.string.use_biometric_confirm_change_auth_settings_desc)
+            )) return@launch
+
+            appDataStore.putBoolean(
+                key = if (installer) AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH else AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH,
+                value = biometricAuth
+            )
+        }
+    }
 
     private fun changeUseMiuix(useMiuix: Boolean) =
         viewModelScope.launch {
@@ -636,6 +653,10 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false)
             val showExpressiveUIFlow =
                 appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
+            val installerRequireBiometricAuthFlow =
+                appDataStore.getBoolean(AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH, false)
+            val uninstallerRequireBiometricAuthFlow =
+                appDataStore.getBoolean(AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH, false)
             val showLiveActivityFlow =
                 appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false)
             val autoLockInstallerFlow =
@@ -707,6 +728,8 @@ class PreferredViewModel(
                 sdkCompareInSingleLineFlow,
                 showOPPOSpecialFlow,
                 showExpressiveUIFlow,
+                installerRequireBiometricAuthFlow,
+                uninstallerRequireBiometricAuthFlow,
                 showLiveActivityFlow,
                 autoLockInstallerFlow,
                 autoSilentInstallFlow,
@@ -751,6 +774,8 @@ class PreferredViewModel(
                 val sdkCompareInSingleLine = values[idx++] as Boolean
                 val showOPPOSpecial = values[idx++] as Boolean
                 val showExpressiveUI = values[idx++] as Boolean
+                val installerRequireBiometricAuth = values[idx++] as Boolean
+                val uninstallerRequireBiometricAuth = values[idx++] as Boolean
                 val showLiveActivity = values[idx++] as Boolean
                 val autoLockInstaller = values[idx++] as Boolean
                 val autoSilentInstall = values[idx++] as Boolean
@@ -824,6 +849,8 @@ class PreferredViewModel(
                     sdkCompareInMultiLine = sdkCompareInSingleLine,
                     showOPPOSpecial = showOPPOSpecial,
                     showExpressiveUI = showExpressiveUI,
+                    installerRequireBiometricAuth = installerRequireBiometricAuth,
+                    uninstallerRequireBiometricAuth = uninstallerRequireBiometricAuth,
                     showLiveActivity = showLiveActivity,
                     autoLockInstaller = autoLockInstaller,
                     autoSilentInstall = autoSilentInstall,

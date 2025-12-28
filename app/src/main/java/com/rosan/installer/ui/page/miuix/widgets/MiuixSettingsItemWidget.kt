@@ -1,6 +1,10 @@
 package com.rosan.installer.ui.page.miuix.widgets
 
 import androidx.annotation.StringRes
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -1010,7 +1014,7 @@ private fun MiuixDeleteSharedUidConfirmationDialog(
 }
 
 @Composable
-fun MiuixUninstallKeepDataWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+fun MiuixUninstallKeepDataWidget(viewModel: PreferredViewModel) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.uninstall_keep_data),
         description = stringResource(id = R.string.uninstall_keep_data_desc),
@@ -1022,7 +1026,7 @@ fun MiuixUninstallKeepDataWidget(viewModel: PreferredViewModel, isM3E: Boolean =
 }
 
 @Composable
-fun MiuixUninstallForAllUsersWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+fun MiuixUninstallForAllUsersWidget(viewModel: PreferredViewModel) {
     MiuixSwitchWidget(
         icon = AppIcons.InstallForAllUsers,
         title = stringResource(id = R.string.uninstall_all_users),
@@ -1035,7 +1039,7 @@ fun MiuixUninstallForAllUsersWidget(viewModel: PreferredViewModel, isM3E: Boolea
 }
 
 @Composable
-fun MiuixUninstallSystemAppWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+fun MiuixUninstallSystemAppWidget(viewModel: PreferredViewModel) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.uninstall_delete_system_app),
         description = stringResource(id = R.string.uninstall_delete_system_app_desc),
@@ -1049,4 +1053,22 @@ fun MiuixUninstallSystemAppWidget(viewModel: PreferredViewModel, isM3E: Boolean 
             )
         }
     )
+}
+
+@Composable
+fun MiuixUninstallRequireBiometricAuthWidget(viewModel: PreferredViewModel) {
+    if (BiometricManager
+            .from(LocalContext.current)
+            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS)
+    {
+        MiuixSwitchWidget(
+            icon = AppIcons.BiometricAuth,
+            title = stringResource(R.string.uninstaller_settings_require_biometric_auth),
+            description = stringResource(R.string.uninstaller_settings_require_biometric_auth_desc),
+            checked = viewModel.state.uninstallerRequireBiometricAuth,
+            onCheckedChange = {
+                viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, false))
+            }
+        )
+    }
 }

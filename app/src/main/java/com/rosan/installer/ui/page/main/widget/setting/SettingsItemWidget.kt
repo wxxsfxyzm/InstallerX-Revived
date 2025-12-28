@@ -1,6 +1,10 @@
 package com.rosan.installer.ui.page.main.widget.setting
 
 import androidx.annotation.StringRes
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -1191,4 +1195,23 @@ fun UninstallSystemAppWidget(viewModel: PreferredViewModel, isM3E: Boolean = tru
         },
         isM3E = isM3E
     )
+}
+
+@Composable
+fun UninstallRequireBiometricAuthWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+    if (BiometricManager
+            .from(LocalContext.current)
+            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS)
+    {
+        SwitchWidget(
+            icon = AppIcons.BiometricAuth,
+            title = stringResource(R.string.uninstaller_settings_require_biometric_auth),
+            description = stringResource(R.string.uninstaller_settings_require_biometric_auth_desc),
+            checked = viewModel.state.uninstallerRequireBiometricAuth,
+            isM3E = isM3E,
+            onCheckedChange = {
+                viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, false))
+            }
+        )
+    }
 }

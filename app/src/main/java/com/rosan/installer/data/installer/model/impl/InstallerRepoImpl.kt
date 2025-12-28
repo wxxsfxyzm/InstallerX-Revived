@@ -117,9 +117,9 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         action.tryEmit(Action.Analyse)
     }
 
-    override fun install() {
+    override fun install(triggerAuth: Boolean) {
         Timber.d("[id=$id] install() called. Emitting Action.Install.")
-        action.tryEmit(Action.Install)
+        action.tryEmit(Action.Install(triggerAuth))
     }
 
     override fun installMultiple(entities: List<SelectInstallEntity>) {
@@ -177,7 +177,25 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     sealed class Action {
         data class ResolveInstall(val activity: Activity) : Action()
         data object Analyse : Action()
-        data object Install : Action()
+
+        /**
+         * Install single module/apk
+         *
+         * **This usually call from viewModel**
+         *
+         * @param triggerAuth request or not request user biometric auth
+         * @see com.rosan.installer.ui.page.main.installer.InstallerViewAction.Install
+         * @see com.rosan.installer.data.installer.model.impl.installer.ActionHandler.handleSingleInstall
+         */
+        data class Install(val triggerAuth: Boolean) : Action()
+
+        /**
+         * Install multiple module/apk
+         *
+         * **This usually call from viewModel**
+         * @see com.rosan.installer.ui.page.main.installer.InstallerViewAction.InstallMultiple
+         * @see com.rosan.installer.data.installer.model.impl.installer.ActionHandler.handleMultiInstall
+         */
         data object InstallMultiple : Action()
         data class ResolveUninstall(val activity: Activity, val packageName: String) : Action()
         data class Uninstall(val packageName: String) : Action()

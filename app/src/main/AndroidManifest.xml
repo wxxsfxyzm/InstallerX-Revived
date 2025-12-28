@@ -25,6 +25,7 @@
     <uses-permission
         android:name="android.permission.DELETE_PACKAGES"
         tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <uses-permission
         android:name="android.permission.REQUEST_INSTALL_PACKAGES"
@@ -128,6 +129,14 @@
             </intent-filter>
 
         </activity>
+
+        <activity
+            android:name=".ui.activity.EmptyFragmentActivity"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Installer.Translucent"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true" />
 
         <service
             android:name="com.rosan.installer.data.installer.model.impl.InstallerService"

@@ -101,6 +101,12 @@
     <string name="uninstaller_settings">卸载器设置</string>
     <string name="uninstaller_settings_desc">更改卸载器的全局设置</string>
     <string name="installer_settings_global_installer">全局</string>
+    <string name="installer_settings_require_biometric_auth">安装时需要通过设备生物认证</string>
+    <string name="installer_settings_require_biometric_auth_desc">在安装时请求系统进行生物识别进行认证</string>
+    <string name="uninstaller_settings_require_biometric_auth">卸载时需要通过设备生物认证</string>
+    <string name="uninstaller_settings_require_biometric_auth_desc">在卸载时请求系统进行生物识别进行认证</string>
+    <string name="use_biometric_confirm_change_auth_settings">确实要修改此设置吗</string>
+    <string name="use_biometric_confirm_change_auth_settings_desc">若要继续，请使用你的设备认证进行确认此操作</string>
     <string name="installer_settings_dialog_mode_options">对话框安装自定义选项</string>
     <string name="installer_settings_notification_mode_options">通知安装自定义选项</string>
     <string name="installer_settings_auto_clear_success_notification">自动清除通知</string>
@@ -279,6 +285,9 @@
     <string name="sort_by_selected_first">选中优先</string>
     <string name="sort_by_show_system_app">显示系统应用</string>
     <string name="sort_by_show_package_name">显示包名</string>
+    <string name="auth_to_continue_work">请认证以确认此操作</string>
+    <string name="auth_summary_install">你正在进行安装操作, 若要继续，请通过你的设备认证以确认此操作</string>
+    <string name="auth_summary_uninstall">你正在进行卸载操作, 若要继续，请通过你的设备认证以确认此操作</string>
     <string name="installer_ready">准备就绪</string>
     <string name="installer_resolving">分析中…</string>
     <string name="installer_resolve_failed">分析失败</string>
@@ -421,6 +430,7 @@
     <string name="exception_resolve_failed">URI 解析失败</string>
     <string name="exception_resolve_failed_no_internet_access">该版本无法访问互联网，要使用此功能，请安装支持联网的版本</string>
     <string name="exception_analyse_failed_all_files_unsupported">不支持的文件格式</string>
+    <string name="exception_authentication_failed">用户认证失败</string>
     <string name="exception_install_failed_already_exists">应用已安装（包名相同、版本相同），请先卸载再安装</string>
     <string name="exception_install_failed_blacklisted_package">你不允许该应用的安装！</string>
     <string name="exception_install_failed_invalid_apk">无效的 APK（安装包已损坏），请重新下载安装包</string>

@@ -24,6 +24,7 @@ sealed class PreferredViewAction {
     data class ChangeNotificationSuccessAutoClearSeconds(val seconds: Int) : PreferredViewAction()
     data class ChangeShowExpressiveUI(val showRefreshedUI: Boolean) : PreferredViewAction()
     data class ChangeShowLiveActivity(val showLiveActivity: Boolean) : PreferredViewAction()
+    data class ChangeBiometricAuth(val biometricAuth: Boolean, val isInstaller: Boolean) : PreferredViewAction()
     data class ChangeUseMiuix(val useMiuix: Boolean) : PreferredViewAction()
     data class ChangePreferSystemIcon(val preferSystemIcon: Boolean) : PreferredViewAction()
     data class ChangeShowLauncherIcon(val showLauncherIcon: Boolean) : PreferredViewAction()

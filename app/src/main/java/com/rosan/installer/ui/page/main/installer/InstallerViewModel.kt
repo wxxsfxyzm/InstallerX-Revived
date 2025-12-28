@@ -360,7 +360,7 @@ class InstallerViewModel(
             is ProgressEntity.UninstallSuccess -> {
                 if (isRetryingInstall) {
                     isRetryingInstall = false
-                    repo.install() // Trigger reinstall
+                    repo.install(false) // Trigger reinstall
                     InstallerViewState.InstallRetryDowngradeUsingUninstall
                 } else {
                     InstallerViewState.UninstallSuccess
@@ -797,7 +797,7 @@ class InstallerViewModel(
     private fun install() {
         autoInstallJob?.cancel()
         Timber.d("Standard foreground installation triggered. Contains Module: $isInstallingModule")
-        repo.install()
+        repo.install(true)
     }
 
     private fun background() {

@@ -63,6 +63,6 @@ class ProgressHandler(scope: CoroutineScope, installer: InstallerRepo) : Handler
         }
 
         Timber.d("[id=${installer.id}] onAnalysedSuccess: Auto-install conditions met. Triggering install().")
-        installer.install()
+        installer.install(true)
     }
 }

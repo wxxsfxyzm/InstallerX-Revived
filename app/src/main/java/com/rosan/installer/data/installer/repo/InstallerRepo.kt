@@ -34,7 +34,12 @@ interface InstallerRepo : Closeable {
      */
     fun resolveInstall(activity: Activity)
     fun analyse()
-    fun install()
+
+    /**
+     * Request Do Package/Module Install
+     * @param triggerAuth request or not request user biometric auth
+     */
+    fun install(triggerAuth: Boolean)
     fun installMultiple(entities: List<SelectInstallEntity>)
 
     /**

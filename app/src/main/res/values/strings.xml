@@ -105,6 +105,12 @@
     <string name="uninstaller_settings">Uninstaller Settings</string>
     <string name="uninstaller_settings_desc">Change the global settings of the uninstaller</string>
     <string name="installer_settings_global_installer">Global</string>
+    <string name="installer_settings_require_biometric_auth">Require Biometric Auth to Install</string>
+    <string name="installer_settings_require_biometric_auth_desc">Require biometric auth when install</string>
+    <string name="uninstaller_settings_require_biometric_auth">Require Biometric Auth to Install</string>
+    <string name="uninstaller_settings_require_biometric_auth_desc">Require biometric auth when install</string>
+    <string name="use_biometric_confirm_change_auth_settings">Are you sure you want to change this setting</string>
+    <string name="use_biometric_confirm_change_auth_settings_desc">To continue, please confirm this action using your device authentication</string>
     <string name="installer_settings_dialog_mode_options">Options for Dialog</string>
     <string name="installer_settings_notification_mode_options">Options for Notification</string>
     <string name="installer_settings_auto_clear_success_notification">Auto-clear notification</string>
@@ -288,6 +294,10 @@
     <string name="sort_by_show_system_app">Display system app</string>
     <string name="sort_by_show_package_name">Display package name</string>
 
+    <string name="auth_to_continue_work">Please authenticate to confirm this operation</string>
+    <string name="auth_summary_install">You are doing an install operation, To continue, please confirm this action using your device authentication</string>
+    <string name="auth_summary_uninstall">You are doing an uninstall operation, To continue, please confirm this action using your device authentication</string>
+
     <string name="installer_ready">Ready</string>
     <string name="installer_resolving">Checking…</string>
     <string name="installer_resolve_failed">Resolve failed</string>
@@ -438,6 +448,7 @@
     <string name="exception_resolve_failed">Resolve URI failed</string>
     <string name="exception_resolve_failed_no_internet_access">This version cannot access Internet, to use this feature, reinstall another version</string>
     <string name="exception_analyse_failed_all_files_unsupported">File not supported</string>
+    <string name="exception_authentication_failed">User authentication failed</string>
     <string name="exception_install_failed_already_exists">This app version is already installed, please uninstall and try again</string>
     <string name="exception_install_failed_blacklisted_package">You don\'t allow installation of the app!</string>
     <string name="exception_install_failed_invalid_apk">This app version is already installed, please uninstall and try again</string>

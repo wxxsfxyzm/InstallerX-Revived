@@ -35,6 +35,7 @@ import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.UninstallForAllUsersWidget
 import com.rosan.installer.ui.page.main.widget.setting.UninstallKeepDataWidget
+import com.rosan.installer.ui.page.main.widget.setting.UninstallRequireBiometricAuthWidget
 import com.rosan.installer.ui.page.main.widget.setting.UninstallSystemAppWidget
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.util.toast
@@ -93,6 +94,7 @@ fun LegacyUninstallerGlobalSettingsPage(
             item { UninstallKeepDataWidget(viewModel, isM3E = false) }
             item { UninstallForAllUsersWidget(viewModel, isM3E = false) }
             item { UninstallSystemAppWidget(viewModel, isM3E = false) }
+            item { UninstallRequireBiometricAuthWidget(viewModel, false) }
             item { LabelWidget(label = stringResource(R.string.uninstall_call_uninstaller)) }
             item {
                 SettingsNavigationItemWidget(

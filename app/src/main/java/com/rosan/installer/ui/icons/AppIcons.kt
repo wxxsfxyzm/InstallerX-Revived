@@ -138,6 +138,7 @@ object AppIcons {
     val UnlockDefault = Icons.TwoTone.FavoriteBorder
     val ClearAll = Icons.TwoTone.ClearAll
     val LiveActivity = Icons.AutoMirrored.TwoTone.Send
+    val BiometricAuth = Icons.TwoTone.Badge
     val IconPack = Icons.TwoTone.Widgets
     val Silent = Icons.TwoTone.DoNotDisturbOnTotalSilence
     val OEMSpecial = Icons.TwoTone.FindInPage

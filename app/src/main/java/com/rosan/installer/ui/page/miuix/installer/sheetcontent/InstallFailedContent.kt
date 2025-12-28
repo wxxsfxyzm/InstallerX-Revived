@@ -130,7 +130,7 @@ private fun MiuixErrorSuggestions(
                     errorClasses = listOf(InstallFailedTestOnlyException::class),
                     onClick = {
                         viewModel.toggleInstallFlag(InstallOption.AllowTest.value, true)
-                        viewModel.dispatch(InstallerViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install(true))
                     },
                     labelRes = R.string.suggestion_allow_test_app,
                     descriptionRes = R.string.suggestion_allow_test_app_desc,
@@ -211,7 +211,7 @@ private fun MiuixErrorSuggestions(
                         errorClasses = listOf(InstallFailedVersionDowngradeException::class),
                         onClick = {
                             viewModel.toggleInstallFlag(InstallOption.AllowDowngrade.value, true)
-                            viewModel.dispatch(InstallerViewAction.Install)
+                            viewModel.dispatch(InstallerViewAction.Install(false))
                         },
                         labelRes = R.string.suggestion_allow_downgrade,
                         descriptionRes = R.string.suggestion_allow_downgrade_desc
@@ -227,7 +227,7 @@ private fun MiuixErrorSuggestions(
                             installer.config.installer = "com.miui.packageinstaller"
                             // Wipe originatingUid
                             installer.config.callingFromUid = null
-                            viewModel.dispatch(InstallerViewAction.Install)
+                            viewModel.dispatch(InstallerViewAction.Install(false))
                         },
                         labelRes = R.string.suggestion_mi_isolation,
                         descriptionRes = R.string.suggestion_mi_isolation_desc
@@ -240,7 +240,7 @@ private fun MiuixErrorSuggestions(
                         onClick = {
                             installer.config.installer = "com.miui.packageinstaller"
                             installer.config.authorizer = ConfigEntity.Authorizer.Shizuku
-                            viewModel.dispatch(InstallerViewAction.Install)
+                            viewModel.dispatch(InstallerViewAction.Install(false))
                         },
                         labelRes = R.string.suggestion_shizuku_isolation,
                         descriptionRes = R.string.suggestion_shizuku_isolation_desc
@@ -268,7 +268,7 @@ private fun MiuixErrorSuggestions(
                     errorClasses = listOf(InstallFailedDeprecatedSdkVersion::class),
                     onClick = {
                         viewModel.toggleInstallFlag(InstallOption.BypassLowTargetSdkBlock.value, true)
-                        viewModel.dispatch(InstallerViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install(false))
                     },
                     labelRes = R.string.suggestion_bypass_low_target_sdk,
                     descriptionRes = R.string.suggestion_bypass_low_target_sdk_desc
@@ -279,7 +279,7 @@ private fun MiuixErrorSuggestions(
                     errorClasses = listOf(InstallFailedBlacklistedPackageException::class),
                     onClick = {
                         viewModel.toggleBypassBlacklist(true)
-                        viewModel.dispatch(InstallerViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install(false))
                     },
                     labelRes = R.string.suggestion_bypass_blacklist_set_by_user,
                     descriptionRes = R.string.suggestion_bypass_blacklist_set_by_user_desc
@@ -288,7 +288,7 @@ private fun MiuixErrorSuggestions(
             add(
                 SuggestionItem(
                     errorClasses = listOf(InstallFailedMissingInstallPermissionException::class),
-                    onClick = { viewModel.dispatch(InstallerViewAction.Install) },
+                    onClick = { viewModel.dispatch(InstallerViewAction.Install(false)) },
                     labelRes = R.string.retry,
                     descriptionRes = R.string.suggestion_retry_install_desc
                 )

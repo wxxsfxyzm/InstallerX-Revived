@@ -44,6 +44,7 @@ import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWid
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.UninstallForAllUsersWidget
 import com.rosan.installer.ui.page.main.widget.setting.UninstallKeepDataWidget
+import com.rosan.installer.ui.page.main.widget.setting.UninstallRequireBiometricAuthWidget
 import com.rosan.installer.ui.page.main.widget.setting.UninstallSystemAppWidget
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.util.toast
@@ -129,6 +130,7 @@ fun NewUninstallerGlobalSettingsPage(
                         add { UninstallKeepDataWidget(viewModel) }
                         add { UninstallForAllUsersWidget(viewModel) }
                         add { UninstallSystemAppWidget(viewModel) }
+                        add { UninstallRequireBiometricAuthWidget(viewModel) }
                     }
                 )
             }
