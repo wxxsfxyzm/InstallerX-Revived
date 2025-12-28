@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.model.entity.InstallResult
+import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.help
@@ -35,9 +36,6 @@ import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -156,7 +154,7 @@ private fun MiuixSuccessRow() {
         modifier = Modifier.fillMaxWidth()
     ) {
         Icon(
-            imageVector = MiuixIcons.Regular.Ok,
+            imageVector = AppMiuixIcons.Ok,
             contentDescription = "Success",
             tint = MiuixTheme.colorScheme.primary
         )
@@ -185,7 +183,7 @@ private fun MiuixCompletedErrorCardContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(
-                imageVector = MiuixIcons.Regular.Close,
+                imageVector = AppMiuixIcons.Close,
                 contentDescription = stringResource(R.string.installer_install_failed),
                 tint = contentColor
             )

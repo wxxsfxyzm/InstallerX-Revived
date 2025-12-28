@@ -2,14 +2,14 @@ package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,7 +43,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -109,65 +108,74 @@ fun MiuixHomePage(
             )
         },
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .height(getWindowSize().height.dp)
+                .fillMaxSize()
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .padding(top = paddingValues.calculateTopPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Spacer(modifier = Modifier.size(48.dp))
+            item { Spacer(modifier = Modifier.size(48.dp)) }
 
-            Image(
-                modifier = Modifier.size(80.dp),
-                painter = rememberDrawablePainter(
-                    drawable = ContextCompat.getDrawable(
-                        LocalContext.current,
-                        R.mipmap.ic_launcher
-                    )
-                ),
-                contentDescription = stringResource(id = R.string.app_name)
-            )
-            Text(
-                text = stringResource(id = R.string.app_name),
-                style = MiuixTheme.textStyles.title2,
-            )
-            Text(
-                text = "$internetAccessHint$level ${RsConfig.VERSION_NAME} (${RsConfig.VERSION_CODE})",
-                style = MiuixTheme.textStyles.subtitle,
-                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-            )
-            if (state.hasUpdate)
+            item {
+                Image(
+                    modifier = Modifier.size(80.dp),
+                    painter = rememberDrawablePainter(
+                        drawable = ContextCompat.getDrawable(
+                            LocalContext.current,
+                            R.mipmap.ic_launcher
+                        )
+                    ),
+                    contentDescription = stringResource(id = R.string.app_name)
+                )
+            }
+            item {
+                Text(
+                    text = stringResource(id = R.string.app_name),
+                    style = MiuixTheme.textStyles.title2,
+                )
+            }
+            item {
+                Text(
+                    text = "$internetAccessHint$level ${RsConfig.VERSION_NAME} (${RsConfig.VERSION_CODE})",
+                    style = MiuixTheme.textStyles.subtitle,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                )
+            }
+            if (state.hasUpdate) item {
                 Text(
                     text = stringResource(R.string.update_available, state.remoteVersion),
                     style = MiuixTheme.textStyles.subtitle,
                     color = MiuixTheme.colorScheme.primary
                 )
-            Spacer(modifier = Modifier.size(12.dp))
+            }
+            item { Spacer(modifier = Modifier.size(12.dp)) }
 
-            Card(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp)
-            ) {
-                MiuixNavigationItemWidget(
-                    title = stringResource(R.string.get_source_code),
-                    description = stringResource(R.string.get_source_code_detail),
-                    onClick = { context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived") }
-                )
-                MiuixNavigationItemWidget(
-                    title = stringResource(R.string.get_update),
-                    description = stringResource(R.string.get_update_detail),
-                    onClick = { showUpdateDialog.value = true }
-                )
-                if (state.hasUpdate)
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
                     MiuixNavigationItemWidget(
-                        title = stringResource(R.string.get_update_directly),
-                        description = stringResource(R.string.get_update_directly_desc),
-                        onClick = { viewModel.dispatch(PreferredViewAction.Update) }
+                        title = stringResource(R.string.get_source_code),
+                        description = stringResource(R.string.get_source_code_detail),
+                        onClick = { context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived") }
                     )
+                    MiuixNavigationItemWidget(
+                        title = stringResource(R.string.get_update),
+                        description = stringResource(R.string.get_update_detail),
+                        onClick = { showUpdateDialog.value = true }
+                    )
+                    if (state.hasUpdate)
+                        MiuixNavigationItemWidget(
+                            title = stringResource(R.string.get_update_directly),
+                            description = stringResource(R.string.get_update_directly_desc),
+                            onClick = { viewModel.dispatch(PreferredViewAction.Update) }
+                        )
+                }
             }
         }
     }

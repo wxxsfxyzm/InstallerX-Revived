@@ -5,10 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
+import com.rosan.installer.ui.icons.AppMiuixIcons
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
 
 /**
  * A standardized back button for the application, styled for MIUIX.
@@ -21,7 +20,7 @@ import top.yukonga.miuix.kmp.icon.extended.Back
 @Composable
 fun MiuixBackButton(
     modifier: Modifier = Modifier,
-    icon: ImageVector = MiuixIcons.Regular.Back,
+    icon: ImageVector = AppMiuixIcons.Back,
     contentDescription: String = stringResource(id = R.string.back),
     onClick: () -> Unit,
 ) {

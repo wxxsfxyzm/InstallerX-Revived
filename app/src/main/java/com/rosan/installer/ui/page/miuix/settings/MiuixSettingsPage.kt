@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -99,7 +100,6 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.VerticalDivider
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.getWindowSize
 
 private object UIConstants {
     val WIDE_SCREEN_THRESHOLD = 840.dp
@@ -186,6 +186,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(null) }
             val showErrorSheetState = remember { mutableStateOf(false) }
 
+            val defaultInstallerErrorDetailActionLabel = stringResource(R.string.details)
             LaunchedEffect(Unit) {
                 preferredViewModel.uiEvents.collect { event ->
                     snackBarHostState.currentSnackbarData?.dismiss()
@@ -197,7 +198,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                         is PreferredViewEvent.ShowDefaultInstallerErrorDetail -> {
                             val snackbarResult = snackBarHostState.showSnackbar(
                                 message = event.title,
-                                actionLabel = context.getString(R.string.details),
+                                actionLabel = defaultInstallerErrorDetailActionLabel,
                                 duration = SnackbarDuration.Short
                             )
                             if (snackbarResult == SnackbarResult.ActionPerformed) {
@@ -395,16 +396,16 @@ private fun SettingsWideScreenLayout(
     snackBarHostState: SnackbarHostState,
     hazeState: HazeState
 ) {
+    val windowInfo = LocalWindowInfo.current
     val layoutDirection = LocalLayoutDirection.current
-    val windowWidth = getWindowSize().width
+    val windowWidth = windowInfo.containerSize.width
 
-    // Draggable Divider Logic
-    var weight by remember(windowWidth) { mutableFloatStateOf(0.3f) } // Default narrower sidebar for settings
+    var weight by remember(windowWidth) { mutableFloatStateOf(0.4f) }
     var potentialWeight by remember { mutableFloatStateOf(weight) }
     val dragState = rememberDraggableState { delta ->
         val nextPotentialWeight = potentialWeight + delta / windowWidth
         potentialWeight = nextPotentialWeight
-        val clampedWeight = nextPotentialWeight.coerceIn(0.2f, 0.4f) // Restrict sidebar width
+        val clampedWeight = nextPotentialWeight.coerceIn(0.2f, 0.5f)
         if (clampedWeight == nextPotentialWeight) {
             weight = clampedWeight
         }
