@@ -12,7 +12,7 @@ hero:
     alt: InstallerX Logo
   actions:
     - theme: brand
-      text: 快速开始
+      text: 开始了解 
       link: /zh/guide/intro
     - theme: alt
       text: 查看 GitHub

@@ -67,7 +67,7 @@ export default defineConfig({
             items: [
               { text: 'What is InstallerX Revived?', link: '/guide/intro' },
               { text: 'Installation', link: '/guide/installation' },
-              { text: 'Getting Started', link: '/guide/getting-started' },
+              { text: 'Quick Start', link: '/guide/quick-start' },
               { text: 'FAQ', link: '/guide/faq' }
             ]
           }
@@ -115,7 +115,7 @@ export default defineConfig({
             items: [
               { text: '什么是 InstallerX Revived?', link: '/zh/guide/intro' },
               { text: '安装指南', link: '/zh/guide/installation' },
-              { text: '快速开始', link: '/zh/guide/getting-started' },
+              { text: '快速开始', link: '/zh/guide/quick-start' },
               { text: '常见问题 FAQ', link: '/zh/guide/faq' }
             ]
           }

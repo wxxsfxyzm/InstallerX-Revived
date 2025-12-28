@@ -33,7 +33,7 @@ For enthusiasts, InstallerX Revived offers features not found in standard instal
 
 ## How to use InstallerX Revived?
 
-See [Getting Started](/guide/getting-started).
+See [Getting Started](/guide/quick-start).
 
 ## Discussion
 
