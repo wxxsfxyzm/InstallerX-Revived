@@ -418,4 +418,23 @@
     <string name="theme_settings_dynamic_color">لون ديناميكي</string>
     <string name="theme_settings_miuix_custom_colors">ألوان مخصّصة</string>
     <string name="theme_settings_miuix_custom_colors_desc">تخصيص ألوان السمة ضمن نمط Miuix</string>
+    <string name="performance">الأداء</string>
+    <string name="lab">المختبر</string>
+    <string name="lab_desc">الوصول إلى الميزات التجريبية والمطورة</string>
+    <string name="updating">جاري التحديث...</string>
+    <string name="update_available">تحديث متاح: %1$s</string>
+    <string name="get_update_directly">احصل على التحديث مباشرة</string>
+    <string name="get_update_directly_desc">احصل على تحديث مباشرة من GitHub وثبت، لن يبقى أي ذاكرة تخزين مؤقت</string>
+    <string name="theme_settings_dynamic_color_desc">لون الموضوع بناء على ورق الجدران</string>
+    <string name="theme_settings_theme_color">لون الموضوع</string>
+    <string name="theme_settings_dynamic_color_follow_icon">حوار ملون</string>
+    <string name="theme_settings_dynamic_color_follow_icon_desc">لن تتبع حوار التثبيت ألوان قالب التطبيق بعد الآن. بدلا من ذلك، سيستخدم ألوانا مستخرجة من أيقونة الحزمة التي يتم تثبيتها</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon">تقدم الأنشطة الحية الملونة</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">سيستخدم جزء التقدم من النشاط المباشر ألوانا مستخرجة من أيقونة الحزمة</string>
+    <string name="color_default">الافتراضي</string>
+    <string name="color_pink">وردي</string>
+    <string name="color_red">الأحمر</string>
+    <string name="color_orange">برتقالي</string>
+    <string name="color_amber">العنبر</string>
+    <string name="color_yellow">الأصفر</string>
 </resources>

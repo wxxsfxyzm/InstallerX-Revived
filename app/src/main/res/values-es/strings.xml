@@ -253,7 +253,7 @@
     <string name="exception_install_failed_package_changed">El paquete cambió durante la instalación</string>
     <string name="exception_install_failed_uid_changed">El UID cambió, desinstala e intenta nuevamente</string>
     <string name="exception_install_failed_version_downgrade">Fallo al instalar versión anterior, por favor desinstálala y vuelva a intentar</string>
-    <string name="exception_install_failed_deprecated_sdk_version">targetSDK demasiado bajo</string>
+    <string name="exception_install_failed_deprecated_sdk_version">SDK de objetivo demasiado bajo, para continuar, activa la bandera correspondiente</string>
     <string name="exception_install_failed_rejected_by_build_type">Rechazado por tipo de compilación</string>
     <string name="exception_install_failed_hyperos_isolation_violation">Añade una fuente de instalación válida para instalar la app del sistema Mi</string>
     <string name="exception_install_failed_duplicate_permission">¡El paquete intenta redeclarar un permiso ya existente!</string>
@@ -631,8 +631,8 @@
     <string name="suggestion_shizuku_isolation">Intentar usando Shizuku</string>
     <string name="suggestion_shizuku_isolation_desc">Reintentar usando shizuku y un instalador válido</string>
     <string name="lab_tip">Las características experimentales en el laboratorio pueden ser inestables o arriesgadas y pueden cambiar o eliminarse en cualquier momento. Úsalo bajo tu propio riesgo</string>
-    <string name="lab_use_hook_mode">Usa el modo gancho</string>
-    <string name="lab_use_hook_mode_desc">Usa modo gancho en lugar de userService para obtener mejor rendimiento</string>
+    <string name="lab_use_hook_mode">Usa el modo Encapsulador de Encadernador</string>
+    <string name="lab_use_hook_mode_desc">Usa modo Encapsulador del Encadernador en lugar de userService para obtener mejor rendimiento</string>
     <string name="lab_module_flashing">Habilitar el flasheo de módulos</string>
     <string name="lab_module_flashing_desc">¡Revisa siempre dos veces antes de flashear cualquier módulo!</string>
     <string name="lab_module_select_root_impl">Elige implementación del root</string>
@@ -647,4 +647,8 @@
     <string name="lab_set_install_requester">Configurar solicitud del instalador</string>
     <string name="lab_set_install_requester_desc">Rellena el campo originatingUid con el paquete del llamador para que coincida con el comportamiento del sistema</string>
     <string name="uninstall_system_app_disabled">Se deshabilitó la eliminación de la aplicación del sistema</string>
+    <string name="performance">Rendimiento</string>
+    <string name="installer_notification_tap_to_disable">Notificación de servicio en primer plano, toca para desactivar.</string>
+    <string name="lab_module_flashing_show_art">Mostrar arte ASCII</string>
+    <string name="lab_module_flashing_show_art_desc">Mostrar arte ASCII de InstallerX cuando comience la instalación</string>
 </resources>
