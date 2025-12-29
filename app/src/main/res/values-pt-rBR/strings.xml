@@ -551,8 +551,8 @@
     <string name="exception_module_install_failed_incompatible_authorizer">Autorizador incompatível</string>
     <string name="installer_mixed_module_apk_description_notification">Clique na notificação para selecionar o tipo de instalação</string>
     <string name="lab_tip">Os recursos experimentais no laboratório podem ser instáveis ou arriscados e podem ser alterados ou removidos a qualquer momento. Use por sua própria conta e risco</string>
-    <string name="lab_use_hook_mode">Usar modo hook</string>
-    <string name="lab_use_hook_mode_desc">Usar o modo hook em vez do userService para obter melhor desempenho</string>
+    <string name="lab_use_hook_mode">Usar o modo BinderWrapper</string>
+    <string name="lab_use_hook_mode_desc">Usar modo BinderWrapper em vez de UserService para obter melhor desempenho, funciona tanto para Shizuku quanto para Root</string>
     <string name="lab_module_flashing">Habilitar flasheamento de módulo</string>
     <string name="lab_module_flashing_desc">Pense duas vezes e sempre confira antes de flashear qualquer módulo!</string>
     <string name="lab_module_select_root_impl">Escolha a implementação de root</string>
@@ -637,4 +637,8 @@
     <string name="uninstall_call_uninstaller_manually_desc">Desinstalar app pelo nome do pacote fornecido</string>
     <string name="uninstall_progress_text">Desinstalando...</string>
     <string name="uninstall_enter_package_name">Digite o nome do pacote para desinstalar</string>
+    <string name="performance">Desempenho</string>
+    <string name="installer_notification_tap_to_disable">Notificação de serviço em primeiro plano, toque para desativar.</string>
+    <string name="lab_module_flashing_show_art">Exibir arte ASCII</string>
+    <string name="lab_module_flashing_show_art_desc">Exibir arte ASCII do InstallerX quando a instalação começar</string>
 </resources>
