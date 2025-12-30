@@ -307,7 +307,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         Timber.d("$tag: Flags: ${Integer.toHexString(intent.flags)}")
         intent.extras?.let { extras ->
             for (key in extras.keySet()) {
-                Timber.d("$tag: Extra: $key = ${extras.get(key)}")
+                Timber.d("$tag: Extra: $key = ${extras.getString(key)}")
             }
         }
     }
