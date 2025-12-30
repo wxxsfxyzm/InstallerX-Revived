@@ -16,7 +16,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -64,7 +63,10 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallingCont
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.rememberAppInfoState
 import com.rosan.installer.ui.page.miuix.widgets.DropdownItem
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.theme.m3color.PaletteStyle
+import com.rosan.installer.ui.theme.InstallerMiuixTheme
+import com.rosan.installer.ui.theme.InstallerTheme
+import com.rosan.installer.ui.theme.LocalInstallerColorScheme
+import com.rosan.installer.ui.theme.LocalPaletteStyle
 import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
 import com.rosan.installer.ui.util.getSupportTitle
 import kotlinx.coroutines.delay
@@ -86,13 +88,7 @@ private const val SHEET_ANIMATION_DURATION = 200L
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
-fun MiuixInstallerPage(
-    installer: InstallerRepo,
-    activeColorSchemeState: MutableState<ColorScheme>,
-    globalColorScheme: ColorScheme,
-    isDarkMode: Boolean,
-    basePaletteStyle: PaletteStyle
-) {
+fun MiuixInstallerPage(installer: InstallerRepo) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val showBottomSheet = remember { mutableStateOf(true) }
@@ -102,19 +98,21 @@ fun MiuixInstallerPage(
     val settings = viewModel.viewSettings
     val showSettings = viewModel.showMiuixSheetRightActionSettings
     val showPermissions = viewModel.showMiuixPermissionList
-    val temporarySeedColor by viewModel.seedColor.collectAsState()
-    val colorScheme = activeColorSchemeState.value
 
-    LaunchedEffect(temporarySeedColor, globalColorScheme, isDarkMode, basePaletteStyle) {
-        if (temporarySeedColor == null) {
-            activeColorSchemeState.value = globalColorScheme
-        } else {
-            activeColorSchemeState.value = dynamicColorScheme(
-                keyColor = temporarySeedColor!!,
-                isDark = isDarkMode,
-                style = basePaletteStyle
-            )
-        }
+    val temporarySeedColor by viewModel.seedColor.collectAsState()
+    val globalSeedColor = InstallerTheme.seedColor
+    val themeMode = InstallerTheme.themeMode
+    val useMiuixMonet = InstallerTheme.useMiuixMonet
+    val useDynamicColor = InstallerTheme.useDynamicColor
+    val isDark = InstallerTheme.isDark
+    val paletteStyle = LocalPaletteStyle.current
+    val globalColorScheme = LocalInstallerColorScheme.current
+
+    val activeSeedColor = temporarySeedColor ?: globalSeedColor
+    val activeMd3ColorScheme = remember(activeSeedColor, globalColorScheme, isDark, paletteStyle) {
+        temporarySeedColor?.let {
+            dynamicColorScheme(keyColor = it, isDark = isDark, style = paletteStyle)
+        } ?: globalColorScheme
     }
 
     val sourceType = installer.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
@@ -176,410 +174,400 @@ fun MiuixInstallerPage(
 
     val isMiInstallerSupported = LocalMiPackageInstallerPresent.current
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = Color.Transparent,
-        content = {}
-    )
-    SuperBottomSheet(
-        show = showBottomSheet, // Always true as long as this page is composed.
-        backgroundColor = if (isDynamicColor) colorScheme.surfaceContainerHigh else if (isDarkMode)
-            Color(0xFF242424) else Color(0xFFF7F7F7),
-        leftAction = {
-            when (currentState) {
-                is InstallerViewState.InstallChoice -> {
-                    // Check the new flag from ViewModel
-                    if (viewModel.navigatedFromPrepareToChoice) {
-                        // Came from Prepare (re-selecting splits) -> Show Back icon, go back to Prepare
-                        MiuixBackButton(
-                            icon = AppMiuixIcons.Back,
-                            onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
-                        )
-                    } else {
-                        // Initial choice or other origin -> Show Cancel icon, force close
-                        MiuixBackButton(
-                            icon = AppMiuixIcons.Close,
-                            onClick = closeSheet
-                        )
-                    }
-                }
-
-                is InstallerViewState.InstallConfirm -> {
-                    MiuixBackButton(
-                        icon = AppMiuixIcons.Close,
-                        onClick = {
-                            viewModel.dispatch(InstallerViewAction.ApproveSession(currentState.sessionId, false))
-                        }
-                    )
-                }
-
-                is InstallerViewState.InstallCompleted,
-                is InstallerViewState.InstallFailed,
-                is InstallerViewState.InstallSuccess,
-                is InstallerViewState.UninstallReady,
-                is InstallerViewState.UninstallSuccess,
-                is InstallerViewState.UninstallFailed,
-                is InstallerViewState.AnalyseFailed,
-                is InstallerViewState.ResolveFailed -> {
-                    MiuixBackButton(
-                        icon = AppMiuixIcons.Close,
-                        onClick = {
-                            showBottomSheet.value = !showBottomSheet.value
-                            scope.launch {
-                                delay(SHEET_ANIMATION_DURATION)
-                                if (viewModel.isDismissible)
-                                    viewModel.dispatch(InstallerViewAction.Close)
-                            }
-                        }
-                    )
-                }
-
-                is InstallerViewState.InstallPrepare -> {
-                    MiuixBackButton(
-                        icon = if (showSettings || showPermissions) AppMiuixIcons.Back else AppMiuixIcons.Close,
-                        onClick = {
-                            if (showSettings) {
-                                viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
-                            } else if (showPermissions) {
-                                viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList)
+    CompositionLocalProvider(
+        LocalInstallerColorScheme provides activeMd3ColorScheme
+    ) {
+        InstallerMiuixTheme(
+            seedColor = activeSeedColor,
+            darkTheme = isDark,
+            themeMode = themeMode,
+            useMiuixMonet = useMiuixMonet,
+            useDynamicColor = useDynamicColor && temporarySeedColor == null,
+            compatStatusBarColor = false
+        ) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color.Transparent,
+                content = {}
+            )
+            SuperBottomSheet(
+                show = showBottomSheet, // Always true as long as this page is composed.
+                backgroundColor = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainerHigh else if (isDark)
+                    Color(0xFF242424) else Color(0xFFF7F7F7),
+                leftAction = {
+                    when (currentState) {
+                        is InstallerViewState.InstallChoice -> {
+                            // Check the new flag from ViewModel
+                            if (viewModel.navigatedFromPrepareToChoice) {
+                                // Came from Prepare (re-selecting splits) -> Show Back icon, go back to Prepare
+                                MiuixBackButton(
+                                    icon = AppMiuixIcons.Back,
+                                    onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
+                                )
                             } else {
-                                showBottomSheet.value = !showBottomSheet.value
-                                scope.launch {
-                                    delay(SHEET_ANIMATION_DURATION)
-                                    viewModel.dispatch(InstallerViewAction.Close)
-                                }
+                                // Initial choice or other origin -> Show Cancel icon, force close
+                                MiuixBackButton(
+                                    icon = AppMiuixIcons.Close,
+                                    onClick = closeSheet
+                                )
                             }
                         }
-                    )
-                }
 
-                is InstallerViewState.InstallExtendedMenu -> {
-                    MiuixBackButton(
-                        icon = AppMiuixIcons.Back,
-                        onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
-                    )
-                }
-
-                else -> {}
-            }
-        },
-        rightAction = {
-            when (currentState) {
-                is InstallerViewState.InstallPrepare -> {
-                    if (!showSettings && !showPermissions) {
-                        IconButton(onClick = { viewModel.dispatch(InstallerViewAction.ShowMiuixSheetRightActionSettings) }) {
-                            Icon(
-                                imageVector = AppMiuixIcons.Settings,
-                                contentDescription = stringResource(R.string.installer_settings)
+                        is InstallerViewState.InstallConfirm -> {
+                            MiuixBackButton(
+                                icon = AppMiuixIcons.Close,
+                                onClick = {
+                                    viewModel.dispatch(InstallerViewAction.ApproveSession(currentState.sessionId, false))
+                                }
                             )
                         }
-                    } else {
-                        Spacer(Modifier.size(48.dp))
-                    }
-                }
 
-                is InstallerViewState.InstallSuccess -> {
-                    IconButton(
-                        onClick = {
-                            if (packageName.isNotEmpty()) {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                                    .setData(Uri.fromParts("package", packageName, null))
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                context.startActivity(intent)
-                            }
-                            viewModel.dispatch(InstallerViewAction.Close)
-                        }) {
-                        Icon(
-                            imageVector = AppMiuixIcons.Info,
-                            contentDescription = stringResource(R.string.installer_settings)
-                        )
-                    }
-                }
-
-                is InstallerViewState.InstallingModule -> {
-                    // Only show the reboot menu when the installation is finished
-                    if (currentState.isFinished) {
-                        RebootListPopup(
-                            onReboot = { reason ->
-                                viewModel.dispatch(InstallerViewAction.Reboot(reason))
-                            }
-                        )
-                    }
-                }
-
-                else -> {}
-            }
-        },
-        title = sheetTitle, // DYNAMIC TITLE
-        insideMargin = DpSize(16.dp, 16.dp),
-        allowDismiss = viewModel.isDismissible,
-        onDismissRequest = {
-            if (viewModel.isDismissible) {
-                // If it is dismissible, then proceed to close the sheet.
-                showBottomSheet.value = !showBottomSheet.value
-                scope.launch {
-                    delay(SHEET_ANIMATION_DURATION) // Wait for sheet animation
-
-                    val state = viewModel.state
-                    val disableNotif = settings.disableNotificationOnDismiss
-                    val isModule = state is InstallerViewState.InstallingModule
-
-                    // 1. If it's a module install OR the "disable notification" setting is on -> Close
-                    // 2. Otherwise (including Preparing, Standard APK install) -> Background
-                    val action = if (isModule || disableNotif) {
-                        InstallerViewAction.Close
-                    } else {
-                        InstallerViewAction.Background
-                    }
-
-                    viewModel.dispatch(action)
-                }
-            }
-        }
-    ) {
-        AnimatedContent(
-            targetState = viewModel.state::class,
-            label = "MiuixSheetContentAnimation",
-            transitionSpec = {
-                fadeIn(animationSpec = tween(durationMillis = 150)) togetherWith
-                        fadeOut(animationSpec = tween(durationMillis = 150))
-            }
-        ) { _ ->
-            when (viewModel.state) {
-                is InstallerViewState.InstallConfirm -> {
-                    InstallConfirmContent(
-                        colorScheme = colorScheme,
-                        isDarkMode = isDarkMode,
-                        viewModel = viewModel,
-                        onCancel = {
-                            showBottomSheet.value = false
-                            scope.launch {
-                                delay(SHEET_ANIMATION_DURATION)
-                                viewModel.dispatch(
-                                    InstallerViewAction.ApproveSession(
-                                        (viewModel.state as InstallerViewState.InstallConfirm).sessionId,
-                                        false
-                                    )
-                                )
-                            }
-                        },
-                        onConfirm = {
-                            showBottomSheet.value = false
-                            scope.launch {
-                                delay(SHEET_ANIMATION_DURATION)
-                                viewModel.dispatch(
-                                    InstallerViewAction.ApproveSession(
-                                        (viewModel.state as InstallerViewState.InstallConfirm).sessionId,
-                                        true
-                                    )
-                                )
-                            }
+                        is InstallerViewState.InstallCompleted,
+                        is InstallerViewState.InstallFailed,
+                        is InstallerViewState.InstallSuccess,
+                        is InstallerViewState.UninstallReady,
+                        is InstallerViewState.UninstallSuccess,
+                        is InstallerViewState.UninstallFailed,
+                        is InstallerViewState.AnalyseFailed,
+                        is InstallerViewState.ResolveFailed -> {
+                            MiuixBackButton(
+                                icon = AppMiuixIcons.Close,
+                                onClick = {
+                                    showBottomSheet.value = !showBottomSheet.value
+                                    scope.launch {
+                                        delay(SHEET_ANIMATION_DURATION)
+                                        if (viewModel.isDismissible)
+                                            viewModel.dispatch(InstallerViewAction.Close)
+                                    }
+                                }
+                            )
                         }
-                    )
-                }
 
-                is InstallerViewState.InstallChoice -> {
-                    InstallChoiceContent(
-                        colorScheme = colorScheme,
-                        isDarkMode = isDarkMode,
-                        installer = installer,
-                        viewModel = viewModel,
-                        onCancel = closeSheet
-                    )
-                }
-
-                is InstallerViewState.InstallExtendedMenu -> {
-                    InstallExtendedMenuContent(
-                        colorScheme = colorScheme,
-                        isDarkMode = isDarkMode,
-                        installer = installer,
-                        viewModel = viewModel
-                    )
-                }
-
-                is InstallerViewState.Preparing -> {
-                    InstallPreparingContent(
-                        colorScheme,
-                        viewModel = viewModel,
-                        onCancel = {
-                            showBottomSheet.value = false
-                            scope.launch {
-                                delay(SHEET_ANIMATION_DURATION)
-                                viewModel.dispatch(InstallerViewAction.Cancel)
-                            }
-                        }
-                    )
-                }
-
-                is InstallerViewState.InstallPrepare -> {
-                    val prepareSubState = when {
-                        showSettings -> "settings"
-                        showPermissions -> "permissions"
-                        else -> "prepare"
-                    }
-
-                    AnimatedContent(
-                        targetState = prepareSubState,
-                        label = "PrepareContentVsSettingsVsPermissions",
-                        transitionSpec = {
-                            fadeIn(animationSpec = tween(durationMillis = 150)) togetherWith
-                                    fadeOut(animationSpec = tween(durationMillis = 150))
-                        }
-                    ) { subState ->
-                        when (subState) {
-                            "settings" -> {
-                                PrepareSettingsContent(
-                                    colorScheme = colorScheme,
-                                    isDarkMode = isDarkMode,
-                                    installer = installer,
-                                    viewModel = viewModel
-                                )
-                            }
-
-                            "permissions" -> {
-                                InstallPreparePermissionContent(
-                                    colorScheme = colorScheme,
-                                    isDarkMode = isDarkMode,
-                                    installer = installer,
-                                    viewModel = viewModel,
-                                    onBack = { viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList) }
-                                )
-                            }
-
-                            else -> { // "prepare"
-                                InstallPrepareContent(
-                                    colorScheme = colorScheme,
-                                    isDarkMode = isDarkMode,
-                                    installer = installer,
-                                    viewModel = viewModel,
-                                    appInfo = appInfoState,
-                                    onCancel = closeSheet,
-                                    onInstall = {
-                                        viewModel.dispatch(InstallerViewAction.Install)
-                                        if (settings.autoSilentInstall && !viewModel.isInstallingModule) {
-                                            showBottomSheet.value = false
-                                            scope.launch {
-                                                delay(SHEET_ANIMATION_DURATION)
-                                                viewModel.dispatch(InstallerViewAction.Background)
-                                            }
+                        is InstallerViewState.InstallPrepare -> {
+                            MiuixBackButton(
+                                icon = if (showSettings || showPermissions) AppMiuixIcons.Back else AppMiuixIcons.Close,
+                                onClick = {
+                                    if (showSettings) {
+                                        viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
+                                    } else if (showPermissions) {
+                                        viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList)
+                                    } else {
+                                        showBottomSheet.value = !showBottomSheet.value
+                                        scope.launch {
+                                            delay(SHEET_ANIMATION_DURATION)
+                                            viewModel.dispatch(InstallerViewAction.Close)
                                         }
+                                    }
+                                }
+                            )
+                        }
+
+                        is InstallerViewState.InstallExtendedMenu -> {
+                            MiuixBackButton(
+                                icon = AppMiuixIcons.Back,
+                                onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
+                            )
+                        }
+
+                        else -> {}
+                    }
+                },
+                rightAction = {
+                    when (currentState) {
+                        is InstallerViewState.InstallPrepare -> {
+                            if (!showSettings && !showPermissions) {
+                                IconButton(onClick = { viewModel.dispatch(InstallerViewAction.ShowMiuixSheetRightActionSettings) }) {
+                                    Icon(
+                                        imageVector = AppMiuixIcons.Settings,
+                                        contentDescription = stringResource(R.string.installer_settings)
+                                    )
+                                }
+                            } else {
+                                Spacer(Modifier.size(48.dp))
+                            }
+                        }
+
+                        is InstallerViewState.InstallSuccess -> {
+                            IconButton(
+                                onClick = {
+                                    if (packageName.isNotEmpty()) {
+                                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                                            .setData(Uri.fromParts("package", packageName, null))
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        context.startActivity(intent)
+                                    }
+                                    viewModel.dispatch(InstallerViewAction.Close)
+                                }) {
+                                Icon(
+                                    imageVector = AppMiuixIcons.Info,
+                                    contentDescription = stringResource(R.string.installer_settings)
+                                )
+                            }
+                        }
+
+                        is InstallerViewState.InstallingModule -> {
+                            // Only show the reboot menu when the installation is finished
+                            if (currentState.isFinished) {
+                                RebootListPopup(
+                                    onReboot = { reason ->
+                                        viewModel.dispatch(InstallerViewAction.Reboot(reason))
                                     }
                                 )
                             }
                         }
+
+                        else -> {}
+                    }
+                },
+                title = sheetTitle, // DYNAMIC TITLE
+                insideMargin = DpSize(16.dp, 16.dp),
+                allowDismiss = viewModel.isDismissible,
+                onDismissRequest = {
+                    if (viewModel.isDismissible) {
+                        // If it is dismissible, then proceed to close the sheet.
+                        showBottomSheet.value = !showBottomSheet.value
+                        scope.launch {
+                            delay(SHEET_ANIMATION_DURATION) // Wait for sheet animation
+
+                            val state = viewModel.state
+                            val disableNotif = settings.disableNotificationOnDismiss
+                            val isModule = state is InstallerViewState.InstallingModule
+
+                            // 1. If it's a module install OR the "disable notification" setting is on -> Close
+                            // 2. Otherwise (including Preparing, Standard APK install) -> Background
+                            val action = if (isModule || disableNotif) {
+                                InstallerViewAction.Close
+                            } else {
+                                InstallerViewAction.Background
+                            }
+
+                            viewModel.dispatch(action)
+                        }
                     }
                 }
+            ) {
+                AnimatedContent(
+                    targetState = viewModel.state::class,
+                    label = "MiuixSheetContentAnimation",
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(durationMillis = 150)) togetherWith
+                                fadeOut(animationSpec = tween(durationMillis = 150))
+                    }
+                ) { _ ->
+                    when (viewModel.state) {
+                        is InstallerViewState.InstallConfirm -> {
+                            InstallConfirmContent(
+                                viewModel = viewModel,
+                                onCancel = {
+                                    showBottomSheet.value = false
+                                    scope.launch {
+                                        delay(SHEET_ANIMATION_DURATION)
+                                        viewModel.dispatch(
+                                            InstallerViewAction.ApproveSession(
+                                                (viewModel.state as InstallerViewState.InstallConfirm).sessionId,
+                                                false
+                                            )
+                                        )
+                                    }
+                                },
+                                onConfirm = {
+                                    showBottomSheet.value = false
+                                    scope.launch {
+                                        delay(SHEET_ANIMATION_DURATION)
+                                        viewModel.dispatch(
+                                            InstallerViewAction.ApproveSession(
+                                                (viewModel.state as InstallerViewState.InstallConfirm).sessionId,
+                                                true
+                                            )
+                                        )
+                                    }
+                                }
+                            )
+                        }
 
-                is InstallerViewState.Installing -> {
-                    InstallingContent(
-                        state = viewModel.state as InstallerViewState.Installing,
-                        appInfo = appInfoState,
-                        onButtonClick = {
-                            scope.launch {
-                                delay(SHEET_ANIMATION_DURATION)
-                                viewModel.dispatch(InstallerViewAction.Background)
+                        is InstallerViewState.InstallChoice -> {
+                            InstallChoiceContent(
+                                installer = installer,
+                                viewModel = viewModel,
+                                onCancel = closeSheet
+                            )
+                        }
+
+                        is InstallerViewState.InstallExtendedMenu -> {
+                            InstallExtendedMenuContent(
+                                installer = installer,
+                                viewModel = viewModel
+                            )
+                        }
+
+                        is InstallerViewState.Preparing -> {
+                            InstallPreparingContent(
+                                viewModel = viewModel,
+                                onCancel = {
+                                    showBottomSheet.value = false
+                                    scope.launch {
+                                        delay(SHEET_ANIMATION_DURATION)
+                                        viewModel.dispatch(InstallerViewAction.Cancel)
+                                    }
+                                }
+                            )
+                        }
+
+                        is InstallerViewState.InstallPrepare -> {
+                            val prepareSubState = when {
+                                showSettings -> "settings"
+                                showPermissions -> "permissions"
+                                else -> "prepare"
+                            }
+
+                            AnimatedContent(
+                                targetState = prepareSubState,
+                                label = "PrepareContentVsSettingsVsPermissions",
+                                transitionSpec = {
+                                    fadeIn(animationSpec = tween(durationMillis = 150)) togetherWith
+                                            fadeOut(animationSpec = tween(durationMillis = 150))
+                                }
+                            ) { subState ->
+                                when (subState) {
+                                    "settings" -> {
+                                        PrepareSettingsContent(
+                                            installer = installer,
+                                            viewModel = viewModel
+                                        )
+                                    }
+
+                                    "permissions" -> {
+                                        InstallPreparePermissionContent(
+                                            installer = installer,
+                                            viewModel = viewModel,
+                                            onBack = { viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList) }
+                                        )
+                                    }
+
+                                    else -> { // "prepare"
+                                        InstallPrepareContent(
+                                            installer = installer,
+                                            viewModel = viewModel,
+                                            appInfo = appInfoState,
+                                            onCancel = closeSheet,
+                                            onInstall = {
+                                                viewModel.dispatch(InstallerViewAction.Install)
+                                                if (settings.autoSilentInstall && !viewModel.isInstallingModule) {
+                                                    showBottomSheet.value = false
+                                                    scope.launch {
+                                                        delay(SHEET_ANIMATION_DURATION)
+                                                        viewModel.dispatch(InstallerViewAction.Background)
+                                                    }
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
                             }
                         }
-                    )
-                }
 
-                is InstallerViewState.InstallSuccess -> {
-                    InstallSuccessContent(
-                        appInfo = appInfoState,
-                        installer = installer,
-                        dhizukuAutoClose = settings.autoCloseCountDown,
-                        onClose = closeSheet
-                    )
-                }
-
-                is InstallerViewState.InstallCompleted -> {
-                    InstallCompletedContent(
-                        colorScheme = colorScheme,
-                        isDarkMode = isDarkMode,
-                        results = (viewModel.state as InstallerViewState.InstallCompleted).results,
-                        onClose = closeSheet
-                    )
-                }
-
-                is InstallerViewState.InstallFailed -> {
-                    if (installer.error is ModuleInstallFailedIncompatibleAuthorizerException ||
-                        installer.error is ModuleInstallCmdInitException ||
-                        installer.error is ModuleInstallException
-                    )
-                        NonInstallFailedContent(
-                            colorScheme = colorScheme,
-                            error = installer.error,
-                            onClose = closeSheet
-                        )
-                    else
-                        CompositionLocalProvider(
-                            LocalMiPackageInstallerPresent provides isMiInstallerSupported
-                        ) {
-                            InstallFailedContent(
-                                colorScheme = colorScheme,
-                                isDarkMode = isDarkMode,
+                        is InstallerViewState.Installing -> {
+                            InstallingContent(
+                                state = viewModel.state as InstallerViewState.Installing,
                                 appInfo = appInfoState,
+                                onButtonClick = {
+                                    scope.launch {
+                                        delay(SHEET_ANIMATION_DURATION)
+                                        viewModel.dispatch(InstallerViewAction.Background)
+                                    }
+                                }
+                            )
+                        }
+
+                        is InstallerViewState.InstallSuccess -> {
+                            InstallSuccessContent(
+                                appInfo = appInfoState,
+                                installer = installer,
+                                dhizukuAutoClose = settings.autoCloseCountDown,
+                                onClose = closeSheet
+                            )
+                        }
+
+                        is InstallerViewState.InstallCompleted -> {
+                            InstallCompletedContent(
+                                results = (viewModel.state as InstallerViewState.InstallCompleted).results,
+                                onClose = closeSheet
+                            )
+                        }
+
+                        is InstallerViewState.InstallFailed -> {
+                            if (installer.error is ModuleInstallFailedIncompatibleAuthorizerException ||
+                                installer.error is ModuleInstallCmdInitException ||
+                                installer.error is ModuleInstallException
+                            )
+                                NonInstallFailedContent(
+                                    error = installer.error,
+                                    onClose = closeSheet
+                                )
+                            else
+                                CompositionLocalProvider(
+                                    LocalMiPackageInstallerPresent provides isMiInstallerSupported
+                                ) {
+                                    InstallFailedContent(
+                                        appInfo = appInfoState,
+                                        installer = installer,
+                                        viewModel = viewModel,
+                                        onClose = closeSheet
+                                    )
+                                }
+                        }
+
+                        is InstallerViewState.InstallingModule -> {
+                            val moduleState = viewModel.state as InstallerViewState.InstallingModule
+                            InstallModuleContent(
+                                outputLines = moduleState.output,
+                                isFinished = moduleState.isFinished,
+                                onClose = closeSheet
+                            )
+                        }
+
+                        is InstallerViewState.UninstallReady -> {
+                            UninstallPrepareContent(
+                                viewModel = viewModel,
+                                onCancel = closeSheet,
+                                onUninstall = { viewModel.dispatch(InstallerViewAction.Uninstall) }
+                            )
+                        }
+
+                        is InstallerViewState.Uninstalling -> {
+                            UninstallingContent(viewModel = viewModel)
+                        }
+
+                        is InstallerViewState.UninstallSuccess -> {
+                            UninstallSuccessContent(viewModel = viewModel, onClose = closeSheet)
+                        }
+
+                        is InstallerViewState.UninstallFailed -> {
+                            UninstallFailedContent(
                                 installer = installer,
                                 viewModel = viewModel,
                                 onClose = closeSheet
                             )
                         }
-                }
 
-                is InstallerViewState.InstallingModule -> {
-                    val moduleState = viewModel.state as InstallerViewState.InstallingModule
-                    InstallModuleContent(
-                        colorScheme = colorScheme,
-                        isDarkMode = isDarkMode,
-                        outputLines = moduleState.output,
-                        isFinished = moduleState.isFinished,
-                        onClose = closeSheet
-                    )
-                }
+                        is InstallerViewState.AnalyseFailed, is InstallerViewState.ResolveFailed -> {
+                            NonInstallFailedContent(
+                                error = installer.error,
+                                onClose = closeSheet
+                            )
+                        }
 
-                is InstallerViewState.UninstallReady -> {
-                    UninstallPrepareContent(
-                        colorScheme = colorScheme,
-                        isDarkMode = isDarkMode,
-                        viewModel = viewModel,
-                        onCancel = closeSheet,
-                        onUninstall = { viewModel.dispatch(InstallerViewAction.Uninstall) }
-                    )
-                }
+                        is InstallerViewState.Resolving, is InstallerViewState.Analysing -> {
+                            LoadingContent(
+                                statusText = if (viewModel.state is InstallerViewState.Resolving) stringResource(R.string.installer_resolving)
+                                else stringResource(R.string.installer_analysing)
+                            )
+                        }
 
-                is InstallerViewState.Uninstalling -> {
-                    UninstallingContent(colorScheme = colorScheme, viewModel = viewModel)
-                }
-
-                is InstallerViewState.UninstallSuccess -> {
-                    UninstallSuccessContent(colorScheme = colorScheme, viewModel = viewModel, onClose = closeSheet)
-                }
-
-                is InstallerViewState.UninstallFailed -> {
-                    UninstallFailedContent(
-                        installer = installer,
-                        viewModel = viewModel,
-                        onClose = closeSheet
-                    )
-                }
-
-                is InstallerViewState.AnalyseFailed, is InstallerViewState.ResolveFailed -> {
-                    NonInstallFailedContent(
-                        colorScheme = colorScheme,
-                        error = installer.error,
-                        onClose = closeSheet
-                    )
-                }
-
-                is InstallerViewState.Resolving, is InstallerViewState.Analysing -> {
-                    LoadingContent(
-                        statusText = if (viewModel.state is InstallerViewState.Resolving) stringResource(R.string.installer_resolving)
-                        else stringResource(R.string.installer_analysing)
-                    )
-                }
-
-                else -> {
-                    LoadingContent(statusText = stringResource(R.string.loading))
+                        else -> {
+                            LoadingContent(statusText = stringResource(R.string.loading))
+                        }
+                    }
                 }
             }
         }
@@ -589,7 +577,7 @@ fun MiuixInstallerPage(
 @Composable
 private fun RebootListPopup(
     modifier: Modifier = Modifier,
-    alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.TopRight,
+    alignment: PopupPositionProvider.Align = PopupPositionProvider.Align.TopEnd,
     onReboot: (String) -> Unit
 ) {
     val showTopPopup = remember { mutableStateOf(false) }
@@ -610,9 +598,7 @@ private fun RebootListPopup(
         show = showTopPopup,
         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
         alignment = alignment,
-        onDismissRequest = {
-            showTopPopup.value = false
-        }
+        onDismissRequest = { showTopPopup.value = false }
     ) {
         val context = LocalContext.current
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager?

@@ -113,7 +113,7 @@ fun MiuixDropdown(
         // The popup menu itself, shown when isDropdownExpanded is true.
         SuperListPopup(
             show = isDropdownExpanded,
-            alignment = PopupPositionProvider.Align.Left,
+            alignment = PopupPositionProvider.Align.Start,
             popupPositionProvider = DropdownWithStartMarginProvider,
             onDismissRequest = { isDropdownExpanded.value = false }
         ) {
@@ -150,7 +150,7 @@ private val DropdownWithStartMarginProvider = object : PopupPositionProvider {
         popupMargin: IntRect,
         alignment: PopupPositionProvider.Align
     ): IntOffset {
-        val offsetX = if (alignment == PopupPositionProvider.Align.Right) {
+        val offsetX = if (alignment == PopupPositionProvider.Align.End) {
             anchorBounds.right - popupContentSize.width - popupMargin.right
         } else {
             anchorBounds.left + popupMargin.left

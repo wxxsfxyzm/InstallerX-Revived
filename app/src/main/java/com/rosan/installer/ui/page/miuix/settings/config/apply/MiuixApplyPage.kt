@@ -377,7 +377,7 @@ private fun TopAppBarActions(viewModel: ApplyViewModel) {
     SuperListPopup(
         show = showMenu,
         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
-        alignment = PopupPositionProvider.Align.TopRight,
+        alignment = PopupPositionProvider.Align.TopEnd,
         onDismissRequest = {
             showMenu.value = false
         },

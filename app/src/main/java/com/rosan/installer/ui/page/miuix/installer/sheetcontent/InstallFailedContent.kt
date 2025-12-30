@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +47,7 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUninstallConfirmationDialog
+import com.rosan.installer.ui.theme.LocalIsDark
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Card
@@ -60,13 +60,13 @@ import kotlin.reflect.KClass
 
 @Composable
 fun InstallFailedContent(
-    colorScheme: ColorScheme,
-    isDarkMode: Boolean,
     appInfo: AppInfoState,
     installer: InstallerRepo,
     viewModel: InstallerViewModel,
     onClose: () -> Unit
 ) {
+    val isDarkMode = LocalIsDark.current
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -82,7 +82,6 @@ fun InstallFailedContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
         MiuixErrorSuggestions(
-            colorScheme = colorScheme,
             isDarkMode = isDarkMode,
             error = installer.error,
             viewModel = viewModel,
@@ -105,7 +104,6 @@ fun InstallFailedContent(
 
 @Composable
 private fun MiuixErrorSuggestions(
-    colorScheme: ColorScheme,
     isDarkMode: Boolean,
     error: Throwable,
     viewModel: InstallerViewModel,
@@ -317,7 +315,7 @@ private fun MiuixErrorSuggestions(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 colors = CardColors(
-                    color = if (isDynamicColor) colorScheme.surfaceContainer else
+                    color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
                         if (isDarkMode) miuixSheetCardColorDark else Color.White,
                     contentColor = MiuixTheme.colorScheme.onSurface
                 )

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -25,6 +24,7 @@ import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.util.help
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
@@ -73,9 +73,8 @@ private fun TipCard(
 
 @Composable
 fun WarningCard(
-    isDarkMode: Boolean,
-    colorScheme: ColorScheme,
-    message: String,
+    isDark: Boolean,
+    message: String
 ) {
     Card(
         modifier = Modifier
@@ -83,8 +82,8 @@ fun WarningCard(
             .fillMaxWidth(),
         colors = CardDefaults.defaultColors(
             color = when {
-                isDynamicColor -> colorScheme.errorContainer
-                isDarkMode -> Color(0XFF310808)
+                isDynamicColor -> MiuixTheme.colorScheme.errorContainer
+                isDark -> Color(0XFF310808)
                 else -> Color(0xFFF8E2E2)
             }
         )
@@ -97,7 +96,7 @@ fun WarningCard(
             Text(
                 text = message,
                 style = MiuixTheme.textStyles.body2,
-                color = if (isDynamicColor) colorScheme.onErrorContainer else Color(0xFFF72727),
+                color = if (isDynamicColor) MiuixTheme.colorScheme.onErrorContainer else Color(0xFFF72727),
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -178,18 +177,26 @@ fun MiuixErrorTextBlock(
     error: Throwable,
     modifier: Modifier = Modifier
 ) {
-    val cardBackgroundColor = MiuixTheme.colorScheme.errorContainer// if (isDark) Color(0xCC8C2323) else Color(0xCCFBEAEA)
-    val errorColor = MiuixTheme.colorScheme.error//if (isDark) Color.White else Color(0xFF601A15)
+    val scheme = if (InstallerTheme.useMiuixMonet)
+        InstallerTheme.colorScheme
+    else
+        InstallerTheme.colorScheme.copy(
+            errorContainer = MiuixTheme.colorScheme.errorContainer,
+            onErrorContainer = MiuixTheme.colorScheme.onErrorContainer
+        )
+    val cardBackgroundColor = scheme.errorContainer
+    val contentColor = scheme.onErrorContainer
 
     Card(
         modifier = modifier,
         colors = CardColors(
             color = cardBackgroundColor,
-            contentColor = errorColor
+            contentColor = contentColor
         )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
+                color = scheme.error,
                 text = error.help(),
                 fontWeight = FontWeight.Bold,
                 style = MiuixTheme.textStyles.body1,
@@ -220,7 +227,7 @@ fun MiuixErrorTextBlock(
                     value = textToShow,
                     onValueChange = {},
                     readOnly = true,
-                    textStyle = LocalTextStyle.current.copy(color = MiuixTheme.colorScheme.onErrorContainer),
+                    textStyle = LocalTextStyle.current.copy(color = contentColor),
                     modifier = Modifier
                         .fillMaxWidth()
                         // Allow vertical scrolling for long stack traces

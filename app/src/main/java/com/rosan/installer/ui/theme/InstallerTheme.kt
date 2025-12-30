@@ -8,8 +8,11 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
@@ -21,42 +24,89 @@ import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+val LocalIsDark = staticCompositionLocalOf { false }
+val LocalPaletteStyle = staticCompositionLocalOf { PaletteStyle.TonalSpot }
+val LocalSeedColor = staticCompositionLocalOf { Color.Unspecified }
+val LocalInstallerColorScheme = staticCompositionLocalOf<ColorScheme> {
+    error("No ColorScheme provided")
+}
+val LocalThemeMode = staticCompositionLocalOf { ThemeMode.SYSTEM }
+val LocalUseMiuixMonet = staticCompositionLocalOf { false }
+val LocalUseDynamicColor = staticCompositionLocalOf { false }
+
+object InstallerTheme {
+    val colorScheme: ColorScheme
+        @Composable @ReadOnlyComposable get() = LocalInstallerColorScheme.current
+
+    val isDark: Boolean
+        @Composable @ReadOnlyComposable get() = LocalIsDark.current
+
+    val seedColor: Color
+        @Composable @ReadOnlyComposable get() = LocalSeedColor.current
+
+    val paletteStyle: PaletteStyle
+        @Composable @ReadOnlyComposable get() = LocalPaletteStyle.current
+
+    val themeMode: ThemeMode
+        @Composable @ReadOnlyComposable get() = LocalThemeMode.current
+
+    val useMiuixMonet: Boolean
+        @Composable @ReadOnlyComposable get() = LocalUseMiuixMonet.current
+
+    val useDynamicColor: Boolean
+        @Composable @ReadOnlyComposable get() = LocalUseDynamicColor.current
+}
+
 @Composable
-fun InstallerMaterialExpressiveTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    useDynamicColor: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
-    compatStatusBarColor: Boolean = false,
-    seedColor: Color,
+fun InstallerTheme(
+    useMiuix: Boolean,
+    themeMode: ThemeMode,
     paletteStyle: PaletteStyle,
+    useDynamicColor: Boolean,
+    useMiuixMonet: Boolean,
+    seedColor: Color,
     content: @Composable () -> Unit
 ) {
+    val isDark = when (themeMode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    }
+
     val keyColor = if (useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
         colorResource(id = android.R.color.system_accent1_500)
     else seedColor
 
-    if (compatStatusBarColor) {
-        val view = LocalView.current
-        if (!view.isInEditMode) {
-            SideEffect {
-                val window = (view.context as ComponentActivity).window
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            }
-        }
+    val colorScheme = remember(keyColor, isDark, paletteStyle) {
+        dynamicColorScheme(keyColor = keyColor, isDark = isDark, style = paletteStyle)
     }
 
-    val colorScheme = dynamicColorScheme(
-        keyColor = keyColor,
-        isDark = darkTheme,
-        style = paletteStyle
-    )
-
-    MaterialExpressiveTheme(
-        colorScheme = colorScheme,
-        motionScheme = MotionScheme.expressive(),
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalIsDark provides isDark,
+        LocalPaletteStyle provides paletteStyle,
+        LocalSeedColor provides seedColor,
+        LocalInstallerColorScheme provides colorScheme,
+        LocalThemeMode provides themeMode,
+        LocalUseMiuixMonet provides useMiuixMonet,
+        LocalUseDynamicColor provides useDynamicColor
+    ) {
+        if (useMiuix) {
+            InstallerMiuixTheme(
+                darkTheme = isDark,
+                themeMode = themeMode,
+                useDynamicColor = useDynamicColor,
+                useMiuixMonet = useMiuixMonet,
+                seedColor = seedColor,
+                content = content
+            )
+        } else {
+            InstallerMaterialExpressiveTheme(
+                darkTheme = isDark,
+                colorScheme = colorScheme,
+                content = content
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -64,7 +114,7 @@ fun InstallerMaterialExpressiveTheme(
 fun InstallerMaterialExpressiveTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     colorScheme: ColorScheme,
-    compatStatusBarColor: Boolean = false,
+    compatStatusBarColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     if (compatStatusBarColor) {
@@ -91,7 +141,7 @@ fun InstallerMiuixTheme(
     themeMode: ThemeMode,
     useMiuixMonet: Boolean,
     useDynamicColor: Boolean = false,
-    compatStatusBarColor: Boolean = false,
+    compatStatusBarColor: Boolean = true,
     seedColor: Color,
     content: @Composable () -> Unit
 ) {

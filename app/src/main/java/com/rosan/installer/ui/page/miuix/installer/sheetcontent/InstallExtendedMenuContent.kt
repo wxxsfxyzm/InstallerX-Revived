@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +35,7 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewAction.SetTargetU
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallExtendedMenuAction
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
+import com.rosan.installer.ui.theme.LocalIsDark
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -51,11 +51,10 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun InstallExtendedMenuContent(
-    colorScheme: ColorScheme,
-    isDarkMode: Boolean,
     installer: InstallerRepo,
     viewModel: InstallerViewModel
 ) {
+    val isDarkMode = LocalIsDark.current
     val installOptions = rememberInstallOptions(installer.config.authorizer)
     val installFlags by viewModel.installFlags.collectAsState()
     val managedPackages by viewModel.managedInstallerPackages.collectAsState()
@@ -129,7 +128,6 @@ fun InstallExtendedMenuContent(
     ) {
         Box(modifier = Modifier.weight(1f, fill = false)) {
             ExtendedMenuLazyList(
-                colorScheme = colorScheme,
                 isDarkMode = isDarkMode,
                 entities = menuEntities,
                 viewModel = viewModel,
@@ -167,7 +165,6 @@ fun InstallExtendedMenuContent(
 
 @Composable
 private fun ExtendedMenuLazyList(
-    colorScheme: ColorScheme,
     isDarkMode: Boolean,
     entities: SnapshotStateList<ExtendedMenuEntity>,
     viewModel: InstallerViewModel,
@@ -181,7 +178,7 @@ private fun ExtendedMenuLazyList(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardColors(
-            color = if (isDynamicColor) colorScheme.surfaceContainer else
+            color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
                 if (isDarkMode) miuixSheetCardColorDark else Color.White,
             contentColor = MiuixTheme.colorScheme.onSurface
         )
