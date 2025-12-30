@@ -43,8 +43,8 @@ android {
         // Version control
         // Github Actions will automatically use versionName A.B.C+1 when building preview releases
         // update versionCode and versionName before manually trigger a stable release
-        versionCode = 44
-        versionName = "2.3.0"
+        versionCode = 45
+        versionName = "2.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
