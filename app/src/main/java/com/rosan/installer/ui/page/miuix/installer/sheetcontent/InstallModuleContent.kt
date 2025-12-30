@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -26,6 +25,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rosan.installer.R
+import com.rosan.installer.ui.theme.LocalIsDark
 import com.rosan.installer.ui.util.KeyEventBlocker
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Button
@@ -49,8 +49,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
  */
 @Composable
 fun InstallModuleContent(
-    colorScheme: ColorScheme,
-    isDarkMode: Boolean,
     outputLines: List<String>,
     isFinished: Boolean,
     onClose: () -> Unit
@@ -68,7 +66,8 @@ fun InstallModuleContent(
         }
     }
 
-    val cardColor = if (isDynamicColor) colorScheme.surfaceContainer else
+    val isDarkMode = LocalIsDark.current
+    val cardColor = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
         if (isDarkMode) Color.Black else Color.White
 
     Column(

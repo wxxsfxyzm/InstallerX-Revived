@@ -6,16 +6,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
@@ -25,11 +22,7 @@ import com.rosan.installer.ui.activity.themestate.ThemeUiState
 import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
-import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
-import com.rosan.installer.ui.theme.InstallerMiuixTheme
-import com.rosan.installer.ui.theme.m3color.ThemeMode
-import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
-import com.rosan.installer.ui.theme.primaryLight
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.util.PermissionDenialReason
 import com.rosan.installer.ui.util.PermissionManager
 import com.rosan.installer.util.toast
@@ -184,63 +177,20 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                 return@setContent
             }
 
-            val useDarkTheme = when (uiState.themeMode) {
-                ThemeMode.LIGHT -> false
-                ThemeMode.DARK -> true
-                ThemeMode.SYSTEM -> isSystemInDarkTheme()
-            }
-
-            val colorRes =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) colorResource(id = android.R.color.system_accent1_500) else primaryLight
-            val globalColorScheme = remember(uiState, useDarkTheme) {
-                // 1. If A12+ and Dynamic -> Use System Resource
-                // 2. Otherwise -> Use uiState.seedColor (which is now either Manual Color OR Wallpaper Color for A11-)
-                val keyColor =
-                    if (uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) colorRes else uiState.seedColor
-
-                dynamicColorScheme(
-                    keyColor = keyColor,
-                    isDark = useDarkTheme,
-                    style = uiState.paletteStyle
-                )
-            }
-
-            val activeColorSchemeState = remember { mutableStateOf(globalColorScheme) }
-
-            LaunchedEffect(globalColorScheme) {
-                activeColorSchemeState.value = globalColorScheme
-            }
-
-            if (uiState.useMiuix) {
-                InstallerMiuixTheme(
-                    darkTheme = useDarkTheme,
-                    themeMode = uiState.themeMode,
-                    useMiuixMonet = uiState.useMiuixMonet,
-                    seedColor = activeColorSchemeState.value.primary
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        MiuixInstallerPage(
-                            installer = currentInstaller,
-                            activeColorSchemeState = activeColorSchemeState,
-                            globalColorScheme = globalColorScheme,
-                            isDarkMode = useDarkTheme,
-                            basePaletteStyle = uiState.paletteStyle
-                        )
-                    }
-                }
-            } else {
-                InstallerMaterialExpressiveTheme(
-                    darkTheme = useDarkTheme,
-                    colorScheme = activeColorSchemeState.value,
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        InstallerPage(
-                            installer = currentInstaller,
-                            activeColorSchemeState = activeColorSchemeState,
-                            globalColorScheme = globalColorScheme,
-                            isDarkMode = useDarkTheme,
-                            basePaletteStyle = uiState.paletteStyle
-                        )
+            // 使用统一的主题管理器
+            InstallerTheme(
+                useMiuix = uiState.useMiuix,
+                themeMode = uiState.themeMode,
+                paletteStyle = uiState.paletteStyle,
+                useDynamicColor = uiState.useDynamicColor,
+                useMiuixMonet = uiState.useMiuixMonet,
+                seedColor = uiState.seedColor
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (uiState.useMiuix) {
+                        MiuixInstallerPage(installer = currentInstaller)
+                    } else {
+                        InstallerPage(installer = currentInstaller)
                     }
                 }
             }

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,6 +48,7 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
+import com.rosan.installer.ui.theme.LocalIsDark
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.isGestureNavigation
@@ -64,14 +64,13 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun InstallPrepareContent(
-    colorScheme: ColorScheme,
-    isDarkMode: Boolean,
     installer: InstallerRepo,
     viewModel: InstallerViewModel,
     appInfo: AppInfoState,
     onCancel: () -> Unit,
     onInstall: () -> Unit
 ) {
+    val isDarkMode = LocalIsDark.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
     val settings = viewModel.viewSettings
@@ -172,7 +171,7 @@ fun InstallPrepareContent(
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
                 colors = CardColors(
-                    color = if (isDynamicColor) colorScheme.surfaceContainer else
+                    color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
                         if (isDarkMode) miuixSheetCardColorDark else Color.White,
                     contentColor = MiuixTheme.colorScheme.onSurface
                 )
@@ -299,7 +298,7 @@ fun InstallPrepareContent(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     colors = CardColors(
-                        color = if (isDynamicColor) colorScheme.surfaceContainer else
+                        color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
                             if (isDarkMode) miuixSheetCardColorDark else Color.White,
                         contentColor = MiuixTheme.colorScheme.onSurface
                     )

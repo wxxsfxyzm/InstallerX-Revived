@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,6 +25,7 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.theme.LocalIsDark
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.getBestPermissionLabel
@@ -39,12 +39,11 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun InstallPreparePermissionContent(
-    colorScheme: ColorScheme,
-    isDarkMode: Boolean,
     installer: InstallerRepo,
     viewModel: InstallerViewModel,
     onBack: () -> Unit
 ) {
+    val isDarkMode = LocalIsDark.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
 
@@ -68,7 +67,7 @@ fun InstallPreparePermissionContent(
                 .weight(1f, fill = false)
                 .padding(vertical = 6.dp),
             colors = CardColors(
-                color = if (isDynamicColor) colorScheme.surfaceContainer else
+                color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
                     if (isDarkMode) miuixSheetCardColorDark else Color.White,
                 contentColor = MiuixTheme.colorScheme.onSurface
             )

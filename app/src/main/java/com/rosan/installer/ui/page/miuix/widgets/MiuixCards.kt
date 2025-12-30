@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -73,9 +72,8 @@ private fun TipCard(
 
 @Composable
 fun WarningCard(
-    isDarkMode: Boolean,
-    colorScheme: ColorScheme,
-    message: String,
+    isDark: Boolean,
+    message: String
 ) {
     Card(
         modifier = Modifier
@@ -83,8 +81,8 @@ fun WarningCard(
             .fillMaxWidth(),
         colors = CardDefaults.defaultColors(
             color = when {
-                isDynamicColor -> colorScheme.errorContainer
-                isDarkMode -> Color(0XFF310808)
+                isDynamicColor -> MiuixTheme.colorScheme.errorContainer
+                isDark -> Color(0XFF310808)
                 else -> Color(0xFFF8E2E2)
             }
         )
@@ -97,7 +95,7 @@ fun WarningCard(
             Text(
                 text = message,
                 style = MiuixTheme.textStyles.body2,
-                color = if (isDynamicColor) colorScheme.onErrorContainer else Color(0xFFF72727),
+                color = if (isDynamicColor) MiuixTheme.colorScheme.onErrorContainer else Color(0xFFF72727),
                 fontWeight = FontWeight.SemiBold
             )
         }

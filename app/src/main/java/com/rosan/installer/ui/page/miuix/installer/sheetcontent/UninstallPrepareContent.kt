@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,6 +22,7 @@ import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCheckboxWidget
+import com.rosan.installer.ui.theme.LocalIsDark
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -34,12 +34,11 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun UninstallPrepareContent(
-    colorScheme: ColorScheme,
-    isDarkMode: Boolean,
     viewModel: InstallerViewModel,
     onCancel: () -> Unit,
     onUninstall: () -> Unit
 ) {
+    val isDarkMode = LocalIsDark.current
     val uninstallInfo by viewModel.uiUninstallInfo.collectAsState()
     val info = uninstallInfo ?: return
 
@@ -66,7 +65,7 @@ fun UninstallPrepareContent(
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
             colors = CardColors(
-                color = if (isDynamicColor) colorScheme.surfaceContainer else
+                color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
                     if (isDarkMode) miuixSheetCardColorDark else Color.White,
                 contentColor = MiuixTheme.colorScheme.onSurface
             )

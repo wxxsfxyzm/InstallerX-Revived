@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,6 +23,7 @@ import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
+import com.rosan.installer.ui.theme.LocalIsDark
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Card
@@ -33,11 +33,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun PrepareSettingsContent(
-    colorScheme: ColorScheme,
-    isDarkMode: Boolean,
     installer: InstallerRepo,
     viewModel: InstallerViewModel
 ) {
+    val isDarkMode = LocalIsDark.current
     val settings = viewModel.viewSettings
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
@@ -59,7 +58,7 @@ fun PrepareSettingsContent(
         Card(
             modifier = Modifier.padding(bottom = 6.dp),
             colors = CardColors(
-                color = if (isDynamicColor) colorScheme.surfaceContainer else
+                color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
                     if (isDarkMode) miuixSheetCardColorDark else Color.White,
                 contentColor = MiuixTheme.colorScheme.onSurface
             )
