@@ -177,7 +177,6 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                 return@setContent
             }
 
-            // 使用统一的主题管理器
             InstallerTheme(
                 useMiuix = uiState.useMiuix,
                 themeMode = uiState.themeMode,

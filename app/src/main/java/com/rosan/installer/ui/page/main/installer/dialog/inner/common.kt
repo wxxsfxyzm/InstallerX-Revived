@@ -77,7 +77,7 @@ val permissionIcon: @Composable () -> Unit = {
  * @param suggestions A composable lambda for displaying suggestion chips below the error block.
  */
 @Composable
-internal fun ErrorTextBlock(
+fun ErrorTextBlock(
     error: Throwable,
     modifier: Modifier = Modifier,
     suggestions: @Composable () -> Unit = {}

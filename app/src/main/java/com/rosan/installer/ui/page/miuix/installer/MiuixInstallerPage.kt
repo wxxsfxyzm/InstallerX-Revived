@@ -598,9 +598,7 @@ private fun RebootListPopup(
         show = showTopPopup,
         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
         alignment = alignment,
-        onDismissRequest = {
-            showTopPopup.value = false
-        }
+        onDismissRequest = { showTopPopup.value = false }
     ) {
         val context = LocalContext.current
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager?

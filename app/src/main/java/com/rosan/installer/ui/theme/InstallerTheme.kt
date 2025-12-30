@@ -141,7 +141,7 @@ fun InstallerMiuixTheme(
     themeMode: ThemeMode,
     useMiuixMonet: Boolean,
     useDynamicColor: Boolean = false,
-    compatStatusBarColor: Boolean = false,
+    compatStatusBarColor: Boolean = true,
     seedColor: Color,
     content: @Composable () -> Unit
 ) {

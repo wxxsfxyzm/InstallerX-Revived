@@ -24,6 +24,7 @@ import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.util.help
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
@@ -176,18 +177,20 @@ fun MiuixErrorTextBlock(
     error: Throwable,
     modifier: Modifier = Modifier
 ) {
-    val cardBackgroundColor = MiuixTheme.colorScheme.errorContainer// if (isDark) Color(0xCC8C2323) else Color(0xCCFBEAEA)
-    val errorColor = MiuixTheme.colorScheme.error//if (isDark) Color.White else Color(0xFF601A15)
+    val md3Scheme = InstallerTheme.colorScheme
+    val cardBackgroundColor = md3Scheme.errorContainer
+    val contentColor = md3Scheme.onErrorContainer
 
     Card(
         modifier = modifier,
         colors = CardColors(
             color = cardBackgroundColor,
-            contentColor = errorColor
+            contentColor = contentColor
         )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
+                color = md3Scheme.error,
                 text = error.help(),
                 fontWeight = FontWeight.Bold,
                 style = MiuixTheme.textStyles.body1,
@@ -218,7 +221,7 @@ fun MiuixErrorTextBlock(
                     value = textToShow,
                     onValueChange = {},
                     readOnly = true,
-                    textStyle = LocalTextStyle.current.copy(color = MiuixTheme.colorScheme.onErrorContainer),
+                    textStyle = LocalTextStyle.current.copy(color = contentColor),
                     modifier = Modifier
                         .fillMaxWidth()
                         // Allow vertical scrolling for long stack traces
