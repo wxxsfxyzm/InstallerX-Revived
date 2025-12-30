@@ -177,9 +177,15 @@ fun MiuixErrorTextBlock(
     error: Throwable,
     modifier: Modifier = Modifier
 ) {
-    val md3Scheme = InstallerTheme.colorScheme
-    val cardBackgroundColor = md3Scheme.errorContainer
-    val contentColor = md3Scheme.onErrorContainer
+    val scheme = if (InstallerTheme.useMiuixMonet)
+        InstallerTheme.colorScheme
+    else
+        InstallerTheme.colorScheme.copy(
+            errorContainer = MiuixTheme.colorScheme.errorContainer,
+            onErrorContainer = MiuixTheme.colorScheme.onErrorContainer
+        )
+    val cardBackgroundColor = scheme.errorContainer
+    val contentColor = scheme.onErrorContainer
 
     Card(
         modifier = modifier,
@@ -190,7 +196,7 @@ fun MiuixErrorTextBlock(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                color = md3Scheme.error,
+                color = scheme.error,
                 text = error.help(),
                 fontWeight = FontWeight.Bold,
                 style = MiuixTheme.textStyles.body1,
