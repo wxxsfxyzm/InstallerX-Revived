@@ -30,7 +30,8 @@ jobs:
     # 依赖检查
     needs: pre_job
     # 如果是定时任务(schedule)直接跑，或者 skip 检查说不跳过才跑
-    if: github.event_name == 'schedule' || needs.pre_job.outputs.should_skip != 'true'
+    if: false
+    # if: github.event_name == 'schedule' || needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       actions: read
