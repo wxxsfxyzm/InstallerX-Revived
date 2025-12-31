@@ -106,9 +106,9 @@
     <string name="uninstaller_settings_desc">Change the global settings of the uninstaller</string>
     <string name="installer_settings_global_installer">Global</string>
     <string name="installer_settings_require_biometric_auth">Require Biometric Auth to Install</string>
-    <string name="installer_settings_require_biometric_auth_desc">Require biometric auth when install</string>
-    <string name="uninstaller_settings_require_biometric_auth">Require Biometric Auth to Install</string>
-    <string name="uninstaller_settings_require_biometric_auth_desc">Require biometric auth when install</string>
+    <string name="installer_settings_require_biometric_auth_desc">Require biometric auth when installing</string>
+    <string name="uninstaller_settings_require_biometric_auth">Require Biometric Auth to Uninstall</string>
+    <string name="uninstaller_settings_require_biometric_auth_desc">Require biometric auth when uninstalling</string>
     <string name="use_biometric_confirm_change_auth_settings">Are you sure you want to change this setting</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">To continue, please confirm this action using your device authentication</string>
     <string name="installer_settings_dialog_mode_options">Options for Dialog</string>

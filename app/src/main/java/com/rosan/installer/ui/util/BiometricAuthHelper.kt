@@ -2,7 +2,6 @@ package com.rosan.installer.ui.util
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
@@ -30,7 +29,8 @@ import kotlin.coroutines.resumeWithException
 suspend fun doBiometricAuthOrThrow(context: Context, title: String, subTitle: String) {
     val biometricManager = BiometricManager.from(context)
     if (biometricManager.canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) != BiometricManager.BIOMETRIC_SUCCESS) {
-        Timber.tag("BiometricAuth").w("Can't do biometricAuth, because device not support BiometricAuth or no biometric or device credential is enrolled.")
+        Timber.tag("BiometricAuth")
+            .w("Can't do biometricAuth, because device not support BiometricAuth or no biometric or device credential is enrolled.")
         return
     }
     val executor = ContextCompat.getMainExecutor(context)
@@ -40,8 +40,8 @@ suspend fun doBiometricAuthOrThrow(context: Context, title: String, subTitle: St
         .setSubtitle(subTitle)
         .setAllowedAuthenticators(
             BIOMETRIC_STRONG or
-            BIOMETRIC_WEAK or
-            DEVICE_CREDENTIAL
+                    BIOMETRIC_WEAK or
+                    DEVICE_CREDENTIAL
         )
         .build()
 
@@ -105,12 +105,12 @@ suspend fun doBiometricAuthOrThrow(context: Context, title: String, subTitle: St
  *
  * @return `true` if the authentication was successful, `false` otherwise (e.g., canceled or failed).
  */
-suspend fun doBiometricAuth(context: Context, title: String, subTitle: String) : Boolean {
+suspend fun doBiometricAuth(context: Context, title: String, subTitle: String): Boolean {
     try {
         doBiometricAuthOrThrow(context, title, subTitle)
         return true
     } catch (e: AuthenticationFailedException) {
-        Log.i("Biometric","Authentication failed", e)
+        Timber.tag("Biometric").i(e, "Authentication failed")
         return false
     }
 }
