@@ -1,6 +1,10 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.installer
 
 import android.os.Build
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -36,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -69,6 +74,7 @@ fun NewInstallerGlobalSettingsPage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
+    val context = LocalContext.current
     val state = viewModel.state
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
@@ -172,6 +178,23 @@ fun NewInstallerGlobalSettingsPage(
                                     }
                                 )
                             }
+                        if (BiometricManager
+                                .from(context)
+                                .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS)
+                        {
+                            add {
+                                SwitchWidget(
+                                    icon = AppIcons.BiometricAuth,
+                                    title = stringResource(R.string.installer_settings_require_biometric_auth),
+                                    description = stringResource(R.string.installer_settings_require_biometric_auth_desc),
+                                    checked = state.installerRequireBiometricAuth,
+                                    isM3E = true,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, true))
+                                    }
+                                )
+                            }
+                        }
                         add {
                             AutoClearNotificationTimeWidget(
                                 currentValue = state.notificationSuccessAutoClearSeconds,

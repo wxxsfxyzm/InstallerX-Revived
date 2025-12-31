@@ -1,6 +1,10 @@
 package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer
 
 import android.os.Build
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -20,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -146,6 +151,20 @@ fun MiuixInstallerGlobalSettingsPage(
                                     )
                                 }
                             )
+                        if (BiometricManager
+                                .from(LocalContext.current)
+                                .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS)
+                        {
+                            MiuixSwitchWidget(
+                                icon = AppIcons.BiometricAuth,
+                                title = stringResource(R.string.installer_settings_require_biometric_auth),
+                                description = stringResource(R.string.installer_settings_require_biometric_auth_desc),
+                                checked = state.installerRequireBiometricAuth,
+                                onCheckedChange = {
+                                    viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, true))
+                                }
+                            )
+                        }
                         MiuixAutoClearNotificationTimeWidget(
                             currentValue = state.notificationSuccessAutoClearSeconds,
                             onValueChange = { seconds ->

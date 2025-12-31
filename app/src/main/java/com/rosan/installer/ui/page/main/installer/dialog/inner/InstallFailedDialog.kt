@@ -130,7 +130,7 @@ private fun ErrorSuggestions(
                     selected = { true },
                     onClick = {
                         viewModel.toggleInstallFlag(InstallOption.AllowTest.value, true)
-                        viewModel.dispatch(InstallerViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install(false))
                     },
                     labelRes = R.string.suggestion_allow_test_app,
                     icon = AppIcons.BugReport
@@ -219,7 +219,7 @@ private fun ErrorSuggestions(
                         selected = { true }, // This is an action, not a state toggle.
                         onClick = {
                             viewModel.toggleInstallFlag(InstallOption.AllowDowngrade.value, true)
-                            viewModel.dispatch(InstallerViewAction.Install)
+                            viewModel.dispatch(InstallerViewAction.Install(false))
                         },
                         labelRes = R.string.suggestion_allow_downgrade,
                         icon = AppIcons.Delete
@@ -236,7 +236,7 @@ private fun ErrorSuggestions(
                             installer.config.installer = "com.miui.packageinstaller"
                             // Wipe originatingUid
                             installer.config.callingFromUid = null
-                            viewModel.dispatch(InstallerViewAction.Install)
+                            viewModel.dispatch(InstallerViewAction.Install(false))
                         },
                         labelRes = R.string.suggestion_mi_isolation,
                         icon = AppIcons.InstallSource
@@ -250,7 +250,7 @@ private fun ErrorSuggestions(
                         onClick = {
                             installer.config.installer = "com.miui.packageinstaller"
                             installer.config.authorizer = ConfigEntity.Authorizer.Shizuku
-                            viewModel.dispatch(InstallerViewAction.Install)
+                            viewModel.dispatch(InstallerViewAction.Install(false))
                         },
                         labelRes = R.string.suggestion_shizuku_isolation,
                         icon = shizukuIcon
@@ -283,7 +283,7 @@ private fun ErrorSuggestions(
                     selected = { true }, // This is an action, not a state toggle.
                     onClick = {
                         viewModel.toggleInstallFlag(InstallOption.BypassLowTargetSdkBlock.value, true)
-                        viewModel.dispatch(InstallerViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install(false))
                     },
                     labelRes = R.string.suggestion_bypass_low_target_sdk,
                     icon = AppIcons.InstallBypassLowTargetSdk
@@ -295,7 +295,7 @@ private fun ErrorSuggestions(
                     selected = { true }, // This is an action, not a state toggle.
                     onClick = {
                         viewModel.toggleBypassBlacklist(true)
-                        viewModel.dispatch(InstallerViewAction.Install)
+                        viewModel.dispatch(InstallerViewAction.Install(false))
                     },
                     labelRes = R.string.suggestion_bypass_blacklist_set_by_user,
                     icon = AppIcons.BugReport
@@ -305,7 +305,7 @@ private fun ErrorSuggestions(
                 SuggestionChipInfo(
                     InstallFailedMissingInstallPermissionException::class,
                     selected = { true },
-                    onClick = { viewModel.dispatch(InstallerViewAction.Install) },
+                    onClick = { viewModel.dispatch(InstallerViewAction.Install(false)) },
                     labelRes = R.string.retry,
                     icon = AppIcons.Retry
                 )

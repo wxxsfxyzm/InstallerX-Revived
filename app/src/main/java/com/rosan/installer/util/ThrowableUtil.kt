@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
+import com.rosan.installer.data.app.model.exception.AuthenticationFailedException
 import com.rosan.installer.data.app.model.exception.InstallFailedAbortedException
 import com.rosan.installer.data.app.model.exception.InstallFailedAlreadyExistsException
 import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
@@ -75,6 +76,7 @@ private fun Throwable.getStringResourceId() =
         is ResolveException -> R.string.exception_resolve_failed
         is ResolvedFailedNoInternetAccessException -> R.string.exception_resolve_failed_no_internet_access
         is AnalyseFailedAllFilesUnsupportedException -> R.string.exception_analyse_failed_all_files_unsupported
+        is AuthenticationFailedException -> R.string.exception_authentication_failed
         is InstallFailedAlreadyExistsException -> R.string.exception_install_failed_already_exists
         is InstallFailedBlacklistedPackageException -> R.string.exception_install_failed_blacklisted_package
         is InstallFailedInvalidAPKException -> R.string.exception_install_failed_invalid_apk

@@ -32,6 +32,12 @@ class AppDataStore(
         // Show Live Activity
         val SHOW_LIVE_ACTIVITY = booleanPreferencesKey("show_live_activity")
 
+        // Use Biometric Auth Install
+        val INSTALLER_REQUIRE_BIOMETRIC_AUTH = booleanPreferencesKey("installer_use_biometric_auth")
+
+        // Use Biometric Auth Uninstall
+        val UNINSTALLER_REQUIRE_BIOMETRIC_AUTH = booleanPreferencesKey("uninstaller_use_biometric_auth")
+
         // Show Launcher Icon
         val SHOW_LAUNCHER_ICON = booleanPreferencesKey("show_launcher_icon")
 

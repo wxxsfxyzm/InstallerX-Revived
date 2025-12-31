@@ -451,7 +451,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                                             appInfo = appInfoState,
                                             onCancel = closeSheet,
                                             onInstall = {
-                                                viewModel.dispatch(InstallerViewAction.Install)
+                                                viewModel.dispatch(InstallerViewAction.Install(true))
                                                 if (settings.autoSilentInstall && !viewModel.isInstallingModule) {
                                                     showBottomSheet.value = false
                                                     scope.launch {

@@ -3,14 +3,23 @@ package com.rosan.installer.data.installer.model.impl.installer
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.system.Os
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
+import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.entity.SessionMode
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
+import com.rosan.installer.data.app.model.exception.AuthenticationFailedException
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
 import com.rosan.installer.data.app.util.IconColorExtractor
 import com.rosan.installer.data.app.util.sourcePath
@@ -28,7 +37,9 @@ import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.ui.activity.EmptyFragmentActivity
 import com.rosan.installer.ui.activity.InstallerActivity
+import com.rosan.installer.ui.util.doBiometricAuthOrThrow
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,11 +54,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
+import kotlin.coroutines.resumeWithException
 
 class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
@@ -164,7 +177,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         when (action) {
             is InstallerRepoImpl.Action.ResolveInstall -> resolve(action.activity)
             is InstallerRepoImpl.Action.Analyse -> analyse()
-            is InstallerRepoImpl.Action.Install -> handleSingleInstall()
+            is InstallerRepoImpl.Action.Install -> handleSingleInstall(action.triggerAuth)
             is InstallerRepoImpl.Action.InstallMultiple -> handleMultiInstall()
             is InstallerRepoImpl.Action.ResolveUninstall -> resolveUninstall(action.activity, action.packageName)
             is InstallerRepoImpl.Action.Uninstall -> uninstall(action.packageName)
@@ -283,12 +296,48 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.progress.emit(ProgressEntity.InstallAnalysedSuccess)
     }
 
-    private suspend fun handleSingleInstall() {
+    /**
+     * Requests the user to perform biometric authentication.
+     *
+     * This function displays the biometric prompt to the user (fingerprint, face, device credential,
+     * or other supported biometrics) and suspends until the user successfully authenticates.
+     * The prompt's subtitle changes depending on whether this is for an install or uninstall action.
+     *
+     * @param isInstall `true` if authentication is for an install operation, `false` for uninstall.
+     *
+     * @throws AuthenticationFailedException Thrown if the user fails or cancels biometric authentication.
+     */
+    private suspend fun requestUserBiometricAuthentication(
+        isInstall: Boolean
+    ) {
+        val requireBiometricAuth =
+            if (isInstall) appDataStore.getBoolean(AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH, false).first()
+            else appDataStore.getBoolean(AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH, false).first()
+
+        if (!requireBiometricAuth) return
+
+        return doBiometricAuthOrThrow(
+            context = context,
+            title = context.getString(R.string.auth_to_continue_work),
+            subTitle = context.getString(
+                if (isInstall)
+                    R.string.auth_summary_install
+                else
+                    R.string.auth_summary_uninstall
+            )
+        )
+    }
+
+    private suspend fun handleSingleInstall(triggerAuth: Boolean) {
+        if (triggerAuth) {
+            requestUserBiometricAuthentication(true)
+        }
         installer.moduleLog = emptyList()
         performInstallLogic()
     }
 
     private suspend fun handleMultiInstall() {
+        requestUserBiometricAuthentication(true)
         val queue = installer.multiInstallQueue
         if (queue.isEmpty()) return
 
@@ -434,6 +483,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     }
 
     private suspend fun uninstall(packageName: String) {
+        requestUserBiometricAuthentication(false)
         Timber.d("[id=$installerId] uninstall: Starting for $packageName. Emitting ProgressEntity.Uninstalling.")
         installer.progress.emit(ProgressEntity.Uninstalling)
 

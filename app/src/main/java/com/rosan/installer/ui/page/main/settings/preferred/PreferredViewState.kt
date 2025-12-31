@@ -29,6 +29,8 @@ data class PreferredViewState(
     val showOPPOSpecial: Boolean = false,
     val showExpressiveUI: Boolean = true,
     val showLiveActivity: Boolean = false,
+    val installerRequireBiometricAuth: Boolean = false,
+    val uninstallerRequireBiometricAuth: Boolean = false,
     val autoLockInstaller: Boolean = false,
     val autoSilentInstall: Boolean = false,
     val showMiuixUI: Boolean = false,
