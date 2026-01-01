@@ -88,7 +88,8 @@ class InstallerViewModel(
             is InstallerViewState.Analysing,
             is InstallerViewState.Resolving,
             is InstallerViewState.InstallExtendedMenu,
-            is InstallerViewState.InstallChoice -> false
+            is InstallerViewState.InstallChoice,
+            is InstallerViewState.Uninstalling -> false
 
             is InstallerViewState.InstallingModule -> (state as InstallerViewState.InstallingModule).isFinished
             is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)

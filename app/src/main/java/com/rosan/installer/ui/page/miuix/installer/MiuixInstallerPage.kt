@@ -332,10 +332,13 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                             val state = viewModel.state
                             val disableNotif = settings.disableNotificationOnDismiss
                             val isModule = state is InstallerViewState.InstallingModule
+                            val isUninstall =
+                                state is InstallerViewState.UninstallReady || state is InstallerViewState.UninstallResolveFailed ||
+                                        state is InstallerViewState.UninstallSuccess || state is InstallerViewState.UninstallFailed
 
-                            // 1. If it's a module install OR the "disable notification" setting is on -> Close
+                            // 1. If it's a module install, OR uninstall OR the "disable notification" setting is on -> Close
                             // 2. Otherwise (including Preparing, Standard APK install) -> Background
-                            val action = if (isModule || disableNotif) {
+                            val action = if (isModule || disableNotif || isUninstall) {
                                 InstallerViewAction.Close
                             } else {
                                 InstallerViewAction.Background
