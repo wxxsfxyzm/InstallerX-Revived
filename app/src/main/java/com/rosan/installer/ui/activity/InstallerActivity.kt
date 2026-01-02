@@ -179,7 +179,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     override fun onStop() {
         super.onStop()
 
-        if (EmptyFragmentActivity.onActivityReady != null) return
+        if (BiometricsAuthenticationActivity.onActivityReady != null) return
         // Check if the screen is currently on.
         // If the screen is off, onStop is triggered by locking the device.
         // We explicitly want to ignore this case.

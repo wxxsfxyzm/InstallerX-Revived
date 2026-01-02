@@ -3,15 +3,8 @@ package com.rosan.installer.data.installer.model.impl.installer
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.system.Os
-import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
-import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
-import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.biometric.BiometricPrompt
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
@@ -37,7 +30,6 @@ import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
-import com.rosan.installer.ui.activity.EmptyFragmentActivity
 import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.ui.util.doBiometricAuthOrThrow
 import kotlinx.coroutines.CancellationException
@@ -54,13 +46,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
-import kotlin.coroutines.resumeWithException
 
 class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     Handler(scope, installer), KoinComponent {
@@ -191,6 +181,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 )
                 installer.progress.emit(ProgressEntity.Finish)
             }
+            // Handle Reboot Action
+            is InstallerRepoImpl.Action.Reboot -> handleReboot(action.reason)
             // Cancel and Finish are handled in the collector directly
             is InstallerRepoImpl.Action.Cancel,
             is InstallerRepoImpl.Action.Finish -> {
@@ -494,6 +486,34 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         )
         Timber.d("[id=$installerId] uninstall: Succeeded for $packageName. Emitting ProgressEntity.UninstallSuccess.")
         installer.progress.emit(ProgressEntity.UninstallSuccess)
+    }
+
+    private suspend fun handleReboot(reason: String) {
+        Timber.d("[id=$installerId] handleReboot: Starting cleanup before reboot.")
+
+        // Execute cleanup immediately
+        // Call clearCache() explicitly to ensure temporary files are removed
+        // before the system goes down
+        clearCache()
+
+        Timber.d("[id=$installerId] handleReboot: Cleanup finished. Executing reboot command.")
+
+        // Execute the reboot command
+        withContext(Dispatchers.IO) {
+            val cmd = if (reason == "recovery") {
+                // KEYCODE_POWER = 26. Hides incorrect "Factory data reset" message in recovery
+                "input keyevent 26 ; svc power reboot $reason || reboot $reason"
+            } else {
+                val reasonArg = if (reason.isNotEmpty()) " $reason" else ""
+                "svc power reboot$reasonArg || reboot$reasonArg"
+            }
+
+            val commandArray = arrayOf("sh", "-c", cmd)
+
+            PrivilegedManager.execArr(installer.config, commandArray)
+        }
+
+        installer.progress.emit(ProgressEntity.Finish)
     }
 
     private fun resetState() {

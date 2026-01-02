@@ -154,6 +154,11 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         action.tryEmit(Action.ApproveSession(sessionId, granted))
     }
 
+    override fun reboot(reason: String) {
+        Timber.d("[id=$id] reboot() called. Emitting Action.Reboot.")
+        action.tryEmit(Action.Reboot(reason))
+    }
+
     override fun background(value: Boolean) {
         Timber.d("[id=$id] background() called with value: $value.")
         background.tryEmit(value)
@@ -201,6 +206,11 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         data class Uninstall(val packageName: String) : Action()
         data class ResolveConfirmInstall(val activity: Activity, val sessionId: Int) : Action()
         data class ApproveSession(val sessionId: Int, val granted: Boolean) : Action()
+
+        /**
+         * Action to trigger device reboot after cleanup.
+         */
+        data class Reboot(val reason: String) : Action()
         data object Cancel : Action()
         data object Finish : Action()
     }

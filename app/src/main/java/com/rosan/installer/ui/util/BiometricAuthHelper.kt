@@ -9,7 +9,7 @@ import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import com.rosan.installer.data.app.model.exception.AuthenticationFailedException
-import com.rosan.installer.ui.activity.EmptyFragmentActivity
+import com.rosan.installer.ui.activity.BiometricsAuthenticationActivity
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
 import kotlin.coroutines.resumeWithException
@@ -20,7 +20,7 @@ import kotlin.coroutines.resumeWithException
  * This function triggers the device's biometric prompt (fingerprint, face, device credential or other supported biometrics)
  * and suspends until the user either successfully authenticates or cancels/fails the authentication.
  *
- * @param context The [Context] used to open [EmptyFragmentActivity] and init [BiometricPrompt]
+ * @param context The [Context] used to open [BiometricsAuthenticationActivity] and init [BiometricPrompt]
  * @param title The title displayed on the biometric prompt dialog.
  * @param subTitle The subtitle displayed on the biometric prompt dialog.
  *
@@ -46,7 +46,7 @@ suspend fun doBiometricAuthOrThrow(context: Context, title: String, subTitle: St
         .build()
 
     return suspendCancellableCoroutine { continuation ->
-        EmptyFragmentActivity.onActivityReady = { activity ->
+        BiometricsAuthenticationActivity.onActivityReady = { activity ->
             val biometricPrompt = BiometricPrompt(
                 activity,
                 executor,
@@ -85,7 +85,7 @@ suspend fun doBiometricAuthOrThrow(context: Context, title: String, subTitle: St
             }
         }
 
-        val intent = Intent(context, EmptyFragmentActivity::class.java)
+        val intent = Intent(context, BiometricsAuthenticationActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         context.startActivity(intent)
@@ -99,7 +99,7 @@ suspend fun doBiometricAuthOrThrow(context: Context, title: String, subTitle: St
  * or other supported biometrics) and suspends until the user either successfully authenticates
  * or cancels/fails the authentication.
  *
- * @param context The [Context] used to open [EmptyFragmentActivity] and init [BiometricPrompt]
+ * @param context The [Context] used to open [BiometricsAuthenticationActivity] and init [BiometricPrompt]
  * @param title The title displayed on the biometric prompt dialog.
  * @param subTitle The subtitle displayed on the biometric prompt dialog.
  *

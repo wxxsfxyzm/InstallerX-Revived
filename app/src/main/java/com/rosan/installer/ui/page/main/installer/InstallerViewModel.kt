@@ -188,7 +188,7 @@ class InstallerViewModel(
             is InstallerViewAction.InstallMultiple -> installMultiple()
             is InstallerViewAction.Install -> install()
             is InstallerViewAction.Background -> background()
-            is InstallerViewAction.Reboot -> rebootDevice(action.reason)
+            is InstallerViewAction.Reboot -> repo.reboot(action.reason)
             is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(
                 action.keepData,
                 action.conflictingPackage
@@ -681,24 +681,6 @@ class InstallerViewModel(
                     currentMap
                 }
             }
-        }
-    }
-
-    private fun rebootDevice(reason: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val cmd = if (reason == "recovery") {
-                // KEYCODE_POWER = 26. This hides the incorrect "Factory data reset" message
-                // on some devices when booting into recovery.
-                "input keyevent 26 ; svc power reboot $reason || reboot $reason"
-            } else {
-                val reasonArg = if (reason.isNotEmpty()) " $reason" else ""
-                // Try "svc power reboot" first (soft reboot), fallback to "reboot" (hard reboot)
-                "svc power reboot$reasonArg || reboot$reasonArg"
-            }
-
-            val commandArray = arrayOf("sh", "-c", cmd)
-
-            PrivilegedManager.execArr(repo.config, commandArray)
         }
     }
 

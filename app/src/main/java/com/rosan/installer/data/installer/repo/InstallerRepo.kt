@@ -52,6 +52,8 @@ interface InstallerRepo : Closeable {
     fun resolveConfirmInstall(activity: Activity, sessionId: Int)
     fun approveConfirmation(sessionId: Int, granted: Boolean)
 
+    fun reboot(reason: String)
+
     fun background(value: Boolean)
     fun cancel()
     override fun close()

@@ -131,7 +131,7 @@
         </activity>
 
         <activity
-            android:name=".ui.activity.EmptyFragmentActivity"
+            android:name=".ui.activity.BiometricsAuthenticationActivity"
             android:exported="false"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.Installer.Translucent"
