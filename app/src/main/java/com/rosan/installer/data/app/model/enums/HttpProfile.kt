@@ -1,4 +1,4 @@
-package com.rosan.installer.data.app.model.entity
+package com.rosan.installer.data.app.model.enums
 
 enum class HttpProfile {
     ALLOW_ALL,

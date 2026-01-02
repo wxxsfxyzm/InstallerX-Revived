@@ -10,7 +10,7 @@ import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.app.model.entity.SessionMode
+import com.rosan.installer.data.app.model.enums.SessionMode
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.exception.AuthenticationFailedException
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl

@@ -3,9 +3,9 @@ package com.rosan.installer.data.app.model.impl
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.app.model.entity.SessionMode
+import com.rosan.installer.data.app.model.enums.DataType
+import com.rosan.installer.data.app.model.enums.SessionMode
 import com.rosan.installer.data.app.model.impl.analyser.UnifiedContainerAnalyser
 import com.rosan.installer.data.app.model.impl.processor.PackagePreprocessor
 import com.rosan.installer.data.app.model.impl.processor.SelectionStrategy

@@ -13,8 +13,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
+import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageManagerUtil

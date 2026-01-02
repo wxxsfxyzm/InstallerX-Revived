@@ -1,4 +1,4 @@
-package com.rosan.installer.data.app.model.entity
+package com.rosan.installer.data.app.model.enums
 
 enum class RootImplementation {
     Magisk,
@@ -12,7 +12,7 @@ enum class RootImplementation {
          * @return The corresponding RootImplementation instance.
          */
         fun fromString(value: String?): RootImplementation = try {
-            value?.let { RootImplementation.valueOf(it) } ?: Magisk
+            value?.let { valueOf(it) } ?: Magisk
         } catch (e: IllegalArgumentException) {
             Magisk
         }

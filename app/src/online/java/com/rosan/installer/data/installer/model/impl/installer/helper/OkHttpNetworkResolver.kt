@@ -5,7 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.app.model.entity.HttpProfile
+import com.rosan.installer.data.app.model.enums.HttpProfile
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.exception.HttpNotAllowedException
 import com.rosan.installer.data.installer.model.exception.HttpRestrictedForLocalhostException

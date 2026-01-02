@@ -3,7 +3,7 @@ package com.rosan.installer.data.app.model.impl.analyser.strategy
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.repo.AnalysisStrategy
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.async

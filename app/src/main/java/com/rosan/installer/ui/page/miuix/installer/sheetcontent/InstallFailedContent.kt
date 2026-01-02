@@ -224,7 +224,7 @@ private fun MiuixErrorSuggestions(
                         errorClasses = listOf(InstallFailedHyperOSIsolationViolationException::class),
                         onClick = {
                             // Set available installer
-                            installer.config.installer = "com.miui.packageinstaller"
+                            installer.config.installer = "com.android.shell"
                             // Wipe originatingUid
                             installer.config.callingFromUid = null
                             viewModel.dispatch(InstallerViewAction.Install(false))
@@ -238,7 +238,7 @@ private fun MiuixErrorSuggestions(
                     SuggestionItem(
                         errorClasses = listOf(InstallFailedHyperOSIsolationViolationException::class),
                         onClick = {
-                            installer.config.installer = "com.miui.packageinstaller"
+                            installer.config.installer = "com.android.shell"
                             installer.config.authorizer = ConfigEntity.Authorizer.Shizuku
                             viewModel.dispatch(InstallerViewAction.Install(false))
                         },

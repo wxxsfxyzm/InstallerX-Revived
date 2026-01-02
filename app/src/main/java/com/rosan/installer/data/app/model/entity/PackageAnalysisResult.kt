@@ -1,5 +1,7 @@
 package com.rosan.installer.data.app.model.entity
 
+import com.rosan.installer.data.app.model.enums.SessionMode
+import com.rosan.installer.data.app.model.enums.SignatureMatchStatus
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 
 /**

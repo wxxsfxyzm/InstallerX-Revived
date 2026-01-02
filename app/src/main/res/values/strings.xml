@@ -504,6 +504,7 @@
     <string name="exception_http_restricted_for_localhost">Cleartext HTTP restricted to localhost</string>
     <string name="old_version_prefix">Current</string>
     <string name="old_version_archived">Archived</string>
+    <string name="old_version_uninstalled">Uninstalled</string>
     <string name="upgrade_version_prefix">Upgrade</string>
     <string name="downgrade_version_prefix">Downgrade</string>
     <string name="install_choice">Select Package</string>
