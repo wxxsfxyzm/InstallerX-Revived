@@ -94,11 +94,21 @@ En comparación con los instaladores de stock, **InstallerX Revived** ofrece má
 > Por favor, lee el FAQ antes de proporcionar feedback.
 > Al proporcionar feedback, especifica tu marca de teléfono, versión del sistema, versión del software y operación en detalle.
 
+- **¿Cómo descargar artefactos de GitHub Actions?**
+    - Esto se aplica a la descarga de compilaciones de cualquier repositorio de GitHub, incluyendo [OwnDroid](https://github.com/BinTianqi/OwnDroid) (implementación de Dhizuku).
+    - **Paso 1:** Navega a la página de ejecución del workflow de GitHub Actions (ej: `https://github.com/BinTianqi/OwnDroid/actions/runs/18057156437`)
+    - **Paso 2:** Inicia sesión en GitHub (los artefactos solo son accesibles para usuarios autenticados)
+    - **Paso 3:** Desplázate hacia abajo hasta la sección **"Artifacts"** al final de la página
+    - **Paso 4:** Haz clic en el nombre del artefacto para descargarlo como archivo ZIP
+    - **Paso 5:** Extrae el archivo ZIP y usa InstallerX para instalar el APK que contiene
+    - **Nota:** Los artefactos de GitHub Actions solo están disponibles durante 90 días después de la ejecución del workflow
+
 - **¿Dhizuku no funciona correctamente?**
     - El soporte para **Dhizuku oficial** es limitado. Probado en AVDs con SDK ≥34. El funcionamiento en SDK <34 no está garantizado.
     - Al usar `OwnDroid`, la función `Eliminar automáticamente después de la instalación` podría no funcionar correctamente.
     - En ROMs chinas, errores ocasionales suelen deberse a restricciones del sistema en el funcionamiento en segundo plano de Dhizuku. Se recomienda reiniciar la app de Dhizuku primero.
     - Dhizuku tiene permisos limitados. Muchas operaciones no son posibles (como evitar interceptores de intents del sistema o especificar el origen de instalación). Se recomienda usar Shizuku si es posible.
+    - **¿Usando OwnDroid?** Consulta la guía anterior para descargar compilaciones de OwnDroid desde GitHub Actions.
 
 - **¿No puedes bloquear InstallerX como instalador predeterminado?**
     - Algunos sistemas tienen políticas muy estrictas sobre instaladores de paquetes. Debes usar un módulo LSPosed para interceptar el intent y reenviarlo al instalador en este caso.

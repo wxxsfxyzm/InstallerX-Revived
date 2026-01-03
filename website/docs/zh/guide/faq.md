@@ -10,10 +10,40 @@
 * **日志** (如果可能，请使用 logcat 或 LogFox 抓取)
 :::
 
+## 如何从 GitHub Actions 下载构建产物？
+
+::: tip 💡 适用于 OwnDroid 等项目
+本指南适用于从任何 GitHub 仓库的 Actions 工作流运行中下载构建产物，包括 [OwnDroid](https://github.com/BinTianqi/OwnDroid)（Dhizuku 实现）和 InstallerX 本身。
+:::
+
+### 步骤 1：访问工作流运行页面
+1. 导航到 GitHub Actions 页面（例如：`https://github.com/BinTianqi/OwnDroid/actions/runs/18057156437`）
+2. 如果您没有登录 GitHub，需要先**登录**（只有已认证用户可以访问构建产物）
+
+### 步骤 2：下载构建产物
+1. 向下滚动到页面底部的 **"Artifacts"** 部分
+2. 点击构建产物名称（例如 `app-release.apk` 或类似名称）进行下载
+3. 构建产物会以 **ZIP 压缩包**形式下载
+
+### 步骤 3：提取并安装
+1. 解压下载的 ZIP 文件以访问其中的 APK
+2. 使用 **InstallerX** 安装 APK：
+   * 通过文件管理器的"打开方式"选择 InstallerX
+   * 将 APK 分享给 InstallerX
+   * 或在在线版本中启用"直接从下载链接安装"功能
+
+::: warning ⚠️ 重要提示
+* GitHub Actions 构建产物在工作流运行后仅保留 **90 天**
+* 您必须**登录** GitHub 才能下载构建产物
+* 某些工作流运行可能需要您有访问该仓库的权限
+* 使用 **OwnDroid** 配合 InstallerX 时，请注意`安装后自动删除`功能可能无法正常工作（这是已知限制）
+:::
+
 ## Dhizuku 无法使用怎么办？
 * 请更新到最新版本的 **Dhizuku**。
 * 国产 ROM 遇到偶发性报错一般是 Dhizuku 被系统限制了后台，请优先**重启 Dhizuku 应用**后再试。
 * Dhizuku 的权限不够大，很多操作无法完成（例如绕过系统 intent 拦截、指定安装来源等）。有条件建议使用 **Shizuku**。
+* **使用 OwnDroid？** 请参考上方指南从 GitHub Actions 下载 OwnDroid 构建版本。
 
 ## 没法锁定安装器怎么办？
 * 部分系统严格限制第三方安装器，需要使用 **LSPosed 模块**拦截 intent 并转发给 InstallerX。

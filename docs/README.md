@@ -96,11 +96,21 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 > Please read the FAQ before providing feedback.
 > When providing feedback, please specify your phone brand, system version, software version, and operation in detail.
 
+- **How to download artifacts from GitHub Actions?**
+    - This applies to downloading builds from any GitHub repository, including [OwnDroid](https://github.com/BinTianqi/OwnDroid) (Dhizuku implementation).
+    - **Step 1:** Navigate to the GitHub Actions workflow run page (e.g., `https://github.com/BinTianqi/OwnDroid/actions/runs/18057156437`)
+    - **Step 2:** Sign in to GitHub (artifacts are only accessible to authenticated users)
+    - **Step 3:** Scroll down to the **"Artifacts"** section at the bottom of the page
+    - **Step 4:** Click on the artifact name to download it as a ZIP file
+    - **Step 5:** Extract the ZIP file and use InstallerX to install the APK inside
+    - **Note:** GitHub Actions artifacts are only available for 90 days after the workflow run
+
 - **Dhizuku not working properly?**
     - Support for **official Dhizuku** is limited. Tested on AVDs with SDK ≥34. Operation on SDK <34 is not guaranteed.
     - When using `OwnDroid`, the `Auto delete after installation` function might not work correctly.
     - On Chinese ROMs, occasional errors are usually due to the system restricting Dhizuku's background operation. It is recommended to restart the Dhizuku app first.
     - Dhizuku has limited permissions. Many operations are not possible (like bypassing system intent interceptors or specifying the installation source). Using Shizuku is recommended if possible.
+    - **Using OwnDroid?** See the guide above for downloading OwnDroid builds from GitHub Actions.
 
 - **Unable to lock InstallerX as default installer?**
     - Some Systems have very strict policy on Package Installers. You must use a LSPosed module to intercept the intent and forward it to the installer in this case.

@@ -10,10 +10,40 @@ When submitting feedback, please include:
 * **Logs** (captured via logcat or LogFox) if possible.
 :::
 
+## How to download artifacts from GitHub Actions?
+
+::: tip 💡 For OwnDroid and other projects
+This guide applies to downloading build artifacts from any GitHub repository's Actions workflow runs, including [OwnDroid](https://github.com/BinTianqi/OwnDroid) (Dhizuku implementation) and InstallerX itself.
+:::
+
+### Step 1: Access the Workflow Run
+1. Navigate to the GitHub Actions page (e.g., `https://github.com/BinTianqi/OwnDroid/actions/runs/18057156437`)
+2. If you're not logged in to GitHub, you'll need to **sign in** first (artifacts are only accessible to authenticated users)
+
+### Step 2: Download Artifacts
+1. Scroll down to the **"Artifacts"** section at the bottom of the workflow run page
+2. Click on the artifact name (e.g., `app-release.apk` or similar) to download it
+3. The artifact will download as a **ZIP file**
+
+### Step 3: Extract and Install
+1. Extract the downloaded ZIP file to access the APK inside
+2. Use **InstallerX** to install the APK:
+   * Open the APK with InstallerX (via file manager "Open with")
+   * Share the APK to InstallerX
+   * Or enable "Direct installation from download link" feature in online version
+
+::: warning ⚠️ Important Notes
+* GitHub Actions artifacts are only available for **90 days** after the workflow run
+* You must be **logged in** to GitHub to download artifacts
+* Some workflow runs may require you to have access to the repository
+* When using **OwnDroid** with InstallerX, note that the `Auto delete after installation` function might not work correctly (this is a known limitation)
+:::
+
 ## Dhizuku is not working?
 * Please update **Dhizuku** to the latest version.
 * On customized Chinese ROMs, random errors are often caused by the system killing Dhizuku's background process. Please try **restarting the Dhizuku app**.
 * Dhizuku has limited permissions compared to Shizuku. It cannot perform advanced operations like bypassing system intent interception or specifying installation sources. We recommend using **Shizuku** if possible.
+* **Using OwnDroid?** See the guide above for downloading OwnDroid builds from GitHub Actions.
 
 ## Cannot lock the installer?
 * Some systems strictly restrict 3rd-party installers. You need to use an **LSPosed module** to intercept the intent and forward it to InstallerX.
