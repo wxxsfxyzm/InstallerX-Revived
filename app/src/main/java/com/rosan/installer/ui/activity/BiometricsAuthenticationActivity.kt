@@ -3,10 +3,10 @@ package com.rosan.installer.ui.activity
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 
-class EmptyFragmentActivity : FragmentActivity() {
+class BiometricsAuthenticationActivity : FragmentActivity() {
 
     companion object {
-        var onActivityReady: ((EmptyFragmentActivity) -> Unit)? = null
+        var onActivityReady: ((BiometricsAuthenticationActivity) -> Unit)? = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -2,7 +2,7 @@ package com.rosan.installer.data.app.util
 
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.enums.DataType
 import timber.log.Timber
 import java.io.File
 import java.util.zip.ZipEntry

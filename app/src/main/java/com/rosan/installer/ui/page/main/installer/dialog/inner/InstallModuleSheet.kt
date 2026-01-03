@@ -41,6 +41,7 @@ import com.rosan.installer.ui.util.KeyEventBlocker
 fun ModuleInstallSheetContent(
     outputLines: List<String>,
     isFinished: Boolean,
+    onReboot: () -> Unit,
     onClose: () -> Unit,
     colorScheme: ColorScheme
 ) {
@@ -103,11 +104,18 @@ fun ModuleInstallSheetContent(
 
         // Action Button
         if (isFinished) {
-            Button(
-                onClick = onClose,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.close))
+            Column {
+                Button(
+                    onClick = onReboot
+                ) {
+                    Text(stringResource(R.string.reboot))
+                }
+                Button(
+                    onClick = onClose,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.close))
+                }
             }
         } else {
             Button(

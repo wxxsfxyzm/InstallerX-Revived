@@ -2,7 +2,6 @@ package com.rosan.installer.ui.util
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
@@ -10,7 +9,7 @@ import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import com.rosan.installer.data.app.model.exception.AuthenticationFailedException
-import com.rosan.installer.ui.activity.EmptyFragmentActivity
+import com.rosan.installer.ui.activity.BiometricsAuthenticationActivity
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
 import kotlin.coroutines.resumeWithException
@@ -21,7 +20,7 @@ import kotlin.coroutines.resumeWithException
  * This function triggers the device's biometric prompt (fingerprint, face, device credential or other supported biometrics)
  * and suspends until the user either successfully authenticates or cancels/fails the authentication.
  *
- * @param context The [Context] used to open [EmptyFragmentActivity] and init [BiometricPrompt]
+ * @param context The [Context] used to open [BiometricsAuthenticationActivity] and init [BiometricPrompt]
  * @param title The title displayed on the biometric prompt dialog.
  * @param subTitle The subtitle displayed on the biometric prompt dialog.
  *
@@ -30,7 +29,8 @@ import kotlin.coroutines.resumeWithException
 suspend fun doBiometricAuthOrThrow(context: Context, title: String, subTitle: String) {
     val biometricManager = BiometricManager.from(context)
     if (biometricManager.canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) != BiometricManager.BIOMETRIC_SUCCESS) {
-        Timber.tag("BiometricAuth").w("Can't do biometricAuth, because device not support BiometricAuth or no biometric or device credential is enrolled.")
+        Timber.tag("BiometricAuth")
+            .w("Can't do biometricAuth, because device not support BiometricAuth or no biometric or device credential is enrolled.")
         return
     }
     val executor = ContextCompat.getMainExecutor(context)
@@ -40,13 +40,13 @@ suspend fun doBiometricAuthOrThrow(context: Context, title: String, subTitle: St
         .setSubtitle(subTitle)
         .setAllowedAuthenticators(
             BIOMETRIC_STRONG or
-            BIOMETRIC_WEAK or
-            DEVICE_CREDENTIAL
+                    BIOMETRIC_WEAK or
+                    DEVICE_CREDENTIAL
         )
         .build()
 
     return suspendCancellableCoroutine { continuation ->
-        EmptyFragmentActivity.onActivityReady = { activity ->
+        BiometricsAuthenticationActivity.onActivityReady = { activity ->
             val biometricPrompt = BiometricPrompt(
                 activity,
                 executor,
@@ -85,7 +85,7 @@ suspend fun doBiometricAuthOrThrow(context: Context, title: String, subTitle: St
             }
         }
 
-        val intent = Intent(context, EmptyFragmentActivity::class.java)
+        val intent = Intent(context, BiometricsAuthenticationActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         context.startActivity(intent)
@@ -99,18 +99,18 @@ suspend fun doBiometricAuthOrThrow(context: Context, title: String, subTitle: St
  * or other supported biometrics) and suspends until the user either successfully authenticates
  * or cancels/fails the authentication.
  *
- * @param context The [Context] used to open [EmptyFragmentActivity] and init [BiometricPrompt]
+ * @param context The [Context] used to open [BiometricsAuthenticationActivity] and init [BiometricPrompt]
  * @param title The title displayed on the biometric prompt dialog.
  * @param subTitle The subtitle displayed on the biometric prompt dialog.
  *
  * @return `true` if the authentication was successful, `false` otherwise (e.g., canceled or failed).
  */
-suspend fun doBiometricAuth(context: Context, title: String, subTitle: String) : Boolean {
+suspend fun doBiometricAuth(context: Context, title: String, subTitle: String): Boolean {
     try {
         doBiometricAuthOrThrow(context, title, subTitle)
         return true
     } catch (e: AuthenticationFailedException) {
-        Log.i("Biometric","Authentication failed", e)
+        Timber.tag("Biometric").i(e, "Authentication failed")
         return false
     }
 }

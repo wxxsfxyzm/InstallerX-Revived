@@ -38,9 +38,9 @@ import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstalledAppInfo
-import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
+import com.rosan.installer.data.app.model.enums.DataType
+import com.rosan.installer.data.app.model.enums.SignatureMatchStatus
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
@@ -130,7 +130,9 @@ fun InstallPrepareContent(
                         warnings.add(downgradeWarning to errorColor)
                         finalButtonTextId = R.string.install_anyway
                     }
-
+                    // If it's a "Ghost" app (Uninstalled but data kept), treat it as a Reinstall
+                    oldInfo.isUninstalled -> finalButtonTextId = R.string.reinstall
+                    // If it's Archived, treat it as Unarchive
                     oldInfo.isArchived -> finalButtonTextId = R.string.unarchive
                     else -> finalButtonTextId = R.string.reinstall
                 }
@@ -160,11 +162,8 @@ fun InstallPrepareContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item { AppInfoSlot(appInfo = appInfo) }
-
         item { Spacer(modifier = Modifier.height(16.dp)) }
-
         item { MiuixWarningTextBlock(warnings = warningMessages) }
-
         item {
             Card(
                 modifier = Modifier
@@ -186,13 +185,14 @@ fun InstallPrepareContent(
                                 labelResId = R.string.installer_version_name_label,
                                 newValue = primaryEntity.versionName,
                                 oldValue = currentPackage.installedAppInfo?.versionName,
+                                isUninstalled = currentPackage.installedAppInfo?.isUninstalled ?: false,
                                 isArchived = currentPackage.installedAppInfo?.isArchived ?: false
                             )
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_code_label,
                                 newValue = primaryEntity.versionCode.toString(),
                                 oldValue = currentPackage.installedAppInfo?.versionCode?.toString(),
-                                isDowngrade = if (currentPackage.installedAppInfo != null) primaryEntity.versionCode < currentPackage.installedAppInfo.versionCode else false,
+                                isUninstalled = currentPackage.installedAppInfo?.isUninstalled ?: false,
                                 isArchived = currentPackage.installedAppInfo?.isArchived ?: false
                             )
                             SDKComparison(
@@ -209,8 +209,7 @@ fun InstallPrepareContent(
                                 AdaptiveInfoRow(
                                     labelResId = R.string.installer_package_size_label,
                                     newValue = newSizeStr,
-                                    oldValue = oldSizeStr,
-                                    isArchived = false
+                                    oldValue = oldSizeStr
                                 )
                             }
 
@@ -220,8 +219,7 @@ fun InstallPrepareContent(
                                         AdaptiveInfoRow(
                                             labelResId = R.string.installer_package_minOsdkVersion_label,
                                             newValue = it,
-                                            oldValue = null,
-                                            isArchived = false
+                                            oldValue = null
                                         )
                                     }
                                 }
@@ -232,22 +230,19 @@ fun InstallPrepareContent(
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_name_label,
                                 newValue = primaryEntity.version,
-                                oldValue = null,
-                                isArchived = false
+                                oldValue = null
                             )
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_code_label,
                                 newValue = primaryEntity.versionCode.toString(),
-                                oldValue = null,
-                                isArchived = false
+                                oldValue = null
                             )
                             AnimatedVisibility(visible = installer.config.displaySdk) {
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     AdaptiveInfoRow(
                                         labelResId = R.string.installer_module_author_label,
                                         newValue = primaryEntity.author,
-                                        oldValue = null,
-                                        isArchived = false
+                                        oldValue = null
                                     )
                                 }
                             }
@@ -258,8 +253,7 @@ fun InstallPrepareContent(
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_split_name_label,
                                 newValue = primaryEntity.splitName,
-                                oldValue = null,
-                                isArchived = false
+                                oldValue = null
                             )
 
                             // SDK Comparison (If splits define min/target SDK)
@@ -275,8 +269,7 @@ fun InstallPrepareContent(
                                 AdaptiveInfoRow(
                                     labelResId = R.string.installer_package_size_label,
                                     newValue = newSizeStr,
-                                    oldValue = null, // Don't compare with full app size, meaningless
-                                    isArchived = false
+                                    oldValue = null // Don't compare with full app size, meaningless
                                 )
                             }
                         }
@@ -443,11 +436,15 @@ private fun AdaptiveInfoRow(
     @StringRes labelResId: Int,
     newValue: String,
     oldValue: String?,
-    isDowngrade: Boolean = false,
-    isArchived: Boolean
+    isUninstalled: Boolean = false,
+    isArchived: Boolean = false
 ) {
     val showComparison = oldValue != null && newValue != oldValue
-    val oldTextContent = if (isArchived) stringResource(R.string.old_version_archived) else oldValue.orEmpty()
+    val oldTextContent = when {
+        isArchived -> stringResource(R.string.old_version_archived)
+        isUninstalled -> stringResource(R.string.old_version_uninstalled)
+        else -> oldValue.orEmpty()
+    }
 
     SubcomposeLayout { constraints ->
         val label = @Composable {
@@ -577,6 +574,7 @@ private fun SDKComparison(
                     labelResId = R.string.installer_package_min_sdk_label,
                     newSdk = newMinSdk,
                     oldSdk = preInstallAppInfo?.minSdk?.toString(),
+                    isUninstalled = preInstallAppInfo?.isUninstalled ?: false,
                     isArchived = preInstallAppInfo?.isArchived ?: false,
                     type = "min"
                 )
@@ -590,7 +588,8 @@ private fun SdkInfoRow(
     @StringRes labelResId: Int,
     newSdk: String,
     oldSdk: String?,
-    isArchived: Boolean,
+    isUninstalled: Boolean = false,
+    isArchived: Boolean = false,
     type: String // "min" or "target"
 ) {
     val newSdkInt = newSdk.toIntOrNull()
@@ -616,7 +615,11 @@ private fun SdkInfoRow(
                 // val isIncompatible = type == "min" && newSdkInt > Build.VERSION.SDK_INT
                 // val color = if (isDowngrade || isIncompatible) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
 
-                val oldText = if (isArchived) stringResource(R.string.old_version_archived) else oldSdk
+                val oldText = when {
+                    isUninstalled -> stringResource(R.string.old_version_uninstalled)
+                    isArchived -> stringResource(R.string.old_version_archived)
+                    else -> oldSdk
+                }
 
                 Text(text = oldText, style = MiuixTheme.textStyles.body2)
 

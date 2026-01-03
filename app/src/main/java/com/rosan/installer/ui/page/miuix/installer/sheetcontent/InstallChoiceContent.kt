@@ -29,10 +29,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.DataType
-import com.rosan.installer.data.app.model.entity.MmzSelectionMode
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.app.model.entity.SessionMode
+import com.rosan.installer.data.app.model.enums.DataType
+import com.rosan.installer.data.app.model.enums.MmzSelectionMode
+import com.rosan.installer.data.app.model.enums.SessionMode
 import com.rosan.installer.data.app.util.getDisplayName
 import com.rosan.installer.data.app.util.getSplitDisplayName
 import com.rosan.installer.data.installer.repo.InstallerRepo

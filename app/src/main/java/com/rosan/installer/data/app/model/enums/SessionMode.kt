@@ -1,4 +1,4 @@
-package com.rosan.installer.data.app.model.entity
+package com.rosan.installer.data.app.model.enums
 
 /**
  * Defines the interaction mode for an installation session.

@@ -91,9 +91,8 @@ fun DialogPage(
                     ModuleInstallSheetContent(
                         outputLines = state.output,
                         isFinished = state.isFinished,
-                        onClose = {
-                            viewModel.dispatch(InstallerViewAction.Close)
-                        },
+                        onReboot = { viewModel.dispatch(InstallerViewAction.Reboot("")) },
+                        onClose = { viewModel.dispatch(InstallerViewAction.Close) },
                         colorScheme = colorScheme
                     )
                 }

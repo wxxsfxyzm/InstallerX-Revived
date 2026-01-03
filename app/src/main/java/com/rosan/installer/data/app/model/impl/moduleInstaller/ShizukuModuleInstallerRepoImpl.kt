@@ -2,7 +2,7 @@ package com.rosan.installer.data.app.model.impl.moduleInstaller
 
 import com.rosan.installer.ICommandOutputListener
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.RootImplementation
+import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
 import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.data.app.repo.ModuleInstallerRepo

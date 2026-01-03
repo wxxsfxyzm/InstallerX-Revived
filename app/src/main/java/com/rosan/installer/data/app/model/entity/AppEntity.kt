@@ -2,6 +2,7 @@ package com.rosan.installer.data.app.model.entity
 
 import android.graphics.drawable.Drawable
 import com.rosan.installer.build.model.entity.Architecture
+import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.util.FilterType
 import com.rosan.installer.data.app.util.SplitType
 

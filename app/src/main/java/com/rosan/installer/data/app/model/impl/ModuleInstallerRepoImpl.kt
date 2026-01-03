@@ -2,7 +2,7 @@
 package com.rosan.installer.data.app.model.impl
 
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.RootImplementation
+import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.data.app.model.impl.moduleInstaller.LocalModuleInstallerRepoImpl
 import com.rosan.installer.data.app.model.impl.moduleInstaller.ShizukuModuleInstallerRepoImpl

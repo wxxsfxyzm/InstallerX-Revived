@@ -2,7 +2,7 @@ package com.rosan.installer.data.app.model.impl.processor
 
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.util.FilterType
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.util.convertLegacyLanguageCode

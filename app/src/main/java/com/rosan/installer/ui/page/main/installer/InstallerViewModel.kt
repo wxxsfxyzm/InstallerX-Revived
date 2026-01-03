@@ -13,8 +13,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
+import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageManagerUtil
@@ -88,7 +88,8 @@ class InstallerViewModel(
             is InstallerViewState.Analysing,
             is InstallerViewState.Resolving,
             is InstallerViewState.InstallExtendedMenu,
-            is InstallerViewState.InstallChoice -> false
+            is InstallerViewState.InstallChoice,
+            is InstallerViewState.Uninstalling -> false
 
             is InstallerViewState.InstallingModule -> (state as InstallerViewState.InstallingModule).isFinished
             is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
@@ -187,7 +188,7 @@ class InstallerViewModel(
             is InstallerViewAction.InstallMultiple -> installMultiple()
             is InstallerViewAction.Install -> install()
             is InstallerViewAction.Background -> background()
-            is InstallerViewAction.Reboot -> rebootDevice(action.reason)
+            is InstallerViewAction.Reboot -> repo.reboot(action.reason)
             is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(
                 action.keepData,
                 action.conflictingPackage
@@ -680,24 +681,6 @@ class InstallerViewModel(
                     currentMap
                 }
             }
-        }
-    }
-
-    private fun rebootDevice(reason: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val cmd = if (reason == "recovery") {
-                // KEYCODE_POWER = 26. This hides the incorrect "Factory data reset" message
-                // on some devices when booting into recovery.
-                "input keyevent 26 ; svc power reboot $reason || reboot $reason"
-            } else {
-                val reasonArg = if (reason.isNotEmpty()) " $reason" else ""
-                // Try "svc power reboot" first (soft reboot), fallback to "reboot" (hard reboot)
-                "svc power reboot$reasonArg || reboot$reasonArg"
-            }
-
-            val commandArray = arrayOf("sh", "-c", cmd)
-
-            PrivilegedManager.execArr(repo.config, commandArray)
         }
     }
 

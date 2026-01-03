@@ -25,7 +25,7 @@ object SignatureUtils {
      */
     fun getApkSignatureHash(context: Context, apkPath: String): String? {
         return try {
-            // MODIFIED: Now calls a dedicated helper for archive files.
+            // Now calls a dedicated helper for archive files.
             val packageInfo = getPackageArchiveInfoFromPath(context, apkPath)
             val signature = getFirstSignature(packageInfo)
             signature?.let { hashSignature(it) }
@@ -70,9 +70,7 @@ object SignatureUtils {
         return hashBytes.joinToString("") { "%02x".format(it) }
     }
 
-    // REMOVED the faulty dual-purpose `getPackageInfo` function.
-
-    // NEW: A dedicated function to get PackageInfo from an APK file path.
+    // Dedicated function to get PackageInfo from an APK file path.
     @Suppress("DEPRECATION")
     private fun getPackageArchiveInfoFromPath(context: Context, apkPath: String): PackageInfo? {
         val pm = context.packageManager
@@ -85,7 +83,7 @@ object SignatureUtils {
         return pm.getPackageArchiveInfo(apkPath, flags)
     }
 
-    // NEW: A dedicated function to get PackageInfo from an installed package name.
+    // Dedicated function to get PackageInfo from an installed package name.
     @Suppress("DEPRECATION")
     private fun getInstalledPackageInfo(context: Context, packageName: String): PackageInfo? {
         val pm = context.packageManager

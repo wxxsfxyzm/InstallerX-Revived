@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.DataType
-import com.rosan.installer.data.app.model.entity.MmzSelectionMode
+import com.rosan.installer.data.app.model.enums.DataType
+import com.rosan.installer.data.app.model.enums.MmzSelectionMode
 import com.rosan.installer.ui.theme.m3color.RawColor
 
 @Composable

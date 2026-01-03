@@ -484,6 +484,7 @@
     <string name="exception_http_restricted_for_localhost">仅允许在本地网络使用明文 HTTP</string>
     <string name="old_version_prefix">当前</string>
     <string name="old_version_archived">已归档</string>
+    <string name="old_version_uninstalled">已卸载</string>
     <string name="upgrade_version_prefix">升级</string>
     <string name="downgrade_version_prefix">降级</string>
     <string name="install_choice">安装包选择</string>

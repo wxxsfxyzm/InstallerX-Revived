@@ -66,8 +66,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.HttpProfile
-import com.rosan.installer.data.app.model.entity.RootImplementation
+import com.rosan.installer.data.app.model.enums.HttpProfile
+import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
@@ -1201,8 +1201,8 @@ fun UninstallSystemAppWidget(viewModel: PreferredViewModel, isM3E: Boolean = tru
 fun UninstallRequireBiometricAuthWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
     if (BiometricManager
             .from(LocalContext.current)
-            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS)
-    {
+            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
+    ) {
         SwitchWidget(
             icon = AppIcons.BiometricAuth,
             title = stringResource(R.string.uninstaller_settings_require_biometric_auth),

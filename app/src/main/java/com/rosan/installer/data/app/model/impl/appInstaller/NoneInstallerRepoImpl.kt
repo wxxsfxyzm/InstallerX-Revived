@@ -7,9 +7,9 @@ import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.provider.Settings
 import androidx.core.net.toUri
-import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
+import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.model.exception.InstallFailedMissingInstallPermissionException
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.app.util.PackageManagerUtil

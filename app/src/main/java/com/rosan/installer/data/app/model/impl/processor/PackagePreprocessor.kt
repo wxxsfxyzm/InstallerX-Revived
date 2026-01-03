@@ -2,9 +2,9 @@ package com.rosan.installer.data.app.model.impl.processor
 
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstalledAppInfo
-import com.rosan.installer.data.app.model.entity.SignatureMatchStatus
+import com.rosan.installer.data.app.model.enums.DataType
+import com.rosan.installer.data.app.model.enums.SignatureMatchStatus
 import com.rosan.installer.data.app.util.calculateSHA256
 import com.rosan.installer.data.app.util.sourcePath
 import kotlinx.coroutines.Dispatchers

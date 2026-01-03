@@ -285,7 +285,8 @@ object ApkParser : KoinComponent {
                 while (entries.hasMoreElements()) {
                     val name = entries.nextElement().name
                     if (name.startsWith("lib/") && name.count { it == '/' } >= 2) {
-                        Architecture.fromArchString(name.split('/')[1]).takeIf { it != Architecture.UNKNOWN }
+                        Architecture.fromArchString(name.split('/')[1])
+                            .takeIf { it != Architecture.UNKNOWN }
                             ?.let { apkArchs.add(it) }
                     }
                 }
@@ -294,11 +295,20 @@ object ApkParser : KoinComponent {
 
         if (apkArchs.isEmpty()) return Architecture.NONE
 
+        // If the APK contains an architecture explicitly supported by the device, return it.
         for (deviceArch in deviceSupportedArchs) {
             if (apkArchs.contains(deviceArch)) return deviceArch
         }
 
-        if (RsConfig.isArm && (apkArchs.contains(Architecture.ARM) || apkArchs.contains(Architecture.ARMEABI))) return Architecture.ARM
+        // Force selection for binary translation scenarios (e.g., running 32-bit libs on arm64-only devices).
+        if (RsConfig.isArm) {
+            // Prefer ARMv7a (Architecture.ARM) if available.
+            if (apkArchs.contains(Architecture.ARM)) return Architecture.ARM
+
+            // Fallback to ARMEABI if ARMv7a is missing but ARMEABI exists.
+            if (apkArchs.contains(Architecture.ARMEABI)) return Architecture.ARMEABI
+        }
+
         if (RsConfig.isX86 && apkArchs.contains(Architecture.X86)) return Architecture.X86
 
         return null

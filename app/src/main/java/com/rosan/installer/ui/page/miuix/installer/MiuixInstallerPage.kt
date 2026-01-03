@@ -14,7 +14,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,13 +25,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.DataType
+import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
 import com.rosan.installer.data.app.model.exception.ModuleInstallException
 import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
@@ -68,6 +66,8 @@ import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.LocalInstallerColorScheme
 import com.rosan.installer.ui.theme.LocalPaletteStyle
 import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
+import com.rosan.installer.ui.theme.miuixSheetColorDark
+import com.rosan.installer.ui.theme.miuixSheetColorLight
 import com.rosan.installer.ui.util.getSupportTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -78,9 +78,8 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
-import top.yukonga.miuix.kmp.extra.SuperListPopup
+import top.yukonga.miuix.kmp.extra.WindowBottomSheet
+import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
@@ -185,15 +184,10 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
             useDynamicColor = useDynamicColor && temporarySeedColor == null,
             compatStatusBarColor = false
         ) {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                containerColor = Color.Transparent,
-                content = {}
-            )
-            SuperBottomSheet(
+            WindowBottomSheet(
                 show = showBottomSheet, // Always true as long as this page is composed.
                 backgroundColor = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainerHigh else if (isDark)
-                    Color(0xFF242424) else Color(0xFFF7F7F7),
+                    miuixSheetColorDark else miuixSheetColorLight,
                 leftAction = {
                     when (currentState) {
                         is InstallerViewState.InstallChoice -> {
@@ -202,12 +196,14 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                                 // Came from Prepare (re-selecting splits) -> Show Back icon, go back to Prepare
                                 MiuixBackButton(
                                     icon = AppMiuixIcons.Back,
+                                    iconTint = MiuixTheme.colorScheme.onSurface,
                                     onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
                                 )
                             } else {
                                 // Initial choice or other origin -> Show Cancel icon, force close
                                 MiuixBackButton(
                                     icon = AppMiuixIcons.Close,
+                                    iconTint = MiuixTheme.colorScheme.onSurface,
                                     onClick = closeSheet
                                 )
                             }
@@ -216,6 +212,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                         is InstallerViewState.InstallConfirm -> {
                             MiuixBackButton(
                                 icon = AppMiuixIcons.Close,
+                                iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = {
                                     viewModel.dispatch(InstallerViewAction.ApproveSession(currentState.sessionId, false))
                                 }
@@ -232,6 +229,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                         is InstallerViewState.ResolveFailed -> {
                             MiuixBackButton(
                                 icon = AppMiuixIcons.Close,
+                                iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = {
                                     showBottomSheet.value = !showBottomSheet.value
                                     scope.launch {
@@ -246,6 +244,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                         is InstallerViewState.InstallPrepare -> {
                             MiuixBackButton(
                                 icon = if (showSettings || showPermissions) AppMiuixIcons.Back else AppMiuixIcons.Close,
+                                iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = {
                                     if (showSettings) {
                                         viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
@@ -265,6 +264,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                         is InstallerViewState.InstallExtendedMenu -> {
                             MiuixBackButton(
                                 icon = AppMiuixIcons.Back,
+                                iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
                             )
                         }
@@ -279,6 +279,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                                 IconButton(onClick = { viewModel.dispatch(InstallerViewAction.ShowMiuixSheetRightActionSettings) }) {
                                     Icon(
                                         imageVector = AppMiuixIcons.Settings,
+                                        tint = MiuixTheme.colorScheme.onSurface,
                                         contentDescription = stringResource(R.string.installer_settings)
                                     )
                                 }
@@ -300,6 +301,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                                 }) {
                                 Icon(
                                     imageVector = AppMiuixIcons.Info,
+                                    tint = MiuixTheme.colorScheme.onSurface,
                                     contentDescription = stringResource(R.string.installer_settings)
                                 )
                             }
@@ -332,10 +334,13 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                             val state = viewModel.state
                             val disableNotif = settings.disableNotificationOnDismiss
                             val isModule = state is InstallerViewState.InstallingModule
+                            val isUninstall =
+                                state is InstallerViewState.UninstallReady || state is InstallerViewState.UninstallResolveFailed ||
+                                        state is InstallerViewState.UninstallSuccess || state is InstallerViewState.UninstallFailed
 
-                            // 1. If it's a module install OR the "disable notification" setting is on -> Close
+                            // 1. If it's a module install, OR uninstall OR the "disable notification" setting is on -> Close
                             // 2. Otherwise (including Preparing, Standard APK install) -> Background
-                            val action = if (isModule || disableNotif) {
+                            val action = if (isModule || disableNotif || isUninstall) {
                                 InstallerViewAction.Close
                             } else {
                                 InstallerViewAction.Background
@@ -594,7 +599,7 @@ private fun RebootListPopup(
         )
     }
 
-    SuperListPopup(
+    WindowListPopup(
         show = showTopPopup,
         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
         alignment = alignment,

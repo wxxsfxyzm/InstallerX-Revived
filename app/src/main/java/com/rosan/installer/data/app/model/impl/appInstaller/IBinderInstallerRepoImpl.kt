@@ -21,9 +21,9 @@ import android.os.ServiceManager
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.build.model.entity.Architecture
-import com.rosan.installer.data.app.model.entity.DataType
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
+import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.app.util.InstallOption

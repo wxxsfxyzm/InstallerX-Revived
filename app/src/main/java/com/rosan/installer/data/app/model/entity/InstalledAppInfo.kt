@@ -23,6 +23,7 @@ data class InstalledAppInfo(
     val targetSdk: Int?,
     val signatureHash: String? = null,
     val isSystemApp: Boolean = false,
+    val isUninstalled: Boolean = false,
     val isArchived: Boolean = false,
     val packageSize: Long = 0L
 ) {
@@ -44,12 +45,16 @@ data class InstalledAppInfo(
 
                 val applicationInfo = packageInfo.applicationInfo
 
-                val packageSize = if (applicationInfo != null) {
-                    // 1. Calculate Base APK size
+                // Check if the app is effectively "uninstalled" (but data kept).
+                // If FLAG_INSTALLED is NOT set, it means the app is not installed for the current user.
+                val isUninstalled = ((applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_INSTALLED) == 0
+
+                val packageSize = if (applicationInfo != null && !isUninstalled && applicationInfo.sourceDir != null) {
+                    // Only calculate size if the app is actually installed and sourceDir is valid.
                     val baseFile = File(applicationInfo.sourceDir)
                     var totalSize = if (baseFile.exists()) baseFile.length() else 0L
 
-                    // 2. Calculate Split APKs size (if any)
+                    // Calculate Split APKs size (if any)
                     applicationInfo.splitSourceDirs?.forEach { path ->
                         val splitFile = File(path)
                         if (splitFile.exists()) {
@@ -72,6 +77,7 @@ data class InstalledAppInfo(
                     targetSdk = applicationInfo?.targetSdkVersion,
                     signatureHash = signatureHash,
                     isSystemApp = ((applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_SYSTEM) != 0,
+                    isUninstalled = isUninstalled,
                     isArchived = packageManager.isPackageArchivedCompat(packageName),
                     packageSize = packageSize
                 )

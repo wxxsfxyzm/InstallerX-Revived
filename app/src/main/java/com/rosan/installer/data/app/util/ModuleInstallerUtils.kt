@@ -1,7 +1,7 @@
 package com.rosan.installer.data.app.util
 
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.RootImplementation
+import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.data.app.model.exception.ModuleInstallException
 
 object ModuleInstallerUtils {

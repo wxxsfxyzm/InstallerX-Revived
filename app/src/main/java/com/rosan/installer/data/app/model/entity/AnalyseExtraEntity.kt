@@ -1,5 +1,7 @@
 package com.rosan.installer.data.app.model.entity
 
+import com.rosan.installer.data.app.model.enums.DataType
+
 /**
  * Includes extra data during analyse
  * @param cacheDirectory Cache directory to store files

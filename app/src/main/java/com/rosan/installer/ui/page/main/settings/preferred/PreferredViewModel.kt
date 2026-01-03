@@ -19,8 +19,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.HttpProfile
-import com.rosan.installer.data.app.model.entity.RootImplementation
+import com.rosan.installer.data.app.model.enums.HttpProfile
+import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
@@ -276,10 +276,11 @@ class PreferredViewModel(
     private fun changeBiometricAuth(biometricAuth: Boolean, installer: Boolean) {
         viewModelScope.launch {
             if (!doBiometricAuth(
-                context = context,
-                title = context.getString(R.string.use_biometric_confirm_change_auth_settings),
-                subTitle = context.getString(R.string.use_biometric_confirm_change_auth_settings_desc)
-            )) return@launch
+                    context = context,
+                    title = context.getString(R.string.use_biometric_confirm_change_auth_settings),
+                    subTitle = context.getString(R.string.use_biometric_confirm_change_auth_settings_desc)
+                )
+            ) return@launch
 
             appDataStore.putBoolean(
                 key = if (installer) AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH else AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH,
