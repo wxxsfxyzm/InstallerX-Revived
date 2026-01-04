@@ -37,7 +37,7 @@ import com.rosan.installer.data.recycle.util.requireDhizukuPermissionGranted
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.util.isSystemInstaller
+import com.rosan.installer.util.OSUtils
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -78,9 +78,8 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             IPackageInstaller.Stub.asInterface(iBinderWrapper(iPackageManager.packageInstaller.asBinder()))
 
         val installerPackageName = when {
-            context.isSystemInstaller() -> context.packageName
             config.authorizer == ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName()
-            config.authorizer == ConfigEntity.Authorizer.None -> BuildConfig.APPLICATION_ID
+            config.authorizer == ConfigEntity.Authorizer.None -> if (OSUtils.isSystemUid) context.packageName else BuildConfig.APPLICATION_ID
             else -> config.installer ?: BuildConfig.APPLICATION_ID
         }
 
@@ -479,19 +478,6 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                 options: Bundle?
             ) {
                 queue.offer(intent, 5, TimeUnit.SECONDS)
-            }
-
-            fun send(
-                code: Int,
-                intent: Intent?,
-                resolvedType: String?,
-                finishedReceiver: IIntentReceiver?,
-                requiredPermission: String?,
-                options: Bundle?
-            ) {
-                send(
-                    code, intent, resolvedType, null, finishedReceiver, requiredPermission, options
-                )
             }
         }
 

@@ -110,7 +110,7 @@ suspend fun doBiometricAuth(context: Context, title: String, subTitle: String): 
         doBiometricAuthOrThrow(context, title, subTitle)
         return true
     } catch (e: AuthenticationFailedException) {
-        Timber.tag("Biometric").i(e, "Authentication failed")
+        Timber.tag("BiometricAuth").i(e, "Authentication failed")
         return false
     }
 }

@@ -11,7 +11,7 @@ import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.util.isSystemInstaller
+import com.rosan.installer.util.OSUtils
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -25,7 +25,7 @@ class SessionProcessor : KoinComponent {
         var label: CharSequence? = "N/A"
         var icon: Bitmap? = null
 
-        if (context.isSystemInstaller()) {
+        if (OSUtils.isSystemUid) {
             Timber.d("Handling CONFIRM_INSTALL as system installer.")
             val local = getSessionDetailsLocally(sessionId)
             label = local.first
@@ -61,7 +61,7 @@ class SessionProcessor : KoinComponent {
     }
 
     fun approveSession(sessionId: Int, granted: Boolean, config: ConfigEntity) {
-        if (context.isSystemInstaller()) {
+        if (OSUtils.isSystemUid) {
             Timber.d("Approving session locally as system installer.")
             approveSessionLocally(sessionId, granted)
         } else if (config.authorizer in listOf(

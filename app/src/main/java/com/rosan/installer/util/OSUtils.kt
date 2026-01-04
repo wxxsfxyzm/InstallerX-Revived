@@ -1,6 +1,7 @@
 package com.rosan.installer.util
 
 import android.annotation.SuppressLint
+import android.os.Process
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -18,7 +19,12 @@ object OSUtils : KoinComponent {
     private const val KEY_OPLUS_API = "ro.build.version.oplus.api"
     private const val KEY_OPLUS_SUB_API = "ro.build.version.oplus.sub_api"
 
-    const val SYSTEM_PACKAGE_INSTALLER = "com.android.packageinstaller"
+    /**
+     * Checks if the current process has system UID (1000).
+     */
+    val isSystemUid: Boolean by lazy {
+        Process.myUid() == 1000
+    }
 
     /**
      * Checks if the device is running HyperOS.
