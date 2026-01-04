@@ -31,6 +31,7 @@ import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.ShizukuHook
 import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.util.OSUtils
 import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
@@ -79,11 +80,14 @@ class DefaultPrivilegedService(
     }
 
     private val iPackageManager: IPackageManager by lazy {
-        // [Mod] Priority: Custom Wrapper (Root Hook) > Shizuku Hook > Direct/Service
+        // [Mod] Priority: Custom Wrapper (Root Hook) > System UID > Shizuku Hook > Direct/Service
         if (binderWrapper != null) {
             Log.d(TAG, "Getting IPackageManager in Process Hook Mode.")
             val original = ServiceManager.getService("package")
             IPackageManager.Stub.asInterface(binderWrapper.invoke(original))
+        } else if (OSUtils.isSystemUid) {
+            Log.d(TAG, "Getting IPackageManager in System UID Mode.")
+            IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
         } else if (isHookMode) {
             Log.d(TAG, "Getting IPackageManager in Hook Mode (Directly).")
             ShizukuHook.hookedPackageManager
@@ -98,6 +102,9 @@ class DefaultPrivilegedService(
             Log.d(TAG, "Getting IActivityManager in Process Hook Mode.")
             val original = ServiceManager.getService(Context.ACTIVITY_SERVICE)
             IActivityManager.Stub.asInterface(binderWrapper.invoke(original))
+        } else if (OSUtils.isSystemUid) {
+            Log.d(TAG, "Getting IActivityManager in System UID Mode.")
+            IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
         } else if (isHookMode) {
             ShizukuHook.hookedActivityManager
         } else {
@@ -110,6 +117,9 @@ class DefaultPrivilegedService(
             Log.d(TAG, "Getting IUserManager in Process Hook Mode.")
             val original = ServiceManager.getService(Context.USER_SERVICE)
             IUserManager.Stub.asInterface(binderWrapper.invoke(original))
+        } else if (OSUtils.isSystemUid) {
+            Log.d(TAG, "Getting IUserManager in System UID Mode.")
+            IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
         } else if (isHookMode) {
             Log.d("", "Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
             ShizukuHook.hookedUserManager

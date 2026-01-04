@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.util.Log
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -84,8 +85,12 @@ suspend fun openAppPrivileged(
 
     var forceStartSuccess = false
 
+    val shouldAttemptPrivileged = config.authorizer == ConfigEntity.Authorizer.Root ||
+            config.authorizer == ConfigEntity.Authorizer.Shizuku ||
+            (config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemUid)
+
     // Only attempt privileged start for Root or Shizuku
-    if (config.authorizer == ConfigEntity.Authorizer.Root || config.authorizer == ConfigEntity.Authorizer.Shizuku) {
+    if (shouldAttemptPrivileged) {
         // timeoutResult will be Boolean? (true/false on completion, or null on timeout)
         val timeoutResult = withTimeoutOrNull(PRIVILEGED_START_TIMEOUT_MS) {
             PrivilegedManager.startActivityPrivileged(config, intent)

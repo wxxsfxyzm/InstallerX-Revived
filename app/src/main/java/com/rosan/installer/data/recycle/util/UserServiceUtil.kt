@@ -11,6 +11,7 @@ import com.rosan.installer.data.recycle.model.impl.recycler.ShizukuUserServiceRe
 import com.rosan.installer.data.recycle.repo.Recyclable
 import com.rosan.installer.data.recycle.repo.recyclable.UserService
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.util.OSUtils
 import timber.log.Timber
 
 private const val TAG = "PrivilegedService"
@@ -27,6 +28,16 @@ fun useUserService(
     special: (() -> String?)? = null,
     action: (UserService) -> Unit
 ) {
+    if (authorizer == ConfigEntity.Authorizer.None) {
+        if (OSUtils.isSystemUid) {
+            Timber.tag(TAG).d("Running as System UID with None Authorizer. Executing direct calls.")
+            action.invoke(DefaultUserService)
+        } else {
+            Timber.tag(TAG).w("Authorizer is None but not running as System UID. Privileged action skipped.")
+        }
+        return
+    }
+
     val recycler = getRecyclableInstance(authorizer, customizeAuthorizer, useHookMode, special)
     processRecycler(authorizer, recycler, action)
 }
@@ -38,11 +49,10 @@ private fun processRecycler(
 ) {
     try {
         if (recycler != null) {
-            // 这里可以把 recycler 的具体类型也打印出来，方便调试看是 Hook 还是 Service
             Timber.tag(TAG).d("Processing $authorizer with recycler: ${recycler.entity::class.java.simpleName}")
             recycler.use { action.invoke(it.entity) }
         } else {
-            Timber.tag(TAG).e("Use Default User Service")
+            Timber.tag(TAG).e("No recycler found for $authorizer. Falling back to DefaultUserService.")
             action.invoke(DefaultUserService)
         }
     } catch (e: IllegalStateException) {
@@ -59,29 +69,19 @@ private fun getRecyclableInstance(
     useHookMode: Boolean,
     special: (() -> String?)?
 ): Recyclable<out UserService>? {
-    Timber.tag(TAG).d("Authorizer: $authorizer, HookMode: $useHookMode")
-
-    // 1. 先获取 specialShell，但不要直接 return
     val specialShell = special?.invoke()
 
-    // 如果有 specialShell，打印一下，确认是 su 1000 还是其他的
-    if (specialShell != null) {
-        Timber.tag(TAG).d("Special shell requested: $specialShell")
-    }
-
     return when (authorizer) {
+        ConfigEntity.Authorizer.None -> null
+
         ConfigEntity.Authorizer.Root -> {
-            // 2. 确定最终要使用的 Shell 命令
-            // 如果有 special (如 "su 1000") 就用它，否则用默认 Root
             val targetShell = specialShell ?: SHELL_ROOT
 
             if (useHookMode) {
                 Timber.tag(TAG).d("Using ProcessHookRecycler with shell: $targetShell")
-                // 关键点：将 "su 1000" 传给 Hook Recycler
                 ProcessHookRecycler(targetShell).make()
             } else {
                 Timber.tag(TAG).d("Using ProcessUserServiceRecycler with shell: $targetShell")
-                // 使用 Service 模式，同样支持 targetShell
                 ProcessUserServiceRecyclers.get(targetShell).make()
             }
         }
@@ -99,20 +99,10 @@ private fun getRecyclableInstance(
         ConfigEntity.Authorizer.Dhizuku -> DhizukuUserServiceRecycler.make()
 
         ConfigEntity.Authorizer.Customize -> {
-            // 自定义模式通常直接使用配置的命令
             val targetShell = customizeAuthorizer.ifBlank { SHELL_ROOT }
             ProcessUserServiceRecyclers.get(targetShell).make()
         }
 
-        // 处理 System 或其他情况
-        else -> {
-            if (specialShell != null) {
-                // 如果是 System 且有 special (su 1000)，通常还是走 Service 模式
-                // 因为 System 模式下 Hook 的概念比较模糊（除非你是指自己 hook 自己）
-                ProcessUserServiceRecyclers.get(specialShell).make()
-            } else {
-                null
-            }
-        }
+        else -> specialShell?.let { ProcessUserServiceRecyclers.get(it).make() }
     }
 }

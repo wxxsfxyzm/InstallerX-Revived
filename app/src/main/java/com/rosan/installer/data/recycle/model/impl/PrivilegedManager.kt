@@ -279,7 +279,7 @@ object PrivilegedManager : KoinComponent {
     }
 
     /**
-     * 异步执行后处理任务
+     * Asynchronously executes post-install tasks.
      */
     fun executePostInstallTasksAsync(
         authorizer: ConfigEntity.Authorizer,
