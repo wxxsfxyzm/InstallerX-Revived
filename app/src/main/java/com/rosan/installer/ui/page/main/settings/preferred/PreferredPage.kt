@@ -52,6 +52,7 @@ import com.rosan.installer.ui.page.main.widget.setting.IgnoreBatteryOptimization
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
+import com.rosan.installer.util.OSUtils
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -82,7 +83,11 @@ fun PreferredPage(
     }
 
     val snackBarHostState = remember { SnackbarHostState() }
-    var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(null) }
+    var errorDialogInfo by remember {
+        mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(
+            null
+        )
+    }
     var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -197,7 +202,8 @@ fun PreferredPage(
                         DisableAdbVerify(
                             checked = !state.adbVerifyEnabled,
                             isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                            enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku,
+                            enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
+                                    (state.authorizer != ConfigEntity.Authorizer.None || OSUtils.isSystemApp),
                             isM3E = false,
                             onCheckedChange = { isDisabled ->
                                 viewModel.dispatch(
@@ -220,12 +226,19 @@ fun PreferredPage(
                             isM3E = false
                         ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
                     }
-                    item { DefaultInstaller(true) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) } }
-                    item { DefaultInstaller(false) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) } }
+                    item {
+                        DefaultInstaller(
+                            lock = true,
+                            enabled = state.authorizer != ConfigEntity.Authorizer.None
+                        ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
+                    }
+                    item {
+                        DefaultInstaller(
+                            lock = false,
+                            enabled = state.authorizer != ConfigEntity.Authorizer.None
+                        ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
+                    }
                     item { ClearCache() }
-                    // pkg { LabelWidget(label = stringResource(id = R.string.more)) }
-                    // pkg { UserTerms() }
-                    // pkg { PrivacyPolicy() }
                     item { LabelWidget(stringResource(R.string.other)) }
                     item {
                         SettingsAboutItemWidget(
@@ -245,7 +258,10 @@ fun PreferredPage(
                     }
                     item {
                         val updateSummary =
-                            if (state.hasUpdate) stringResource(R.string.update_available, state.remoteVersion)
+                            if (state.hasUpdate) stringResource(
+                                R.string.update_available,
+                                state.remoteVersion
+                            )
                             else stringResource(R.string.get_update_detail)
                         SettingsAboutItemWidget(
                             imageVector = AppIcons.Update,

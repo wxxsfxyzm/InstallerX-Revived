@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -37,6 +38,7 @@ fun BaseWidget(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
+    val alpha = if (enabled) 1f else 0.38f
 
     Row(
         modifier = Modifier
@@ -58,7 +60,7 @@ fun BaseWidget(
                     .align(Alignment.CenterVertically),
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
             )
         if (icon == null && iconPlaceholder)
             Spacer(modifier = Modifier.size(24.dp))
@@ -70,23 +72,27 @@ fun BaseWidget(
             Column {
                 Text(
                     text = title,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
                     style = MaterialTheme.typography.titleMedium
                 )
                 description?.let {
+                    val color = if (isError) MaterialTheme.colorScheme.error
+                    else descriptionColor
                     Text(
                         text = it,
-                        color = if (isError) MaterialTheme.colorScheme.error
-                        else descriptionColor,
+                        color = color.copy(alpha = alpha),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
-            foreContent()
+            Box(Modifier.alpha(alpha)) {
+                foreContent()
+            }
         }
         Box(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
+                .alpha(alpha)
         ) {
             content()
         }

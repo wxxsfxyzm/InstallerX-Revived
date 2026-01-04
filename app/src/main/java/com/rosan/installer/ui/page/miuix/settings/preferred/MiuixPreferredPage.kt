@@ -33,6 +33,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationS
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
+import com.rosan.installer.util.OSUtils
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -152,7 +153,7 @@ fun MiuixPreferredPage(
                         checked = !state.adbVerifyEnabled,
                         isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
                         enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
-                                state.authorizer != ConfigEntity.Authorizer.None,
+                                (state.authorizer != ConfigEntity.Authorizer.None|| OSUtils.isSystemApp),
                         onCheckedChange = { isDisabled ->
                             viewModel.dispatch(
                                 PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
