@@ -77,9 +77,9 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         val iPackageInstaller =
             IPackageInstaller.Stub.asInterface(iBinderWrapper(iPackageManager.packageInstaller.asBinder()))
 
-        val installerPackageName = when {
-            config.authorizer == ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName()
-            config.authorizer == ConfigEntity.Authorizer.None -> if (OSUtils.isSystemUid) context.packageName else BuildConfig.APPLICATION_ID
+        val installerPackageName = when (config.authorizer) {
+            ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName()
+            ConfigEntity.Authorizer.None -> if (OSUtils.isSystemApp) context.packageName else BuildConfig.APPLICATION_ID
             else -> config.installer ?: BuildConfig.APPLICATION_ID
         }
 

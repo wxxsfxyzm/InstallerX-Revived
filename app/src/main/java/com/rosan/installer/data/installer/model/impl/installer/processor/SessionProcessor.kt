@@ -25,7 +25,7 @@ class SessionProcessor : KoinComponent {
         var label: CharSequence? = "N/A"
         var icon: Bitmap? = null
 
-        if (OSUtils.isSystemUid) {
+        if (OSUtils.isSystemApp) {
             Timber.d("Handling CONFIRM_INSTALL as system installer.")
             val local = getSessionDetailsLocally(sessionId)
             label = local.first
@@ -61,7 +61,7 @@ class SessionProcessor : KoinComponent {
     }
 
     fun approveSession(sessionId: Int, granted: Boolean, config: ConfigEntity) {
-        if (OSUtils.isSystemUid) {
+        if (OSUtils.isSystemApp) {
             Timber.d("Approving session locally as system installer.")
             approveSessionLocally(sessionId, granted)
         } else if (config.authorizer in listOf(

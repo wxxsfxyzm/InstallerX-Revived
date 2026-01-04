@@ -27,7 +27,7 @@ object InstallerRepoImpl : InstallerRepo, KoinComponent {
             ConfigEntity.Authorizer.Shizuku -> ShizukuInstallerRepoImpl
             ConfigEntity.Authorizer.Dhizuku -> DhizukuInstallerRepoImpl
             ConfigEntity.Authorizer.None -> {
-                if (OSUtils.isSystemUid) SystemInstallerRepoImpl
+                if (OSUtils.isSystemApp) SystemInstallerRepoImpl
                 else NoneInstallerRepoImpl
             }
 
@@ -62,7 +62,7 @@ object InstallerRepoImpl : InstallerRepo, KoinComponent {
             ConfigEntity.Authorizer.Shizuku -> ShizukuInstallerRepoImpl
             ConfigEntity.Authorizer.Dhizuku -> DhizukuInstallerRepoImpl
             ConfigEntity.Authorizer.None -> {
-                if (OSUtils.isSystemUid) SystemInstallerRepoImpl
+                if (OSUtils.isSystemApp) SystemInstallerRepoImpl
                 else NoneInstallerRepoImpl
             }
 

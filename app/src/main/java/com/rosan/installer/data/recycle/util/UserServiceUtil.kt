@@ -29,7 +29,7 @@ fun useUserService(
     action: (UserService) -> Unit
 ) {
     if (authorizer == ConfigEntity.Authorizer.None) {
-        if (OSUtils.isSystemUid) {
+        if (OSUtils.isSystemApp) {
             Timber.tag(TAG).d("Running as System UID with None Authorizer. Executing direct calls.")
             action.invoke(DefaultUserService)
         } else {

@@ -85,7 +85,7 @@ class DefaultPrivilegedService(
             Log.d(TAG, "Getting IPackageManager in Process Hook Mode.")
             val original = ServiceManager.getService("package")
             IPackageManager.Stub.asInterface(binderWrapper.invoke(original))
-        } else if (OSUtils.isSystemUid) {
+        } else if (OSUtils.isSystemApp) {
             Log.d(TAG, "Getting IPackageManager in System UID Mode.")
             IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
         } else if (isHookMode) {
@@ -102,7 +102,7 @@ class DefaultPrivilegedService(
             Log.d(TAG, "Getting IActivityManager in Process Hook Mode.")
             val original = ServiceManager.getService(Context.ACTIVITY_SERVICE)
             IActivityManager.Stub.asInterface(binderWrapper.invoke(original))
-        } else if (OSUtils.isSystemUid) {
+        } else if (OSUtils.isSystemApp) {
             Log.d(TAG, "Getting IActivityManager in System UID Mode.")
             IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
         } else if (isHookMode) {
@@ -117,7 +117,7 @@ class DefaultPrivilegedService(
             Log.d(TAG, "Getting IUserManager in Process Hook Mode.")
             val original = ServiceManager.getService(Context.USER_SERVICE)
             IUserManager.Stub.asInterface(binderWrapper.invoke(original))
-        } else if (OSUtils.isSystemUid) {
+        } else if (OSUtils.isSystemApp) {
             Log.d(TAG, "Getting IUserManager in System UID Mode.")
             IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
         } else if (isHookMode) {
@@ -360,7 +360,9 @@ class DefaultPrivilegedService(
             val am = iActivityManager
 
             val userId = AndroidProcess.myUid() / 100000
-            val callerPackage = "com.android.shell"
+            val callerPackage = if (OSUtils.isSystemApp) {
+                context.packageName
+            } else "com.android.shell"
             val resolvedType = intent.resolveType(context.contentResolver)
 
             val result = am.startActivityAsUser(

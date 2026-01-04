@@ -80,14 +80,14 @@ suspend fun openAppPrivileged(
 ) {
     val intent = context.packageManager.getLaunchIntentForPackage(packageName)
         ?: return // Exit if no launch intent is found
-
+    Timber.tag("HybridStart").i("Current UID: ${android.os.Process.myUid()}, isSystemApp: ${OSUtils.isSystemApp}")
     Timber.tag("HybridStart").i("Attempting privileged API start for $packageName...")
 
     var forceStartSuccess = false
 
     val shouldAttemptPrivileged = config.authorizer == ConfigEntity.Authorizer.Root ||
             config.authorizer == ConfigEntity.Authorizer.Shizuku ||
-            (config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemUid)
+            (config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
 
     // Only attempt privileged start for Root or Shizuku
     if (shouldAttemptPrivileged) {
@@ -105,7 +105,7 @@ suspend fun openAppPrivileged(
         } else {
             // The call completed, use its boolean result
             forceStartSuccess = timeoutResult
-            Timber.tag("HybridStart").d("PARepoImpl.startActivityPrivileged returned: $forceStartSuccess")
+            Timber.tag("HybridStart").d("startActivityPrivileged returned: $forceStartSuccess")
         }
     }
 
