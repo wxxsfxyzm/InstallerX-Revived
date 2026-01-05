@@ -42,6 +42,7 @@ import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
+import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.main.widget.setting.AutoLockInstaller
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
@@ -197,13 +198,19 @@ fun PreferredPage(
                             }
                         )
                     }
+                    if (viewModel.state.authorizer == ConfigEntity.Authorizer.None)
+                        item {
+                            val tip = if (OSUtils.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
+                            else stringResource(R.string.config_authorizer_none_tips)
+                            InfoTipCard(text = tip)
+                        }
                     item { LabelWidget(stringResource(R.string.basic)) }
                     item {
                         DisableAdbVerify(
                             checked = !state.adbVerifyEnabled,
                             isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
                             enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
-                                    (state.authorizer != ConfigEntity.Authorizer.None || OSUtils.isSystemApp),
+                                    state.authorizer != ConfigEntity.Authorizer.None,
                             isM3E = false,
                             onCheckedChange = { isDisabled ->
                                 viewModel.dispatch(

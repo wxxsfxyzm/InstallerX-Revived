@@ -167,6 +167,7 @@
     <string name="config_authorizer_global">Global</string>
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">None</string>
+    <string name="config_authorizer_none_system_app_tips">Running as system installer, most of the options here are not needed.</string>
     <string name="config_authorizer_none_tips">When using system installer, most of the options here are invalid.</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>

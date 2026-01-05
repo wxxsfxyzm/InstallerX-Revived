@@ -15,7 +15,6 @@ import android.content.pm.ParceledListSlice
 import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
@@ -25,7 +24,6 @@ import android.os.RemoteException
 import android.os.ServiceManager
 import android.provider.Settings
 import android.util.Log
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.rosan.installer.ICommandOutputListener
@@ -56,6 +54,14 @@ class DefaultPrivilegedService(
     private val reflect by inject<ReflectRepo>()
 
     private val isHookMode by lazy {
+        if (binderWrapper != null) return@lazy true
+
+        if (OSUtils.isSystemApp) {
+            // In this case, it's a direct call in the local process, no Shizuku Hook needed
+            Log.d(TAG, "Running as System App (Direct Mode). isHookMode = false")
+            return@lazy false
+        }
+
         val processName: String? = try {
             val activityThreadClass = Class.forName("android.app.ActivityThread")
             val currentProcessNameMethod = reflect.getDeclaredMethod(activityThreadClass, "currentProcessName")
@@ -83,7 +89,6 @@ class DefaultPrivilegedService(
     }
 
     private val iPackageManager: IPackageManager by lazy {
-        // [Mod] Priority: Custom Wrapper (Root Hook) > System UID > Shizuku Hook > Direct/Service
         if (binderWrapper != null) {
             Log.d(TAG, "Getting IPackageManager in Process Hook Mode.")
             val original = ServiceManager.getService("package")
@@ -275,17 +280,17 @@ class DefaultPrivilegedService(
     @Throws(RemoteException::class)
     override fun execArr(command: Array<String>): String {
         return try {
-            // 执行 shell 命令
+            // Execute shell command
             val process = Runtime.getRuntime().exec(command)
-            // 读取执行结果
+            // Read execution result
             readResult(process)
         } catch (e: IOException) {
-            // 将 IOException 包装成 RemoteException 抛出
+            // Wrap IOException in RemoteException and throw
             throw RemoteException(e.message)
         } catch (e: InterruptedException) {
-            // 恢复线程的中断状态
+            // Restore thread's interrupted status
             Thread.currentThread().interrupt()
-            // 将 InterruptedException 包装成 RemoteException 抛出
+            // Wrap InterruptedException in RemoteException and throw
             throw RemoteException(e.message)
         }
     }
@@ -422,7 +427,6 @@ class DefaultPrivilegedService(
 
             } catch (e: Exception) {
                 Timber.tag(TAG).e(e, "Failed to putInt for ADB verify")
-                // 如果是 SecurityException，现在应该解决了
             } finally {
                 if (originalBinder != null && originalBinder != targetBinder) {
                     try {
@@ -509,7 +513,7 @@ class DefaultPrivilegedService(
         }
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
+    @SuppressLint("UseCompatLoadingForDrawables", "LogNotTimber")
     override fun getSessionDetails(sessionId: Int): Bundle? {
         Log.d(TAG, "getSessionDetails: sessionId=$sessionId")
         try {
@@ -522,7 +526,7 @@ class DefaultPrivilegedService(
             val originatingUid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 sessionInfo.originatingUid
             } else {
-                -1 // Return -1 if SDK too low (Process.INVALID_UID)
+                -1
             }
             Log.d(TAG, "Got originatingUid: $originatingUid")
 
@@ -530,7 +534,7 @@ class DefaultPrivilegedService(
             var resolvedIcon: Bitmap? = null
             var path: String? = null
 
-            // Get apk path via reflection
+            // 1. Reflect to get the resolved APK path
             try {
                 val resolvedField: Field? = reflect.getDeclaredField(
                     sessionInfo::class.java,
@@ -544,7 +548,8 @@ class DefaultPrivilegedService(
                 Log.e(TAG, "Failed to reflect resolvedBaseCodePath", e)
             }
 
-            // Load appInfo from path
+            // 2. Parse APK from path to get Label and Icon
+            // This logic is ported from the old SessionProcessor as it handles drawables/adaptive icons better.
             if (!path.isNullOrEmpty()) {
                 Log.d(TAG, "Loading info from APK path: $path")
                 try {
@@ -555,7 +560,9 @@ class DefaultPrivilegedService(
                     )
                     val appInfo = pkgInfo?.applicationInfo
                     if (appInfo != null) {
+                        // Crucial: set the source dir so the PM can read resources
                         appInfo.publicSourceDir = path
+                        appInfo.sourceDir = path
 
                         // Load Label
                         try {
@@ -565,70 +572,45 @@ class DefaultPrivilegedService(
                             Log.e(TAG, "Failed to load label", e)
                         }
 
+                        // Load Icon
                         try {
-                            // Load Resources for APK
-                            // appInfo.publicSourceDir must be set
-                            val apkResources = pm.getResourcesForApplication(appInfo)
-                            val iconId = appInfo.icon
-
-                            if (iconId == 0) {
-                                Log.w(TAG, "appInfo.icon ID is 0, using default icon.")
-                                // Fallback to default icon
-                                val defaultIcon = pm.defaultActivityIcon
-                                resolvedIcon = (defaultIcon as? BitmapDrawable)?.bitmap
-                                    ?: defaultIcon.toBitmap(
-                                        defaultIcon.intrinsicWidth.coerceAtLeast(1),
-                                        defaultIcon.intrinsicHeight.coerceAtLeast(1)
-                                    )
+                            val drawable = appInfo.loadIcon(pm)
+                            resolvedIcon = if (drawable is BitmapDrawable) {
+                                drawable.bitmap
                             } else {
-                                Log.d(TAG, "Loading icon ID $iconId from APK resources.")
-                                val drawableIcon = apkResources.getDrawable(iconId, null) // Use null for theme
-
-                                val width = drawableIcon.intrinsicWidth
-                                val height = drawableIcon.intrinsicHeight
-                                Log.d(
-                                    TAG,
-                                    "Drawable loaded from resources. Class: ${drawableIcon.javaClass.name}, WxH: ${width}x${height}"
-                                )
-
-                                if (width <= 0 || height <= 0) {
-                                    Log.w(TAG, "Drawable has invalid dimensions, cannot convert.")
-                                } else {
-                                    // Render Drawable to Bitmap manually
-                                    // Handles VectorDrawable, AdaptiveIconDrawable etc.
-                                    val bitmap = createBitmap(width, height)
-                                    val canvas = Canvas(bitmap)
-                                    drawableIcon.setBounds(0, 0, canvas.width, canvas.height)
-                                    drawableIcon.draw(canvas)
-                                    resolvedIcon = bitmap
-                                    Log.d(TAG, "Manually rendered drawable to bitmap.")
-                                }
+                                // Handle AdaptiveIconDrawable, VectorDrawable, etc.
+                                val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 1
+                                val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 1
+                                drawable.toBitmap(width, height, Bitmap.Config.ARGB_8888)
                             }
+                            Log.d(TAG, "Icon loaded and converted to Bitmap successfully.")
                         } catch (e: Exception) {
-                            Log.e(TAG, "Failed to load icon using getResourcesForApplication", e)
+                            Log.e(TAG, "Failed to load icon using loadIcon", e)
                         }
-
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Failed to load info from APK path", e)
+                    Log.e(TAG, "Failed to parse APK from path", e)
                 }
             }
 
-            // Fallback to sessionInfo (mostly null)
-            Log.d(TAG, "Icon Decision: resolvedIcon is null: ${resolvedIcon == null}")
-            Log.d(TAG, "Icon Decision: sessionInfo.appIcon is null: ${sessionInfo.appIcon == null}")
-
+            // 3. Fallback to SessionInfo
             val finalLabel = resolvedLabel ?: sessionInfo.appLabel ?: "N/A"
             val finalIcon = resolvedIcon ?: sessionInfo.appIcon
-            Log.d(TAG, "Icon Decision: finalIcon is null: ${finalIcon == null}")
 
-            // Package into Bundle
+            // 4. Serialize to Bundle
             val bundle = Bundle()
             bundle.putCharSequence("appLabel", finalLabel)
             if (finalIcon != null) {
-                val stream = ByteArrayOutputStream()
-                finalIcon.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                bundle.putByteArray("appIcon", stream.toByteArray())
+                try {
+                    val stream = ByteArrayOutputStream()
+                    // Compress to PNG to transfer across Binder (Bitmap is Parcelable but large bitmaps can fail transaction)
+                    // Or we can put the Bitmap directly into Bundle if it's not too huge.
+                    // Ideally, pass Bitmap directly if within limits, but byte array is safer for IPC limits.
+                    finalIcon.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                    bundle.putByteArray("appIcon", stream.toByteArray())
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to compress icon", e)
+                }
             }
             bundle.putInt("originatingUid", originatingUid)
             return bundle
@@ -798,21 +780,21 @@ class DefaultPrivilegedService(
 
     @Throws(IOException::class, InterruptedException::class)
     private fun readResult(process: Process): String {
-        // 分别读取标准输出和标准错误
+        // Read standard output and standard error respectively
         val output = process.inputStream.bufferedReader().use { it.readText() }
         val error = process.errorStream.bufferedReader().use { it.readText() }
 
-        // 等待命令执行完成，并获取退出码
+        // Wait for command execution to complete and get the exit code
         val exitCode = process.waitFor()
 
-        // 检查退出码。0 通常代表成功，任何非零值都代表失败。
+        // Check exit code. 0 typically represents success, any non-zero value represents failure.
         if (exitCode != 0) {
-            // 如果失败了，就构造一个详细的错误信息并抛出 IOException
-            // 这样 execArr 方法里的 catch 块就能捕捉到它，并转换成 RemoteException
-            throw IOException("命令执行失败，退出码: $exitCode, 错误信息: '$error'")
+            // If it failed, construct a detailed error message and throw IOException
+            // This way the catch block in the execArr method can catch it and convert it to RemoteException
+            throw IOException("Command execution failed, exit code: $exitCode, error message: '$error'")
         }
 
-        // 如果成功，返回标准输出的内容
+        // If successful, return the content of standard output
         return output
     }
 }

@@ -215,7 +215,11 @@ fun NewPreferredPage(
                     }
 
                     if (viewModel.state.authorizer == ConfigEntity.Authorizer.None)
-                        item { InfoTipCard(text = stringResource(R.string.config_authorizer_none_tips)) }
+                        item {
+                            val tip = if (OSUtils.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
+                            else stringResource(R.string.config_authorizer_none_tips)
+                            InfoTipCard(text = tip)
+                        }
 
                     // --- Basic Settings Group ---
                     item {
@@ -227,7 +231,7 @@ fun NewPreferredPage(
                                         checked = !state.adbVerifyEnabled,
                                         isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
                                         enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
-                                                (state.authorizer != ConfigEntity.Authorizer.None || OSUtils.isSystemApp),
+                                                state.authorizer != ConfigEntity.Authorizer.None,
                                         onCheckedChange = { isDisabled ->
                                             viewModel.dispatch(
                                                 PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)

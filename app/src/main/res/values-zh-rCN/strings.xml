@@ -163,6 +163,7 @@
     <string name="config_authorizer_global">跟随全局</string>
     <string name="config_authorizer_global_desc">跟随全局（%1$s）</string>
     <string name="config_authorizer_none">无</string>
+    <string name="config_authorizer_none_system_app_tips">正在作为系统安装器运行，此处的大多数选项不再有效。</string>
     <string name="config_authorizer_none_tips">使用系统安装器时，此处的大多数选项将无效。</string>
     <string name="config_authorizer_root">ROOT 超级用户</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
