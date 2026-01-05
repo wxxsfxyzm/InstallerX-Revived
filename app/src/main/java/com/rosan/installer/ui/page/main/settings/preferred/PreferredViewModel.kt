@@ -462,24 +462,12 @@ class PreferredViewModel(
             successMessage = null, // No success snackbar message for this action type
             block = {
                 Timber.d("Changing ADB Verify Enabled to: $enabled")
-                val isPermissionGranted = PrivilegedManager.isPermissionGranted(
-                    state.authorizer,
-                    context.packageName, "android.permission.WRITE_SECURE_SETTINGS"
-                )
-                if (!isPermissionGranted) {
-                    Timber.w("WRITE_SECURE_SETTINGS permission not granted, attempting to grant it...")
-                    PrivilegedManager.grantRuntimePermission(
-                        state.authorizer,
-                        context.packageName,
-                        "android.permission.WRITE_SECURE_SETTINGS"
-                    )
-                }
-
-                // This need android.permission.WRITE_SECURE_SETTINGS, thus cannot be called directly
-                Settings.Global.putInt(
-                    context.contentResolver,
-                    "verifier_verify_adb_installs",
-                    if (enabled) 1 else 0
+                // [New Logic] Delegate to PrivilegedManager (Service)
+                // The Service handles the Permission/Hook logic internally via Binder Proxy
+                PrivilegedManager.setAdbVerify(
+                    authorizer = state.authorizer,
+                    customizeAuthorizer = state.customizeAuthorizer,
+                    enabled = enabled
                 )
                 adbVerifyEnabledFlow.value = enabled
             }

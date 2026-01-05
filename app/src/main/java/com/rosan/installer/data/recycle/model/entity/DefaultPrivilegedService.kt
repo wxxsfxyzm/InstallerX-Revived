@@ -5,6 +5,7 @@ import android.app.IActivityManager
 import android.app.IApplicationThread
 import android.app.ProfilerInfo
 import android.content.ComponentName
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -22,6 +23,7 @@ import android.os.IBinder
 import android.os.IUserManager
 import android.os.RemoteException
 import android.os.ServiceManager
+import android.provider.Settings
 import android.util.Log
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
@@ -29,6 +31,7 @@ import androidx.core.net.toUri
 import com.rosan.installer.ICommandOutputListener
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
 import com.rosan.installer.data.recycle.util.ShizukuHook
+import com.rosan.installer.data.recycle.util.SystemContext
 import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.util.OSUtils
@@ -85,12 +88,12 @@ class DefaultPrivilegedService(
             Log.d(TAG, "Getting IPackageManager in Process Hook Mode.")
             val original = ServiceManager.getService("package")
             IPackageManager.Stub.asInterface(binderWrapper.invoke(original))
-        } else if (OSUtils.isSystemApp) {
-            Log.d(TAG, "Getting IPackageManager in System UID Mode.")
-            IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
         } else if (isHookMode) {
             Log.d(TAG, "Getting IPackageManager in Hook Mode (Directly).")
             ShizukuHook.hookedPackageManager
+        } else if (OSUtils.isSystemApp) {
+            Log.d(TAG, "Getting IPackageManager in System UID Mode.")
+            IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
         } else {
             Log.d(TAG, "Getting IPackageManager in UserService Mode.")
             IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
@@ -102,11 +105,11 @@ class DefaultPrivilegedService(
             Log.d(TAG, "Getting IActivityManager in Process Hook Mode.")
             val original = ServiceManager.getService(Context.ACTIVITY_SERVICE)
             IActivityManager.Stub.asInterface(binderWrapper.invoke(original))
+        } else if (isHookMode) {
+            ShizukuHook.hookedActivityManager
         } else if (OSUtils.isSystemApp) {
             Log.d(TAG, "Getting IActivityManager in System UID Mode.")
             IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
-        } else if (isHookMode) {
-            ShizukuHook.hookedActivityManager
         } else {
             IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
         }
@@ -117,15 +120,51 @@ class DefaultPrivilegedService(
             Log.d(TAG, "Getting IUserManager in Process Hook Mode.")
             val original = ServiceManager.getService(Context.USER_SERVICE)
             IUserManager.Stub.asInterface(binderWrapper.invoke(original))
-        } else if (OSUtils.isSystemApp) {
-            Log.d(TAG, "Getting IUserManager in System UID Mode.")
-            IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
         } else if (isHookMode) {
             Log.d("", "Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
             ShizukuHook.hookedUserManager
+        } else if (OSUtils.isSystemApp) {
+            Log.d(TAG, "Getting IUserManager in System UID Mode.")
+            IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
         } else {
             Log.d(TAG, "Getting IUserManager in UserService Mode.")
             IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
+        }
+    }
+
+    private val settingsBinder: IBinder? by lazy {
+        // Helper to get the original raw binder via reflection
+        fun getOriginalBinder(): IBinder? {
+            return try {
+                val settingsClass = Settings.Global::class.java
+                val holder = reflect.getStaticObjectField(settingsClass, "sProviderHolder")
+                val providerField = reflect.getDeclaredField(holder.javaClass, "mContentProvider")
+                providerField?.isAccessible = true
+                val provider = providerField?.get(holder)
+                val remoteField = reflect.getDeclaredField(provider!!.javaClass, "mRemote")
+                remoteField?.isAccessible = true
+                remoteField?.get(provider) as? IBinder
+            } catch (e: Exception) {
+                Timber.tag(TAG).e(e, "Failed to get original Settings binder via reflection")
+                null
+            }
+        }
+
+        // [Mod] Priority: Custom Wrapper (Root Hook) > System UID > Shizuku Hook > Direct
+        if (binderWrapper != null) {
+            Log.d(TAG, "Getting Settings Binder in Process Hook Mode.")
+            val original = getOriginalBinder()
+            if (original != null) binderWrapper.invoke(original) else null
+        } else if (isHookMode) {
+            Log.d(TAG, "Getting Settings Binder in Hook Mode (via ShizukuHook).")
+            ShizukuHook.hookedSettingsBinder
+        } else if (OSUtils.isSystemApp) {
+            Log.d(TAG, "Getting Settings Binder in System UID Mode.")
+            // System apps usually have WRITE_SECURE_SETTINGS, return original
+            getOriginalBinder()
+        } else {
+            Log.d(TAG, "Getting Settings Binder in UserService Mode.")
+            getOriginalBinder()
         }
     }
 
@@ -320,6 +359,85 @@ class DefaultPrivilegedService(
         }
     }
 
+    override fun setAdbVerify(enabled: Boolean) {
+        val key = "verifier_verify_adb_installs"
+        val targetValue = if (enabled) 1 else 0
+
+        // 1. Check current value
+        val currentValue = try {
+            Settings.Global.getInt(context.contentResolver, key, 1)
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Failed to read initial setting for $key")
+            1
+        }
+
+        if (currentValue == targetValue) {
+            Timber.tag(TAG).d("ADB verify state matches target ($enabled). No action needed.")
+            return
+        }
+
+        // 2. Get the privileged binder from our unified lazy loader
+        val targetBinder = settingsBinder
+        if (targetBinder == null) {
+            Timber.tag(TAG).w("Cannot change ADB verify: Privileged Settings binder is unavailable.")
+            return
+        }
+
+        Timber.tag(TAG).d("Trying to set ADB verify to $targetValue (Current: $currentValue)")
+
+        try {
+            // 3. Prepare Reflection for Swapping
+            val settingsClass = Settings.Global::class.java
+            val holder = reflect.getStaticObjectField(settingsClass, "sProviderHolder")
+
+            val providerField = reflect.getDeclaredField(holder.javaClass, "mContentProvider") ?: return
+            providerField.isAccessible = true
+            val provider = providerField.get(holder) ?: return
+
+            val remoteField = reflect.getDeclaredField(provider.javaClass, "mRemote") ?: return
+            remoteField.isAccessible = true
+            val originalBinder = remoteField.get(provider) as? IBinder
+
+            // 4. Swap -> Execute -> Restore
+            try {
+                if (originalBinder != targetBinder) {
+                    remoteField.set(provider, targetBinder)
+                }
+                val targetResolver = if (binderWrapper != null) {
+                    // [Root Mode] UID is 1000.
+                    // Must spoof package name "android" to pass AppOps check.
+                    Timber.tag(TAG).d("Root Mode: Using SystemContextResolver (UID 1000, Pkg: android)")
+                    val systemContext = SystemContext(context)
+                    object : ContentResolver(systemContext) {}
+                } else {
+                    // [Shizuku Mode] UID is 2000.
+                    // Must spoof package name "com.android.shell".
+                    Timber.tag(TAG).d("Shizuku Mode: Using ShellContextResolver (UID 2000, Pkg: com.android.shell)")
+                    val shellContext = ShellContext(context)
+                    object : ContentResolver(shellContext) {}
+                }
+
+                val result = Settings.Global.putInt(targetResolver, key, targetValue)
+                Timber.tag(TAG).i("Set $key to $targetValue. Result: $result")
+
+            } catch (e: Exception) {
+                Timber.tag(TAG).e(e, "Failed to putInt for ADB verify")
+                // 如果是 SecurityException，现在应该解决了
+            } finally {
+                if (originalBinder != null && originalBinder != targetBinder) {
+                    try {
+                        remoteField.set(provider, originalBinder)
+                        Timber.tag(TAG).d("Restored original settings binder")
+                    } catch (e: Exception) {
+                        Timber.tag(TAG).e(e, "Failed to restore original binder!")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Critical error in setAdbVerify setup")
+        }
+    }
+
     override fun grantRuntimePermission(packageName: String, permission: String) {
         try {
             val userId = AndroidProcess.myUid() / 100000
@@ -331,9 +449,7 @@ class DefaultPrivilegedService(
             Log.i(TAG, "Successfully granted $permission to $packageName")
 
         } catch (e: Exception) {
-            // 捕获所有可能的异常 (包括 SecurityException)
             Log.e(TAG, "ERROR granting permission", e)
-            // 将异常包装成 RemoteException 抛回给客户端
             throw RemoteException("Failed to grant permission via system API: ${e.message}")
         }
     }

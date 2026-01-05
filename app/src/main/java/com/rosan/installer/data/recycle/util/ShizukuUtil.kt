@@ -5,7 +5,9 @@ import android.app.ActivityManager
 import android.app.IActivityManager
 import android.content.pm.IPackageManager
 import android.content.pm.PackageManager
+import android.os.IBinder
 import android.os.IUserManager
+import android.provider.Settings
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
 import com.rosan.installer.data.reflect.repo.ReflectRepo
@@ -43,7 +45,7 @@ suspend fun <T> requireShizukuPermissionGranted(action: suspend () -> T): T {
     }.catch {
         throw ShizukuNotWorkException(it)
     }.first()
-    
+
     return action()
 }
 
@@ -83,6 +85,36 @@ object ShizukuHook : KoinComponent {
         val wrapper = ShizukuBinderWrapper(originalUM.asBinder())
         IUserManager.Stub.asInterface(wrapper).also {
             Timber.tag("ShizukuHook").i("On-demand hooked IUserManager created.")
+        }
+    }
+
+    val hookedSettingsBinder: IBinder? by lazy {
+        Timber.tag("ShizukuHook").d("Creating on-demand hooked Settings Binder...")
+        try {
+            // 1. Get Settings.Global.sProviderHolder
+            val settingsClass = Settings.Global::class.java
+            val holder = reflect.getStaticObjectField(settingsClass, "sProviderHolder")
+
+            // 2. Get mContentProvider
+            val holderClass = holder.javaClass
+            val providerField = reflect.getDeclaredField(holderClass, "mContentProvider")
+            providerField?.isAccessible = true
+            val provider = providerField?.get(holder) ?: throw IllegalStateException("mContentProvider is null")
+
+            // 3. Get mRemote
+            val providerClass = provider.javaClass
+            val remoteField = reflect.getDeclaredField(providerClass, "mRemote")
+            remoteField?.isAccessible = true
+            val originalBinder = remoteField?.get(provider) as? IBinder
+                ?: throw IllegalStateException("mRemote binder is null")
+
+            // 4. Wrap with Shizuku
+            ShizukuBinderWrapper(originalBinder).also {
+                Timber.tag("ShizukuHook").i("On-demand hooked Settings Binder created.")
+            }
+        } catch (e: Exception) {
+            Timber.tag("ShizukuHook").e(e, "Failed to create hooked Settings Binder")
+            null
         }
     }
 }

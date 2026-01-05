@@ -41,9 +41,12 @@ object PrivilegedManager : KoinComponent {
      * Helper to generate the special auth command (e.g. "su 1000") for Root mode.
      * This ensures different methods reuse the same 'su 1000' service process.
      */
-    private fun getSpecialAuth(authorizer: ConfigEntity.Authorizer): (() -> String?)? =
+    private fun getSpecialAuth(
+        authorizer: ConfigEntity.Authorizer,
+        specialAuth: String = SHELL_SYSTEM
+    ): (() -> String?)? =
         if (authorizer == ConfigEntity.Authorizer.Root) {
-            { SHELL_SYSTEM }
+            { specialAuth }
         } else null
 
     /**
@@ -60,6 +63,32 @@ object PrivilegedManager : KoinComponent {
             special = getSpecialAuth(authorizer)
         ) { userService ->
             userService.privileged.setDefaultInstaller(component, enable)
+        }
+    }
+
+    /**
+     * Sets the "Verify apps over ADB" setting via Binder Hooking.
+     * Note: useHookMode is forced to true.
+     */
+    fun setAdbVerify(
+        authorizer: ConfigEntity.Authorizer,
+        customizeAuthorizer: String = "",
+        enabled: Boolean
+    ) {
+        useUserService(
+            authorizer = authorizer,
+            customizeAuthorizer = customizeAuthorizer,
+            useHookMode = true, // Force Hook Mode for Binder swapping logic
+            special = getSpecialAuth(authorizer)
+        ) { userService ->
+            try {
+                // Call the updated AIDL method
+                userService.privileged.setAdbVerify(enabled)
+                Timber.i("Successfully requested to set ADB verify to $enabled.")
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to set ADB verify")
+                throw e
+            }
         }
     }
 
@@ -172,7 +201,7 @@ object PrivilegedManager : KoinComponent {
             authorizer = config.authorizer,
             customizeAuthorizer = config.customizeAuthorizer,
             useHookMode = getHookMode(),
-            special = getSpecialAuth(config.authorizer)
+            special = null
         ) {
             try {
                 success = it.privileged.startActivityPrivileged(intent)
@@ -192,7 +221,7 @@ object PrivilegedManager : KoinComponent {
         useUserService(
             authorizer = authorizer,
             useHookMode = getHookMode(),
-            special = getSpecialAuth(authorizer)
+            special = null
         ) {
             try {
                 @Suppress("UNCHECKED_CAST")

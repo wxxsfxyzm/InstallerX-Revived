@@ -65,6 +65,10 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
         return false
     }
 
+    override fun setAdbVerify(enabled: Boolean) {
+        throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
+    }
+
     /**
      * Grants a runtime permission to a specific package.
      * This requires Device Owner or Profile Owner privileges.
