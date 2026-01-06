@@ -40,10 +40,13 @@ jobs:
           # 主分支构建允许更新缓存
           cache-read-only: false
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
       - name: Update versionName format
         id: version
         run: |
-          VERSION=$(grep -oP 'versionName = "\K([0-9]+\.[0-9]+\.[0-9]+)' app/build.gradle.kts)
+          VERSION=$(./gradlew -q properties | grep '^BASE_VERSION:' | awk '{print $2}')
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           A=$(echo $VERSION | cut -d. -f1)
           B=$(echo $VERSION | cut -d. -f2)
@@ -61,15 +64,11 @@ jobs:
           echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> keystore.properties
           echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> keystore.properties
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-
       - name: Build Preview Release APKs
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease \
-          -PVERSION_NAME="${NEW_VERSION}"
+        run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease -PVERSION_NAME="${NEW_VERSION}"
 
       - name: Find and Rename Preview APKs
         id: rename_apks

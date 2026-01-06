@@ -46,7 +46,7 @@ android {
         // update versionCode and versionName before manually trigger a stable release
         versionCode = 45
         versionName = project.findProperty("VERSION_NAME") as String?
-            ?: "2.3.1"
+            ?: project.findProperty("BASE_VERSION") as String
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
