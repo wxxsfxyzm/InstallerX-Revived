@@ -70,15 +70,18 @@ jobs:
 
       - name: Update versionName format
         id: version
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=$(./gradlew -q properties | grep '^BASE_VERSION:' | awk '{print $2}')
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           A=$(echo $VERSION | cut -d. -f1)
           B=$(echo $VERSION | cut -d. -f2)
           C=$(echo $VERSION | cut -d. -f3)
           C_NEW=$((C + 1))
           NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
-          echo "VNEW_VERSION=v${A}.${B}.${C_NEW}" >> $GITHUB_OUTPUT
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "Generated Version: $NEW_VERSION"
 
       - name: Decode and set up signing key
         run: |
@@ -93,7 +96,7 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease -PVERSION_NAME="${NEW_VERSION}"
+        run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease -PVERSION_NAME="${{ env.NEW_VERSION }}"
 
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
