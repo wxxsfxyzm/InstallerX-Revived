@@ -28,9 +28,11 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.rosan.installer.ICommandOutputListener
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
+import com.rosan.installer.data.recycle.util.ShizukuContext
 import com.rosan.installer.data.recycle.util.ShizukuHook
 import com.rosan.installer.data.recycle.util.SystemContext
 import com.rosan.installer.data.recycle.util.deletePaths
+import com.rosan.installer.data.recycle.util.resolveSettingsBinder
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.util.OSUtils
 import org.koin.core.component.inject
@@ -96,11 +98,9 @@ class DefaultPrivilegedService(
         } else if (isHookMode) {
             Log.d(TAG, "Getting IPackageManager in Hook Mode (Directly).")
             ShizukuHook.hookedPackageManager
-        } else if (OSUtils.isSystemApp) {
-            Log.d(TAG, "Getting IPackageManager in System UID Mode.")
-            IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
         } else {
-            Log.d(TAG, "Getting IPackageManager in UserService Mode.")
+            if (OSUtils.isSystemApp) Log.d(TAG, "Getting IPackageManager in System Mode.")
+            else Log.d(TAG, "Getting IPackageManager in UserService Mode.")
             IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
         }
     }
@@ -112,10 +112,9 @@ class DefaultPrivilegedService(
             IActivityManager.Stub.asInterface(binderWrapper.invoke(original))
         } else if (isHookMode) {
             ShizukuHook.hookedActivityManager
-        } else if (OSUtils.isSystemApp) {
-            Log.d(TAG, "Getting IActivityManager in System UID Mode.")
-            IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
         } else {
+            if (OSUtils.isSystemApp) Log.d(TAG, "Getting IActivityManager in System Mode.")
+            else Log.d(TAG, "Getting IActivityManager in UserService Mode.")
             IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
         }
     }
@@ -128,48 +127,26 @@ class DefaultPrivilegedService(
         } else if (isHookMode) {
             Log.d("", "Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
             ShizukuHook.hookedUserManager
-        } else if (OSUtils.isSystemApp) {
-            Log.d(TAG, "Getting IUserManager in System UID Mode.")
-            IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
         } else {
-            Log.d(TAG, "Getting IUserManager in UserService Mode.")
+            if (OSUtils.isSystemApp) Log.d(TAG, "Getting IUserManager in System UID Mode.")
+            else Log.d(TAG, "Getting IUserManager in UserService Mode.")
             IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
         }
     }
 
     private val settingsBinder: IBinder? by lazy {
-        // Helper to get the original raw binder via reflection
-        fun getOriginalBinder(): IBinder? {
-            return try {
-                val settingsClass = Settings.Global::class.java
-                val holder = reflect.getStaticObjectField(settingsClass, "sProviderHolder")
-                val providerField = reflect.getDeclaredField(holder.javaClass, "mContentProvider")
-                providerField?.isAccessible = true
-                val provider = providerField?.get(holder)
-                val remoteField = reflect.getDeclaredField(provider!!.javaClass, "mRemote")
-                remoteField?.isAccessible = true
-                remoteField?.get(provider) as? IBinder
-            } catch (e: Exception) {
-                Timber.tag(TAG).e(e, "Failed to get original Settings binder via reflection")
-                null
-            }
-        }
+        val original = resolveSettingsBinder(reflect)?.originalBinder
 
-        // [Mod] Priority: Custom Wrapper (Root Hook) > System UID > Shizuku Hook > Direct
         if (binderWrapper != null) {
             Log.d(TAG, "Getting Settings Binder in Process Hook Mode.")
-            val original = getOriginalBinder()
             if (original != null) binderWrapper.invoke(original) else null
         } else if (isHookMode) {
             Log.d(TAG, "Getting Settings Binder in Hook Mode (via ShizukuHook).")
             ShizukuHook.hookedSettingsBinder
-        } else if (OSUtils.isSystemApp) {
-            Log.d(TAG, "Getting Settings Binder in System UID Mode.")
-            // System apps usually have WRITE_SECURE_SETTINGS, return original
-            getOriginalBinder()
         } else {
-            Log.d(TAG, "Getting Settings Binder in UserService Mode.")
-            getOriginalBinder()
+            if (OSUtils.isSystemApp) Log.d(TAG, "Getting Settings Binder in System Mode.")
+            else Log.d(TAG, "Getting Settings Binder in UserService Mode.")
+            original
         }
     }
 
@@ -183,10 +160,6 @@ class DefaultPrivilegedService(
         Timber.tag(TAG).d("performDexOpt: $packageName, filter=$compilerFilter, force=$force")
 
         return try {
-            val iPackageManager = IPackageManager.Stub.asInterface(
-                ServiceManager.getService("package")
-            )
-
             val method = iPackageManager::class.java.getDeclaredMethod(
                 "performDexOptMode",
                 String::class.java,
@@ -392,16 +365,15 @@ class DefaultPrivilegedService(
 
         try {
             // 3. Prepare Reflection for Swapping
-            val settingsClass = Settings.Global::class.java
-            val holder = reflect.getStaticObjectField(settingsClass, "sProviderHolder")
+            val info = resolveSettingsBinder(reflect)
+            if (info == null) {
+                Timber.tag(TAG).e("Failed to resolve Settings reflection info for swapping")
+                return
+            }
 
-            val providerField = reflect.getDeclaredField(holder.javaClass, "mContentProvider") ?: return
-            providerField.isAccessible = true
-            val provider = providerField.get(holder) ?: return
-
-            val remoteField = reflect.getDeclaredField(provider.javaClass, "mRemote") ?: return
-            remoteField.isAccessible = true
-            val originalBinder = remoteField.get(provider) as? IBinder
+            val provider = info.provider
+            val remoteField = info.remoteField
+            val originalBinder = info.originalBinder
 
             // 4. Swap -> Execute -> Restore
             try {
@@ -418,7 +390,7 @@ class DefaultPrivilegedService(
                     // [Shizuku Mode] UID is 2000.
                     // Must spoof package name "com.android.shell".
                     Timber.tag(TAG).d("Shizuku Mode: Using ShellContextResolver (UID 2000, Pkg: com.android.shell)")
-                    val shellContext = ShellContext(context)
+                    val shellContext = ShizukuContext(context)
                     object : ContentResolver(shellContext) {}
                 }
 
@@ -428,7 +400,7 @@ class DefaultPrivilegedService(
             } catch (e: Exception) {
                 Timber.tag(TAG).e(e, "Failed to putInt for ADB verify")
             } finally {
-                if (originalBinder != null && originalBinder != targetBinder) {
+                if (originalBinder !== targetBinder) {
                     try {
                         remoteField.set(provider, originalBinder)
                         Timber.tag(TAG).d("Restored original settings binder")
