@@ -188,7 +188,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                 show = showBottomSheet, // Always true as long as this page is composed.
                 backgroundColor = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainerHigh else if (isDark)
                     miuixSheetColorDark else miuixSheetColorLight,
-                leftAction = {
+                startAction = {
                     when (currentState) {
                         is InstallerViewState.InstallChoice -> {
                             // Check the new flag from ViewModel
@@ -272,7 +272,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                         else -> {}
                     }
                 },
-                rightAction = {
+                endAction = {
                     when (currentState) {
                         is InstallerViewState.InstallPrepare -> {
                             if (!showSettings && !showPermissions) {

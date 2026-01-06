@@ -531,7 +531,7 @@ fun MiuixManagedPackagesWidget(
                 BasicComponent(
                     title = item.name,
                     summary = item.packageName,
-                    rightActions = {
+                    endActions = {
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
@@ -824,7 +824,7 @@ fun MiuixManagedUidsWidget(
                 BasicComponent(
                     title = item.uidName,
                     summary = "UID: ${item.uidValue}",
-                    rightActions = {
+                    endActions = {
                         // Custom delete button
                         Box(
                             modifier = Modifier
@@ -1059,8 +1059,8 @@ fun MiuixUninstallSystemAppWidget(viewModel: PreferredViewModel) {
 fun MiuixUninstallRequireBiometricAuthWidget(viewModel: PreferredViewModel) {
     if (BiometricManager
             .from(LocalContext.current)
-            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS)
-    {
+            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
+    ) {
         MiuixSwitchWidget(
             icon = AppIcons.BiometricAuth,
             title = stringResource(R.string.uninstaller_settings_require_biometric_auth),
