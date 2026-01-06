@@ -75,7 +75,6 @@ jobs:
           C=$(echo $VERSION | cut -d. -f3)
           C_NEW=$((C + 1))
           NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
-          sed -i "s/versionName = \".*\"/versionName = \"${NEW_VERSION}\"/" app/build.gradle.kts
           echo "VNEW_VERSION=v${A}.${B}.${C_NEW}" >> $GITHUB_OUTPUT
 
       - name: Grant execute permission for gradlew
@@ -94,7 +93,8 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease
+        run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease \
+          -PVERSION_NAME="${NEW_VERSION}"
 
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4

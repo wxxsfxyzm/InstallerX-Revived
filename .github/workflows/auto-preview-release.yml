@@ -50,7 +50,6 @@ jobs:
           C=$(echo $VERSION | cut -d. -f3)
           C_NEW=$((C + 1))
           NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
-          sed -i "s/versionName = \".*\"/versionName = \"${NEW_VERSION}\"/" app/build.gradle.kts
           echo "VNEW_VERSION=v${A}.${B}.${C_NEW}" >> $GITHUB_OUTPUT
 
       - name: Decode and set up signing key
@@ -69,7 +68,8 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease
+        run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease \
+          -PVERSION_NAME="${NEW_VERSION}"
 
       - name: Find and Rename Preview APKs
         id: rename_apks
