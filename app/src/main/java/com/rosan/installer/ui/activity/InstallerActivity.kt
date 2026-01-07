@@ -309,7 +309,12 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         Timber.d("$tag: Flags: ${Integer.toHexString(intent.flags)}")
         intent.extras?.let { extras ->
             for (key in extras.keySet()) {
-                Timber.d("$tag: Extra: $key = ${extras.getString(key)}")
+                // Use get(key) instead of getString(key) to avoid ClassCastException
+                // on non-string values (e.g. SESSION_ID is an Integer).
+                // Although get(key) is deprecated in newer APIs, it is the only way
+                // to generically log unknown types without suppressions or reflection.
+                val value = extras.get(key)
+                Timber.d("$tag: Extra: $key = $value")
             }
         }
     }

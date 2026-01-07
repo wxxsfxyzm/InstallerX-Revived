@@ -26,4 +26,13 @@ interface InstallerRepo {
         packageName: String,
         extra: InstallExtraInfoEntity,
     )
+
+    /**
+     * Approve or deny a session.
+     */
+    suspend fun approveSession(
+        config: ConfigEntity,
+        sessionId: Int,
+        granted: Boolean
+    )
 }

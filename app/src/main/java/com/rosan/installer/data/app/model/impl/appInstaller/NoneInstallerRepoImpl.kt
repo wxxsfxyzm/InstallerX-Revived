@@ -141,7 +141,7 @@ object NoneInstallerRepoImpl : InstallerRepo, KoinComponent {
             val receiver = IBinderInstallerRepoImpl.LocalIntentReceiver()
 
             // Request uninstallation using the standard API
-            // This will likely trigger a system dialog asking the user to confirm uninstallation
+            // This will trigger a system dialog asking the user to confirm uninstallation
             packageInstaller.uninstall(packageName, receiver.getIntentSender())
 
             // Block and wait for the result verification
@@ -152,5 +152,9 @@ object NoneInstallerRepoImpl : InstallerRepo, KoinComponent {
         result.onFailure {
             throw it
         }
+    }
+
+    override suspend fun approveSession(config: ConfigEntity, sessionId: Int, granted: Boolean) {
+        throw UnsupportedOperationException("Session Approve is not supported in None authorizer")
     }
 }

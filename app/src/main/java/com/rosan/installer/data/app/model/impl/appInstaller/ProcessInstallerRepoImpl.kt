@@ -69,6 +69,29 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
         }
     }
 
+    override suspend fun approveSession(
+        config: ConfigEntity,
+        sessionId: Int,
+        granted: Boolean
+    ) {
+        val shell = when (config.authorizer) {
+            ConfigEntity.Authorizer.Root -> SHELL_ROOT
+            ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
+            else -> SHELL_SH
+        }
+
+        val recycler = ProcessHookRecycler(shell)
+        val recyclableHandle = recycler.make()
+
+        withContext(localService.asContextElement(value = recyclableHandle.entity)) {
+            try {
+                super.approveSession(config, sessionId, granted)
+            } finally {
+                recyclableHandle.recycle()
+            }
+        }
+    }
+
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder {
         val service = localService.get()
             ?: throw IllegalStateException(

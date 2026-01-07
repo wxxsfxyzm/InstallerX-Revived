@@ -40,7 +40,6 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.lang.reflect.Field
-import java.lang.reflect.Method
 import java.nio.charset.StandardCharsets
 import android.os.Process as AndroidProcess
 
@@ -485,29 +484,35 @@ class DefaultPrivilegedService(
         }
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables", "LogNotTimber")
+    @SuppressLint("LogNotTimber")
     override fun getSessionDetails(sessionId: Int): Bundle? {
         Log.d(TAG, "getSessionDetails: sessionId=$sessionId")
         try {
             val packageInstaller = context.packageManager.packageInstaller
-            val sessionInfo = packageInstaller.getSessionInfo(sessionId) ?: run {
-                Log.w(TAG, "getSessionDetails: SessionInfo is null for id $sessionId")
+            val sessionInfo = packageInstaller.getSessionInfo(sessionId)
+
+            if (sessionInfo == null) {
+                Log.w(TAG, "getSessionDetails: sessionInfo is null for id $sessionId")
                 return null
             }
 
+            // Get originatingUid (Available on Android P+)
             val originatingUid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 sessionInfo.originatingUid
             } else {
                 -1
             }
-            Log.d(TAG, "Got originatingUid: $originatingUid")
+            Log.d(TAG, "originatingUid: $originatingUid")
 
             var resolvedLabel: CharSequence? = null
             var resolvedIcon: Bitmap? = null
             var path: String? = null
 
-            // 1. Reflect to get the resolved APK path
+            // ---------------------------------------------------------
+            // STRATEGY 1: Try to get the APK path via reflection
+            // ---------------------------------------------------------
             try {
+                // Try to get "resolvedBaseCodePath" field
                 val resolvedField: Field? = reflect.getDeclaredField(
                     sessionInfo::class.java,
                     "resolvedBaseCodePath"
@@ -516,12 +521,35 @@ class DefaultPrivilegedService(
                     resolvedField.isAccessible = true
                     path = resolvedField.get(sessionInfo) as? String
                 }
+
+                // ---------------------------------------------------------
+                // STRATEGY 2: If path is null, try "stageDir" (Android 16+ / Staged Sessions)
+                // ---------------------------------------------------------
+                if (path == null) {
+                    val stageDirField = reflect.getDeclaredField(
+                        sessionInfo::class.java,
+                        "stageDir"
+                    )
+                    if (stageDirField != null) {
+                        stageDirField.isAccessible = true
+                        val stageDir = stageDirField.get(sessionInfo) as? java.io.File
+                        // Find the first .apk file in the staging directory
+                        if (stageDir != null && stageDir.exists() && stageDir.isDirectory) {
+                            path = stageDir.listFiles { _, name -> name.endsWith(".apk") }
+                                ?.firstOrNull()?.absolutePath
+                            Log.d(TAG, "Found APK path via stageDir: $path")
+                        }
+                    }
+                } else {
+                    Log.d(TAG, "Reflected resolvedBaseCodePath: $path")
+                }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to reflect resolvedBaseCodePath", e)
+                Log.e(TAG, "Failed to reflect path or stageDir", e)
             }
 
-            // 2. Parse APK from path to get Label and Icon
-            // This logic is ported from the old SessionProcessor as it handles drawables/adaptive icons better.
+            // ---------------------------------------------------------
+            // Parse APK from path (if found)
+            // ---------------------------------------------------------
             if (!path.isNullOrEmpty()) {
                 Log.d(TAG, "Loading info from APK path: $path")
                 try {
@@ -532,16 +560,14 @@ class DefaultPrivilegedService(
                     )
                     val appInfo = pkgInfo?.applicationInfo
                     if (appInfo != null) {
-                        // Crucial: set the source dir so the PM can read resources
                         appInfo.publicSourceDir = path
                         appInfo.sourceDir = path
 
                         // Load Label
                         try {
                             resolvedLabel = appInfo.loadLabel(pm)
-                            Log.d(TAG, "Label loaded successfully: $resolvedLabel")
                         } catch (e: Exception) {
-                            Log.e(TAG, "Failed to load label", e)
+                            Log.e(TAG, "Failed to load label from APK", e)
                         }
 
                         // Load Icon
@@ -550,14 +576,12 @@ class DefaultPrivilegedService(
                             resolvedIcon = if (drawable is BitmapDrawable) {
                                 drawable.bitmap
                             } else {
-                                // Handle AdaptiveIconDrawable, VectorDrawable, etc.
                                 val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 1
                                 val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 1
                                 drawable.toBitmap(width, height, Bitmap.Config.ARGB_8888)
                             }
-                            Log.d(TAG, "Icon loaded and converted to Bitmap successfully.")
                         } catch (e: Exception) {
-                            Log.e(TAG, "Failed to load icon using loadIcon", e)
+                            Log.e(TAG, "Failed to load icon from APK", e)
                         }
                     }
                 } catch (e: Exception) {
@@ -565,59 +589,75 @@ class DefaultPrivilegedService(
                 }
             }
 
-            // 3. Fallback to SessionInfo
+            // ---------------------------------------------------------
+            // STRATEGY 3: Fallback to Installed App Info (Crucial for Updates)
+            // ---------------------------------------------------------
+            // If we still don't have a label or icon, check if the app is already installed.
+            // This fixes "N/A" when updating an app where the new APK path is hidden.
+            if (resolvedLabel == null || resolvedIcon == null) {
+                try {
+                    val pm = context.packageManager
+                    val appPackageName = sessionInfo.appPackageName
+
+                    if (appPackageName != null) {
+                        val installedInfo = pm.getApplicationInfo(appPackageName, 0)
+
+                        if (resolvedLabel == null) {
+                            resolvedLabel = installedInfo.loadLabel(pm)
+                            Log.d(TAG, "Fallback: Loaded label from installed app")
+                        }
+
+                        if (resolvedIcon == null) {
+                            val drawable = installedInfo.loadIcon(pm)
+                            resolvedIcon = if (drawable is BitmapDrawable) {
+                                drawable.bitmap
+                            } else {
+                                val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 1
+                                val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 1
+                                drawable.toBitmap(width, height, Bitmap.Config.ARGB_8888)
+                            }
+                            Log.d(TAG, "Fallback: Loaded icon from installed app")
+                        }
+                    }
+                } catch (e: PackageManager.NameNotFoundException) {
+                    Log.d(TAG, "App not installed, cannot use fallback info.")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to load info from installed app fallback", e)
+                }
+            }
+
+            // ---------------------------------------------------------
+            // Final Data Preparation
+            // ---------------------------------------------------------
             val finalLabel = resolvedLabel ?: sessionInfo.appLabel ?: "N/A"
             val finalIcon = resolvedIcon ?: sessionInfo.appIcon
 
-            // 4. Serialize to Bundle
+            Log.d(TAG, "Final Data -> Label: '$finalLabel', Has Icon: ${finalIcon != null}")
+
             val bundle = Bundle()
             bundle.putCharSequence("appLabel", finalLabel)
+
             if (finalIcon != null) {
                 try {
                     val stream = ByteArrayOutputStream()
-                    // Compress to PNG to transfer across Binder (Bitmap is Parcelable but large bitmaps can fail transaction)
-                    // Or we can put the Bitmap directly into Bundle if it's not too huge.
-                    // Ideally, pass Bitmap directly if within limits, but byte array is safer for IPC limits.
                     finalIcon.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                    bundle.putByteArray("appIcon", stream.toByteArray())
+                    val iconBytes = stream.toByteArray()
+
+                    if (iconBytes.size > 500 * 1024) {
+                        Log.w(TAG, "WARNING: Icon size is large (${iconBytes.size} bytes).")
+                    }
+                    bundle.putByteArray("appIcon", iconBytes)
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to compress icon", e)
                 }
             }
+
             bundle.putInt("originatingUid", originatingUid)
             return bundle
+
         } catch (e: Exception) {
-            Log.e(TAG, "getSessionDetails failed", e)
+            Log.e(TAG, "getSessionDetails CRITICAL FAILURE", e)
             return null
-        }
-    }
-
-    override fun approveSession(sessionId: Int, granted: Boolean) {
-        try {
-            val packageInstaller = context.packageManager.packageInstaller
-
-            val method: Method? = reflect.getMethod(
-                packageInstaller::class.java,
-                "setPermissionsResult",
-                Int::class.java,
-                Boolean::class.java
-            )
-
-            if (method != null) {
-                method.invoke(packageInstaller, sessionId, granted)
-                Log.d(TAG, "Invoked setPermissionsResult($sessionId, $granted)")
-            } else {
-                throw NoSuchMethodException("setPermissionsResult not found")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "approveSession failed", e)
-            if (!granted) {
-                try {
-                    context.packageManager.packageInstaller.abandonSession(sessionId)
-                } catch (e2: Exception) {
-                    Log.e(TAG, "Fallback abandonSession failed", e2)
-                }
-            }
         }
     }
 

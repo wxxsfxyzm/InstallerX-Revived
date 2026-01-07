@@ -141,15 +141,10 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
     }
 
     override fun getUsers(): Map<Int, String> {
-        // TODO temporarily not necessary for dhizuku
-        return emptyMap()
-    }
-
-    override fun getSessionDetails(sessionId: Int): Bundle? {
         throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
     }
 
-    override fun approveSession(sessionId: Int, granted: Boolean) {
+    override fun getSessionDetails(sessionId: Int): Bundle {
         throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
     }
 }

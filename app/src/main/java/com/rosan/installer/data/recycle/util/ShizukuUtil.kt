@@ -139,7 +139,7 @@ fun resolveSettingsBinder(reflect: ReflectRepo): SettingsReflectionInfo? {
     return try {
         // 1. Get Settings.Global.sProviderHolder
         val settingsClass = Settings.Global::class.java
-        val holder = reflect.getStaticObjectField(settingsClass, "sProviderHolder") ?: return null
+        val holder = reflect.getStaticObjectField(settingsClass, "sProviderHolder")
 
         // 2. Get mContentProvider
         val providerField = reflect.getDeclaredField(holder.javaClass, "mContentProvider") ?: return null

@@ -145,3 +145,15 @@ val InstallIntentFilter = IntentFilter().apply {
     addDataScheme(ContentResolver.SCHEME_FILE)
     addDataType("application/vnd.android.package-archive")
 }
+
+/**
+ * Helper to generate the special auth command (e.g. "su 1000") for Root mode.
+ * This ensures different methods reuse the same 'su 1000' service process.
+ */
+fun getSpecialAuth(
+    authorizer: ConfigEntity.Authorizer,
+    specialAuth: String = SHELL_SYSTEM
+): (() -> String?)? =
+    if (authorizer == ConfigEntity.Authorizer.Root) {
+        { specialAuth }
+    } else null

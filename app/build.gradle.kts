@@ -49,9 +49,6 @@ android {
             ?: project.findProperty("BASE_VERSION") as String
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
 
         javaCompileOptions {
             annotationProcessorOptions {

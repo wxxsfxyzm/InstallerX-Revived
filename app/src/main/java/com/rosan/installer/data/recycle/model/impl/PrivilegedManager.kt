@@ -3,7 +3,7 @@ package com.rosan.installer.data.recycle.model.impl
 import android.content.ComponentName
 import android.content.Intent
 import com.rosan.installer.data.recycle.util.SHELL_ROOT
-import com.rosan.installer.data.recycle.util.SHELL_SYSTEM
+import com.rosan.installer.data.recycle.util.getSpecialAuth
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.LAB_USE_HOOK_MODE
@@ -33,21 +33,7 @@ object PrivilegedManager : KoinComponent {
     /**
      * Helper to retrieve the current Shizuku Hook Mode setting.
      */
-    private suspend fun getHookMode(): Boolean {
-        return useHookModeFlow.first()
-    }
-
-    /**
-     * Helper to generate the special auth command (e.g. "su 1000") for Root mode.
-     * This ensures different methods reuse the same 'su 1000' service process.
-     */
-    private fun getSpecialAuth(
-        authorizer: ConfigEntity.Authorizer,
-        specialAuth: String = SHELL_SYSTEM
-    ): (() -> String?)? =
-        if (authorizer == ConfigEntity.Authorizer.Root) {
-            { specialAuth }
-        } else null
+    private suspend fun getHookMode(): Boolean = useHookModeFlow.first()
 
     /**
      * Sets the app as the default installer.

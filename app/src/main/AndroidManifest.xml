@@ -36,6 +36,11 @@
         android:name="android.permission.MANAGE_USERS"
         tools:ignore="ProtectedPermissions" />
 
+    <uses-permission android:name="android.permission.READ_INSTALL_SESSIONS" />
+    <uses-permission
+        android:name="android.permission.READ_INSTALLED_SESSION_PATHS"
+        tools:ignore="ProtectedPermissions" />
+
     <uses-permission android:name="com.rosan.dhizuku.permission.API" />
 
     <uses-sdk tools:overrideLibrary="rikka.shizuku.api, rikka.shizuku.provider, rikka.shizuku.shared, rikka.shizuku.aidl" />
