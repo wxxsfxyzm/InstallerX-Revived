@@ -102,21 +102,6 @@ fun MiuixLabPage(
         ) {
             item { MiuixSettingsTipCard(stringResource(R.string.lab_tip)) }
             item { Spacer(modifier = Modifier.size(12.dp)) }
-            item { SmallTitle(stringResource(R.string.performance)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
-                ) {
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.lab_use_hook_mode),
-                        description = stringResource(R.string.lab_use_hook_mode_desc),
-                        checked = state.labShizukuHookMode,
-                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
-                    )
-                }
-            }
             item { SmallTitle(stringResource(R.string.config_authorizer_root)) }
             item {
                 Card(

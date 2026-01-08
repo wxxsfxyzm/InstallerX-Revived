@@ -6,15 +6,12 @@ import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.getSpecialAuth
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
-import com.rosan.installer.data.settings.model.datastore.AppDataStore.Companion.LAB_USE_HOOK_MODE
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 
 /**
@@ -27,14 +24,6 @@ import timber.log.Timber
 object PrivilegedManager : KoinComponent {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    private val appDataStore by inject<AppDataStore>()
-    private val useHookModeFlow = appDataStore.getBoolean(LAB_USE_HOOK_MODE, true)
-
-    /**
-     * Helper to retrieve the current Shizuku Hook Mode setting.
-     */
-    private suspend fun getHookMode(): Boolean = useHookModeFlow.first()
-
     /**
      * Sets the app as the default installer.
      */
@@ -45,7 +34,6 @@ object PrivilegedManager : KoinComponent {
     ) {
         useUserService(
             authorizer = authorizer,
-            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) { userService ->
             userService.privileged.setDefaultInstaller(component, enable)
@@ -64,7 +52,6 @@ object PrivilegedManager : KoinComponent {
         useUserService(
             authorizer = authorizer,
             customizeAuthorizer = customizeAuthorizer,
-            useHookMode = true, // Force Hook Mode for Binder swapping logic
             special = getSpecialAuth(authorizer)
         ) { userService ->
             try {
@@ -88,7 +75,6 @@ object PrivilegedManager : KoinComponent {
     ) {
         useUserService(
             authorizer = authorizer,
-            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) {
             try {
@@ -103,7 +89,7 @@ object PrivilegedManager : KoinComponent {
     /**
      * Checks if a specific permission is granted.
      */
-    suspend fun isPermissionGranted(
+    fun isPermissionGranted(
         authorizer: ConfigEntity.Authorizer,
         packageName: String,
         permission: String
@@ -111,7 +97,6 @@ object PrivilegedManager : KoinComponent {
         var isGranted = false
         useUserService(
             authorizer = authorizer,
-            useHookMode = getHookMode(),
             special = getSpecialAuth(authorizer)
         ) {
             try {
@@ -186,7 +171,6 @@ object PrivilegedManager : KoinComponent {
         useUserService(
             authorizer = config.authorizer,
             customizeAuthorizer = config.customizeAuthorizer,
-            useHookMode = getHookMode(),
             special = null
         ) {
             try {
@@ -202,13 +186,9 @@ object PrivilegedManager : KoinComponent {
     /**
      * Fetches the list of users on the device.
      */
-    suspend fun getUsers(authorizer: ConfigEntity.Authorizer): Map<Int, String> {
+    fun getUsers(authorizer: ConfigEntity.Authorizer): Map<Int, String> {
         var users: Map<Int, String> = emptyMap()
-        useUserService(
-            authorizer = authorizer,
-            useHookMode = getHookMode(),
-            special = null
-        ) {
+        useUserService(authorizer) {
             try {
                 @Suppress("UNCHECKED_CAST")
                 users = it.privileged.users as? Map<Int, String> ?: emptyMap()
@@ -254,9 +234,7 @@ object PrivilegedManager : KoinComponent {
                 runCatching {
                     useUserService(
                         authorizer = authorizer,
-                        customizeAuthorizer = customizeAuthorizer,
-                        useHookMode = true, // Force Hook Mode for Dexopt (using BinderWrapper)
-                        special = null
+                        customizeAuthorizer = customizeAuthorizer
                     ) { userService ->
                         val result = userService.privileged.performDexOpt(
                             config.packageName,
@@ -279,7 +257,6 @@ object PrivilegedManager : KoinComponent {
                         authorizer = authorizer,
                         customizeAuthorizer = customizeAuthorizer,
                         useHookMode = false, // Force Shell Mode for Delete (using remote Shell Service)
-                        special = null
                     ) { userService ->
                         userService.privileged.delete(config.deletePaths)
                         Timber.i("Delete completed")

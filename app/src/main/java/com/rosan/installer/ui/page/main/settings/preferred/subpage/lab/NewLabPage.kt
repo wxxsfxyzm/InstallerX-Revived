@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.AltRoute
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -110,22 +109,6 @@ fun NewLabPage(
                 .padding(paddingValues)
         ) {
             item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
-            item {
-                SplicedColumnGroup(
-                    title = stringResource(R.string.performance),
-                    content = buildList {
-                        add {
-                            SwitchWidget(
-                                icon = Icons.AutoMirrored.Filled.AltRoute,
-                                title = stringResource(R.string.lab_use_hook_mode),
-                                description = stringResource(R.string.lab_use_hook_mode_desc),
-                                checked = state.labShizukuHookMode,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
-                            )
-                        }
-                    }
-                )
-            }
             item {
                 SplicedColumnGroup(
                     title = stringResource(R.string.config_authorizer_root),

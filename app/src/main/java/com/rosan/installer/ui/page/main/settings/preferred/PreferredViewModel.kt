@@ -160,7 +160,6 @@ class PreferredViewModel(
                 setDefaultInstaller(action.lock, action)
             }
 
-            is PreferredViewAction.LabChangeShizukuHookMode -> labChangeShizukuHookMode(action.enable)
             is PreferredViewAction.LabChangeRootModuleFlash -> labChangeRootModuleFlash(action.enable)
             is PreferredViewAction.LabChangeRootShowModuleArt -> labChangeRootShowModuleArt(action.enable)
             is PreferredViewAction.LabChangeRootImplementation -> labChangeRootImplementation(action.implementation)
@@ -498,11 +497,6 @@ class PreferredViewModel(
         )
     }
 
-    private fun labChangeShizukuHookMode(enabled: Boolean) =
-        viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.LAB_USE_HOOK_MODE, enabled)
-        }
-
     private fun labChangeRootModuleFlash(enabled: Boolean) =
         viewModelScope.launch {
             appDataStore.putBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, enabled)
@@ -668,8 +662,6 @@ class PreferredViewModel(
                 appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
             val uninstallFlagsFlow =
                 appDataStore.getInt(AppDataStore.UNINSTALL_FLAGS, 0)
-            val labShizukuHookModeFlow =
-                appDataStore.getBoolean(AppDataStore.LAB_USE_HOOK_MODE, true)
             val labRootModuleFlashFlow =
                 appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false)
             val labRootShowModuleArtFlow =
@@ -732,7 +724,6 @@ class PreferredViewModel(
                 uninstallFlagsFlow,
                 adbVerifyEnabledFlow,
                 isIgnoringBatteryOptFlow,
-                labShizukuHookModeFlow,
                 labRootModuleFlashFlow,
                 labRootShowModuleArtFlow,
                 labRootImplementationFlow,
@@ -782,7 +773,6 @@ class PreferredViewModel(
                 val uninstallFlags = values[idx++] as Int
                 val adbVerifyEnabled = values[idx++] as Boolean
                 val isIgnoringBatteryOptimizations = values[idx++] as Boolean
-                val labShizukuHookMode = values[idx++] as Boolean
                 val labRootModuleFlash = values[idx++] as Boolean
                 val labRootShowModuleArt = values[idx++] as Boolean
                 val labRootImplementation = values[idx++] as RootImplementation
@@ -852,7 +842,6 @@ class PreferredViewModel(
                     managedSharedUserIdExemptedPackages = managedSharedUserIdExemptPkg,
                     adbVerifyEnabled = adbVerifyEnabled,
                     isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations,
-                    labShizukuHookMode = labShizukuHookMode,
                     labRootEnableModuleFlash = labRootModuleFlash,
                     labRootShowModuleArt = labRootShowModuleArt,
                     labRootImplementation = labRootImplementation,
