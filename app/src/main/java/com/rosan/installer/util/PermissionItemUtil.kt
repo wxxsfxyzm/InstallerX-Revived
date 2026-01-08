@@ -93,7 +93,7 @@ fun Context.getBestPermissionLabel(permission: String): String {
             this.getString(R.string.permission_unknown)
         else permissionInfo.loadLabel(pm).toString()
     } catch (e: PackageManager.NameNotFoundException) {
-        Timber.e(e.printStackTrace().toString())
+        Timber.e(e, "Permission not found: %s", permission)
         this.getString(R.string.permission_unknown)
     }
 }

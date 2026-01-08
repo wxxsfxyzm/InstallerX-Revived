@@ -52,13 +52,15 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     private val appDataStore: AppDataStore by inject()
+    private var uiState by mutableStateOf(ThemeUiState())
 
     private var installer by mutableStateOf<InstallerRepo?>(null)
     private var job: Job? = null
 
     private lateinit var permissionManager: PermissionManager
 
-    private var uiState by mutableStateOf(ThemeUiState())
+    // Flag to track if the activity is stopped due to a permission request
+    private var isRequestingPermission = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (RsConfig.isDebug && RsConfig.LEVEL == Level.UNSTABLE)
@@ -77,6 +79,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
 
         permissionManager = PermissionManager(this)
+        // Setup the callback to intercept the settings launch event
+        permissionManager.onBeforeLaunchSettings = {
+            Timber.d("Launching settings for permission, preventing repo closure in onStop.")
+            isRequestingPermission = true
+        }
 
         Timber.d("onCreate: Handling all flows via restoreInstaller and action dispatch.")
         restoreInstaller(savedInstanceState)
@@ -193,7 +200,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
         // Only strictly interpret as user leaving when not finishing and not changing configurations (e.g., rotation)
         // TODO add a flag to handle Session Install Confirmation
-        if (!isFinishing && !isChangingConfigurations) {
+        if (!isFinishing && !isChangingConfigurations && !isRequestingPermission) {
             installer?.let { repo ->
                 // If using session install, we don't hide UI since oems have different package installer impls
                 // if (repo.config.authorizer == ConfigEntity.Authorizer.None) return
@@ -206,13 +213,15 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 if (currentProgress !is ProgressEntity.Finish &&
                     currentProgress !is ProgressEntity.Error
                 ) {
-
                     Timber.d("onStop: User left activity. Triggering background mode.")
 
                     // Trigger background mode
                     repo.background(true)
                 }
             }
+        } else if (isRequestingPermission) {
+            Timber.d("onStop: Ignored background trigger due to active permission request.")
+            isRequestingPermission = false
         }
     }
 
