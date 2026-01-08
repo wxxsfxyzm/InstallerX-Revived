@@ -540,6 +540,45 @@ class DefaultPrivilegedService(
             }
 
             // ---------------------------------------------------------
+            // STRATEGY 2.5: Root/Privileged Direct File Access
+            // ---------------------------------------------------------
+            // When running as Root process, access /data/app/ directory directly to find vmdl{sessionId}.tmp
+            // This is the standard location for Android PackageInstallerService temporary files
+            if (path == null) {
+                try {
+                    // Standard Session staging directory structure: /data/app/vmdl{sessionId}.tmp
+                    val sessionDir = java.io.File("/data/app/vmdl${sessionId}.tmp")
+
+                    if (sessionDir.exists() && sessionDir.isDirectory) {
+                        Log.d(TAG, "Direct Access: Found session dir at ${sessionDir.absolutePath}")
+
+                        // 1. Get list of all .apk files
+                        val apkFiles = sessionDir.listFiles { _, name ->
+                            name.endsWith(".apk", ignoreCase = true)
+                        }
+
+                        if (!apkFiles.isNullOrEmpty()) {
+                            // 2. Core Logic: Prefer 'base.apk', otherwise take the first one found
+                            // Split APK installations must contain base.apk; Single APK installs usually are base.apk too
+                            val targetApk = apkFiles.find { it.name == "base.apk" } ?: apkFiles.first()
+
+                            path = targetApk.absolutePath
+                            Log.d(TAG, "Direct Access: Found APK path: $path (Selected from ${apkFiles.size} files)")
+                        } else {
+                            Log.w(TAG, "Direct Access: Session dir exists but contains no APKs")
+                        }
+                    } else {
+                        // Rare cases or older versions might be in /data/local/tmp (mainly ADB push)
+                        // Or /data/app/vmdl{sessionId}.tmp does not exist (Session hasn't written data yet)
+                        Log.d(TAG, "Direct Access: Session dir not found at standard path.")
+                    }
+                } catch (e: Exception) {
+                    // Only happens if process lacks file read permissions (e.g. SELinux denial)
+                    Log.e(TAG, "Failed to perform direct file search", e)
+                }
+            }
+
+            // ---------------------------------------------------------
             // Parse APK from path (if found)
             // ---------------------------------------------------------
             if (!path.isNullOrEmpty()) {
