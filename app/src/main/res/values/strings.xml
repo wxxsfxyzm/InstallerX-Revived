@@ -672,6 +672,8 @@
     <string name="lab_module_flashing_desc">Always check twice before flashing any modules!</string>
     <string name="lab_module_flashing_show_art">Display ASCII art</string>
     <string name="lab_module_flashing_show_art_desc">Display InstallerX ASCII art when installation starts"</string>
+    <string name="lab_module_always_use_root">Always use root to flash modules</string>
+    <string name="lab_module_always_use_root_desc">While working as system installer, always use root to flash modules to get best compatibility and performance</string>
     <string name="lab_module_select_root_impl">Choose root implementation</string>
     <string name="lab_http_save_file">Save downloaded files</string>
     <string name="lab_http_save_file_desc">Save files to the Downloads folder after download is complete</string>

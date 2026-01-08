@@ -12,6 +12,7 @@ import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
@@ -94,9 +95,15 @@ class InstallationProcessor(
         progressFlow.emit(ProgressEntity.InstallingModule(output.toList()))
 
         val rootImpl = RootImplementation.fromString(appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION).first())
+        val systemUseRoot = OSUtils.isSystemApp && appDataStore.getBoolean(AppDataStore.LAB_MODULE_ALWAYS_ROOT, false).first()
 
         // Collect logs from the underlying implementation and emit full updates.
-        ModuleInstallerRepoImpl.doInstallWork(config, module, rootImpl).collect { line ->
+        ModuleInstallerRepoImpl.doInstallWork(
+            config = config,
+            module = module,
+            useRoot = systemUseRoot,
+            rootImplementation = rootImpl
+        ).collect { line ->
             output.add(line)
             // Sync to Repo: This ensures logs are saved even if UI is destroyed
             repo.moduleLog = output.toList()

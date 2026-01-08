@@ -35,6 +35,7 @@ import com.rosan.installer.ui.page.main.widget.setting.LabHttpProfileWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabRootImplementationWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
+import com.rosan.installer.util.OSUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,6 +107,7 @@ fun LegacyLabPage(
                     exit = fadeOut() + shrinkVertically()
                 ) {
                     Column {
+                        LabRootImplementationWidget(viewModel)
                         SwitchWidget(
                             icon = AppIcons.Terminal,
                             title = stringResource(R.string.lab_module_flashing_show_art),
@@ -114,7 +116,14 @@ fun LegacyLabPage(
                             checked = state.labRootShowModuleArt,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
                         )
-                        LabRootImplementationWidget(viewModel)
+                        if (OSUtils.isSystemApp)
+                            SwitchWidget(
+                                title = stringResource(R.string.lab_module_always_use_root),
+                                description = stringResource(R.string.lab_module_always_use_root_desc),
+                                isM3E = false,
+                                checked = state.labRootModuleAlwaysUseRoot,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(it)) }
+                            )
                     }
                 }
             }

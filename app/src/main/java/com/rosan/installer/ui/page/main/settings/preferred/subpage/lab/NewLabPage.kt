@@ -46,6 +46,7 @@ import com.rosan.installer.ui.page.main.widget.setting.LabRootImplementationWidg
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.util.OSUtils
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -90,7 +91,7 @@ fun NewLabPage(
                             onClick = { navController.navigateUp() },
                             icon = Icons.AutoMirrored.TwoTone.ArrowBack,
                             modifier = Modifier.size(36.dp),
-                            containerColor = MaterialTheme.colorScheme.surfaceBright
+                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
                         )
                         Spacer(modifier = Modifier.size(16.dp))
                     }
@@ -135,6 +136,7 @@ fun NewLabPage(
                                 exit = fadeOut() + shrinkVertically()
                             ) {
                                 Column {
+                                    LabRootImplementationWidget(viewModel)
                                     SwitchWidget(
                                         icon = AppIcons.Terminal,
                                         title = stringResource(R.string.lab_module_flashing_show_art),
@@ -148,7 +150,19 @@ fun NewLabPage(
                                             )
                                         }
                                     )
-                                    LabRootImplementationWidget(viewModel)
+                                    if (OSUtils.isSystemApp)
+                                        SwitchWidget(
+                                            title = stringResource(R.string.lab_module_always_use_root),
+                                            description = stringResource(R.string.lab_module_always_use_root_desc),
+                                            checked = state.labRootModuleAlwaysUseRoot,
+                                            onCheckedChange = {
+                                                viewModel.dispatch(
+                                                    PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(
+                                                        it
+                                                    )
+                                                )
+                                            }
+                                        )
                                 }
                             }
                         }

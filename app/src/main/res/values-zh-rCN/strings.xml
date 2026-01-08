@@ -654,6 +654,8 @@
     <string name="lab_module_flashing_desc">在刷写任何模块前务必再次确认！</string>
     <string name="lab_module_flashing_show_art">显示字符画</string>
     <string name="lab_module_flashing_show_art_desc">安装开始时显示 InstallerX 字符画</string>
+    <string name="lab_module_always_use_root">使用 Root 刷写模块</string>
+    <string name="lab_module_always_use_root_desc">当作为系统安装器工作时，选择 root 来刷写模块来获得最佳性能</string>
     <string name="lab_module_select_root_impl">选择 Root 实现方式</string>
     <string name="lab_http_save_file">保存下载文件</string>
     <string name="lab_http_save_file_desc">下载完成后将文件保存到系统下载目录</string>

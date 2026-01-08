@@ -106,7 +106,8 @@ fun ModuleInstallSheetContent(
         if (isFinished) {
             Column {
                 Button(
-                    onClick = onReboot
+                    onClick = onReboot,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.reboot))
                 }

@@ -32,6 +32,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixRootImplementationDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
+import com.rosan.installer.util.OSUtils
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -146,12 +147,6 @@ fun MiuixLabPage(
                         }
 
                         Column {
-                            MiuixSwitchWidget(
-                                title = stringResource(R.string.lab_module_flashing_show_art),
-                                description = stringResource(R.string.lab_module_flashing_show_art_desc),
-                                checked = state.labRootShowModuleArt,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
-                            )
                             SuperSpinner(
                                 title = stringResource(R.string.lab_module_select_root_impl),
                                 items = spinnerEntries,
@@ -162,6 +157,19 @@ fun MiuixLabPage(
                                     }
                                 }
                             )
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.lab_module_flashing_show_art),
+                                description = stringResource(R.string.lab_module_flashing_show_art_desc),
+                                checked = state.labRootShowModuleArt,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
+                            )
+                            if (OSUtils.isSystemApp)
+                                MiuixSwitchWidget(
+                                    title = stringResource(R.string.lab_module_always_use_root),
+                                    description = stringResource(R.string.lab_module_always_use_root_desc),
+                                    checked = state.labRootModuleAlwaysUseRoot,
+                                    onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(it)) }
+                                )
                         }
                     }
                 }

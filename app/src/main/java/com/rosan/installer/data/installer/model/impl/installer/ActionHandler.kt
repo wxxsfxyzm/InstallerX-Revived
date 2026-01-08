@@ -32,6 +32,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.ui.util.doBiometricAuthOrThrow
+import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -490,7 +491,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun handleReboot(reason: String) {
         Timber.d("[id=$installerId] handleReboot: Starting cleanup before reboot.")
-
+        val systemUseRoot = OSUtils.isSystemApp && appDataStore.getBoolean(AppDataStore.LAB_MODULE_ALWAYS_ROOT, false).first()
+        if (systemUseRoot) installer.config.authorizer = ConfigEntity.Authorizer.Root
         // Execute cleanup immediately
         // Call clearCache() explicitly to ensure temporary files are removed
         // before the system goes down

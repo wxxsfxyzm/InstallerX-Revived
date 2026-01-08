@@ -21,6 +21,7 @@ object ShizukuModuleInstallerRepoImpl : ModuleInstallerRepo {
     override fun doInstallWork(
         config: ConfigEntity,
         module: AppEntity.ModuleEntity,
+        useRoot: Boolean,
         rootImplementation: RootImplementation
     ): Flow<String> = callbackFlow {
         // 1. Resolve Path using Helper

@@ -53,6 +53,7 @@ sealed class PreferredViewAction {
 
     data class LabChangeRootModuleFlash(val enable: Boolean) : PreferredViewAction()
     data class LabChangeRootShowModuleArt(val enable: Boolean) : PreferredViewAction()
+    data class LabChangeRootModuleAlwaysUseRoot(val enable: Boolean) : PreferredViewAction()
     data class LabChangeRootImplementation(val implementation: RootImplementation) : PreferredViewAction()
     data class LabChangeHttpProfile(val profile: HttpProfile) : PreferredViewAction()
     data class LabChangeHttpSaveFile(val enable: Boolean) : PreferredViewAction()

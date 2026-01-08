@@ -199,7 +199,7 @@ fun NewEditPage(
                             onClick = { navController.navigateUp() },
                             icon = Icons.AutoMirrored.TwoTone.ArrowBack,
                             modifier = Modifier.size(36.dp),
-                            containerColor = MaterialTheme.colorScheme.surfaceBright
+                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
                         )
                         Spacer(modifier = Modifier.size(16.dp))
                     }
