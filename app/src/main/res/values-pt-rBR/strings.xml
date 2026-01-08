@@ -641,4 +641,15 @@
     <string name="installer_notification_tap_to_disable">Notificação de serviço em primeiro plano, toque para desativar.</string>
     <string name="lab_module_flashing_show_art">Exibir arte ASCII</string>
     <string name="lab_module_flashing_show_art_desc">Exibir arte ASCII do InstallerX quando a instalação começar</string>
+    <string name="installer_settings_require_biometric_auth">Exigir Autenticação Biométrica para Instalar</string>
+    <string name="installer_settings_require_biometric_auth_desc">Exigir autenticação biométrica durante a instalação</string>
+    <string name="uninstaller_settings_require_biometric_auth">Exigir Autenticação Biométrica para Desinstalar</string>
+    <string name="uninstaller_settings_require_biometric_auth_desc">Exigir autenticação biométrica ao desinstalar</string>
+    <string name="use_biometric_confirm_change_auth_settings">Tem certeza de que deseja alterar essa configuração?</string>
+    <string name="use_biometric_confirm_change_auth_settings_desc">Para continuar, confirme esta ação usando a autenticação do seu dispositivo</string>
+    <string name="auth_to_continue_work">Por favor, autentique-se para confirmar esta operação</string>
+    <string name="auth_summary_install">Você está realizando uma operação de instalação. Para continuar, confirme esta ação usando a autenticação do seu dispositivo</string>
+    <string name="auth_summary_uninstall">Você está realizando uma operação de desinstalação. Para continuar, confirme esta ação usando a autenticação do seu dispositivo</string>
+    <string name="exception_authentication_failed">Falha na autenticação do usuário</string>
+    <string name="old_version_uninstalled">Desinstalado</string>
 </resources>

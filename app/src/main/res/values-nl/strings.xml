@@ -641,4 +641,15 @@
     <string name="uninstall_enter_package_name">Voer pakketnaam in om te verwijderen</string>
     <string name="lab_module_flashing_show_art">ASCII-kunst weergeven</string>
     <string name="lab_module_flashing_show_art_desc">InstallerX ASCII-kunst weergeven bij start installatie</string>
+    <string name="installer_settings_require_biometric_auth">Biometrische authenticatie vereisen voor installatie</string>
+    <string name="installer_settings_require_biometric_auth_desc">Biometrische authenticatie vereisen tijdens installatie</string>
+    <string name="uninstaller_settings_require_biometric_auth">Biometrische authenticatie vereisen voor verwijderen</string>
+    <string name="uninstaller_settings_require_biometric_auth_desc">Biometrische authenticatie vereisen tijdens verwijderen</string>
+    <string name="use_biometric_confirm_change_auth_settings">Weet je zeker dat je deze instelling wilt veranderen</string>
+    <string name="use_biometric_confirm_change_auth_settings_desc">Om door te gaan, bevestig alsjeblieft deze actie met je apparaatauthenticatie</string>
+    <string name="auth_to_continue_work">Authenticeer alsjeblieft om deze actie te bevestigen</string>
+    <string name="auth_summary_install">Je bent een installatieactie aan het doen. Om door te gaan, bevestig alsjeblieft deze actie met je apparaatauthenticatie</string>
+    <string name="auth_summary_uninstall">Je bent een verwijderingsactie aan het doen. Om door te gaan, bevestig alsjeblieft deze actie met je apparaatauthenticatie</string>
+    <string name="exception_authentication_failed">Gebruikersauthenticatie mislukt</string>
+    <string name="old_version_uninstalled">Verwijderd</string>
 </resources>
