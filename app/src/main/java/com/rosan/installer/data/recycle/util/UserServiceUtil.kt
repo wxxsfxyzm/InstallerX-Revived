@@ -30,10 +30,10 @@ fun useUserService(
 ) {
     if (authorizer == ConfigEntity.Authorizer.None) {
         if (OSUtils.isSystemApp) {
-            Timber.tag(TAG).d("Running as System UID with None Authorizer. Executing direct calls.")
+            Timber.tag(TAG).d("Running as System App with None Authorizer. Executing direct calls.")
             action.invoke(DefaultUserService)
         } else {
-            Timber.tag(TAG).w("Authorizer is None but not running as System UID. Privileged action skipped.")
+            Timber.tag(TAG).w("Authorizer is None but not running as System App. Privileged action skipped.")
         }
         return
     }

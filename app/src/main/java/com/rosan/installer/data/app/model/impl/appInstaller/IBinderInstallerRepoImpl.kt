@@ -108,7 +108,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             )) as PackageInstaller
     }
 
-    private suspend fun getDhizukuComponentName(): String? =
+    private suspend fun getDhizukuComponentName(): String =
         requireDhizukuPermissionGranted {
             Dhizuku.getOwnerPackageName()
         }
@@ -193,7 +193,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         val flags = config.uninstallFlags
         val versionedPackage = VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST)
         val callerPackageName = when (config.authorizer) {
-            ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName() ?: context.packageName
+            ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName()
             else -> context.packageName
         }
 

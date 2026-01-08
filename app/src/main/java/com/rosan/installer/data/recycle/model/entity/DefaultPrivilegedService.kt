@@ -127,7 +127,7 @@ class DefaultPrivilegedService(
             Log.d("", "Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
             ShizukuHook.hookedUserManager
         } else {
-            if (OSUtils.isSystemApp) Log.d(TAG, "Getting IUserManager in System UID Mode.")
+            if (OSUtils.isSystemApp) Log.d(TAG, "Getting IUserManager in System Mode.")
             else Log.d(TAG, "Getting IUserManager in UserService Mode.")
             IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
         }
@@ -496,14 +496,6 @@ class DefaultPrivilegedService(
                 return null
             }
 
-            // Get originatingUid (Available on Android P+)
-            val originatingUid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                sessionInfo.originatingUid
-            } else {
-                -1
-            }
-            Log.d(TAG, "originatingUid: $originatingUid")
-
             var resolvedLabel: CharSequence? = null
             var resolvedIcon: Bitmap? = null
             var path: String? = null
@@ -652,7 +644,6 @@ class DefaultPrivilegedService(
                 }
             }
 
-            bundle.putInt("originatingUid", originatingUid)
             return bundle
 
         } catch (e: Exception) {

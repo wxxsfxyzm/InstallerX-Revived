@@ -26,6 +26,7 @@ class SessionProcessor : KoinComponent {
             useUserService(
                 authorizer = config.authorizer,
                 customizeAuthorizer = config.customizeAuthorizer,
+                useHookMode = false
             ) { bundle = it.privileged.getSessionDetails(sessionId) }
         } catch (e: Exception) {
             Timber.e(e, "Failed to get session details via ${config.authorizer}")
