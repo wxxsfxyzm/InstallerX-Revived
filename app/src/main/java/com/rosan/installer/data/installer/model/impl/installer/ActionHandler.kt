@@ -29,7 +29,6 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.ui.util.doBiometricAuthOrThrow
 import com.rosan.installer.util.OSUtils
@@ -437,7 +436,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun resolveConfirm(activity: Activity, sessionId: Int) {
         Timber.d("[id=$installerId] resolveConfirmInstall: Starting for session $sessionId.")
-        installer.config.authorizer = ConfigUtil.getGlobalAuthorizer()
+        installer.config = ConfigResolver.resolve(activity)
 
         val details = sessionProcessor.getSessionDetails(sessionId, installer.config)
         installer.confirmationDetails.value = details
