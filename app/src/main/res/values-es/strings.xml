@@ -77,8 +77,8 @@
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">Ninguno</string>
     <string name="config_authorizer_root">Root</string>
-    <string name="config_authorizer_shizuku">Shizuku</string>
-    <string name="config_authorizer_dhizuku">Dhizuku</string>
+    <string name="config_authorizer_shizuku">Shizuku.</string>
+    <string name="config_authorizer_dhizuku">Dhizuku.</string>
     <string name="config_authorizer_customize">Personalizado</string>
     <string name="config_customize_authorizer">Autorizador personalizado</string>
     <string name="config_install_mode">Modo de instalación</string>
@@ -220,7 +220,7 @@
     <string name="permission_dhizuku">Usar Dhizuku</string>
     <string name="permission_unknown">Permiso desconocido</string>
     <string name="installer_running">InstallerX en ejecución</string>
-    <string name="installer_version_short">Ver. %1$s (%2$s)</string>
+    <string name="installer_version_short">Ver: %1$s (%2$s)</string>
     <string name="installer_version">Versión: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">Paquete: %1$s</string>
@@ -419,7 +419,7 @@
     <string name="config_target_user">Usuario de destino</string>
     <string name="config_manual_dexopt">Optimización manual de Dex</string>
     <string name="config_manual_dexopt_desc">Inicie manualmente el proceso dex2oat después de la instalación</string>
-    <string name="theme_settings_miuix_ui">Miuix</string>
+    <string name="theme_settings_miuix_ui">Miuix.</string>
     <string name="config_dexopt_mode">Modo de optimización</string>
     <string name="config_force_dexopt">Forzar optimización</string>
     <string name="config_force_dexopt_desc">Forzar la recompilación aunque el sistema lo considere innecesario</string>
@@ -651,4 +651,15 @@
     <string name="installer_notification_tap_to_disable">Notificación de servicio en primer plano, toca para desactivar.</string>
     <string name="lab_module_flashing_show_art">Mostrar arte ASCII</string>
     <string name="lab_module_flashing_show_art_desc">Mostrar arte ASCII de InstallerX cuando comience la instalación</string>
+    <string name="installer_settings_require_biometric_auth">Requiere autenticación biométrica para instalar</string>
+    <string name="installer_settings_require_biometric_auth_desc">Requiere autenticación biométrica al instalar</string>
+    <string name="uninstaller_settings_require_biometric_auth">Requiere autenticación biométrica para desinstalar</string>
+    <string name="uninstaller_settings_require_biometric_auth_desc">Requiere autenticación biométrica al desinstalar</string>
+    <string name="use_biometric_confirm_change_auth_settings">¿Estás seguro de que quieres cambiar esta configuración?</string>
+    <string name="use_biometric_confirm_change_auth_settings_desc">Para continuar, por favor confirma esta acción usando la autenticación de tu dispositivo</string>
+    <string name="auth_to_continue_work">Por favor, autentifíquese para confirmar esta operación</string>
+    <string name="auth_summary_install">Estás realizando una operación de instalación. Para continuar, por favor confirma esta acción usando la autenticación de tu dispositivo</string>
+    <string name="auth_summary_uninstall">Estás realizando una operación de desinstalación. Para continuar, por favor confirma esta acción usando la autenticación de tu dispositivo</string>
+    <string name="exception_authentication_failed">Fallo en la autenticación del usuario</string>
+    <string name="old_version_uninstalled">Desisntalado</string>
 </resources>
