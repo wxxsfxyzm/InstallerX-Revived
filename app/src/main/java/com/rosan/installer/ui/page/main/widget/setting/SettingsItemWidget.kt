@@ -436,7 +436,8 @@ fun AutoLockInstaller(
 fun DefaultInstaller(
     lock: Boolean,
     enabled: Boolean,
-    onClick: () -> Unit) {
+    onClick: () -> Unit
+) {
     BaseWidget(
         icon = if (lock) AppIcons.LockDefault else AppIcons.UnlockDefault,
         title =
@@ -956,6 +957,7 @@ fun LabRootImplementationWidget(viewModel: PreferredViewModel) {
     val selectedIndex = keys.indexOf(currentRootImpl).coerceAtLeast(0)
 
     DropDownMenuWidget(
+        icon = AppIcons.RootMethod,
         title = stringResource(R.string.lab_module_select_root_impl),
         description = options.getOrNull(selectedIndex),
         choice = selectedIndex,

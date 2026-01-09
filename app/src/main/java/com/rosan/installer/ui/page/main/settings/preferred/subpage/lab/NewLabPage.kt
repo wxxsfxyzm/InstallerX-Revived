@@ -152,6 +152,7 @@ fun NewLabPage(
                                     )
                                     if (OSUtils.isSystemApp)
                                         SwitchWidget(
+                                            icon = AppIcons.FlashPreferRoot,
                                             title = stringResource(R.string.lab_module_always_use_root),
                                             description = stringResource(R.string.lab_module_always_use_root_desc),
                                             checked = state.labRootModuleAlwaysUseRoot,
