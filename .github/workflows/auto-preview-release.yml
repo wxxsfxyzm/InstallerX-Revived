@@ -77,7 +77,7 @@ jobs:
         id: rename_apks
         run: |
           PROJECT_NAME="InstallerX-Revived"
-          VERSION_TAG="${{ steps.version.outputs.VNEW_VERSION }}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
+          VERSION_TAG="v${{ env.NEW_VERSION }}"
 
           ONLINE_APK_DIR="app/build/outputs/apk/onlinePreview/release/"
           OFFLINE_APK_DIR="app/build/outputs/apk/offlinePreview/release/"
@@ -107,19 +107,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          LATEST_TAG=$(git tag --list "*-alpha-latest" | sort -Vr | head -n 1)
+          LATEST_TAG=$(git tag --list "*-alpha" | sort -Vr | head -n 1)
           if [[ -n "$LATEST_TAG" ]]; then
             gh release delete "$LATEST_TAG" --yes || echo "No previous alpha release found to delete."
             git push origin --delete "$LATEST_TAG" || echo "No previous alpha tag found to delete."
           else
-            echo "No alpha-latest tag to delete."
+            echo "No alpha tag to delete."
           fi
 
       - name: Generate changelog
         id: changelog
         run: |
           PREV_TAG=$(git tag --list | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -Vr | head -n 1)
-          CURR_TAG="${{ steps.version.outputs.VNEW_VERSION }}-alpha-latest"
+          CURR_TAG="v${{ env.NEW_VERSION }}-alpha"
 
           if [ -z "$PREV_TAG" ]; then
             LOG_RANGE=""
@@ -166,7 +166,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: "InstallerX Revived Alpha (${{ steps.commit_sha.outputs.SHORT_SHA }})"
-          tag_name: "${{ steps.version.outputs.VNEW_VERSION }}-alpha-latest"
+          tag_name: "v${{ env.NEW_VERSION }}-alpha"
           target_commitish: ${{ github.sha }}
           body: |
             ## 这是自动构建的最新 Alpha 测试版。
