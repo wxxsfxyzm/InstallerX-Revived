@@ -1,12 +1,16 @@
 package com.rosan.installer.util
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.ApplicationInfo
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import org.koin.core.component.inject
 
 object OSUtils : KoinComponent {
     private val reflect = get<ReflectRepo>()
+    private val context by inject<Context>()
 
     // MIUI legacy key (exists in both MIUI and HyperOS)
     private const val KEY_MIUI_VERSION_NAME = "ro.miui.ui.version.name"
@@ -18,7 +22,17 @@ object OSUtils : KoinComponent {
     private const val KEY_OPLUS_API = "ro.build.version.oplus.api"
     private const val KEY_OPLUS_SUB_API = "ro.build.version.oplus.sub_api"
 
-    const val SYSTEM_PACKAGE_INSTALLER = "com.android.packageinstaller"
+    /**
+     * Checks if the app is installed as a System App.
+     * This includes apps in /system/app and /system/priv-app.
+     */
+    val isSystemApp: Boolean by lazy {
+        try {
+            (context.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+        } catch (_: Exception) {
+            false
+        }
+    }
 
     /**
      * Checks if the device is running HyperOS.

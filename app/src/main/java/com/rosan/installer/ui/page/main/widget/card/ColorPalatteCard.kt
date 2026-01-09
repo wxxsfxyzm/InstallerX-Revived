@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -115,7 +114,7 @@ fun ColorSwatchPreview(
         }
         Spacer(Modifier.height(12.dp))
         Text(
-            text = rawColor.getDisplayName(LocalContext.current),
+            text = rawColor.getDisplayName(),
             style = textStyle,
             color = textColor,
             maxLines = 1,

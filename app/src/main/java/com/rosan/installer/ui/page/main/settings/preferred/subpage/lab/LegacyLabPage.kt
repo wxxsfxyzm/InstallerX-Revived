@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.AltRoute
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,6 +35,7 @@ import com.rosan.installer.ui.page.main.widget.setting.LabHttpProfileWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabRootImplementationWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
+import com.rosan.installer.util.OSUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,18 +79,6 @@ fun LegacyLabPage(
                 .padding(paddingValues)
         ) {
             item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
-            // --- Performance Section ---
-            item { LabelWidget(stringResource(R.string.performance)) }
-            item {
-                SwitchWidget(
-                    icon = Icons.AutoMirrored.Filled.AltRoute,
-                    title = stringResource(R.string.lab_use_hook_mode),
-                    description = stringResource(R.string.lab_use_hook_mode_desc),
-                    checked = state.labShizukuHookMode,
-                    isM3E = false,
-                    onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
-                )
-            }
             // --- Root Section (Module Flashing) ---
             item { LabelWidget(stringResource(R.string.config_authorizer_root)) }
             item {
@@ -120,6 +107,7 @@ fun LegacyLabPage(
                     exit = fadeOut() + shrinkVertically()
                 ) {
                     Column {
+                        LabRootImplementationWidget(viewModel)
                         SwitchWidget(
                             icon = AppIcons.Terminal,
                             title = stringResource(R.string.lab_module_flashing_show_art),
@@ -128,7 +116,15 @@ fun LegacyLabPage(
                             checked = state.labRootShowModuleArt,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
                         )
-                        LabRootImplementationWidget(viewModel)
+                        if (OSUtils.isSystemApp)
+                            SwitchWidget(
+                                icon = AppIcons.FlashPreferRoot,
+                                title = stringResource(R.string.lab_module_always_use_root),
+                                description = stringResource(R.string.lab_module_always_use_root_desc),
+                                isM3E = false,
+                                checked = state.labRootModuleAlwaysUseRoot,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(it)) }
+                            )
                     }
                 }
             }

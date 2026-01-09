@@ -106,7 +106,7 @@ fun NewInstallerGlobalSettingsPage(
                             onClick = { navController.navigateUp() },
                             icon = Icons.AutoMirrored.TwoTone.ArrowBack,
                             modifier = Modifier.size(36.dp),
-                            containerColor = MaterialTheme.colorScheme.surfaceBright
+                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
                         )
                         Spacer(modifier = Modifier.size(16.dp))
                     }
@@ -180,8 +180,8 @@ fun NewInstallerGlobalSettingsPage(
                             }
                         if (BiometricManager
                                 .from(context)
-                                .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS)
-                        {
+                                .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
+                        ) {
                             add {
                                 SwitchWidget(
                                     icon = AppIcons.BiometricAuth,

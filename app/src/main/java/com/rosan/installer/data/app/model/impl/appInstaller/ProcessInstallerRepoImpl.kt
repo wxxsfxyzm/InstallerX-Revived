@@ -20,53 +20,24 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
-    ) {
-        val shell = when (config.authorizer) {
-            ConfigEntity.Authorizer.Root -> SHELL_ROOT
-            ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
-            else -> SHELL_SH
-        }
-
-        val recycler = ProcessHookRecycler(shell)
-        val recyclableHandle = recycler.make()
-
-        withContext(localService.asContextElement(value = recyclableHandle.entity)) {
-            try {
-                super.doInstallWork(
-                    config,
-                    entities,
-                    extra,
-                    blacklist,
-                    sharedUserIdBlacklist,
-                    sharedUserIdExemption
-                )
-            } finally {
-                recyclableHandle.recycle()
-            }
-        }
+    ) = runWithProcess(config) {
+        super.doInstallWork(config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
     }
 
     override suspend fun doUninstallWork(
         config: ConfigEntity,
         packageName: String,
         extra: InstallExtraInfoEntity
-    ) {
-        val shell = when (config.authorizer) {
-            ConfigEntity.Authorizer.Root -> SHELL_ROOT
-            ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
-            else -> SHELL_SH
-        }
+    ) = runWithProcess(config) {
+        super.doUninstallWork(config, packageName, extra)
+    }
 
-        val recycler = ProcessHookRecycler(shell)
-        val recyclableHandle = recycler.make()
-
-        withContext(localService.asContextElement(value = recyclableHandle.entity)) {
-            try {
-                super.doUninstallWork(config, packageName, extra)
-            } finally {
-                recyclableHandle.recycle()
-            }
-        }
+    override suspend fun approveSession(
+        config: ConfigEntity,
+        sessionId: Int,
+        granted: Boolean
+    ) = runWithProcess(config) {
+        super.approveSession(config, sessionId, granted)
     }
 
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder {
@@ -86,5 +57,28 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
         result: Result<Unit>
     ) {
         super.doFinishWork(config, entities, extraInfo, result)
+    }
+
+    private suspend fun <T> runWithProcess(
+        config: ConfigEntity,
+        rootShell: String = SHELL_ROOT,
+        block: suspend () -> T
+    ): T {
+        val shell = when (config.authorizer) {
+            ConfigEntity.Authorizer.Root -> rootShell
+            ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
+            else -> SHELL_SH
+        }
+
+        val recycler = ProcessHookRecycler(shell)
+        val recyclableHandle = recycler.make()
+
+        return withContext(localService.asContextElement(value = recyclableHandle.entity)) {
+            try {
+                block()
+            } finally {
+                recyclableHandle.recycle()
+            }
+        }
     }
 }

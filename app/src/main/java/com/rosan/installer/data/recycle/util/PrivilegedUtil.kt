@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.util.Log
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -17,6 +18,7 @@ import java.io.File
 
 const val SHELL_ROOT = "su"
 const val SHELL_SYSTEM = "su 1000"
+const val SHELL_SHELL = "su 2000"
 const val SHELL_SH = "sh"
 
 private const val PRIVILEGED_START_TIMEOUT_MS = 2500L
@@ -79,13 +81,17 @@ suspend fun openAppPrivileged(
 ) {
     val intent = context.packageManager.getLaunchIntentForPackage(packageName)
         ?: return // Exit if no launch intent is found
-
+    Timber.tag("HybridStart").i("Current UID: ${android.os.Process.myUid()}, isSystemApp: ${OSUtils.isSystemApp}")
     Timber.tag("HybridStart").i("Attempting privileged API start for $packageName...")
 
     var forceStartSuccess = false
 
+    val shouldAttemptPrivileged = config.authorizer == ConfigEntity.Authorizer.Root ||
+            config.authorizer == ConfigEntity.Authorizer.Shizuku ||
+            (config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
+
     // Only attempt privileged start for Root or Shizuku
-    if (config.authorizer == ConfigEntity.Authorizer.Root || config.authorizer == ConfigEntity.Authorizer.Shizuku) {
+    if (shouldAttemptPrivileged) {
         // timeoutResult will be Boolean? (true/false on completion, or null on timeout)
         val timeoutResult = withTimeoutOrNull(PRIVILEGED_START_TIMEOUT_MS) {
             PrivilegedManager.startActivityPrivileged(config, intent)
@@ -100,7 +106,7 @@ suspend fun openAppPrivileged(
         } else {
             // The call completed, use its boolean result
             forceStartSuccess = timeoutResult
-            Timber.tag("HybridStart").d("PARepoImpl.startActivityPrivileged returned: $forceStartSuccess")
+            Timber.tag("HybridStart").d("startActivityPrivileged returned: $forceStartSuccess")
         }
     }
 
@@ -139,3 +145,15 @@ val InstallIntentFilter = IntentFilter().apply {
     addDataScheme(ContentResolver.SCHEME_FILE)
     addDataType("application/vnd.android.package-archive")
 }
+
+/**
+ * Helper to generate the special auth command (e.g. "su 1000") for Root mode.
+ * This ensures different methods reuse the same 'su 1000' service process.
+ */
+fun getSpecialAuth(
+    authorizer: ConfigEntity.Authorizer,
+    specialAuth: String = SHELL_SYSTEM
+): (() -> String?)? =
+    if (authorizer == ConfigEntity.Authorizer.Root) {
+        { specialAuth }
+    } else null

@@ -36,7 +36,8 @@ android {
         // 请换一个applicationId，不要和官方的任何发布版本产生冲突。
         // If you use InstallerX source code, package it into apk or other installation package format
         // Please change the applicationId to one that does not conflict with any official release.
-        applicationId = "com.rosan.installer.x.revived"
+        applicationId = project.findProperty("APP_ID") as String?
+            ?: "com.rosan.installer.x.revived"
         namespace = "com.rosan.installer"
         minSdk = 26
         targetSdk = 36
@@ -44,12 +45,10 @@ android {
         // Github Actions will automatically use versionName A.B.C+1 when building preview releases
         // update versionCode and versionName before manually trigger a stable release
         versionCode = 45
-        versionName = "2.3.1"
+        versionName = project.findProperty("VERSION_NAME") as String?
+            ?: project.findProperty("BASE_VERSION") as String
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
 
         javaCompileOptions {
             annotationProcessorOptions {

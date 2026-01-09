@@ -163,6 +163,7 @@
     <string name="config_authorizer_global">跟随全局</string>
     <string name="config_authorizer_global_desc">跟随全局（%1$s）</string>
     <string name="config_authorizer_none">无</string>
+    <string name="config_authorizer_none_system_app_tips">正在作为系统安装器运行，此处的大多数选项不再有效。</string>
     <string name="config_authorizer_none_tips">使用系统安装器时，此处的大多数选项将无效。</string>
     <string name="config_authorizer_root">ROOT 超级用户</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
@@ -419,6 +420,7 @@
     <string name="installer_version_code_label">版本代码：</string>
     <string name="installer_version">版本：%1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
+    <string name="installer_author">作者：%1$s</string>
     <string name="installer_split_name_label">分包名称：</string>
     <string name="installer_package_name">包名：%1$s</string>
     <string name="installer_package_min_sdk_label">最小 SDK：</string>
@@ -653,6 +655,8 @@
     <string name="lab_module_flashing_desc">在刷写任何模块前务必再次确认！</string>
     <string name="lab_module_flashing_show_art">显示字符画</string>
     <string name="lab_module_flashing_show_art_desc">安装开始时显示 InstallerX 字符画</string>
+    <string name="lab_module_always_use_root">始终使用 Root 刷写模块</string>
+    <string name="lab_module_always_use_root_desc">当作为系统安装器工作时，始终使用 root 来刷写模块以获得最佳性能</string>
     <string name="lab_module_select_root_impl">选择 Root 实现方式</string>
     <string name="lab_http_save_file">保存下载文件</string>
     <string name="lab_http_save_file_desc">下载完成后将文件保存到系统下载目录</string>

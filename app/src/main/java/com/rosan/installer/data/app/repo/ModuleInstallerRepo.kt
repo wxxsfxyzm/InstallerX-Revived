@@ -17,6 +17,7 @@ interface ModuleInstallerRepo {
     fun doInstallWork(
         config: ConfigEntity,
         module: AppEntity.ModuleEntity,
+        useRoot: Boolean,
         rootImplementation: RootImplementation
     ): Flow<String> // Return a Flow of strings
 }

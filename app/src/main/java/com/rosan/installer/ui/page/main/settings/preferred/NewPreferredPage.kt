@@ -58,6 +58,7 @@ import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.util.OSUtils
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -84,9 +85,17 @@ fun NewPreferredPage(
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
     }
 
-    var updateErrorInfo by remember { mutableStateOf<PreferredViewEvent.ShowInAppUpdateErrorDetail?>(null) }
+    var updateErrorInfo by remember {
+        mutableStateOf<PreferredViewEvent.ShowInAppUpdateErrorDetail?>(
+            null
+        )
+    }
     val snackBarHostState = remember { SnackbarHostState() }
-    var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(null) }
+    var errorDialogInfo by remember {
+        mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(
+            null
+        )
+    }
     var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -206,7 +215,11 @@ fun NewPreferredPage(
                     }
 
                     if (viewModel.state.authorizer == ConfigEntity.Authorizer.None)
-                        item { InfoTipCard(text = stringResource(R.string.config_authorizer_none_tips)) }
+                        item {
+                            val tip = if (OSUtils.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
+                            else stringResource(R.string.config_authorizer_none_tips)
+                            InfoTipCard(text = tip)
+                        }
 
                     // --- Basic Settings Group ---
                     item {
@@ -217,7 +230,8 @@ fun NewPreferredPage(
                                     DisableAdbVerify(
                                         checked = !state.adbVerifyEnabled,
                                         isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                                        enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku,
+                                        enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
+                                                state.authorizer != ConfigEntity.Authorizer.None,
                                         onCheckedChange = { isDisabled ->
                                             viewModel.dispatch(
                                                 PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
@@ -238,14 +252,16 @@ fun NewPreferredPage(
                                     ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
                                 },
                                 {
-                                    DefaultInstaller(true) {
-                                        viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true))
-                                    }
+                                    DefaultInstaller(
+                                        lock = true,
+                                        enabled = state.authorizer != ConfigEntity.Authorizer.None
+                                    ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
                                 },
                                 {
-                                    DefaultInstaller(false) {
-                                        viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false))
-                                    }
+                                    DefaultInstaller(
+                                        lock = false,
+                                        enabled = state.authorizer != ConfigEntity.Authorizer.None
+                                    ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
                                 },
                                 { ClearCache() }
                             )
@@ -275,7 +291,10 @@ fun NewPreferredPage(
                                 }
                                 add {
                                     val updateSummary =
-                                        if (state.hasUpdate) stringResource(R.string.update_available, state.remoteVersion)
+                                        if (state.hasUpdate) stringResource(
+                                            R.string.update_available,
+                                            state.remoteVersion
+                                        )
                                         else stringResource(R.string.get_update_detail)
                                     SettingsAboutItemWidget(
                                         imageVector = AppIcons.Update,

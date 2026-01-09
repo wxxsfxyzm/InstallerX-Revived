@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.AltRoute
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -47,6 +46,7 @@ import com.rosan.installer.ui.page.main.widget.setting.LabRootImplementationWidg
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.util.OSUtils
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -91,7 +91,7 @@ fun NewLabPage(
                             onClick = { navController.navigateUp() },
                             icon = Icons.AutoMirrored.TwoTone.ArrowBack,
                             modifier = Modifier.size(36.dp),
-                            containerColor = MaterialTheme.colorScheme.surfaceBright
+                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
                         )
                         Spacer(modifier = Modifier.size(16.dp))
                     }
@@ -110,22 +110,6 @@ fun NewLabPage(
                 .padding(paddingValues)
         ) {
             item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
-            item {
-                SplicedColumnGroup(
-                    title = stringResource(R.string.performance),
-                    content = buildList {
-                        add {
-                            SwitchWidget(
-                                icon = Icons.AutoMirrored.Filled.AltRoute,
-                                title = stringResource(R.string.lab_use_hook_mode),
-                                description = stringResource(R.string.lab_use_hook_mode_desc),
-                                checked = state.labShizukuHookMode,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeShizukuHookMode(it)) }
-                            )
-                        }
-                    }
-                )
-            }
             item {
                 SplicedColumnGroup(
                     title = stringResource(R.string.config_authorizer_root),
@@ -152,6 +136,7 @@ fun NewLabPage(
                                 exit = fadeOut() + shrinkVertically()
                             ) {
                                 Column {
+                                    LabRootImplementationWidget(viewModel)
                                     SwitchWidget(
                                         icon = AppIcons.Terminal,
                                         title = stringResource(R.string.lab_module_flashing_show_art),
@@ -165,7 +150,20 @@ fun NewLabPage(
                                             )
                                         }
                                     )
-                                    LabRootImplementationWidget(viewModel)
+                                    if (OSUtils.isSystemApp)
+                                        SwitchWidget(
+                                            icon = AppIcons.FlashPreferRoot,
+                                            title = stringResource(R.string.lab_module_always_use_root),
+                                            description = stringResource(R.string.lab_module_always_use_root_desc),
+                                            checked = state.labRootModuleAlwaysUseRoot,
+                                            onCheckedChange = {
+                                                viewModel.dispatch(
+                                                    PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(
+                                                        it
+                                                    )
+                                                )
+                                            }
+                                        )
                                 }
                             }
                         }

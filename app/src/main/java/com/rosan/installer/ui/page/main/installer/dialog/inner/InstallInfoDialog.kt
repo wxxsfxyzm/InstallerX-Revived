@@ -280,6 +280,16 @@ fun installInfoDialog(
                             textAlign = TextAlign.Center,
                             modifier = Modifier.basicMarquee()
                         )
+                        Spacer(modifier = Modifier.size(4.dp))
+                        Text(
+                            text = stringResource(
+                                R.string.installer_author,
+                                entityToInstall.author
+                            ),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.basicMarquee(),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
 
                     else -> {}
@@ -618,7 +628,7 @@ private fun SdkInfoExpanded(
                     style = MaterialTheme.typography.bodyMedium
                 )
 
-                else -> SdkValueWithIcon(sdk = oldSdk!!, color = MaterialTheme.colorScheme.onSurface)
+                else -> SdkValueWithIcon(sdk = oldSdk, color = MaterialTheme.colorScheme.onSurface)
             }
 
             Icon(

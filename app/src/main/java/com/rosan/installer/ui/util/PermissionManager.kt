@@ -28,7 +28,11 @@ enum class PermissionDenialReason {
  * @param activity The ComponentActivity that is requesting the permissions.
  */
 class PermissionManager(private val activity: ComponentActivity) {
-
+    /**
+     * Callback triggered before launching a system settings activity.
+     * Useful for handling lifecycle events in the parent activity.
+     */
+    var onBeforeLaunchSettings: (() -> Unit)? = null
     private var onPermissionsGranted: (() -> Unit)? = null
     private var onPermissionsDenied: ((reason: PermissionDenialReason) -> Unit)? = null
 
@@ -154,6 +158,8 @@ class PermissionManager(private val activity: ComponentActivity) {
             // Final check to see if any activity can handle the determined intent.
             if (intent.resolveActivity(activity.packageManager) != null) {
                 try {
+                    // Notify that we are about to leave the app
+                    onBeforeLaunchSettings?.invoke()
                     requestStoragePermissionLauncherFromSettings.launch(intent)
                 } catch (e: Exception) {
                     Timber.e(e, "Error launching storage permission settings.")

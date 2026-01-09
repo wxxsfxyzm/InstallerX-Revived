@@ -62,6 +62,13 @@ interface IPrivilegedService {
     void execArrWithCallback(in String[] command, ICommandOutputListener listener);
 
     /**
+     * Sets the "Verify apps over ADB" setting in Global Settings.
+     *
+     * @param enabled true to enable verification (value 1), false to disable it (value 0).
+     */
+    void setAdbVerify(boolean enabled);
+
+    /**
      * Grants a runtime permission to a specified package using the privileged service.
      *
      * @param packageName the package name of the app to grant the permission to
@@ -93,11 +100,4 @@ interface IPrivilegedService {
      * or null if the session is invalid or the query fails.
      */
     Bundle getSessionDetails(int sessionId);
-
-    /**
-     * Approves or rejects an installation session.
-     * @param sessionId The ID of the session.
-     * @param granted true to approve, false to reject.
-     */
-    void approveSession(int sessionId, boolean granted);
 }

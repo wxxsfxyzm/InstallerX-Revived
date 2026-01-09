@@ -15,18 +15,18 @@ class ReflectRepoImpl : ReflectRepo {
     override fun getDeclaredMethods(clazz: Class<*>): Array<Method> = clazz.declaredMethods
 
     /**
-     * Optimized: Directly calls clazz.getConstructor instead of looping.
+     * Directly calls clazz.getConstructor instead of looping.
      */
     override fun getConstructor(clazz: Class<*>, vararg parameterTypes: Class<*>): Constructor<*>? {
         return try {
             clazz.getConstructor(*parameterTypes)
-        } catch (e: NoSuchMethodException) {
+        } catch (_: NoSuchMethodException) {
             null
         }
     }
 
     /**
-     * Optimized: Directly calls clazz.getDeclaredConstructor instead of looping.
+     * Directly calls clazz.getDeclaredConstructor instead of looping.
      */
     override fun getDeclaredConstructor(
         clazz: Class<*>,
@@ -34,13 +34,13 @@ class ReflectRepoImpl : ReflectRepo {
     ): Constructor<*>? {
         return try {
             clazz.getDeclaredConstructor(*parameterTypes)
-        } catch (e: NoSuchMethodException) {
+        } catch (_: NoSuchMethodException) {
             null
         }
     }
 
     /**
-     * Optimized: Directly calls clazz.getField instead of looping.
+     * Directly calls clazz.getField instead of looping.
      */
     override fun getField(clazz: Class<*>, name: String): Field? {
         return try {
@@ -51,18 +51,18 @@ class ReflectRepoImpl : ReflectRepo {
     }
 
     /**
-     * Optimized: Directly calls clazz.getDeclaredField instead of looping.
+     * Directly calls clazz.getDeclaredField instead of looping.
      */
     override fun getDeclaredField(clazz: Class<*>, name: String): Field? {
         return try {
             clazz.getDeclaredField(name)
-        } catch (e: NoSuchFieldException) {
+        } catch (_: NoSuchFieldException) {
             null
         }
     }
 
     /**
-     * Optimized: Directly calls clazz.getMethod instead of looping.
+     * Directly calls clazz.getMethod instead of looping.
      */
     override fun getMethod(
         clazz: Class<*>,
@@ -71,13 +71,13 @@ class ReflectRepoImpl : ReflectRepo {
     ): Method? {
         return try {
             clazz.getMethod(name, *parameterTypes)
-        } catch (e: NoSuchMethodException) {
+        } catch (_: NoSuchMethodException) {
             null
         }
     }
 
     /**
-     * Optimized: Directly calls clazz.getDeclaredMethod instead of looping.
+     * Directly calls clazz.getDeclaredMethod instead of looping.
      */
     override fun getDeclaredMethod(
         clazz: Class<*>,
@@ -86,7 +86,7 @@ class ReflectRepoImpl : ReflectRepo {
     ): Method? {
         return try {
             clazz.getDeclaredMethod(name, *parameterTypes)
-        } catch (e: NoSuchMethodException) {
+        } catch (_: NoSuchMethodException) {
             null
         }
     }

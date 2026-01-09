@@ -93,8 +93,10 @@ fun InstallPrepareContent(
         .map { it.app }
         .filterIsInstance<AppEntity.BaseEntity>()
         .firstOrNull()
-    val primaryEntity = appInfo.primaryEntity
-    if (primaryEntity == null) {
+    val effectivePrimaryEntity = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+        ?: selectedEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
+        ?: appInfo.primaryEntity
+    if (effectivePrimaryEntity == null) {
         LoadingContent(statusText = "No main app entity found")
         return
     }
@@ -102,10 +104,12 @@ fun InstallPrepareContent(
     val entityToInstall = allEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val totalSelectedSize = allEntities.sumOf { it.size }
 
-    val isPureSplit = primaryEntity is AppEntity.SplitEntity
-    val isBundleSplitUpdate = primaryEntity is AppEntity.BaseEntity &&
+    val isModuleSelected = selectedEntities.any { it is AppEntity.ModuleEntity }
+    val isPureSplit = effectivePrimaryEntity is AppEntity.SplitEntity
+    val isBundleSplitUpdate = effectivePrimaryEntity is AppEntity.BaseEntity &&
             entityToInstall == null &&
-            selectedEntities.isNotEmpty()
+            selectedEntities.isNotEmpty() &&
+            !isModuleSelected
     val isSplitUpdateMode = (isBundleSplitUpdate || isPureSplit) && currentPackage.installedAppInfo != null
 
     val errorColor = MaterialTheme.colorScheme.error
@@ -138,7 +142,7 @@ fun InstallPrepareContent(
                 }
             }
         }
-        if (!isSplitUpdateMode && (primaryEntity.sourceType == DataType.APK || primaryEntity.sourceType == DataType.APKS))
+        if (!isSplitUpdateMode && (effectivePrimaryEntity.sourceType == DataType.APK || effectivePrimaryEntity.sourceType == DataType.APKS))
             when (signatureStatus) {
                 SignatureMatchStatus.MISMATCH -> {
                     warnings.add(0, sigMismatchWarning to errorColor)
@@ -179,29 +183,29 @@ fun InstallPrepareContent(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    when (primaryEntity) {
+                    when (effectivePrimaryEntity) {
                         is AppEntity.BaseEntity -> {
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_name_label,
-                                newValue = primaryEntity.versionName,
+                                newValue = effectivePrimaryEntity.versionName,
                                 oldValue = currentPackage.installedAppInfo?.versionName,
                                 isUninstalled = currentPackage.installedAppInfo?.isUninstalled ?: false,
                                 isArchived = currentPackage.installedAppInfo?.isArchived ?: false
                             )
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_code_label,
-                                newValue = primaryEntity.versionCode.toString(),
+                                newValue = effectivePrimaryEntity.versionCode.toString(),
                                 oldValue = currentPackage.installedAppInfo?.versionCode?.toString(),
                                 isUninstalled = currentPackage.installedAppInfo?.isUninstalled ?: false,
                                 isArchived = currentPackage.installedAppInfo?.isArchived ?: false
                             )
                             SDKComparison(
-                                entityToInstall = primaryEntity,
+                                entityToInstall = effectivePrimaryEntity,
                                 preInstallAppInfo = currentPackage.installedAppInfo,
                                 installer = installer
                             )
 
-                            AnimatedVisibility(visible = installer.config.displaySize && primaryEntity.size > 0) {
+                            AnimatedVisibility(visible = installer.config.displaySize && effectivePrimaryEntity.size > 0) {
                                 val oldSize = currentPackage.installedAppInfo?.packageSize ?: 0L
                                 val oldSizeStr = if (oldSize > 0 && !isSplitUpdateMode) oldSize.formatSize() else null
                                 val newSizeStr = totalSelectedSize.formatSize()
@@ -214,8 +218,8 @@ fun InstallPrepareContent(
                             }
 
                             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                                AnimatedVisibility(visible = settings.showOPPOSpecial && primaryEntity.sourceType == DataType.APK) {
-                                    primaryEntity.minOsdkVersion?.let {
+                                AnimatedVisibility(visible = settings.showOPPOSpecial && effectivePrimaryEntity.sourceType == DataType.APK) {
+                                    effectivePrimaryEntity.minOsdkVersion?.let {
                                         AdaptiveInfoRow(
                                             labelResId = R.string.installer_package_minOsdkVersion_label,
                                             newValue = it,
@@ -229,22 +233,28 @@ fun InstallPrepareContent(
                         is AppEntity.ModuleEntity -> {
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_name_label,
-                                newValue = primaryEntity.version,
+                                newValue = effectivePrimaryEntity.version,
                                 oldValue = null
                             )
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_code_label,
-                                newValue = primaryEntity.versionCode.toString(),
+                                newValue = effectivePrimaryEntity.versionCode.toString(),
                                 oldValue = null
                             )
                             AnimatedVisibility(visible = installer.config.displaySdk) {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    AdaptiveInfoRow(
-                                        labelResId = R.string.installer_module_author_label,
-                                        newValue = primaryEntity.author,
-                                        oldValue = null
-                                    )
-                                }
+                                AdaptiveInfoRow(
+                                    labelResId = R.string.installer_module_author_label,
+                                    newValue = effectivePrimaryEntity.author,
+                                    oldValue = null
+                                )
+                            }
+                            AnimatedVisibility(visible = installer.config.displaySize) {
+                                val newSizeStr = totalSelectedSize.formatSize()
+                                AdaptiveInfoRow(
+                                    labelResId = R.string.installer_package_size_label,
+                                    newValue = newSizeStr,
+                                    oldValue = null
+                                )
                             }
                         }
 
@@ -252,13 +262,13 @@ fun InstallPrepareContent(
                             // Split Name
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_split_name_label,
-                                newValue = primaryEntity.splitName,
+                                newValue = effectivePrimaryEntity.splitName,
                                 oldValue = null
                             )
 
                             // SDK Comparison (If splits define min/target SDK)
                             SDKComparison(
-                                entityToInstall = primaryEntity,
+                                entityToInstall = effectivePrimaryEntity,
                                 preInstallAppInfo = currentPackage.installedAppInfo,
                                 installer = installer
                             )
@@ -358,17 +368,17 @@ fun InstallPrepareContent(
 
         item {
             AnimatedVisibility(
-                visible = (primaryEntity is AppEntity.ModuleEntity) &&
-                        primaryEntity.description.isNotBlank() &&
+                visible = (effectivePrimaryEntity is AppEntity.ModuleEntity) &&
+                        effectivePrimaryEntity.description.isNotBlank() &&
                         installer.config.displaySdk,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
-                MiuixInstallerTipCard((primaryEntity as AppEntity.ModuleEntity).description)
+                MiuixInstallerTipCard((effectivePrimaryEntity as AppEntity.ModuleEntity).description)
             }
         }
 
-        val canInstallBaseEntity = (primaryEntity as? AppEntity.BaseEntity)?.let { base ->
+        val canInstallBaseEntity = (effectivePrimaryEntity as? AppEntity.BaseEntity)?.let { base ->
             if (entityToInstall != null) {
                 // Installing Base: Check SDK
                 base.minSdk?.toIntOrNull()?.let { sdk -> sdk <= Build.VERSION.SDK_INT } ?: true
@@ -378,11 +388,11 @@ fun InstallPrepareContent(
             }
         } ?: false
 
-        val canInstallModuleEntity = (primaryEntity as? AppEntity.ModuleEntity)?.let {
+        val canInstallModuleEntity = (effectivePrimaryEntity as? AppEntity.ModuleEntity)?.let {
             settings.enableModuleInstall
         } ?: false
 
-        val canInstallSplitEntity = (primaryEntity as? AppEntity.SplitEntity)?.let {
+        val canInstallSplitEntity = (effectivePrimaryEntity as? AppEntity.SplitEntity)?.let {
             currentPackage.installedAppInfo != null
         } ?: false
 

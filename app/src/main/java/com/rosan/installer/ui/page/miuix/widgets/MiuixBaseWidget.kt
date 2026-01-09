@@ -41,7 +41,7 @@ fun MiuixSwitchWidget(
         summary = description,
         enabled = enabled,
         onClick = toggleAction,
-        rightActions = {
+        endActions = {
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
@@ -82,7 +82,7 @@ fun MiuixCheckboxWidget(
         summary = description,
         enabled = enabled,
         onClick = toggleAction,
-        rightActions = {
+        endActions = {
             Checkbox(
                 checked = checked,
                 onCheckedChange = onCheckedChange,

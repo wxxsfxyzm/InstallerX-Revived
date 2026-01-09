@@ -196,7 +196,7 @@ fun MiuixUpdateDialog(
                             context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
                             onDismiss()
                         },
-                        rightActions = {
+                        endActions = {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_link_icon),
                                 contentDescription = null
@@ -209,7 +209,7 @@ fun MiuixUpdateDialog(
                             context.openUrl("https://t.me/installerx_revived")
                             onDismiss()
                         },
-                        rightActions = {
+                        endActions = {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_link_icon),
                                 contentDescription = null
@@ -304,7 +304,7 @@ fun ErrorDisplaySheet(
         show = showState,
         onDismissRequest = onDismissRequest,
         title = title,
-        leftAction = {
+        startAction = {
             MiuixBackButton(
                 icon = MiuixIcons.Regular.Close,
                 onClick = onDismissRequest

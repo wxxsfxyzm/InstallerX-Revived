@@ -5,7 +5,6 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.net.toUri
-import com.rosan.installer.util.OSUtils.SYSTEM_PACKAGE_INSTALLER
 
 fun Context.openUrl(url: String) =
     try {
@@ -26,5 +25,3 @@ fun Context.toast(text: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
 fun Context.toast(@StringRes resId: Int, duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(this, resId, duration).show()
 }
-
-fun Context.isSystemInstaller(): Boolean = this.packageName == SYSTEM_PACKAGE_INSTALLER

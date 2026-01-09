@@ -5,6 +5,7 @@ import android.app.IActivityManager
 import android.app.IApplicationThread
 import android.app.ProfilerInfo
 import android.content.ComponentName
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -14,7 +15,6 @@ import android.content.pm.ParceledListSlice
 import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
@@ -22,21 +22,24 @@ import android.os.IBinder
 import android.os.IUserManager
 import android.os.RemoteException
 import android.os.ServiceManager
+import android.provider.Settings
 import android.util.Log
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.rosan.installer.ICommandOutputListener
 import com.rosan.installer.data.recycle.util.InstallIntentFilter
+import com.rosan.installer.data.recycle.util.ShizukuContext
 import com.rosan.installer.data.recycle.util.ShizukuHook
+import com.rosan.installer.data.recycle.util.SystemContext
 import com.rosan.installer.data.recycle.util.deletePaths
+import com.rosan.installer.data.recycle.util.resolveSettingsBinder
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.util.OSUtils
 import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.lang.reflect.Field
-import java.lang.reflect.Method
 import java.nio.charset.StandardCharsets
 import android.os.Process as AndroidProcess
 
@@ -52,6 +55,14 @@ class DefaultPrivilegedService(
     private val reflect by inject<ReflectRepo>()
 
     private val isHookMode by lazy {
+        if (binderWrapper != null) return@lazy true
+
+        if (OSUtils.isSystemApp) {
+            // In this case, it's a direct call in the local process, no Shizuku Hook needed
+            Log.d(TAG, "Running as System App (Direct Mode). isHookMode = false")
+            return@lazy false
+        }
+
         val processName: String? = try {
             val activityThreadClass = Class.forName("android.app.ActivityThread")
             val currentProcessNameMethod = reflect.getDeclaredMethod(activityThreadClass, "currentProcessName")
@@ -79,7 +90,6 @@ class DefaultPrivilegedService(
     }
 
     private val iPackageManager: IPackageManager by lazy {
-        // [Mod] Priority: Custom Wrapper (Root Hook) > Shizuku Hook > Direct/Service
         if (binderWrapper != null) {
             Log.d(TAG, "Getting IPackageManager in Process Hook Mode.")
             val original = ServiceManager.getService("package")
@@ -88,7 +98,8 @@ class DefaultPrivilegedService(
             Log.d(TAG, "Getting IPackageManager in Hook Mode (Directly).")
             ShizukuHook.hookedPackageManager
         } else {
-            Log.d(TAG, "Getting IPackageManager in UserService Mode.")
+            if (OSUtils.isSystemApp) Log.d(TAG, "Getting IPackageManager in System Mode.")
+            else Log.d(TAG, "Getting IPackageManager in UserService Mode.")
             IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
         }
     }
@@ -101,6 +112,8 @@ class DefaultPrivilegedService(
         } else if (isHookMode) {
             ShizukuHook.hookedActivityManager
         } else {
+            if (OSUtils.isSystemApp) Log.d(TAG, "Getting IActivityManager in System Mode.")
+            else Log.d(TAG, "Getting IActivityManager in UserService Mode.")
             IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
         }
     }
@@ -114,8 +127,25 @@ class DefaultPrivilegedService(
             Log.d("", "Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
             ShizukuHook.hookedUserManager
         } else {
-            Log.d(TAG, "Getting IUserManager in UserService Mode.")
+            if (OSUtils.isSystemApp) Log.d(TAG, "Getting IUserManager in System Mode.")
+            else Log.d(TAG, "Getting IUserManager in UserService Mode.")
             IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
+        }
+    }
+
+    private val settingsBinder: IBinder? by lazy {
+        val original = resolveSettingsBinder(reflect)?.originalBinder
+
+        if (binderWrapper != null) {
+            Log.d(TAG, "Getting Settings Binder in Process Hook Mode.")
+            if (original != null) binderWrapper.invoke(original) else null
+        } else if (isHookMode) {
+            Log.d(TAG, "Getting Settings Binder in Hook Mode (via ShizukuHook).")
+            ShizukuHook.hookedSettingsBinder
+        } else {
+            if (OSUtils.isSystemApp) Log.d(TAG, "Getting Settings Binder in System Mode.")
+            else Log.d(TAG, "Getting Settings Binder in UserService Mode.")
+            original
         }
     }
 
@@ -129,10 +159,6 @@ class DefaultPrivilegedService(
         Timber.tag(TAG).d("performDexOpt: $packageName, filter=$compilerFilter, force=$force")
 
         return try {
-            val iPackageManager = IPackageManager.Stub.asInterface(
-                ServiceManager.getService("package")
-            )
-
             val method = iPackageManager::class.java.getDeclaredMethod(
                 "performDexOptMode",
                 String::class.java,
@@ -226,17 +252,17 @@ class DefaultPrivilegedService(
     @Throws(RemoteException::class)
     override fun execArr(command: Array<String>): String {
         return try {
-            // 执行 shell 命令
+            // Execute shell command
             val process = Runtime.getRuntime().exec(command)
-            // 读取执行结果
+            // Read execution result
             readResult(process)
         } catch (e: IOException) {
-            // 将 IOException 包装成 RemoteException 抛出
+            // Wrap IOException in RemoteException and throw
             throw RemoteException(e.message)
         } catch (e: InterruptedException) {
-            // 恢复线程的中断状态
+            // Restore thread's interrupted status
             Thread.currentThread().interrupt()
-            // 将 InterruptedException 包装成 RemoteException 抛出
+            // Wrap InterruptedException in RemoteException and throw
             throw RemoteException(e.message)
         }
     }
@@ -310,6 +336,83 @@ class DefaultPrivilegedService(
         }
     }
 
+    override fun setAdbVerify(enabled: Boolean) {
+        val key = "verifier_verify_adb_installs"
+        val targetValue = if (enabled) 1 else 0
+
+        // 1. Check current value
+        val currentValue = try {
+            Settings.Global.getInt(context.contentResolver, key, 1)
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Failed to read initial setting for $key")
+            1
+        }
+
+        if (currentValue == targetValue) {
+            Timber.tag(TAG).d("ADB verify state matches target ($enabled). No action needed.")
+            return
+        }
+
+        // 2. Get the privileged binder from our unified lazy loader
+        val targetBinder = settingsBinder
+        if (targetBinder == null) {
+            Timber.tag(TAG).w("Cannot change ADB verify: Privileged Settings binder is unavailable.")
+            return
+        }
+
+        Timber.tag(TAG).d("Trying to set ADB verify to $targetValue (Current: $currentValue)")
+
+        try {
+            // 3. Prepare Reflection for Swapping
+            val info = resolveSettingsBinder(reflect)
+            if (info == null) {
+                Timber.tag(TAG).e("Failed to resolve Settings reflection info for swapping")
+                return
+            }
+
+            val provider = info.provider
+            val remoteField = info.remoteField
+            val originalBinder = info.originalBinder
+
+            // 4. Swap -> Execute -> Restore
+            try {
+                if (originalBinder != targetBinder) {
+                    remoteField.set(provider, targetBinder)
+                }
+                val targetResolver = if (binderWrapper != null) {
+                    // [Root Mode] UID is 1000.
+                    // Must spoof package name "android" to pass AppOps check.
+                    Timber.tag(TAG).d("Root Mode: Using SystemContextResolver (UID 1000, Pkg: android)")
+                    val systemContext = SystemContext(context)
+                    object : ContentResolver(systemContext) {}
+                } else {
+                    // [Shizuku Mode] UID is 2000.
+                    // Must spoof package name "com.android.shell".
+                    Timber.tag(TAG).d("Shizuku Mode: Using ShellContextResolver (UID 2000, Pkg: com.android.shell)")
+                    val shellContext = ShizukuContext(context)
+                    object : ContentResolver(shellContext) {}
+                }
+
+                val result = Settings.Global.putInt(targetResolver, key, targetValue)
+                Timber.tag(TAG).i("Set $key to $targetValue. Result: $result")
+
+            } catch (e: Exception) {
+                Timber.tag(TAG).e(e, "Failed to putInt for ADB verify")
+            } finally {
+                if (originalBinder !== targetBinder) {
+                    try {
+                        remoteField.set(provider, originalBinder)
+                        Timber.tag(TAG).d("Restored original settings binder")
+                    } catch (e: Exception) {
+                        Timber.tag(TAG).e(e, "Failed to restore original binder!")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Critical error in setAdbVerify setup")
+        }
+    }
+
     override fun grantRuntimePermission(packageName: String, permission: String) {
         try {
             val userId = AndroidProcess.myUid() / 100000
@@ -321,9 +424,7 @@ class DefaultPrivilegedService(
             Log.i(TAG, "Successfully granted $permission to $packageName")
 
         } catch (e: Exception) {
-            // 捕获所有可能的异常 (包括 SecurityException)
             Log.e(TAG, "ERROR granting permission", e)
-            // 将异常包装成 RemoteException 抛回给客户端
             throw RemoteException("Failed to grant permission via system API: ${e.message}")
         }
     }
@@ -350,7 +451,9 @@ class DefaultPrivilegedService(
             val am = iActivityManager
 
             val userId = AndroidProcess.myUid() / 100000
-            val callerPackage = "com.android.shell"
+            val callerPackage = if (OSUtils.isSystemApp) {
+                context.packageName
+            } else "com.android.shell"
             val resolvedType = intent.resolveType(context.contentResolver)
 
             val result = am.startActivityAsUser(
@@ -381,29 +484,27 @@ class DefaultPrivilegedService(
         }
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
+    @SuppressLint("LogNotTimber")
     override fun getSessionDetails(sessionId: Int): Bundle? {
         Log.d(TAG, "getSessionDetails: sessionId=$sessionId")
         try {
             val packageInstaller = context.packageManager.packageInstaller
-            val sessionInfo = packageInstaller.getSessionInfo(sessionId) ?: run {
-                Log.w(TAG, "getSessionDetails: SessionInfo is null for id $sessionId")
+            val sessionInfo = packageInstaller.getSessionInfo(sessionId)
+
+            if (sessionInfo == null) {
+                Log.w(TAG, "getSessionDetails: sessionInfo is null for id $sessionId")
                 return null
             }
-
-            val originatingUid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                sessionInfo.originatingUid
-            } else {
-                -1 // Return -1 if SDK too low (Process.INVALID_UID)
-            }
-            Log.d(TAG, "Got originatingUid: $originatingUid")
 
             var resolvedLabel: CharSequence? = null
             var resolvedIcon: Bitmap? = null
             var path: String? = null
 
-            // Get apk path via reflection
+            // ---------------------------------------------------------
+            // STRATEGY 1: Try to get the APK path via reflection
+            // ---------------------------------------------------------
             try {
+                // Try to get "resolvedBaseCodePath" field
                 val resolvedField: Field? = reflect.getDeclaredField(
                     sessionInfo::class.java,
                     "resolvedBaseCodePath"
@@ -412,11 +513,74 @@ class DefaultPrivilegedService(
                     resolvedField.isAccessible = true
                     path = resolvedField.get(sessionInfo) as? String
                 }
+
+                // ---------------------------------------------------------
+                // STRATEGY 2: If path is null, try "stageDir" (Android 16+ / Staged Sessions)
+                // ---------------------------------------------------------
+                if (path == null) {
+                    val stageDirField = reflect.getDeclaredField(
+                        sessionInfo::class.java,
+                        "stageDir"
+                    )
+                    if (stageDirField != null) {
+                        stageDirField.isAccessible = true
+                        val stageDir = stageDirField.get(sessionInfo) as? java.io.File
+                        // Find the first .apk file in the staging directory
+                        if (stageDir != null && stageDir.exists() && stageDir.isDirectory) {
+                            path = stageDir.listFiles { _, name -> name.endsWith(".apk") }
+                                ?.firstOrNull()?.absolutePath
+                            Log.d(TAG, "Found APK path via stageDir: $path")
+                        }
+                    }
+                } else {
+                    Log.d(TAG, "Reflected resolvedBaseCodePath: $path")
+                }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to reflect resolvedBaseCodePath", e)
+                Log.e(TAG, "Failed to reflect path or stageDir", e)
             }
 
-            // Load appInfo from path
+            // ---------------------------------------------------------
+            // STRATEGY 2.5: Root/Privileged Direct File Access
+            // ---------------------------------------------------------
+            // When running as Root process, access /data/app/ directory directly to find vmdl{sessionId}.tmp
+            // This is the standard location for Android PackageInstallerService temporary files
+            if (path == null) {
+                try {
+                    // Standard Session staging directory structure: /data/app/vmdl{sessionId}.tmp
+                    val sessionDir = java.io.File("/data/app/vmdl${sessionId}.tmp")
+
+                    if (sessionDir.exists() && sessionDir.isDirectory) {
+                        Log.d(TAG, "Direct Access: Found session dir at ${sessionDir.absolutePath}")
+
+                        // 1. Get list of all .apk files
+                        val apkFiles = sessionDir.listFiles { _, name ->
+                            name.endsWith(".apk", ignoreCase = true)
+                        }
+
+                        if (!apkFiles.isNullOrEmpty()) {
+                            // 2. Core Logic: Prefer 'base.apk', otherwise take the first one found
+                            // Split APK installations must contain base.apk; Single APK installs usually are base.apk too
+                            val targetApk = apkFiles.find { it.name == "base.apk" } ?: apkFiles.first()
+
+                            path = targetApk.absolutePath
+                            Log.d(TAG, "Direct Access: Found APK path: $path (Selected from ${apkFiles.size} files)")
+                        } else {
+                            Log.w(TAG, "Direct Access: Session dir exists but contains no APKs")
+                        }
+                    } else {
+                        // Rare cases or older versions might be in /data/local/tmp (mainly ADB push)
+                        // Or /data/app/vmdl{sessionId}.tmp does not exist (Session hasn't written data yet)
+                        Log.d(TAG, "Direct Access: Session dir not found at standard path.")
+                    }
+                } catch (e: Exception) {
+                    // Only happens if process lacks file read permissions (e.g. SELinux denial)
+                    Log.e(TAG, "Failed to perform direct file search", e)
+                }
+            }
+
+            // ---------------------------------------------------------
+            // Parse APK from path (if found)
+            // ---------------------------------------------------------
             if (!path.isNullOrEmpty()) {
                 Log.d(TAG, "Loading info from APK path: $path")
                 try {
@@ -428,114 +592,102 @@ class DefaultPrivilegedService(
                     val appInfo = pkgInfo?.applicationInfo
                     if (appInfo != null) {
                         appInfo.publicSourceDir = path
+                        appInfo.sourceDir = path
 
                         // Load Label
                         try {
                             resolvedLabel = appInfo.loadLabel(pm)
-                            Log.d(TAG, "Label loaded successfully: $resolvedLabel")
                         } catch (e: Exception) {
-                            Log.e(TAG, "Failed to load label", e)
+                            Log.e(TAG, "Failed to load label from APK", e)
                         }
 
+                        // Load Icon
                         try {
-                            // Load Resources for APK
-                            // appInfo.publicSourceDir must be set
-                            val apkResources = pm.getResourcesForApplication(appInfo)
-                            val iconId = appInfo.icon
-
-                            if (iconId == 0) {
-                                Log.w(TAG, "appInfo.icon ID is 0, using default icon.")
-                                // Fallback to default icon
-                                val defaultIcon = pm.defaultActivityIcon
-                                resolvedIcon = (defaultIcon as? BitmapDrawable)?.bitmap
-                                    ?: defaultIcon.toBitmap(
-                                        defaultIcon.intrinsicWidth.coerceAtLeast(1),
-                                        defaultIcon.intrinsicHeight.coerceAtLeast(1)
-                                    )
+                            val drawable = appInfo.loadIcon(pm)
+                            resolvedIcon = if (drawable is BitmapDrawable) {
+                                drawable.bitmap
                             } else {
-                                Log.d(TAG, "Loading icon ID $iconId from APK resources.")
-                                val drawableIcon = apkResources.getDrawable(iconId, null) // Use null for theme
-
-                                val width = drawableIcon.intrinsicWidth
-                                val height = drawableIcon.intrinsicHeight
-                                Log.d(
-                                    TAG,
-                                    "Drawable loaded from resources. Class: ${drawableIcon.javaClass.name}, WxH: ${width}x${height}"
-                                )
-
-                                if (width <= 0 || height <= 0) {
-                                    Log.w(TAG, "Drawable has invalid dimensions, cannot convert.")
-                                } else {
-                                    // Render Drawable to Bitmap manually
-                                    // Handles VectorDrawable, AdaptiveIconDrawable etc.
-                                    val bitmap = createBitmap(width, height)
-                                    val canvas = Canvas(bitmap)
-                                    drawableIcon.setBounds(0, 0, canvas.width, canvas.height)
-                                    drawableIcon.draw(canvas)
-                                    resolvedIcon = bitmap
-                                    Log.d(TAG, "Manually rendered drawable to bitmap.")
-                                }
+                                val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 1
+                                val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 1
+                                drawable.toBitmap(width, height, Bitmap.Config.ARGB_8888)
                             }
                         } catch (e: Exception) {
-                            Log.e(TAG, "Failed to load icon using getResourcesForApplication", e)
+                            Log.e(TAG, "Failed to load icon from APK", e)
                         }
-
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Failed to load info from APK path", e)
+                    Log.e(TAG, "Failed to parse APK from path", e)
                 }
             }
 
-            // Fallback to sessionInfo (mostly null)
-            Log.d(TAG, "Icon Decision: resolvedIcon is null: ${resolvedIcon == null}")
-            Log.d(TAG, "Icon Decision: sessionInfo.appIcon is null: ${sessionInfo.appIcon == null}")
+            // ---------------------------------------------------------
+            // STRATEGY 3: Fallback to Installed App Info (Crucial for Updates)
+            // ---------------------------------------------------------
+            // If we still don't have a label or icon, check if the app is already installed.
+            // This fixes "N/A" when updating an app where the new APK path is hidden.
+            if (resolvedLabel == null || resolvedIcon == null) {
+                try {
+                    val pm = context.packageManager
+                    val appPackageName = sessionInfo.appPackageName
 
+                    if (appPackageName != null) {
+                        val installedInfo = pm.getApplicationInfo(appPackageName, 0)
+
+                        if (resolvedLabel == null) {
+                            resolvedLabel = installedInfo.loadLabel(pm)
+                            Log.d(TAG, "Fallback: Loaded label from installed app")
+                        }
+
+                        if (resolvedIcon == null) {
+                            val drawable = installedInfo.loadIcon(pm)
+                            resolvedIcon = if (drawable is BitmapDrawable) {
+                                drawable.bitmap
+                            } else {
+                                val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 1
+                                val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 1
+                                drawable.toBitmap(width, height, Bitmap.Config.ARGB_8888)
+                            }
+                            Log.d(TAG, "Fallback: Loaded icon from installed app")
+                        }
+                    }
+                } catch (e: PackageManager.NameNotFoundException) {
+                    Log.d(TAG, "App not installed, cannot use fallback info.")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to load info from installed app fallback", e)
+                }
+            }
+
+            // ---------------------------------------------------------
+            // Final Data Preparation
+            // ---------------------------------------------------------
             val finalLabel = resolvedLabel ?: sessionInfo.appLabel ?: "N/A"
             val finalIcon = resolvedIcon ?: sessionInfo.appIcon
-            Log.d(TAG, "Icon Decision: finalIcon is null: ${finalIcon == null}")
 
-            // Package into Bundle
+            Log.d(TAG, "Final Data -> Label: '$finalLabel', Has Icon: ${finalIcon != null}")
+
             val bundle = Bundle()
             bundle.putCharSequence("appLabel", finalLabel)
+
             if (finalIcon != null) {
-                val stream = ByteArrayOutputStream()
-                finalIcon.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                bundle.putByteArray("appIcon", stream.toByteArray())
-            }
-            bundle.putInt("originatingUid", originatingUid)
-            return bundle
-        } catch (e: Exception) {
-            Log.e(TAG, "getSessionDetails failed", e)
-            return null
-        }
-    }
-
-    override fun approveSession(sessionId: Int, granted: Boolean) {
-        try {
-            val packageInstaller = context.packageManager.packageInstaller
-
-            val method: Method? = reflect.getMethod(
-                packageInstaller::class.java,
-                "setPermissionsResult",
-                Int::class.java,
-                Boolean::class.java
-            )
-
-            if (method != null) {
-                method.invoke(packageInstaller, sessionId, granted)
-                Log.d(TAG, "Invoked setPermissionsResult($sessionId, $granted)")
-            } else {
-                throw NoSuchMethodException("setPermissionsResult not found")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "approveSession failed", e)
-            if (!granted) {
                 try {
-                    context.packageManager.packageInstaller.abandonSession(sessionId)
-                } catch (e2: Exception) {
-                    Log.e(TAG, "Fallback abandonSession failed", e2)
+                    val stream = ByteArrayOutputStream()
+                    finalIcon.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                    val iconBytes = stream.toByteArray()
+
+                    if (iconBytes.size > 500 * 1024) {
+                        Log.w(TAG, "WARNING: Icon size is large (${iconBytes.size} bytes).")
+                    }
+                    bundle.putByteArray("appIcon", iconBytes)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to compress icon", e)
                 }
             }
+
+            return bundle
+
+        } catch (e: Exception) {
+            Log.e(TAG, "getSessionDetails CRITICAL FAILURE", e)
+            return null
         }
     }
 
@@ -670,21 +822,21 @@ class DefaultPrivilegedService(
 
     @Throws(IOException::class, InterruptedException::class)
     private fun readResult(process: Process): String {
-        // 分别读取标准输出和标准错误
+        // Read standard output and standard error respectively
         val output = process.inputStream.bufferedReader().use { it.readText() }
         val error = process.errorStream.bufferedReader().use { it.readText() }
 
-        // 等待命令执行完成，并获取退出码
+        // Wait for command execution to complete and get the exit code
         val exitCode = process.waitFor()
 
-        // 检查退出码。0 通常代表成功，任何非零值都代表失败。
+        // Check exit code. 0 typically represents success, any non-zero value represents failure.
         if (exitCode != 0) {
-            // 如果失败了，就构造一个详细的错误信息并抛出 IOException
-            // 这样 execArr 方法里的 catch 块就能捕捉到它，并转换成 RemoteException
-            throw IOException("命令执行失败，退出码: $exitCode, 错误信息: '$error'")
+            // If it failed, construct a detailed error message and throw IOException
+            // This way the catch block in the execArr method can catch it and convert it to RemoteException
+            throw IOException("Command execution failed, exit code: $exitCode, error message: '$error'")
         }
 
-        // 如果成功，返回标准输出的内容
+        // If successful, return the content of standard output
         return output
     }
 }

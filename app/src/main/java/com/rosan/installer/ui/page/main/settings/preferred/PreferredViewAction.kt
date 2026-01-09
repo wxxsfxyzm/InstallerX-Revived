@@ -51,9 +51,9 @@ sealed class PreferredViewAction {
     data object RefreshIgnoreBatteryOptimizationStatus : PreferredViewAction()
     data class SetDefaultInstaller(val lock: Boolean) : PreferredViewAction()
 
-    data class LabChangeShizukuHookMode(val enable: Boolean) : PreferredViewAction()
     data class LabChangeRootModuleFlash(val enable: Boolean) : PreferredViewAction()
     data class LabChangeRootShowModuleArt(val enable: Boolean) : PreferredViewAction()
+    data class LabChangeRootModuleAlwaysUseRoot(val enable: Boolean) : PreferredViewAction()
     data class LabChangeRootImplementation(val implementation: RootImplementation) : PreferredViewAction()
     data class LabChangeHttpProfile(val profile: HttpProfile) : PreferredViewAction()
     data class LabChangeHttpSaveFile(val enable: Boolean) : PreferredViewAction()

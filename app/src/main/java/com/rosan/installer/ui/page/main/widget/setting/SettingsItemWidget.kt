@@ -433,13 +433,18 @@ fun AutoLockInstaller(
 }
 
 @Composable
-fun DefaultInstaller(lock: Boolean, onClick: () -> Unit) {
+fun DefaultInstaller(
+    lock: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
     BaseWidget(
         icon = if (lock) AppIcons.LockDefault else AppIcons.UnlockDefault,
         title =
             stringResource(if (lock) R.string.lock_default_installer else R.string.unlock_default_installer),
         description =
             stringResource(if (lock) R.string.lock_default_installer_desc else R.string.unlock_default_installer_desc),
+        enabled = enabled,
         onClick = onClick
     ) {}
 }
@@ -952,6 +957,7 @@ fun LabRootImplementationWidget(viewModel: PreferredViewModel) {
     val selectedIndex = keys.indexOf(currentRootImpl).coerceAtLeast(0)
 
     DropDownMenuWidget(
+        icon = AppIcons.RootMethod,
         title = stringResource(R.string.lab_module_select_root_impl),
         description = options.getOrNull(selectedIndex),
         choice = selectedIndex,

@@ -32,6 +32,7 @@ import androidx.compose.material.icons.twotone.AutoAwesome
 import androidx.compose.material.icons.twotone.AutoFixHigh
 import androidx.compose.material.icons.twotone.Badge
 import androidx.compose.material.icons.twotone.BatterySaver
+import androidx.compose.material.icons.twotone.Bolt
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.ClearAll
 import androidx.compose.material.icons.twotone.Close
@@ -43,6 +44,7 @@ import androidx.compose.material.icons.twotone.DoNotDisturbOnTotalSilence
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Expand
+import androidx.compose.material.icons.twotone.Extension
 import androidx.compose.material.icons.twotone.Face
 import androidx.compose.material.icons.twotone.Favorite
 import androidx.compose.material.icons.twotone.FavoriteBorder
@@ -89,6 +91,8 @@ object AppIcons {
     val BugReport = Icons.TwoTone.BugReport
     val Terminal = Icons.TwoTone.Terminal
     val Launcher = Icons.TwoTone.RocketLaunch
+    val RootMethod = Icons.TwoTone.Extension
+    val FlashPreferRoot = Icons.TwoTone.Bolt
     val History = Icons.TwoTone.History
     val Lab = Icons.TwoTone.Science
     val Suggestion = Icons.TwoTone.AutoAwesome

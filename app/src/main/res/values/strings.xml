@@ -167,6 +167,7 @@
     <string name="config_authorizer_global">Global</string>
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">None</string>
+    <string name="config_authorizer_none_system_app_tips">Running as system installer, most of the options here are not needed.</string>
     <string name="config_authorizer_none_tips">When using system installer, most of the options here are invalid.</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
@@ -430,6 +431,7 @@
     <string name="installer_version_code_label">Version Code:</string>
     <string name="installer_version">Version: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
+    <string name="installer_author">Author: %1$s</string>
     <string name="installer_split_name_label">Split Name:</string>
     <string name="installer_package_name">Package: %1$s</string>
     <string name="installer_package_min_sdk_label">Min SDK:</string>
@@ -671,6 +673,8 @@
     <string name="lab_module_flashing_desc">Always check twice before flashing any modules!</string>
     <string name="lab_module_flashing_show_art">Display ASCII art</string>
     <string name="lab_module_flashing_show_art_desc">Display InstallerX ASCII art when installation starts"</string>
+    <string name="lab_module_always_use_root">Always use root to flash modules</string>
+    <string name="lab_module_always_use_root_desc">While working as system installer, always use root to flash modules to get best performance</string>
     <string name="lab_module_select_root_impl">Choose root implementation</string>
     <string name="lab_http_save_file">Save downloaded files</string>
     <string name="lab_http_save_file_desc">Save files to the Downloads folder after download is complete</string>

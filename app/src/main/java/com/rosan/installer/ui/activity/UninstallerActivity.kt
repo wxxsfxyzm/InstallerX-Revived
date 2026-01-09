@@ -3,6 +3,7 @@ package com.rosan.installer.ui.activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,13 +44,15 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     private val appDataStore: AppDataStore by inject()
+    private var uiState by mutableStateOf(ThemeUiState())
 
     private var installer: InstallerRepo? = null
     private var job: Job? = null
 
     private lateinit var permissionManager: PermissionManager
 
-    private var uiState by mutableStateOf(ThemeUiState())
+    // Flag to track if the activity is stopped due to a permission request
+    private var isRequestingPermission = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -66,6 +69,12 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         }
 
         permissionManager = PermissionManager(this)
+        // Setup the callback to intercept the settings launch event
+        permissionManager.onBeforeLaunchSettings = {
+            Timber.d("Launching settings for permission, preventing repo closure in onStop.")
+            isRequestingPermission = true
+        }
+
         val installerId = savedInstanceState?.getString(KEY_ID)
         installer = get { parametersOf(installerId) }
 
@@ -110,12 +119,26 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
     override fun onStop() {
         super.onStop()
+        // Check if the screen is currently on.
+        // If the screen is off, onStop is triggered by locking the device.
+        // We explicitly want to ignore this case.
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+        val isScreenOn = powerManager.isInteractive
+
+        if (!isScreenOn) {
+            // The screen is turned off (locked), do nothing.
+            Timber.d("onStop: Screen is turned off. Ignoring.")
+            return
+        }
         // Only strictly interpret as user leaving when not finishing and not changing configurations (e.g., rotation)
-        if (!isFinishing && !isChangingConfigurations) {
+        if (!isFinishing && !isChangingConfigurations && !isRequestingPermission) {
             installer?.let { repo ->
                 Timber.d("onStop: User left UninstallerActivity. Closing repository.")
                 repo.close()
             }
+        } else if (isRequestingPermission) {
+            Timber.d("onStop: Ignored repo closure due to active permission request.")
+            isRequestingPermission = false
         }
     }
 

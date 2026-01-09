@@ -65,6 +65,10 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
         return false
     }
 
+    override fun setAdbVerify(enabled: Boolean) {
+        throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
+    }
+
     /**
      * Grants a runtime permission to a specific package.
      * This requires Device Owner or Profile Owner privileges.
@@ -137,15 +141,10 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
     }
 
     override fun getUsers(): Map<Int, String> {
-        // TODO temporarily not necessary for dhizuku
-        return emptyMap()
-    }
-
-    override fun getSessionDetails(sessionId: Int): Bundle? {
         throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
     }
 
-    override fun approveSession(sessionId: Int, granted: Boolean) {
+    override fun getSessionDetails(sessionId: Int): Bundle {
         throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
     }
 }
