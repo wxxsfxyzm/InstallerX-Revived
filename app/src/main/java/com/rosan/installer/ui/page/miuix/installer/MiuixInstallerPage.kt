@@ -130,7 +130,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
 
     val sheetTitle = when (currentState) {
         is InstallerViewState.Preparing -> stringResource(R.string.installer_preparing)
-        is InstallerViewState.InstallChoice -> stringResource(sourceType.getSupportTitle())
+        is InstallerViewState.InstallChoice -> sourceType.getSupportTitle()
         is InstallerViewState.InstallExtendedMenu -> stringResource(R.string.config_label_install_options)
         is InstallerViewState.InstallPrepare -> when {
             showSettings -> stringResource(R.string.installer_settings)

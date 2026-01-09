@@ -75,7 +75,6 @@ fun installChoiceDialog(
     val isMixedModuleZip = sourceType == DataType.MIXED_MODULE_ZIP
     var selectionMode by remember(sourceType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
 
-    val titleRes = sourceType.getSupportTitle()
     val primaryButtonText = if (isMultiApk) R.string.install else R.string.next
     val primaryButtonAction = if (isMultiApk) {
         { viewModel.dispatch(InstallerViewAction.InstallMultiple) }
@@ -110,7 +109,7 @@ fun installChoiceDialog(
 
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.IconWorking.id, {}),
-        title = DialogInnerParams(DialogParamsType.InstallChoice.id) { Text(stringResource(titleRes)) },
+        title = DialogInnerParams(DialogParamsType.InstallChoice.id) { Text(sourceType.getSupportTitle()) },
         subtitle = DialogInnerParams(DialogParamsType.InstallChoice.id) {
             sourceType.getSupportSubtitle(selectionMode)?.let { Text(it) }
         },

@@ -420,6 +420,7 @@
     <string name="installer_version_code_label">版本代码：</string>
     <string name="installer_version">版本：%1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
+    <string name="installer_author">作者：%1$s</string>
     <string name="installer_split_name_label">分包名称：</string>
     <string name="installer_package_name">包名：%1$s</string>
     <string name="installer_package_min_sdk_label">最小 SDK：</string>

@@ -10,8 +10,12 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,9 +25,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
@@ -121,10 +127,12 @@ fun installPrepareDialog( // 小写开头
     val selectedEntities = currentPackage.appEntities.filter { it.selected }.map { it.app }
     if (selectedEntities.isEmpty()) return installPrepareEmptyDialog(viewModel)
 
-    val primaryEntity = allAvailableApps.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-        ?: allAvailableApps.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
-        ?: allAvailableApps.filterIsInstance<AppEntity.SplitEntity>().firstOrNull()
-        ?: allAvailableApps.sortedBest().firstOrNull() ?: selectedEntities.first()
+    val effectivePrimaryEntity = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+        ?: selectedEntities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
+        ?: selectedEntities.filterIsInstance<AppEntity.SplitEntity>().firstOrNull()
+        ?: selectedEntities.firstOrNull()
+        ?: allAvailableApps.sortedBest().firstOrNull()
+    val primaryEntity = effectivePrimaryEntity ?: return installPrepareEmptyDialog(viewModel)
 
     val entityToInstall = selectedEntities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
     val containerType = primaryEntity.sourceType
@@ -250,6 +258,31 @@ fun installPrepareDialog( // 小写开头
                 item { WarningTextBlock(warnings = warningMessages) }
                 item {
                     AnimatedVisibility(
+                        visible = (primaryEntity is AppEntity.ModuleEntity) &&
+                                primaryEntity.description.isNotBlank() &&
+                                displaySdk,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ) {
+                            Text(
+                                text = (primaryEntity as AppEntity.ModuleEntity).description,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(12.dp)
+                            )
+                        }
+                    }
+                }
+                item {
+                    AnimatedVisibility(
                         visible = showChips,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
@@ -267,17 +300,16 @@ fun installPrepareDialog( // 小写开头
                                 label = stringResource(id = R.string.config_auto_delete),
                                 icon = AppIcons.Delete
                             )
-                            if (primaryEntity !is AppEntity.ModuleEntity)
-                                Chip(
-                                    selected = displaySdk,
-                                    onClick = {
-                                        val newValue = !displaySdk
-                                        displaySdk = newValue
-                                        installer.config.displaySdk = newValue
-                                    },
-                                    label = stringResource(id = R.string.config_display_sdk_version),
-                                    icon = AppIcons.Info
-                                )
+                            Chip(
+                                selected = displaySdk,
+                                onClick = {
+                                    val newValue = !displaySdk
+                                    displaySdk = newValue
+                                    installer.config.displaySdk = newValue
+                                },
+                                label = stringResource(id = R.string.config_display_sdk_version),
+                                icon = AppIcons.Info
+                            )
                             Chip(
                                 selected = displaySize,
                                 onClick = {

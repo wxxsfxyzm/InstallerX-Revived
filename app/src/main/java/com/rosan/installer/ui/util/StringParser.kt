@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.util
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
@@ -11,10 +10,10 @@ import com.rosan.installer.ui.theme.m3color.RawColor
 @Composable
 fun DataType.getSupportTitle() =
     when (this) {
-        DataType.MIXED_MODULE_APK -> R.string.installer_select_from_mixed_module_apk
-        DataType.MULTI_APK_ZIP -> R.string.installer_select_from_zip
-        DataType.MULTI_APK -> R.string.installer_select_multi_apk
-        else -> R.string.installer_select_install
+        DataType.MIXED_MODULE_APK -> stringResource(R.string.installer_select_from_mixed_module_apk)
+        DataType.MULTI_APK_ZIP -> stringResource(R.string.installer_select_from_zip)
+        DataType.MULTI_APK -> stringResource(R.string.installer_select_multi_apk)
+        else -> stringResource(R.string.installer_select_install)
     }
 
 @Composable
@@ -30,25 +29,26 @@ fun DataType.getSupportSubtitle(selectionMode: MmzSelectionMode) =
         else -> null
     }
 
-fun RawColor.getDisplayName(context: Context): String = when (key) {
-    "default" -> context.getString(R.string.color_default)
-    "pink" -> context.getString(R.string.color_pink)
-    "red" -> context.getString(R.string.color_red)
-    "orange" -> context.getString(R.string.color_orange)
-    "amber" -> context.getString(R.string.color_amber)
-    "yellow" -> context.getString(R.string.color_yellow)
-    "lime" -> context.getString(R.string.color_lime)
-    "green" -> context.getString(R.string.color_green)
-    "cyan" -> context.getString(R.string.color_cyan)
-    "teal" -> context.getString(R.string.color_teal)
-    "light_blue" -> context.getString(R.string.color_light_blue)
-    "blue" -> context.getString(R.string.color_blue)
-    "indigo" -> context.getString(R.string.color_indigo)
-    "purple" -> context.getString(R.string.color_purple)
-    "deep_purple" -> context.getString(R.string.color_deep_purple)
-    "blue_grey" -> context.getString(R.string.color_blue_grey)
-    "brown" -> context.getString(R.string.color_brown)
-    "grey" -> context.getString(R.string.color_grey)
+@Composable
+fun RawColor.getDisplayName() = when (key) {
+    "default" -> stringResource(R.string.color_default)
+    "pink" -> stringResource(R.string.color_pink)
+    "red" -> stringResource(R.string.color_red)
+    "orange" -> stringResource(R.string.color_orange)
+    "amber" -> stringResource(R.string.color_amber)
+    "yellow" -> stringResource(R.string.color_yellow)
+    "lime" -> stringResource(R.string.color_lime)
+    "green" -> stringResource(R.string.color_green)
+    "cyan" -> stringResource(R.string.color_cyan)
+    "teal" -> stringResource(R.string.color_teal)
+    "light_blue" -> stringResource(R.string.color_light_blue)
+    "blue" -> stringResource(R.string.color_blue)
+    "indigo" -> stringResource(R.string.color_indigo)
+    "purple" -> stringResource(R.string.color_purple)
+    "deep_purple" -> stringResource(R.string.color_deep_purple)
+    "blue_grey" -> stringResource(R.string.color_blue_grey)
+    "brown" -> stringResource(R.string.color_brown)
+    "grey" -> stringResource(R.string.color_grey)
     else -> key
 }
 

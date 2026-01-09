@@ -242,13 +242,19 @@ fun InstallPrepareContent(
                                 oldValue = null
                             )
                             AnimatedVisibility(visible = installer.config.displaySdk) {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    AdaptiveInfoRow(
-                                        labelResId = R.string.installer_module_author_label,
-                                        newValue = effectivePrimaryEntity.author,
-                                        oldValue = null
-                                    )
-                                }
+                                AdaptiveInfoRow(
+                                    labelResId = R.string.installer_module_author_label,
+                                    newValue = effectivePrimaryEntity.author,
+                                    oldValue = null
+                                )
+                            }
+                            AnimatedVisibility(visible = installer.config.displaySize) {
+                                val newSizeStr = totalSelectedSize.formatSize()
+                                AdaptiveInfoRow(
+                                    labelResId = R.string.installer_package_size_label,
+                                    newValue = newSizeStr,
+                                    oldValue = null
+                                )
                             }
                         }
 
