@@ -372,7 +372,7 @@ fun installPrepareDialog( // 小写开头
                 if (canInstall) {
                     add(DialogButton(stringResource(buttonTextId), 1f) {
                         viewModel.dispatch(InstallerViewAction.Install(true))
-                        if (settings.autoSilentInstall)
+                        if (settings.autoSilentInstall && !viewModel.isInstallingModule)
                             viewModel.dispatch(InstallerViewAction.Background)
                     })
                 }
