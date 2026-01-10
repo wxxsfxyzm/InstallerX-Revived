@@ -4,14 +4,9 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,13 +26,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Sort
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Shield
 import androidx.compose.material.icons.twotone.Visibility
@@ -57,8 +49,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
@@ -67,28 +57,22 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -97,15 +81,18 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.ApplyItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
+import com.rosan.installer.ui.theme.bottomShape
+import com.rosan.installer.ui.theme.middleShape
 import com.rosan.installer.ui.theme.none
-import kotlinx.coroutines.Dispatchers
+import com.rosan.installer.ui.theme.singleShape
+import com.rosan.installer.ui.theme.topShape
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -295,23 +282,11 @@ private fun ItemsWidget(
     viewModel: ApplyViewModel,
     lazyListState: LazyListState,
 ) {
-    // Define the shapes, same as in SplicedColumnGroup
-    val cornerRadius = 16.dp
-    val connectionRadius = 5.dp
-    val topShape = RoundedCornerShape(
-        topStart = cornerRadius,
-        topEnd = cornerRadius,
-        bottomStart = connectionRadius,
-        bottomEnd = connectionRadius
-    )
-    val middleShape = RoundedCornerShape(connectionRadius)
-    val bottomShape = RoundedCornerShape(
-        topStart = connectionRadius,
-        topEnd = connectionRadius,
-        bottomStart = cornerRadius,
-        bottomEnd = cornerRadius
-    )
-    val singleShape = RoundedCornerShape(cornerRadius)
+    val appliedPackageSet by remember(viewModel.state.appEntities.data) {
+        derivedStateOf {
+            viewModel.state.appEntities.data.map { it.packageName }.toHashSet()
+        }
+    }
 
     LazyColumn(
         modifier = modifier,
@@ -320,8 +295,11 @@ private fun ItemsWidget(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         val apps = viewModel.state.checkedApps
-        itemsIndexed(apps, key = { _, app -> app.packageName }) { index, app ->
-            // Determine the shape based on the item's position in the list.
+        itemsIndexed(
+            items = apps,
+            key = { _, app -> app.packageName },
+            contentType = { _, _ -> "app_item" }
+        ) { index, app ->
             val shape = when {
                 apps.size == 1 -> singleShape
                 index == 0 -> topShape
@@ -329,119 +307,27 @@ private fun ItemsWidget(
                 else -> middleShape
             }
 
-            var alpha by remember {
-                mutableFloatStateOf(0f)
-            }
-            ItemWidget(
-                modifier = Modifier
-                    .animateItem(
-                        fadeInSpec = null, fadeOutSpec = null, placementSpec = spring(
-                            stiffness = Spring.StiffnessMediumLow,
-                            visibilityThreshold = IntOffset.VisibilityThreshold
-                        )
+            val isApplied = appliedPackageSet.contains(app.packageName)
+
+            ApplyItemWidget(
+                modifier = Modifier.animateItem(
+                    placementSpec = spring(
+                        stiffness = Spring.StiffnessMediumLow,
+                        visibilityThreshold = IntOffset.VisibilityThreshold
                     )
-                    .graphicsLayer(
-                        alpha = animateFloatAsState(
-                            targetValue = alpha,
-                            animationSpec = spring(stiffness = 100f), label = ""
-                        ).value
-                    ),
-                viewModel = viewModel,
+                ),
                 app = app,
-                shape = shape
-            )
-            SideEffect {
-                alpha = 1f
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun ItemWidget(
-    modifier: Modifier = Modifier,
-    viewModel: ApplyViewModel,
-    app: ApplyViewApp,
-    shape: Shape
-) {
-    val applied = viewModel.state.appEntities.data.find { it.packageName == app.packageName } != null
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceBright, shape)
-            .clip(shape)
-            .clickable(
+                isApplied = isApplied,
+                shape = shape,
+                containerColor = MaterialTheme.colorScheme.surfaceBright,
+                onToggle = { isChecked ->
+                    viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, isChecked))
+                },
                 onClick = {
-                    viewModel.dispatch(
-                        ApplyViewAction.ApplyPackageName(
-                            app.packageName, !applied
-                        )
-                    )
-                },
-                interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(color = MaterialTheme.colorScheme.primary)
+                    viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, !isApplied))
+                }
             )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val packageManager = LocalContext.current.packageManager
-        val scope = rememberCoroutineScope()
-        var icon by remember { mutableStateOf(viewModel.defaultIcon) }
-
-        SideEffect {
-            scope.launch(Dispatchers.IO) {
-                icon = packageManager.getApplicationIcon(app.packageName)
-            }
         }
-        Image(
-            painter = rememberDrawablePainter(icon),
-            modifier = Modifier
-                .size(40.dp),
-            contentDescription = null
-        )
-        Column(
-            modifier = Modifier
-                .weight(1f)
-        ) {
-            Text(
-                text = app.label ?: app.packageName,
-                style = MaterialTheme.typography.titleMediumEmphasized
-            )
-            AnimatedVisibility(viewModel.state.showPackageName) {
-                Text(
-                    app.packageName, style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-        Switch(
-            checked = applied,
-            thumbContent =
-                if (applied) {
-                    {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(SwitchDefaults.IconSize),
-                        )
-                    }
-                } else {
-                    {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = null,
-                            modifier = Modifier.size(SwitchDefaults.IconSize),
-                        )
-                    }
-                },
-            onCheckedChange = {
-                viewModel.dispatch(
-                    ApplyViewAction.ApplyPackageName(app.packageName, it)
-                )
-            }
-        )
     }
 }
 

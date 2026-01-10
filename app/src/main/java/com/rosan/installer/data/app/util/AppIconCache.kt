@@ -66,7 +66,7 @@ object AppIconCache : CoroutineScope {
         info: ApplicationInfo,
         userId: Int,
         size: Int
-    ): Bitmap? {
+    ): Bitmap {
         get(info.packageName, userId, size)?.let { return it }
 
         val loader = appIconLoaders.getOrPut(size) {
@@ -94,7 +94,7 @@ object AppIconCache : CoroutineScope {
                 // Assuming primary user (ID 0)
                 getOrLoadBitmap(context, info, 0, size)
             }
-            bitmap?.toDrawable(context.resources)
+            bitmap.toDrawable(context.resources)
         } catch (e: Exception) {
             e.printStackTrace()
             null

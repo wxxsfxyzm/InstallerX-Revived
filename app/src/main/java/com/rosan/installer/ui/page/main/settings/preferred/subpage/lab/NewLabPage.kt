@@ -1,11 +1,5 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.lab
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -100,7 +94,7 @@ fun NewLabPage(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
+                )
             )
         }
     ) { paddingValues ->
@@ -112,96 +106,83 @@ fun NewLabPage(
             item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.config_authorizer_root),
-                    content = buildList {
-                        add {
-                            SwitchWidget(
-                                icon = AppIcons.Root,
-                                title = stringResource(R.string.lab_module_flashing),
-                                description = stringResource(R.string.lab_module_flashing_desc),
-                                checked = state.labRootEnableModuleFlash,
-                                onCheckedChange = { isChecking ->
-                                    if (isChecking) {
-                                        // If turning ON, show the dialog first (don't enable yet)
-                                        showRootImplementationDialog.value = true
-                                    } else {
-                                        // If turning OFF, disable immediately
-                                        viewModel.dispatch(PreferredViewAction.LabChangeRootModuleFlash(false))
-                                    }
-                                }
-                            )
-                            AnimatedVisibility(
-                                visible = state.labRootEnableModuleFlash,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                Column {
-                                    LabRootImplementationWidget(viewModel)
-                                    SwitchWidget(
-                                        icon = AppIcons.Terminal,
-                                        title = stringResource(R.string.lab_module_flashing_show_art),
-                                        description = stringResource(R.string.lab_module_flashing_show_art_desc),
-                                        checked = state.labRootShowModuleArt,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.LabChangeRootShowModuleArt(
-                                                    it
-                                                )
-                                            )
-                                        }
-                                    )
-                                    if (OSUtils.isSystemApp)
-                                        SwitchWidget(
-                                            icon = AppIcons.FlashPreferRoot,
-                                            title = stringResource(R.string.lab_module_always_use_root),
-                                            description = stringResource(R.string.lab_module_always_use_root_desc),
-                                            checked = state.labRootModuleAlwaysUseRoot,
-                                            onCheckedChange = {
-                                                viewModel.dispatch(
-                                                    PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(
-                                                        it
-                                                    )
-                                                )
-                                            }
-                                        )
+                    title = stringResource(R.string.config_authorizer_root)
+                ) {
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.Root,
+                            title = stringResource(R.string.lab_module_flashing),
+                            description = stringResource(R.string.lab_module_flashing_desc),
+                            checked = state.labRootEnableModuleFlash,
+                            onCheckedChange = { isChecking ->
+                                if (isChecking) {
+                                    showRootImplementationDialog.value = true
+                                } else {
+                                    viewModel.dispatch(PreferredViewAction.LabChangeRootModuleFlash(false))
                                 }
                             }
-                        }
-                    })
+                        )
+                    }
+                    item(visible = state.labRootEnableModuleFlash) {
+                        LabRootImplementationWidget(viewModel)
+                    }
+                    item(visible = state.labRootEnableModuleFlash) {
+                        SwitchWidget(
+                            icon = AppIcons.Terminal,
+                            title = stringResource(R.string.lab_module_flashing_show_art),
+                            description = stringResource(R.string.lab_module_flashing_show_art_desc),
+                            checked = state.labRootShowModuleArt,
+                            onCheckedChange = {
+                                viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it))
+                            }
+                        )
+                    }
+                    item(visible = state.labRootEnableModuleFlash && OSUtils.isSystemApp) {
+                        SwitchWidget(
+                            icon = AppIcons.FlashPreferRoot,
+                            title = stringResource(R.string.lab_module_always_use_root),
+                            description = stringResource(R.string.lab_module_always_use_root_desc),
+                            checked = state.labRootModuleAlwaysUseRoot,
+                            onCheckedChange = {
+                                viewModel.dispatch(PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(it))
+                            }
+                        )
+                    }
+                }
             }
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.lab_unstable_features),
-                    content = buildList {
-                        add {
-                            SwitchWidget(
-                                icon = AppIcons.InstallRequester,
-                                title = stringResource(R.string.lab_set_install_requester),
-                                description = stringResource(R.string.lab_set_install_requester_desc),
-                                checked = state.labSetInstallRequester,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
-                            )
-                        }
+                    title = stringResource(R.string.lab_unstable_features)
+                ) {
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.InstallRequester,
+                            title = stringResource(R.string.lab_set_install_requester),
+                            description = stringResource(R.string.lab_set_install_requester_desc),
+                            checked = state.labSetInstallRequester,
+                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
+                        )
                     }
-                )
+                }
             }
+
             if (RsConfig.isInternetAccessEnabled)
                 item {
                     SplicedColumnGroup(
-                        title = stringResource(R.string.internet_access_enabled),
-                        content = buildList {
-                            /*add{
-                                SwitchWidget(
-                                    icon = Icons.Default.Download,
-                                    title = stringResource(R.string.lab_http_save_file),
-                                    description = stringResource(R.string.lab_http_save_file_desc),
-                                    checked = state.labHttpSaveFile,
-                                    isM3E = false,
-                                    onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeHttpSaveFile(it)) }
-                                )
-                            }*/
-                            add { LabHttpProfileWidget(viewModel) }
-                        })
+                        title = stringResource(R.string.internet_access_enabled)
+                    ) {
+                        /*item {
+                            SwitchWidget(
+                                icon = Icons.Default.Download,
+                                title = stringResource(R.string.lab_http_save_file),
+                                description = stringResource(R.string.lab_http_save_file_desc),
+                                checked = state.labHttpSaveFile,
+                                isM3E = false,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeHttpSaveFile(it)) }
+                            )
+                        }*/
+                        item { LabHttpProfileWidget(viewModel) }
+                    }
                 }
             item { Spacer(Modifier.navigationBarsPadding()) }
         }

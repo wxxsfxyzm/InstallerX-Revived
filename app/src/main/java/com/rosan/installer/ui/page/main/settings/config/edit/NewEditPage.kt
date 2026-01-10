@@ -262,66 +262,69 @@ fun NewEditPage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),
-            state = listState, // 关键: 将 state 传入 LazyColumn
+            state = listState,
         ) {
             // --- Group 1: Main Settings ---
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.config_label_main_settings),
-                    content = buildList {
-                        add { DataNameWidget(viewModel, { DataDescriptionWidget(viewModel) }) }
-                        add { DataAuthorizerWidget(viewModel) }
-                        // Add customize authorizer widget only if the condition is met.
-                        if (viewModel.state.data.authorizerCustomize)
-                            add { DataCustomizeAuthorizerWidget(viewModel) }
-                        add { DataInstallModeWidget(viewModel) }
+                    title = stringResource(R.string.config_label_main_settings)
+                ) {
+                    item { DataNameWidget(viewModel, { DataDescriptionWidget(viewModel) }) }
+                    item { DataAuthorizerWidget(viewModel) }
+                    item(visible = viewModel.state.data.authorizerCustomize) {
+                        DataCustomizeAuthorizerWidget(viewModel)
                     }
-                )
+                    item { DataInstallModeWidget(viewModel) }
+                }
             }
 
-            if (isNoneActive(stateAuthorizer, globalAuthorizer))
+            if (isNoneActive(stateAuthorizer, globalAuthorizer)) {
                 item { InfoTipCard(text = stringResource(R.string.config_authorizer_none_tips)) }
+            }
 
             // --- Group 2: Installer Settings ---
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.config_label_installer_settings),
-                    content = buildList {
-                        add { DataUserWidget(viewModel) }
-                        add { DataInstallReasonWidget(viewModel) }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add { DataPackageSourceWidget(viewModel) }
-                        if (viewModel.state.isCustomInstallRequesterEnabled) add { DataInstallRequesterWidget(viewModel) }
-                        add { DataDeclareInstallerWidget(viewModel) }
-                        add { DataManualDexoptWidget(viewModel) }
-                        add { DataAutoDeleteWidget(viewModel) }
-                        add { DisplaySdkWidget(viewModel) }
-                        add { DisplaySizeWidget(viewModel) }
+                    title = stringResource(R.string.config_label_installer_settings)
+                ) {
+                    item { DataUserWidget(viewModel) }
+                    item { DataInstallReasonWidget(viewModel) }
+                    item(visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        DataPackageSourceWidget(viewModel)
                     }
-                )
+                    item(visible = viewModel.state.isCustomInstallRequesterEnabled) {
+                        DataInstallRequesterWidget(viewModel)
+                    }
+                    item { DataDeclareInstallerWidget(viewModel) }
+                    item { DataManualDexoptWidget(viewModel) }
+                    item { DataAutoDeleteWidget(viewModel) }
+                    item { DisplaySdkWidget(viewModel) }
+                    item { DisplaySizeWidget(viewModel) }
+                }
             }
 
             // --- Group 3: Install Options ---
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.config_label_install_options),
-                    content = buildList {
-                        add { DataForAllUserWidget(viewModel) }
-                        add { DataAllowTestOnlyWidget(viewModel) }
-                        add { DataAllowDowngradeWidget(viewModel) }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-                            add { DataBypassLowTargetSdkWidget(viewModel) }
-                        add { DataAllowAllRequestedPermissionsWidget(viewModel) }
+                    title = stringResource(R.string.config_label_install_options)
+                ) {
+                    item { DataForAllUserWidget(viewModel) }
+                    item { DataAllowTestOnlyWidget(viewModel) }
+                    item { DataAllowDowngradeWidget(viewModel) }
+                    item(visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        DataBypassLowTargetSdkWidget(viewModel)
                     }
-                )
+                    item { DataAllowAllRequestedPermissionsWidget(viewModel) }
+                }
             }
 
+            // --- Group 4: App Bundle Settings ---
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.config_label_app_bundle_settings),
-                    content = buildList {
-                        add { DataSplitChooseAllWidget(viewModel) }
-                    }
-                )
+                    title = stringResource(R.string.config_label_app_bundle_settings)
+                ) {
+                    item { DataSplitChooseAllWidget(viewModel) }
+                }
             }
 
             item { Spacer(Modifier.navigationBarsPadding()) }

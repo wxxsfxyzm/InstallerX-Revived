@@ -123,33 +123,35 @@ fun NewUninstallerGlobalSettingsPage(
                 .padding(paddingValues)
         ) {
             item { InfoTipCard(text = stringResource(R.string.uninstall_authorizer_tip)) }
+            // --- Group 1: Global Settings ---
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.global),
-                    content = buildList {
-                        add { UninstallKeepDataWidget(viewModel) }
-                        add { UninstallForAllUsersWidget(viewModel) }
-                        add { UninstallSystemAppWidget(viewModel) }
-                        add { UninstallRequireBiometricAuthWidget(viewModel) }
-                    }
-                )
+                    title = stringResource(R.string.global)
+                ) {
+                    item { UninstallKeepDataWidget(viewModel) }
+                    item { UninstallForAllUsersWidget(viewModel) }
+                    item { UninstallSystemAppWidget(viewModel) }
+                    item { UninstallRequireBiometricAuthWidget(viewModel) }
+                }
             }
+
+            // --- Group 2: Manual Uninstaller Call ---
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.uninstall_call_uninstaller),
-                    content = buildList {
-                        add {
-                            SettingsNavigationItemWidget(
-                                icon = AppIcons.Delete,
-                                title = stringResource(R.string.uninstall_call_uninstaller_manually),
-                                description = stringResource(R.string.uninstall_call_uninstaller_manually_desc)
-                            ) {
-                                showUninstallInputDialog = true
-                            }
+                    title = stringResource(R.string.uninstall_call_uninstaller)
+                ) {
+                    item {
+                        SettingsNavigationItemWidget(
+                            icon = AppIcons.Delete,
+                            title = stringResource(R.string.uninstall_call_uninstaller_manually),
+                            description = stringResource(R.string.uninstall_call_uninstaller_manually_desc)
+                        ) {
+                            showUninstallInputDialog = true
                         }
                     }
-                )
+                }
             }
+            
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
