@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -60,6 +59,10 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.theme.bottomShape
+import com.rosan.installer.ui.theme.middleShape
+import com.rosan.installer.ui.theme.singleShape
+import com.rosan.installer.ui.theme.topShape
 import com.rosan.installer.ui.util.getSupportSubtitle
 import com.rosan.installer.ui.util.getSupportTitle
 
@@ -146,24 +149,6 @@ private fun ChoiceContent(
     selectionMode: MmzSelectionMode,
     onSetSelectionMode: (MmzSelectionMode) -> Unit
 ) {
-    // Define shapes for different positions
-    val cornerRadius = 16.dp
-    val connectionRadius = 5.dp
-    val topShape = RoundedCornerShape(
-        topStart = cornerRadius,
-        topEnd = cornerRadius,
-        bottomStart = connectionRadius,
-        bottomEnd = connectionRadius
-    )
-    val middleShape = RoundedCornerShape(connectionRadius)
-    val bottomShape = RoundedCornerShape(
-        topStart = connectionRadius,
-        topEnd = connectionRadius,
-        bottomStart = cornerRadius,
-        bottomEnd = cornerRadius
-    )
-    val singleShape = RoundedCornerShape(cornerRadius)
-
     if (isModuleApk) {
         val allSelectableEntities = analysisResults.flatMap { it.appEntities }
         val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
