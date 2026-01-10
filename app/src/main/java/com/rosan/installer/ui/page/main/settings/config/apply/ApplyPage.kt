@@ -1,11 +1,13 @@
 package com.rosan.installer.ui.page.main.settings.config.apply
 
+import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
@@ -67,7 +69,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -81,6 +82,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -91,6 +93,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
+import com.rosan.installer.data.app.util.AppIconCache
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.chip.Chip
@@ -272,36 +275,44 @@ private fun ItemsWidget(
     viewModel: ApplyViewModel,
     lazyListState: LazyListState,
 ) {
+    // Optimize lookup performance by converting the list to a Set.
+    // Use derivedStateOf to ensure it only recalculates when the data actually changes.
+    val appliedPackageSet by remember(viewModel.state.appEntities.data) {
+        derivedStateOf {
+            viewModel.state.appEntities.data.map { it.packageName }.toHashSet()
+        }
+    }
+
     LazyColumn(
         modifier = modifier,
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(8.dp)
     ) {
-        items(viewModel.state.checkedApps, key = { it.packageName }) {
-            var alpha by remember {
-                mutableFloatStateOf(0f)
-            }
+        items(
+            items = viewModel.state.checkedApps,
+            key = { it.packageName },
+            contentType = { "app_item" } // Help Compose recycle items more efficiently
+        ) { app ->
+            val isApplied = appliedPackageSet.contains(app.packageName)
+
             ItemWidget(
-                modifier = Modifier
-                    .animateItem(
-                        fadeInSpec = null, fadeOutSpec = null, placementSpec = spring(
-                            stiffness = Spring.StiffnessMediumLow,
-                            visibilityThreshold = IntOffset.VisibilityThreshold
-                        )
+                modifier = Modifier.animateItem(
+                    // Handle reordering animations with a spring effect
+                    placementSpec = spring(
+                        stiffness = Spring.StiffnessMediumLow,
+                        visibilityThreshold = IntOffset.VisibilityThreshold
                     )
-                    .graphicsLayer(
-                        alpha = animateFloatAsState(
-                            targetValue = alpha,
-                            animationSpec = spring(stiffness = 100f), label = ""
-                        ).value
-                    ),
-                viewModel = viewModel,
-                app = it
+                ),
+                app = app,
+                isApplied = isApplied,
+                onToggle = { isChecked ->
+                    viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, isChecked))
+                },
+                onClick = {
+                    viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, !isApplied))
+                }
             )
-            SideEffect {
-                alpha = 1f
-            }
         }
     }
 }
@@ -309,54 +320,85 @@ private fun ItemsWidget(
 @Composable
 private fun ItemWidget(
     modifier: Modifier = Modifier,
-    viewModel: ApplyViewModel,
     app: ApplyViewApp,
+    isApplied: Boolean,
+    onToggle: (Boolean) -> Unit,
+    onClick: () -> Unit
 ) {
-    val applied =
-        viewModel.state.appEntities.data.find { it.packageName == app.packageName } != null
+    // Manually control the entry animation state.
+    val animationState = remember { Animatable(0f) }
+
+    // Trigger the animation once when the item enters the composition.
+    LaunchedEffect(Unit) {
+        animationState.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 300)
+        )
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                // Apply transformations in the draw phase to avoid relayout.
+                val progress = animationState.value
+                this.alpha = progress
+                // Slight vertical slide-in effect (50px -> 0px)
+                this.translationY = 50f * (1f - progress)
+            }
             .clip(RoundedCornerShape(8.dp)),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(
-                    onClick = {
-                        viewModel.dispatch(
-                            ApplyViewAction.ApplyPackageName(
-                                app.packageName, !applied
-                            )
-                        )
-                    },
-                    interactionSource = remember {
-                        MutableInteractionSource()
-                    },
-                    indication = ripple(
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    onClick = onClick,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(color = MaterialTheme.colorScheme.primary)
                 )
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            val packageManager = LocalContext.current.packageManager
-            val scope = rememberCoroutineScope()
-            var icon by remember {
-                mutableStateOf(viewModel.defaultIcon)
-            }
-            SideEffect {
-                scope.launch(Dispatchers.IO) {
-                    icon = packageManager.getApplicationIcon(app.packageName)
+            val context = LocalContext.current
+            val density = LocalDensity.current
+            val iconSizePx = remember(density) { with(density) { 40.dp.roundToPx() } }
+
+            var icon by remember(app.packageName) { mutableStateOf<Drawable?>(null) }
+
+            // Load icon asynchronously to prevent UI stuttering
+            LaunchedEffect(app.packageName) {
+                launch(Dispatchers.IO) {
+                    val pm = context.packageManager
+                    val info = runCatching {
+                        pm.getApplicationInfo(app.packageName, 0)
+                    }.getOrNull()
+
+                    if (info != null) {
+                        val loadedIcon = AppIconCache.loadIconDrawable(context, info, iconSizePx)
+                        if (loadedIcon != null) {
+                            icon = loadedIcon
+                        }
+                    }
                 }
             }
-            Image(
-                painter = rememberDrawablePainter(icon),
-                modifier = Modifier
-                    .size(40.dp)
-                    .align(Alignment.CenterVertically),
-                contentDescription = null
-            )
+
+            if (icon != null) {
+                Image(
+                    painter = rememberDrawablePainter(icon),
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.CenterVertically),
+                    contentDescription = null
+                )
+            } else {
+                // Placeholder to prevent layout jumps
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.CenterVertically)
+                )
+            }
+
             Column(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
@@ -366,22 +408,16 @@ private fun ItemWidget(
                     text = app.label ?: app.packageName,
                     style = MaterialTheme.typography.titleMedium
                 )
-                AnimatedVisibility(viewModel.state.showPackageName) {
-                    Text(
-                        app.packageName, style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+                Text(
+                    text = app.packageName,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
             Switch(
                 modifier = Modifier.align(Alignment.CenterVertically),
-                checked = applied,
-                onCheckedChange = {
-                    viewModel.dispatch(
-                        ApplyViewAction.ApplyPackageName(
-                            app.packageName, it
-                        )
-                    )
-                })
+                checked = isApplied,
+                onCheckedChange = onToggle
+            )
         }
     }
 }
@@ -395,6 +431,7 @@ private fun BottomSheetContent(viewModel: ApplyViewModel) {
             }
         }
     }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -407,37 +444,6 @@ private fun BottomSheetContent(viewModel: ApplyViewModel) {
     }
 }
 
-/*@Composable
-private fun LabelWidget(text: String) {
-    CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.titleMedium) {
-        Text(text)
-    }
-}*/
-
-/*@Composable
-private fun OrderWidget(viewModel: ApplyViewModel) {
-    LabelWidget(stringResource(R.string.sort))
-
-    data class OrderData(val labelResId: Int, val type: ApplyViewState.OrderType)
-
-    val map = listOf(
-        OrderData(R.string.sort_by_label, ApplyViewState.OrderType.Label),
-        OrderData(R.string.sort_by_package_name, ApplyViewState.OrderType.PackageName),
-        OrderData(R.string.sort_by_install_time, ApplyViewState.OrderType.FirstInstallTime)
-    )
-
-    val selectedIndex = map.map { it.type }.indexOf(viewModel.state.orderType)
-    ToggleRow(selectedIndex = selectedIndex) {
-        val a = mutableListOf<String>()
-        map.forEachIndexed { index, value ->
-            Toggle(selected = selectedIndex == index, onSelected = {
-                viewModel.dispatch(ApplyViewAction.Order(value.type))
-            }) {
-                Text(stringResource(value.labelResId))
-            }
-        }
-    }
-}*/
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun OrderWidget(viewModel: ApplyViewModel) {

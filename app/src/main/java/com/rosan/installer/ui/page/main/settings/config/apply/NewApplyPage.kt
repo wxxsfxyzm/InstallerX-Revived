@@ -1,11 +1,13 @@
 package com.rosan.installer.ui.page.main.settings.config.apply
 
+import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
@@ -31,7 +33,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
@@ -74,7 +75,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -89,6 +89,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -99,12 +100,17 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
+import com.rosan.installer.data.app.util.AppIconCache
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
+import com.rosan.installer.ui.theme.bottomShape
+import com.rosan.installer.ui.theme.middleShape
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.theme.singleShape
+import com.rosan.installer.ui.theme.topShape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -295,23 +301,12 @@ private fun ItemsWidget(
     viewModel: ApplyViewModel,
     lazyListState: LazyListState,
 ) {
-    // Define the shapes, same as in SplicedColumnGroup
-    val cornerRadius = 16.dp
-    val connectionRadius = 5.dp
-    val topShape = RoundedCornerShape(
-        topStart = cornerRadius,
-        topEnd = cornerRadius,
-        bottomStart = connectionRadius,
-        bottomEnd = connectionRadius
-    )
-    val middleShape = RoundedCornerShape(connectionRadius)
-    val bottomShape = RoundedCornerShape(
-        topStart = connectionRadius,
-        topEnd = connectionRadius,
-        bottomStart = cornerRadius,
-        bottomEnd = cornerRadius
-    )
-    val singleShape = RoundedCornerShape(cornerRadius)
+    // Pre-calculate the set of applied packages to reduce lookup time from O(N) to O(1).
+    val appliedPackageSet by remember(viewModel.state.appEntities.data) {
+        derivedStateOf {
+            viewModel.state.appEntities.data.map { it.packageName }.toHashSet()
+        }
+    }
 
     LazyColumn(
         modifier = modifier,
@@ -320,8 +315,12 @@ private fun ItemsWidget(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         val apps = viewModel.state.checkedApps
-        itemsIndexed(apps, key = { _, app -> app.packageName }) { index, app ->
-            // Determine the shape based on the item's position in the list.
+        itemsIndexed(
+            items = apps,
+            key = { _, app -> app.packageName },
+            contentType = { _, _ -> "app_item" }
+        ) { index, app ->
+            // Determine shape based on list position.
             val shape = when {
                 apps.size == 1 -> singleShape
                 index == 0 -> topShape
@@ -329,30 +328,25 @@ private fun ItemsWidget(
                 else -> middleShape
             }
 
-            var alpha by remember {
-                mutableFloatStateOf(0f)
-            }
+            val isApplied = appliedPackageSet.contains(app.packageName)
+
             ItemWidget(
-                modifier = Modifier
-                    .animateItem(
-                        fadeInSpec = null, fadeOutSpec = null, placementSpec = spring(
-                            stiffness = Spring.StiffnessMediumLow,
-                            visibilityThreshold = IntOffset.VisibilityThreshold
-                        )
+                modifier = Modifier.animateItem(
+                    placementSpec = spring(
+                        stiffness = Spring.StiffnessMediumLow,
+                        visibilityThreshold = IntOffset.VisibilityThreshold
                     )
-                    .graphicsLayer(
-                        alpha = animateFloatAsState(
-                            targetValue = alpha,
-                            animationSpec = spring(stiffness = 100f), label = ""
-                        ).value
-                    ),
-                viewModel = viewModel,
+                ),
                 app = app,
-                shape = shape
+                shape = shape,
+                isApplied = isApplied,
+                onToggle = { isChecked ->
+                    viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, isChecked))
+                },
+                onClick = {
+                    viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, !isApplied))
+                }
             )
-            SideEffect {
-                alpha = 1f
-            }
         }
     }
 }
@@ -361,25 +355,34 @@ private fun ItemsWidget(
 @Composable
 private fun ItemWidget(
     modifier: Modifier = Modifier,
-    viewModel: ApplyViewModel,
     app: ApplyViewApp,
-    shape: Shape
+    shape: Shape,
+    isApplied: Boolean,
+    onToggle: (Boolean) -> Unit,
+    onClick: () -> Unit
 ) {
-    val applied = viewModel.state.appEntities.data.find { it.packageName == app.packageName } != null
+    // Manually control entry animation to ensure it runs only once upon composition.
+    val animationState = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        animationState.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 300)
+        )
+    }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                val progress = animationState.value
+                this.alpha = progress
+                this.translationY = 50f * (1f - progress)
+            }
             .background(MaterialTheme.colorScheme.surfaceBright, shape)
             .clip(shape)
             .clickable(
-                onClick = {
-                    viewModel.dispatch(
-                        ApplyViewAction.ApplyPackageName(
-                            app.packageName, !applied
-                        )
-                    )
-                },
+                onClick = onClick,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(color = MaterialTheme.colorScheme.primary)
             )
@@ -387,60 +390,68 @@ private fun ItemWidget(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val packageManager = LocalContext.current.packageManager
-        val scope = rememberCoroutineScope()
-        var icon by remember { mutableStateOf(viewModel.defaultIcon) }
+        val context = LocalContext.current
+        val density = LocalDensity.current
+        val iconSizePx = remember(density) { with(density) { 40.dp.roundToPx() } }
 
-        SideEffect {
-            scope.launch(Dispatchers.IO) {
-                icon = packageManager.getApplicationIcon(app.packageName)
+        var icon by remember(app.packageName) { mutableStateOf<Drawable?>(null) }
+
+        // Load icon on a background thread using the cache helper.
+        LaunchedEffect(app.packageName) {
+            launch(Dispatchers.IO) {
+                val pm = context.packageManager
+                val info = runCatching {
+                    pm.getApplicationInfo(app.packageName, 0)
+                }.getOrNull()
+
+                if (info != null) {
+                    val loadedIcon = AppIconCache.loadIconDrawable(context, info, iconSizePx)
+                    if (loadedIcon != null) {
+                        icon = loadedIcon
+                    }
+                }
             }
         }
-        Image(
-            painter = rememberDrawablePainter(icon),
-            modifier = Modifier
-                .size(40.dp),
-            contentDescription = null
-        )
+
+        if (icon != null) {
+            Image(
+                painter = rememberDrawablePainter(icon),
+                modifier = Modifier.size(40.dp),
+                contentDescription = null
+            )
+        } else {
+            // Placeholder to avoid layout shifts.
+            Box(modifier = Modifier.size(40.dp))
+        }
+
         Column(
-            modifier = Modifier
-                .weight(1f)
+            modifier = Modifier.weight(1f)
         ) {
             Text(
                 text = app.label ?: app.packageName,
                 style = MaterialTheme.typography.titleMediumEmphasized
             )
-            AnimatedVisibility(viewModel.state.showPackageName) {
+            // Note: If `showPackageName` changes frequently, consider passing it as a parameter to avoid recomposition.
+            // Assuming it's relatively stable here.
+            AnimatedVisibility(visible = true /* Pass showPackageName via params if dynamic visibility is needed */) {
                 Text(
-                    app.packageName, style = MaterialTheme.typography.bodySmall
+                    app.packageName,
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }
+
         Switch(
-            checked = applied,
-            thumbContent =
-                if (applied) {
-                    {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(SwitchDefaults.IconSize),
-                        )
-                    }
-                } else {
-                    {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = null,
-                            modifier = Modifier.size(SwitchDefaults.IconSize),
-                        )
-                    }
-                },
-            onCheckedChange = {
-                viewModel.dispatch(
-                    ApplyViewAction.ApplyPackageName(app.packageName, it)
+            checked = isApplied,
+            thumbContent = {
+                val iconVector = if (isApplied) Icons.Filled.Check else Icons.Filled.Close
+                Icon(
+                    imageVector = iconVector,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
                 )
-            }
+            },
+            onCheckedChange = onToggle
         )
     }
 }

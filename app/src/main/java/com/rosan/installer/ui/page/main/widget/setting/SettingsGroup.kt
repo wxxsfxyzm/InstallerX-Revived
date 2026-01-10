@@ -4,13 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.rosan.installer.ui.theme.bottomShape
+import com.rosan.installer.ui.theme.middleShape
+import com.rosan.installer.ui.theme.singleShape
+import com.rosan.installer.ui.theme.topShape
 
 /**
  * Settings Group Container
@@ -27,24 +30,6 @@ fun SplicedColumnGroup(
 ) {
     if (content.isEmpty()) return
 
-    val cornerRadius = 16.dp
-    val connectionRadius = 5.dp
-    // Define shapes for different positions.
-    val topShape = RoundedCornerShape(
-        topStart = cornerRadius,
-        topEnd = cornerRadius,
-        bottomStart = connectionRadius,
-        bottomEnd = connectionRadius
-    )
-    val middleShape = RoundedCornerShape(connectionRadius)
-    val bottomShape = RoundedCornerShape(
-        topStart = connectionRadius,
-        topEnd = connectionRadius,
-        bottomStart = cornerRadius,
-        bottomEnd = cornerRadius
-    )
-    val singleShape = RoundedCornerShape(cornerRadius)
-
     Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         // Group title
         if (title != "")
@@ -59,7 +44,7 @@ fun SplicedColumnGroup(
         Column(
             modifier = Modifier.clip(
                 // Clip the whole column to ensure content stays within the rounded bounds.
-                if (content.size == 1) singleShape else RoundedCornerShape(cornerRadius)
+                singleShape
             ),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
