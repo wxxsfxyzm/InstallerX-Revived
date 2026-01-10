@@ -1,19 +1,12 @@
 package com.rosan.installer.ui.page.main.settings.config.apply
 
-import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,8 +30,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Sort
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Shield
 import androidx.compose.material.icons.twotone.Visibility
@@ -58,8 +49,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
@@ -68,7 +57,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -81,15 +69,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -98,20 +81,18 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
-import com.rosan.installer.data.app.util.AppIconCache
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.ApplyItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.theme.bottomShape
 import com.rosan.installer.ui.theme.middleShape
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.singleShape
 import com.rosan.installer.ui.theme.topShape
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -301,7 +282,6 @@ private fun ItemsWidget(
     viewModel: ApplyViewModel,
     lazyListState: LazyListState,
 ) {
-    // Pre-calculate the set of applied packages to reduce lookup time from O(N) to O(1).
     val appliedPackageSet by remember(viewModel.state.appEntities.data) {
         derivedStateOf {
             viewModel.state.appEntities.data.map { it.packageName }.toHashSet()
@@ -320,7 +300,6 @@ private fun ItemsWidget(
             key = { _, app -> app.packageName },
             contentType = { _, _ -> "app_item" }
         ) { index, app ->
-            // Determine shape based on list position.
             val shape = when {
                 apps.size == 1 -> singleShape
                 index == 0 -> topShape
@@ -330,7 +309,7 @@ private fun ItemsWidget(
 
             val isApplied = appliedPackageSet.contains(app.packageName)
 
-            ItemWidget(
+            ApplyItemWidget(
                 modifier = Modifier.animateItem(
                     placementSpec = spring(
                         stiffness = Spring.StiffnessMediumLow,
@@ -338,8 +317,9 @@ private fun ItemsWidget(
                     )
                 ),
                 app = app,
-                shape = shape,
                 isApplied = isApplied,
+                shape = shape,
+                containerColor = MaterialTheme.colorScheme.surfaceBright,
                 onToggle = { isChecked ->
                     viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, isChecked))
                 },
@@ -348,111 +328,6 @@ private fun ItemsWidget(
                 }
             )
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun ItemWidget(
-    modifier: Modifier = Modifier,
-    app: ApplyViewApp,
-    shape: Shape,
-    isApplied: Boolean,
-    onToggle: (Boolean) -> Unit,
-    onClick: () -> Unit
-) {
-    // Manually control entry animation to ensure it runs only once upon composition.
-    val animationState = remember { Animatable(0f) }
-
-    LaunchedEffect(Unit) {
-        animationState.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 300)
-        )
-    }
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .graphicsLayer {
-                val progress = animationState.value
-                this.alpha = progress
-                this.translationY = 50f * (1f - progress)
-            }
-            .background(MaterialTheme.colorScheme.surfaceBright, shape)
-            .clip(shape)
-            .clickable(
-                onClick = onClick,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(color = MaterialTheme.colorScheme.primary)
-            )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val context = LocalContext.current
-        val density = LocalDensity.current
-        val iconSizePx = remember(density) { with(density) { 40.dp.roundToPx() } }
-
-        var icon by remember(app.packageName) { mutableStateOf<Drawable?>(null) }
-
-        // Load icon on a background thread using the cache helper.
-        LaunchedEffect(app.packageName) {
-            launch(Dispatchers.IO) {
-                val pm = context.packageManager
-                val info = runCatching {
-                    pm.getApplicationInfo(app.packageName, 0)
-                }.getOrNull()
-
-                if (info != null) {
-                    val loadedIcon = AppIconCache.loadIconDrawable(context, info, iconSizePx)
-                    if (loadedIcon != null) {
-                        icon = loadedIcon
-                    }
-                }
-            }
-        }
-
-        if (icon != null) {
-            Image(
-                painter = rememberDrawablePainter(icon),
-                modifier = Modifier.size(40.dp),
-                contentDescription = null
-            )
-        } else {
-            // Placeholder to avoid layout shifts.
-            Box(modifier = Modifier.size(40.dp))
-        }
-
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = app.label ?: app.packageName,
-                style = MaterialTheme.typography.titleMediumEmphasized
-            )
-            // Note: If `showPackageName` changes frequently, consider passing it as a parameter to avoid recomposition.
-            // Assuming it's relatively stable here.
-            AnimatedVisibility(visible = true /* Pass showPackageName via params if dynamic visibility is needed */) {
-                Text(
-                    app.packageName,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-
-        Switch(
-            checked = isApplied,
-            thumbContent = {
-                val iconVector = if (isApplied) Icons.Filled.Check else Icons.Filled.Close
-                Icon(
-                    imageVector = iconVector,
-                    contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize),
-                )
-            },
-            onCheckedChange = onToggle
-        )
     }
 }
 

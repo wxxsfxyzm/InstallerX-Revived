@@ -1,18 +1,12 @@
 package com.rosan.installer.ui.page.main.settings.config.apply
 
-import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,13 +18,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.Sort
@@ -53,7 +45,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
@@ -62,7 +53,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -75,14 +65,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -91,16 +77,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
-import com.rosan.installer.data.app.util.AppIconCache
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.ApplyItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.theme.none
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -296,7 +280,7 @@ private fun ItemsWidget(
         ) { app ->
             val isApplied = appliedPackageSet.contains(app.packageName)
 
-            ItemWidget(
+            ApplyItemWidget(
                 modifier = Modifier.animateItem(
                     // Handle reordering animations with a spring effect
                     placementSpec = spring(
@@ -306,117 +290,14 @@ private fun ItemsWidget(
                 ),
                 app = app,
                 isApplied = isApplied,
+                isM3e = false,
+                // ApplyPage uses default styling (Transparent background, no switch icons)
                 onToggle = { isChecked ->
                     viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, isChecked))
                 },
                 onClick = {
                     viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, !isApplied))
                 }
-            )
-        }
-    }
-}
-
-@Composable
-private fun ItemWidget(
-    modifier: Modifier = Modifier,
-    app: ApplyViewApp,
-    isApplied: Boolean,
-    onToggle: (Boolean) -> Unit,
-    onClick: () -> Unit
-) {
-    // Manually control the entry animation state.
-    val animationState = remember { Animatable(0f) }
-
-    // Trigger the animation once when the item enters the composition.
-    LaunchedEffect(Unit) {
-        animationState.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 300)
-        )
-    }
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .graphicsLayer {
-                // Apply transformations in the draw phase to avoid relayout.
-                val progress = animationState.value
-                this.alpha = progress
-                // Slight vertical slide-in effect (50px -> 0px)
-                this.translationY = 50f * (1f - progress)
-            }
-            .clip(RoundedCornerShape(8.dp)),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(
-                    onClick = onClick,
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = ripple(color = MaterialTheme.colorScheme.primary)
-                )
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            val context = LocalContext.current
-            val density = LocalDensity.current
-            val iconSizePx = remember(density) { with(density) { 40.dp.roundToPx() } }
-
-            var icon by remember(app.packageName) { mutableStateOf<Drawable?>(null) }
-
-            // Load icon asynchronously to prevent UI stuttering
-            LaunchedEffect(app.packageName) {
-                launch(Dispatchers.IO) {
-                    val pm = context.packageManager
-                    val info = runCatching {
-                        pm.getApplicationInfo(app.packageName, 0)
-                    }.getOrNull()
-
-                    if (info != null) {
-                        val loadedIcon = AppIconCache.loadIconDrawable(context, info, iconSizePx)
-                        if (loadedIcon != null) {
-                            icon = loadedIcon
-                        }
-                    }
-                }
-            }
-
-            if (icon != null) {
-                Image(
-                    painter = rememberDrawablePainter(icon),
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.CenterVertically),
-                    contentDescription = null
-                )
-            } else {
-                // Placeholder to prevent layout jumps
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.CenterVertically)
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(1f)
-            ) {
-                Text(
-                    text = app.label ?: app.packageName,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = app.packageName,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            Switch(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                checked = isApplied,
-                onCheckedChange = onToggle
             )
         }
     }
