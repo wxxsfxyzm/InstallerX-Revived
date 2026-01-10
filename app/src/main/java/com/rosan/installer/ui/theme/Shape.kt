@@ -4,20 +4,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 
 // Define shapes for the spliced list style.
-private val cornerRadius = 16.dp
-private val connectionRadius = 5.dp
+val CornerRadius = 16.dp
+val ConnectionRadius = 5.dp
 
 val topShape = RoundedCornerShape(
-    topStart = cornerRadius,
-    topEnd = cornerRadius,
-    bottomStart = connectionRadius,
-    bottomEnd = connectionRadius
+    topStart = CornerRadius,
+    topEnd = CornerRadius,
+    bottomStart = ConnectionRadius,
+    bottomEnd = ConnectionRadius
 )
-val middleShape = RoundedCornerShape(connectionRadius)
+val middleShape = RoundedCornerShape(ConnectionRadius)
 val bottomShape = RoundedCornerShape(
-    topStart = connectionRadius,
-    topEnd = connectionRadius,
-    bottomStart = cornerRadius,
-    bottomEnd = cornerRadius
+    topStart = ConnectionRadius,
+    topEnd = ConnectionRadius,
+    bottomStart = CornerRadius,
+    bottomEnd = CornerRadius
 )
-val singleShape = RoundedCornerShape(cornerRadius)
+val singleShape = RoundedCornerShape(CornerRadius)
