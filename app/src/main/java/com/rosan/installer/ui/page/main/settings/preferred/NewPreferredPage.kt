@@ -178,40 +178,33 @@ fun NewPreferredPage(
                     // --- Global Settings Group ---
                     item {
                         SplicedColumnGroup(
-                            title = stringResource(R.string.personalization),
-                            content = buildList {
-                                add {
-                                    SettingsNavigationItemWidget(
-                                        icon = AppIcons.Theme,
-                                        title = stringResource(R.string.theme_settings),
-                                        description = stringResource(R.string.theme_settings_desc),
-                                        onClick = {
-                                            navController.navigate(SettingsScreen.Theme.route)
-                                        }
-                                    )
-                                }
-                                add {
-                                    SettingsNavigationItemWidget(
-                                        icon = AppIcons.InstallMode,
-                                        title = stringResource(R.string.installer_settings),
-                                        description = stringResource(R.string.installer_settings_desc),
-                                        onClick = {
-                                            navController.navigate(SettingsScreen.InstallerGlobal.route)
-                                        }
-                                    )
-                                }
-                                add {
-                                    SettingsNavigationItemWidget(
-                                        icon = AppIcons.Delete,
-                                        title = stringResource(R.string.uninstaller_settings),
-                                        description = stringResource(R.string.uninstaller_settings_desc),
-                                        onClick = {
-                                            navController.navigate(SettingsScreen.UninstallerGlobal.route)
-                                        }
-                                    )
-                                }
+                            title = stringResource(R.string.personalization)
+                        ) {
+                            item {
+                                SettingsNavigationItemWidget(
+                                    icon = AppIcons.Theme,
+                                    title = stringResource(R.string.theme_settings),
+                                    description = stringResource(R.string.theme_settings_desc),
+                                    onClick = { navController.navigate(SettingsScreen.Theme.route) }
+                                )
                             }
-                        )
+                            item {
+                                SettingsNavigationItemWidget(
+                                    icon = AppIcons.InstallMode,
+                                    title = stringResource(R.string.installer_settings),
+                                    description = stringResource(R.string.installer_settings_desc),
+                                    onClick = { navController.navigate(SettingsScreen.InstallerGlobal.route) }
+                                )
+                            }
+                            item {
+                                SettingsNavigationItemWidget(
+                                    icon = AppIcons.Delete,
+                                    title = stringResource(R.string.uninstaller_settings),
+                                    description = stringResource(R.string.uninstaller_settings_desc),
+                                    onClick = { navController.navigate(SettingsScreen.UninstallerGlobal.route) }
+                                )
+                            }
+                        }
                     }
 
                     if (viewModel.state.authorizer == ConfigEntity.Authorizer.None)
@@ -224,88 +217,81 @@ fun NewPreferredPage(
                     // --- Basic Settings Group ---
                     item {
                         SplicedColumnGroup(
-                            title = stringResource(R.string.basic),
-                            content = listOf(
-                                {
-                                    DisableAdbVerify(
-                                        checked = !state.adbVerifyEnabled,
-                                        isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                                        enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
-                                                state.authorizer != ConfigEntity.Authorizer.None,
-                                        onCheckedChange = { isDisabled ->
-                                            viewModel.dispatch(
-                                                PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
-                                            )
-                                        }
-                                    )
-                                },
-                                {
-                                    IgnoreBatteryOptimizationSetting(
-                                        checked = state.isIgnoringBatteryOptimizations,
-                                        enabled = !state.isIgnoringBatteryOptimizations,
-                                    ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
-                                },
-                                {
-                                    AutoLockInstaller(
-                                        checked = state.autoLockInstaller,
-                                        enabled = state.authorizer != ConfigEntity.Authorizer.None
-                                    ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
-                                },
-                                {
-                                    DefaultInstaller(
-                                        lock = true,
-                                        enabled = state.authorizer != ConfigEntity.Authorizer.None
-                                    ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
-                                },
-                                {
-                                    DefaultInstaller(
-                                        lock = false,
-                                        enabled = state.authorizer != ConfigEntity.Authorizer.None
-                                    ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
-                                },
-                                { ClearCache() }
-                            )
-                        )
+                            title = stringResource(R.string.basic)
+                        ) {
+                            item {
+                                DisableAdbVerify(
+                                    checked = !state.adbVerifyEnabled,
+                                    isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                                    enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
+                                            state.authorizer != ConfigEntity.Authorizer.None,
+                                    onCheckedChange = { isDisabled ->
+                                        viewModel.dispatch(PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled))
+                                    }
+                                )
+                            }
+                            item {
+                                IgnoreBatteryOptimizationSetting(
+                                    checked = state.isIgnoringBatteryOptimizations,
+                                    enabled = !state.isIgnoringBatteryOptimizations,
+                                ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
+                            }
+                            item {
+                                AutoLockInstaller(
+                                    checked = state.autoLockInstaller,
+                                    enabled = state.authorizer != ConfigEntity.Authorizer.None
+                                ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
+                            }
+                            item {
+                                DefaultInstaller(
+                                    lock = true,
+                                    enabled = state.authorizer != ConfigEntity.Authorizer.None
+                                ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
+                            }
+                            item {
+                                DefaultInstaller(
+                                    lock = false,
+                                    enabled = state.authorizer != ConfigEntity.Authorizer.None
+                                ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
+                            }
+                            item { ClearCache() }
+                        }
                     }
-
                     // --- Other Settings Group ---
                     item {
                         SplicedColumnGroup(
-                            title = stringResource(R.string.other),
-                            content = buildList {
-                                add {
-                                    SettingsAboutItemWidget(
-                                        imageVector = AppIcons.Lab,
-                                        headlineContentText = stringResource(R.string.lab),
-                                        supportingContentText = stringResource(R.string.lab_desc),
-                                        onClick = { navController.navigate(SettingsScreen.Lab.route) }
-                                    )
-                                }
-                                add {
-                                    SettingsAboutItemWidget(
-                                        imageVector = AppIcons.Info,
-                                        headlineContentText = stringResource(R.string.about_detail),
-                                        supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
-                                        onClick = { navController.navigate(SettingsScreen.About.route) }
-                                    )
-                                }
-                                add {
-                                    val updateSummary =
-                                        if (state.hasUpdate) stringResource(
-                                            R.string.update_available,
-                                            state.remoteVersion
-                                        )
-                                        else stringResource(R.string.get_update_detail)
-                                    SettingsAboutItemWidget(
-                                        imageVector = AppIcons.Update,
-                                        headlineContentText = stringResource(R.string.get_update),
-                                        supportingContentText = updateSummary,
-                                        supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        onClick = { showBottomSheet = true }
-                                    )
-                                }
+                            title = stringResource(R.string.other)
+                        ) {
+                            item {
+                                SettingsAboutItemWidget(
+                                    imageVector = AppIcons.Lab,
+                                    headlineContentText = stringResource(R.string.lab),
+                                    supportingContentText = stringResource(R.string.lab_desc),
+                                    onClick = { navController.navigate(SettingsScreen.Lab.route) }
+                                )
                             }
-                        )
+                            item {
+                                SettingsAboutItemWidget(
+                                    imageVector = AppIcons.Info,
+                                    headlineContentText = stringResource(R.string.about_detail),
+                                    supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
+                                    onClick = { navController.navigate(SettingsScreen.About.route) }
+                                )
+                            }
+                            item {
+                                val updateSummary =
+                                    if (state.hasUpdate) stringResource(R.string.update_available, state.remoteVersion)
+                                    else stringResource(R.string.get_update_detail)
+
+                                SettingsAboutItemWidget(
+                                    imageVector = AppIcons.Update,
+                                    headlineContentText = stringResource(R.string.get_update),
+                                    supportingContentText = updateSummary,
+                                    supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    onClick = { showBottomSheet = true }
+                                )
+                            }
+                        }
                     }
                     item { Spacer(modifier = Modifier.size(6.dp)) }
                 }

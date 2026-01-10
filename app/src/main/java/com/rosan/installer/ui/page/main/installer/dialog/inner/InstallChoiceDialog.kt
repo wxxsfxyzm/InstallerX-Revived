@@ -154,98 +154,87 @@ private fun ChoiceContent(
         val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
         val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }
 
-        SplicedColumnGroup(
-            content = buildList {
-                if (baseSelectableEntity != null) {
-                    val baseEntityInfo = baseSelectableEntity.app as AppEntity.BaseEntity
-                    add {
-                        SettingsNavigationItemWidget(
-                            iconPlaceholder = false,
-                            title = baseEntityInfo.label ?: "N/A",
-                            description = stringResource(R.string.installer_package_name, baseEntityInfo.packageName),
-                            onClick = {
-                                // The initial state of baseSelectableEntity.selected is false.
-                                // Toggling it will set its 'selected' state to true.
-                                // The isMultiSelect=false flag ensures the other entity remains false.
-                                viewModel.dispatch(
-                                    InstallerViewAction.ToggleSelection(
-                                        packageName = baseSelectableEntity.app.packageName,
-                                        entity = baseSelectableEntity,
-                                        isMultiSelect = false
-                                    )
+        SplicedColumnGroup {
+            baseSelectableEntity?.let { entity ->
+                item {
+                    val baseEntityInfo = entity.app as AppEntity.BaseEntity
+                    SettingsNavigationItemWidget(
+                        iconPlaceholder = false,
+                        title = baseEntityInfo.label ?: "N/A",
+                        description = stringResource(R.string.installer_package_name, baseEntityInfo.packageName),
+                        onClick = {
+                            viewModel.dispatch(
+                                InstallerViewAction.ToggleSelection(
+                                    packageName = entity.app.packageName,
+                                    entity = entity,
+                                    isMultiSelect = false
                                 )
-                                // After updating the selection state, immediately proceed to the prepare screen.
-                                viewModel.dispatch(InstallerViewAction.InstallPrepare)
-                            }
-                        )
-                    }
-                }
-                if (moduleSelectableEntity != null) {
-                    val moduleEntityInfo = moduleSelectableEntity.app as AppEntity.ModuleEntity
-                    add {
-                        SettingsNavigationItemWidget(
-                            iconPlaceholder = false,
-                            title = moduleEntityInfo.name,
-                            description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
-                            onClick = {
-                                // The initial state of moduleSelectableEntity.selected is false.
-                                // Toggling it will set its 'selected' state to true.
-                                viewModel.dispatch(
-                                    InstallerViewAction.ToggleSelection(
-                                        packageName = moduleSelectableEntity.app.packageName,
-                                        entity = moduleSelectableEntity,
-                                        isMultiSelect = false
-                                    )
-                                )
-                                // After updating the selection state, immediately proceed to the prepare screen.
-                                viewModel.dispatch(InstallerViewAction.InstallPrepare)
-                            }
-                        )
-                    }
+                            )
+                            viewModel.dispatch(InstallerViewAction.InstallPrepare)
+                        }
+                    )
                 }
             }
-        )
+            moduleSelectableEntity?.let { entity ->
+                item {
+                    val moduleEntityInfo = entity.app as AppEntity.ModuleEntity
+                    SettingsNavigationItemWidget(
+                        iconPlaceholder = false,
+                        title = moduleEntityInfo.name,
+                        description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
+                        onClick = {
+                            viewModel.dispatch(
+                                InstallerViewAction.ToggleSelection(
+                                    packageName = entity.app.packageName,
+                                    entity = entity,
+                                    isMultiSelect = false
+                                )
+                            )
+                            viewModel.dispatch(InstallerViewAction.InstallPrepare)
+                        }
+                    )
+                }
+            }
+        }
     } else if (isMixedModuleZip && selectionMode == MmzSelectionMode.INITIAL_CHOICE) {
         val allSelectableEntities = analysisResults.flatMap { it.appEntities }
         val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }
         val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
 
-        SplicedColumnGroup(
-            content = buildList {
-                if (moduleSelectableEntity != null) {
-                    val moduleEntityInfo = moduleSelectableEntity.app as AppEntity.ModuleEntity
-                    add {
-                        SettingsNavigationItemWidget(
-                            iconPlaceholder = false,
-                            title = stringResource(R.string.installer_choice_install_as_module),
-                            description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
-                            onClick = {
-                                viewModel.dispatch(
-                                    InstallerViewAction.ToggleSelection(
-                                        packageName = moduleSelectableEntity.app.packageName,
-                                        entity = moduleSelectableEntity,
-                                        isMultiSelect = false
-                                    )
+        SplicedColumnGroup {
+            moduleSelectableEntity?.let { entity ->
+                item {
+                    val moduleEntityInfo = entity.app as AppEntity.ModuleEntity
+                    SettingsNavigationItemWidget(
+                        iconPlaceholder = false,
+                        title = stringResource(R.string.installer_choice_install_as_module),
+                        description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
+                        onClick = {
+                            viewModel.dispatch(
+                                InstallerViewAction.ToggleSelection(
+                                    packageName = entity.app.packageName,
+                                    entity = entity,
+                                    isMultiSelect = false
                                 )
-                                viewModel.dispatch(InstallerViewAction.InstallPrepare)
-                            }
-                        )
-                    }
-                }
-                if (baseSelectableEntity != null) {
-                    add {
-                        SettingsNavigationItemWidget(
-                            iconPlaceholder = false,
-                            title = stringResource(R.string.installer_choice_install_as_app),
-                            description = stringResource(R.string.installer_choice_install_as_app_desc),
-                            onClick = {
-                                onSetSelectionMode(MmzSelectionMode.APK_CHOICE)
-                            }
-                        )
-                    }
+                            )
+                            viewModel.dispatch(InstallerViewAction.InstallPrepare)
+                        }
+                    )
                 }
             }
-        )
+            if (baseSelectableEntity != null) {
+                item {
+                    SettingsNavigationItemWidget(
+                        iconPlaceholder = false,
+                        title = stringResource(R.string.installer_choice_install_as_app),
+                        description = stringResource(R.string.installer_choice_install_as_app_desc),
+                        onClick = {
+                            onSetSelectionMode(MmzSelectionMode.APK_CHOICE)
+                        }
+                    )
+                }
+            }
+        }
     } else if (isMultiApk || (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE)) {
         // --- Multi-APK Mode ---
         val resultsForList = if (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE) {

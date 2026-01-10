@@ -156,122 +156,112 @@ fun NewThemeSettingsPage(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            // --- Group 1: UI Style Selection ---
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.theme_settings_ui_style),
-                    content = listOf(
-                        {
-                            // Option 1: Google UI
-                            SelectableSettingItem(
-                                title = stringResource(R.string.theme_settings_google_ui),
-                                description = stringResource(R.string.theme_settings_google_ui_desc),
-                                selected = !state.showMiuixUI,
-                                onClick = {
-                                    if (state.showMiuixUI) { // Only dispatch if changing state
-                                        viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(false))
-                                    }
+                    title = stringResource(R.string.theme_settings_ui_style)
+                ) {
+                    // Option 1: Google UI
+                    item {
+                        SelectableSettingItem(
+                            title = stringResource(R.string.theme_settings_google_ui),
+                            description = stringResource(R.string.theme_settings_google_ui_desc),
+                            selected = !state.showMiuixUI,
+                            onClick = {
+                                if (state.showMiuixUI) {
+                                    viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(false))
                                 }
-                            )
-                        },
-                        {
-                            // Option 2: MIUIX UI
-                            SelectableSettingItem(
-                                title = stringResource(R.string.theme_settings_miuix_ui),
-                                description = stringResource(R.string.theme_settings_miuix_ui_desc),
-                                selected = state.showMiuixUI,
-                                onClick = {
-                                    if (!state.showMiuixUI) { // Only dispatch if changing state
-                                        viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(true))
-                                    }
+                            }
+                        )
+                    }
+                    // Option 2: MIUIX UI
+                    item {
+                        SelectableSettingItem(
+                            title = stringResource(R.string.theme_settings_miuix_ui),
+                            description = stringResource(R.string.theme_settings_miuix_ui_desc),
+                            selected = state.showMiuixUI,
+                            onClick = {
+                                if (!state.showMiuixUI) {
+                                    viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(true))
                                 }
-                            )
-                        }
-                    )
-                )
-            }
-
-            // --- Google UI Style Options (Legacy vs Expressive) ---
-            // Only show this section if Google UI is selected
-            if (!state.showMiuixUI) {
-                item {
-                    SplicedColumnGroup(
-                        title = stringResource(R.string.theme_settings_google_ui),
-                        content = buildList {
-                            add {
-                                SwitchWidget(
-                                    icon = AppIcons.Theme,
-                                    title = stringResource(R.string.theme_settings_use_expressive_ui),
-                                    description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
-                                    checked = state.showExpressiveUI,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(
-                                            PreferredViewAction.ChangeShowExpressiveUI(it)
-                                        )
-                                    }
-                                )
                             }
-                            add {
-                                // Theme Mode Selector
-                                BaseWidget(
-                                    icon = Icons.Default.DarkMode,
-                                    title = stringResource(R.string.theme_settings_theme_mode),
-                                    description = when (state.themeMode) {
-                                        ThemeMode.LIGHT -> stringResource(R.string.theme_settings_theme_mode_light)
-                                        ThemeMode.DARK -> stringResource(R.string.theme_settings_theme_mode_dark)
-                                        ThemeMode.SYSTEM -> stringResource(R.string.theme_settings_theme_mode_system)
-                                    },
-                                    onClick = { showThemeModeDialog = true }
-                                ) {}
-                            }
-                            add {
-                                // Palette Style Selector
-                                BaseWidget(
-                                    icon = Icons.Default.Style,
-                                    title = stringResource(R.string.theme_settings_palette_style),
-                                    description = state.paletteStyle.displayName,
-                                    onClick = { showPaletteDialog = true }
-                                ) {}
-                            }
-                            add {
-                                // Dynamic Color Switch
-                                SwitchWidget(
-                                    icon = Icons.TwoTone.InvertColors,
-                                    title = stringResource(R.string.theme_settings_dynamic_color),
-                                    description = stringResource(R.string.theme_settings_dynamic_color_desc),
-                                    checked = state.useDynamicColor,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
-                                    }
-                                )
-                            }
-                            add {
-                                SwitchWidget(
-                                    icon = Icons.TwoTone.Colorize,
-                                    title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
-                                    description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
-                                    checked = state.useDynColorFollowPkgIcon,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIcon(it))
-                                    }
-                                )
-                            }
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && state.showLiveActivity)
-                                add {
-                                    SwitchWidget(
-                                        icon = Icons.TwoTone.Colorize,
-                                        title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
-                                        description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
-                                        checked = state.useDynColorFollowPkgIconForLiveActivity,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity(it))
-                                        }
-                                    )
-                                }
-                        }
-                    )
+                        )
+                    }
                 }
             }
 
+            // --- Group 2: Google UI Options ---
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.theme_settings_google_ui)
+                ) {
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.Theme,
+                            title = stringResource(R.string.theme_settings_use_expressive_ui),
+                            description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
+                            checked = state.showExpressiveUI,
+                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it)) }
+                        )
+                    }
+                    item {
+                        BaseWidget(
+                            icon = Icons.Default.DarkMode,
+                            title = stringResource(R.string.theme_settings_theme_mode),
+                            description = when (state.themeMode) {
+                                ThemeMode.LIGHT -> stringResource(R.string.theme_settings_theme_mode_light)
+                                ThemeMode.DARK -> stringResource(R.string.theme_settings_theme_mode_dark)
+                                ThemeMode.SYSTEM -> stringResource(R.string.theme_settings_theme_mode_system)
+                            },
+                            onClick = { showThemeModeDialog = true }
+                        ) {}
+                    }
+                    item {
+                        BaseWidget(
+                            icon = Icons.Default.Style,
+                            title = stringResource(R.string.theme_settings_palette_style),
+                            description = state.paletteStyle.displayName,
+                            onClick = { showPaletteDialog = true }
+                        ) {}
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = Icons.TwoTone.InvertColors,
+                            title = stringResource(R.string.theme_settings_dynamic_color),
+                            description = stringResource(R.string.theme_settings_dynamic_color_desc),
+                            checked = state.useDynamicColor,
+                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it)) }
+                        )
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = Icons.TwoTone.Colorize,
+                            title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
+                            description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
+                            checked = state.useDynColorFollowPkgIcon,
+                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIcon(it)) }
+                        )
+                    }
+                    // Conditional item for Live Activity
+                    item(visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && state.showLiveActivity) {
+                        SwitchWidget(
+                            icon = Icons.TwoTone.Colorize,
+                            title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
+                            description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
+                            checked = state.useDynColorFollowPkgIconForLiveActivity,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity(
+                                        it
+                                    )
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+
+            // --- Group 3: Theme Color (Manual Selection) ---
             item {
                 AnimatedVisibility(
                     visible = !state.useDynamicColor,
@@ -281,94 +271,84 @@ fun NewThemeSettingsPage(
                             shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
                 ) {
                     SplicedColumnGroup(
-                        title = stringResource(R.string.theme_settings_theme_color),
-                        content =
-                            buildList {
-                                add(
-                                    @Composable {
-                                        BoxWithConstraints(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 12.dp, vertical = 16.dp)
+                        title = stringResource(R.string.theme_settings_theme_color)
+                    ) {
+                        item {
+                            BoxWithConstraints(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 16.dp)
+                            ) {
+                                val itemMinWidth = 88.dp
+                                val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
+                                val chunkedColors = state.availableColors.chunked(columns)
+
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    chunkedColors.forEach { rowItems ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.Center
                                         ) {
-                                            val itemMinWidth = 88.dp
-                                            val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
-                                            val chunkedColors = state.availableColors.chunked(columns)
-
-                                            Column(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                                            ) {
-                                                chunkedColors.forEach { rowItems ->
-                                                    Row(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        horizontalArrangement = Arrangement.Center
+                                            rowItems.forEach { rawColor ->
+                                                Box(
+                                                    modifier = Modifier.weight(1f),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    ColorSwatchPreview(
+                                                        rawColor = rawColor,
+                                                        currentStyle = state.paletteStyle,
+                                                        textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
+                                                        textColor = MaterialTheme.colorScheme.onSurface,
+                                                        isSelected = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                                                            state.seedColor == rawColor.color
+                                                        else !state.useDynamicColor && state.seedColor == rawColor.color,
                                                     ) {
-                                                        rowItems.forEach { rawColor ->
-                                                            Box(
-                                                                modifier = Modifier.weight(1f),
-                                                                contentAlignment = Alignment.Center
-                                                            ) {
-                                                                ColorSwatchPreview(
-                                                                    rawColor = rawColor,
-                                                                    currentStyle = state.paletteStyle,
-                                                                    textStyle = MaterialTheme.typography.labelMedium.copy(
-                                                                        fontSize = 13.sp
-                                                                    ),
-                                                                    textColor = MaterialTheme.colorScheme.onSurface,
-                                                                    isSelected = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-                                                                        state.seedColor == rawColor.color
-                                                                    else !state.useDynamicColor && state.seedColor == rawColor.color,
-                                                                ) {
-                                                                    viewModel.dispatch(
-                                                                        PreferredViewAction.SetSeedColor(
-                                                                            rawColor.color
-                                                                        )
-                                                                    )
-                                                                }
-                                                            }
-                                                        }
-
-                                                        val remaining = columns - rowItems.size
-                                                        if (remaining > 0) {
-                                                            repeat(remaining) {
-                                                                Spacer(Modifier.weight(1f))
-                                                            }
-                                                        }
+                                                        viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
                                                     }
+                                                }
+                                            }
+
+                                            val remaining = columns - rowItems.size
+                                            if (remaining > 0) {
+                                                repeat(remaining) {
+                                                    Spacer(Modifier.weight(1f))
                                                 }
                                             }
                                         }
                                     }
-                                )
+                                }
                             }
-                    )
+                        }
+                    }
                 }
             }
 
+            // --- Group 4: Package Icons ---
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.theme_settings_package_icons),
-                    content = listOf {
+                    title = stringResource(R.string.theme_settings_package_icons)
+                ) {
+                    item {
                         SwitchWidget(
                             icon = AppIcons.IconPack,
                             title = stringResource(R.string.theme_settings_prefer_system_icon),
                             description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
                             checked = state.preferSystemIcon,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    PreferredViewAction.ChangePreferSystemIcon(it)
-                                )
-                            }
+                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangePreferSystemIcon(it)) }
                         )
                     }
-
-                )
+                }
             }
+
+            // --- Group 5: Launcher Icons ---
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.theme_settings_launcher_icons),
-                    content = listOf {
+                    title = stringResource(R.string.theme_settings_launcher_icons)
+                ) {
+                    item {
                         SwitchWidget(
                             icon = AppIcons.Launcher,
                             title = stringResource(R.string.theme_settings_hide_launcher_icon),
@@ -378,17 +358,14 @@ fun NewThemeSettingsPage(
                                 if (newCheckedState) {
                                     showHideLauncherIconDialog = true
                                 } else {
-                                    viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowLauncherIcon(
-                                            true
-                                        )
-                                    )
+                                    viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
                                 }
                             }
                         )
                     }
-                )
+                }
             }
+
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
