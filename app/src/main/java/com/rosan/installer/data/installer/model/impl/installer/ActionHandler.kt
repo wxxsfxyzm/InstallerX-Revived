@@ -308,8 +308,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         if (!requireBiometricAuth) return
 
-        return doBiometricAuthOrThrow(
-            context = context,
+        return context.doBiometricAuthOrThrow(
             title = context.getString(R.string.auth_to_continue_work),
             subTitle = context.getString(
                 if (isInstall)

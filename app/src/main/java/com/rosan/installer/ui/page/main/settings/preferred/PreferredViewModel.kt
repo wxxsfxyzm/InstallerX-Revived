@@ -275,8 +275,7 @@ class PreferredViewModel(
 
     private fun changeBiometricAuth(biometricAuth: Boolean, installer: Boolean) {
         viewModelScope.launch {
-            if (!doBiometricAuth(
-                    context = context,
+            if (!context.doBiometricAuth(
                     title = context.getString(R.string.use_biometric_confirm_change_auth_settings),
                     subTitle = context.getString(R.string.use_biometric_confirm_change_auth_settings_desc)
                 )
