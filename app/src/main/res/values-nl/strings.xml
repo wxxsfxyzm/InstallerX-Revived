@@ -652,4 +652,8 @@
     <string name="auth_summary_uninstall">Je bent een verwijderingsactie aan het doen. Om door te gaan, bevestig alsjeblieft deze actie met je apparaatauthenticatie</string>
     <string name="exception_authentication_failed">Gebruikersauthenticatie mislukt</string>
     <string name="old_version_uninstalled">Verwijderd</string>
+    <string name="config_authorizer_none_system_app_tips">Uitvoerend als systeeminstallateur, de meeste opties hier zijn niet nodig.</string>
+    <string name="installer_author">Auteur: %1$s</string>
+    <string name="lab_module_always_use_root">Altijd root gebruiken bij het flashen van modules</string>
+    <string name="lab_module_always_use_root_desc">Tijdens het werken als systeeminstallateur, altijd root gebruiken voor het flashen van modules voor de beste prestaties</string>
 </resources>
