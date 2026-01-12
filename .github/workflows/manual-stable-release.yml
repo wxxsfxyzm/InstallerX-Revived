@@ -36,23 +36,7 @@ jobs:
           # 手动发布版本无需写入构建缓存
           cache-read-only: true
 
-      - name: Verify Keystore
-        run: |
-          if [ -z "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" ]; then
-            echo "ERROR: SIGNING_KEY_STORE_BASE64 secret is missing"
-            exit 1
-          fi
-
-      - name: Setup Signing Keys
-        run: |
-          mkdir -p keystore
-          echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > keystore/carlyu.jks
-          cat <<EOF > keystore.properties
-          storeFile=keystore/carlyu.jks
-          keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}
-          keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}
-          storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}
-          EOF
+      
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
