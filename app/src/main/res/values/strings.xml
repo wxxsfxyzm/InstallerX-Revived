@@ -8,6 +8,7 @@
     <string name="agree">Agree</string>
     <string name="warning">Warning</string>
     <string name="open_source_license">Open Source License</string>
+    <string name="open_source_license_settings_description">View third-party open-source libraries and their licenses</string>
     <string name="back">Back</string>
     <string name="home">Home</string>
     <string name="config">Profiles</string>
@@ -272,6 +273,9 @@
     <string name="next">Next</string>
     <string name="previous">Back</string>
     <string name="close">Close</string>
+    <string name="visit_home_page">Visit Home Page</string>
+    <string name="license">License: %s</string>
+    <string name="no_license_text">No license text available.</string>
     <string name="finish">Done</string>
     <string name="open">Open</string>
     <string name="select">Select</string>
