@@ -6,6 +6,7 @@
     <string name="agree">同意</string>
     <string name="warning">警告</string>
     <string name="open_source_license">开放源代码许可</string>
+    <string name="open_source_license_settings_description">查看本应用所使用的第三方开源库及其许可证信息</string>
     <string name="back">返回</string>
     <string name="home">主页</string>
     <string name="config">配置</string>
@@ -264,6 +265,9 @@
     <string name="next">下一步</string>
     <string name="previous">上一步</string>
     <string name="close">关闭</string>
+    <string name="visit_home_page">访问主页</string>
+    <string name="license">许可证：%s</string>
+    <string name="no_license_text">许可证内容不可用</string>
     <string name="finish">完成</string>
     <string name="open">打开</string>
     <string name="select">选择</string>
