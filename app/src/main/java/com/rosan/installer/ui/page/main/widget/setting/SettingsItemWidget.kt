@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -79,38 +80,11 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.util.MIN_FEEDBACK_DURATION_MS
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.getDirectorySize
-import com.rosan.installer.util.openUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-
-/**
- * @author iamr0s
- */
-/*@Composable
-fun DataAuthorizerWidget(viewModel: PreferredViewModel) {
-    val authorizer = viewModel.state.authorizer
-    val data = mapOf(
-        ConfigEntity.Authorizer.None to stringResource(R.string.config_authorizer_none),
-        ConfigEntity.Authorizer.Root to stringResource(R.string.config_authorizer_root),
-        ConfigEntity.Authorizer.Shizuku to stringResource(R.string.config_authorizer_shizuku),
-        ConfigEntity.Authorizer.Dhizuku to stringResource(R.string.config_authorizer_dhizuku),
-        ConfigEntity.Authorizer.Customize to stringResource(R.string.config_authorizer_customize),
-    )
-    DropDownMenuWidget(
-        icon = Icons.TwoTone.Memory,
-        title = stringResource(R.string.config_authorizer),
-        description = if (data.containsKey(authorizer)) data[authorizer] else null,
-        choice = data.keys.toList().indexOf(authorizer),
-        data = data.values.toList(),
-    ) {
-        data.keys.toList().getOrNull(it)?.let {
-            viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(it))
-        }
-    }
-}*/
 
 data class AuthorizerInfo(
     @param:StringRes val labelResId: Int,
@@ -620,6 +594,7 @@ fun BottomSheetContent(
     onDirectUpdateClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val haptic = LocalHapticFeedback.current
     Column(
         modifier = Modifier
@@ -656,7 +631,7 @@ fun BottomSheetContent(
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
+                uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -671,7 +646,7 @@ fun BottomSheetContent(
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                context.openUrl("https://t.me/installerx_revived")
+                uriHandler.openUri("https://t.me/installerx_revived")
             },
             modifier = Modifier.fillMaxWidth()
         ) {

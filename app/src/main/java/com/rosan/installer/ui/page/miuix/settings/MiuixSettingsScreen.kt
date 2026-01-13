@@ -5,6 +5,7 @@ sealed class MiuixSettingsScreen(val route: String) {
     data object MiuixEditConfig : MiuixSettingsScreen("config/edit?id={id}")
     data object MiuixApplyConfig : MiuixSettingsScreen("config/apply?id={id}")
     data object MiuixAbout : MiuixSettingsScreen("about")
+    data object MiuixOpenSourceLicense : MiuixSettingsScreen("ossLicense")
     data object MiuixTheme : MiuixSettingsScreen("theme")
     data object MiuixInstallerGlobal : MiuixSettingsScreen("installerGlobal")
     data object MiuixUninstallerGlobal : MiuixSettingsScreen("uninstallerGlobal")

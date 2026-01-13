@@ -74,6 +74,7 @@ import com.rosan.installer.ui.page.miuix.settings.config.apply.MiuixApplyPage
 import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPreferredPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home.MiuixHomePage
+import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home.ossLicensePage.MiuixOpenSourceLicensePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.MiuixInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.MiuixUninstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.lab.MiuixLabPage
@@ -110,7 +111,6 @@ private object UIConstants {
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
-    val context = LocalContext.current
     val navController = rememberNavController()
 
     NavHost(
@@ -289,6 +289,9 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
         }
         composable(route = MiuixSettingsScreen.MiuixAbout.route) {
             MiuixHomePage(navController = navController, viewModel = preferredViewModel)
+        }
+        composable(route = MiuixSettingsScreen.MiuixOpenSourceLicense.route) {
+            MiuixOpenSourceLicensePage(navController = navController)
         }
         composable(route = MiuixSettingsScreen.MiuixTheme.route) {
             MiuixThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
