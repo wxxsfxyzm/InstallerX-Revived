@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,7 +34,7 @@ import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.entity.License
 import com.mikepenz.aboutlibraries.ui.compose.util.author
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.miuix.widgets.MiuixInfoTipCard
+import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -49,20 +49,24 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun LibrariesContainer(
     modifier: Modifier = Modifier,
     libraries: Libs?
-)
-{
+) {
     val uriHandler = LocalUriHandler.current
     var selectedLibrary by remember { mutableStateOf<Library?>(null) }
     val showState = remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier,
+        overscrollEffect = null
     ) {
+        item { Spacer(modifier = Modifier.size(16.dp)) }
         items(libraries?.libraries ?: persistentListOf()) { library ->
-            LibraryCard(library, Modifier.clickable {
-                selectedLibrary = library
-                showState.value = true
-            })
+            LibraryCard(
+                library = library,
+                onClick = {
+                    selectedLibrary = library
+                    showState.value = true
+                }
+            )
         }
     }
 
@@ -84,12 +88,11 @@ fun LibrariesContainer(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         item {
-                            MiuixInfoTipCard(
+                            MiuixInstallerTipCard(
                                 text = stringResource(
                                     R.string.license,
                                     library.licenses.joinToString(", ") { it.name }
-                                ),
-                                modifier = Modifier.fillMaxWidth(),
+                                )
                             )
                         }
 
@@ -141,9 +144,7 @@ fun LibrariesContainer(
                             modifier = Modifier.weight(1f),
                             onClick = onDismiss,
                             text = stringResource(R.string.close),
-                            colors = ButtonDefaults.textButtonColors(
-                                color = MiuixTheme.colorScheme.primary
-                            )
+                            colors = ButtonDefaults.textButtonColorsPrimary()
                         )
                     }
                 }
@@ -155,11 +156,15 @@ fun LibrariesContainer(
 @Composable
 fun LibraryCard(
     library: Library,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier.padding(horizontal = 12.dp)
+        modifier = modifier
+            .padding(horizontal = 12.dp)
             .padding(bottom = 12.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
     ) {
         Column(
             modifier = Modifier
@@ -175,7 +180,9 @@ fun LibraryCard(
                     style = MiuixTheme.textStyles.title2,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
-                    modifier = Modifier.weight(1f).padding(end = 5.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 5.dp)
                 )
                 library.artifactVersion?.let {
                     Text(
@@ -217,7 +224,6 @@ fun LibraryCard(
     }
 }
 
-
 @Preview
 @Composable
 fun LibraryCardPreview() {
@@ -227,21 +233,25 @@ fun LibraryCardPreview() {
         name = "InstallerX-Revived",
         description = "More Expressive InstallerX !",
         website = "https://github.com/wxxsfxyzm/InstallerX-Revived",
-        developers = persistentListOf(Developer(
-            name = "wxxsfxyzm",
-            organisationUrl = null
-        )),
+        developers = persistentListOf(
+            Developer(
+                name = "wxxsfxyzm",
+                organisationUrl = null
+            )
+        ),
         organization = null,
         scm = null,
-        licenses = persistentSetOf(License(
-            name = "GPL-3.0",
-            url = "https://www.gnu.org/licenses/gpl-3.0.txt",
-            spdxId = "GPL-3.0-or-later",
-            hash = "gpl_3_0_hash"
-        )),
+        licenses = persistentSetOf(
+            License(
+                name = "GPL-3.0",
+                url = "https://www.gnu.org/licenses/gpl-3.0.txt",
+                spdxId = "GPL-3.0-or-later",
+                hash = "gpl_3_0_hash"
+            )
+        ),
         funding = persistentSetOf(),
         tag = "Open Source"
     )
 
-    LibraryCard(fakeLibrary)
+    LibraryCard(fakeLibrary, onClick = {})
 }

@@ -132,25 +132,6 @@ fun MiuixScopeTipCard(viewModel: AllViewModel) {
 }
 
 @Composable
-fun MiuixInfoTipCard(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    TipCard(
-        modifier = modifier,
-        tipContent = {
-            Text(
-                text = text,
-                style = MiuixTheme.textStyles.body1,
-                color = MiuixTheme.colorScheme.onTertiaryContainer
-            )
-        }
-    ) {
-        Spacer(modifier = Modifier.size(16.dp))
-    }
-}
-
-@Composable
 fun MiuixSettingsTipCard(text: String) {
     TipCard(
         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
