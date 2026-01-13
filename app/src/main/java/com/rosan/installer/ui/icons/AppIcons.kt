@@ -36,8 +36,10 @@ import androidx.compose.material.icons.twotone.Bolt
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.ClearAll
 import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material.icons.twotone.Code
 import androidx.compose.material.icons.twotone.ColorLens
 import androidx.compose.material.icons.twotone.Compress
+import androidx.compose.material.icons.twotone.Copyright
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
 import androidx.compose.material.icons.twotone.DoNotDisturbOnTotalSilence
@@ -55,9 +57,11 @@ import androidx.compose.material.icons.twotone.HourglassEmpty
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
 import androidx.compose.material.icons.twotone.LibraryAddCheck
+import androidx.compose.material.icons.twotone.LocalPolice
 import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.PermDeviceInformation
+import androidx.compose.material.icons.twotone.Policy
 import androidx.compose.material.icons.twotone.Refresh
 import androidx.compose.material.icons.twotone.RocketLaunch
 import androidx.compose.material.icons.twotone.RoomPreferences
@@ -104,6 +108,8 @@ object AppIcons {
     val AutoFixHigh = Icons.TwoTone.AutoFixHigh
     val Developer = Icons.TwoTone.DeveloperMode
     val Theme = Icons.TwoTone.ColorLens
+    val ViewSourceCode = Icons.TwoTone.Code
+    val OpenSourceLicense = Icons.TwoTone.Copyright
 
     // --- 导航图标集合 ---
     val RoomPreferences = Icons.TwoTone.RoomPreferences

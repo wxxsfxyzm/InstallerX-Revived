@@ -96,7 +96,6 @@ fun NewPreferredPage(
             null
         )
     }
-    var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
@@ -278,19 +277,6 @@ fun NewPreferredPage(
                                     onClick = { navController.navigate(SettingsScreen.About.route) }
                                 )
                             }
-                            item {
-                                val updateSummary =
-                                    if (state.hasUpdate) stringResource(R.string.update_available, state.remoteVersion)
-                                    else stringResource(R.string.get_update_detail)
-
-                                SettingsAboutItemWidget(
-                                    imageVector = AppIcons.Update,
-                                    headlineContentText = stringResource(R.string.get_update),
-                                    supportingContentText = updateSummary,
-                                    supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    onClick = { showBottomSheet = true }
-                                )
-                            }
                         }
                     }
                     item { Spacer(modifier = Modifier.size(6.dp)) }
@@ -318,18 +304,5 @@ fun NewPreferredPage(
             exception = info.exception,
             onDismissRequest = { updateErrorInfo = null }
         )
-    }
-
-    if (showBottomSheet) {
-        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-            BottomSheetContent(
-                title = stringResource(R.string.get_update),
-                hasUpdate = state.hasUpdate,
-                onDirectUpdateClick = {
-                    showBottomSheet = false
-                    viewModel.dispatch(PreferredViewAction.Update)
-                }
-            )
-        }
     }
 }

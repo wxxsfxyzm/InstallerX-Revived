@@ -19,6 +19,7 @@ import com.rosan.installer.ui.page.main.settings.main.MainPage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.HomePage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.NewHomePage
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.OpenSourceLicensePage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.LegacyInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.LegacyUninstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.NewInstallerGlobalSettingsPage
@@ -132,9 +133,26 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             }
         ) {
             if (preferredViewModel.state.showExpressiveUI)
-                NewHomePage(navController = navController)
+                NewHomePage(navController = navController, viewModel = preferredViewModel)
             else
-                HomePage(navController)
+                HomePage(navController = navController, viewModel = preferredViewModel)
+        }
+        composable(
+            route = SettingsScreen.OpenSourceLicense.route,
+            enterTransition = {
+                slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth })
+            },
+            exitTransition = {
+                slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth })
+            },
+            popEnterTransition = {
+                slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth })
+            },
+            popExitTransition = {
+                scaleOut(targetScale = 0.9f) + fadeOut()
+            }
+        ) {
+            OpenSourceLicensePage(navController, preferredViewModel.state.showExpressiveUI)
         }
         composable(
             route = SettingsScreen.Theme.route,

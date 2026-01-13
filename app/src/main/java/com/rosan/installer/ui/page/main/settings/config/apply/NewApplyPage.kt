@@ -320,6 +320,7 @@ private fun ItemsWidget(
                 isApplied = isApplied,
                 shape = shape,
                 containerColor = MaterialTheme.colorScheme.surfaceBright,
+                showPackageName = viewModel.state.showPackageName,
                 onToggle = { isChecked ->
                     viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, isChecked))
                 },

@@ -5,16 +5,11 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -204,150 +199,114 @@ fun NewInstallerGlobalSettingsPage(
             }
 
             // --- Group 2: Dialog / Notification Mode Options (Refactored) ---
-            val modeState = when {
-                isDialogMode -> ConfigEntity.InstallMode.Dialog // 代表 Dialog 这一组
-                isNotificationMode -> ConfigEntity.InstallMode.Notification // 代表 Notification 这一组
-                else -> null // 不显示
-            }
-
             item {
-                // 1. 外层 AnimatedVisibility: 当处于 Dialog 或 Notification 模式时显示，否则隐藏
                 AnimatedVisibility(
                     visible = isDialogMode || isNotificationMode,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    // 2. 内层 AnimatedContent: 处理两种模式的平滑切换
-                    AnimatedContent(
-                        targetState = isDialogMode,
-                        label = "InstallerModeTransition",
-                        transitionSpec = {
-                            // 定义"推挤"动画：
-                            // 新内容：从下方进入 (height) + 淡入
-                            // 旧内容：向方退出 (-height) + 淡出
-                            // 这样两者不会重叠，看起来像是一个列表把自己"推"了上去
-                            (slideInVertically { height -> height } + fadeIn())
-                                .togetherWith(slideOutVertically { height -> -height } + fadeOut())
-                                .using(SizeTransform(clip = true)) // 允许内容在动画期间超出边界，保证滑动流畅
+                    // Determine title based on mode
+                    val optionsTitle = if (isDialogMode) {
+                        stringResource(R.string.installer_settings_dialog_mode_options)
+                    } else {
+                        stringResource(R.string.installer_settings_notification_mode_options)
+                    }
+
+                    SplicedColumnGroup(
+                        title = optionsTitle
+                    ) {
+                        // 1. Version Compare (Dialog Mode)
+                        item(visible = isDialogMode) {
+                            SwitchWidget(
+                                icon = AppIcons.SingleLineSettingIcon,
+                                title = stringResource(id = R.string.version_compare_in_single_line),
+                                description = stringResource(id = R.string.version_compare_in_single_line_desc),
+                                checked = state.versionCompareInSingleLine,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it)) }
+                            )
                         }
-                    ) { showDialogSettings ->
-                        // 根据状态渲染完全不同的 SplicedColumnGroup
-                        if (showDialogSettings) {
-                            // --- Dialog 模式设置组 ---
-                            SplicedColumnGroup(
-                                title = stringResource(R.string.installer_settings_dialog_mode_options)
-                            ) {
-                                item {
-                                    SwitchWidget(
-                                        icon = AppIcons.SingleLineSettingIcon,
-                                        title = stringResource(id = R.string.version_compare_in_single_line),
-                                        description = stringResource(id = R.string.version_compare_in_single_line_desc),
-                                        checked = state.versionCompareInSingleLine,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeVersionCompareInSingleLine(
-                                                    it
-                                                )
-                                            )
-                                        }
+
+                        // 2. SDK Compare (Dialog Mode)
+                        item(visible = isDialogMode) {
+                            SwitchWidget(
+                                icon = AppIcons.MultiLineSettingIcon,
+                                title = stringResource(id = R.string.sdk_compare_in_multi_line),
+                                description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
+                                checked = state.sdkCompareInMultiLine,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it)) }
+                            )
+                        }
+
+                        // 3. Extended Menu (Strictly Dialog Mode)
+                        item(visible = state.installMode == ConfigEntity.InstallMode.Dialog) {
+                            SwitchWidget(
+                                icon = AppIcons.MenuOpen,
+                                title = stringResource(id = R.string.show_dialog_install_extended_menu),
+                                description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
+                                checked = state.showDialogInstallExtendedMenu,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)) }
+                            )
+                        }
+
+                        // 4. Smart Suggestion (Dialog Mode)
+                        item(visible = isDialogMode) {
+                            SwitchWidget(
+                                icon = AppIcons.Suggestion,
+                                title = stringResource(id = R.string.show_intelligent_suggestion),
+                                description = stringResource(id = R.string.show_intelligent_suggestion_desc),
+                                checked = state.showSmartSuggestion,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowSuggestion(it)) }
+                            )
+                        }
+
+                        // 5. Show Dialog on Touch (Notification Mode)
+                        item(visible = isNotificationMode) {
+                            SwitchWidget(
+                                icon = AppIcons.Dialog,
+                                title = stringResource(id = R.string.show_dialog_when_pressing_notification),
+                                description = stringResource(id = R.string.change_notification_touch_behavior),
+                                checked = state.showDialogWhenPressingNotification,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        PreferredViewAction.ChangeShowDialogWhenPressingNotification(
+                                            it
+                                        )
                                     )
                                 }
-                                item {
-                                    SwitchWidget(
-                                        icon = AppIcons.MultiLineSettingIcon,
-                                        title = stringResource(id = R.string.sdk_compare_in_multi_line),
-                                        description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
-                                        checked = state.sdkCompareInMultiLine,
-                                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it)) }
-                                    )
-                                }
-                                // 特殊项：Dialog 模式下的扩展菜单
-                                item(visible = state.installMode == ConfigEntity.InstallMode.Dialog) {
-                                    SwitchWidget(
-                                        icon = AppIcons.MenuOpen,
-                                        title = stringResource(id = R.string.show_dialog_install_extended_menu),
-                                        description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
-                                        checked = state.showDialogInstallExtendedMenu,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowDialogInstallExtendedMenu(
-                                                    it
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
-                                item {
-                                    SwitchWidget(
-                                        icon = AppIcons.Suggestion,
-                                        title = stringResource(id = R.string.show_intelligent_suggestion),
-                                        description = stringResource(id = R.string.show_intelligent_suggestion_desc),
-                                        checked = state.showSmartSuggestion,
-                                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowSuggestion(it)) }
-                                    )
-                                }
-                                item {
-                                    SwitchWidget(
-                                        icon = AppIcons.Silent,
-                                        title = stringResource(id = R.string.auto_silent_install),
-                                        description = stringResource(id = R.string.auto_silent_install_desc),
-                                        checked = state.autoSilentInstall,
-                                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it)) }
-                                    )
-                                }
-                                item {
-                                    SwitchWidget(
-                                        icon = AppIcons.NotificationDisabled,
-                                        title = stringResource(id = R.string.disable_notification),
-                                        description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
-                                        checked = state.disableNotificationForDialogInstall,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowDisableNotification(
-                                                    it
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
-                            }
-                        } else {
-                            // --- Notification 模式设置组 ---
-                            // isDialogMode = false 时渲染这里
-                            SplicedColumnGroup(
-                                title = stringResource(R.string.installer_settings_notification_mode_options)
-                            ) {
-                                item {
-                                    SwitchWidget(
-                                        icon = AppIcons.Dialog,
-                                        title = stringResource(id = R.string.show_dialog_when_pressing_notification),
-                                        description = stringResource(id = R.string.change_notification_touch_behavior),
-                                        checked = state.showDialogWhenPressingNotification,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowDialogWhenPressingNotification(
-                                                    it
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
-                                item(visible = state.showDialogWhenPressingNotification) {
-                                    SwitchWidget(
-                                        icon = AppIcons.NotificationDisabled,
-                                        title = stringResource(id = R.string.disable_notification_on_dismiss),
-                                        description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
-                                        checked = state.disableNotificationForDialogInstall,
-                                        onCheckedChange = {
-                                            viewModel.dispatch(
-                                                PreferredViewAction.ChangeShowDisableNotification(
-                                                    it
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
-                            }
+                            )
+                        }
+
+                        // 6. Auto Silent Install (Dialog Mode)
+                        item(visible = isDialogMode) {
+                            SwitchWidget(
+                                icon = AppIcons.Silent,
+                                title = stringResource(id = R.string.auto_silent_install),
+                                description = stringResource(id = R.string.auto_silent_install_desc),
+                                checked = state.autoSilentInstall,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it)) }
+                            )
+                        }
+
+                        // 7. Disable Notification (Dialog Mode)
+                        item(visible = isDialogMode) {
+                            SwitchWidget(
+                                icon = AppIcons.NotificationDisabled,
+                                title = stringResource(id = R.string.disable_notification),
+                                description = stringResource(id = R.string.close_immediately_on_dialog_dismiss),
+                                checked = state.disableNotificationForDialogInstall,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowDisableNotification(it)) }
+                            )
+                        }
+
+                        // 8. Disable Notification (Notification Mode + Show Dialog)
+                        item(visible = isNotificationMode && state.showDialogWhenPressingNotification) {
+                            SwitchWidget(
+                                icon = AppIcons.NotificationDisabled,
+                                title = stringResource(id = R.string.disable_notification_on_dismiss),
+                                description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
+                                checked = state.disableNotificationForDialogInstall,
+                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowDisableNotification(it)) }
+                            )
                         }
                     }
                 }

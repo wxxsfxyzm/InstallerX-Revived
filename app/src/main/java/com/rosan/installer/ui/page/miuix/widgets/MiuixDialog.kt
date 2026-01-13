@@ -43,6 +43,7 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Check
 import top.yukonga.miuix.kmp.icon.extended.Close
@@ -242,7 +243,7 @@ fun MiuixUninstallConfirmationDialog(
     onConfirm: () -> Unit,
     keepData: Boolean
 ) {
-    SuperDialog(
+    WindowDialog(
         show = showState,
         onDismissRequest = onDismiss,
         title = stringResource(R.string.suggestion_uninstall_alert_dialog_confirm_action),

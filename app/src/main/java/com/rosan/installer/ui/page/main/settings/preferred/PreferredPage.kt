@@ -263,21 +263,6 @@ fun PreferredPage(
                             onClick = { navController.navigate(SettingsScreen.About.route) }
                         )
                     }
-                    item {
-                        val updateSummary =
-                            if (state.hasUpdate) stringResource(
-                                R.string.update_available,
-                                state.remoteVersion
-                            )
-                            else stringResource(R.string.get_update_detail)
-                        SettingsAboutItemWidget(
-                            imageVector = AppIcons.Update,
-                            headlineContentText = stringResource(R.string.get_update),
-                            supportingContentText = updateSummary,
-                            supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            onClick = { showBottomSheet = true }
-                        )
-                    }
                     // Temporarily Disable This
                     /*                    pkg {
                                             SettingsAboutItemWidget(

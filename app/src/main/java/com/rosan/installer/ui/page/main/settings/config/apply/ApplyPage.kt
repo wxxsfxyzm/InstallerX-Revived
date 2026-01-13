@@ -291,7 +291,7 @@ private fun ItemsWidget(
                 app = app,
                 isApplied = isApplied,
                 isM3e = false,
-                // ApplyPage uses default styling (Transparent background, no switch icons)
+                showPackageName = viewModel.state.showPackageName,
                 onToggle = { isChecked ->
                     viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, isChecked))
                 },
