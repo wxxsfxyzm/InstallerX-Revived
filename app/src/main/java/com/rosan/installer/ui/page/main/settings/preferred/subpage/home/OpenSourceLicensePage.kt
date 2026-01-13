@@ -183,7 +183,7 @@ fun OpenSourceLicensePage(
                         items(library.licenses.toList()) { license ->
                             OutlinedCard(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.outlinedCardColors(
                                     containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
                                 )

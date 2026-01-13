@@ -27,9 +27,11 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
+import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
@@ -163,6 +165,11 @@ fun MiuixHomePage(
                         title = stringResource(R.string.get_source_code),
                         description = stringResource(R.string.get_source_code_detail),
                         onClick = { context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived") }
+                    )
+                    MiuixNavigationItemWidget(
+                        title = stringResource(R.string.open_source_license),
+                        description = stringResource(R.string.open_source_license_settings_description),
+                        onClick = { navController.navigate(MiuixSettingsScreen.MiuixOpenSourceLicense.route) }
                     )
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.get_update),

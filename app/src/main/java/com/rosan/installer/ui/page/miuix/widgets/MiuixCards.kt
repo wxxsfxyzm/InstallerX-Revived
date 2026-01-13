@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.miuix.widgets
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,11 +18,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.theme.InstallerTheme
@@ -128,6 +131,25 @@ fun MiuixScopeTipCard(viewModel: AllViewModel) {
                 tint = MiuixTheme.colorScheme.primary
             )
         }
+    }
+}
+
+@Composable
+fun MiuixInfoTipCard(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    TipCard(
+        modifier = modifier,
+        tipContent = {
+            Text(
+                text = text,
+                style = MiuixTheme.textStyles.body1,
+                color = MiuixTheme.colorScheme.onTertiaryContainer
+            )
+        }
+    ) {
+        Spacer(modifier = Modifier.size(16.dp))
     }
 }
 
