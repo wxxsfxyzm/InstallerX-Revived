@@ -71,7 +71,6 @@ fun LibrariesContainer(
 
     val onDismiss = {
         showState.value = false
-        selectedLibrary = null
     }
 
     selectedLibrary?.let { library ->
