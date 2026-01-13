@@ -35,7 +35,6 @@ import com.mikepenz.aboutlibraries.entity.License
 import com.mikepenz.aboutlibraries.ui.compose.util.author
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInfoTipCard
-import com.rosan.installer.ui.page.miuix.widgets.MiuixScopeTipCard
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import top.yukonga.miuix.kmp.basic.ButtonDefaults

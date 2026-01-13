@@ -111,7 +111,6 @@ private object UIConstants {
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
-    val context = LocalContext.current
     val navController = rememberNavController()
 
     NavHost(
