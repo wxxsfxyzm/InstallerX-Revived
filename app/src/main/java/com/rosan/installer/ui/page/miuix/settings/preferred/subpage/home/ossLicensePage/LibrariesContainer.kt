@@ -61,12 +61,9 @@ fun LibrariesContainer(
         items(libraries?.libraries ?: persistentListOf()) { library ->
             LibraryCard(library, Modifier.clickable {
                 selectedLibrary = library
+                showState.value = true
             })
         }
-    }
-
-    LaunchedEffect(selectedLibrary) {
-        showState.value = selectedLibrary != null
     }
 
     val onDismiss = {
