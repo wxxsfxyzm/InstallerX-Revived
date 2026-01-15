@@ -114,6 +114,7 @@
 
             <intent-filter android:priority="10">
                 <action android:name="android.content.pm.action.CONFIRM_INSTALL" />
+                <action android:name="android.content.pm.action.CONFIRM_PERMISSIONS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
