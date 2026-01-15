@@ -24,11 +24,11 @@ ktx-serialization = "1.9.0"
 accompanist = "0.37.3"
 rikka-shizuku = "13.1.5"
 koin-bom = "4.1.1"
-datastoreCoreAndroid = "1.2.0"
+datastore = "1.2.0"
 aboutLibraries = "13.2.1"
 appiconloader = "1.5.0"
 timber = "5.0.1"
-miuix = "0.8.0-aedfe1b-SNAPSHOT"
+miuix = "0.8.0-130d026-SNAPSHOT"
 okhttp = "5.3.2"
 monetcompat = "0.4.1"
 
@@ -50,7 +50,7 @@ androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.17.0"
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.12.2" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.10.0" }
-androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androix-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
 
 capsule = { module = "io.github.kyant0:capsule", version.ref = "capsule" }

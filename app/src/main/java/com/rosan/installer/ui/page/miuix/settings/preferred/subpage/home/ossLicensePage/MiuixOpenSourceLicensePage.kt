@@ -62,8 +62,7 @@ fun MiuixOpenSourceLicensePage(
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .padding(top = paddingValues.calculateTopPadding())
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .padding(bottom = 12.dp),
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
             libraries = libraries
         )
     }

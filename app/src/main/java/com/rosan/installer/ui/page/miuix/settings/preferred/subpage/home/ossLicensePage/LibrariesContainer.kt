@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,6 +45,8 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun LibrariesContainer(
@@ -68,6 +71,7 @@ fun LibrariesContainer(
                 }
             )
         }
+        item { Spacer(Modifier.navigationBarsPadding()) }
     }
 
     val onDismiss = {
@@ -84,8 +88,11 @@ fun LibrariesContainer(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f, fill = false),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                            .weight(1f, fill = false)
+                            .scrollEndHaptic()
+                            .overScrollVertical(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        overscrollEffect = null
                     ) {
                         item {
                             MiuixInstallerTipCard(
@@ -167,8 +174,7 @@ fun LibraryCard(
             .clickable(onClick = onClick)
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
