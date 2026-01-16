@@ -523,7 +523,7 @@
     <string name="suggestion_retry_install_desc">Intenta instalar de nuevo</string>
     <string name="lab">Laboratorio</string>
     <string name="lab_desc">Accede a funciones experimentales y de desarrollo</string>
-    <string name="updating">Actualizando...</string>
+    <string name="updating">Actualizando...…</string>
     <string name="update_available">Actualización Disponible: %1$s</string>
     <string name="get_update_directly">Recibe la actualización directamente</string>
     <string name="get_update_directly_desc">Recibe la actualización directamente desde GitHub e instálala, no quedará caché</string>
@@ -662,4 +662,12 @@
     <string name="auth_summary_uninstall">Estás realizando una operación de desinstalación. Para continuar, por favor confirma esta acción usando la autenticación de tu dispositivo</string>
     <string name="exception_authentication_failed">Fallo en la autenticación del usuario</string>
     <string name="old_version_uninstalled">Desisntalado</string>
+    <string name="config_authorizer_none_system_app_tips">Funcionando como instalador del sistema, la mayoría de las opciones aquí no son necesarias.</string>
+    <string name="installer_author">Autor: %1$s</string>
+    <string name="lab_module_always_use_root">Siempre usar root para flashear módulos</string>
+    <string name="lab_module_always_use_root_desc">Mientras trabajas como instalador de sistemas, usa siempre root al flashear modulso para obtener el mejor rendimiento</string>
+    <string name="open_source_license_settings_description">Consulta la bibliotecas de código abierto de terceros y sus licencias</string>
+    <string name="visit_home_page">Visitar página principal</string>
+    <string name="license">Licencia: %s</string>
+    <string name="no_license_text">No hay texto de licencia disponible.</string>
 </resources>
