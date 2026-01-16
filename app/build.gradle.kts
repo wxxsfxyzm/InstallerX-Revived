@@ -2,13 +2,11 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.agp.app)
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.aboutLibraries)
-    alias(libs.plugins.aboutLibraries.android)
 }
 
 android {
@@ -50,12 +48,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        javaCompileOptions {
-            annotationProcessorOptions {
-                compilerArgumentProviders(
-                )
-            }
-        }
     }
 
     signingConfigs {
@@ -138,28 +130,9 @@ android {
         }
     }
 
-    applicationVariants.all {
-        val variant = this
-
-        val levelFlavor = variant.productFlavors.find { it.dimension == "level" }
-
-
-        val level = when (levelFlavor?.name) {
-            "Unstable" -> 0
-            "Preview" -> 1
-            "Stable" -> 2
-            else -> 0
-        }.toString()
-        buildConfigField("int", "BUILD_LEVEL", level)
-    }
-
     compileOptions {
         targetCompatibility = JavaVersion.VERSION_25
         sourceCompatibility = JavaVersion.VERSION_25
-    }
-
-    kotlin {
-        jvmToolchain(25)
     }
 
     buildFeatures {
@@ -168,14 +141,40 @@ android {
         aidl = true
     }
 
-    /*    composeOptions {
-            //kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-        }*/
-
     packaging {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
+    }
+}
+
+kotlin {
+    jvmToolchain(25)
+}
+
+androidComponents {
+    onVariants { variant ->
+        val level = variant.productFlavors
+            .firstOrNull { it.second == "level" }
+            ?.first
+            ?.let {
+                when (it) {
+                    "Unstable" -> 0
+                    "Preview" -> 1
+                    "Stable" -> 2
+                    else -> 0
+                }
+            } ?: 0
+
+        variant.buildConfigFields?.put(
+            "BUILD_LEVEL",
+            com.android.build.api.variant.BuildConfigField
+                (
+                "int",
+                level.toString(),
+                null
+            )
+        )
     }
 }
 
