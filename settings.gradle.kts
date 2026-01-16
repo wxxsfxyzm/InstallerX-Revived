@@ -54,7 +54,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "InstallerX Revived"
+rootProject.name = "InstallerX-Revived"
 include(
     ":app",
     ":hidden-api"
