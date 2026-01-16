@@ -26,18 +26,13 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mikepenz.aboutlibraries.Libs
-import com.mikepenz.aboutlibraries.entity.Developer
 import com.mikepenz.aboutlibraries.entity.Library
-import com.mikepenz.aboutlibraries.entity.License
 import com.mikepenz.aboutlibraries.ui.compose.util.author
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentSetOf
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -62,7 +57,7 @@ fun LibrariesContainer(
         overscrollEffect = null
     ) {
         item { Spacer(modifier = Modifier.size(16.dp)) }
-        items(libraries?.libraries ?: persistentListOf()) { library ->
+        items(libraries?.libraries ?: listOf()) { library ->
             LibraryCard(
                 library = library,
                 onClick = {
@@ -228,36 +223,4 @@ fun LibraryCard(
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun LibraryCardPreview() {
-    val fakeLibrary = Library(
-        uniqueId = "com.rosan.installer.x.revived",
-        artifactVersion = "2.3.2",
-        name = "InstallerX-Revived",
-        description = "More Expressive InstallerX !",
-        website = "https://github.com/wxxsfxyzm/InstallerX-Revived",
-        developers = persistentListOf(
-            Developer(
-                name = "wxxsfxyzm",
-                organisationUrl = null
-            )
-        ),
-        organization = null,
-        scm = null,
-        licenses = persistentSetOf(
-            License(
-                name = "GPL-3.0",
-                url = "https://www.gnu.org/licenses/gpl-3.0.txt",
-                spdxId = "GPL-3.0-or-later",
-                hash = "gpl_3_0_hash"
-            )
-        ),
-        funding = persistentSetOf(),
-        tag = "Open Source"
-    )
-
-    LibraryCard(fakeLibrary, onClick = {})
 }
