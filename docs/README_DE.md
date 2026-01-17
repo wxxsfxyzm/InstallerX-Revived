@@ -121,3 +121,10 @@ der verwendeten Quellcode-Version.
 ## Danksagungen
 
 Dieses Projekt verwendet Code aus oder basiert auf Implementierungen der folgenden Projekte:
+
+- [iamr0s/InstallerX](https://github.com/iamr0s/InstallerX)
+- [tiann/KernelSU](https://github.com/tiann/KernelSU)
+- [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku)
+- [zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions)
+- [vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller)
+- [compose-miuix-ui/miuix](https://github.com/compose-miuix-ui/miuix)
