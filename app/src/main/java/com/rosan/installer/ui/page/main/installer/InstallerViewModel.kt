@@ -515,7 +515,11 @@ class InstallerViewModel(
                                 ?: _currentPackageName.value // Fallback
                         } else {
                             // For single install, use the selected entity.
-                            _currentPackageName.value ?: repo.analysisResults.firstOrNull()?.packageName
+                            _currentPackageName.value
+                                ?: repo.analysisResults.firstNotNullOfOrNull { result ->
+                                    if (result.appEntities.any { it.selected }) result.packageName else null
+                                }
+                                ?: repo.analysisResults.firstOrNull()?.packageName
                         }
                     }
 
