@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README_CN.md) | [Español](README_ES.md) | **日本語**
 
-[![ライセンス: GPL v3](https://img.shields.io/badge/Licencia-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![安定版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=安定版)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![ベータ版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=ベータ版)](https://github.com/wxxsfxyzm/InstallerX/releases)[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
+[![ライセンス: GPL v3](https://img.shields.io/badge/ライセンス-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![安定版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=安定版)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![ベータ版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=ベータ版)](https://github.com/wxxsfxyzm/InstallerX/releases)[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
 - これは、作者によって[元のプロジェクト](https://github.com/iamr0s/InstallerX)がアーカイブされた後にコミュニティによって維持されているフォークです
 - 限定的なオープンソースの更新とサポートを提供します
@@ -18,7 +18,7 @@
 多くのカスタマイズされた中国製ROMには、デフォルトよりも劣ったインストーラーが搭載されていますが、それらを**InstallerX Revived**に置き換えることができます。
 
 デフォルトインストーラーと比較して、**InstallerX Revived**はより多くの機能を提供します:
-- 豊富なインストール形式：APK、APKS、APKM、XAPK、ZIP内APK、バッチAPK。
+- 豊富なインストール形式：APK、APKS、APKM、XAPK、ZIP内APK、バッチAPK
 - ダイアログベースのインストール
 - 通知ベースのインストール（Live Activity API 対応）
 - 自動インストール
