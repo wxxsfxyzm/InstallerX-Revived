@@ -19,7 +19,7 @@
 
 Du suchst nach einem besseren App-Installer? Probiere **InstallerX**!
 
-Viele angepasste chinesische ROMs liefern minderwertige Standard-Installer mit. Diese kannst du durch **InstallerX Revived** ersetzen.
+Viele stark angepasste chinesische ROMs haben minderwertige Standard-Installer. Diese kannst du durch **InstallerX Revived** ersetzen.
 
 Im Vergleich zu Standard-Installern bietet **InstallerX Revived** mehr funktionen:
 
