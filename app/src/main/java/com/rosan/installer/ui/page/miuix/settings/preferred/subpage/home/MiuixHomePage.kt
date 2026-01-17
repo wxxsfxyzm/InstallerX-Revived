@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -30,11 +31,11 @@ import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUpdateDialog
-import com.rosan.installer.util.openUrl
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -52,6 +53,7 @@ fun MiuixHomePage(
     viewModel: PreferredViewModel
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val state = viewModel.state
     val scrollBehavior = MiuixScrollBehavior()
     val showUpdateDialog = remember { mutableStateOf(false) }
@@ -162,7 +164,12 @@ fun MiuixHomePage(
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.get_source_code),
                         description = stringResource(R.string.get_source_code_detail),
-                        onClick = { context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived") }
+                        onClick = { uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived") }
+                    )
+                    MiuixNavigationItemWidget(
+                        title = stringResource(R.string.open_source_license),
+                        description = stringResource(R.string.open_source_license_settings_description),
+                        onClick = { navController.navigate(MiuixSettingsScreen.MiuixOpenSourceLicense.route) }
                     )
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.get_update),

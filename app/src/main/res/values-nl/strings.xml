@@ -19,7 +19,7 @@
     <string name="lab">Laboratorium</string>
     <string name="lab_desc">Toegang tot experimentele en ontwikkelaarsfuncties</string>
     <string name="about_detail">Over InstallerX Revived</string>
-    <string name="updating">Updaten...</string>
+    <string name="updating">Updaten…</string>
     <string name="get_update">Update krijgen</string>
     <string name="get_update_detail">Naar software-updates en nieuwe functies zoeken</string>
     <string name="update_available">Update beschikbaar:%1$s</string>
@@ -635,7 +635,7 @@
     <string name="uninstall_all_users_disabled">Verwijdering voor alle gebruikers was uitgeschakeld</string>
     <string name="uninstall_system_app_disabled">Het verwijderen van systeemapps was uitgeschakeld</string>
     <string name="uninstall_call_uninstaller">Verwijderaar aanroepen</string>
-    <string name="uninstall_call_uninstaller_manually">Roept manueel de verwijderaar aan</string>
+    <string name="uninstall_call_uninstaller_manually">Roep manueel de verwijderaar aan</string>
     <string name="uninstall_call_uninstaller_manually_desc">Verwijder app met gegeven pakketnaam</string>
     <string name="uninstall_progress_text">Verwijderen...</string>
     <string name="uninstall_enter_package_name">Voer pakketnaam in om te verwijderen</string>
@@ -652,4 +652,12 @@
     <string name="auth_summary_uninstall">Je bent een verwijderingsactie aan het doen. Om door te gaan, bevestig alsjeblieft deze actie met je apparaatauthenticatie</string>
     <string name="exception_authentication_failed">Gebruikersauthenticatie mislukt</string>
     <string name="old_version_uninstalled">Verwijderd</string>
+    <string name="config_authorizer_none_system_app_tips">Uitvoerend als systeeminstallateur, de meeste opties hier zijn niet nodig.</string>
+    <string name="installer_author">Auteur: %1$s</string>
+    <string name="lab_module_always_use_root">Altijd root gebruiken bij het flashen van modules</string>
+    <string name="lab_module_always_use_root_desc">Tijdens het werken als systeeminstallateur, altijd root gebruiken voor het flashen van modules voor de beste prestaties</string>
+    <string name="open_source_license_settings_description">Bekijk open-sourcebibliotheken van derden en hun licenties</string>
+    <string name="visit_home_page">Startpagina bezoeken</string>
+    <string name="license">Licentie: %s</string>
+    <string name="no_license_text">Geen licentietekst beschikbaar.</string>
 </resources>

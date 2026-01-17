@@ -23,7 +23,7 @@
     <string name="lab">Laboratory</string>
     <string name="lab_desc">Access experimental and developer features</string>
     <string name="about_detail">About InstallerX Revived</string>
-    <string name="updating">Updating...</string>
+    <string name="updating">Updating…</string>
     <string name="get_update">Get update</string>
     <string name="get_update_detail">Check for software updates and new features</string>
     <string name="update_available">Update Available: %1$s</string>
@@ -298,11 +298,9 @@
     <string name="sort_by_selected_first">Selected go first</string>
     <string name="sort_by_show_system_app">Display system app</string>
     <string name="sort_by_show_package_name">Display package name</string>
-
     <string name="auth_to_continue_work">Please authenticate to confirm this operation</string>
     <string name="auth_summary_install">You are doing an install operation, To continue, please confirm this action using your device authentication</string>
     <string name="auth_summary_uninstall">You are doing an uninstall operation, To continue, please confirm this action using your device authentication</string>
-
     <string name="installer_ready">Ready</string>
     <string name="installer_resolving">Checking…</string>
     <string name="installer_resolve_failed">Resolve failed</string>
@@ -669,7 +667,6 @@
     <string name="suggestion_bypass_blacklist_set_by_user">Allow install once</string>
     <string name="suggestion_bypass_blacklist_set_by_user_desc">Temporarily allow install once</string>
     <string name="suggestion_retry_install_desc">Try install again</string>
-
     <string name="lab_tip">Experimental features in the lab may be unstable or risky and could change or be removed at any time. Use at your own risk</string>
     <string name="lab_use_hook_mode">Use BinderWrapper mode</string>
     <string name="lab_use_hook_mode_desc">Use BinderWrapper instead of UserService to get better performance, works both for Shizuku and Root</string>

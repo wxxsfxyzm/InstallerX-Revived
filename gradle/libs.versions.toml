@@ -8,41 +8,38 @@
 # https://mvnrepository.com/
 
 [versions]
-agp = "8.13.2"
+agp = "9.0.0"
 biometric = "1.4.0-alpha05"
 capsule = "2.1.2"
 kotlin = "2.3.0"
 ksp = "2.3.4"
-composeBom = "2025.12.01"
-compose = "1.10.0"
+composeBom = "2026.01.00"
+compose = "1.10.1"
 m3color = "2025.4"
 haze = "1.7.1"
 splashScreen = "1.2.0"
-material3 = "1.5.0-alpha11"
+material3 = "1.5.0-alpha12"
 room = "2.8.4"
 ktx-serialization = "1.9.0"
 accompanist = "0.37.3"
 rikka-shizuku = "13.1.5"
 koin-bom = "4.1.1"
-datastoreCoreAndroid = "1.2.0"
-aboutLibraries = "13.2.1"
+datastore = "1.2.0"
+aboutLibraries = "14.0.0-b01"
 appiconloader = "1.5.0"
 timber = "5.0.1"
-miuix = "0.8.0-aedfe1b-SNAPSHOT"
+miuix = "0.8.0-77ca36e-SNAPSHOT"
 okhttp = "5.3.2"
 monetcompat = "0.4.1"
 
 [plugins]
 agp-lib = { id = "com.android.library", version.ref = "agp" }
 agp-app = { id = "com.android.application", version.ref = "agp" }
-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
-aboutLibraries-android = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutLibraries" }
 
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
@@ -50,7 +47,7 @@ androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.17.0"
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.12.2" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.10.0" }
-androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androix-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
 
 capsule = { module = "io.github.kyant0:capsule", version.ref = "capsule" }

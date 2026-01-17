@@ -49,6 +49,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     companion object {
         const val KEY_ID = "installer_id"
         private const val ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL"
+        private const val ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS"
     }
 
     private val appDataStore: AppDataStore by inject()
@@ -112,7 +113,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         permissionManager.requestEssentialPermissions(
             onGranted = {
                 Timber.d("All essential permissions are granted.")
-                if (intent.action == ACTION_CONFIRM_INSTALL) {
+                if (intent.action == ACTION_CONFIRM_INSTALL || intent.action == ACTION_CONFIRM_PERMISSIONS) {
                     val sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
                     if (sessionId != -1) {
                         Timber.d("onCreate: Dispatching resolveConfirmInstall for session $sessionId")
@@ -168,7 +169,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         super.onNewIntent(intent)
         restoreInstaller()
 
-        if (intent.action == ACTION_CONFIRM_INSTALL) {
+        if (intent.action == ACTION_CONFIRM_INSTALL || intent.action == ACTION_CONFIRM_PERMISSIONS) {
             val sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
             if (sessionId != -1) {
                 Timber.d("onNewIntent: Dispatching resolveConfirmInstall for session $sessionId")
