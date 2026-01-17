@@ -452,7 +452,7 @@ private fun AdaptiveInfoRow(
     val showComparison = oldValue != null && newValue != oldValue
     val oldTextContent = when {
         isArchived -> stringResource(R.string.old_version_archived)
-        isUninstalled -> stringResource(R.string.old_version_uninstalled)
+        isUninstalled -> if (oldValue.isNullOrEmpty()) stringResource(R.string.old_version_uninstalled) else oldValue
         else -> oldValue.orEmpty()
     }
 
