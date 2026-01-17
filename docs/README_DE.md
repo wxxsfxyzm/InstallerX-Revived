@@ -84,7 +84,38 @@ Im Vergleich zu Standard-Installern bietet **InstallerX Revived** mehr funktione
 > Bitte lies diese FAQ vor dem Melden von Problemen.  
 > Gib dabei Gerätehersteller, Systemversion, App-Version und genaue Schritte an.
 
-(FAQ-Inhalt vollständig übersetzt wie im Original)
+- **Dhizuku funktioniert nicht richtig?**
+    - Die Unterstützung für **offizielles Dhizuku** ist eingeschränkt. Getestet auf AVDs mit SDK ≥34. Der Betrieb auf SDK <34 ist nicht garantiert.
+    - Bei Verwendung von `OwnDroid` funktioniert die Funktion `Auto delete after installation` möglicherweise nicht korrekt.
+    - Auf chinesischen ROMs treten gelegentliche Fehler meist dadurch auf, dass das System die Hintergrundausführung von Dhizuku einschränkt. Es wird empfohlen, zuerst die Dhizuku-App neu zu starten.
+    - Dhizuku verfügt nur über eingeschränkte Berechtigungen. Viele Vorgänge sind nicht möglich (z. B. das Umgehen von System-Intent-Interzeptoren oder das Festlegen der Installationsquelle). Wenn möglich, wird die Nutzung von Shizuku empfohlen.
+
+- **InstallerX lässt sich nicht als Standard-Installer festlegen?**
+    - Einige Systeme haben sehr strenge Richtlinien für Paket-Installer. In diesem Fall musst du ein LSPosed-Modul verwenden, um den Intent abzufangen und an den Installer weiterzuleiten.
+    - Funktioniert am besten mit: [Chimioo/InxLocker](https://github.com/Chimioo/InxLocker)
+    - Andere als LSPosed arbeitende Locker werden nicht mehr empfohlen.
+
+- **Ein Fehler ist in der Auflösungsphase aufgetreten: `No Content Provider` oder `reading provider` meldet `Permission Denial`?**
+    - Du hast „Hide app list“ oder ähnliche Funktionen aktiviert. Bitte konfiguriere die Whitelist entsprechend.
+
+- **HyperOS zeigt den Fehler „Installing system apps requires declaring a valid installer“**
+    - Dies ist eine Systemsicherheitsbeschränkung. Du musst einen Installer deklarieren, der eine System-App ist (empfohlen: `com.android.fileexplorer` oder `com.android.vending` für HyperOS; App-Store bei Vivo).
+    - Funktioniert mit Shizuku/Root. **Dhizuku wird nicht unterstützt**.
+    - Neues Feature: InstallerX erkennt HyperOS automatisch und fügt eine Standardkonfiguration (`com.miui.packageinstaller`) hinzu. Du kannst diese bei Bedarf in den Einstellungen ändern.
+
+- **HyperOS installiert den Standard-Installer erneut / Sperren schlägt fehl**
+    - Versuche, `Auto Lock Installer` in den Einstellungen zu aktivieren.
+    - Auf einigen HyperOS-Versionen ist ein Fehlschlagen der Sperre zu erwarten.
+    - HyperOS fängt USB-Installationsanfragen (ADB/Shizuku) mit einem Dialog ab. Wenn der Nutzer die Installation einer neuen App ablehnt, setzt das System die Installer-Einstellung zurück und erzwingt den Standard-Installer. In diesem Fall sperre InstallerX erneut.
+
+- **Der Fortschrittsbalken der Benachrichtigung friert ein**
+    - Einige Custom-OS haben sehr strenge Hintergrund-App-Kontrollen. Setze für die App „Keine Hintergrundbeschränkungen“, falls dieses Problem auftritt.
+    - Die App ist optimiert: Sie beendet alle Hintergrunddienste und schließt sich 1 Sekunde nach Abschluss der Installationsaufgabe (wenn der Nutzer auf „Done“ klickt oder die Benachrichtigung entfernt). Du kannst die Foreground-Service-Benachrichtigung aktivieren, um den Vorgang zu überwachen.
+
+- **Probleme auf Oppo/Vivo/Lenovo/…-Systemen?**
+    - Wir verfügen nicht über Geräte dieser Marken zum Testen. Du kannst dies in den [Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions) besprechen oder über unseren [Telegram-Kanal](https://t.me/installerx_revived) melden.
+    - Um den Installer auf Oppo/Vivo zu sperren, verwende das Lock-Tool.
+    - Um Apps über Shizuku auf Honor-Geräten zu installieren, deaktiviere `Monitor ADB install` in den Entwickleroptionen.
 
 ## Über Releases
 
