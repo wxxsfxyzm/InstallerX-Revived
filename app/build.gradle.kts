@@ -155,8 +155,8 @@ kotlin {
 androidComponents {
     onVariants { variant ->
         val level = variant.productFlavors
-            .firstOrNull { it.second == "level" }
-            ?.first
+            .firstOrNull { it.first == "level" }
+            ?.second
             ?.let {
                 when (it) {
                     "Unstable" -> 0
@@ -168,8 +168,7 @@ androidComponents {
 
         variant.buildConfigFields?.put(
             "BUILD_LEVEL",
-            com.android.build.api.variant.BuildConfigField
-                (
+            com.android.build.api.variant.BuildConfigField(
                 "int",
                 level.toString(),
                 null
