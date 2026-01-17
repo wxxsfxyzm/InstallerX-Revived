@@ -21,14 +21,14 @@ Du suchst nach einem besseren App-Installer? Probiere **InstallerX**!
 
 Viele angepasste chinesische ROMs liefern minderwertige Standard-Installer mit. Diese kannst du durch **InstallerX Revived** ersetzen.
 
-Im Vergleich zu Standard-Installern bietet **InstallerX Revived** mehr Installationsfunktionen:
+Im Vergleich zu Standard-Installern bietet **InstallerX Revived** mehr funktionen:
 
 - Umfangreiche Installationstypen: APK, APKS, APKM, XAPK, APKs innerhalb von ZIP-Archiven sowie Batch-APKs
 - Dialogbasierte Installation
 - Benachrichtigungsbasierte Installation (Live Activity API unterstützt)
 - Automatische Installation
-- Installer-Deklaration
-- Setzen von Installations-Flags (kann Profileinstellungen erben)
+- Festlegen als Standard-installer
+- Setzen von Installations-Flags (kann nach Profileinstellungen standardmäßig festgelegt werden)
 - Installation für einen bestimmten Benutzer / alle Benutzer
 - Dex2oat nach erfolgreicher Installation
 - Blockieren der Installation bestimmter Apps nach packageName oder sharedUID
@@ -42,22 +42,22 @@ Im Vergleich zu Standard-Installern bietet **InstallerX Revived** mehr Installat
 
 ## Wichtige Änderungen und Funktionen
 
-- **UI-Optionen:** Umschaltbar zwischen einem neuen UI-Design basierend auf Material 3 Expressive und Miuix (ähnlich HyperOS)
+- **UI-Optionen:** Umschaltbar zwischen Material 3 Expressive (Google Design) und Miuix (ähnlich HyperOS)
 - **Mehr Anpassungsmöglichkeiten:** Stärker konfigurierbare Oberflächeneinstellungen
 - **Fehlerbehebungen:** Behebung von Problemen beim Löschen von APKs aus dem Originalprojekt auf bestimmten Systemen
 - **Leistung:** Optimierte Parsing-Geschwindigkeit und verbesserte Verarbeitung verschiedener Pakettypen
-- **Mehrsprachige Unterstützung:** Weitere Sprachen werden unterstützt – Beiträge sind willkommen
+- **Mehrsprachige Unterstützung:** Mehr Sprachen werden unterstützt – Beiträge sind willkommen
 - **Dialog-Optimierung:** Verbesserte Darstellung der Installationsdialoge
 - **System-Icons:** Unterstützung für System-Icon-Pakete während der Installation (umschaltbar)
 - **Versionsvergleich:** Anzeige von Versionsnummern im ein- oder mehrzeiligen Format
 - **SDK-Informationen:** Anzeige von targetSDK und minSDK im Installationsdialog
 - **Session-Installationsbestätigung:** Unterstützung dank [InxLocker](https://github.com/Chimioo/InxLocker) für Store-Apps wie Aurora Store oder F-Droid
-- **Umgehung von Interzeptoren:** Shizuku/Root kann OS-Beschränkungen beim App-Start nach der Installation umgehen
+- **Umgehung von Beschränkungen:** Shizuku/Root kann OS-Beschränkungen beim App-Start nach der Installation umgehen
   - Aktuell nur bei Dialoginstallation
   - Für Dhizuku wurde ein anpassbarer Countdown hinzugefügt
 - **Erweitertes Menü (Dialoginstallation):**
   - Anzeige angeforderter Berechtigungen
-  - InstallFlags-Konfiguration (vererbbar aus Profilen)
+  - InstallFlags-Konfiguration (anwendbar aus Profilen)
   - **Hinweis:** InstallFlags funktionieren nicht garantiert und können Sicherheitsrisiken bergen
 - **Voreingestellte Quellen:** Vorabkonfiguration von Installationsquellen für schnelle Auswahl
 - **Installation aus ZIP:**
