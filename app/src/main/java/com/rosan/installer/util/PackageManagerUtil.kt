@@ -1,4 +1,4 @@
-package com.rosan.installer.data.common.util
+package com.rosan.installer.util
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.pm.PackageInfoCompat
 import timber.log.Timber
+
+private const val FLAG_ARCHIVED = 1 shl 30
 
 val PackageInfo.compatVersionCode: Long
     get() = PackageInfoCompat.getLongVersionCode(this)
@@ -47,7 +49,6 @@ fun PackageManager.isPackageArchivedCompat(packageName: String): Boolean {
             appInfo.isArchived
         } else {
             // For Android 14 (API 34), check the flag manually.
-            val FLAG_ARCHIVED = 1 shl 30
             (appInfo.flags and FLAG_ARCHIVED) != 0
         }
     } catch (e: PackageManager.NameNotFoundException) {

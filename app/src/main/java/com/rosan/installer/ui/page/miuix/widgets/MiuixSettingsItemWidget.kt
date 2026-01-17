@@ -58,6 +58,7 @@ import com.rosan.installer.ui.theme.m3color.ThemeMode
 import com.rosan.installer.ui.util.MIN_FEEDBACK_DURATION_MS
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.getDirectorySize
+import com.rosan.installer.util.hasFlag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -1018,7 +1019,7 @@ fun MiuixUninstallKeepDataWidget(viewModel: PreferredViewModel) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.uninstall_keep_data),
         description = stringResource(id = R.string.uninstall_keep_data_desc),
-        checked = (viewModel.state.uninstallFlags and PackageManagerUtil.DELETE_KEEP_DATA) != 0,
+        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA),
         onCheckedChange = {
             viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_KEEP_DATA, it))
         }
@@ -1031,7 +1032,7 @@ fun MiuixUninstallForAllUsersWidget(viewModel: PreferredViewModel) {
         icon = AppIcons.InstallForAllUsers,
         title = stringResource(id = R.string.uninstall_all_users),
         description = stringResource(id = R.string.uninstall_all_users_desc),
-        checked = (viewModel.state.uninstallFlags and PackageManagerUtil.DELETE_ALL_USERS) != 0,
+        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS),
         onCheckedChange = {
             viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_ALL_USERS, it))
         }
@@ -1043,7 +1044,7 @@ fun MiuixUninstallSystemAppWidget(viewModel: PreferredViewModel) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.uninstall_delete_system_app),
         description = stringResource(id = R.string.uninstall_delete_system_app_desc),
-        checked = (viewModel.state.uninstallFlags and PackageManagerUtil.DELETE_SYSTEM_APP) != 0,
+        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP),
         onCheckedChange = {
             viewModel.dispatch(
                 PreferredViewAction.ToggleGlobalUninstallFlag(
