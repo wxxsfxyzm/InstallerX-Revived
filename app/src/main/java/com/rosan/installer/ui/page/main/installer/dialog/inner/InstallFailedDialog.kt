@@ -89,9 +89,6 @@ fun installFailedDialog( // 小写开头
             DialogParamsType.InstallerInstallFailed.id
         ) {
             listOf(
-                /*DialogButton(stringResource(R.string.previous)) {
-                    viewModel.dispatch(DialogViewAction.InstallPrepare)
-                },*/
                 DialogButton(stringResource(R.string.close)) {
                     viewModel.dispatch(InstallerViewAction.Close)
                 }

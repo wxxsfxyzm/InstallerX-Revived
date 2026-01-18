@@ -31,13 +31,14 @@ import com.rosan.installer.data.app.util.PackageInstallerUtil.abiOverride
 import com.rosan.installer.data.app.util.PackageInstallerUtil.installFlags
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
-import com.rosan.installer.data.common.util.isPackageArchivedCompat
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.recycle.util.requireDhizukuPermissionGranted
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
+import com.rosan.installer.util.isPackageArchivedCompat
+import com.rosan.installer.util.removeFlag
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -320,7 +321,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         // --- Disable Dhizuku not supported stuff ---
         if (config.authorizer == ConfigEntity.Authorizer.Dhizuku)
         // Dhizuku does not support GrantAllRequestedPermissions
-            params.installFlags = params.installFlags and InstallOption.GrantAllRequestedPermissions.value.inv()
+            params.installFlags = params.installFlags.removeFlag(InstallOption.GrantAllRequestedPermissions.value)
         // --- Dhizuku End ---
 
         // Android System will ignore INSTALL_ALLOW_DOWNGRADE for None ROOT/SYSTEM on Android 15+, no need to disable it here
