@@ -1,10 +1,6 @@
 # InstallerX Revived (Community Edition)
 
-<<<<<<< HEAD
-[English](README.md) | [简体中文](README_CN.md) | [Español](README_ES.md) | **日本語**
-=======
 [English](README.md) | [简体中文](README_CN.md) | [Español](README_ES.md) | **日本語** | [日本語](README_JA.md)
->>>>>>> 669cd8349f79df44d71b46d7a315491e561f0b4f
 
 [![ライセンス: GPL v3](https://img.shields.io/badge/ライセンス-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![安定版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=安定版)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![ベータ版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=ベータ版)](https://github.com/wxxsfxyzm/InstallerX/releases)[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
