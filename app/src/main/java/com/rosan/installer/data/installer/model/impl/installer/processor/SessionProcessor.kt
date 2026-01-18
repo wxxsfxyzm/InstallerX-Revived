@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import com.rosan.installer.data.app.model.impl.InstallerRepoImpl
-import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
+import com.rosan.installer.data.installer.model.entity.InstallConfirmInfo
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import org.koin.core.component.KoinComponent
@@ -12,7 +12,7 @@ import timber.log.Timber
 
 class SessionProcessor : KoinComponent {
 
-    fun getSessionDetails(sessionId: Int, config: ConfigEntity): ConfirmationDetails {
+    fun getSessionDetails(sessionId: Int, config: ConfigEntity): InstallConfirmInfo {
         var label: CharSequence? = "N/A"
         var icon: Bitmap? = null
 
@@ -46,7 +46,7 @@ class SessionProcessor : KoinComponent {
             Timber.w("Service returned null bundle for session $sessionId")
         }
 
-        return ConfirmationDetails(sessionId, label ?: "N/A", icon)
+        return InstallConfirmInfo(sessionId, label ?: "N/A", icon)
     }
 
     suspend fun approveSession(sessionId: Int, granted: Boolean, config: ConfigEntity) {

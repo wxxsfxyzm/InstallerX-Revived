@@ -10,10 +10,11 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
+import com.rosan.installer.data.installer.model.entity.InstallConfirmInfo
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
+import com.rosan.installer.data.installer.model.entity.UnarchiveInfo
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -105,7 +106,7 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     override var currentMultiInstallIndex: Int = 0
     override var moduleLog: List<String> = emptyList()
     override val uninstallInfo: MutableStateFlow<UninstallInfo?> = MutableStateFlow(null)
-    override val confirmationDetails: MutableStateFlow<ConfirmationDetails?> = MutableStateFlow(null)
+    override val installConfirmInfo: MutableStateFlow<InstallConfirmInfo?> = MutableStateFlow(null)
 
     override fun resolveInstall(activity: Activity) {
         Timber.d("[id=$id] resolve() called. Emitting Action.Resolve.")
@@ -206,6 +207,8 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         data class Uninstall(val packageName: String) : Action()
         data class ResolveConfirmInstall(val activity: Activity, val sessionId: Int) : Action()
         data class ApproveSession(val sessionId: Int, val granted: Boolean) : Action()
+        data class ResolveUnarchive(val intent: Intent) : Action()
+        data class Unarchive(val info: UnarchiveInfo) : Action()
 
         /**
          * Action to trigger device reboot after cleanup.

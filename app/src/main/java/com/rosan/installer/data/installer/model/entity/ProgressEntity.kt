@@ -34,4 +34,10 @@ sealed class ProgressEntity {
     data object Uninstalling : ProgressEntity()
     data object UninstallSuccess : ProgressEntity()
     data object UninstallFailed : ProgressEntity()
+
+    data object UnarchiveResolving : ProgressEntity()
+    data class UnarchiveReady(val info: UnarchiveInfo) : ProgressEntity() // 准备好显示弹窗
+    data object Unarchiving : ProgressEntity() // 正在请求系统恢复
+    data object UnarchiveSuccess : ProgressEntity() // 请求成功发送
+    data object UnarchiveFailed : ProgressEntity() // 失败
 }

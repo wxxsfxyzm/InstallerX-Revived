@@ -3,7 +3,7 @@ package com.rosan.installer.data.installer.repo
 import android.app.Activity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
+import com.rosan.installer.data.installer.model.entity.InstallConfirmInfo
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
@@ -26,7 +26,7 @@ interface InstallerRepo : Closeable {
     var currentMultiInstallIndex: Int
     var moduleLog: List<String>
     val uninstallInfo: StateFlow<UninstallInfo?>
-    val confirmationDetails: StateFlow<ConfirmationDetails?>
+    val installConfirmInfo: StateFlow<InstallConfirmInfo?>
 
     /**
      * Resolves information for a package to be installed.

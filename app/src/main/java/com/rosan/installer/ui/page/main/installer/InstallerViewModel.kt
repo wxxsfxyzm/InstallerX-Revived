@@ -336,7 +336,7 @@ class InstallerViewModel(
             is ProgressEntity.InstallingModule -> InstallerViewState.InstallingModule(progress.output)
 
             is ProgressEntity.InstallConfirming -> {
-                val details = repo.confirmationDetails.value
+                val details = repo.installConfirmInfo.value
                 if (details != null) {
                     InstallerViewState.InstallConfirm(
                         appLabel = details.appLabel,

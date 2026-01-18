@@ -3,6 +3,10 @@ package com.rosan.installer.data.installer.model.impl.installer
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.IntentSender
+import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
 import android.os.Build
 import android.system.Os
 import com.rosan.installer.R
@@ -19,6 +23,7 @@ import com.rosan.installer.data.app.util.sourcePath
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
+import com.rosan.installer.data.installer.model.entity.UnarchiveInfo
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.model.impl.InstallerRepoImpl
 import com.rosan.installer.data.installer.model.impl.installer.helper.ConfigResolver
@@ -181,6 +186,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 )
                 installer.progress.emit(ProgressEntity.Finish)
             }
+
+            is InstallerRepoImpl.Action.ResolveUnarchive -> resolveUnarchive(action.intent)
+            is InstallerRepoImpl.Action.Unarchive -> performUnarchive(action.info)
             // Handle Reboot Action
             is InstallerRepoImpl.Action.Reboot -> handleReboot(action.reason)
             // Cancel and Finish are handled in the collector directly
@@ -438,7 +446,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         installer.config = ConfigResolver.resolve(activity)
 
         val details = sessionProcessor.getSessionDetails(sessionId, installer.config)
-        installer.confirmationDetails.value = details
+        installer.installConfirmInfo.value = details
 
         Timber.d("[id=$installerId] resolveConfirmInstall: Success. Emitting InstallConfirming.")
         installer.progress.emit(ProgressEntity.InstallConfirming)
@@ -485,6 +493,88 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         )
         Timber.d("[id=$installerId] uninstall: Succeeded for $packageName. Emitting ProgressEntity.UninstallSuccess.")
         installer.progress.emit(ProgressEntity.UninstallSuccess)
+    }
+
+    // 2. 实现解析逻辑：获取包名、App标题和安装来源标题
+    private suspend fun resolveUnarchive(intent: Intent) {
+        Timber.d("[id=${installer.id}] resolveUnarchive: Starting.")
+        installer.progress.emit(ProgressEntity.UnarchiveResolving)
+
+        val packageName = intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME)
+        val intentSender = intent.getParcelableExtra<IntentSender>(EXTRA_UNARCHIVE_INTENT_SENDER)
+
+        if (packageName == null || intentSender == null) {
+            Timber.e("[id=$installerId] resolveUnarchive: Missing package name or intent sender.")
+            installer.progress.emit(ProgressEntity.InstallResolvedFailed) // 或者定义专门的错误
+            return
+        }
+
+        try {
+            val pm = context.packageManager
+
+            // 获取 App 信息 (注意使用 MATCH_ARCHIVED_PACKAGES)
+            // Android 15+ 可能需要 PackageManager.MATCH_ARCHIVED_PACKAGES
+            // 为了兼容性，可以使用整数值或做版本判断，这里假设你在高版本编译
+            val flags = PackageManager.MATCH_ARCHIVED_PACKAGES
+            val appInfo = pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(flags.toLong()))
+            val appLabel = appInfo.loadLabel(pm).toString()
+
+            // 获取负责该 App 的安装器信息 (InstallSourceInfo)
+            val installSourceInfo = pm.getInstallSourceInfo(packageName)
+            // 优先显示 UpdateOwner，其次显示 InstallingPackage
+            val responsiblePackage = installSourceInfo.updateOwnerPackageName
+                ?: installSourceInfo.installingPackageName
+
+            var installerLabel = ""
+            if (responsiblePackage != null) {
+                try {
+                    val installerInfo = pm.getApplicationInfo(responsiblePackage, 0)
+                    installerLabel = installerInfo.loadLabel(pm).toString()
+                } catch (e: Exception) {
+                    Timber.w("Could not find installer label for $responsiblePackage")
+                }
+            }
+
+            // 构建 Info 并发送状态
+            val info = UnarchiveInfo(packageName, appLabel, installerLabel, intentSender)
+
+            // 可以在 InstallerRepo 中增加一个变量暂存这个 info，或者直接传给 State
+            // installer.unarchiveInfo = info
+
+            Timber.d("[id=$installerId] resolveUnarchive: Ready. App: $appLabel, Installer: $installerLabel")
+            installer.progress.emit(ProgressEntity.UnarchiveReady(info))
+
+        } catch (e: Exception) {
+            Timber.e(e, "[id=$installerId] resolveUnarchive: Failed.")
+            installer.progress.emit(ProgressEntity.InstallResolvedFailed)
+        }
+    }
+
+    // 3. 实现执行逻辑：调用系统的 requestUnarchive
+    private suspend fun performUnarchive(info: UnarchiveInfo) {
+        Timber.d("[id=$installerId] performUnarchive: Requesting system unarchive for ${info.packageName}")
+        installer.progress.emit(ProgressEntity.Unarchiving)
+
+        try {
+            // 调用 Android Framework API
+            // 注意：这需要 API Level 35+ (Android 14 QPR / 15)
+            if (Build.VERSION.SDK_INT >= 35) { // Android 15+
+                context.packageManager.packageInstaller.requestUnarchive(
+                    info.packageName,
+                    info.intentSender
+                )
+                Timber.d("[id=$installerId] performUnarchive: Request sent successfully.")
+                installer.progress.emit(ProgressEntity.UnarchiveSuccess)
+                // 通常发送成功后 UI 就可以关闭了，具体的下载进度由系统/商店接管
+                installer.progress.emit(ProgressEntity.Finish)
+            } else {
+                throw UnsupportedOperationException("Unarchive requires Android 14+")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "[id=$installerId] performUnarchive: Failed.")
+            installer.error = e
+            installer.progress.emit(ProgressEntity.UnarchiveFailed)
+        }
     }
 
     private suspend fun handleReboot(reason: String) {
