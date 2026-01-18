@@ -28,7 +28,7 @@ object OSUtils : KoinComponent {
      */
     val isSystemApp: Boolean by lazy {
         try {
-            (context.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+            context.applicationInfo.flags.hasFlag(ApplicationInfo.FLAG_SYSTEM)
         } catch (_: Exception) {
             false
         }

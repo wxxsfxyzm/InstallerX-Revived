@@ -37,6 +37,8 @@ import com.rosan.installer.ui.theme.m3color.PresetColors
 import com.rosan.installer.ui.theme.m3color.RawColor
 import com.rosan.installer.ui.theme.m3color.ThemeMode
 import com.rosan.installer.ui.util.doBiometricAuth
+import com.rosan.installer.util.addFlag
+import com.rosan.installer.util.removeFlag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -392,25 +394,25 @@ class PreferredViewModel(
 
             if (enable) {
                 // 1. Add the flag being enabled
-                newFlags = newFlags or flag
+                newFlags = newFlags.addFlag(flag)
 
                 // 2. Handle mutual exclusivity
                 if (flag == PackageManagerUtil.DELETE_ALL_USERS) {
                     if (currentFlags and PackageManagerUtil.DELETE_SYSTEM_APP != 0) {
                         // Notify user about forced change
                         notifyMutualExclusion(flag)
-                        newFlags = newFlags and PackageManagerUtil.DELETE_SYSTEM_APP.inv()
+                        newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_SYSTEM_APP)
                     }
                 } else if (flag == PackageManagerUtil.DELETE_SYSTEM_APP) {
                     if (currentFlags and PackageManagerUtil.DELETE_ALL_USERS != 0) {
                         // Notify user about forced change
                         notifyMutualExclusion(flag)
-                        newFlags = newFlags and PackageManagerUtil.DELETE_ALL_USERS.inv()
+                        newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_ALL_USERS)
                     }
                 }
             } else {
                 // Disable: just remove the flag
-                newFlags = newFlags and flag.inv()
+                newFlags = newFlags.removeFlag(flag)
             }
 
             newFlags

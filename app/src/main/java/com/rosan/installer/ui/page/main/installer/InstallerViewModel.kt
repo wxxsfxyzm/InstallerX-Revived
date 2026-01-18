@@ -27,7 +27,10 @@ import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
+import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.getErrorMessage
+import com.rosan.installer.util.hasFlag
+import com.rosan.installer.util.removeFlag
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -560,10 +563,10 @@ class InstallerViewModel(
         val currentFlags = _installFlags.value
         if (enable) {
             // Add flag using bitwise OR
-            _installFlags.value = currentFlags or flag
+            _installFlags.value = currentFlags.addFlag(flag)
         } else {
             // Remove flag using bitwise AND and bitwise NOT (inv)
-            _installFlags.value = currentFlags and flag.inv()
+            _installFlags.value = currentFlags.removeFlag(flag)
         }
         repo.config.installFlags = _installFlags.value // 同步到 repo.config
     }
@@ -829,20 +832,20 @@ class InstallerViewModel(
         var newFlags = currentFlags
 
         if (enable) {
-            newFlags = newFlags or flag
+            newFlags = newFlags.addFlag(flag)
 
             if (flag == PackageManagerUtil.DELETE_ALL_USERS) {
-                if ((currentFlags and PackageManagerUtil.DELETE_SYSTEM_APP) != 0) {
-                    newFlags = newFlags and PackageManagerUtil.DELETE_SYSTEM_APP.inv()
+                if (currentFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP)) {
+                    newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_SYSTEM_APP)
                     toast(R.string.uninstall_system_app_disabled)
                 }
             } else if (flag == PackageManagerUtil.DELETE_SYSTEM_APP) {
-                if ((currentFlags and PackageManagerUtil.DELETE_ALL_USERS) != 0) {
-                    newFlags = newFlags and PackageManagerUtil.DELETE_ALL_USERS.inv()
+                if (currentFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS)) {
+                    newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_ALL_USERS)
                     toast(R.string.uninstall_all_users_disabled)
                 }
             }
-        } else newFlags = newFlags and flag.inv()
+        } else newFlags = newFlags.removeFlag(flag)
 
         if (newFlags != currentFlags) {
             _uninstallFlags.value = newFlags
