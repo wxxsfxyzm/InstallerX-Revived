@@ -585,6 +585,22 @@ fun DataAutoDeleteWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
         isM3E = isM3E,
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAutoDelete(it)) }
     )
+
+    AnimatedVisibility (
+        visible = viewModel.state.data.autoDelete,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        SwitchWidget(
+            title = stringResource(id = R.string.config_auto_delete_zip),
+            description = stringResource(id = R.string.config_auto_delete_zip_desc),
+            checked = viewModel.state.data.autoDeleteZip,
+            isM3E = isM3E,
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataZipAutoDelete(it))
+            }
+        )
+    }
 }
 
 @Composable

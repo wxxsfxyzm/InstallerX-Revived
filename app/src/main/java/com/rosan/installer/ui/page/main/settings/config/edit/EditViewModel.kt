@@ -104,6 +104,7 @@ class EditViewModel(
                     is EditViewAction.ChangeDataForceDexopt -> changeDataForceDexopt(action.force)
                     is EditViewAction.ChangeDataDexoptMode -> changeDataDexoptMode(action.mode)
                     is EditViewAction.ChangeDataAutoDelete -> changeDataAutoDelete(action.autoDelete)
+                    is EditViewAction.ChangeDataZipAutoDelete -> changeDataZipAutoDelete(action.autoDelete)
                     is EditViewAction.ChangeDisplaySdk -> changeDisplaySdk(action.displaySdk)
                     is EditViewAction.ChangeDisplaySize -> changeDisplaySize(action.displaySize)
                     is EditViewAction.ChangeDataForAllUser -> changeDataForAllUser(action.forAllUser)
@@ -369,7 +370,17 @@ class EditViewModel(
         Timber.d("[STATE_CHANGE] AutoDelete changing to: $autoDelete")
         state = state.copy(
             data = state.data.copy(
-                autoDelete = autoDelete
+                autoDelete = autoDelete,
+                autoDeleteZip = false
+            )
+        )
+    }
+
+    private fun changeDataZipAutoDelete(autoDelete: Boolean) {
+        Timber.d("[STATE_CHANGE] Zip AutoDelete changing to: $autoDelete")
+        state = state.copy(
+            data = state.data.copy(
+                autoDeleteZip = autoDelete
             )
         )
     }
