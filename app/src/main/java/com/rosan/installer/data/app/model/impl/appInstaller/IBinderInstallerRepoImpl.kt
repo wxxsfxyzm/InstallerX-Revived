@@ -411,7 +411,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                 DataType.MIXED_MODULE_ZIP
             )
 
-            val shouldDelete = config.autoDelete && isDeleteCapable
+            val shouldDelete = config.autoDelete && (isDeleteCapable || config.autoDeleteZip)
 
             PrivilegedManager.executePostInstallTasksAsync(
                 authorizer = config.authorizer,

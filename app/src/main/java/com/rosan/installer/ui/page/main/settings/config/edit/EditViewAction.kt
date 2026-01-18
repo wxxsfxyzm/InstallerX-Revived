@@ -23,6 +23,7 @@ sealed class EditViewAction {
     data class ChangeDataForceDexopt(val force: Boolean) : EditViewAction()
     data class ChangeDataDexoptMode(val mode: ConfigEntity.DexoptMode) : EditViewAction()
     data class ChangeDataAutoDelete(val autoDelete: Boolean) : EditViewAction()
+    data class ChangeDataZipAutoDelete(val autoDelete: Boolean) : EditViewAction()
     data class ChangeDisplaySdk(val displaySdk: Boolean) : EditViewAction()
     data class ChangeDisplaySize(val displaySize: Boolean) : EditViewAction()
     data class ChangeDataForAllUser(val forAllUser: Boolean) : EditViewAction()
