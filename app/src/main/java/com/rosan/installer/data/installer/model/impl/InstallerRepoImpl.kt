@@ -155,6 +155,16 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
         action.tryEmit(Action.ApproveSession(sessionId, granted))
     }
 
+    override fun resolveUnarchive(intent: Intent) {
+        Timber.d("[id=$id] resolveUnarchive() called.")
+        action.tryEmit(Action.ResolveUnarchive(intent))
+    }
+
+    override fun performUnarchive(info: UnarchiveInfo) {
+        Timber.d("[id=$id] performUnarchive() called.")
+        action.tryEmit(Action.Unarchive(info))
+    }
+
     override fun reboot(reason: String) {
         Timber.d("[id=$id] reboot() called. Emitting Action.Reboot.")
         action.tryEmit(Action.Reboot(reason))

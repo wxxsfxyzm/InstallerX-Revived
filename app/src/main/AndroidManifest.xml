@@ -115,6 +115,12 @@
             <intent-filter android:priority="10">
                 <action android:name="android.content.pm.action.CONFIRM_INSTALL" />
                 <action android:name="android.content.pm.action.CONFIRM_PERMISSIONS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <intent-filter android:priority="1">
+                <action android:name="android.content.pm.action.CONFIRM_PRE_APPROVAL" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -132,6 +138,21 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="package" />
+            </intent-filter>
+
+        </activity>
+
+        <activity
+            android:name=".ui.activity.UnarchiveActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Installer.Translucent">
+            <intent-filter>
+                <action android:name="com.android.intent.action.UNARCHIVE_DIALOG" />
+                <action android:name="com.android.intent.action.UNARCHIVE_ERROR_DIALOG" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
         </activity>

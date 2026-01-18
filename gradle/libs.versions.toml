@@ -101,7 +101,7 @@ iamr0s-dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version
 
 # AndroidAppProcess
 # https://github.com/iamr0s/AndroidAppProcess
-# iamr0s-androidAppProcess = { group = "io.github.iamr0s", name = "AndroidAppProcess", version = "1.4.1" }
+# iamr0s-androidAppProcess = { group = "io.github.iamr0s", name = "AndroidAppProcess", version = "1.4.2" }
 iamr0s-androidAppProcess = { group = "com.github.wxxsfxyzm", name = "AndroidAppProcess", version = "v1.4.1-revived" }
 
 # Core module (required for accessing library data)

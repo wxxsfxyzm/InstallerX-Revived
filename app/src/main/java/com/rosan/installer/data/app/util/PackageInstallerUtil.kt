@@ -7,6 +7,7 @@ import org.koin.core.component.get
 
 object PackageInstallerUtil : KoinComponent {
     const val EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS"
+    const val EXTRA_UNARCHIVE_INTENT_SENDER = "android.content.pm.extra.UNARCHIVE_INTENT_SENDER"
 
     private val installFlagsField = get<ReflectRepo>().getDeclaredField(
         PackageInstaller.SessionParams::class.java,

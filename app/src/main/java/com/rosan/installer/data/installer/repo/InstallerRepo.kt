@@ -1,12 +1,14 @@
 package com.rosan.installer.data.installer.repo
 
 import android.app.Activity
+import android.content.Intent
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.installer.model.entity.InstallConfirmInfo
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
+import com.rosan.installer.data.installer.model.entity.UnarchiveInfo
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +53,9 @@ interface InstallerRepo : Closeable {
 
     fun resolveConfirmInstall(activity: Activity, sessionId: Int)
     fun approveConfirmation(sessionId: Int, granted: Boolean)
+
+    fun resolveUnarchive(intent: Intent)
+    fun performUnarchive(info: UnarchiveInfo)
 
     fun reboot(reason: String)
 
