@@ -51,8 +51,8 @@ interface IPrivilegedService {
     /**
      * Send an broadcast in a privileged process.
      *
-     * @param intent the {@link Intent} describing what broadcast shoule be send
-     * @return {@code true} if the activity was started successfully,
+     * @param intent the {@link Intent} describing what broadcast should be send
+     * @return {@code true} if the broadcast was send successfully,
      *         {@code false} otherwise
      */
     boolean sendBroadcastPrivileged(in Intent intent);
