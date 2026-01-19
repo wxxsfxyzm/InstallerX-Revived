@@ -22,7 +22,6 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.util.openAppPrivileged
 import com.rosan.installer.data.recycle.util.openLSPosedPrivileged
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.Dispatchers
@@ -76,7 +75,6 @@ fun InstallSuccessContent(
                     onClick = {
                         coroutineScope.launch(Dispatchers.IO) {
                             openLSPosedPrivileged(
-                                context = context,
                                 config = installer.config,
                                 onSuccess = onClose
                             )

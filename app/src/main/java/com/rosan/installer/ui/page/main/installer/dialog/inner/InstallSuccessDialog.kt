@@ -20,7 +20,6 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
 import com.rosan.installer.data.recycle.util.openLSPosedPrivileged
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
@@ -80,7 +79,6 @@ fun installSuccessDialog(
                     add(DialogButton(stringResource(R.string.open_lsposed)) {
                         coroutineScope.launch(Dispatchers.IO) {
                             openLSPosedPrivileged(
-                                context = context,
                                 config = installer.config,
                                 onSuccess = { viewModel.dispatch(InstallerViewAction.Close) }
                             )

@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import androidx.core.net.toUri
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
@@ -63,17 +64,19 @@ fun deletePaths(paths: Array<out String>) {
 /**
  * Attempts use broadcast to open LSPosed
  *
- * @param context The Android Context
  * @param config The installer configuration containing the authorizer type.
  * @param onSuccess A lambda function to be executed after the app is launched and the calling UI should be closed.
  */
 suspend fun openLSPosedPrivileged(
-    context: Context,
     config: ConfigEntity,
     onSuccess: () -> Unit
 ) {
     val intent = Intent()
-    intent.setAction("android.telephony.action.SECRET_CODE")
+    if (Build.VERSION.SDK_INT >= 29) {
+        intent.setAction("android.telephony.action.SECRET_CODE");
+    } else {
+        intent.setAction("android.provider.Telephony.SECRET_CODE");
+    }
     intent.setData("android_secret_code://5776733".toUri())
 
     val shouldAttemptPrivileged = config.authorizer == ConfigEntity.Authorizer.Root ||
@@ -85,6 +88,8 @@ suspend fun openLSPosedPrivileged(
     withTimeoutOrNull(PRIVILEGED_START_TIMEOUT_MS) {
         PrivilegedManager.sendBroadcastPrivileged(config, intent)
     }
+
+    onSuccess()
 }
 
 /**
