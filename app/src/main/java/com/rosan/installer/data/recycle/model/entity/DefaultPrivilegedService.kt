@@ -484,6 +484,41 @@ class DefaultPrivilegedService(
         }
     }
 
+    override fun sendBroadcastPrivileged(intent: Intent): Boolean {
+        try {
+            val am = iActivityManager
+
+            val userId = AndroidProcess.myUid() / 100000
+            val resolvedType = intent.resolveType(context.contentResolver)
+
+            // 假装result不存在，防止一些系统上可能出问题
+            am.broadcastIntent(
+                null,
+                intent,
+                resolvedType,
+                null,
+                0,
+                null,
+                null,
+                null,
+                -1,
+                null,
+                false,
+                false,
+                userId
+            )
+            return true
+        } catch (e: SecurityException) {
+            // Log security exceptions specifically, as they indicate a permission issue.
+            Log.e(TAG, "sendBroadcastPrivileged failed due to SecurityException", e)
+            return false
+        } catch (e: Exception) {
+            // Catch other potential exceptions, such as RemoteException.
+            Log.e(TAG, "sendBroadcastPrivileged failed with an exception", e)
+            return false
+        }
+    }
+
     @SuppressLint("LogNotTimber")
     override fun getSessionDetails(sessionId: Int): Bundle? {
         Log.d(TAG, "getSessionDetails: sessionId=$sessionId")

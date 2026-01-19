@@ -11,6 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
+import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.util.openAppPrivileged
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
@@ -19,6 +20,9 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.rosan.installer.data.recycle.util.openLSPosedPrivileged
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.util.OSUtils
 
 @Composable
 fun installSuccessDialog(
@@ -31,6 +35,15 @@ fun installSuccessDialog(
     val settings = viewModel.viewSettings
 
     val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
+    val currentPackage = installer.analysisResults.find { it.packageName == packageName }
+
+    val selectedEntities = currentPackage?.appEntities
+        ?.filter { it.selected }
+        ?.map { it.app }
+    val effectivePrimaryEntity = selectedEntities?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
+        ?: selectedEntities?.filterIsInstance<AppEntity.ModuleEntity>()?.firstOrNull()
+
+    val isXposedModule = if (effectivePrimaryEntity is AppEntity.BaseEntity) effectivePrimaryEntity.isXposedModule else false
 
     val baseParams = installInfoDialog(
         installer = installer,
@@ -58,6 +71,21 @@ fun installSuccessDialog(
             }
 
             buildList {
+                if (isXposedModule ||
+                    installer.config.authorizer == ConfigEntity.Authorizer.Root ||
+                    installer.config.authorizer == ConfigEntity.Authorizer.Shizuku ||
+                    (installer.config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
+                ) {
+                    add(DialogButton(stringResource(R.string.open_lsposed)) {
+                        coroutineScope.launch(Dispatchers.IO) {
+                            openLSPosedPrivileged(
+                                config = installer.config,
+                                onSuccess = { viewModel.dispatch(InstallerViewAction.Close) }
+                            )
+                        }
+                    })
+                }
+
                 if (launchIntent != null) {
                     add(DialogButton(stringResource(R.string.open)) {
                         coroutineScope.launch(Dispatchers.IO) {
@@ -71,6 +99,7 @@ fun installSuccessDialog(
                         }
                     })
                 }
+
                 add(DialogButton(stringResource(R.string.finish)) {
                     viewModel.dispatch(InstallerViewAction.Close)
                 })
