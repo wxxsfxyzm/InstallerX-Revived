@@ -115,6 +115,7 @@
             <intent-filter android:priority="10">
                 <action android:name="android.content.pm.action.CONFIRM_INSTALL" />
                 <action android:name="android.content.pm.action.CONFIRM_PERMISSIONS" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -172,6 +173,12 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SECRET_CODE" />
+                <data
+                    android:scheme="android_secret_code"
+                    android:host="46789" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.telephony.action.SECRET_CODE" />
                 <data
                     android:scheme="android_secret_code"
                     android:host="46789" />

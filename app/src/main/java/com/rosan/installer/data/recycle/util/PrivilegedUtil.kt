@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
 import androidx.core.net.toUri
+import com.rosan.installer.SecretCodeReceiver
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
@@ -72,10 +73,10 @@ suspend fun openLSPosedPrivileged(
     onSuccess: () -> Unit
 ) {
     val intent = Intent()
-    if (Build.VERSION.SDK_INT >= 29) {
-        intent.setAction("android.telephony.action.SECRET_CODE");
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        intent.setAction(SecretCodeReceiver.SECRET_CODE_ACTION);
     } else {
-        intent.setAction("android.provider.Telephony.SECRET_CODE");
+        intent.setAction(SecretCodeReceiver.SECRET_CODE_ACTION_OLD);
     }
     intent.setData("android_secret_code://5776733".toUri())
 
