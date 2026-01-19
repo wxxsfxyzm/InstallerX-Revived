@@ -29,6 +29,7 @@ sealed class AppEntity {
         override val minSdk: String?,
         // Only available for oppo apk
         val minOsdkVersion: String? = null,
+        val isXposedModule: Boolean = false,
         override val arch: Architecture? = null,
         override val size: Long = data.getSize(),
         override val sourceType: DataType? = null,

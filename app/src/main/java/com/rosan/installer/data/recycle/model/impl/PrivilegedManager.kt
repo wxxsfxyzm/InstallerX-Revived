@@ -184,6 +184,26 @@ object PrivilegedManager : KoinComponent {
     }
 
     /**
+     * Starts an activity using a privileged context.
+     */
+    suspend fun sendBroadcastPrivileged(config: ConfigEntity, intent: Intent): Boolean {
+        var success = false
+        useUserService(
+            authorizer = config.authorizer,
+            customizeAuthorizer = config.customizeAuthorizer,
+            special = null
+        ) {
+            try {
+                success = it.privileged.sendBroadcastPrivileged(intent)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to start activity privileged: $intent")
+                success = false
+            }
+        }
+        return success
+    }
+
+    /**
      * Fetches the list of users on the device.
      */
     fun getUsers(authorizer: ConfigEntity.Authorizer): Map<Int, String> {

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
+import androidx.core.net.toUri
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
@@ -56,6 +57,33 @@ fun deletePaths(paths: Array<out String>) {
             // Catch any other unexpected errors during the process.
             Log.e("DELETE_PATH", "An unexpected error occurred while processing $path", e)
         }
+    }
+}
+
+/**
+ * Attempts use broadcast to open LSPosed
+ *
+ * @param context The Android Context
+ * @param config The installer configuration containing the authorizer type.
+ * @param onSuccess A lambda function to be executed after the app is launched and the calling UI should be closed.
+ */
+suspend fun openLSPosedPrivileged(
+    context: Context,
+    config: ConfigEntity,
+    onSuccess: () -> Unit
+) {
+    val intent = Intent()
+    intent.setAction("android.telephony.action.SECRET_CODE")
+    intent.setData("android_secret_code://5776733".toUri())
+
+    val shouldAttemptPrivileged = config.authorizer == ConfigEntity.Authorizer.Root ||
+            config.authorizer == ConfigEntity.Authorizer.Shizuku ||
+            (config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
+    if (!shouldAttemptPrivileged) return
+
+    // timeoutResult will be Boolean? (true/false on completion, or null on timeout)
+    withTimeoutOrNull(PRIVILEGED_START_TIMEOUT_MS) {
+        PrivilegedManager.sendBroadcastPrivileged(config, intent)
     }
 }
 

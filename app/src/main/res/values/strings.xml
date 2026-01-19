@@ -280,6 +280,7 @@
     <string name="no_license_text">No license text available.</string>
     <string name="finish">Done</string>
     <string name="open">Open</string>
+    <string name="open_lsposed">Open LSPosed</string>
     <string name="select">Select</string>
     <string name="clear">Clear</string>
     <string name="global">Global</string>

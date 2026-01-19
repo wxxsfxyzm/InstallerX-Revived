@@ -57,6 +57,7 @@ object ApkParser : KoinComponent {
                 val entity = loadAppEntity(
                     apkResources,
                     apkResources.newTheme(),
+                    path,
                     data,
                     extra,
                     bestArch ?: Architecture.UNKNOWN
@@ -156,7 +157,12 @@ object ApkParser : KoinComponent {
     }
 
     private fun loadAppEntity(
-        resources: Resources, theme: Resources.Theme?, data: DataEntity, extra: AnalyseExtraEntity, arch: Architecture
+        resources: Resources,
+        theme: Resources.Theme?,
+        path: String,
+        data: DataEntity,
+        extra: AnalyseExtraEntity,
+        arch: Architecture
     ): AppEntity {
         var packageName: String? = null
         var sharedUserId: String? = null
@@ -164,6 +170,7 @@ object ApkParser : KoinComponent {
         var versionCode: Long = -1
         var versionName = ""
         var minOsdkVersion: String? = null
+        var isXposedModule = false
         var label: String? = null
         var icon: Drawable? = null
         var roundIcon: Drawable? = null
@@ -217,11 +224,27 @@ object ApkParser : KoinComponent {
                         )
                     }
                 }
+
+                val metaDataName = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")
+
+                if ("xposedmodule" == metaDataName ||
+                    "xposedminversion" == metaDataName ||
+                    "xposeddescription" == metaDataName) {
+                    isXposedModule = true
+                }
             }
             .register("/manifest/uses-permission") {
                 getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")?.let { if (it.isNotBlank()) permissions.add(it) }
             }
             .map { }
+
+        ZipFile(path).use { zip ->
+            val propEntry = zip.getEntry("META-INF/xposed/module.prop");
+            if (propEntry != null) {
+                isXposedModule = true
+            }
+        }
+
         Timber.d("ApkParser: Manifest parsed. Package: $packageName, Split: $splitName")
         if (packageName.isNullOrEmpty()) throw Exception("Invalid APK: missing package name")
 
@@ -236,6 +259,7 @@ object ApkParser : KoinComponent {
             targetSdk = targetSdk,
             minSdk = minSdk,
             minOsdkVersion = minOsdkVersion,
+            isXposedModule = isXposedModule,
             arch = arch,
             permissions = permissions,
             sourceType = extra.dataType,
