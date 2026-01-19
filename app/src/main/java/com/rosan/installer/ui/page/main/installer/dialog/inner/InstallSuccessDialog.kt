@@ -73,9 +73,9 @@ fun installSuccessDialog(
 
             buildList {
                 if (isXposedModule ||
-                    installer.config.authorizer.value == "root" ||
-                    installer.config.authorizer.value == "shizuku" ||
-                    (installer.config.authorizer.value == "none" && OSUtils.isSystemApp)
+                    installer.config.authorizer == ConfigEntity.Authorizer.Root ||
+                    installer.config.authorizer == ConfigEntity.Authorizer.Shizuku ||
+                    (installer.config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
                 ) {
                     add(DialogButton(stringResource(R.string.open_lsposed)) {
                         coroutineScope.launch(Dispatchers.IO) {

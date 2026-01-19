@@ -491,7 +491,8 @@ class DefaultPrivilegedService(
             val userId = AndroidProcess.myUid() / 100000
             val resolvedType = intent.resolveType(context.contentResolver)
 
-            val result = am.broadcastIntent(
+            // 假装result不存在，防止一些系统上可能出问题
+            am.broadcastIntent(
                 null,
                 intent,
                 resolvedType,
@@ -505,11 +506,8 @@ class DefaultPrivilegedService(
                 false,
                 false,
                 userId
-            );
-
-            // A result code >= 0 indicates success.
-            // See ActivityManager.START_SUCCESS, START_DELIVERED_TO_TOP, etc.
-            return result >= 0
+            )
+            return true
         } catch (e: SecurityException) {
             // Log security exceptions specifically, as they indicate a permission issue.
             Log.e(TAG, "sendBroadcastPrivileged failed due to SecurityException", e)

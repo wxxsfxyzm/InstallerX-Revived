@@ -21,6 +21,7 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.util.openAppPrivileged
 import com.rosan.installer.data.recycle.util.openLSPosedPrivileged
+import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.OSUtils
@@ -61,9 +62,9 @@ fun InstallSuccessContent(
         Spacer(modifier = Modifier.height(32.dp))
 
         if (isXposedModule ||
-            installer.config.authorizer.value == "root" ||
-            installer.config.authorizer.value == "shizuku" ||
-            (installer.config.authorizer.value == "none" && OSUtils.isSystemApp)
+            installer.config.authorizer == ConfigEntity.Authorizer.Root ||
+            installer.config.authorizer == ConfigEntity.Authorizer.Shizuku ||
+            (installer.config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
