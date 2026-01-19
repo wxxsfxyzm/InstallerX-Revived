@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.PermDeviceInformation
@@ -60,6 +59,10 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
+import com.rosan.installer.ui.theme.bottomShape
+import com.rosan.installer.ui.theme.middleShape
+import com.rosan.installer.ui.theme.singleShape
+import com.rosan.installer.ui.theme.topShape
 import com.rosan.installer.util.getBestPermissionLabel
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -191,33 +194,12 @@ fun MenuItemWidget(
     val haptic = LocalHapticFeedback.current
     val defaultInstallerFromSettings by viewmodel.defaultInstallerFromSettings.collectAsState()
 
-    // Define shapes for different positions
-    val cornerRadius = 16.dp
-    val connectionRadius = 5.dp
-    val topShape = RoundedCornerShape(
-        topStart = cornerRadius,
-        topEnd = cornerRadius,
-        bottomStart = connectionRadius,
-        bottomEnd = connectionRadius
-    )
-    val middleShape = RoundedCornerShape(connectionRadius)
-    val bottomShape = RoundedCornerShape(
-        topStart = connectionRadius,
-        topEnd = connectionRadius,
-        bottomStart = cornerRadius,
-        bottomEnd = cornerRadius
-    )
-    val singleShape = RoundedCornerShape(cornerRadius)
-
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp), // 卡片之间的间距
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .heightIn(max = 325.dp)
-            .clip(
-                // Clip the whole column to ensure content stays within the rounded bounds.
-                if (entities.size == 1) singleShape else RoundedCornerShape(cornerRadius)
-            ),
+            .clip(singleShape),
     ) {
         itemsIndexed(entities, key = { _, item -> item.menuItem.nameResourceId }) { index, item ->
             // Determine the shape based on the item's position.

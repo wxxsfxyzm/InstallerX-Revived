@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,6 +21,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.rosan.installer.ui.theme.singleShape
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -37,7 +37,6 @@ fun MiuixHintTextField(
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     // Define colors and calculate animated border properties based on focus state.
-    val cornerRadius = 16.dp
     val backgroundColor = MiuixTheme.colorScheme.surfaceContainer // Color when not focused
     val focusedBorderColor = MiuixTheme.colorScheme.primary // Color when focused
 
@@ -56,12 +55,12 @@ fun MiuixHintTextField(
             .fillMaxWidth()
             .background(
                 color = backgroundColor,
-                shape = RoundedCornerShape(cornerRadius)
+                shape = singleShape
             )
             .border(
                 width = borderWidth,
                 color = animatedBorderColor,
-                shape = RoundedCornerShape(cornerRadius)
+                shape = singleShape
             ),
         interactionSource = interactionSource,
         textStyle = TextStyle.Default.copy(

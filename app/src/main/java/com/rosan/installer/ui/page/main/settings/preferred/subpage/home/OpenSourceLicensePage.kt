@@ -54,6 +54,7 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.theme.singleShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -113,12 +114,11 @@ fun OpenSourceLicensePage(
             }
         },
     ) { paddingValues ->
-        val cornerRadius = 16.dp
         LibrariesContainer(
             libraries = libraries,
             libraryModifier = Modifier
                 .padding(vertical = 4.dp)
-                .clip(RoundedCornerShape(cornerRadius)),
+                .clip(singleShape),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
