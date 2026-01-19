@@ -184,7 +184,7 @@ object PrivilegedManager : KoinComponent {
     }
 
     /**
-     * Starts an activity using a privileged context.
+     * Send an broadcast using a privileged context.
      */
     suspend fun sendBroadcastPrivileged(config: ConfigEntity, intent: Intent): Boolean {
         var success = false

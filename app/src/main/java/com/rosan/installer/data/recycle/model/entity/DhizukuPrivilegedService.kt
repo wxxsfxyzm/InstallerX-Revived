@@ -65,7 +65,7 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
         return false
     }
 
-    // Dhizuku does not support privileged activity
+    // Dhizuku does not support privileged broadcast
     override fun sendBroadcastPrivileged(intent: Intent): Boolean {
         return false
     }

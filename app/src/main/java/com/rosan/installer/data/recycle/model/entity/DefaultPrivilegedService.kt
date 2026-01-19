@@ -492,19 +492,19 @@ class DefaultPrivilegedService(
             val resolvedType = intent.resolveType(context.contentResolver)
 
             val result = am.broadcastIntent(
-                null,               // caller: 系统应用调用的情况下，这里传 null 即可
-                intent,             // intent: 你要发送的 Intent
-                resolvedType,               // resolvedType: 通常传 null
-                null,               // resultTo: 不需要回调则传 null
-                0,                  // resultCode: 初始代码
-                null,               // resultData: 初始数据
-                null,               // map: 初始 Bundle
-                null,               // requiredPermissions: 接收者权限，无则 null
-                -1,                 // appOp: AppOpsManager.OP_NONE (-1)
-                null,               // options: Bundle 格式的 BroadcastOptions
-                false,              // serialized: 是否有序
-                false,              // sticky: 是否粘性
-                userId                   // userId: 关键点！0 表示 Owner 用户，-1 表示所有用户
+                null,
+                intent,
+                resolvedType,
+                null,
+                0,
+                null,
+                null,
+                null,
+                -1,
+                null,
+                false,
+                false,
+                userId
             );
 
             // A result code >= 0 indicates success.
@@ -512,11 +512,11 @@ class DefaultPrivilegedService(
             return result >= 0
         } catch (e: SecurityException) {
             // Log security exceptions specifically, as they indicate a permission issue.
-            Log.e(TAG, "startActivityPrivileged failed due to SecurityException", e)
+            Log.e(TAG, "sendBroadcastPrivileged failed due to SecurityException", e)
             return false
         } catch (e: Exception) {
             // Catch other potential exceptions, such as RemoteException.
-            Log.e(TAG, "startActivityPrivileged failed with an exception", e)
+            Log.e(TAG, "sendBroadcastPrivileged failed with an exception", e)
             return false
         }
     }
