@@ -14,10 +14,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_25
         sourceCompatibility = JavaVersion.VERSION_25
     }
-
-    buildFeatures {
-        aidl = true
-    }
 }
 
 dependencies {
