@@ -147,8 +147,12 @@
 
         <service
             android:name="com.rosan.installer.data.installer.model.impl.InstallerService"
-            android:permission="android.permission.FOREGROUND_SERVICE"
-            android:foregroundServiceType="specialUse" />
+            android:foregroundServiceType="specialUse">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="installer_processing" />
+        </service>
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"

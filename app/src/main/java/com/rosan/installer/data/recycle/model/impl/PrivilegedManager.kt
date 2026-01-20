@@ -166,7 +166,7 @@ object PrivilegedManager : KoinComponent {
     /**
      * Starts an activity using a privileged context.
      */
-    suspend fun startActivityPrivileged(config: ConfigEntity, intent: Intent): Boolean {
+    fun startActivityPrivileged(config: ConfigEntity, intent: Intent): Boolean {
         var success = false
         useUserService(
             authorizer = config.authorizer,
