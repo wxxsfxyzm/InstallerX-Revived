@@ -60,12 +60,7 @@ class DefaultPrivilegedService(
     private val isHookMode by lazy {
         if (binderWrapper != null) return@lazy true
 
-        if (OSUtils.isSystemApp) {
-            // In this case, it's a direct call in the local process, no Shizuku Hook needed
-            Log.d(TAG, "Running as System App (Direct Mode). isHookMode = false")
-            return@lazy false
-        }
-
+        // 1. 先获取进程名，这是判断的基础，不能跳过
         val processName: String? = try {
             val activityThreadClass = Class.forName("android.app.ActivityThread")
             reflect.invokeStatic<String>(activityThreadClass, "currentProcessName")
@@ -77,15 +72,45 @@ class DefaultPrivilegedService(
         Log.d(TAG, "Detected process name: '$processName'")
 
         if (processName == null) {
+            // 获取不到进程名，保守起见认为是 UserService 模式 (Direct)
             Log.d(TAG, "Process name is null, assuming UserService Mode.")
-            false // isHookMode is false (UserService Mode)
+            return@lazy false
+        }
+
+        // 2. 核心判断逻辑
+        val isShizukuProcess = processName.endsWith(":shizuku_privileged")
+
+        if (isShizukuProcess) {
+            // A. 如果我自己就是 Shizuku 服务进程，必须使用 Direct 模式（操作本地 Binder）
+            Log.d(TAG, "Running in Shizuku Service Process. Force Direct Mode.")
+            return@lazy false
         } else {
-            val isShizukuProcess = processName.endsWith(":shizuku_privileged")
-            Log.d(
-                TAG,
-                "Process name is '$processName', isShizukuProcess: $isShizukuProcess. Assuming Hook Mode: ${!isShizukuProcess}"
-            )
-            !isShizukuProcess // isHookMode is true for main process
+            // B. 我是主进程（Client）
+
+            // [关键修改]：先检测 Shizuku 是否可用
+            val isShizukuAvailable = try {
+                // pingBinder 返回 true 说明 Shizuku 服务正在运行且可连接
+                rikka.shizuku.Shizuku.pingBinder()
+            } catch (e: Throwable) {
+                // 依赖未找到或服务未运行
+                false
+            }
+
+            if (isShizukuAvailable) {
+                // 3. 优先级一：Shizuku 活着，强制使用 Hook 模式 (走 Shizuku 代理)
+                Log.i(TAG, "Shizuku is available. Force Hook Mode (Even if System App).")
+                return@lazy true
+            }
+
+            // 4. 优先级二：Shizuku 挂了/没授权，再检查是不是 System App
+            if (OSUtils.isSystemApp) {
+                Log.i(TAG, "Shizuku unavailable, but running as System App. Falling back to Direct Mode.")
+                return@lazy false
+            }
+
+            // 5. 既没 Shizuku 也不是 System App，默认尝试 Hook (虽然可能会失败)
+            Log.d(TAG, "Shizuku unavailable and not System App. Defaulting to Hook Mode.")
+            return@lazy true
         }
     }
 
@@ -493,7 +518,7 @@ class DefaultPrivilegedService(
 
             // 假装result不存在，防止一些系统上可能出问题
             am.broadcastIntent(
-                null,
+                if (OSUtils.isSystemApp) currentApplicationThread else null as IApplicationThread?,
                 intent,
                 resolvedType,
                 null,
@@ -518,6 +543,27 @@ class DefaultPrivilegedService(
             return false
         }
     }
+
+    private val currentApplicationThread: IApplicationThread?
+        get() {
+            return try {
+                // 1. 获取 ActivityThread 类
+                val activityThreadClass = Class.forName("android.app.ActivityThread")
+
+                // 2. 获取当前的 ActivityThread 实例 (静态方法 currentActivityThread)
+                val currentActivityThreadMethod = reflect.getDeclaredMethod(activityThreadClass, "currentActivityThread")
+                val activityThread = currentActivityThreadMethod?.invoke(null)
+
+                // 3. 获取 ApplicationThread (实例方法 getApplicationThread)
+                val getApplicationThreadMethod = reflect.getDeclaredMethod(activityThreadClass, "getApplicationThread")
+
+                // 4. 调用并转换为 IApplicationThread
+                getApplicationThreadMethod?.invoke(activityThread) as? IApplicationThread
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to get IApplicationThread", e)
+                null
+            }
+        }
 
     @SuppressLint("LogNotTimber")
     override fun getSessionDetails(sessionId: Int): Bundle? {
