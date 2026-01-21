@@ -125,9 +125,6 @@ data class ConfigEntity(
     @Ignore
     var callingFromUid: Int? = null
 
-    val isCustomizeAuthorizer: Boolean
-        get() = authorizer == Authorizer.Customize
-
     enum class Authorizer(val value: String) {
         Global("global"),
         None("none"),

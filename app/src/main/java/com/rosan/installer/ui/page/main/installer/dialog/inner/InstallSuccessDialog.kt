@@ -14,15 +14,14 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.util.openAppPrivileged
+import com.rosan.installer.data.recycle.util.openLSPosedPrivileged
+import com.rosan.installer.data.settings.model.room.entity.ext.isPrivileged
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import com.rosan.installer.data.recycle.util.openLSPosedPrivileged
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.util.OSUtils
 
 @Composable
 fun installSuccessDialog(
@@ -71,11 +70,7 @@ fun installSuccessDialog(
             }
 
             buildList {
-                if (isXposedModule ||
-                    installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                    installer.config.authorizer == ConfigEntity.Authorizer.Shizuku ||
-                    (installer.config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
-                ) {
+                if (isXposedModule && installer.config.isPrivileged) {
                     add(DialogButton(stringResource(R.string.open_lsposed)) {
                         coroutineScope.launch(Dispatchers.IO) {
                             openLSPosedPrivileged(
