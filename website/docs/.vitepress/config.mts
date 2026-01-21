@@ -9,7 +9,7 @@ export default defineConfig({
   base: '/InstallerX-Revived/',
   title: "InstallerX Revived",
   description: "A modern, feature-rich Android package installer",
-  
+
   // 默认语言 (当不匹配任何路径时)
   lang: 'en-US',
 
@@ -67,7 +67,28 @@ export default defineConfig({
             items: [
               { text: 'What is InstallerX Revived?', link: '/guide/intro' },
               { text: 'Installation', link: '/guide/installation' },
-              { text: 'Quick Start', link: '/guide/quick-start' },
+              { text: 'Quick Start', link: '/guide/quick-start' }
+            ]
+          },
+          {
+            text: 'Advanced Features',
+            items: [
+              { text: 'Profiles & Scopes', link: '/guide/profiles' },
+              { text: 'System Integration', link: '/guide/system-integration' },
+              { text: 'Laboratory', link: '/guide/laboratory' },
+              { text: 'App Settings', link: '/guide/app-settings' }
+            ]
+          },
+          {
+            text: 'Install Options',
+            items: [
+              { text: 'Parameters', link: '/guide/install-options' },
+              { text: 'Exceptions', link: '/guide/exceptions' }
+            ]
+          },
+          {
+            text: 'Support',
+            items: [
               { text: 'FAQ', link: '/guide/faq' }
             ]
           }
@@ -115,8 +136,29 @@ export default defineConfig({
             items: [
               { text: '什么是 InstallerX Revived?', link: '/zh/guide/intro' },
               { text: '安装指南', link: '/zh/guide/installation' },
-              { text: '快速开始', link: '/zh/guide/quick-start' },
-              { text: '常见问题 FAQ', link: '/zh/guide/faq' }
+              { text: '快速开始', link: '/zh/guide/quick-start' }
+            ]
+          },
+          {
+            text: '高级功能',
+            items: [
+              { text: '用户配置文件', link: '/zh/guide/profiles' },
+              { text: '应用设置', link: '/zh/guide/app-settings' },
+              { text: '实验室', link: '/zh/guide/laboratory' },
+              { text: '系统集成', link: '/zh/guide/system-integration' }
+            ]
+          },
+          {
+            text: '安装选项',
+            items: [
+              { text: '参数设定', link: '/zh/guide/install-options' },
+              { text: '异常处理', link: '/zh/guide/exceptions' }
+            ]
+          },
+          {
+            text: '支持',
+            items: [
+              { text: '常见问题', link: '/zh/guide/faq' }
             ]
           }
         ],
@@ -141,7 +183,7 @@ export default defineConfig({
         sidebarMenuLabel: '菜单',
         returnToTopLabel: '回到顶部',
         darkModeSwitchLabel: '主题',
-        
+
         editLink: {
           pattern: 'https://github.com/wxxsfxyzm/InstallerX-Revived/edit/main/website/docs/:path',
           text: '在 GitHub 上编辑此页'
