@@ -34,7 +34,12 @@ suspend fun <T> requireShizukuPermissionGranted(action: suspend () -> T): T {
     callbackFlow {
         Sui.init(BuildConfig.APPLICATION_ID)
         if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-            send(Unit)
+            if (Shizuku.pingBinder()) {
+                send(Unit)
+            } else {
+                // 权限虽然有，但服务死了，抛出异常或尝试请求绑定（通常抛异常让用户去启动服务）
+                close(ShizukuNotWorkException("Shizuku service is not running (ping failed)."))
+            }
             awaitClose()
         } else {
             val requestCode = (Int.MIN_VALUE..Int.MAX_VALUE).random()
