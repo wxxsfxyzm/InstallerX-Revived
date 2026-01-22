@@ -15,8 +15,6 @@ import android.provider.Settings
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
 import com.rosan.installer.data.reflect.repo.ReflectRepo
-import com.rosan.installer.data.reflect.repo.getStaticValue
-import com.rosan.installer.data.reflect.repo.getValue
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
@@ -37,7 +35,6 @@ suspend fun <T> requireShizukuPermissionGranted(action: suspend () -> T): T {
             if (Shizuku.pingBinder()) {
                 send(Unit)
             } else {
-                // 权限虽然有，但服务死了，抛出异常或尝试请求绑定（通常抛异常让用户去启动服务）
                 close(ShizukuNotWorkException("Shizuku service is not running (ping failed)."))
             }
             awaitClose()
@@ -124,7 +121,7 @@ object ShizukuHook : KoinComponent {
     val hookedSettingsBinder: IBinder? by lazy {
         Timber.tag("ShizukuHook").d("Creating on-demand hooked Settings Binder...")
         try {
-            val info = resolveSettingsBinder(reflect) ?: return@lazy null
+            val info = reflect.resolveSettingsBinder() ?: return@lazy null
 
             ShizukuBinderWrapper(info.originalBinder).also {
                 Timber.tag("ShizukuHook").i("On-demand hooked Settings Binder created.")

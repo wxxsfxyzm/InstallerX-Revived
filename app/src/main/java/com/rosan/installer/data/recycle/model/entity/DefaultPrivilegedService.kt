@@ -102,7 +102,7 @@ class DefaultPrivilegedService(
     }
 
     private val settingsBinder: IBinder? by lazy {
-        val original = resolveSettingsBinder(reflect)?.originalBinder
+        val original = reflect.resolveSettingsBinder()?.originalBinder
 
         if (binderWrapper != null) {
             Log.d(TAG, "Getting Settings Binder in Process Hook Mode.")
@@ -332,7 +332,7 @@ class DefaultPrivilegedService(
 
         try {
             // 3. Prepare Reflection for Swapping
-            val info = resolveSettingsBinder(reflect)
+            val info = reflect.resolveSettingsBinder()
             if (info == null) {
                 Timber.tag(TAG).e("Failed to resolve Settings reflection info for swapping")
                 return
