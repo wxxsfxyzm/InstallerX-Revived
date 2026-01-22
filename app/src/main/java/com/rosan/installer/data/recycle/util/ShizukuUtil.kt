@@ -15,6 +15,8 @@ import android.provider.Settings
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.data.reflect.repo.getStaticValue
+import com.rosan.installer.data.reflect.repo.getValue
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
@@ -139,11 +141,11 @@ data class SettingsReflectionInfo(
     val originalBinder: IBinder
 )
 
-fun resolveSettingsBinder(reflect: ReflectRepo): SettingsReflectionInfo? {
-    val holder = reflect.getStaticValue<Any>(Settings.Global::class.java, "sProviderHolder") ?: return null
-    val provider = reflect.getValue<Any>(holder, "mContentProvider") ?: return null
+fun ReflectRepo.resolveSettingsBinder(): SettingsReflectionInfo? {
+    val holder = this.getStaticValue<Any>(Settings.Global::class.java, "sProviderHolder") ?: return null
+    val provider = this.getValue<Any>(holder, "mContentProvider") ?: return null
 
-    val remoteField = reflect.getDeclaredField(provider.javaClass, "mRemote") ?: return null
+    val remoteField = this.getDeclaredField(provider.javaClass, "mRemote") ?: return null
     val originalBinder = remoteField.get(provider) as? IBinder ?: return null
 
     return SettingsReflectionInfo(provider, remoteField, originalBinder)
