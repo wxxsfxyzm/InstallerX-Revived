@@ -269,7 +269,7 @@
     <string name="close">关闭</string>
     <string name="visit_home_page">访问主页</string>
     <string name="license">许可证：%s</string>
-    <string name="no_license_text">许可证内容不可用</string>
+    <string name="no_license_text">许可证内容不可用。</string>
     <string name="finish">完成</string>
     <string name="open">打开</string>
     <string name="open_lsposed">打开 LSPosed</string>

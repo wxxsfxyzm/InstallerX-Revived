@@ -670,4 +670,7 @@
     <string name="visit_home_page">Visitar página principal</string>
     <string name="license">Licencia: %s</string>
     <string name="no_license_text">No hay texto de licencia disponible.</string>
+    <string name="config_auto_delete_zip">Eliminación automática de archivos zip</string>
+    <string name="config_auto_delete_zip_desc">Además de eliminar el paquete de instalación, también elimina el archivo comprimido que contiene el paquete de instalación.</string>
+    <string name="open_lsposed">Abrir LSPosed</string>
 </resources>
