@@ -18,6 +18,7 @@ import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsuppo
 import com.rosan.installer.data.app.util.SignatureUtils
 import com.rosan.installer.data.app.util.parseSplitMetadata
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.data.reflect.repo.invoke
 import com.rosan.installer.data.res.model.impl.AxmlTreeRepoImpl
 import com.rosan.installer.data.res.repo.AxmlTreeRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -131,12 +132,13 @@ object ApkParser : KoinComponent {
 
             val assets = constructor.newInstance() as AssetManager
 
-            val addAssetPath = reflect.getDeclaredMethod(AssetManager::class.java, "addAssetPath", String::class.java)
-                ?: throw AnalyseFailedAllFilesUnsupportedException("Failed to find addAssetPath method via reflection")
+            val cookie = reflect.invoke<Int>(
+                obj = assets,
+                name = "addAssetPath",
+                parameterTypes = arrayOf(String::class.java),
+                args = arrayOf(path)
+            ) ?: throw AnalyseFailedAllFilesUnsupportedException("Failed to find or invoke addAssetPath via reflection")
 
-            addAssetPath.isAccessible = true
-
-            val cookie = addAssetPath.invoke(assets, path) as Int
             if (cookie == 0) {
                 throw AnalyseFailedAllFilesUnsupportedException("addAssetPath returned 0 for: $path")
             }
@@ -146,8 +148,8 @@ object ApkParser : KoinComponent {
 
     private fun setAssetPath(assetManager: AssetManager, assets: Array<ApkAssets>) {
         val setApkAssetsMtd = reflect.getDeclaredMethod(
-            AssetManager::class.java,
             "setApkAssets",
+            AssetManager::class.java,
             Array<ApkAssets>::class.java,
             Boolean::class.java
         ) ?: throw AnalyseFailedAllFilesUnsupportedException("Failed to find setApkAssets method")
@@ -195,7 +197,7 @@ object ApkParser : KoinComponent {
                     0 -> versionName
                     else -> try {
                         resources.getString(resId)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName") ?: versionName
                     }
                 }
@@ -229,7 +231,8 @@ object ApkParser : KoinComponent {
 
                 if ("xposedmodule" == metaDataName ||
                     "xposedminversion" == metaDataName ||
-                    "xposeddescription" == metaDataName) {
+                    "xposeddescription" == metaDataName
+                ) {
                     isXposedModule = true
                 }
             }

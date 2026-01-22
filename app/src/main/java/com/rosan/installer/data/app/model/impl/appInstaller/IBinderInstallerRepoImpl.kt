@@ -97,8 +97,8 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         val iBinder = iPackageInstallerSession.asBinder()
         reflect.setFieldValue(
             session,
-            session::class.java,
             "mSession",
+            session::class.java,
             IPackageInstallerSession.Stub.asInterface(iBinderWrapper(iBinder))
         )
     }
@@ -119,8 +119,8 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
 
             reflect.invokeMethod(
                 iPackageInstaller,
-                IPackageInstaller::class.java,
                 "setPermissionsResult",
+                IPackageInstaller::class.java,
                 arrayOf(Int::class.java, Boolean::class.java),
                 sessionId,
                 granted

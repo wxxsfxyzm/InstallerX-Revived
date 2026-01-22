@@ -129,8 +129,8 @@ class DefaultPrivilegedService(
         return try {
             val result = reflect.invoke<Boolean>(
                 iPackageManager,
-                iPackageManager::class.java,
                 "performDexOptMode",
+                iPackageManager::class.java,
                 arrayOf(
                     String::class.java,
                     Boolean::class.javaPrimitiveType!!,
@@ -491,11 +491,10 @@ class DefaultPrivilegedService(
         get() {
             return try {
                 val activityThreadClass = Class.forName("android.app.ActivityThread")
-                val currentActivityThreadMethod = reflect.getDeclaredMethod(activityThreadClass, "currentActivityThread")
-                val activityThread = currentActivityThreadMethod?.invoke(null)
-                val getApplicationThreadMethod = reflect.getDeclaredMethod(activityThreadClass, "getApplicationThread")
-
-                getApplicationThreadMethod?.invoke(activityThread) as? IApplicationThread
+                val activityThread = reflect.invokeStatic<Any>("currentActivityThread", activityThreadClass)
+                activityThread?.let {
+                    reflect.invoke<IApplicationThread>(it, "getApplicationThread", activityThreadClass)
+                }
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to get IApplicationThread", e)
                 null
@@ -735,8 +734,8 @@ class DefaultPrivilegedService(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             reflect.invoke<Unit>(
                 iPackageManager,
-                IPackageManager::class.java,
                 "addPreferredActivity",
+                IPackageManager::class.java,
                 arrayOf(
                     IntentFilter::class.java,
                     Int::class.javaPrimitiveType!!,
@@ -755,8 +754,8 @@ class DefaultPrivilegedService(
         } else {
             reflect.invoke<Unit>(
                 iPackageManager,
-                IPackageManager::class.java,
                 "addPreferredActivity",
+                IPackageManager::class.java,
                 arrayOf(
                     IntentFilter::class.java,
                     Int::class.javaPrimitiveType!!,
@@ -781,8 +780,8 @@ class DefaultPrivilegedService(
     ) {
         reflect.invoke<Unit>(
             iPackageManager,
-            IPackageManager::class.java,
             "addPersistentPreferredActivity",
+            IPackageManager::class.java,
             arrayOf(
                 IntentFilter::class.java,
                 ComponentName::class.java,
@@ -804,8 +803,8 @@ class DefaultPrivilegedService(
         val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             reflect.invoke<ParceledListSlice<ResolveInfo>>(
                 iPackageManager,
-                IPackageManager::class.java,
                 "queryIntentActivities",
+                IPackageManager::class.java,
                 arrayOf(
                     Intent::class.java,
                     String::class.java,
@@ -820,8 +819,8 @@ class DefaultPrivilegedService(
         } else {
             reflect.invoke<ParceledListSlice<ResolveInfo>>(
                 iPackageManager,
-                IPackageManager::class.java,
                 "queryIntentActivities",
+                IPackageManager::class.java,
                 arrayOf(
                     Intent::class.java,
                     String::class.java,

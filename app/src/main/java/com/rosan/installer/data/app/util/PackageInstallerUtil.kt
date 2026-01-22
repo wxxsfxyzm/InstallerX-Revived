@@ -11,9 +11,9 @@ object PackageInstallerUtil : KoinComponent {
 
     var PackageInstaller.SessionParams.installFlags: Int
         get() = reflect.getValue(this, "installFlags") ?: 0
-        set(value) = reflect.setFieldValue(this, PackageInstaller.SessionParams::class.java, "installFlags", value)
+        set(value) = reflect.setFieldValue(this, "installFlags", PackageInstaller.SessionParams::class.java, value)
 
     var PackageInstaller.SessionParams.abiOverride: String?
         get() = reflect.getValue(this, "abiOverride")
-        set(value) = reflect.setFieldValue(this, PackageInstaller.SessionParams::class.java, "abiOverride", value)
+        set(value) = reflect.setFieldValue(this, "abiOverride", PackageInstaller.SessionParams::class.java, value)
 }

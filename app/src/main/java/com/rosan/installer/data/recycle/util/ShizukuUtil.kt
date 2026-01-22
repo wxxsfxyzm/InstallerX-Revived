@@ -98,9 +98,9 @@ object ShizukuHook : KoinComponent {
 
     val hookedActivityManager: IActivityManager by lazy {
         Timber.tag("ShizukuHook").d("Creating on-demand hooked IActivityManager...")
-        val amSingleton = reflect.getStaticFieldValue(ActivityManager::class.java, "IActivityManagerSingleton")
+        val amSingleton = reflect.getStaticFieldValue("IActivityManagerSingleton", ActivityManager::class.java)
         val singletonClass = Class.forName("android.util.Singleton")
-        val mInstanceField = reflect.getDeclaredField(singletonClass, "mInstance")
+        val mInstanceField = reflect.getDeclaredField("mInstance", singletonClass)
         mInstanceField?.isAccessible = true
         val originalAM = mInstanceField?.get(amSingleton) as IActivityManager
 
@@ -142,10 +142,10 @@ data class SettingsReflectionInfo(
 )
 
 fun ReflectRepo.resolveSettingsBinder(): SettingsReflectionInfo? {
-    val holder = this.getStaticValue<Any>(Settings.Global::class.java, "sProviderHolder") ?: return null
+    val holder = this.getStaticValue<Any>("sProviderHolder", Settings.Global::class.java) ?: return null
     val provider = this.getValue<Any>(holder, "mContentProvider") ?: return null
 
-    val remoteField = this.getDeclaredField(provider.javaClass, "mRemote") ?: return null
+    val remoteField = this.getDeclaredField("mRemote", provider.javaClass) ?: return null
     val originalBinder = remoteField.get(provider) as? IBinder ?: return null
 
     return SettingsReflectionInfo(provider, remoteField, originalBinder)

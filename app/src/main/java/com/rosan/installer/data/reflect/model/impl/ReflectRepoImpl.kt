@@ -63,7 +63,7 @@ class ReflectRepoImpl : ReflectRepo {
         }
     }
 
-    override fun getField(clazz: Class<*>, name: String): Field? {
+    override fun getField(name: String, clazz: Class<*>): Field? {
         val key = clazz.name + "#" + name
         return fieldCache.getOrPut(key) {
             try {
@@ -75,7 +75,7 @@ class ReflectRepoImpl : ReflectRepo {
         }
     }
 
-    override fun getDeclaredField(clazz: Class<*>, name: String): Field? {
+    override fun getDeclaredField(name: String, clazz: Class<*>): Field? {
         val key = "decl:" + clazz.name + "#" + name
         return fieldCache.getOrPut(key) {
             try {
@@ -88,8 +88,8 @@ class ReflectRepoImpl : ReflectRepo {
     }
 
     override fun getMethod(
-        clazz: Class<*>,
         name: String,
+        clazz: Class<*>,
         vararg parameterTypes: Class<*>
     ): Method? {
         val key = clazz.name + "#" + name + parameterTypes.joinToString(prefix = "(", postfix = ")") { it.name }
@@ -104,8 +104,8 @@ class ReflectRepoImpl : ReflectRepo {
     }
 
     override fun getDeclaredMethod(
-        clazz: Class<*>,
         name: String,
+        clazz: Class<*>,
         vararg parameterTypes: Class<*>
     ): Method? {
         val key = "decl:" + clazz.name + "#" + name + parameterTypes.joinToString(prefix = "(", postfix = ")") { it.name }
@@ -119,41 +119,41 @@ class ReflectRepoImpl : ReflectRepo {
         }
     }
 
-    override fun getFieldValue(obj: Any?, clazz: Class<*>, name: String): Any? {
-        return (getDeclaredField(clazz, name) ?: getField(clazz, name))?.get(obj)
+    override fun getFieldValue(obj: Any?, name: String, clazz: Class<*>): Any? {
+        return (getDeclaredField(name, clazz) ?: getField(name, clazz))?.get(obj)
     }
 
-    override fun setFieldValue(obj: Any?, clazz: Class<*>, name: String, value: Any?) {
-        (getDeclaredField(clazz, name) ?: getField(clazz, name))?.set(obj, value)
+    override fun setFieldValue(obj: Any?, name: String, clazz: Class<*>, value: Any?) {
+        (getDeclaredField(name, clazz) ?: getField(name, clazz))?.set(obj, value)
     }
 
-    override fun getStaticFieldValue(clazz: Class<*>, name: String): Any? {
-        return getFieldValue(null, clazz, name)
+    override fun getStaticFieldValue(name: String, clazz: Class<*>): Any? {
+        return getFieldValue(null, name, clazz)
     }
 
-    override fun setStaticFieldValue(clazz: Class<*>, name: String, value: Any?) {
-        setFieldValue(null, clazz, name, value)
+    override fun setStaticFieldValue(name: String, clazz: Class<*>, value: Any?) {
+        setFieldValue(null, name, clazz, value)
     }
 
     override fun invokeMethod(
         obj: Any?,
-        clazz: Class<*>,
         name: String,
+        clazz: Class<*>,
         parameterTypes: Array<Class<*>>,
         vararg args: Any?
     ): Any? {
-        val method = getDeclaredMethod(clazz, name, *parameterTypes)
-            ?: getMethod(clazz, name, *parameterTypes)
+        val method = getDeclaredMethod(name, clazz, *parameterTypes)
+            ?: getMethod(name, clazz, *parameterTypes)
         return method?.invoke(obj, *args)
     }
 
     override fun invokeStaticMethod(
-        clazz: Class<*>,
         name: String,
+        clazz: Class<*>,
         parameterTypes: Array<Class<*>>,
         vararg args: Any?
     ): Any? {
-        return invokeMethod(null, clazz, name, parameterTypes, *args)
+        return invokeMethod(null, name, clazz, parameterTypes, *args)
     }
 
     private inline fun <K : Any, V : Any> ConcurrentHashMap<K, V>.getOrPut(key: K, defaultValue: () -> V?): V? {

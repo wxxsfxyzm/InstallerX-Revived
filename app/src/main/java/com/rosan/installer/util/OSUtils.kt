@@ -80,10 +80,9 @@ object OSUtils : KoinComponent {
      */
     private fun getSystemProperty(key: String): String? {
         return reflect.invokeStatic<String>(
-            systemPropertiesClass,
             "get",
+            systemPropertiesClass,
             arrayOf(String::class.java, String::class.java),
-            key,
             ""
         )?.takeIf { it.isNotEmpty() }
     }

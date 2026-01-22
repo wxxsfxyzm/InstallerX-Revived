@@ -15,37 +15,37 @@ interface ReflectRepo {
 
     fun getDeclaredConstructor(clazz: Class<*>, vararg parameterTypes: Class<*>): Constructor<*>?
 
-    fun getField(clazz: Class<*>, name: String): Field?
+    fun getField(name: String, clazz: Class<*>): Field?
 
-    fun getDeclaredField(clazz: Class<*>, name: String): Field?
+    fun getDeclaredField(name: String, clazz: Class<*>): Field?
 
-    fun getMethod(clazz: Class<*>, name: String, vararg parameterTypes: Class<*>): Method?
+    fun getMethod(name: String, clazz: Class<*>, vararg parameterTypes: Class<*>): Method?
 
-    fun getDeclaredMethod(clazz: Class<*>, name: String, vararg parameterTypes: Class<*>): Method?
+    fun getDeclaredMethod(name: String, clazz: Class<*>, vararg parameterTypes: Class<*>): Method?
 
     // --- High-level Property Accessors ---
 
-    fun getFieldValue(obj: Any?, clazz: Class<*>, name: String): Any?
+    fun getFieldValue(obj: Any?, name: String, clazz: Class<*>): Any?
 
-    fun setFieldValue(obj: Any?, clazz: Class<*>, name: String, value: Any?)
+    fun setFieldValue(obj: Any?, name: String, clazz: Class<*>, value: Any?)
 
-    fun getStaticFieldValue(clazz: Class<*>, name: String): Any?
+    fun getStaticFieldValue(name: String, clazz: Class<*>): Any?
 
-    fun setStaticFieldValue(clazz: Class<*>, name: String, value: Any?)
+    fun setStaticFieldValue(name: String, clazz: Class<*>, value: Any?)
 
     // --- High-level Method Invocation ---
 
     fun invokeMethod(
         obj: Any?,
-        clazz: Class<*>,
         name: String,
+        clazz: Class<*>,
         parameterTypes: Array<Class<*>> = emptyArray(),
         vararg args: Any?
     ): Any?
 
     fun invokeStaticMethod(
-        clazz: Class<*>,
         name: String,
+        clazz: Class<*>,
         parameterTypes: Array<Class<*>> = emptyArray(),
         vararg args: Any?
     ): Any?
