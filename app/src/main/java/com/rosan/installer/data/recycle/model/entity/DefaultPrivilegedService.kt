@@ -35,6 +35,7 @@ import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.recycle.util.resolveSettingsBinder
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.getValue
+import com.rosan.installer.data.reflect.repo.invoke
 import com.rosan.installer.data.reflect.repo.invokeStatic
 import com.rosan.installer.util.OSUtils
 import org.koin.core.component.inject
@@ -65,8 +66,13 @@ class DefaultPrivilegedService(
             return@lazy false
         }
 
-        val activityThreadClass = Class.forName("android.app.ActivityThread")
-        val processName = reflect.invokeStatic<String>(activityThreadClass, "currentProcessName")
+        val processName: String? = try {
+            val activityThreadClass = Class.forName("android.app.ActivityThread")
+            reflect.invokeStatic<String>(activityThreadClass, "currentProcessName")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get current process name reflection setup: ${e.message}")
+            null
+        }
 
         Log.d(TAG, "Detected process name: '$processName'")
 
@@ -153,7 +159,7 @@ class DefaultPrivilegedService(
         Timber.tag(TAG).d("performDexOpt: $packageName, filter=$compilerFilter, force=$force")
 
         return try {
-            val result = reflect.invokeMethod(
+            val result = reflect.invoke<Boolean>(
                 iPackageManager,
                 iPackageManager::class.java,
                 "performDexOptMode",
@@ -171,7 +177,7 @@ class DefaultPrivilegedService(
                 force,
                 true,            // bootComplete
                 null             // splitName
-            ) as Boolean
+            ) ?: false
 
             Timber.tag(TAG).i("performDexOpt result for $packageName: $result")
             result
@@ -744,7 +750,7 @@ class DefaultPrivilegedService(
         removeExisting: Boolean
     ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            reflect.invokeMethod(
+            reflect.invoke<Unit>(
                 iPackageManager,
                 IPackageManager::class.java,
                 "addPreferredActivity",
@@ -764,7 +770,7 @@ class DefaultPrivilegedService(
                 removeExisting
             )
         } else {
-            reflect.invokeMethod(
+            reflect.invoke<Unit>(
                 iPackageManager,
                 IPackageManager::class.java,
                 "addPreferredActivity",
@@ -790,7 +796,7 @@ class DefaultPrivilegedService(
         name: ComponentName,
         userId: Int,
     ) {
-        reflect.invokeMethod(
+        reflect.invoke<Unit>(
             iPackageManager,
             IPackageManager::class.java,
             "addPersistentPreferredActivity",
@@ -812,8 +818,8 @@ class DefaultPrivilegedService(
         flags: Int,
         userId: Int
     ): List<ResolveInfo> {
-        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            reflect.invokeMethod(
+        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            reflect.invoke<ParceledListSlice<ResolveInfo>>(
                 iPackageManager,
                 IPackageManager::class.java,
                 "queryIntentActivities",
@@ -829,7 +835,7 @@ class DefaultPrivilegedService(
                 userId
             )
         } else {
-            reflect.invokeMethod(
+            reflect.invoke<ParceledListSlice<ResolveInfo>>(
                 iPackageManager,
                 IPackageManager::class.java,
                 "queryIntentActivities",
@@ -844,7 +850,8 @@ class DefaultPrivilegedService(
                 flags,
                 userId
             )
-        } as ParceledListSlice<ResolveInfo>).list
+        }
+        return result?.list ?: emptyList()
     }
 
     @Throws(IOException::class, InterruptedException::class)

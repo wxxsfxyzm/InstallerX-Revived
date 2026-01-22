@@ -14,10 +14,11 @@ inline fun <reified T> ReflectRepo.getValue(obj: Any, clazz: Class<*>, name: Str
 
 inline fun <reified T> ReflectRepo.invoke(
     obj: Any,
+    clazz: Class<*>? = null,
     name: String,
     parameterTypes: Array<Class<*>> = emptyArray(),
     vararg args: Any?
-): T? = invokeMethod(obj, obj.javaClass, name, parameterTypes, *args) as? T
+): T? = invokeMethod(obj, clazz ?: obj.javaClass, name, parameterTypes, *args) as? T
 
 inline fun <reified T> ReflectRepo.invokeStatic(
     clazz: Class<*>,
