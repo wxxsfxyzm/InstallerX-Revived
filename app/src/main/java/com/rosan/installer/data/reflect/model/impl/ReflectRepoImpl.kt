@@ -1,6 +1,7 @@
 package com.rosan.installer.data.reflect.model.impl
 
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import timber.log.Timber
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -41,6 +42,7 @@ class ReflectRepoImpl : ReflectRepo {
             try {
                 clazz.getConstructor(*parameterTypes).apply { isAccessible = true }
             } catch (_: NoSuchMethodException) {
+                Timber.w("Reflect: Constructor not found in ${clazz.name} with params ${parameterTypes.map { it.name }}")
                 null
             }
         }
@@ -55,6 +57,7 @@ class ReflectRepoImpl : ReflectRepo {
             try {
                 clazz.getDeclaredConstructor(*parameterTypes).apply { isAccessible = true }
             } catch (_: NoSuchMethodException) {
+                Timber.w("Reflect: Declared Constructor not found in ${clazz.name}")
                 null
             }
         }
@@ -66,6 +69,7 @@ class ReflectRepoImpl : ReflectRepo {
             try {
                 clazz.getField(name).apply { isAccessible = true }
             } catch (_: NoSuchFieldException) {
+                Timber.w("Reflect: Field '$name' not found in ${clazz.name}")
                 null
             }
         }
@@ -77,6 +81,7 @@ class ReflectRepoImpl : ReflectRepo {
             try {
                 clazz.getDeclaredField(name).apply { isAccessible = true }
             } catch (_: NoSuchFieldException) {
+                Timber.w("Reflect: Field '$name' not found in ${clazz.name}")
                 null
             }
         }
@@ -92,6 +97,7 @@ class ReflectRepoImpl : ReflectRepo {
             try {
                 clazz.getMethod(name, *parameterTypes).apply { isAccessible = true }
             } catch (_: NoSuchMethodException) {
+                Timber.w("Reflect: Method '$name' not found in ${clazz.name}")
                 null
             }
         }
@@ -107,6 +113,7 @@ class ReflectRepoImpl : ReflectRepo {
             try {
                 clazz.getDeclaredMethod(name, *parameterTypes).apply { isAccessible = true }
             } catch (_: NoSuchMethodException) {
+                Timber.w("Reflect: Method '$name' not found in ${clazz.name}")
                 null
             }
         }
