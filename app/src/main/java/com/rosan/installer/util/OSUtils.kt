@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.data.reflect.repo.invokeStatic
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -21,6 +22,8 @@ object OSUtils : KoinComponent {
     // Keys for OPPO OSdkVersion
     private const val KEY_OPLUS_API = "ro.build.version.oplus.api"
     private const val KEY_OPLUS_SUB_API = "ro.build.version.oplus.sub_api"
+
+    private val systemPropertiesClass by lazy { @SuppressLint("PrivateApi") Class.forName("android.os.SystemProperties") }
 
     /**
      * Checks if the app is installed as a System App.
@@ -75,21 +78,13 @@ object OSUtils : KoinComponent {
     /**
      * Get a system property value using the ReflectRepo
      */
-    @SuppressLint("PrivateApi")
     private fun getSystemProperty(key: String): String? {
-        try {
-            val clz = Class.forName("android.os.SystemProperties")
-            // Try public get(key, def) first
-            val method = reflect.getMethod(clz, "get", String::class.java, String::class.java)
-                ?: reflect.getDeclaredMethod(clz, "get", String::class.java, String::class.java)
-                ?: return null
-
-            // It's a static method: pass null as the instance. Use empty string as default.
-            val value = method.invoke(null, key, "") as? String
-            return value?.takeIf { it.isNotEmpty() }
-        } catch (t: Throwable) {
-            t.printStackTrace()
-        }
-        return null
+        return reflect.invokeStatic<String>(
+            systemPropertiesClass,
+            "get",
+            arrayOf(String::class.java, String::class.java),
+            key,
+            ""
+        )?.takeIf { it.isNotEmpty() }
     }
 }

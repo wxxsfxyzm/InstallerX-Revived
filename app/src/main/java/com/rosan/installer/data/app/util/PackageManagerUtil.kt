@@ -49,6 +49,8 @@ import com.rosan.installer.data.app.model.exception.UninstallFailedUserRestricte
 import com.rosan.installer.data.app.model.impl.appInstaller.IBinderInstallerRepoImpl
 
 object PackageManagerUtil {
+    private const val EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS"
+
     /**
      * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
      * package's data directory.
@@ -133,9 +135,7 @@ object PackageManagerUtil {
             return
         }
         if (status == PackageInstaller.STATUS_SUCCESS) return
-        val legacyStatus = intent.getIntExtra(
-            PackageInstallerUtil.EXTRA_LEGACY_STATUS, PackageInstaller.STATUS_FAILURE
-        )
+        val legacyStatus = intent.getIntExtra(EXTRA_LEGACY_STATUS, PackageInstaller.STATUS_FAILURE)
         val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
         val ecpMsg = "Install Failure $status#$legacyStatus [$msg]"
         throw when (legacyStatus) {
@@ -208,9 +208,7 @@ object PackageManagerUtil {
         }
         if (status == PackageInstaller.STATUS_SUCCESS) return
 
-        val legacyStatus = intent.getIntExtra(
-            PackageInstallerUtil.EXTRA_LEGACY_STATUS, 0
-        )
+        val legacyStatus = intent.getIntExtra(EXTRA_LEGACY_STATUS, 0)
         val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
         val ecpMsg = "Uninstall Failure $status#$legacyStatus [$msg]"
 

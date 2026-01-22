@@ -15,6 +15,8 @@ import android.provider.Settings
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.data.reflect.repo.getStaticValue
+import com.rosan.installer.data.reflect.repo.getValue
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
@@ -92,7 +94,7 @@ object ShizukuHook : KoinComponent {
 
     val hookedActivityManager: IActivityManager by lazy {
         Timber.tag("ShizukuHook").d("Creating on-demand hooked IActivityManager...")
-        val amSingleton = reflect.getStaticObjectField(ActivityManager::class.java, "IActivityManagerSingleton")
+        val amSingleton = reflect.getStaticFieldValue(ActivityManager::class.java, "IActivityManagerSingleton")
         val singletonClass = Class.forName("android.util.Singleton")
         val mInstanceField = reflect.getDeclaredField(singletonClass, "mInstance")
         mInstanceField?.isAccessible = true
@@ -136,24 +138,11 @@ data class SettingsReflectionInfo(
 )
 
 fun resolveSettingsBinder(reflect: ReflectRepo): SettingsReflectionInfo? {
-    return try {
-        // 1. Get Settings.Global.sProviderHolder
-        val settingsClass = Settings.Global::class.java
-        val holder = reflect.getStaticObjectField(settingsClass, "sProviderHolder")
+    val holder = reflect.getStaticValue<Any>(Settings.Global::class.java, "sProviderHolder") ?: return null
+    val provider = reflect.getValue<Any>(holder, "mContentProvider") ?: return null
 
-        // 2. Get mContentProvider
-        val providerField = reflect.getDeclaredField(holder.javaClass, "mContentProvider") ?: return null
-        providerField.isAccessible = true
-        val provider = providerField.get(holder) ?: return null
+    val remoteField = reflect.getDeclaredField(provider.javaClass, "mRemote") ?: return null
+    val originalBinder = remoteField.get(provider) as? IBinder ?: return null
 
-        // 3. Get mRemote (field and value)
-        val remoteField = reflect.getDeclaredField(provider.javaClass, "mRemote") ?: return null
-        remoteField.isAccessible = true
-        val originalBinder = remoteField.get(provider) as? IBinder ?: return null
-
-        SettingsReflectionInfo(provider, remoteField, originalBinder)
-    } catch (e: Exception) {
-        Timber.e(e, "Failed to resolve Settings binder reflection")
-        null
-    }
+    return SettingsReflectionInfo(provider, remoteField, originalBinder)
 }
