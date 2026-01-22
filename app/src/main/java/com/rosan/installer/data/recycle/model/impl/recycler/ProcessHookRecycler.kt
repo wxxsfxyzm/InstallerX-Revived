@@ -33,7 +33,7 @@ class ProcessHookRecycler(private val shell: String) :
 
         // Inject the binder wrapper logic into DefaultPrivilegedService for standard service calls
         override val privileged: IPrivilegedService by lazy {
-            DefaultPrivilegedService { binder ->
+            DefaultPrivilegedService(isHookMode = true) { binder ->
                 binderWrapper(binder)
             }
         }

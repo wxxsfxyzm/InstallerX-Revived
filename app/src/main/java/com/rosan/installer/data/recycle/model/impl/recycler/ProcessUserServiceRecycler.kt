@@ -57,7 +57,7 @@ class ProcessUserServiceRecycler(private val shell: String) :
             }
         }
 
-        private val privileged = DefaultPrivilegedService()
+        private val privileged = DefaultPrivilegedService(isHookMode = false)
 
         override fun quit() {
             try {

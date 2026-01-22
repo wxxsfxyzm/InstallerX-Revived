@@ -22,7 +22,7 @@ object ShizukuHookRecycler : Recycler<ShizukuHookRecycler.HookedUserService>(), 
      */
     class HookedUserService : UserService, KoinComponent {
         override val privileged: IPrivilegedService by lazy {
-            DefaultPrivilegedService()
+            DefaultPrivilegedService(isHookMode = true)
         }
 
         override fun close() {

@@ -34,7 +34,11 @@ suspend fun <T> requireShizukuPermissionGranted(action: suspend () -> T): T {
     callbackFlow {
         Sui.init(BuildConfig.APPLICATION_ID)
         if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-            send(Unit)
+            if (Shizuku.pingBinder()) {
+                send(Unit)
+            } else {
+                close(ShizukuNotWorkException("Shizuku service is not running (ping failed)."))
+            }
             awaitClose()
         } else {
             val requestCode = (Int.MIN_VALUE..Int.MAX_VALUE).random()
@@ -119,7 +123,7 @@ object ShizukuHook : KoinComponent {
     val hookedSettingsBinder: IBinder? by lazy {
         Timber.tag("ShizukuHook").d("Creating on-demand hooked Settings Binder...")
         try {
-            val info = resolveSettingsBinder(reflect) ?: return@lazy null
+            val info = reflect.resolveSettingsBinder() ?: return@lazy null
 
             ShizukuBinderWrapper(info.originalBinder).also {
                 Timber.tag("ShizukuHook").i("On-demand hooked Settings Binder created.")
@@ -137,11 +141,11 @@ data class SettingsReflectionInfo(
     val originalBinder: IBinder
 )
 
-fun resolveSettingsBinder(reflect: ReflectRepo): SettingsReflectionInfo? {
-    val holder = reflect.getStaticValue<Any>(Settings.Global::class.java, "sProviderHolder") ?: return null
-    val provider = reflect.getValue<Any>(holder, "mContentProvider") ?: return null
+fun ReflectRepo.resolveSettingsBinder(): SettingsReflectionInfo? {
+    val holder = this.getStaticValue<Any>(Settings.Global::class.java, "sProviderHolder") ?: return null
+    val provider = this.getValue<Any>(holder, "mContentProvider") ?: return null
 
-    val remoteField = reflect.getDeclaredField(provider.javaClass, "mRemote") ?: return null
+    val remoteField = this.getDeclaredField(provider.javaClass, "mRemote") ?: return null
     val originalBinder = remoteField.get(provider) as? IBinder ?: return null
 
     return SettingsReflectionInfo(provider, remoteField, originalBinder)

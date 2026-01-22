@@ -6,8 +6,8 @@ import com.rosan.installer.util.OSUtils
 
 val ConfigEntity.isPrivileged: Boolean
     get() = when (authorizer) {
-        ConfigEntity.Authorizer.Root, ConfigEntity.Authorizer.Shizuku -> true
-        ConfigEntity.Authorizer.None -> OSUtils.isSystemApp
+        Authorizer.Root, Authorizer.Shizuku -> true
+        Authorizer.None -> OSUtils.isSystemApp
         else -> false
     }
 

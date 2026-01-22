@@ -48,7 +48,7 @@ import android.os.Process as AndroidProcess
 
 @SuppressLint("LogNotTimber")
 class DefaultPrivilegedService(
-    // Add binderWrapper parameter to support Process Hook Mode
+    private val isHookMode: Boolean,
     private val binderWrapper: ((IBinder) -> IBinder)? = null
 ) : BasePrivilegedService() {
     companion object {
@@ -56,38 +56,6 @@ class DefaultPrivilegedService(
     }
 
     private val reflect by inject<ReflectRepo>()
-
-    private val isHookMode by lazy {
-        if (binderWrapper != null) return@lazy true
-
-        if (OSUtils.isSystemApp) {
-            // In this case, it's a direct call in the local process, no Shizuku Hook needed
-            Log.d(TAG, "Running as System App (Direct Mode). isHookMode = false")
-            return@lazy false
-        }
-
-        val processName: String? = try {
-            val activityThreadClass = Class.forName("android.app.ActivityThread")
-            reflect.invokeStatic<String>(activityThreadClass, "currentProcessName")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to get current process name reflection setup: ${e.message}")
-            null
-        }
-
-        Log.d(TAG, "Detected process name: '$processName'")
-
-        if (processName == null) {
-            Log.d(TAG, "Process name is null, assuming UserService Mode.")
-            false // isHookMode is false (UserService Mode)
-        } else {
-            val isShizukuProcess = processName.endsWith(":shizuku_privileged")
-            Log.d(
-                TAG,
-                "Process name is '$processName', isShizukuProcess: $isShizukuProcess. Assuming Hook Mode: ${!isShizukuProcess}"
-            )
-            !isShizukuProcess // isHookMode is true for main process
-        }
-    }
 
     private val iPackageManager: IPackageManager by lazy {
         if (binderWrapper != null) {
@@ -134,7 +102,7 @@ class DefaultPrivilegedService(
     }
 
     private val settingsBinder: IBinder? by lazy {
-        val original = resolveSettingsBinder(reflect)?.originalBinder
+        val original = reflect.resolveSettingsBinder()?.originalBinder
 
         if (binderWrapper != null) {
             Log.d(TAG, "Getting Settings Binder in Process Hook Mode.")
@@ -364,7 +332,7 @@ class DefaultPrivilegedService(
 
         try {
             // 3. Prepare Reflection for Swapping
-            val info = resolveSettingsBinder(reflect)
+            val info = reflect.resolveSettingsBinder()
             if (info == null) {
                 Timber.tag(TAG).e("Failed to resolve Settings reflection info for swapping")
                 return
@@ -493,7 +461,7 @@ class DefaultPrivilegedService(
 
             // 假装result不存在，防止一些系统上可能出问题
             am.broadcastIntent(
-                null,
+                currentApplicationThread,
                 intent,
                 resolvedType,
                 null,
@@ -518,6 +486,21 @@ class DefaultPrivilegedService(
             return false
         }
     }
+
+    private val currentApplicationThread: IApplicationThread?
+        get() {
+            return try {
+                val activityThreadClass = Class.forName("android.app.ActivityThread")
+                val currentActivityThreadMethod = reflect.getDeclaredMethod(activityThreadClass, "currentActivityThread")
+                val activityThread = currentActivityThreadMethod?.invoke(null)
+                val getApplicationThreadMethod = reflect.getDeclaredMethod(activityThreadClass, "getApplicationThread")
+
+                getApplicationThreadMethod?.invoke(activityThread) as? IApplicationThread
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to get IApplicationThread", e)
+                null
+            }
+        }
 
     @SuppressLint("LogNotTimber")
     override fun getSessionDetails(sessionId: Int): Bundle? {
