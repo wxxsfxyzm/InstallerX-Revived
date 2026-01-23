@@ -34,18 +34,21 @@ import com.rosan.installer.data.recycle.util.SystemContext
 import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.recycle.util.resolveSettingsBinder
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.data.reflect.repo.getValue
+import com.rosan.installer.data.reflect.repo.invoke
+import com.rosan.installer.data.reflect.repo.invokeStatic
 import com.rosan.installer.util.OSUtils
 import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.IOException
-import java.lang.reflect.Field
 import java.nio.charset.StandardCharsets
 import android.os.Process as AndroidProcess
 
 @SuppressLint("LogNotTimber")
 class DefaultPrivilegedService(
-    // Add binderWrapper parameter to support Process Hook Mode
+    private val isHookMode: Boolean,
     private val binderWrapper: ((IBinder) -> IBinder)? = null
 ) : BasePrivilegedService() {
     companion object {
@@ -53,41 +56,6 @@ class DefaultPrivilegedService(
     }
 
     private val reflect by inject<ReflectRepo>()
-
-    private val isHookMode by lazy {
-        if (binderWrapper != null) return@lazy true
-
-        if (OSUtils.isSystemApp) {
-            // In this case, it's a direct call in the local process, no Shizuku Hook needed
-            Log.d(TAG, "Running as System App (Direct Mode). isHookMode = false")
-            return@lazy false
-        }
-
-        val processName: String? = try {
-            val activityThreadClass = Class.forName("android.app.ActivityThread")
-            val currentProcessNameMethod = reflect.getDeclaredMethod(activityThreadClass, "currentProcessName")
-            currentProcessNameMethod?.isAccessible = true
-
-            currentProcessNameMethod?.invoke(null) as? String
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to get current process name reflection setup: ${e.message}")
-            null
-        }
-
-        Log.d(TAG, "Detected process name: '$processName'")
-
-        if (processName == null) {
-            Log.d(TAG, "Process name is null, assuming UserService Mode.")
-            false // isHookMode is false (UserService Mode)
-        } else {
-            val isShizukuProcess = processName.endsWith(":shizuku_privileged")
-            Log.d(
-                TAG,
-                "Process name is '$processName', isShizukuProcess: $isShizukuProcess. Assuming Hook Mode: ${!isShizukuProcess}"
-            )
-            !isShizukuProcess // isHookMode is true for main process
-        }
-    }
 
     private val iPackageManager: IPackageManager by lazy {
         if (binderWrapper != null) {
@@ -134,7 +102,7 @@ class DefaultPrivilegedService(
     }
 
     private val settingsBinder: IBinder? by lazy {
-        val original = resolveSettingsBinder(reflect)?.originalBinder
+        val original = reflect.resolveSettingsBinder()?.originalBinder
 
         if (binderWrapper != null) {
             Log.d(TAG, "Getting Settings Binder in Process Hook Mode.")
@@ -159,25 +127,25 @@ class DefaultPrivilegedService(
         Timber.tag(TAG).d("performDexOpt: $packageName, filter=$compilerFilter, force=$force")
 
         return try {
-            val method = iPackageManager::class.java.getDeclaredMethod(
-                "performDexOptMode",
-                String::class.java,
-                Boolean::class.javaPrimitiveType,
-                String::class.java,
-                Boolean::class.javaPrimitiveType,
-                Boolean::class.javaPrimitiveType,
-                String::class.java
-            ).apply { isAccessible = true }
-
-            val result = method.invoke(
+            val result = reflect.invoke<Boolean>(
                 iPackageManager,
+                "performDexOptMode",
+                iPackageManager::class.java,
+                arrayOf(
+                    String::class.java,
+                    Boolean::class.javaPrimitiveType!!,
+                    String::class.java,
+                    Boolean::class.javaPrimitiveType!!,
+                    Boolean::class.javaPrimitiveType!!,
+                    String::class.java
+                ),
                 packageName,
                 false,           // checkProfiles
                 compilerFilter,
                 force,
                 true,            // bootComplete
                 null             // splitName
-            ) as Boolean
+            ) ?: false
 
             Timber.tag(TAG).i("performDexOpt result for $packageName: $result")
             result
@@ -364,7 +332,7 @@ class DefaultPrivilegedService(
 
         try {
             // 3. Prepare Reflection for Swapping
-            val info = resolveSettingsBinder(reflect)
+            val info = reflect.resolveSettingsBinder()
             if (info == null) {
                 Timber.tag(TAG).e("Failed to resolve Settings reflection info for swapping")
                 return
@@ -484,6 +452,55 @@ class DefaultPrivilegedService(
         }
     }
 
+    override fun sendBroadcastPrivileged(intent: Intent): Boolean {
+        try {
+            val am = iActivityManager
+
+            val userId = AndroidProcess.myUid() / 100000
+            val resolvedType = intent.resolveType(context.contentResolver)
+
+            // 假装result不存在，防止一些系统上可能出问题
+            am.broadcastIntent(
+                currentApplicationThread,
+                intent,
+                resolvedType,
+                null,
+                0,
+                null,
+                null,
+                null,
+                -1,
+                null,
+                false,
+                false,
+                userId
+            )
+            return true
+        } catch (e: SecurityException) {
+            // Log security exceptions specifically, as they indicate a permission issue.
+            Log.e(TAG, "sendBroadcastPrivileged failed due to SecurityException", e)
+            return false
+        } catch (e: Exception) {
+            // Catch other potential exceptions, such as RemoteException.
+            Log.e(TAG, "sendBroadcastPrivileged failed with an exception", e)
+            return false
+        }
+    }
+
+    private val currentApplicationThread: IApplicationThread?
+        get() {
+            return try {
+                val activityThreadClass = Class.forName("android.app.ActivityThread")
+                val activityThread = reflect.invokeStatic<Any>("currentActivityThread", activityThreadClass)
+                activityThread?.let {
+                    reflect.invoke<IApplicationThread>(it, "getApplicationThread", activityThreadClass)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to get IApplicationThread", e)
+                null
+            }
+        }
+
     @SuppressLint("LogNotTimber")
     override fun getSessionDetails(sessionId: Int): Bundle? {
         Log.d(TAG, "getSessionDetails: sessionId=$sessionId")
@@ -498,45 +515,26 @@ class DefaultPrivilegedService(
 
             var resolvedLabel: CharSequence? = null
             var resolvedIcon: Bitmap? = null
-            var path: String? = null
+            var path: String?
 
             // ---------------------------------------------------------
             // STRATEGY 1: Try to get the APK path via reflection
             // ---------------------------------------------------------
-            try {
-                // Try to get "resolvedBaseCodePath" field
-                val resolvedField: Field? = reflect.getDeclaredField(
-                    sessionInfo::class.java,
-                    "resolvedBaseCodePath"
-                )
-                if (resolvedField != null) {
-                    resolvedField.isAccessible = true
-                    path = resolvedField.get(sessionInfo) as? String
-                }
+            path = reflect.getValue<String>(sessionInfo, "resolvedBaseCodePath")
 
-                // ---------------------------------------------------------
-                // STRATEGY 2: If path is null, try "stageDir" (Android 16+ / Staged Sessions)
-                // ---------------------------------------------------------
-                if (path == null) {
-                    val stageDirField = reflect.getDeclaredField(
-                        sessionInfo::class.java,
-                        "stageDir"
-                    )
-                    if (stageDirField != null) {
-                        stageDirField.isAccessible = true
-                        val stageDir = stageDirField.get(sessionInfo) as? java.io.File
-                        // Find the first .apk file in the staging directory
-                        if (stageDir != null && stageDir.exists() && stageDir.isDirectory) {
-                            path = stageDir.listFiles { _, name -> name.endsWith(".apk") }
-                                ?.firstOrNull()?.absolutePath
-                            Log.d(TAG, "Found APK path via stageDir: $path")
-                        }
-                    }
-                } else {
-                    Log.d(TAG, "Reflected resolvedBaseCodePath: $path")
+            // ---------------------------------------------------------
+            // STRATEGY 2: If path is null, try "stageDir" (Android 16+ / Staged Sessions)
+            // ---------------------------------------------------------
+            if (path == null) {
+                val stageDir = reflect.getValue<File>(sessionInfo, "stageDir")
+                // Find the first .apk file in the staging directory
+                if (stageDir != null && stageDir.exists() && stageDir.isDirectory) {
+                    path = stageDir.listFiles { _, name -> name.endsWith(".apk") }
+                        ?.firstOrNull()?.absolutePath
+                    Log.d(TAG, "Found APK path via stageDir: $path")
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to reflect path or stageDir", e)
+            } else {
+                Log.d(TAG, "Reflected resolvedBaseCodePath: $path")
             }
 
             // ---------------------------------------------------------
@@ -547,7 +545,7 @@ class DefaultPrivilegedService(
             if (path == null) {
                 try {
                     // Standard Session staging directory structure: /data/app/vmdl{sessionId}.tmp
-                    val sessionDir = java.io.File("/data/app/vmdl${sessionId}.tmp")
+                    val sessionDir = File("/data/app/vmdl${sessionId}.tmp")
 
                     if (sessionDir.exists() && sessionDir.isDirectory) {
                         Log.d(TAG, "Direct Access: Found session dir at ${sessionDir.absolutePath}")
@@ -734,17 +732,18 @@ class DefaultPrivilegedService(
         removeExisting: Boolean
     ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            reflect.getDeclaredMethod(
-                IPackageManager::class.java,
-                "addPreferredActivity",
-                IntentFilter::class.java,
-                Int::class.java,
-                Array<ComponentName>::class.java,
-                ComponentName::class.java,
-                Int::class.java,
-                Boolean::class.java,
-            )?.invoke(
+            reflect.invoke<Unit>(
                 iPackageManager,
+                "addPreferredActivity",
+                IPackageManager::class.java,
+                arrayOf(
+                    IntentFilter::class.java,
+                    Int::class.javaPrimitiveType!!,
+                    Array<ComponentName>::class.java,
+                    ComponentName::class.java,
+                    Int::class.javaPrimitiveType!!,
+                    Boolean::class.javaPrimitiveType!!
+                ),
                 filter,
                 match,
                 names,
@@ -753,16 +752,17 @@ class DefaultPrivilegedService(
                 removeExisting
             )
         } else {
-            reflect.getDeclaredMethod(
-                IPackageManager::class.java,
-                "addPreferredActivity",
-                IntentFilter::class.java,
-                Int::class.java,
-                Array<ComponentName>::class.java,
-                ComponentName::class.java,
-                Int::class.java
-            )?.invoke(
+            reflect.invoke<Unit>(
                 iPackageManager,
+                "addPreferredActivity",
+                IPackageManager::class.java,
+                arrayOf(
+                    IntentFilter::class.java,
+                    Int::class.javaPrimitiveType!!,
+                    Array<ComponentName>::class.java,
+                    ComponentName::class.java,
+                    Int::class.javaPrimitiveType!!
+                ),
                 filter,
                 match,
                 names,
@@ -778,14 +778,15 @@ class DefaultPrivilegedService(
         name: ComponentName,
         userId: Int,
     ) {
-        reflect.getDeclaredMethod(
-            IPackageManager::class.java,
-            "addPersistentPreferredActivity",
-            IntentFilter::class.java,
-            ComponentName::class.java,
-            Int::class.java,
-        )?.invoke(
+        reflect.invoke<Unit>(
             iPackageManager,
+            "addPersistentPreferredActivity",
+            IPackageManager::class.java,
+            arrayOf(
+                IntentFilter::class.java,
+                ComponentName::class.java,
+                Int::class.javaPrimitiveType!!
+            ),
             filter,
             name,
             userId,
@@ -799,25 +800,40 @@ class DefaultPrivilegedService(
         flags: Int,
         userId: Int
     ): List<ResolveInfo> {
-        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            reflect.getDeclaredMethod(
-                IPackageManager::class.java,
+        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            reflect.invoke<ParceledListSlice<ResolveInfo>>(
+                iPackageManager,
                 "queryIntentActivities",
-                Intent::class.java,
-                String::class.java,
-                Long::class.java,
-                Int::class.java
-            )?.invoke(iPackageManager, intent, resolvedType, flags.toLong(), userId)
+                IPackageManager::class.java,
+                arrayOf(
+                    Intent::class.java,
+                    String::class.java,
+                    Long::class.javaPrimitiveType!!,
+                    Int::class.javaPrimitiveType!!
+                ),
+                intent,
+                resolvedType,
+                flags.toLong(),
+                userId
+            )
         } else {
-            reflect.getDeclaredMethod(
-                IPackageManager::class.java,
+            reflect.invoke<ParceledListSlice<ResolveInfo>>(
+                iPackageManager,
                 "queryIntentActivities",
-                Intent::class.java,
-                String::class.java,
-                Int::class.java,
-                Int::class.java
-            )?.invoke(iPackageManager, intent, resolvedType, flags, userId)
-        } as ParceledListSlice<ResolveInfo>).list
+                IPackageManager::class.java,
+                arrayOf(
+                    Intent::class.java,
+                    String::class.java,
+                    Int::class.javaPrimitiveType!!,
+                    Int::class.javaPrimitiveType!!
+                ),
+                intent,
+                resolvedType,
+                flags,
+                userId
+            )
+        }
+        return result?.list ?: emptyList()
     }
 
     @Throws(IOException::class, InterruptedException::class)

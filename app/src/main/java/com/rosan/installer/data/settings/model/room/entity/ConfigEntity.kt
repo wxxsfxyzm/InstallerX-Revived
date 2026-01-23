@@ -42,6 +42,7 @@ data class ConfigEntity(
         defaultValue = "'speed-profile'"
     ) var dexoptMode: DexoptMode = DexoptMode.SpeedProfile,
     @ColumnInfo(name = "auto_delete") var autoDelete: Boolean,
+    @ColumnInfo(name = "auto_delete_zip", defaultValue = "0") var autoDeleteZip: Boolean = false,
     @ColumnInfo(name = "display_size", defaultValue = "0") var displaySize: Boolean = false,
     @ColumnInfo(name = "display_sdk", defaultValue = "0") var displaySdk: Boolean = false,
     @ColumnInfo(name = "for_all_user") var forAllUser: Boolean,
@@ -70,6 +71,7 @@ data class ConfigEntity(
             forceDexopt = false,
             dexoptMode = DexoptMode.SpeedProfile,
             autoDelete = false,
+            autoDeleteZip = false,
             displaySize = false,
             displaySdk = false,
             forAllUser = false,
@@ -96,6 +98,7 @@ data class ConfigEntity(
             forceDexopt = false,
             dexoptMode = DexoptMode.SpeedProfile,
             autoDelete = false,
+            autoDeleteZip = false,
             displaySize = false,
             displaySdk = false,
             forAllUser = false,
@@ -121,9 +124,6 @@ data class ConfigEntity(
      */
     @Ignore
     var callingFromUid: Int? = null
-
-    val isCustomizeAuthorizer: Boolean
-        get() = authorizer == Authorizer.Customize
 
     enum class Authorizer(val value: String) {
         Global("global"),

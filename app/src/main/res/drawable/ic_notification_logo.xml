@@ -10,19 +10,19 @@
         android:pivotX="48"
         android:pivotY="48">
         <path
-            android:fillColor="#000000"
+            android:fillColor="#FFFFFF"
             android:strokeWidth="0"
             android:pathData="M 66.1138 29.9179 L 66.1138 35.5000 L 70.5018 35.5000 Z" />
         <path
-            android:fillColor="#000000"
+            android:fillColor="#FFFFFF"
             android:strokeWidth="0"
             android:pathData="M 64.4261 48.7692 L 64.4261 28.3400 L 56.1759 28.3400 L 51.9001 34.5696 Z" />
         <path
-            android:fillColor="#000000"
+            android:fillColor="#FFFFFF"
             android:strokeWidth="0"
             android:pathData="M 50.4373 35.5807 L 25.4982 35.5807 L 53.3629 67.1343 L 64.1637 51.1146 Z" />
         <path
-            android:fillColor="#000000"
+            android:fillColor="#FFFFFF"
             android:strokeWidth="0"
             android:pathData="M 51.5256 67.6600 L 42.3370 57.2640 L 30.1485 67.6600 Z" />
     </group>

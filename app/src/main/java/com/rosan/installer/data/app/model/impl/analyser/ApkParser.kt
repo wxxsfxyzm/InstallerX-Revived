@@ -18,6 +18,7 @@ import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsuppo
 import com.rosan.installer.data.app.util.SignatureUtils
 import com.rosan.installer.data.app.util.parseSplitMetadata
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.data.reflect.repo.invoke
 import com.rosan.installer.data.res.model.impl.AxmlTreeRepoImpl
 import com.rosan.installer.data.res.repo.AxmlTreeRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -57,6 +58,7 @@ object ApkParser : KoinComponent {
                 val entity = loadAppEntity(
                     apkResources,
                     apkResources.newTheme(),
+                    path,
                     data,
                     extra,
                     bestArch ?: Architecture.UNKNOWN
@@ -130,12 +132,13 @@ object ApkParser : KoinComponent {
 
             val assets = constructor.newInstance() as AssetManager
 
-            val addAssetPath = reflect.getDeclaredMethod(AssetManager::class.java, "addAssetPath", String::class.java)
-                ?: throw AnalyseFailedAllFilesUnsupportedException("Failed to find addAssetPath method via reflection")
+            val cookie = reflect.invoke<Int>(
+                obj = assets,
+                name = "addAssetPath",
+                parameterTypes = arrayOf(String::class.java),
+                args = arrayOf(path)
+            ) ?: throw AnalyseFailedAllFilesUnsupportedException("Failed to find or invoke addAssetPath via reflection")
 
-            addAssetPath.isAccessible = true
-
-            val cookie = addAssetPath.invoke(assets, path) as Int
             if (cookie == 0) {
                 throw AnalyseFailedAllFilesUnsupportedException("addAssetPath returned 0 for: $path")
             }
@@ -145,8 +148,8 @@ object ApkParser : KoinComponent {
 
     private fun setAssetPath(assetManager: AssetManager, assets: Array<ApkAssets>) {
         val setApkAssetsMtd = reflect.getDeclaredMethod(
-            AssetManager::class.java,
             "setApkAssets",
+            AssetManager::class.java,
             Array<ApkAssets>::class.java,
             Boolean::class.java
         ) ?: throw AnalyseFailedAllFilesUnsupportedException("Failed to find setApkAssets method")
@@ -156,7 +159,12 @@ object ApkParser : KoinComponent {
     }
 
     private fun loadAppEntity(
-        resources: Resources, theme: Resources.Theme?, data: DataEntity, extra: AnalyseExtraEntity, arch: Architecture
+        resources: Resources,
+        theme: Resources.Theme?,
+        path: String,
+        data: DataEntity,
+        extra: AnalyseExtraEntity,
+        arch: Architecture
     ): AppEntity {
         var packageName: String? = null
         var sharedUserId: String? = null
@@ -164,6 +172,7 @@ object ApkParser : KoinComponent {
         var versionCode: Long = -1
         var versionName = ""
         var minOsdkVersion: String? = null
+        var isXposedModule = false
         var label: String? = null
         var icon: Drawable? = null
         var roundIcon: Drawable? = null
@@ -188,7 +197,7 @@ object ApkParser : KoinComponent {
                     0 -> versionName
                     else -> try {
                         resources.getString(resId)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName") ?: versionName
                     }
                 }
@@ -217,11 +226,28 @@ object ApkParser : KoinComponent {
                         )
                     }
                 }
+
+                val metaDataName = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")
+
+                if ("xposedmodule" == metaDataName ||
+                    "xposedminversion" == metaDataName ||
+                    "xposeddescription" == metaDataName
+                ) {
+                    isXposedModule = true
+                }
             }
             .register("/manifest/uses-permission") {
                 getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")?.let { if (it.isNotBlank()) permissions.add(it) }
             }
             .map { }
+
+        ZipFile(path).use { zip ->
+            val propEntry = zip.getEntry("META-INF/xposed/module.prop");
+            if (propEntry != null) {
+                isXposedModule = true
+            }
+        }
+
         Timber.d("ApkParser: Manifest parsed. Package: $packageName, Split: $splitName")
         if (packageName.isNullOrEmpty()) throw Exception("Invalid APK: missing package name")
 
@@ -236,6 +262,7 @@ object ApkParser : KoinComponent {
             targetSdk = targetSdk,
             minSdk = minSdk,
             minOsdkVersion = minOsdkVersion,
+            isXposedModule = isXposedModule,
             arch = arch,
             permissions = permissions,
             sourceType = extra.dataType,

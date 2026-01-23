@@ -13,11 +13,12 @@ import com.rosan.installer.data.recycle.repo.recyclable.UserService
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
 import timber.log.Timber
+import java.lang.reflect.InvocationTargetException
 
 private const val TAG = "PrivilegedService"
 
 private object DefaultUserService : UserService {
-    override val privileged: IPrivilegedService = DefaultPrivilegedService()
+    override val privileged: IPrivilegedService = DefaultPrivilegedService(isHookMode = false)
     override fun close() {}
 }
 
@@ -55,10 +56,24 @@ private fun processRecycler(
             Timber.tag(TAG).e("No recycler found for $authorizer. Falling back to DefaultUserService.")
             action.invoke(DefaultUserService)
         }
-    } catch (e: IllegalStateException) {
-        if (authorizer == ConfigEntity.Authorizer.Shizuku && e.message?.contains("binder haven't been received") == true) {
-            throw ShizukuNotWorkException("Shizuku service connection lost during privileged action.", e)
+    } catch (e: Exception) {
+        if (e is InvocationTargetException) {
+            val target = e.targetException
+            if (authorizer == ConfigEntity.Authorizer.Shizuku &&
+                target is IllegalStateException &&
+                target.message?.contains("binder haven't been received") == true
+            ) {
+                throw ShizukuNotWorkException("Shizuku service connection lost during privileged action (Reflected).", target)
+            }
+            throw e
         }
+
+        if (e is IllegalStateException) {
+            if (authorizer == ConfigEntity.Authorizer.Shizuku && e.message?.contains("binder haven't been received") == true) {
+                throw ShizukuNotWorkException("Shizuku service connection lost during privileged action.", e)
+            }
+        }
+
         throw e
     }
 }

@@ -222,6 +222,8 @@
     <string name="config_dexopt_mode_everything" translatable="false">Everything</string>
     <string name="config_auto_delete">Auto deletion</string>
     <string name="config_auto_delete_desc">Automatically delete the apk after it\'s been installed</string>
+    <string name="config_auto_delete_zip">Auto delete zip files</string>
+    <string name="config_auto_delete_zip_desc">In addition to deleting the installation package, also delete the compressed file containing the installation package.</string>
     <string name="config_display_sdk_version">Display SDK information</string>
     <string name="config_display_sdk_version_desc">Show target and min information on the installation interface</string>
     <string name="config_display_module_extra_info_desc">Show extra infos if is module</string>
@@ -278,6 +280,7 @@
     <string name="no_license_text">No license text available.</string>
     <string name="finish">Done</string>
     <string name="open">Open</string>
+    <string name="open_lsposed">Open LSPosed</string>
     <string name="select">Select</string>
     <string name="clear">Clear</string>
     <string name="global">Global</string>

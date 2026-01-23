@@ -44,6 +44,7 @@
 
     <application
         android:name=".App"
+        android:persistent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
@@ -115,6 +116,7 @@
             <intent-filter android:priority="10">
                 <action android:name="android.content.pm.action.CONFIRM_INSTALL" />
                 <action android:name="android.content.pm.action.CONFIRM_PERMISSIONS" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -146,8 +148,12 @@
 
         <service
             android:name="com.rosan.installer.data.installer.model.impl.InstallerService"
-            android:permission="android.permission.FOREGROUND_SERVICE"
-            android:foregroundServiceType="specialUse" />
+            android:foregroundServiceType="specialUse">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="installer_processing" />
+        </service>
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
@@ -172,6 +178,12 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SECRET_CODE" />
+                <data
+                    android:scheme="android_secret_code"
+                    android:host="46789" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.telephony.action.SECRET_CODE" />
                 <data
                     android:scheme="android_secret_code"
                     android:host="46789" />

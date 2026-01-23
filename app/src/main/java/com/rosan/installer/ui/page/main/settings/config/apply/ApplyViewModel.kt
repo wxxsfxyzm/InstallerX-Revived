@@ -7,14 +7,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rosan.installer.data.common.util.compatVersionCode
-import com.rosan.installer.data.common.util.getCompatInstalledPackages
-import com.rosan.installer.data.common.util.hasFlag
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.AppEntity
 import com.rosan.installer.data.settings.repo.AppRepo
 import com.rosan.installer.data.settings.repo.ConfigRepo
 import com.rosan.installer.ui.common.ViewContent
+import com.rosan.installer.util.compatVersionCode
+import com.rosan.installer.util.getCompatInstalledPackages
+import com.rosan.installer.util.hasFlag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -34,11 +34,7 @@ class ApplyViewModel(
 
     private val packageManager = context.packageManager
 
-    val defaultIcon = packageManager.defaultActivityIcon
-
-    var state by mutableStateOf(
-        ApplyViewState()
-    )
+    var state by mutableStateOf(ApplyViewState())
 
     fun dispatch(action: ApplyViewAction) {
         when (action) {

@@ -214,6 +214,8 @@
     <string name="config_force_dexopt_desc">即使系统认为没有必要，也强制重新编译</string>
     <string name="config_auto_delete">自动删除</string>
     <string name="config_auto_delete_desc">安装成功后自动删除安装包</string>
+    <string name="config_auto_delete_zip">删除压缩包</string>
+    <string name="config_auto_delete_zip_desc">除删除安装包之外，删除包含安装包的压缩文件</string>
     <string name="config_display_sdk_version">显示 SDK 信息</string>
     <string name="config_display_sdk_version_desc">在安装界面显示 target 与 min 信息</string>
     <string name="config_display_module_extra_info_desc">如果是模块则显示额外信息</string>
@@ -267,9 +269,10 @@
     <string name="close">关闭</string>
     <string name="visit_home_page">访问主页</string>
     <string name="license">许可证：%s</string>
-    <string name="no_license_text">许可证内容不可用</string>
+    <string name="no_license_text">许可证内容不可用。</string>
     <string name="finish">完成</string>
     <string name="open">打开</string>
+    <string name="open_lsposed">打开 LSPosed</string>
     <string name="select">选择</string>
     <string name="clear">清除</string>
     <string name="global">全局</string>
