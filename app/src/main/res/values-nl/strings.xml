@@ -660,4 +660,7 @@
     <string name="visit_home_page">Startpagina bezoeken</string>
     <string name="license">Licentie: %s</string>
     <string name="no_license_text">Geen licentietekst beschikbaar.</string>
+    <string name="config_auto_delete_zip">Automatisch zip-bestanden verwijderen</string>
+    <string name="config_auto_delete_zip_desc">Naast het verwijderen van het installatiepakket, ook het gecomprimeerde bestand waarin het installatiepakket zit verwijderen.</string>
+    <string name="open_lsposed">LSPosed openen</string>
 </resources>

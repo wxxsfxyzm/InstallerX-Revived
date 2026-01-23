@@ -306,9 +306,9 @@
     <string name="exception_dhizuku_not_work">Bitte aktivieren Sie Dhizuku und erteilen Sie die Berechtigung</string>
     <string name="exception_root_not_work">Root-zugriff verweigert</string>
     <string name="exception_app_process_not_work">Authorizer konnten nicht verbunden werden</string>
-    <string name="old_version_prefix">Aktuell</string>
+    <string name="old_version_prefix">Aktuelle</string>
     <string name="old_version_archived">Archiviert</string>
-    <string name="upgrade_version_prefix">Aufrüstung</string>
+    <string name="upgrade_version_prefix">Neue</string>
     <string name="downgrade_version_prefix">Herabstufung</string>
     <string name="install_choice">Paket auswählen</string>
     <string name="show_dialog_when_pressing_notification">Dialog anzeigen, wenn die Benachrichtigung abgetippt wird</string>
@@ -433,12 +433,12 @@
     <string name="suggestion_bypass_blacklist_set_by_user">Einmalige Installation zulassen</string>
     <string name="lab">Labor</string>
     <string name="lab_desc">Zugriff auf experimentelle und Entwicklerfunktionen</string>
-    <string name="updating">Aktualisiere...</string>
+    <string name="updating">Aktualisiere…</string>
     <string name="update_available">Aktualisierung verfügbar: %1$s</string>
     <string name="get_update_directly">Aktualisierung direkt abrufen</string>
     <string name="get_update_directly_desc">Aktualisierung direkt von Github herunterladen und installieren, kein Cache wird verbleiben</string>
     <string name="uninstall_title">Deinstalliere InstallerX Revived</string>
-    <string name="uninstall_content">Nach der Deinstallation dieser App wirst du InstallerX R3vived nicht mehr zum installieren von Apps verwenden können.</string>
+    <string name="uninstall_content">Nach der Deinstallation dieser App wirst du InstallerX Revived nicht mehr zum installieren von Apps verwenden können.</string>
     <string name="theme_settings_miuix_custom_colors">Benutzerdefinierte Farben</string>
     <string name="theme_settings_miuix_custom_colors_desc">Designfarben im MIUI-Designstil anpassen</string>
     <string name="theme_settings_theme_mode">Designmodus</string>
@@ -608,7 +608,7 @@
     <string name="exception_install_parse_failed_skipped">Das Paket wurde übersprungen und sollte ignoriert werden</string>
     <string name="exception_uninstall_failed_aborted">Deinstallation vom Benutzer abgebrochen</string>
     <string name="lab_unstable_features">Instabile Funktionen</string>
-    <string name="lab_set_install_requester">Set Install Requester</string>
+    <string name="lab_set_install_requester">Installationsanforderer festlegen</string>
     <string name="lab_set_install_requester_desc">Füllen Sie das Feld OriginatingUid mit dem Caller-Paket, um das Systemverhalten anzupassen</string>
     <string name="performance">Leistung</string>
     <string name="uninstaller_settings">Deinstallationseinstellungen</string>
@@ -652,4 +652,12 @@
     <string name="auth_summary_uninstall">Sie führen eine Deinstallationsoperation durch. Um fortzufahren, bestätigen Sie diese Aktion bitte mit Ihrer Geräte-Authentifizierung</string>
     <string name="exception_authentication_failed">Die Benutzerauthentifizierung fehlschlug</string>
     <string name="old_version_uninstalled">Deinstalliert</string>
+    <string name="open_source_license_settings_description">Drittparteien-Open-Source Bibliotheken und deren Lizenzen anzeigen</string>
+    <string name="config_authorizer_none_system_app_tips">Wird als System-installer ausgeführt - die meisten dieser Optionen werden nicht benötigt.</string>
+    <string name="visit_home_page">Homepage (Webseite) besuchen</string>
+    <string name="license">Lizenz: %s</string>
+    <string name="no_license_text">Kein Lizenztext verfügbar.</string>
+    <string name="installer_author">Autor: %1$s</string>
+    <string name="lab_module_always_use_root">Immer root nutzen, um Module zu flashen</string>
+    <string name="lab_module_always_use_root_desc">Wenn installerX als System-installer ausgeführt wird, immer root nutzen um Module zu flashen, um beste Performance zu erzielen</string>
 </resources>
