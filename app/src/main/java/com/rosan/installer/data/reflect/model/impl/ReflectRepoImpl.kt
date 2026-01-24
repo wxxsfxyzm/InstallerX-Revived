@@ -119,17 +119,16 @@ class ReflectRepoImpl : ReflectRepo {
         }
     }
 
-    override fun getFieldValue(obj: Any?, name: String, clazz: Class<*>): Any? {
-        return (getDeclaredField(name, clazz) ?: getField(name, clazz))?.get(obj)
-    }
+    override fun getFieldValue(obj: Any?, name: String, clazz: Class<*>): Any? =
+        (getDeclaredField(name, clazz) ?: getField(name, clazz))?.get(obj)
+
 
     override fun setFieldValue(obj: Any?, name: String, clazz: Class<*>, value: Any?) {
         (getDeclaredField(name, clazz) ?: getField(name, clazz))?.set(obj, value)
     }
 
-    override fun getStaticFieldValue(name: String, clazz: Class<*>): Any? {
-        return getFieldValue(null, name, clazz)
-    }
+    override fun getStaticFieldValue(name: String, clazz: Class<*>): Any? =
+        getFieldValue(null, name, clazz)
 
     override fun setStaticFieldValue(name: String, clazz: Class<*>, value: Any?) {
         setFieldValue(null, name, clazz, value)
@@ -152,9 +151,7 @@ class ReflectRepoImpl : ReflectRepo {
         clazz: Class<*>,
         parameterTypes: Array<Class<*>>,
         vararg args: Any?
-    ): Any? {
-        return invokeMethod(null, name, clazz, parameterTypes, *args)
-    }
+    ): Any? = invokeMethod(null, name, clazz, parameterTypes, *args)
 
     private inline fun <K : Any, V : Any> ConcurrentHashMap<K, V>.getOrPut(key: K, defaultValue: () -> V?): V? {
         val existing = get(key)

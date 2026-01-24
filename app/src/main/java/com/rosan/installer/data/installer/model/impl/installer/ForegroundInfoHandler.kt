@@ -83,6 +83,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private var lastProgressClass: KClass<out ProgressEntity>? = null
     private var lastLogLine: String? = null
 
+    // State for fake progress animation
+    private var currentInstallKey: String? = null
+    private var currentInstallStartTime: Long = 0L
+
     @SuppressLint("MissingPermission")
     override suspend fun onStart() {
         Timber.d("[id=${installer.id}] onStart: Starting to combine and collect flows.")
@@ -99,15 +103,40 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             preferDynamicColor = appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
         )
 
+        // Ticker flow for animation (approx 30fps cap for calculation, throttled by setNotificationThrottled)
+        // Note: Actual UI update rate is limited by NOTIFICATION_UPDATE_INTERVAL_MS (500ms)
+        val ticker = kotlinx.coroutines.flow.flow {
+            while (true) {
+                emit(Unit)
+                delay(200) // Trigger check every 200ms
+            }
+        }
+
         job = scope.launch {
             combine(
                 installer.progress,
-                installer.background
-            ) { progress, background ->
+                installer.background,
+                ticker
+            ) { progress, background, _ -> // Ignore ticker value
 
                 // Log reduction for specific high-frequency states
                 if (progress !is ProgressEntity.InstallingModule) {
                     Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=${settings.showDialog}")
+                }
+
+                var fakeItemProgress = 0f
+                if (progress is ProgressEntity.Installing) {
+                    val key = "${progress.current}|${progress.total}|${progress.appLabel}"
+                    if (currentInstallKey != key) {
+                        currentInstallKey = key
+                        currentInstallStartTime = System.currentTimeMillis()
+                    }
+                    val elapsed = System.currentTimeMillis() - currentInstallStartTime
+                    // Asymptotic curve: Starts fast, slows down, caps at 0.95
+                    // Formula: 1 - 1 / (1 + t/3000) roughly maps 0s->0, 3s->0.5, 9s->0.75...
+                    fakeItemProgress = (1f - 1f / (1f + elapsed / 3000f)).coerceAtMost(0.95f)
+                } else {
+                    currentInstallKey = null
                 }
 
                 if (progress is ProgressEntity.InstallAnalysedUnsupported) {
@@ -139,7 +168,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                                 progress = progress,
                                 showDialog = settings.showDialog,
                                 preferSystemIcon = settings.preferSystemIcon,
-                                preferDynamicColor = settings.preferDynamicColor
+                                preferDynamicColor = settings.preferDynamicColor,
+                                fakeItemProgress = fakeItemProgress
                             )
                         } else {
                             buildLegacyNotification(progress, true, settings.showDialog, settings.preferSystemIcon)
@@ -312,12 +342,13 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         progress: ProgressEntity,
         showDialog: Boolean,
         preferSystemIcon: Boolean = false,
-        preferDynamicColor: Boolean = false
+        preferDynamicColor: Boolean = false,
+        fakeItemProgress: Float = 0f
     ): Notification? {
-        if (progress is ProgressEntity.Finish || progress is ProgressEntity.Error || progress is ProgressEntity.InstallAnalysedUnsupported) {
+        if (progress is ProgressEntity.Finish || progress is ProgressEntity.Error || progress is ProgressEntity.InstallAnalysedUnsupported)
             return null
-        }
-        val builder = newModernNotificationBuilder(progress, showDialog, preferSystemIcon, preferDynamicColor)
+
+        val builder = newModernNotificationBuilder(progress, showDialog, preferSystemIcon, preferDynamicColor, fakeItemProgress)
 
         return when (progress) {
             is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
@@ -332,7 +363,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         progress: ProgressEntity,
         showDialog: Boolean,
         preferSystemIcon: Boolean = false,
-        preferDynamicColor: Boolean = false
+        preferDynamicColor: Boolean = false,
+        fakeItemProgress: Float = 0f
     ): NotificationCompat.Builder {
         val contentIntent = when (installer.config.installMode) {
             ConfigEntity.InstallMode.Notification,
@@ -447,13 +479,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 }
             }
 
-            // === Modified: Handle Batch and Detailed Installing ===
+            // Handle Batch and Detailed Installing
             is ProgressEntity.Installing -> {
                 val isBatch = progress.total > 1
                 val appLabel = progress.appLabel ?: getString(R.string.installer_installing)
 
                 contentTitle = if (isBatch) {
-                    // E.g. "Installing (1/5): My App"
                     getString(R.string.installer_installing) + " (${progress.current}/${progress.total}): $appLabel"
                 } else {
                     appLabel
@@ -461,22 +492,28 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
                 shortText = getString(R.string.installer_live_channel_short_text_installing)
 
-                // Calculate progress based on current/total
+                // Calculate progress: Base + (Segment * Fraction)
                 val segmentWeight = installStages[3].weight
-                val batchFraction = if (progress.total > 0) progress.current.toFloat() / progress.total.toFloat() else 0.5f
+
+                // Logic:
+                // If Single: fraction = fakeItemProgress (0 -> 0.95)
+                // If Batch: fraction = ( (current - 1) + fakeItemProgress ) / total
+                val total = progress.total.coerceAtLeast(1).toFloat()
+                val currentBase = (progress.current - 1).coerceAtLeast(0).toFloat()
+                val batchFraction = (currentBase + fakeItemProgress) / total
+
                 val progressValue = previousStagesWeight + (segmentWeight * batchFraction)
 
                 progressStyle.setProgress(progressValue.toInt())
                 baseBuilder.setContentText(getString(R.string.installer_installing))
 
-                // Pass current index for correct icon in batch mode
                 val currentBatchIndex = if (isBatch) progress.current - 1 else null
                 baseBuilder.setLargeIcon(getLargeIconBitmap(preferSystemIcon, currentBatchIndex))
             }
 
-            // === Added: Handle Module Installation ===
+            // Handle Module Installation
             is ProgressEntity.InstallingModule -> {
-                contentTitle = getString(R.string.installer_installing) // Or "Installing Module"
+                contentTitle = getString(R.string.installer_installing)
                 shortText = getString(R.string.installer_live_channel_short_text_installing)
 
                 // Module installs don't have percentage, so we set it to the start of the "Installing" segment
