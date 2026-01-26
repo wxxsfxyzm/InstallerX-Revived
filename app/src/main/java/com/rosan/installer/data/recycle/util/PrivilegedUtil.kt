@@ -19,9 +19,11 @@ import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import java.io.File
 
-const val SHELL_ROOT = "su -M"
-const val SHELL_SYSTEM = "su -M 1000"
+const val SHELL_ROOT = "su"
+const val SHELL_SYSTEM = "su 1000"
 const val SHELL_SH = "sh"
+
+const val SU_ARGS = "-M"
 
 private const val PRIVILEGED_START_TIMEOUT_MS = 2500L
 

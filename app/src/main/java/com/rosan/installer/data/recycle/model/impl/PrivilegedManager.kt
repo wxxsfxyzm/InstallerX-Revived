@@ -3,6 +3,7 @@ package com.rosan.installer.data.recycle.model.impl
 import android.content.ComponentName
 import android.content.Intent
 import com.rosan.installer.data.recycle.util.SHELL_ROOT
+import com.rosan.installer.data.recycle.util.SU_ARGS
 import com.rosan.installer.data.recycle.util.getSpecialAuth
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
@@ -116,19 +117,28 @@ object PrivilegedManager : KoinComponent {
     fun execArr(config: ConfigEntity, command: Array<String>): String {
         if (config.authorizer == ConfigEntity.Authorizer.Root || config.authorizer == ConfigEntity.Authorizer.Customize) {
             return try {
-                val shellBinary = if (config.authorizer == ConfigEntity.Authorizer.Customize) {
-                    config.customizeAuthorizer.ifBlank { SHELL_ROOT }
+                // 1. Determine Shell Binary Parts
+                // Use split for Customize to handle inputs like "/path/to/su --arg"
+                // Use listOf(SHELL_ROOT, SU_ARGS) for default to ensure "su -M" is passed correctly
+                val shellParts = if (config.authorizer == ConfigEntity.Authorizer.Customize && config.customizeAuthorizer.isNotBlank()) {
+                    config.customizeAuthorizer.trim().split("\\s+".toRegex())
                 } else {
-                    SHELL_ROOT
+                    listOf(SHELL_ROOT, SU_ARGS)
                 }
 
+                // 2. Escape arguments to safe shell string
+                // Since we are wrapping the command in 'su -c "..."', we must escape single quotes.
                 val escapedCommand = command.joinToString(" ") { arg ->
                     "'" + arg.replace("'", "'\\''") + "'"
                 }
 
-                Timber.d("Executing local shell command: $shellBinary -c $escapedCommand")
+                // 3. Construct Final Process Command
+                // Combine shell parts (e.g. [su, -M]) + [-c] + [command_string]
+                val processCommand = shellParts + listOf("-c", escapedCommand)
 
-                val process = ProcessBuilder(shellBinary, "-c", escapedCommand)
+                Timber.d("Executing local shell command: $processCommand")
+
+                val process = ProcessBuilder(processCommand)
                     .redirectErrorStream(true)
                     .start()
 

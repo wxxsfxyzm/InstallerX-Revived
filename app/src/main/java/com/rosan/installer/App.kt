@@ -39,6 +39,7 @@ class App : Application() {
             modules(appModules)
         }
 
+        // Initialize Shizuku module
         AutoLockManager.init()
     }
 }

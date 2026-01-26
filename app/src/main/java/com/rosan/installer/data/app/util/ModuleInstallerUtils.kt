@@ -8,22 +8,20 @@ object ModuleInstallerUtils {
     /**
      * Resolves the module path or throws an exception if not found.
      */
-    fun getModulePathOrThrow(module: AppEntity.ModuleEntity): String {
-        return module.data.sourcePath()
+    fun getModulePathOrThrow(module: AppEntity.ModuleEntity): String =
+        module.data.sourcePath()
             ?: throw ModuleInstallException("Could not resolve module file path for ${module.name}")
-    }
 
     /**
      * Returns the raw command arguments for installing a module.
      * @return An array of strings representing the command and its arguments.
      */
-    fun getInstallCommandArgs(rootImplementation: RootImplementation, modulePath: String): Array<String> {
-        return when (rootImplementation) {
+    fun getInstallCommandArgs(rootImplementation: RootImplementation, modulePath: String): Array<String> =
+        when (rootImplementation) {
             RootImplementation.Magisk -> arrayOf("magisk", "--install-module", modulePath)
             RootImplementation.KernelSU -> arrayOf("ksud", "module", "install", modulePath)
             RootImplementation.APatch -> arrayOf("apd", "module", "install", modulePath)
         }
-    }
 
     /**
      * Converts raw arguments into a shell-safe command string.

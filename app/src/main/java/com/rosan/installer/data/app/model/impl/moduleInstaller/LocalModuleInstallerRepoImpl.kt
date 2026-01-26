@@ -7,6 +7,7 @@ import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZero
 import com.rosan.installer.data.app.repo.ModuleInstallerRepo
 import com.rosan.installer.data.app.util.ModuleInstallerUtils
 import com.rosan.installer.data.recycle.util.SHELL_ROOT
+import com.rosan.installer.data.recycle.util.SU_ARGS // Make sure to import this
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -26,15 +27,16 @@ object LocalModuleInstallerRepoImpl : ModuleInstallerRepo {
         // 1. Resolve Path using Helper
         val modulePath = ModuleInstallerUtils.getModulePathOrThrow(module)
 
-        // 2. Determine Shell Binary
-        val shellBinaryString = if (config.authorizer == ConfigEntity.Authorizer.Customize) {
-            config.customizeAuthorizer.ifBlank { SHELL_ROOT }
+        // 2. Determine Shell Binary Parts
+        // If customizing, we still need to split user input (e.g. "su -c") to ensure ProcessBuilder works correctly.
+        // If default, we directly concatenate the constants (SHELL_ROOT + SU_ARGS).
+        val shellParts = if (config.authorizer == ConfigEntity.Authorizer.Customize && config.customizeAuthorizer.isNotBlank()) {
+            config.customizeAuthorizer.trim().split("\\s+".toRegex())
         } else {
-            SHELL_ROOT
+            listOf(SHELL_ROOT, SU_ARGS)
         }
 
         // 3. Construct Command String using Helper (Safe for Shell)
-        val shellParts = shellBinaryString.trim().split("\\s+".toRegex())
         val installCmd = ModuleInstallerUtils.buildShellCommandString(rootImplementation, modulePath)
 
         val commandList = shellParts + listOf("-c", installCmd)
