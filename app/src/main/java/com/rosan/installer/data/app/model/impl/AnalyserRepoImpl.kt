@@ -6,11 +6,11 @@ import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.model.enums.SessionMode
+import com.rosan.installer.data.app.model.impl.analyser.FileTypeDetector
 import com.rosan.installer.data.app.model.impl.analyser.UnifiedContainerAnalyser
 import com.rosan.installer.data.app.model.impl.processor.PackagePreprocessor
 import com.rosan.installer.data.app.model.impl.processor.SelectionStrategy
 import com.rosan.installer.data.app.repo.AnalyserRepo
-import com.rosan.installer.data.app.util.FileTypeDetector
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
