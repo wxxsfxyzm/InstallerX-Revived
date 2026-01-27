@@ -491,6 +491,7 @@
     <string name="exception_module_install_exit_code_non_zero">退出状态码非零！</string>
     <string name="exception_http_not_allowed">当前配置不允许明文 HTTP</string>
     <string name="exception_http_restricted_for_localhost">仅允许在本地网络使用明文 HTTP</string>
+    <string name="exception_zip_exception">无法打开 zip 文件</string>
     <string name="old_version_prefix">当前</string>
     <string name="old_version_archived">已归档</string>
     <string name="old_version_uninstalled">已卸载</string>

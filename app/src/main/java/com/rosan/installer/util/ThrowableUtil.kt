@@ -61,6 +61,7 @@ import com.rosan.installer.data.recycle.model.exception.DhizukuDeadServiceExcept
 import com.rosan.installer.data.recycle.model.exception.DhizukuNotWorkException
 import com.rosan.installer.data.recycle.model.exception.RootNotWorkException
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
+import java.util.zip.ZipException
 
 /**
  * 公共实现
@@ -130,6 +131,7 @@ private fun Throwable.getStringResourceId() =
         is ModuleInstallExitCodeNonZeroException -> R.string.exception_module_install_exit_code_non_zero
         is HttpNotAllowedException -> R.string.exception_http_not_allowed
         is HttpRestrictedForLocalhostException -> R.string.exception_http_restricted_for_localhost
+        is ZipException -> R.string.exception_zip_exception
 
         else -> R.string.exception_install_failed_unknown
     }

@@ -509,6 +509,7 @@
     <string name="exception_module_install_exit_code_non_zero">Exit code non zero!</string>
     <string name="exception_http_not_allowed">Cleartext HTTP not allowed</string>
     <string name="exception_http_restricted_for_localhost">Cleartext HTTP restricted to localhost</string>
+    <string name="exception_zip_exception">Failed to open zip as file</string>
     <string name="old_version_prefix">Current</string>
     <string name="old_version_archived">Archived</string>
     <string name="old_version_uninstalled">Uninstalled</string>

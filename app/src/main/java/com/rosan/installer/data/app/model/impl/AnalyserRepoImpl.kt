@@ -17,6 +17,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
+import java.util.zip.ZipException
 
 object AnalyserRepoImpl : AnalyserRepo {
     override suspend fun doWork(
@@ -108,13 +109,14 @@ object AnalyserRepoImpl : AnalyserRepo {
         return try {
             // Detect type efficiently
             val fileType = FileTypeDetector.detect(data, extra)
+            Timber.d("AnalyserRepo: FileType -> $fileType")
             if (fileType == DataType.NONE) return emptyList()
-
             // Delegate to the Unified Analyser
             UnifiedContainerAnalyser.analyze(config, data, fileType, extra.copy(dataType = fileType))
         } catch (e: Exception) {
             Timber.e(e, "Fatal error analyzing source: ${data.source}")
-            emptyList()
+            if (e is ZipException) throw e
+            else emptyList()
         }
     }
 }

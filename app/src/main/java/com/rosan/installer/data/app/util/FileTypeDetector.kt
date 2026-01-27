@@ -6,6 +6,7 @@ import com.rosan.installer.data.app.model.enums.DataType
 import timber.log.Timber
 import java.io.File
 import java.util.zip.ZipEntry
+import java.util.zip.ZipException
 import java.util.zip.ZipFile
 
 object FileTypeDetector {
@@ -31,7 +32,9 @@ object FileTypeDetector {
             if (fileEntity.path.endsWith(".apk", true)) {
                 DataType.APK
             } else {
-                DataType.NONE
+                Timber.e(e, "Failed to detect file type for path: ${fileEntity.path}")
+                if (e is ZipException) throw e
+                else DataType.NONE
             }
         }
     }
