@@ -660,4 +660,8 @@
     <string name="installer_author">Autor: %1$s</string>
     <string name="lab_module_always_use_root">Sempre usar root para atualizar módulos</string>
     <string name="lab_module_always_use_root_desc">Ao trabalhar como instalador do sistema, utilizar sempre root para atualizar os módulos e obter melhor desempenho</string>
+    <string name="config_auto_delete_zip">Excluir automaticamente arquivos zip</string>
+    <string name="config_auto_delete_zip_desc">Além de excluir o pacote de instalação, exclua também o arquivo compactado que contém o pacote de instalação.</string>
+    <string name="open_lsposed">Abrir o LSPosed</string>
+    <string name="exception_zip_exception">Não foi possível abrir o zip como arquivo</string>
 </resources>
