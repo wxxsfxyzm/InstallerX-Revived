@@ -53,6 +53,7 @@ import com.rosan.installer.ui.page.main.widget.setting.IgnoreBatteryOptimization
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
+import com.rosan.installer.ui.theme.none
 import com.rosan.installer.util.OSUtils
 import org.koin.androidx.compose.koinViewModel
 
@@ -60,7 +61,6 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun PreferredPage(
     navController: NavController,
-    windowInsets: WindowInsets,
     viewModel: PreferredViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -119,7 +119,7 @@ fun PreferredPage(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
-        contentWindowInsets = windowInsets,
+        contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -259,21 +259,14 @@ fun PreferredPage(
                         SettingsAboutItemWidget(
                             imageVector = AppIcons.Info,
                             headlineContentText = stringResource(R.string.about_detail),
-                            supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
+                            supportingContentText = if (state.hasUpdate) stringResource(
+                                R.string.update_available,
+                                state.remoteVersion
+                            ) else "$revLevel ${RsConfig.VERSION_NAME}",
+                            supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             onClick = { navController.navigate(SettingsScreen.About.route) }
                         )
                     }
-                    // Temporarily Disable This
-                    /*                    pkg {
-                                            SettingsAboutItemWidget(
-                                                imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
-                                                headlineContentText = stringResource(R.string.telegram_group),
-                                                supportingContentText = stringResource(R.string.telegram_group_desc),
-                                                onClick = {
-                                                    openUrl(context, "https://t.me/installerx_revived")
-                                                }
-                                            )
-                                        }*/
                 }
             }
         }

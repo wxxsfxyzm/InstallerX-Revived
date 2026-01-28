@@ -32,6 +32,6 @@ val networkModule = module {
 }
 
 val updateModule = module {
-    single<UpdateChecker> { OnlineUpdateChecker(get(), get()) }
+    single<UpdateChecker> { OnlineUpdateChecker(get(), get(), get()) }
     single<AppUpdater> { OnlineAppUpdater(get(), get()) }
 }

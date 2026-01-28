@@ -14,8 +14,8 @@ import java.io.IOException
 import com.rosan.installer.data.app.model.impl.InstallerRepoImpl as CoreInstaller
 
 class OnlineAppUpdater(
-    private val updateChecker: UpdateChecker,
-    private val context: Context
+    private val context: Context,
+    private val updateChecker: UpdateChecker
 ) : AppUpdater {
     override suspend fun performInAppUpdate(url: String, config: ConfigEntity) {
         // Get download stream entity (DataEntity)

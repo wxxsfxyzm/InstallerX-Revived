@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -54,11 +55,14 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     useMiuixMonet = state.useMiuixMonet,
                     seedColor = state.seedColor
                 ) {
-                    val modifier = Modifier.fillMaxSize()
                     if (state.showMiuixUI) {
-                        MiuixSurface(modifier = modifier) { MiuixSettingsPage(preferredViewModel) }
+                        MiuixSurface(modifier = Modifier.fillMaxSize()) { MiuixSettingsPage(preferredViewModel) }
                     } else {
-                        Material3Surface(modifier = modifier) { SettingsPage(preferredViewModel) }
+                        Material3Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = if (state.showExpressiveUI) MaterialTheme.colorScheme.surfaceContainer
+                            else MaterialTheme.colorScheme.surface
+                        ) { SettingsPage(preferredViewModel) }
                     }
                 }
             }

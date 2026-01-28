@@ -43,6 +43,9 @@ import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -50,105 +53,112 @@ fun NewHomePage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
+    val hazeState = remember { HazeState() }
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val uriHandler = LocalUriHandler.current
 
-    Scaffold(
-        modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        topBar = {
-            LargeFlexibleTopAppBar(
-                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                title = {
-                    Text(text = stringResource(id = R.string.about))
-                },
-                scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    Row {
-                        AppBackButton(
-                            onClick = { navController.navigateUp() },
-                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                            modifier = Modifier.size(36.dp),
-                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
-                        )
-                        Spacer(modifier = Modifier.size(16.dp))
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
-            )
-        },
-    ) { paddingValues ->
-        var showBottomSheet by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .hazeSource(state = hazeState),
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            topBar = {
+                LargeFlexibleTopAppBar(
+                    windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                    title = {
+                        Text(text = stringResource(id = R.string.about))
+                    },
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        Row {
+                            AppBackButton(
+                                onClick = { navController.navigateUp() },
+                                icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                                modifier = Modifier.size(36.dp),
+                                containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                            )
+                            Spacer(modifier = Modifier.size(16.dp))
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    ),
+                )
+            },
+        ) { paddingValues ->
+            var showBottomSheet by remember { mutableStateOf(false) }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(top = paddingValues.calculateTopPadding()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                Box(
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    StatusWidget()
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    Box(
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        StatusWidget(viewModel)
+                    }
                 }
-            }
-            item {
-                SplicedColumnGroup {
-                    item {
-                        SettingsNavigationItemWidget(
-                            icon = AppIcons.ViewSourceCode,
-                            title = stringResource(R.string.get_source_code),
-                            description = stringResource(R.string.get_source_code_detail),
-                            onClick = { uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived") }
-                        )
-                    }
-                    item {
-                        SettingsNavigationItemWidget(
-                            icon = AppIcons.OpenSourceLicense,
-                            title = stringResource(R.string.open_source_license),
-                            description = stringResource(R.string.open_source_license_settings_description),
-                            onClick = { navController.navigate(SettingsScreen.OpenSourceLicense.route) }
-                        )
-                    }
-                    item {
-                        SettingsNavigationItemWidget(
-                            icon = AppIcons.Update,
-                            title = stringResource(R.string.get_update),
-                            description = stringResource(R.string.get_update_detail),
-                            onClick = { showBottomSheet = true }
-                        )
-                    }
-                    if (viewModel.state.hasUpdate)
+                item {
+                    SplicedColumnGroup {
+                        item {
+                            SettingsNavigationItemWidget(
+                                icon = AppIcons.ViewSourceCode,
+                                title = stringResource(R.string.get_source_code),
+                                description = stringResource(R.string.get_source_code_detail),
+                                onClick = { uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived") }
+                            )
+                        }
+                        item {
+                            SettingsNavigationItemWidget(
+                                icon = AppIcons.OpenSourceLicense,
+                                title = stringResource(R.string.open_source_license),
+                                description = stringResource(R.string.open_source_license_settings_description),
+                                onClick = { navController.navigate(SettingsScreen.OpenSourceLicense.route) }
+                            )
+                        }
                         item {
                             SettingsNavigationItemWidget(
                                 icon = AppIcons.Update,
-                                title = stringResource(R.string.get_update_directly),
-                                description = stringResource(R.string.get_update_directly_desc),
-                                onClick = { viewModel.dispatch(PreferredViewAction.Update) }
+                                title = stringResource(R.string.get_update),
+                                description = stringResource(R.string.get_update_detail),
+                                onClick = { showBottomSheet = true }
                             )
                         }
-                }
-            }
-            if (showBottomSheet) {
-                item {
-                    ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-                        BottomSheetContent(
-                            title = stringResource(R.string.get_update),
-                            hasUpdate = viewModel.state.hasUpdate,
-                            onDirectUpdateClick = {
-                                showBottomSheet = false
-                                viewModel.dispatch(PreferredViewAction.Update)
+                        if (viewModel.state.hasUpdate)
+                            item {
+                                SettingsNavigationItemWidget(
+                                    icon = AppIcons.Download,
+                                    title = stringResource(R.string.get_update_directly),
+                                    description = stringResource(R.string.get_update_directly_desc),
+                                    onClick = { viewModel.dispatch(PreferredViewAction.Update) }
+                                )
                             }
-                        )
+                    }
+                }
+                if (showBottomSheet) {
+                    item {
+                        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+                            BottomSheetContent(
+                                title = stringResource(R.string.get_update),
+                                hasUpdate = viewModel.state.hasUpdate,
+                                onDirectUpdateClick = {
+                                    showBottomSheet = false
+                                    viewModel.dispatch(PreferredViewAction.Update)
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
+        UpdateLoadingIndicator(hazeState = hazeState, viewModel = viewModel)
     }
 }

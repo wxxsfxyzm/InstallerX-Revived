@@ -5,15 +5,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
@@ -30,13 +28,15 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.HomeCardItem
+import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 
 /**
  * @author iamr0s
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun StatusWidget() {
+fun StatusWidget(viewModel: PreferredViewModel) {
+    val state = viewModel.state
     val containerColor = when (RsConfig.LEVEL) {
         Level.STABLE -> MaterialTheme.colorScheme.primaryContainer
         Level.PREVIEW -> MaterialTheme.colorScheme.secondaryContainer
@@ -84,69 +84,23 @@ fun StatusWidget() {
             )
         },
         content = {
-            Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text(
-                    modifier = Modifier.align(Alignment.Center),
                     text = "$internetAccessHint$level ${RsConfig.VERSION_NAME} (${RsConfig.VERSION_CODE})",
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                if (state.hasUpdate)
+                    Text(
+                        text = stringResource(R.string.update_available, state.remoteVersion),
+                        style = MaterialTheme.typography.bodyMediumEmphasized,
+                        color = MaterialTheme.colorScheme.primary
+                    )
             }
         }
-    )
-}
-
-/**
- * @author iamr0s
- */
-@Composable
-fun ItemsCardWidget(
-    colors: CardColors = CardDefaults.elevatedCardColors(),
-    onClick: (() -> Unit)? = null,
-    showItemIcon: Boolean = false,
-    icon: (@Composable () -> Unit)? = null,
-    title: (@Composable () -> Unit)? = null,
-    items: List<HomeCardItem>,
-    buttons: (@Composable () -> Unit)? = null
-) {
-    CardWidget(
-        colors = colors,
-        onClick = onClick,
-        icon = icon,
-        title = title,
-        content = {
-            @Composable
-            fun ItemWidget(item: HomeCardItem) {
-                Row(
-                    modifier = Modifier
-                        .clickable(enabled = item.onClick != null, onClick = item.onClick ?: {})
-                        .padding(horizontal = 24.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    if (showItemIcon) {
-                        if (item.icon != null) {
-                            Icon(imageVector = item.icon, contentDescription = item.label)
-                        } else {
-                            Spacer(modifier = Modifier.size(32.dp))
-                        }
-                    }
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        Text(text = item.label, style = MaterialTheme.typography.bodyLarge)
-                        if (item.content != null) {
-                            Text(text = item.content, style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
-                }
-            }
-            Column {
-                items.forEach {
-                    ItemWidget(it)
-                }
-            }
-        },
-        buttons = buttons
     )
 }
 

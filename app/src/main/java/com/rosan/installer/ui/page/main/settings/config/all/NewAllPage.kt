@@ -44,13 +44,13 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.ScopeTipCard
 import com.rosan.installer.ui.page.main.widget.card.ShowDataWidget
+import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewAllPage(
     navController: NavController,
-    windowInsets: WindowInsets,
     viewModel: AllViewModel
 ) {
     LaunchedEffect(Unit) {
@@ -111,12 +111,13 @@ fun NewAllPage(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentWindowInsets = windowInsets,
+        contentWindowInsets = WindowInsets.none,
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = { Text(text = stringResource(id = R.string.config)) },
+                scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
@@ -148,9 +149,8 @@ fun NewAllPage(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
     ) {
         Box(modifier = Modifier.padding(it)) {
-            when {
-                viewModel.state.data.progress is AllViewState.Data.Progress.Loading
-                        && viewModel.state.data.configs.isEmpty() -> {
+            when (viewModel.state.data.progress) {
+                is AllViewState.Data.Progress.Loading if viewModel.state.data.configs.isEmpty() -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -171,8 +171,7 @@ fun NewAllPage(
                     }
                 }
 
-                viewModel.state.data.progress is AllViewState.Data.Progress.Loaded
-                        && viewModel.state.data.configs.isEmpty() -> {
+                is AllViewState.Data.Progress.Loaded if viewModel.state.data.configs.isEmpty() -> {
                     // TODO Add error handling
                     // Since we don't allow removing default profile,
                     // There is no need to handle an empty state.

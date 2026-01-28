@@ -3,19 +3,16 @@ package com.rosan.installer.ui.page.main.settings.preferred
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -49,7 +46,6 @@ import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.main.widget.setting.AutoLockInstaller
-import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.page.main.widget.setting.ClearCache
 import com.rosan.installer.ui.page.main.widget.setting.DefaultInstaller
 import com.rosan.installer.ui.page.main.widget.setting.DisableAdbVerify
@@ -273,13 +269,16 @@ fun NewPreferredPage(
                                 SettingsAboutItemWidget(
                                     imageVector = AppIcons.Info,
                                     headlineContentText = stringResource(R.string.about_detail),
-                                    supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
+                                    supportingContentText = if (state.hasUpdate) stringResource(
+                                        R.string.update_available,
+                                        state.remoteVersion
+                                    ) else "$revLevel ${RsConfig.VERSION_NAME}",
+                                    supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     onClick = { navController.navigate(SettingsScreen.About.route) }
                                 )
                             }
                         }
                     }
-                    item { Spacer(modifier = Modifier.size(6.dp)) }
                 }
             }
         }

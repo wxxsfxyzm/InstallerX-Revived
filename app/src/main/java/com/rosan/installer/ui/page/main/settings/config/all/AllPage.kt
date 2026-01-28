@@ -42,17 +42,16 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.ScopeTipCard
 import com.rosan.installer.ui.page.main.widget.card.ShowDataWidget
+import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AllPage(
     navController: NavController,
-    windowInsets: WindowInsets,
     viewModel: AllViewModel
 ) {
     LaunchedEffect(Unit) {
-        //viewModel.dispatch(AllViewAction.Init)
         viewModel.navController = navController
     }
 
@@ -109,7 +108,7 @@ fun AllPage(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentWindowInsets = windowInsets,
+        contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
                 title = {

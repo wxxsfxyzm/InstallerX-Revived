@@ -43,6 +43,7 @@ import androidx.compose.material.icons.twotone.Copyright
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
 import androidx.compose.material.icons.twotone.DoNotDisturbOnTotalSilence
+import androidx.compose.material.icons.twotone.Download
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Expand
@@ -102,6 +103,7 @@ object AppIcons {
     val Suggestion = Icons.TwoTone.AutoAwesome
     val Tip = Icons.Filled.Lightbulb
     val Update = Icons.TwoTone.SystemUpdate
+    val Download = Icons.TwoTone.Download
     val Rule = Icons.AutoMirrored.TwoTone.Rule
     val Search = Icons.TwoTone.Search
     val Close = Icons.TwoTone.Close

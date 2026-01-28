@@ -122,7 +122,7 @@
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">Dhizuku 不受支持</string>
     <string name="disable_adb_install_verify_failed">无法停用安装验证</string>
     <string name="ignore_battery_optimizations">忽略电池优化</string>
-    <string name="ignore_battery_optimizations_desc">在某些具有严格后台策略的 ROM 上很有用</string>
+    <string name="ignore_battery_optimizations_desc">适用于后台管理严格的 ROM。若安装通知卡住，请尝试忽略电池优化</string>
     <string name="ignore_battery_optimizations_desc_disabled">已被忽略</string>
     <string name="auto_lock_default_installer">自动锁定安装器</string>
     <string name="auto_lock_default_installer_desc">在开始安装时自动将本应用设置为默认安装器</string>

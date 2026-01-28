@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,8 +24,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
-import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
@@ -35,10 +32,10 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.card.StatusWidget
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
-import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
-import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
-import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -46,84 +43,91 @@ fun HomePage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
+    val hazeState = remember { HazeState() }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val uriHandler = LocalUriHandler.current
 
-    Scaffold(
-        modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(id = R.string.about))
-                },
-                scrollBehavior = scrollBehavior,
-                navigationIcon = { AppBackButton(onClick = { navController.navigateUp() }) }
-            )
-        },
-    ) { paddingValues ->
-        var showBottomSheet by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .hazeSource(state = hazeState),
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(text = stringResource(id = R.string.about))
+                    },
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = { AppBackButton(onClick = { navController.navigateUp() }) }
+                )
+            },
+        ) { paddingValues ->
+            var showBottomSheet by remember { mutableStateOf(false) }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(top = paddingValues.calculateTopPadding()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                Box(
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    StatusWidget()
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    Box(
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        StatusWidget(viewModel)
+                    }
                 }
-            }
-            item {
-                SettingsAboutItemWidget(
-                    imageVector = AppIcons.ViewSourceCode,
-                    headlineContentText = stringResource(R.string.get_source_code),
-                    supportingContentText = stringResource(R.string.get_source_code_detail),
-                    onClick = { uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived") }
-                )
-            }
-            item {
-                SettingsAboutItemWidget(
-                    imageVector = AppIcons.OpenSourceLicense,
-                    headlineContentText = stringResource(R.string.open_source_license),
-                    supportingContentText = stringResource(R.string.open_source_license_settings_description),
-                    onClick = { navController.navigate(SettingsScreen.OpenSourceLicense.route) }
-                )
-            }
-            item {
-                SettingsAboutItemWidget(
-                    imageVector = AppIcons.Update,
-                    headlineContentText = stringResource(R.string.get_update),
-                    supportingContentText = stringResource(R.string.get_update_detail),
-                    onClick = { showBottomSheet = true }
-                )
-            }
-            if (viewModel.state.hasUpdate)
+                item {
+                    SettingsAboutItemWidget(
+                        imageVector = AppIcons.ViewSourceCode,
+                        headlineContentText = stringResource(R.string.get_source_code),
+                        supportingContentText = stringResource(R.string.get_source_code_detail),
+                        onClick = { uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived") }
+                    )
+                }
+                item {
+                    SettingsAboutItemWidget(
+                        imageVector = AppIcons.OpenSourceLicense,
+                        headlineContentText = stringResource(R.string.open_source_license),
+                        supportingContentText = stringResource(R.string.open_source_license_settings_description),
+                        onClick = { navController.navigate(SettingsScreen.OpenSourceLicense.route) }
+                    )
+                }
                 item {
                     SettingsAboutItemWidget(
                         imageVector = AppIcons.Update,
-                        headlineContentText = stringResource(R.string.get_update_directly),
-                        supportingContentText = stringResource(R.string.get_update_directly_desc),
-                        onClick = { viewModel.dispatch(PreferredViewAction.Update) }
+                        headlineContentText = stringResource(R.string.get_update),
+                        supportingContentText = stringResource(R.string.get_update_detail),
+                        onClick = { showBottomSheet = true }
                     )
                 }
-            if (showBottomSheet) {
-                item {
-                    ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-                        BottomSheetContent(
-                            title = stringResource(R.string.get_update),
-                            hasUpdate = viewModel.state.hasUpdate,
-                            onDirectUpdateClick = {
-                                showBottomSheet = false
-                                viewModel.dispatch(PreferredViewAction.Update)
-                            }
+                if (viewModel.state.hasUpdate)
+                    item {
+                        SettingsAboutItemWidget(
+                            imageVector = AppIcons.Download,
+                            headlineContentText = stringResource(R.string.get_update_directly),
+                            supportingContentText = stringResource(R.string.get_update_directly_desc),
+                            onClick = { viewModel.dispatch(PreferredViewAction.Update) }
                         )
+                    }
+                if (showBottomSheet) {
+                    item {
+                        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+                            BottomSheetContent(
+                                title = stringResource(R.string.get_update),
+                                hasUpdate = viewModel.state.hasUpdate,
+                                onDirectUpdateClick = {
+                                    showBottomSheet = false
+                                    viewModel.dispatch(PreferredViewAction.Update)
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
+        UpdateLoadingIndicator(hazeState = hazeState, viewModel = viewModel)
     }
 }
