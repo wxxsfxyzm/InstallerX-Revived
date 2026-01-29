@@ -1,3 +1,8 @@
+---
+title: Installation Guide for InstallerX Revived
+description: Step-by-step installation guide for InstallerX Revived Android APK installer
+---
+
 # Installation
 
 ## Supported Versions
