@@ -22,6 +22,7 @@
     <string name="performance">Performance</string>
     <string name="lab">Laboratory</string>
     <string name="lab_desc">Access experimental and developer features</string>
+    <string name="debug">Debug</string>
     <string name="about_detail">About InstallerX Revived</string>
     <string name="updating">Updating…</string>
     <string name="get_update">Get update</string>
@@ -31,6 +32,10 @@
     <string name="get_update_directly_desc">Get update directly from GitHub and install, no cache will be left</string>
     <string name="get_source_code">Check for source code</string>
     <string name="get_source_code_detail">Check for source code on GitHub</string>
+    <string name="save_logs">Save Logs</string>
+    <string name="save_logs_desc">Save log to local file for debugging purposes</string>
+    <string name="export_logs">Export Logs</string>
+    <string name="export_logs_desc">Export logs of the app</string>
     <string name="internet_access_enabled">Online</string>
     <string name="internet_access_disabled">Offline</string>
     <string name="uninstall_title">Uninstall InstallerX Revived</string>

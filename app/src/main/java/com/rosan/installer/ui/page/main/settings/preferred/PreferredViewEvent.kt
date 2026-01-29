@@ -18,4 +18,7 @@ sealed class PreferredViewEvent {
         val title: String,
         val exception: Throwable
     ) : PreferredViewEvent()
+
+    data class OpenLogShare(val uri: android.net.Uri) : PreferredViewEvent()
+    data class ShareLogFailed(val error: String) : PreferredViewEvent()
 }

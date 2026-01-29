@@ -13,11 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kieronquinn.monetcompat.core.MonetCompat
+import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.data.app.model.enums.HttpProfile
 import com.rosan.installer.data.app.model.enums.RootImplementation
@@ -39,6 +41,8 @@ import com.rosan.installer.ui.theme.m3color.ThemeMode
 import com.rosan.installer.ui.util.doBiometricAuth
 import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.removeFlag
+import com.rosan.installer.util.timber.FileLoggingTree.Companion.LOG_DIR_NAME
+import com.rosan.installer.util.timber.FileLoggingTree.Companion.LOG_SUFFIX
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -56,6 +60,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
+import java.io.File
 
 class PreferredViewModel(
     private val appDataStore: AppDataStore,
@@ -177,6 +182,9 @@ class PreferredViewModel(
             is PreferredViewAction.SetSeedColor -> setSeedColor(action.color)
             is PreferredViewAction.SetDynColorFollowPkgIcon -> setDynColorFollowPkgIcon(action.follow)
             is PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity -> setDynColorFollowPkgIconForLiveActivity(action.follow)
+
+            is PreferredViewAction.SetEnableFileLogging -> setEnableFileLogging(action.enable)
+            is PreferredViewAction.ShareLog -> shareLog()
         }
 
     private fun init() {
@@ -537,6 +545,45 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER, enable)
         }
 
+    private fun setEnableFileLogging(enable: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.ENABLE_FILE_LOGGING, enable)
+        }
+
+    private fun shareLog() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val logDir = File(context.cacheDir, LOG_DIR_NAME)
+            if (!logDir.exists() || !logDir.isDirectory) {
+                _uiEvents.emit(PreferredViewEvent.ShareLogFailed("Log directory missing"))
+                return@launch
+            }
+
+            val latestLogFile = logDir.listFiles()
+                ?.filter { it.isFile && it.name.endsWith(LOG_SUFFIX) }
+                ?.maxByOrNull { it.lastModified() }
+
+            if (latestLogFile == null) {
+                _uiEvents.emit(PreferredViewEvent.ShareLogFailed("No logs found"))
+                return@launch
+            }
+
+            // Check if the log file is empty before sharing
+            if (latestLogFile.length() == 0L) {
+                _uiEvents.emit(PreferredViewEvent.ShareLogFailed("Log file is empty"))
+                return@launch
+            }
+
+            val authority = "${BuildConfig.APPLICATION_ID}.fileprovider"
+            val uri = FileProvider.getUriForFile(context, authority, latestLogFile)
+
+            _uiEvents.emit(PreferredViewEvent.OpenLogShare(uri))
+
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to share log")
+            _uiEvents.emit(PreferredViewEvent.ShareLogFailed(e.message ?: "Failed to share log"))
+        }
+    }
+
     private fun setThemeMode(mode: ThemeMode) = viewModelScope.launch {
         appDataStore.putString(AppDataStore.THEME_MODE, mode.name)
     }
@@ -675,6 +722,8 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART, true)
             val labRootModuleAlwaysUseRootFlow =
                 appDataStore.getBoolean(AppDataStore.LAB_MODULE_ALWAYS_ROOT, false)
+            val enableFileLoggingFlow =
+                appDataStore.getBoolean(AppDataStore.ENABLE_FILE_LOGGING, true)
             val labRootImplementationFlow =
                 appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
                     .map { RootImplementation.fromString(it) }
@@ -740,6 +789,7 @@ class PreferredViewModel(
                 labHttpProfileFlow,
                 labHttpSaveFileFlow,
                 labSetInstallRequesterFlow,
+                enableFileLoggingFlow,
                 themeModeFlow,
                 paletteStyleFlow,
                 useDynamicColorFlow,
@@ -790,6 +840,7 @@ class PreferredViewModel(
                 val labHttpProfile = values[idx++] as HttpProfile
                 val labHttpSaveFile = values[idx++] as Boolean
                 val labSetInstallRequester = values[idx++] as Boolean
+                val enableFileLogging = values[idx++] as Boolean
                 val themeMode = values[idx++] as ThemeMode
                 val paletteStyle = values[idx++] as PaletteStyle
                 val useDynamicColor = values[idx++] as Boolean
@@ -870,7 +921,8 @@ class PreferredViewModel(
                     useDynColorFollowPkgIconForLiveActivity = useDynColorFollowPkgIconForLiveActivity,
                     hasUpdate = hasUpdate,
                     remoteVersion = remoteVersion,
-                    uninstallFlags = uninstallFlags
+                    uninstallFlags = uninstallFlags,
+                    enableFileLogging = enableFileLogging
                 )
             }.collectLatest { state = it }
         }

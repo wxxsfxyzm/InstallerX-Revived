@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -88,6 +89,7 @@ fun MiuixUninstallerGlobalSettingsPage(
                     blurRadius = 30.dp
                     noiseFactor = 0f
                 },
+                color = Color.Transparent,
                 title = stringResource(R.string.uninstaller_settings),
                 navigationIcon = {
                     MiuixBackButton(

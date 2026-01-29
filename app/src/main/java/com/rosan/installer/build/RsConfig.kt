@@ -23,6 +23,8 @@ object RsConfig {
     const val VERSION_NAME: String = BuildConfig.VERSION_NAME
     const val VERSION_CODE: Int = BuildConfig.VERSION_CODE
 
+    val isLogEnabled = LEVEL == Level.PREVIEW || LEVEL == Level.UNSTABLE || isDebug
+
     val systemVersion: String = if (Build.VERSION.PREVIEW_SDK_INT != 0)
         "%s Preview (API %s)".format(Build.VERSION.CODENAME, Build.VERSION.SDK_INT)
     else

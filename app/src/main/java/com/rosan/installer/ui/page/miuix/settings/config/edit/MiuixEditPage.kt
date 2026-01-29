@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -138,6 +139,7 @@ fun MiuixEditPage(
                     blurRadius = 30.dp
                     noiseFactor = 0f
                 },
+                color = Color.Transparent,
                 scrollBehavior = scrollBehavior,
                 title = stringResource(id = if (id == null) R.string.add else R.string.update),
                 navigationIcon = {

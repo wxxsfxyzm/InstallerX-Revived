@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -89,6 +90,7 @@ fun MiuixPreferredPage(
                     blurRadius = 30.dp
                     noiseFactor = 0f
                 },
+                color = Color.Transparent,
                 title = title,
                 scrollBehavior = scrollBehavior
             )

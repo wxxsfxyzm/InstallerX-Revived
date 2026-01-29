@@ -101,6 +101,9 @@ class AppDataStore(
         val LAB_HTTP_PROFILE = stringPreferencesKey("lab_http_profile")
         val LAB_HTTP_SAVE_FILE = booleanPreferencesKey("lab_http_save_file")
         val LAB_SET_INSTALL_REQUESTER = booleanPreferencesKey("lab_set_install_requester")
+
+        // Debug
+        val ENABLE_FILE_LOGGING = booleanPreferencesKey("enable_file_logging")
     }
 
     suspend fun putString(key: Preferences.Key<String>, value: String) {

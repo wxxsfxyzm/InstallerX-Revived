@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -84,6 +85,7 @@ fun MiuixInstallerGlobalSettingsPage(
                     blurRadius = 30.dp
                     noiseFactor = 0f
                 },
+                color = Color.Transparent,
                 title = stringResource(R.string.installer_settings),
                 navigationIcon = {
                     MiuixBackButton(modifier = Modifier.padding(start = 16.dp), onClick = { navController.navigateUp() })
@@ -153,8 +155,8 @@ fun MiuixInstallerGlobalSettingsPage(
                             )
                         if (BiometricManager
                                 .from(LocalContext.current)
-                                .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS)
-                        {
+                                .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
+                        ) {
                             MiuixSwitchWidget(
                                 icon = AppIcons.BiometricAuth,
                                 title = stringResource(R.string.installer_settings_require_biometric_auth),

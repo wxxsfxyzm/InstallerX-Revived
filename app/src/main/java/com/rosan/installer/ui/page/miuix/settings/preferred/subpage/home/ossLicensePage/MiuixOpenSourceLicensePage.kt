@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -45,6 +46,7 @@ fun MiuixOpenSourceLicensePage(
                     blurRadius = 30.dp
                     noiseFactor = 0f
                 },
+                color = Color.Transparent,
                 title = stringResource(id = R.string.open_source_license),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
