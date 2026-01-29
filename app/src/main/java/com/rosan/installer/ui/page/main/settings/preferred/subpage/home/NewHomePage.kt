@@ -29,10 +29,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
@@ -57,7 +59,7 @@ fun NewHomePage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
-
+    val context = LocalContext.current
     val hazeState = remember { HazeState() }
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
@@ -152,7 +154,7 @@ fun NewHomePage(
                             }
                     }
                 }
-                if (RsConfig.isLogEnabled)
+                if (RsConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID)
                     item {
                         SplicedColumnGroup(
                             title = stringResource(R.string.debug)

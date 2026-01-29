@@ -78,7 +78,7 @@ class App : Application() {
      * Dynamically adds or removes the FileLoggingTree based on the setting.
      */
     private fun updateFileLoggingState(enabled: Boolean) {
-        if (enabled) {
+        if (enabled && this.packageName == BuildConfig.APPLICATION_ID) {
             // Enable: Plant if not already planted
             if (fileLoggingTree == null) {
                 val tree = FileLoggingTree(this)

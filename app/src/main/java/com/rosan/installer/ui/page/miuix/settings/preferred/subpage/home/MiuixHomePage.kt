@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
@@ -70,6 +71,7 @@ fun MiuixHomePage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
+    val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val state = viewModel.state
     val scrollBehavior = MiuixScrollBehavior()
@@ -216,29 +218,31 @@ fun MiuixHomePage(
                         )
                 }
             }
-            item { SmallTitle(stringResource(R.string.debug)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
-                ) {
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.save_logs),
-                        description = stringResource(R.string.save_logs_desc),
-                        checked = viewModel.state.enableFileLogging,
-                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetEnableFileLogging(it)) }
-                    )
-                    AnimatedVisibility(
-                        visible = viewModel.state.enableFileLogging,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+            if (RsConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID) {
+                item { SmallTitle(stringResource(R.string.debug)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp)
                     ) {
-                        BasicComponent(
-                            title = stringResource(R.string.export_logs),
-                            summary = stringResource(R.string.export_logs_desc),
-                            onClick = { viewModel.dispatch(PreferredViewAction.ShareLog) }
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.save_logs),
+                            description = stringResource(R.string.save_logs_desc),
+                            checked = viewModel.state.enableFileLogging,
+                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetEnableFileLogging(it)) }
                         )
+                        AnimatedVisibility(
+                            visible = viewModel.state.enableFileLogging,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            BasicComponent(
+                                title = stringResource(R.string.export_logs),
+                                summary = stringResource(R.string.export_logs_desc),
+                                onClick = { viewModel.dispatch(PreferredViewAction.ShareLog) }
+                            )
+                        }
                     }
                 }
             }

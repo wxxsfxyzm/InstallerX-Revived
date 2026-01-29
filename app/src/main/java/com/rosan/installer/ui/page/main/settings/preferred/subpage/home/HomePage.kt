@@ -26,10 +26,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.ui.icons.AppIcons
@@ -54,6 +56,7 @@ fun HomePage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
+    val context = LocalContext.current
     val hazeState = remember { HazeState() }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val uriHandler = LocalUriHandler.current
@@ -126,7 +129,7 @@ fun HomePage(
                             onClick = { viewModel.dispatch(PreferredViewAction.Update) }
                         )
                     }
-                if (RsConfig.isLogEnabled) {
+                if (RsConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID) {
                     item { LabelWidget(stringResource(R.string.debug)) }
                     item {
                         SwitchWidget(
