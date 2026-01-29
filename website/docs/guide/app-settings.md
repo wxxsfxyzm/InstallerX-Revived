@@ -1,3 +1,8 @@
+---
+title: App Settings - InstallerX Revived
+description: Configure app settings in InstallerX Revived for optimal installation experience
+---
+
 # App Settings
 
 App settings provide you with a wealth of customization options, allowing you to tailor the app to your usage habits and preferences.

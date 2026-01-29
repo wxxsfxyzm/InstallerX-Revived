@@ -1,7 +1,19 @@
 ---
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
-title: 首页
+title: InstallerX Revived - 现代化 Android 应用安装器
+description: 全能的 Android APK 安装器，支持 APK、APKS、APKM、XAPK 格式，拥有 Material 3 设计和 Shizuku 支持
+
+head:
+  - - meta
+    - name: keywords
+      content: "InstallerX, Android安装器, APK安装, XAPK, 应用管理"
+  - - meta
+    - property: og:title
+      content: "InstallerX Revived - 现代化 Android 应用安装器"
+  - - meta
+    - property: og:description
+      content: "全能的 Android APK 安装器，支持 APK、APKS、APKM、XAPK 格式"
 
 hero:
   name: "InstallerX Revived"
