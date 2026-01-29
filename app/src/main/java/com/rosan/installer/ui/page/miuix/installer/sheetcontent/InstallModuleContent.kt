@@ -60,9 +60,13 @@ fun InstallModuleContent(
 
     // Coroutine to auto-scroll to the bottom as new lines are added,
     // but ONLY if the installation is not yet finished.
-    LaunchedEffect(outputLines.size) {
-        if (!isFinished && outputLines.isNotEmpty()) {
-            lazyListState.animateScrollToItem(index = outputLines.size - 1)
+    LaunchedEffect(outputLines.size, isFinished) {
+        if (outputLines.isNotEmpty()) {
+            if (!isFinished) {
+                lazyListState.animateScrollToItem(index = outputLines.size - 1)
+            } else {
+                lazyListState.scrollToItem(index = outputLines.size - 1)
+            }
         }
     }
 

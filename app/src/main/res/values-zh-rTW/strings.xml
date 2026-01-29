@@ -651,4 +651,7 @@
     <string name="reboot_userspace">用戶空間重啟</string>
     <string name="reboot_recovery">重新啟動至 Recovery</string>
     <string name="reboot_bootloader">重新啟動至 Bootloader</string>
+    <string name="open_source_license_settings_description">查看第三方開源庫及其許可證</string>
+    <string name="installer_settings_require_biometric_auth">安裝時需進行生物特徵驗證</string>
+    <string name="installer_settings_require_biometric_auth_desc">安裝時需進行生物特徵驗證</string>
 </resources>

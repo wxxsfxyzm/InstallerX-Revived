@@ -591,6 +591,21 @@ fun MiuixDataAutoDeleteWidget(viewModel: EditViewModel) {
             viewModel.dispatch(EditViewAction.ChangeDataAutoDelete(it))
         }
     )
+
+    AnimatedVisibility (
+        visible = viewModel.state.data.autoDelete,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        MiuixSwitchWidget(
+            title = stringResource(id = R.string.config_auto_delete_zip),
+            description = stringResource(id = R.string.config_auto_delete_zip_desc),
+            checked = viewModel.state.data.autoDeleteZip,
+            onCheckedChange = {
+                viewModel.dispatch(EditViewAction.ChangeDataZipAutoDelete(it))
+            }
+        )
+    }
 }
 
 @Composable

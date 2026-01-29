@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
@@ -32,7 +33,6 @@ import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.enums.RootImplementation
-import com.rosan.installer.util.openUrl
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -177,6 +177,7 @@ fun MiuixUpdateDialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
 
     SuperDialog(
         show = showState,
@@ -194,7 +195,7 @@ fun MiuixUpdateDialog(
                     BasicComponent(
                         title = "GitHub",
                         onClick = {
-                            context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
+                            uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
                             onDismiss()
                         },
                         endActions = {
@@ -207,7 +208,7 @@ fun MiuixUpdateDialog(
                     BasicComponent(
                         title = "Telegram",
                         onClick = {
-                            context.openUrl("https://t.me/installerx_revived")
+                            uriHandler.openUri("https://t.me/installerx_revived")
                             onDismiss()
                         },
                         endActions = {

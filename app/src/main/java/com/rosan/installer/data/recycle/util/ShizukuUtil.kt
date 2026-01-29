@@ -15,6 +15,8 @@ import android.provider.Settings
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.data.reflect.repo.getStaticValue
+import com.rosan.installer.data.reflect.repo.getValue
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
@@ -32,7 +34,11 @@ suspend fun <T> requireShizukuPermissionGranted(action: suspend () -> T): T {
     callbackFlow {
         Sui.init(BuildConfig.APPLICATION_ID)
         if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-            send(Unit)
+            if (Shizuku.pingBinder()) {
+                send(Unit)
+            } else {
+                close(ShizukuNotWorkException("Shizuku service is not running (ping failed)."))
+            }
             awaitClose()
         } else {
             val requestCode = (Int.MIN_VALUE..Int.MAX_VALUE).random()
@@ -92,9 +98,9 @@ object ShizukuHook : KoinComponent {
 
     val hookedActivityManager: IActivityManager by lazy {
         Timber.tag("ShizukuHook").d("Creating on-demand hooked IActivityManager...")
-        val amSingleton = reflect.getStaticObjectField(ActivityManager::class.java, "IActivityManagerSingleton")
+        val amSingleton = reflect.getStaticFieldValue("IActivityManagerSingleton", ActivityManager::class.java)
         val singletonClass = Class.forName("android.util.Singleton")
-        val mInstanceField = reflect.getDeclaredField(singletonClass, "mInstance")
+        val mInstanceField = reflect.getDeclaredField("mInstance", singletonClass)
         mInstanceField?.isAccessible = true
         val originalAM = mInstanceField?.get(amSingleton) as IActivityManager
 
@@ -117,7 +123,7 @@ object ShizukuHook : KoinComponent {
     val hookedSettingsBinder: IBinder? by lazy {
         Timber.tag("ShizukuHook").d("Creating on-demand hooked Settings Binder...")
         try {
-            val info = resolveSettingsBinder(reflect) ?: return@lazy null
+            val info = reflect.resolveSettingsBinder() ?: return@lazy null
 
             ShizukuBinderWrapper(info.originalBinder).also {
                 Timber.tag("ShizukuHook").i("On-demand hooked Settings Binder created.")
@@ -135,25 +141,12 @@ data class SettingsReflectionInfo(
     val originalBinder: IBinder
 )
 
-fun resolveSettingsBinder(reflect: ReflectRepo): SettingsReflectionInfo? {
-    return try {
-        // 1. Get Settings.Global.sProviderHolder
-        val settingsClass = Settings.Global::class.java
-        val holder = reflect.getStaticObjectField(settingsClass, "sProviderHolder")
+fun ReflectRepo.resolveSettingsBinder(): SettingsReflectionInfo? {
+    val holder = this.getStaticValue<Any>("sProviderHolder", Settings.Global::class.java) ?: return null
+    val provider = this.getValue<Any>(holder, "mContentProvider") ?: return null
 
-        // 2. Get mContentProvider
-        val providerField = reflect.getDeclaredField(holder.javaClass, "mContentProvider") ?: return null
-        providerField.isAccessible = true
-        val provider = providerField.get(holder) ?: return null
+    val remoteField = this.getDeclaredField("mRemote", provider.javaClass) ?: return null
+    val originalBinder = remoteField.get(provider) as? IBinder ?: return null
 
-        // 3. Get mRemote (field and value)
-        val remoteField = reflect.getDeclaredField(provider.javaClass, "mRemote") ?: return null
-        remoteField.isAccessible = true
-        val originalBinder = remoteField.get(provider) as? IBinder ?: return null
-
-        SettingsReflectionInfo(provider, remoteField, originalBinder)
-    } catch (e: Exception) {
-        Timber.e(e, "Failed to resolve Settings binder reflection")
-        null
-    }
+    return SettingsReflectionInfo(provider, remoteField, originalBinder)
 }

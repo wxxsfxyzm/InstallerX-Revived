@@ -61,7 +61,6 @@ import androidx.compose.material.icons.twotone.LocalPolice
 import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.PermDeviceInformation
-import androidx.compose.material.icons.twotone.Policy
 import androidx.compose.material.icons.twotone.Refresh
 import androidx.compose.material.icons.twotone.RocketLaunch
 import androidx.compose.material.icons.twotone.RoomPreferences
@@ -98,6 +97,7 @@ object AppIcons {
     val RootMethod = Icons.TwoTone.Extension
     val FlashPreferRoot = Icons.TwoTone.Bolt
     val History = Icons.TwoTone.History
+    val License = Icons.TwoTone.LocalPolice
     val Lab = Icons.TwoTone.Science
     val Suggestion = Icons.TwoTone.AutoAwesome
     val Tip = Icons.Filled.Lightbulb
