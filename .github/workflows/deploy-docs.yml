@@ -2,10 +2,10 @@ name: Deploy Documentation
 
 on:
   push:
-    branches: [ website, main ]
+    branches: [website, main]
     paths:
-      - 'website/**'         # Only trigger when files in website/ change
-      - '.github/workflows/deploy-docs.yml'
+      - "website/**" # Only trigger when files in website/ change
+      - ".github/workflows/deploy-docs.yml"
 
 permissions:
   contents: read
@@ -26,14 +26,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
           # Important: Tell existing cache action where the lock file is
           cache-dependency-path: website/package-lock.json
@@ -45,7 +45,7 @@ jobs:
         run: npm run docs:build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           # Adjust the path to look inside 'website'
           path: website/docs/.vitepress/dist
