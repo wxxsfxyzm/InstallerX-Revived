@@ -1,3 +1,8 @@
+---
+title: Quick Start Guide - InstallerX Revived
+description: Get started with InstallerX Revived in minutes. Learn basic setup and core features
+---
+
 # Getting Started
 
 Welcome to InstallerX Revived! The app is designed to be "out-of-the-box," meaning complex setup is optional. However, understanding the core concepts of **Profiles** and **Settings** will help you unlock its full potential.

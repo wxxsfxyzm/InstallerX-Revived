@@ -1,3 +1,8 @@
+---
+title: 什么是 InstallerX Revived?
+description: 了解 InstallerX Revived - 现代化的 Android 应用安装器，支持多种包格式和高级功能
+---
+
 # 什么是 InstallerX Revived?
 
 InstallerX Revived 是一款现代、功能丰富的 Android 软件包安装器。它是原 InstallerX 项目的社区维护续作，旨在取代定制 Android ROM 中通常功能简陋的默认安装器。

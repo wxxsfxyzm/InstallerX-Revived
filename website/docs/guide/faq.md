@@ -1,3 +1,8 @@
+---
+title: FAQ - Frequently Asked Questions
+description: Common questions and answers about InstallerX Revived installation and usage
+---
+
 # FAQ
 
 ::: info 📝 Before Reporting Issues
