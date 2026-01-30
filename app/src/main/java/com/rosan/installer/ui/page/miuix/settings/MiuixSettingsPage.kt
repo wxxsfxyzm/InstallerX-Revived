@@ -37,10 +37,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.RoomPreferences
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -96,6 +92,10 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SnackbarDuration
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.SnackbarResult
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.VerticalDivider
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -187,7 +187,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             val defaultInstallerErrorDetailActionLabel = stringResource(R.string.details)
             LaunchedEffect(Unit) {
                 preferredViewModel.uiEvents.collect { event ->
-                    snackBarHostState.currentSnackbarData?.dismiss()
+                    //snackBarHostState.newestSnackbarData()?.dismiss()
                     when (event) {
                         is PreferredViewEvent.ShowDefaultInstallerResult -> {
                             snackBarHostState.showSnackbar(event.message)
@@ -345,7 +345,7 @@ private fun SettingsCompactLayout(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        snackbarHost = { SnackbarHost(state = snackBarHostState) },
         floatingActionButton = {
             // FAB logic specifically tied to the first page (Config)
             AnimatedVisibility(
@@ -524,7 +524,7 @@ private fun SettingsWideContent(
                 WindowInsets.displayCutout.only(WindowInsetsSides.Start)
             )
         ),
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        snackbarHost = { SnackbarHost(state = snackBarHostState) },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = pagerState.currentPage == 0,
