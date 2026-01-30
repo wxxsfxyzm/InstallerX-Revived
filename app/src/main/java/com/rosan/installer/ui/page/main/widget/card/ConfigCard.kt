@@ -37,20 +37,26 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ShowDataWidget(
     viewModel: AllViewModel,
-    listState: LazyStaggeredGridState = rememberLazyStaggeredGridState()
+    listState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
+    contentPadding: PaddingValues = PaddingValues(16.dp),
+    hazeState: HazeState? = null
 ) {
     val configs = viewModel.state.data.configs
     val minId = configs.minByOrNull { it.id }?.id
 
     LazyVerticalStaggeredGrid(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .then(if (hazeState != null) Modifier.hazeSource(hazeState) else Modifier),
         columns = StaggeredGridCells.Adaptive(350.dp),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = contentPadding,
         verticalItemSpacing = 16.dp,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         state = listState,
@@ -65,6 +71,7 @@ fun ShowDataWidget(
     }
 }
 
+// ... DataItemWidget 保持不变 ...
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun DataItemWidget(

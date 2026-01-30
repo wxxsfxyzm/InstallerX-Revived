@@ -32,7 +32,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.NewThem
 @Composable
 fun SettingsPage(preferredViewModel: PreferredViewModel) {
     val navController = rememberNavController()
-
+    val useBlur = preferredViewModel.state.useBlur
     NavHost(
         navController = navController,
         startDestination = SettingsScreen.Main.route,
@@ -81,8 +81,8 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             if (preferredViewModel.state.showExpressiveUI)
                 NewEditPage(
                     navController = navController,
-                    id = if (id != -1L) id
-                    else null
+                    id = if (id != -1L) id else null,
+                    useBlur = useBlur
                 ) else
                 EditPage(
                     navController = navController,

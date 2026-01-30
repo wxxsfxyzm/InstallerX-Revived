@@ -18,7 +18,8 @@ class AppDataStore(
     private val json: Json
 ) {
     companion object {
-        // UI Fresh Switch
+        // UI Related
+        val UI_USE_BLUR = booleanPreferencesKey("ui_use_blur")
         val UI_EXPRESSIVE_SWITCH = booleanPreferencesKey("ui_fresh_switch")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val THEME_PALETTE_STYLE = stringPreferencesKey("theme_palette_style")
@@ -101,6 +102,9 @@ class AppDataStore(
         val LAB_HTTP_PROFILE = stringPreferencesKey("lab_http_profile")
         val LAB_HTTP_SAVE_FILE = booleanPreferencesKey("lab_http_save_file")
         val LAB_SET_INSTALL_REQUESTER = booleanPreferencesKey("lab_set_install_requester")
+
+        // Debug
+        val ENABLE_FILE_LOGGING = booleanPreferencesKey("enable_file_logging")
     }
 
     suspend fun putString(key: Preferences.Key<String>, value: String) {

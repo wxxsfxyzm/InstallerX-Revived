@@ -12,39 +12,41 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.rosan.installer.R
+import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.theme.getMiuixAppBarColor
+import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixOpenSourceLicensePage(
     navController: NavController,
+    viewModel: PreferredViewModel
 ) {
+    val state = viewModel.state
     val libraries by produceLibraries(R.raw.aboutlibraries)
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = remember { HazeState() }
-    val hazeStyle = HazeStyle(
-        backgroundColor = MiuixTheme.colorScheme.surface,
-        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
-    )
+    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeStyle = rememberMiuixHazeStyle()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.hazeEffect(hazeState) {
-                    style = hazeStyle
-                    blurRadius = 30.dp
-                    noiseFactor = 0f
-                },
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(hazeState) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
+                color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(id = R.string.open_source_license),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
@@ -58,7 +60,7 @@ fun MiuixOpenSourceLicensePage(
         LibrariesContainer(
             modifier = Modifier
                 .fillMaxSize()
-                .hazeSource(hazeState)
+                .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier)
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .padding(top = paddingValues.calculateTopPadding())

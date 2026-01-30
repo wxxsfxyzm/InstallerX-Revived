@@ -3,19 +3,19 @@ package com.rosan.installer.ui.page.main.settings.preferred
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -49,7 +48,6 @@ import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.main.widget.setting.AutoLockInstaller
-import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.page.main.widget.setting.ClearCache
 import com.rosan.installer.ui.page.main.widget.setting.DefaultInstaller
 import com.rosan.installer.ui.page.main.widget.setting.DisableAdbVerify
@@ -57,17 +55,24 @@ import com.rosan.installer.ui.page.main.widget.setting.IgnoreBatteryOptimization
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.theme.getM3TopBarColor
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.util.OSUtils
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewPreferredPage(
     navController: NavController,
-    viewModel: PreferredViewModel = koinViewModel()
+    viewModel: PreferredViewModel = koinViewModel(),
+    outerPadding: PaddingValues = PaddingValues(0.dp),
+    hazeState: HazeState? = null
 ) {
-    val context = LocalContext.current
     val state = viewModel.state
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
@@ -85,6 +90,11 @@ fun NewPreferredPage(
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
     }
 
+    val hazeStyle = HazeStyle(
+        backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
+        tint = HazeTint(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f))
+    )
+
     var updateErrorInfo by remember {
         mutableStateOf<PreferredViewEvent.ShowInAppUpdateErrorDetail?>(
             null
@@ -97,6 +107,8 @@ fun NewPreferredPage(
         )
     }
 
+    val detailLabel = stringResource(id = R.string.details)
+
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             snackBarHostState.currentSnackbarData?.dismiss()
@@ -108,7 +120,7 @@ fun NewPreferredPage(
                 is PreferredViewEvent.ShowDefaultInstallerErrorDetail -> {
                     val snackbarResult = snackBarHostState.showSnackbar(
                         message = event.title,
-                        actionLabel = context.getString(R.string.details),
+                        actionLabel = detailLabel,
                         duration = SnackbarDuration.Short
                     )
                     if (snackbarResult == SnackbarResult.ActionPerformed) {
@@ -133,16 +145,29 @@ fun NewPreferredPage(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(hazeState) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = { Text(text = stringResource(id = R.string.preferred)) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    containerColor = hazeState.getM3TopBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    scrolledContainerColor = hazeState.getM3TopBarColor()
                 )
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        snackbarHost = {
+            SnackbarHost(
+                modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding()),
+                hostState = snackBarHostState
+            )
+        },
     ) { paddingValues ->
         when (state.progress) {
             is PreferredViewState.Progress.Loading -> {
@@ -172,7 +197,11 @@ fun NewPreferredPage(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
+                        .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
+                    contentPadding = PaddingValues(
+                        top = paddingValues.calculateTopPadding(),
+                        bottom = outerPadding.calculateBottomPadding()
+                    )
                 ) {
                     // --- Global Settings Group ---
                     item {
@@ -273,13 +302,17 @@ fun NewPreferredPage(
                                 SettingsAboutItemWidget(
                                     imageVector = AppIcons.Info,
                                     headlineContentText = stringResource(R.string.about_detail),
-                                    supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
+                                    supportingContentText = if (state.hasUpdate) stringResource(
+                                        R.string.update_available,
+                                        state.remoteVersion
+                                    ) else "$revLevel ${RsConfig.VERSION_NAME}",
+                                    supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     onClick = { navController.navigate(SettingsScreen.About.route) }
                                 )
                             }
                         }
                     }
-                    item { Spacer(modifier = Modifier.size(6.dp)) }
+                    item { Spacer(Modifier.navigationBarsPadding()) }
                 }
             }
         }

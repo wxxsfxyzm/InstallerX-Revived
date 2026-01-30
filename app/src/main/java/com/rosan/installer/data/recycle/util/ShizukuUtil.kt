@@ -98,11 +98,13 @@ object ShizukuHook : KoinComponent {
 
     val hookedActivityManager: IActivityManager by lazy {
         Timber.tag("ShizukuHook").d("Creating on-demand hooked IActivityManager...")
-        val amSingleton = reflect.getStaticFieldValue("IActivityManagerSingleton", ActivityManager::class.java)
+        val amSingleton = reflect.getStaticValue<Any>("IActivityManagerSingleton", ActivityManager::class.java)
+            ?: throw NullPointerException("Failed to retrieve IActivityManagerSingleton")
         val singletonClass = Class.forName("android.util.Singleton")
-        val mInstanceField = reflect.getDeclaredField("mInstance", singletonClass)
-        mInstanceField?.isAccessible = true
-        val originalAM = mInstanceField?.get(amSingleton) as IActivityManager
+
+        // Explicitly passing singletonClass is safer because mInstance is private in the base class
+        val originalAM = reflect.getValue<IActivityManager>(amSingleton, "mInstance", singletonClass)
+            ?: throw NullPointerException("Failed to retrieve mInstance from Singleton")
 
         val wrapper = ShizukuBinderWrapper(originalAM.asBinder())
         IActivityManager.Stub.asInterface(wrapper).also {

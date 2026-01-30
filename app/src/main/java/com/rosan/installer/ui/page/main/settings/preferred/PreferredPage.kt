@@ -3,8 +3,11 @@ package com.rosan.installer.ui.page.main.settings.preferred
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ContainedLoadingIndicator
@@ -29,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -53,6 +55,7 @@ import com.rosan.installer.ui.page.main.widget.setting.IgnoreBatteryOptimization
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
+import com.rosan.installer.ui.theme.none
 import com.rosan.installer.util.OSUtils
 import org.koin.androidx.compose.koinViewModel
 
@@ -60,10 +63,9 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun PreferredPage(
     navController: NavController,
-    windowInsets: WindowInsets,
-    viewModel: PreferredViewModel = koinViewModel()
+    viewModel: PreferredViewModel = koinViewModel(),
+    outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
-    val context = LocalContext.current
     val state = viewModel.state
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -91,6 +93,8 @@ fun PreferredPage(
     }
     var showBottomSheet by remember { mutableStateOf(false) }
 
+    val detailLabel = stringResource(id = R.string.details)
+
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             snackBarHostState.currentSnackbarData?.dismiss() // Dismiss any existing snackbar
@@ -102,7 +106,7 @@ fun PreferredPage(
                 is PreferredViewEvent.ShowDefaultInstallerErrorDetail -> {
                     val snackbarResult = snackBarHostState.showSnackbar(
                         message = event.title,
-                        actionLabel = context.getString(R.string.details),
+                        actionLabel = detailLabel,
                         duration = SnackbarDuration.Short
                     )
                     if (snackbarResult == SnackbarResult.ActionPerformed) {
@@ -119,7 +123,7 @@ fun PreferredPage(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
-        contentWindowInsets = windowInsets,
+        contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -133,7 +137,12 @@ fun PreferredPage(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        snackbarHost = {
+            SnackbarHost(
+                modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding()),
+                hostState = snackBarHostState
+            )
+        },
     ) { paddingValues ->
         when (state.progress) {
             is PreferredViewState.Progress.Loading -> {
@@ -259,21 +268,15 @@ fun PreferredPage(
                         SettingsAboutItemWidget(
                             imageVector = AppIcons.Info,
                             headlineContentText = stringResource(R.string.about_detail),
-                            supportingContentText = "$revLevel ${RsConfig.VERSION_NAME}",
+                            supportingContentText = if (state.hasUpdate) stringResource(
+                                R.string.update_available,
+                                state.remoteVersion
+                            ) else "$revLevel ${RsConfig.VERSION_NAME}",
+                            supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             onClick = { navController.navigate(SettingsScreen.About.route) }
                         )
                     }
-                    // Temporarily Disable This
-                    /*                    pkg {
-                                            SettingsAboutItemWidget(
-                                                imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
-                                                headlineContentText = stringResource(R.string.telegram_group),
-                                                supportingContentText = stringResource(R.string.telegram_group_desc),
-                                                onClick = {
-                                                    openUrl(context, "https://t.me/installerx_revived")
-                                                }
-                                            )
-                                        }*/
+                    item { Spacer(Modifier.navigationBarsPadding()) }
                 }
             }
         }

@@ -87,7 +87,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
             // If not found, try to get it from the intent data (for system calls)
             if (packageName.isNullOrBlank()) {
                 val action = intent.action
-                if (action == Intent.ACTION_UNINSTALL_PACKAGE || action == Intent.ACTION_DELETE) {
+                if (action == @Suppress("DEPRECATION") Intent.ACTION_UNINSTALL_PACKAGE || action == Intent.ACTION_DELETE) {
                     intent.data?.schemeSpecificPart?.let {
                         packageName = it
                     }

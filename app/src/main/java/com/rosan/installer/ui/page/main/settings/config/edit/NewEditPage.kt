@@ -8,6 +8,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -75,8 +76,13 @@ import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySizeWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.theme.getM3TopBarColor
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import com.rosan.installer.ui.util.isNoneActive
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -89,7 +95,8 @@ import org.koin.core.parameter.parametersOf
 fun NewEditPage(
     navController: NavController,
     id: Long? = null,
-    viewModel: EditViewModel = koinViewModel { parametersOf(id) }
+    viewModel: EditViewModel = koinViewModel { parametersOf(id) },
+    useBlur: Boolean
 ) {
     LaunchedEffect(Unit) {
         viewModel.dispatch(EditViewAction.Init)
@@ -100,6 +107,8 @@ fun NewEditPage(
     val listState = rememberLazyListState()
     val snackBarHostState = remember { SnackbarHostState() }
     val topAppBarState = rememberTopAppBarState()
+    val hazeState = if (useBlur) remember { HazeState() } else null
+    val hazeStyle = rememberMaterial3HazeStyle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     var showUnsavedDialog by remember { mutableStateOf(false) }
 
@@ -187,6 +196,13 @@ fun NewEditPage(
         contentWindowInsets = WindowInsets.none,
         topBar = {
             LargeFlexibleTopAppBar(
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(it) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = {
                     Row {
@@ -206,8 +222,9 @@ fun NewEditPage(
                 },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    containerColor = hazeState.getM3TopBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    scrolledContainerColor = hazeState.getM3TopBarColor()
                 ),
                 actions = {
                     AnimatedVisibility(
@@ -235,10 +252,10 @@ fun NewEditPage(
                 }
             )
         },
-        // 只有在未滚动到底部时，才在右下角显示 FAB
+        // Only show FAB when not scrolling to the bottom
         floatingActionButton = {
             AnimatedVisibility(
-                visible = showFloating, // 在未滚动到底部且 showFloating 为 true 时可见
+                visible = showFloating, // Visible when not scrolling to the bottom
                 enter = scaleIn(),
                 exit = scaleOut(),
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -257,11 +274,14 @@ fun NewEditPage(
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-    ) {
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it),
+                .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding()
+            ),
             state = listState,
         ) {
             // --- Group 1: Main Settings ---

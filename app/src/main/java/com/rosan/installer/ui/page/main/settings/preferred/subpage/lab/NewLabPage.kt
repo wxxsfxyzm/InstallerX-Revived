@@ -1,12 +1,12 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.lab
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -39,8 +39,13 @@ import com.rosan.installer.ui.page.main.widget.setting.LabHttpProfileWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabRootImplementationWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
+import com.rosan.installer.ui.theme.getM3TopBarColor
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import com.rosan.installer.util.OSUtils
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -50,6 +55,8 @@ fun NewLabPage(
 ) {
     val state = viewModel.state
     val topAppBarState = rememberTopAppBarState()
+    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeStyle = rememberMaterial3HazeStyle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val showRootImplementationDialog = remember { mutableStateOf(false) }
 
@@ -75,6 +82,13 @@ fun NewLabPage(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(it) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = {
                     Text(stringResource(R.string.lab))
@@ -92,8 +106,9 @@ fun NewLabPage(
                 },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    containerColor = hazeState.getM3TopBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    scrolledContainerColor = hazeState.getM3TopBarColor()
                 )
             )
         }
@@ -101,7 +116,10 @@ fun NewLabPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding() + 12.dp
+            )
         ) {
             item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
             item {

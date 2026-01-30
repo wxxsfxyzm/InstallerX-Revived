@@ -70,7 +70,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private val installerId get() = installer.id
 
     // Cache directory
-    private val cacheDirectory = "${context.externalCacheDir?.absolutePath}/$installerId".apply { File(this).mkdirs() }
+    private val cacheDirectory = File(context.cacheDir, "installer_sessions/$installerId")
+        .apply { mkdirs() }
+        .absolutePath
 
     // Initializing helpers without passing ID
     private val sourceResolver = SourceResolver(cacheDirectory, mutableProgressFlow)

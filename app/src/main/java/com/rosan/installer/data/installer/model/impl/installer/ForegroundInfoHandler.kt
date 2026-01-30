@@ -35,13 +35,15 @@ import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
 import com.rosan.installer.ui.theme.primaryDark
 import com.rosan.installer.ui.theme.primaryLight
 import com.rosan.installer.util.getErrorMessage
+import com.rosan.installer.util.hasFlag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -68,6 +70,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val preferDynamicColor: Boolean
     )
 
+    private data class NotificationState(
+        val progress: ProgressEntity,
+        val background: Boolean,
+        val tick: Unit // Only used to trigger a notification update
+    )
+
     private var job: Job? = null
     private var sessionStartTime: Long = 0L
     private val context by inject<Context>()
@@ -82,6 +90,13 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private var lastProgressValue = -1f
     private var lastProgressClass: KClass<out ProgressEntity>? = null
     private var lastLogLine: String? = null
+
+    // State for comparing last notified entity
+    private var lastNotifiedEntity: ProgressEntity? = null
+
+    // State for fake progress animation
+    private var currentInstallKey: String? = null
+    private var currentInstallStartTime: Long = 0L
 
     @SuppressLint("MissingPermission")
     override suspend fun onStart() {
@@ -99,15 +114,49 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             preferDynamicColor = appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
         )
 
+        // Ticker flow for animation (approx 30fps cap for calculation, throttled by setNotificationThrottled)
+        // Actual UI update rate is limited by NOTIFICATION_UPDATE_INTERVAL_MS (500ms)
+        val ticker = flow {
+            while (true) {
+                emit(Unit)
+                delay(200) // Trigger check every 200ms
+            }
+        }
+
         job = scope.launch {
             combine(
                 installer.progress,
-                installer.background
-            ) { progress, background ->
+                installer.background,
+                ticker
+            ) { progress, background, tick ->
+                NotificationState(progress, background, tick)
+            }.distinctUntilChanged { old, new ->
+                if (old.progress != new.progress || old.background != new.background) {
+                    return@distinctUntilChanged false
+                }
+                val isAnimating = new.progress is ProgressEntity.Installing && new.background
+                return@distinctUntilChanged !isAnimating
+            }.collect { state ->
+                val progress = state.progress
+                val background = state.background
 
-                // Log reduction for specific high-frequency states
                 if (progress !is ProgressEntity.InstallingModule) {
-                    Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background, showDialog=${settings.showDialog}")
+                    Timber.i("[id=${installer.id}] Combined Flow: progress=${progress::class.simpleName}, background=$background")
+                }
+
+                var fakeItemProgress = 0f
+                if (progress is ProgressEntity.Installing) {
+                    val key = "${progress.current}|${progress.total}|${progress.appLabel}"
+                    if (currentInstallKey != key) {
+                        currentInstallKey = key
+                        currentInstallStartTime = System.currentTimeMillis()
+                    }
+                    val elapsed = System.currentTimeMillis() - currentInstallStartTime
+                    // Asymptotic curve: Starts fast, slows down, caps at 0.95
+                    // Formula: 1 - 1 / (1 + t/3000) roughly maps 0s->0, 3s->0.5, 9s->0.75...
+                    fakeItemProgress = (1f - 1f / (1f + elapsed / 3000f)).coerceAtMost(0.95f)
+                } else {
+                    currentInstallKey = null
                 }
 
                 if (progress is ProgressEntity.InstallAnalysedUnsupported) {
@@ -116,7 +165,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                         Toast.makeText(context, progress.reason, Toast.LENGTH_LONG).show()
                     }
                     installer.close()
-                    return@combine
+                    return@collect
                 }
 
                 // --- Skip the "Confirm Install" notification in AutoNotification mode ---
@@ -127,7 +176,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     installer.config.installMode == ConfigEntity.InstallMode.AutoNotification
                 ) {
                     Timber.d("[id=${installer.id}] AutoNotification mode detected. Skipping interactive InstallAnalysedSuccess notification.")
-                    return@combine
+                    return@collect
                 }
 
                 if (background) {
@@ -139,7 +188,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                                 progress = progress,
                                 showDialog = settings.showDialog,
                                 preferSystemIcon = settings.preferSystemIcon,
-                                preferDynamicColor = settings.preferDynamicColor
+                                preferDynamicColor = settings.preferDynamicColor,
+                                fakeItemProgress = fakeItemProgress
                             )
                         } else {
                             buildLegacyNotification(progress, true, settings.showDialog, settings.preferSystemIcon)
@@ -172,7 +222,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     Timber.d("[id=${installer.id}] Foreground mode. Cancelling notification.")
                     setNotificationImmediate(null)
                 }
-            }.collect()
+            }
         }
     }
 
@@ -182,17 +232,26 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             NotificationChannelCompat.Builder(
                 Channel.InstallerChannel.value,
                 NotificationManagerCompat.IMPORTANCE_HIGH
-            ).setName(getString(R.string.installer_channel_name)).build(),
+            )
+                .setName(getString(R.string.installer_channel_name))
+                .setDescription(getString(R.string.installer_channel_name_desc))
+                .build(),
 
             NotificationChannelCompat.Builder(
                 Channel.InstallerProgressChannel.value,
                 NotificationManagerCompat.IMPORTANCE_LOW
-            ).setName(getString(R.string.installer_progress_channel_name)).build(),
+            )
+                .setName(getString(R.string.installer_progress_channel_name))
+                .setDescription(getString(R.string.installer_progress_channel_name_desc))
+                .build(),
 
             NotificationChannelCompat.Builder(
                 Channel.InstallerLiveChannel.value,
                 NotificationManagerCompat.IMPORTANCE_HIGH
-            ).setName(getString(R.string.installer_live_channel_name)).build()
+            )
+                .setName(getString(R.string.installer_live_channel_name))
+                .setDescription(getString(R.string.installer_live_channel_name_desc))
+                .build()
         )
         channels.forEach { channel ->
             notificationManager.createNotificationChannel(channel)
@@ -211,6 +270,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             lastProgressValue = -1f  // Reset state
             lastProgressClass = null // Reset state class
             lastLogLine = null       // Reset module log
+            lastNotifiedEntity = null
             return
         }
 
@@ -245,7 +305,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val currentProgress = (progress as? ProgressEntity.InstallPreparing)?.progress ?: -1f
 
         val shouldUpdate = when {
-            isCriticalState -> true
+            // For critical states, updates must only occur when the state entity actually changes.
+            // This prevents redundant refreshes triggered by the ticker.
+            isCriticalState -> progress != lastNotifiedEntity
             isEnteringInstalling -> true
             timeSinceLastUpdate < NOTIFICATION_UPDATE_INTERVAL_MS -> false
             progress is ProgressEntity.Installing -> true // Installing state (batch or single) should update per item or progress
@@ -260,11 +322,10 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         if (shouldUpdate) {
             setNotificationImmediate(notification)
             lastNotificationUpdateTime = currentTime
-            if (currentProgress >= 0) {
-                lastProgressValue = currentProgress
-            }
+            if (currentProgress >= 0) lastProgressValue = currentProgress
             // Update the tracked class only when we actually notify
             lastProgressClass = progress::class
+            lastNotifiedEntity = progress
         }
     }
 
@@ -286,9 +347,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             .filter { it.selected }
             .map { it.app.packageName }
             .distinct()
-            .forEach {
-                appIconRepo.clearCacheForPackage(it)
-            }
+            .forEach { appIconRepo.clearCacheForPackage(it) }
         setNotificationImmediate(null)
         job?.cancel()
     }
@@ -312,12 +371,13 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         progress: ProgressEntity,
         showDialog: Boolean,
         preferSystemIcon: Boolean = false,
-        preferDynamicColor: Boolean = false
+        preferDynamicColor: Boolean = false,
+        fakeItemProgress: Float = 0f
     ): Notification? {
-        if (progress is ProgressEntity.Finish || progress is ProgressEntity.Error || progress is ProgressEntity.InstallAnalysedUnsupported) {
+        if (progress is ProgressEntity.Finish || progress is ProgressEntity.Error || progress is ProgressEntity.InstallAnalysedUnsupported)
             return null
-        }
-        val builder = newModernNotificationBuilder(progress, showDialog, preferSystemIcon, preferDynamicColor)
+
+        val builder = newModernNotificationBuilder(progress, showDialog, preferSystemIcon, preferDynamicColor, fakeItemProgress)
 
         return when (progress) {
             is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
@@ -332,7 +392,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         progress: ProgressEntity,
         showDialog: Boolean,
         preferSystemIcon: Boolean = false,
-        preferDynamicColor: Boolean = false
+        preferDynamicColor: Boolean = false,
+        fakeItemProgress: Float = 0f
     ): NotificationCompat.Builder {
         val contentIntent = when (installer.config.installMode) {
             ConfigEntity.InstallMode.Notification,
@@ -340,8 +401,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             else -> openIntent
         }
-        val isDarkTheme = context.resources.configuration.uiMode and
-                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        val isDarkTheme = context.resources.configuration.uiMode.hasFlag(Configuration.UI_MODE_NIGHT_YES)
         val brandColor = if (isDarkTheme) primaryDark else primaryLight
 
         val baseBuilder = NotificationCompat.Builder(context, Channel.InstallerLiveChannel.value)
@@ -447,13 +507,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 }
             }
 
-            // === Modified: Handle Batch and Detailed Installing ===
+            // Handle Batch and Detailed Installing
             is ProgressEntity.Installing -> {
                 val isBatch = progress.total > 1
                 val appLabel = progress.appLabel ?: getString(R.string.installer_installing)
 
                 contentTitle = if (isBatch) {
-                    // E.g. "Installing (1/5): My App"
                     getString(R.string.installer_installing) + " (${progress.current}/${progress.total}): $appLabel"
                 } else {
                     appLabel
@@ -461,22 +520,28 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
                 shortText = getString(R.string.installer_live_channel_short_text_installing)
 
-                // Calculate progress based on current/total
+                // Calculate progress: Base + (Segment * Fraction)
                 val segmentWeight = installStages[3].weight
-                val batchFraction = if (progress.total > 0) progress.current.toFloat() / progress.total.toFloat() else 0.5f
+
+                // Logic:
+                // If Single: fraction = fakeItemProgress (0 -> 0.95)
+                // If Batch: fraction = ( (current - 1) + fakeItemProgress ) / total
+                val total = progress.total.coerceAtLeast(1).toFloat()
+                val currentBase = (progress.current - 1).coerceAtLeast(0).toFloat()
+                val batchFraction = (currentBase + fakeItemProgress) / total
+
                 val progressValue = previousStagesWeight + (segmentWeight * batchFraction)
 
                 progressStyle.setProgress(progressValue.toInt())
                 baseBuilder.setContentText(getString(R.string.installer_installing))
 
-                // Pass current index for correct icon in batch mode
                 val currentBatchIndex = if (isBatch) progress.current - 1 else null
                 baseBuilder.setLargeIcon(getLargeIconBitmap(preferSystemIcon, currentBatchIndex))
             }
 
-            // === Added: Handle Module Installation ===
+            // Handle Module Installation
             is ProgressEntity.InstallingModule -> {
-                contentTitle = getString(R.string.installer_installing) // Or "Installing Module"
+                contentTitle = getString(R.string.installer_installing)
                 shortText = getString(R.string.installer_live_channel_short_text_installing)
 
                 // Module installs don't have percentage, so we set it to the start of the "Installing" segment
@@ -580,7 +645,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Pausing(R.drawable.round_hourglass_disabled_24)
     }
 
-    // === Modified: Support fetching specific icon from Multi-Install Queue ===
+    // Support fetching specific icon from Multi-Install Queue
     private suspend fun getLargeIconBitmap(preferSystemIcon: Boolean, currentBatchIndex: Int? = null): Bitmap? {
         // Priority 1: If explicit batch index provided and queue is valid
         val entityFromQueue = if (currentBatchIndex != null && installer.multiInstallQueue.isNotEmpty()) {

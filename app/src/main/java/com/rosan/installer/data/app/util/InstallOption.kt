@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.rosan.installer.R
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.util.OSUtils
 
 @SuppressLint("LocalContextResourcesRead")
 @Composable
@@ -60,8 +61,9 @@ private fun getInstallOptions(authorizer: ConfigEntity.Authorizer) = InstallOpti
 
         // Second, apply custom logic based on the authorizer.
         when (it) {
-            // The AllowDowngrade option should only be available when the authorizer is Root.
-            is InstallOption.AllowDowngrade -> authorizer == ConfigEntity.Authorizer.Root
+            // The AllowDowngrade option should only be available when the authorizer is Root, Shizuku(running as root).
+            // Or running as SystemApp
+            is InstallOption.AllowDowngrade -> authorizer == ConfigEntity.Authorizer.Root || authorizer == ConfigEntity.Authorizer.Shizuku || (authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
             // All other options are available by default.
             else -> true
         }
@@ -235,13 +237,14 @@ sealed class InstallOption(
         descResource = R.string.dry_run_desc,
     )
 
-    @Keep
+    // This has no effect
+    /* @Keep
     data object AllWhitelistRestrictedPermissions : InstallOption(
         value = 0x00400000,
         minSdk = Build.VERSION_CODES.S,
         labelResource = R.string.config_all_whitelist_restricted_permissions,
         descResource = R.string.config_all_whitelist_restricted_permissions_desc,
-    )
+    )*/
 
     @Keep
     data object DisableAllowedApexUpdateCheck : InstallOption(

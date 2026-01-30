@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.ComponentName
 import android.content.Intent
-import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationChannelCompat
@@ -56,7 +55,8 @@ class InstallerService : Service() {
         val channel = NotificationChannelCompat.Builder(
             channelId,
             NotificationManagerCompat.IMPORTANCE_LOW
-        ).setName(getString(R.string.installer_background_channel_name)).build()
+        ).setName(getString(R.string.installer_background_channel_name))
+            .setDescription(getString(R.string.installer_notification_desc)).build()
         val manager = NotificationManagerCompat.from(this)
         manager.createNotificationChannel(channel)
 
@@ -90,11 +90,7 @@ class InstallerService : Service() {
             .setDeleteIntent(cancelPendingIntent) // Handle swipe dismissal if applicable
             .build()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(id, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
-        } else {
-            startForeground(id, notification)
-        }
+        startForeground(id, notification)
     }
 
     private fun autoForeground() {

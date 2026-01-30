@@ -32,6 +32,7 @@ import androidx.compose.material.icons.twotone.AutoAwesome
 import androidx.compose.material.icons.twotone.AutoFixHigh
 import androidx.compose.material.icons.twotone.Badge
 import androidx.compose.material.icons.twotone.BatterySaver
+import androidx.compose.material.icons.twotone.BlurOn
 import androidx.compose.material.icons.twotone.Bolt
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.ClearAll
@@ -43,6 +44,7 @@ import androidx.compose.material.icons.twotone.Copyright
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
 import androidx.compose.material.icons.twotone.DoNotDisturbOnTotalSilence
+import androidx.compose.material.icons.twotone.Download
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Expand
@@ -102,6 +104,7 @@ object AppIcons {
     val Suggestion = Icons.TwoTone.AutoAwesome
     val Tip = Icons.Filled.Lightbulb
     val Update = Icons.TwoTone.SystemUpdate
+    val Download = Icons.TwoTone.Download
     val Rule = Icons.AutoMirrored.TwoTone.Rule
     val Search = Icons.TwoTone.Search
     val Close = Icons.TwoTone.Close
@@ -110,6 +113,7 @@ object AppIcons {
     val Theme = Icons.TwoTone.ColorLens
     val ViewSourceCode = Icons.TwoTone.Code
     val OpenSourceLicense = Icons.TwoTone.Copyright
+    val Blur = Icons.TwoTone.BlurOn
 
     // --- 导航图标集合 ---
     val RoomPreferences = Icons.TwoTone.RoomPreferences

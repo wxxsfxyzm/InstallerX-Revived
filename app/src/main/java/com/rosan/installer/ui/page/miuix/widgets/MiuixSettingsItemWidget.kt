@@ -25,13 +25,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,14 +51,8 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.theme.m3color.ThemeMode
-import com.rosan.installer.ui.util.MIN_FEEDBACK_DURATION_MS
-import com.rosan.installer.ui.util.formatSize
-import com.rosan.installer.ui.util.getDirectorySize
+import com.rosan.installer.ui.util.rememberCacheInfo
 import com.rosan.installer.util.hasFlag
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
@@ -77,7 +67,6 @@ import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import java.io.File
 
 data class AuthorizerInfo(
     @param:StringRes val labelResId: Int,
@@ -339,71 +328,12 @@ fun MiuixDefaultInstaller(
 
 @Composable
 fun MiuixClearCache() {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var inProgress by remember {
-        mutableStateOf(false)
-    }
-    var cacheSize by remember { mutableLongStateOf(0L) }
-    // A trigger to recalculate the cache size
-    var calculationTrigger by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(calculationTrigger) {
-        withContext(Dispatchers.IO) {
-            val internalCache = context.cacheDir?.getDirectorySize() ?: 0L
-            val externalCache = context.externalCacheDir?.getDirectorySize() ?: 0L
-            cacheSize = internalCache + externalCache
-        }
-    }
-
+    val cacheState = rememberCacheInfo()
     BasicComponent(
-        enabled = !inProgress,
+        enabled = !cacheState.inProgress,
         title = stringResource(id = R.string.clear_cache),
-        summary = if (inProgress) stringResource(R.string.clearing_cache)
-        else if (cacheSize == 0L) stringResource(R.string.no_cache)
-        else stringResource(
-            R.string.cache_size,
-            cacheSize.formatSize()
-        ),
-        onClick = {
-            if (inProgress) return@BasicComponent
-
-            scope.launch {
-                inProgress = true
-                val startTime = System.currentTimeMillis()
-
-                // Perform the actual clearing operation on the IO dispatcher
-                withContext(Dispatchers.IO) {
-                    val paths = listOfNotNull(
-                        context.cacheDir,
-                        context.externalCacheDir
-                    )
-
-                    fun clearFile(file: File) {
-                        if (!file.exists()) return
-                        if (file.isDirectory) {
-                            file.listFiles()?.forEach {
-                                clearFile(it)
-                            }
-                        }
-                        file.delete()
-                    }
-                    paths.forEach { clearFile(it) }
-                }
-
-                val elapsedTime = System.currentTimeMillis() - startTime
-
-                // If the operation was too fast, wait for the remaining time
-                if (elapsedTime < MIN_FEEDBACK_DURATION_MS) {
-                    delay(MIN_FEEDBACK_DURATION_MS - elapsedTime)
-                }
-
-                cacheSize = 0L
-                inProgress = false
-                // Trigger a recalculation of the cache size
-                calculationTrigger++
-            }
-        }
+        summary = cacheState.description,
+        onClick = { cacheState.onClear() }
     )
 }
 

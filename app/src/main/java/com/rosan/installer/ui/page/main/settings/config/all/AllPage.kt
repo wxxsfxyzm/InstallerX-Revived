@@ -6,6 +6,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -42,17 +42,18 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.ScopeTipCard
 import com.rosan.installer.ui.page.main.widget.card.ShowDataWidget
+import com.rosan.installer.ui.page.main.widget.setting.DeleteEventCollector
+import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AllPage(
     navController: NavController,
-    windowInsets: WindowInsets,
-    viewModel: AllViewModel
+    viewModel: AllViewModel,
+    outerPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     LaunchedEffect(Unit) {
-        //viewModel.dispatch(AllViewAction.Init)
         viewModel.navController = navController
     }
 
@@ -84,32 +85,13 @@ fun AllPage(
             }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is AllViewEvent.DeletedConfig -> {
-                    val result = snackBarHostState.showSnackbar(
-                        message = viewModel.context.getString(R.string.delete_success),
-                        actionLabel = viewModel.context.getString(R.string.restore),
-                        withDismissAction = true
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        viewModel.dispatch(
-                            AllViewAction.RestoreDataConfig(
-                                configEntity = event.configEntity
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    }
+    DeleteEventCollector(viewModel, snackBarHostState)
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentWindowInsets = windowInsets,
+        contentWindowInsets = WindowInsets.none,
         topBar = {
             TopAppBar(
                 title = {
@@ -119,6 +101,7 @@ fun AllPage(
         },
         floatingActionButton = {
             AnimatedVisibility(
+                modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding()),
                 visible = showFloating,
                 enter = scaleIn(),
                 exit = scaleOut()

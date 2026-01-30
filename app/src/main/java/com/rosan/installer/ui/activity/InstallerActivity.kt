@@ -55,6 +55,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     private val appDataStore: AppDataStore by inject()
     private var uiState by mutableStateOf(ThemeUiState())
+    private var disableNotificationOnDismiss = false
 
     private var installer by mutableStateOf<InstallerRepo?>(null)
     private var job: Job? = null
@@ -75,8 +76,16 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         Timber.d("onCreate. SavedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}")
 
         lifecycleScope.launch {
-            createThemeUiStateFlow(appDataStore).collect { newState ->
-                uiState = newState
+            launch { // Collect theme state
+                createThemeUiStateFlow(appDataStore).collect { newState ->
+                    uiState = newState
+                }
+            }
+
+            launch { // Collect disable notification on dismiss state
+                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS).collect {
+                    disableNotificationOnDismiss = it
+                }
             }
         }
 
@@ -201,7 +210,6 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             return
         }
         // Only strictly interpret as user leaving when not finishing and not changing configurations (e.g., rotation)
-        // TODO add a flag to handle Session Install Confirmation
         if (!isFinishing && !isChangingConfigurations && !isRequestingPermission) {
             installer?.let { repo ->
                 // If using session install, we don't hide UI since oems have different package installer impls
@@ -211,14 +219,25 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 val sharedFlow = repo.progress as? SharedFlow<*>
                 val currentProgress = sharedFlow?.replayCache?.lastOrNull()
 
+                val isRunning = currentProgress is ProgressEntity.InstallResolving ||
+                        currentProgress is ProgressEntity.InstallAnalysing ||
+                        currentProgress is ProgressEntity.InstallPreparing ||
+                        currentProgress is ProgressEntity.Installing ||
+                        currentProgress is ProgressEntity.InstallConfirming ||
+                        currentProgress is ProgressEntity.InstallingModule
+                
                 // If the task is still running and hasn't finished or errored
-                if (currentProgress !is ProgressEntity.Finish &&
-                    currentProgress !is ProgressEntity.Error
-                ) {
-                    Timber.d("onStop: User left activity. Triggering background mode.")
-
-                    // Trigger background mode
+                if (isRunning) {
+                    Timber.d("onStop: User left activity while running. Triggering background mode.")
                     repo.background(true)
+                } else { // If the task has finished or errored
+                    if (disableNotificationOnDismiss) {
+                        Timber.d("onStop: Task finished and disableNotificationOnDismiss is true. Closing.")
+                        repo.close()
+                    } else {
+                        Timber.d("onStop: Task finished and disableNotificationOnDismiss is false. Triggering background mode.")
+                        repo.background(true)
+                    }
                 }
             }
         } else if (isRequestingPermission) {

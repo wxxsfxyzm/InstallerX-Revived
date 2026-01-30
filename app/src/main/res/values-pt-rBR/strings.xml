@@ -57,8 +57,8 @@
     <string name="disable_adb_install_verify_desc">Desabilitar a verificação de instalação do ADB, útil em alguns sistemas onde uma instalação acionará uma verificação (Play Protect)</string>
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">Não suporta Dhizuku</string>
     <string name="disable_adb_install_verify_failed">Não foi possível desabilitar a verificação de instalação do ADB</string>
-    <string name="ignore_battery_optimizations">Ignorar Otimizações da Bateria</string>
-    <string name="ignore_battery_optimizations_desc">Útil em algumas ROMs personalizadas que têm política de fundo de string</string>
+    <string name="ignore_battery_optimizations">Ignorar Otimização da Bateria</string>
+    <string name="ignore_battery_optimizations_desc">Útil em ROMs com políticas de execução em segundo plano rigorosas. Se a notificação ficar travada, tente ignorar a otimização da bateria</string>
     <string name="ignore_battery_optimizations_desc_disabled">Já Ignorado</string>
     <string name="lock_default_installer">Definir como instalador padrão</string>
     <string name="lock_default_installer_desc">Definir o InstallerX como o instalador padrão de apks</string>
@@ -457,7 +457,7 @@
     <string name="exception_install_failed_missing_split">Pacote(s) dividido(s) necessário(s) ausente(s)</string>
     <string name="installer_oppo_related">Relacionado ao OPPO</string>
     <string name="installer_show_oem_special">Mostrar informações extras do OEM</string>
-    <string name="installer_show_oem_special_desc">Analise e mostre algum valor específico para apks OEM na caixa de diálogo de instalação</string>
+    <string name="installer_show_oem_special_desc">Analise e mostre algum valor específico para APK(S) do fabricante na caixa de diálogo de instalação</string>
     <string name="config_global_default">Padrão Global</string>
     <string name="installer_version_name_label">Nome da Versão:</string>
     <string name="installer_version_code_label">Código da Versão:</string>
@@ -660,4 +660,8 @@
     <string name="installer_author">Autor: %1$s</string>
     <string name="lab_module_always_use_root">Sempre usar root para atualizar módulos</string>
     <string name="lab_module_always_use_root_desc">Ao trabalhar como instalador do sistema, utilizar sempre root para atualizar os módulos e obter melhor desempenho</string>
+    <string name="config_auto_delete_zip">Excluir automaticamente arquivos zip</string>
+    <string name="config_auto_delete_zip_desc">Além de excluir o pacote de instalação, exclua também o arquivo compactado que contém o pacote de instalação.</string>
+    <string name="open_lsposed">Abrir o LSPosed</string>
+    <string name="exception_zip_exception">Não foi possível abrir o zip como arquivo</string>
 </resources>

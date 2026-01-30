@@ -18,6 +18,7 @@
     <string name="about">关于</string>
     <string name="other">其它</string>
     <string name="performance">性能</string>
+    <string name="debug">调试</string>
     <string name="lab">实验室</string>
     <string name="lab_desc">访问实验性或开发中的新功能</string>
     <string name="about_detail">关于 InstallerX Revived</string>
@@ -28,6 +29,10 @@
     <string name="get_update_directly_desc">直接从 Github 安装更新，不会留下缓存</string>
     <string name="get_source_code">查看源代码</string>
     <string name="get_source_code_detail">在 GitHub 上查看源代码</string>
+    <string name="save_logs">存储日志文件</string>
+    <string name="save_logs_desc">将日志文件存储到本地以便调试</string>
+    <string name="export_logs">导出日志</string>
+    <string name="export_logs_desc">导出应用日志</string>
     <string name="internet_access_enabled">联网</string>
     <string name="internet_access_disabled">离线</string>
     <string name="uninstall_title">卸载 InstallerX Revived</string>
@@ -54,6 +59,8 @@
     <string name="theme_settings_ui_engine">UI 引擎</string>
     <string name="theme_settings_use_expressive_ui">使用 M3 Expressive 外观</string>
     <string name="theme_settings_use_expressive_ui_desc">使用全新 Material 3 Expressive 设计风格</string>
+    <string name="theme_settings_use_blur">启用模糊</string>
+    <string name="theme_settings_use_blur_desc">为应用启用模糊效果</string>
     <string name="theme_settings_google_ui_style">Google UI 风格</string>
     <string name="theme_settings_theme_mode">主题模式</string>
     <string name="theme_settings_theme_mode_desc">选择主题模式</string>
@@ -122,7 +129,7 @@
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">Dhizuku 不受支持</string>
     <string name="disable_adb_install_verify_failed">无法停用安装验证</string>
     <string name="ignore_battery_optimizations">忽略电池优化</string>
-    <string name="ignore_battery_optimizations_desc">在某些具有严格后台策略的 ROM 上很有用</string>
+    <string name="ignore_battery_optimizations_desc">适用于后台管理严格的 ROM。若安装通知卡住，请尝试忽略电池优化</string>
     <string name="ignore_battery_optimizations_desc_disabled">已被忽略</string>
     <string name="auto_lock_default_installer">自动锁定安装器</string>
     <string name="auto_lock_default_installer_desc">在开始安装时自动将本应用设置为默认安装器</string>
@@ -337,10 +344,14 @@
     <string name="installer_silent_install">静默安装</string>
     <string name="installer_unknown_error">未知错误</string>
     <string name="installer_channel_name">安装通知</string>
-    <string name="installer_notification_tap_to_disable">前台服务通知，点击以禁用。</string>
+    <string name="installer_channel_name_desc">显示安装的阶段</string>
+    <string name="installer_notification_tap_to_disable">前台服务通知，点击以禁用</string>
     <string name="installer_progress_channel_name">安装过程通知</string>
+    <string name="installer_progress_channel_name_desc">显示安装的进度</string>
     <string name="installer_background_channel_name">后台通知</string>
+    <string name="installer_notification_desc">无用的后台服务通知</string>
     <string name="installer_live_channel_name">安装进度实时活动</string>
+    <string name="installer_live_channel_name_desc">以实时活动形式展示通知进度</string>
     <string name="installer_live_channel_short_text_resolving">解析中</string>
     <string name="installer_live_channel_short_text_preparing">准备中</string>
     <string name="installer_live_channel_short_text_analysing">分析中</string>
@@ -491,6 +502,7 @@
     <string name="exception_module_install_exit_code_non_zero">退出状态码非零！</string>
     <string name="exception_http_not_allowed">当前配置不允许明文 HTTP</string>
     <string name="exception_http_restricted_for_localhost">仅允许在本地网络使用明文 HTTP</string>
+    <string name="exception_zip_exception">无法打开 zip 文件</string>
     <string name="old_version_prefix">当前</string>
     <string name="old_version_archived">已归档</string>
     <string name="old_version_uninstalled">已卸载</string>

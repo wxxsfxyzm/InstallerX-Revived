@@ -22,6 +22,7 @@
     <string name="performance">Performance</string>
     <string name="lab">Laboratory</string>
     <string name="lab_desc">Access experimental and developer features</string>
+    <string name="debug">Debug</string>
     <string name="about_detail">About InstallerX Revived</string>
     <string name="updating">Updating…</string>
     <string name="get_update">Get update</string>
@@ -31,6 +32,10 @@
     <string name="get_update_directly_desc">Get update directly from GitHub and install, no cache will be left</string>
     <string name="get_source_code">Check for source code</string>
     <string name="get_source_code_detail">Check for source code on GitHub</string>
+    <string name="save_logs">Save Logs</string>
+    <string name="save_logs_desc">Save log to local file for debugging purposes</string>
+    <string name="export_logs">Export Logs</string>
+    <string name="export_logs_desc">Export logs of the app</string>
     <string name="internet_access_enabled">Online</string>
     <string name="internet_access_disabled">Offline</string>
     <string name="uninstall_title">Uninstall InstallerX Revived</string>
@@ -58,6 +63,8 @@
     <string name="theme_settings_ui_engine">UI Engine</string>
     <string name="theme_settings_use_expressive_ui">Use Expressive UI</string>
     <string name="theme_settings_use_expressive_ui_desc">Use the new M3 Expressive style</string>
+    <string name="theme_settings_use_blur">Enable Blur</string>
+    <string name="theme_settings_use_blur_desc">Enable blur for the app</string>
     <string name="theme_settings_google_ui_style">Google UI style</string>
     <string name="theme_settings_theme_mode">Theme Mode</string>
     <string name="theme_settings_theme_mode_desc">Select theme mode</string>
@@ -125,8 +132,8 @@
     <string name="disable_adb_install_verify_desc">Disable ADB install verification, useful on some systems where a installation will trigger an scan (Play Protect)</string>
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">Not support Dhizuku</string>
     <string name="disable_adb_install_verify_failed">Couldn\'t disable ADB install verification</string>
-    <string name="ignore_battery_optimizations">Ignore Battery Optimizations</string>
-    <string name="ignore_battery_optimizations_desc">Useful on some custom ROMs which have string background policy</string>
+    <string name="ignore_battery_optimizations">Ignore Battery Optimization</string>
+    <string name="ignore_battery_optimizations_desc">Useful on ROMs with strict background policies. If the notification gets stuck, try ignoring battery optimization</string>
     <string name="ignore_battery_optimizations_desc_disabled">Already Ignored</string>
     <string name="auto_lock_default_installer">Auto set as default installer</string>
     <string name="auto_lock_default_installer_desc">Automatically set this app as installer when starting a new install</string>
@@ -345,11 +352,15 @@
     <string name="installer_silent_install">Silent Install</string>
     <string name="installer_error_reason">Error Reason</string>
     <string name="installer_unknown_error">Unknown Error</string>
-    <string name="installer_notification_tap_to_disable">Foreground service notification, tap to disable.</string>
+    <string name="installer_notification_tap_to_disable">Foreground service notification, tap to disable</string>
     <string name="installer_channel_name">Install Notification</string>
+    <string name="installer_channel_name_desc">Shows the installation stage</string>
     <string name="installer_progress_channel_name">Install Process Notification</string>
+    <string name="installer_progress_channel_name_desc">Shows the installation process</string>
     <string name="installer_background_channel_name">Background Notification</string>
+    <string name="installer_notification_desc">Background service notification, useless</string>
     <string name="installer_live_channel_name">Install Progress Live Update</string>
+    <string name="installer_live_channel_name_desc">Show install progress as live update</string>
     <string name="installer_live_channel_short_text_resolving">Resolving</string>
     <string name="installer_live_channel_short_text_preparing">Preparing</string>
     <string name="installer_live_channel_short_text_analysing">Analysing</string>
@@ -509,6 +520,7 @@
     <string name="exception_module_install_exit_code_non_zero">Exit code non zero!</string>
     <string name="exception_http_not_allowed">Cleartext HTTP not allowed</string>
     <string name="exception_http_restricted_for_localhost">Cleartext HTTP restricted to localhost</string>
+    <string name="exception_zip_exception">Failed to open zip as file</string>
     <string name="old_version_prefix">Current</string>
     <string name="old_version_archived">Archived</string>
     <string name="old_version_uninstalled">Uninstalled</string>

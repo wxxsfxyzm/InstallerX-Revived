@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
+    <cache-path
+        name="internal_cache_logs"
+        path="logs/" />
     <external-cache-path
         name="external_cache"
         path="." />

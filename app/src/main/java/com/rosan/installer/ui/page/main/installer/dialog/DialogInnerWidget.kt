@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.installer.dialog
 
 import android.annotation.SuppressLint
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -43,6 +44,7 @@ fun dialogInnerWidget(
         }
     }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun dialogGenerateParams(
     installer: InstallerRepo, viewModel: InstallerViewModel

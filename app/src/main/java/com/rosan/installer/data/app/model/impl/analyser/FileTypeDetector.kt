@@ -1,4 +1,4 @@
-package com.rosan.installer.data.app.util
+package com.rosan.installer.data.app.model.impl.analyser
 
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
@@ -6,6 +6,7 @@ import com.rosan.installer.data.app.model.enums.DataType
 import timber.log.Timber
 import java.io.File
 import java.util.zip.ZipEntry
+import java.util.zip.ZipException
 import java.util.zip.ZipFile
 
 object FileTypeDetector {
@@ -15,55 +16,56 @@ object FileTypeDetector {
 
         return try {
             ZipFile(fileEntity.path).use { zip ->
-                // 将 entries 转为 List，因为后续可能需要多次遍历（虽然性能有轻微损耗，但逻辑更清晰且安全）
+                // Convert entries to List because we might iterate multiple times
                 val entries = zip.entries().asSequence().toList()
 
-                // 优先级 1: 模块类型 (Module Types) - 仅当开关开启时检测
+                // Priority 1: Module Types (only if enabled)
                 if (extra.isModuleFlashEnabled) {
                     detectModuleType(zip, entries)?.let { return it }
                 }
 
-                // 优先级 2: 标准应用格式 (Standard App Types)
+                // Priority 2: Standard App Types
                 detectStandardType(zip, entries)
             }
         } catch (e: Exception) {
-            // 如果无法作为 Zip 打开，且路径以 .apk 结尾，则兜底认为是 APK
+            // Fallback: assume APK if path ends with .apk and zip open failed
             if (fileEntity.path.endsWith(".apk", true)) {
                 DataType.APK
             } else {
-                DataType.NONE
+                Timber.Forest.e(e, "Failed to detect file type for path: ${fileEntity.path}")
+                if (e is ZipException) throw e
+                else DataType.NONE
             }
         }
     }
 
     private fun detectModuleType(zipFile: ZipFile, entries: List<ZipEntry>): DataType? {
-        // 核心特征：存在 module.prop
+        // Core feature: presence of module.prop
         val hasModuleProp = entries.any {
             it.name == "module.prop" || it.name == "common/module.prop"
         }
 
         if (!hasModuleProp) return null
 
-        // 进一步细分模块类型
         val hasAndroidManifest = zipFile.getEntry("AndroidManifest.xml") != null
         val hasApksInside = entries.any {
             !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true)
         }
 
         return when {
-            // 既是模块又是 APK
+            // Module and APK mixed
             hasAndroidManifest -> {
-                Timber.d("Detected MIXED_MODULE_APK")
+                Timber.Forest.d("Detected MIXED_MODULE_APK")
                 DataType.MIXED_MODULE_APK
             }
-            // 包含 APK 的模块包
+            // Module containing APKs
             hasApksInside -> {
-                Timber.d("Detected MIXED_MODULE_ZIP")
+                Timber.Forest.d("Detected MIXED_MODULE_ZIP")
                 DataType.MIXED_MODULE_ZIP
             }
-            // 纯模块
+            // Pure module
             else -> {
-                Timber.d("Detected MODULE_ZIP")
+                Timber.Forest.d("Detected MODULE_ZIP")
                 DataType.MODULE_ZIP
             }
         }
@@ -73,21 +75,40 @@ object FileTypeDetector {
         // 1. XAPK (manifest.json)
         if (zipFile.getEntry("manifest.json") != null) return DataType.XAPK
 
-        // 2. APKM (info.json) - 可增加对 json 内容的简单校验
-        if (zipFile.getEntry("info.json") != null) return DataType.APKM
+        // 2. APKM (info.json) - Validate content to distinguish from generic info.json
+        val infoEntry = zipFile.getEntry("info.json")
+        if (infoEntry != null) {
+            try {
+                // Read content to verify mandatory APKM fields exist
+                // This prevents misidentifying other formats (like some APKS/ZIPs) that happen to have an info.json
+                val isValidApkm = zipFile.getInputStream(infoEntry).use { input ->
+                    val content = input.reader().readText()
+                    // "pname" and "versioncode" are strictly required by ApkmStrategy
+                    content.contains("\"pname\"") && content.contains("\"versioncode\"")
+                }
 
-        // 3. 标准 APK (AndroidManifest.xml)
+                if (isValidApkm) {
+                    return DataType.APKM
+                } else {
+                    Timber.d("Found info.json but missing APKM keys (pname/versioncode). Skipping APKM detection.")
+                }
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to read info.json content. Skipping APKM detection.")
+            }
+        }
+
+        // 3. Standard APK (AndroidManifest.xml)
         if (zipFile.getEntry("AndroidManifest.xml") != null) return DataType.APK
 
         // 4. APKS (Split APKs)
-        // 特征：包含 base.apk 或 base-master.apk
+        // Feature: contains base.apk or base-master.apk
         val hasBaseApk = entries.any {
             val name = File(it.name).name
             name.equals("base.apk", true) || name.startsWith("base-master")
         }
         if (hasBaseApk) return DataType.APKS
 
-        // 5. Multi-APK Zip (包含任意 APK 的压缩包)
+        // 5. Multi-APK Zip (Zip containing arbitrary APKs)
         val hasApkFiles = entries.any {
             !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true)
         }

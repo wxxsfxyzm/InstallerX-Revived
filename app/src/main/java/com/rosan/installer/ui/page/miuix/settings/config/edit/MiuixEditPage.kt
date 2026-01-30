@@ -48,10 +48,10 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySizeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallReasonWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
+import com.rosan.installer.ui.theme.getMiuixAppBarColor
+import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import com.rosan.installer.ui.util.isNoneActive
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.flow.collectLatest
@@ -67,7 +67,6 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.Ok
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -75,7 +74,8 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 fun MiuixEditPage(
     navController: NavController,
     id: Long? = null,
-    viewModel: EditViewModel = koinViewModel { parametersOf(id) }
+    viewModel: EditViewModel = koinViewModel { parametersOf(id) },
+    useBlur: Boolean
 ) {
     LaunchedEffect(true) {
         viewModel.dispatch(EditViewAction.Init)
@@ -83,11 +83,8 @@ fun MiuixEditPage(
 
     val snackBarHostState = remember { SnackbarHostState() }
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = remember { HazeState() }
-    val hazeStyle = HazeStyle(
-        backgroundColor = MiuixTheme.colorScheme.surface,
-        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
-    )
+    val hazeState = if (useBlur) remember { HazeState() } else null
+    val hazeStyle = rememberMiuixHazeStyle()
     val showUnsavedDialogState = remember { mutableStateOf(false) }
 
     MiuixUnsavedChangesDialog(
@@ -133,11 +130,14 @@ fun MiuixEditPage(
         modifier = Modifier.imePadding(),
         topBar = {
             TopAppBar(
-                modifier = Modifier.hazeEffect(hazeState) {
-                    style = hazeStyle
-                    blurRadius = 30.dp
-                    noiseFactor = 0f
-                },
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(hazeState) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
+                color = hazeState.getMiuixAppBarColor(),
                 scrollBehavior = scrollBehavior,
                 title = stringResource(id = if (id == null) R.string.add else R.string.update),
                 navigationIcon = {
@@ -165,7 +165,7 @@ fun MiuixEditPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .hazeSource(hazeState)
+                .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier)
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),

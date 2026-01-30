@@ -6,17 +6,18 @@ import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.model.enums.SessionMode
+import com.rosan.installer.data.app.model.impl.analyser.FileTypeDetector
 import com.rosan.installer.data.app.model.impl.analyser.UnifiedContainerAnalyser
 import com.rosan.installer.data.app.model.impl.processor.PackagePreprocessor
 import com.rosan.installer.data.app.model.impl.processor.SelectionStrategy
 import com.rosan.installer.data.app.repo.AnalyserRepo
-import com.rosan.installer.data.app.util.FileTypeDetector
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
+import java.util.zip.ZipException
 
 object AnalyserRepoImpl : AnalyserRepo {
     override suspend fun doWork(
@@ -108,13 +109,14 @@ object AnalyserRepoImpl : AnalyserRepo {
         return try {
             // Detect type efficiently
             val fileType = FileTypeDetector.detect(data, extra)
+            Timber.d("AnalyserRepo: FileType -> $fileType")
             if (fileType == DataType.NONE) return emptyList()
-
             // Delegate to the Unified Analyser
             UnifiedContainerAnalyser.analyze(config, data, fileType, extra.copy(dataType = fileType))
         } catch (e: Exception) {
             Timber.e(e, "Fatal error analyzing source: ${data.source}")
-            emptyList()
+            if (e is ZipException) throw e
+            else emptyList()
         }
     }
 }

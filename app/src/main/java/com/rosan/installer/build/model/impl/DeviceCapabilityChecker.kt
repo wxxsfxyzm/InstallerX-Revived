@@ -59,8 +59,8 @@ class DeviceCapabilityChecker(private val context: Context) {
         }
     }
 
-    private fun getMiuiPackageInstallerVersion(): Pair<String, Long>? {
-        return try {
+    private fun getMiuiPackageInstallerVersion(): Pair<String, Long>? =
+        try {
             val pm = context.packageManager
             val info = pm.getPackageInfo(MIUI_PACKAGE_INSTALLER, 0)
 
@@ -80,5 +80,4 @@ class DeviceCapabilityChecker(private val context: Context) {
             Timber.e(e, "Failed to retrieve MIUI package installer version")
             null
         }
-    }
 }

@@ -65,4 +65,8 @@ sealed class PreferredViewAction {
     data class SetSeedColor(val color: Color) : PreferredViewAction()
     data class SetDynColorFollowPkgIcon(val follow: Boolean) : PreferredViewAction()
     data class SetDynColorFollowPkgIconForLiveActivity(val follow: Boolean) : PreferredViewAction()
+    data class SetUseBlur(val enable: Boolean) : PreferredViewAction()
+
+    data class SetEnableFileLogging(val enable: Boolean) : PreferredViewAction()
+    data object ShareLog : PreferredViewAction()
 }

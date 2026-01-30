@@ -1,5 +1,7 @@
 package com.rosan.installer.data.updater.model.impl
 
+import android.content.Context
+import com.rosan.installer.BuildConfig
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.data.app.model.entity.DataEntity
@@ -11,12 +13,14 @@ import okhttp3.Request
 import timber.log.Timber
 
 class OnlineUpdateChecker(
+    private val context: Context,
     private val client: OkHttpClient,
     private val json: Json
 ) : UpdateChecker {
-
-    private val REPO_OWNER = "wxxsfxyzm"
-    private val REPO_NAME = "InstallerX-Revived"
+    companion object {
+        private const val REPO_OWNER = "wxxsfxyzm"
+        private const val REPO_NAME = "InstallerX-Revived"
+    }
 
     override fun check(): UpdateChecker.CheckResult? {
         // Skip check for Debug builds
@@ -28,6 +32,12 @@ class OnlineUpdateChecker(
         // Skip check for Unstable builds
         if (RsConfig.LEVEL == Level.UNSTABLE) {
             Timber.d("Update check skipped: Unstable build")
+            return null
+        }
+
+        // Skip check for non-target app
+        if (context.packageName != BuildConfig.APPLICATION_ID) {
+            Timber.d("Update check skipped: Not the target app")
             return null
         }
 

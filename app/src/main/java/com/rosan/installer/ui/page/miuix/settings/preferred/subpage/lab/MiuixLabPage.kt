@@ -32,10 +32,10 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixRootImplementationDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
+import com.rosan.installer.ui.theme.getMiuixAppBarColor
+import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import com.rosan.installer.util.OSUtils
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import top.yukonga.miuix.kmp.basic.Card
@@ -45,7 +45,6 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SpinnerEntry
 import top.yukonga.miuix.kmp.extra.SuperSpinner
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -56,11 +55,8 @@ fun MiuixLabPage(
 ) {
     val state = viewModel.state
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = remember { HazeState() }
-    val hazeStyle = HazeStyle(
-        backgroundColor = MiuixTheme.colorScheme.surface,
-        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
-    )
+    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeStyle = rememberMiuixHazeStyle()
     val showRootImplementationDialog = remember { mutableStateOf(false) }
 
     MiuixRootImplementationDialog(
@@ -78,11 +74,14 @@ fun MiuixLabPage(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.hazeEffect(hazeState) {
-                    style = hazeStyle
-                    blurRadius = 30.dp
-                    noiseFactor = 0f
-                },
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(hazeState) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
+                color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(R.string.lab),
                 navigationIcon = {
                     MiuixBackButton(modifier = Modifier.padding(start = 16.dp), onClick = { navController.navigateUp() })
@@ -94,7 +93,7 @@ fun MiuixLabPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .hazeSource(hazeState)
+                .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier)
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
