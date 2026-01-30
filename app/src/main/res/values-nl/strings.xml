@@ -111,7 +111,7 @@
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">Ondersteunt niet Dhizuku</string>
     <string name="disable_adb_install_verify_failed">Kon niet ADB-installatieverificatie uitschakelen</string>
     <string name="ignore_battery_optimizations">Batterijoptimalisatie negeren</string>
-    <string name="ignore_battery_optimizations_desc">Handig bij sommige aangepaste ROM\'s met een string-achtergrondbeleid</string>
+    <string name="ignore_battery_optimizations_desc">Handig bij ROM\'s met een strikt achtergrondbeleid. Als de melding blijft haken, probeer dan batterijoptimalisatie te negeren</string>
     <string name="ignore_battery_optimizations_desc_disabled">Reeds genegeerd</string>
     <string name="auto_lock_default_installer">Automatisch instellen als de standaard installateur</string>
     <string name="auto_lock_default_installer_desc">Automatisch deze app instellen als de standaard installateur bij het starten van een nieuwe installatie</string>
@@ -663,4 +663,5 @@
     <string name="config_auto_delete_zip">Automatisch zip-bestanden verwijderen</string>
     <string name="config_auto_delete_zip_desc">Naast het verwijderen van het installatiepakket, ook het gecomprimeerde bestand waarin het installatiepakket zit verwijderen.</string>
     <string name="open_lsposed">LSPosed openen</string>
+    <string name="exception_zip_exception">Openen van zip als bestand mislukt</string>
 </resources>
