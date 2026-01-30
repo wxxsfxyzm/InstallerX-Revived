@@ -182,6 +182,7 @@ class PreferredViewModel(
             is PreferredViewAction.SetSeedColor -> setSeedColor(action.color)
             is PreferredViewAction.SetDynColorFollowPkgIcon -> setDynColorFollowPkgIcon(action.follow)
             is PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity -> setDynColorFollowPkgIconForLiveActivity(action.follow)
+            is PreferredViewAction.SetUseBlur -> setUseBlur(action.enable)
 
             is PreferredViewAction.SetEnableFileLogging -> setEnableFileLogging(action.enable)
             is PreferredViewAction.ShareLog -> shareLog()
@@ -614,6 +615,11 @@ class PreferredViewModel(
             appDataStore.putBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, enable)
         }
 
+    private fun setUseBlur(enable: Boolean) =
+        viewModelScope.launch {
+            appDataStore.putBoolean(AppDataStore.UI_USE_BLUR, enable)
+        }
+
     private suspend fun runPrivilegedAction(
         action: PreferredViewAction,
         titleForError: String,
@@ -752,6 +758,8 @@ class PreferredViewModel(
                 appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false)
             val useDynColorFollowPkgIconForLiveActivityFlow =
                 appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false)
+            val useBlurFlow =
+                appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, true)
 
             combine(
                 authorizerFlow,
@@ -798,6 +806,7 @@ class PreferredViewModel(
                 wallpaperColorsFlow,
                 useDynColorFollowPkgIconFlow,
                 useDynColorFollowPkgIconForLiveActivityFlow,
+                useBlurFlow,
                 updateResultFlow
             ) { values: Array<Any?> ->
                 var idx = 0
@@ -849,6 +858,7 @@ class PreferredViewModel(
                 @Suppress("UNCHECKED_CAST") val wallpaperColors = values[idx++] as? List<Int>
                 val useDynColorFollowPkgIcon = values[idx++] as Boolean
                 val useDynColorFollowPkgIconForLiveActivity = values[idx++] as Boolean
+                val useBlur = values[idx++] as Boolean
                 val updateResult = values[idx] as UpdateChecker.CheckResult?
 
                 val effectiveSeedColor = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
@@ -919,6 +929,7 @@ class PreferredViewModel(
                     availableColors = availableColors,
                     useDynColorFollowPkgIcon = useDynColorFollowPkgIcon,
                     useDynColorFollowPkgIconForLiveActivity = useDynColorFollowPkgIconForLiveActivity,
+                    useBlur = useBlur,
                     hasUpdate = hasUpdate,
                     remoteVersion = remoteVersion,
                     uninstallFlags = uninstallFlags,

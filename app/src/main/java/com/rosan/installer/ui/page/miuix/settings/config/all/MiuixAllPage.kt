@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,9 +33,9 @@ import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixScopeTipCard
+import com.rosan.installer.ui.theme.getMiuixAppBarColor
+import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
@@ -62,7 +61,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 fun MiuixAllPage(
     navController: NavController,
     viewModel: AllViewModel,
-    hazeState: HazeState,
+    hazeState: HazeState?,
     title: String,
     outerPadding: PaddingValues
 ) {
@@ -73,21 +72,20 @@ fun MiuixAllPage(
     val listState = rememberLazyStaggeredGridState()
 
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeStyle = HazeStyle(
-        backgroundColor = MiuixTheme.colorScheme.surface,
-        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(alpha = 0.8f))
-    )
+    val hazeStyle = rememberMiuixHazeStyle()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                modifier = Modifier.hazeEffect(hazeState) {
-                    style = hazeStyle
-                    blurRadius = 30.dp
-                    noiseFactor = 0f
-                },
-                color = Color.Transparent,
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(hazeState) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
+                color = hazeState.getMiuixAppBarColor(),
                 title = title,
                 scrollBehavior = scrollBehavior
             )
@@ -127,7 +125,7 @@ fun MiuixAllPage(
                 LazyVerticalStaggeredGrid(
                     modifier = Modifier
                         .fillMaxSize()
-                        .hazeSource(hazeState)
+                        .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier)
                         .overScrollVertical()
                         .nestedScroll(scrollBehavior.nestedScrollConnection),
                     columns = StaggeredGridCells.Adaptive(350.dp),

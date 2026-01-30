@@ -39,7 +39,7 @@ import dev.chrisbanes.haze.hazeEffect
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun UpdateLoadingIndicator(
-    hazeState: HazeState,
+    hazeState: HazeState?,
     viewModel: PreferredViewModel
 ) {
     var showUpdateLoading by remember { mutableStateOf(false) }
@@ -63,15 +63,17 @@ fun UpdateLoadingIndicator(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .hazeEffect(
-                    state = hazeState,
-                    style = HazeStyle(
-                        backgroundColor = MaterialTheme.colorScheme.surface,
-                        tint = HazeTint(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
-                        blurRadius = 25.dp,
-                        noiseFactor = 0f
+                .then(hazeState?.let {
+                    Modifier.hazeEffect(
+                        state = hazeState,
+                        style = HazeStyle(
+                            backgroundColor = MaterialTheme.colorScheme.surface,
+                            tint = HazeTint(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
+                            blurRadius = 25.dp,
+                            noiseFactor = 0f
+                        )
                     )
-                )
+                } ?: Modifier)
                 .background(Color.Black.copy(alpha = 0.3f))
                 .clickable(
                     indication = null,

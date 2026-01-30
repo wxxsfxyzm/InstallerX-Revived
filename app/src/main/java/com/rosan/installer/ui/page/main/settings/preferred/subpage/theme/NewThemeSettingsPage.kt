@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -65,9 +66,14 @@ import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.SelectableSettingItem
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
+import com.rosan.installer.ui.theme.getM3TopBarColor
 import com.rosan.installer.ui.theme.m3color.PaletteStyle
 import com.rosan.installer.ui.theme.m3color.ThemeMode
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 
 // This is now a top-level composable, likely in its own file.
 // It takes NavController instead of an onBack lambda.
@@ -79,9 +85,11 @@ fun NewThemeSettingsPage(
 ) {
     val state = viewModel.state
     val topAppBarState = rememberTopAppBarState()
+    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeStyle = rememberMaterial3HazeStyle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
-    var showHideLauncherIconDialog by remember { mutableStateOf(false) }
 
+    var showHideLauncherIconDialog by remember { mutableStateOf(false) }
     var showPaletteDialog by remember { mutableStateOf(false) }
     var showThemeModeDialog by remember { mutableStateOf(false) }
 
@@ -128,6 +136,13 @@ fun NewThemeSettingsPage(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(it) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = {
                     Text(stringResource(R.string.theme_settings))
@@ -145,16 +160,20 @@ fun NewThemeSettingsPage(
                 },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    containerColor = hazeState.getM3TopBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
+                    scrolledContainerColor = hazeState.getM3TopBarColor()
+                )
             )
         },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding()
+            )
         ) {
             // --- Group 1: UI Style Selection ---
             item {
@@ -202,6 +221,15 @@ fun NewThemeSettingsPage(
                             description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
                             checked = state.showExpressiveUI,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it)) }
+                        )
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.Blur,
+                            title = stringResource(R.string.theme_settings_use_blur),
+                            description = stringResource(R.string.theme_settings_use_blur_desc),
+                            checked = state.useBlur,
+                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetUseBlur(it)) }
                         )
                     }
                     item {

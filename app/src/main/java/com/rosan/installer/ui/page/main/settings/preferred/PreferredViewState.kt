@@ -55,6 +55,7 @@ data class PreferredViewState(
     val availableColors: List<RawColor> = PresetColors,
     val useDynColorFollowPkgIcon: Boolean = false,
     val useDynColorFollowPkgIconForLiveActivity: Boolean = false,
+    val useBlur: Boolean = true,
     val hasUpdate: Boolean = false,
     val remoteVersion: String = "",
     val uninstallFlags: Int = 0,

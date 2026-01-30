@@ -26,7 +26,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -40,9 +39,9 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixHideLauncherIconWarningDia
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeEngineWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeModeWidget
+import com.rosan.installer.ui.theme.getMiuixAppBarColor
+import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import top.yukonga.miuix.kmp.basic.Card
@@ -61,11 +60,8 @@ fun MiuixThemeSettingsPage(
 ) {
     val state = viewModel.state
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = remember { HazeState() }
-    val hazeStyle = HazeStyle(
-        backgroundColor = MiuixTheme.colorScheme.surface,
-        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
-    )
+    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeStyle = rememberMiuixHazeStyle()
     val showHideLauncherIconDialog = remember { mutableStateOf(false) }
 
     MiuixHideLauncherIconWarningDialog(
@@ -80,12 +76,14 @@ fun MiuixThemeSettingsPage(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.hazeEffect(hazeState) {
-                    style = hazeStyle
-                    blurRadius = 30.dp
-                    noiseFactor = 0f
-                },
-                color = Color.Transparent,
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(hazeState) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
+                color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(R.string.theme_settings),
                 navigationIcon = {
                     MiuixBackButton(modifier = Modifier.padding(start = 16.dp), onClick = { navController.navigateUp() })
@@ -97,7 +95,7 @@ fun MiuixThemeSettingsPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .hazeSource(hazeState)
+                .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier)
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -132,6 +130,12 @@ fun MiuixThemeSettingsPage(
                         onThemeModeChange = { newMode ->
                             viewModel.dispatch(PreferredViewAction.SetThemeMode(newMode))
                         }
+                    )
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.theme_settings_use_blur),
+                        description = stringResource(R.string.theme_settings_use_blur_desc),
+                        checked = state.useBlur,
+                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetUseBlur(it)) }
                     )
                     MiuixSwitchWidget(
                         title = stringResource(R.string.theme_settings_miuix_custom_colors),

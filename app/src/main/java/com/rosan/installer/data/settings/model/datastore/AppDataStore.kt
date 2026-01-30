@@ -18,7 +18,8 @@ class AppDataStore(
     private val json: Json
 ) {
     companion object {
-        // UI Fresh Switch
+        // UI Related
+        val UI_USE_BLUR = booleanPreferencesKey("ui_use_blur")
         val UI_EXPRESSIVE_SWITCH = booleanPreferencesKey("ui_fresh_switch")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val THEME_PALETTE_STYLE = stringPreferencesKey("theme_palette_style")

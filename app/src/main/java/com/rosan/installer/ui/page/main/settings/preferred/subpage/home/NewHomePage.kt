@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.home
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -50,7 +51,10 @@ import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWid
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
+import com.rosan.installer.ui.theme.getM3TopBarColor
+import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -59,10 +63,13 @@ fun NewHomePage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
+    val state = viewModel.state
     val context = LocalContext.current
-    val hazeState = remember { HazeState() }
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val topBarHazeState = if (state.useBlur) remember { HazeState() } else null
+    val indicatorHazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeStyle = rememberMaterial3HazeStyle()
     val uriHandler = LocalUriHandler.current
     var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -73,10 +80,17 @@ fun NewHomePage(
             modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .hazeSource(state = hazeState),
+                .then(indicatorHazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
             topBar = {
                 LargeFlexibleTopAppBar(
+                    modifier = topBarHazeState?.let {
+                        Modifier.hazeEffect(it) {
+                            style = hazeStyle
+                            blurRadius = 30.dp
+                            noiseFactor = 0f
+                        }
+                    } ?: Modifier,
                     windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                     title = {
                         Text(text = stringResource(id = R.string.about))
@@ -94,23 +108,27 @@ fun NewHomePage(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        containerColor = topBarHazeState.getM3TopBarColor(),
                         titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    ),
+                        scrolledContainerColor = topBarHazeState.getM3TopBarColor()
+                    )
                 )
             },
         ) { paddingValues ->
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = paddingValues.calculateTopPadding()),
+                    .then(topBarHazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
+                contentPadding = PaddingValues(
+                    top = paddingValues.calculateTopPadding()
+                ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
-                            .padding(bottom = 12.dp)
+                            .padding(top = 8.dp, bottom = 12.dp)
                     ) {
                         StatusWidget(viewModel)
                     }
@@ -188,6 +206,6 @@ fun NewHomePage(
                 )
             }
         }
-        UpdateLoadingIndicator(hazeState = hazeState, viewModel = viewModel)
+        UpdateLoadingIndicator(hazeState = indicatorHazeState, viewModel = viewModel)
     }
 }
