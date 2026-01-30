@@ -13,7 +13,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -31,10 +30,10 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixUninstallKeepDataWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUninstallPackageDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUninstallRequireBiometricAuthWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUninstallSystemAppWidget
+import com.rosan.installer.ui.theme.getMiuixAppBarColor
+import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import com.rosan.installer.util.toast
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import top.yukonga.miuix.kmp.basic.Card
@@ -42,7 +41,6 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -52,13 +50,11 @@ fun MiuixUninstallerGlobalSettingsPage(
     viewModel: PreferredViewModel
 ) {
     val context = LocalContext.current
+    val state = viewModel.state
     val scrollBehavior = MiuixScrollBehavior()
     var showUninstallInputDialog = remember { mutableStateOf(false) }
-    val hazeState = remember { HazeState() }
-    val hazeStyle = HazeStyle(
-        backgroundColor = MiuixTheme.colorScheme.surface,
-        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
-    )
+    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeStyle = rememberMiuixHazeStyle()
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
@@ -84,12 +80,14 @@ fun MiuixUninstallerGlobalSettingsPage(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.hazeEffect(hazeState) {
-                    style = hazeStyle
-                    blurRadius = 30.dp
-                    noiseFactor = 0f
-                },
-                color = Color.Transparent,
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(hazeState) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
+                color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(R.string.uninstaller_settings),
                 navigationIcon = {
                     MiuixBackButton(
@@ -103,7 +101,7 @@ fun MiuixUninstallerGlobalSettingsPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .hazeSource(hazeState)
+                .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier)
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),

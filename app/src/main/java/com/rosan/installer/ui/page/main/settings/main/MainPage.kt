@@ -4,9 +4,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -28,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.WideNavigationRail
 import androidx.compose.material3.WideNavigationRailColors
@@ -40,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -54,6 +55,9 @@ import com.rosan.installer.ui.page.main.settings.config.all.NewAllPage
 import com.rosan.installer.ui.page.main.settings.preferred.NewPreferredPage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredPage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -68,32 +72,33 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
     LaunchedEffect(Unit) {
         allViewModel.dispatch(AllViewAction.Init)
     }
-    val configCount = allViewModel.state.data.configs.size
     val showExpressiveUI = preferredViewModel.state.showExpressiveUI
+    val useBlur = showExpressiveUI && preferredViewModel.state.useBlur
+    val hazeState = if (useBlur) remember { HazeState() } else null
+
+    val configCount = allViewModel.state.data.configs.size
     val configLabel = stringResource(R.string.config)
     val preferredLabel = stringResource(R.string.preferred)
+
     val data = remember(showExpressiveUI, configLabel, preferredLabel, navController, allViewModel, preferredViewModel) {
         arrayOf(
             NavigationData(
                 icon = AppIcons.RoomPreferences,
                 label = configLabel
-            ) {
-                if (showExpressiveUI)
-                    NewAllPage(navController, allViewModel)
-                else
-                    AllPage(navController, allViewModel)
+            ) { outerPadding, hazeState ->
+                if (showExpressiveUI) NewAllPage(navController, allViewModel, outerPadding = outerPadding, hazeState = hazeState)
+                else AllPage(navController, allViewModel, outerPadding)
             },
             NavigationData(
                 icon = AppIcons.SettingsSuggest,
                 label = preferredLabel
-            ) {
-                if (showExpressiveUI)
-                    NewPreferredPage(navController, preferredViewModel)
-                else
-                    PreferredPage(navController, preferredViewModel)
+            ) { outerPadding, hazeState ->
+                if (showExpressiveUI) NewPreferredPage(navController, preferredViewModel, outerPadding = outerPadding, hazeState = hazeState)
+                else PreferredPage(navController, preferredViewModel, outerPadding)
             }
         )
     }
+
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { data.size })
     val currentPage = pagerState.currentPage
@@ -103,85 +108,95 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        BoxWithConstraints(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            val isPortrait = maxWidth < maxHeight || (maxHeight / maxWidth > 1.4f)
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        val isPortrait = maxWidth < maxHeight || (maxHeight / maxWidth > 1.4f)
 
-            val navigationSide =
-                if (isPortrait) WindowInsetsSides.Bottom
-                else WindowInsetsSides.Start
+        val navigationSide =
+            if (isPortrait) WindowInsetsSides.Bottom
+            else WindowInsetsSides.Start
 
-            val navigationWindowInsets = WindowInsets.safeDrawing.only(
-                (if (isPortrait) WindowInsetsSides.Horizontal
-                else WindowInsetsSides.Vertical) + navigationSide
-            )
+        val navigationWindowInsets = WindowInsets.safeDrawing.only(
+            (if (isPortrait) WindowInsetsSides.Horizontal
+            else WindowInsetsSides.Vertical) + navigationSide
+        )
 
-            Row(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if (!isPortrait) {
-                    ColumnNavigation(
+        val hazeStyle = rememberMaterial3HazeStyle()
+
+        if (isPortrait) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                bottomBar = {
+                    RowNavigation(
+                        modifier = hazeState?.let {
+                            Modifier.hazeEffect(hazeState) {
+                                style = hazeStyle
+                                blurRadius = 30.dp
+                                noiseFactor = 0f
+                            }
+                        } ?: Modifier,
                         isM3e = showExpressiveUI,
                         windowInsets = navigationWindowInsets,
                         data = data,
                         currentPage = currentPage,
-                        onPageChanged = { onPageChanged(it) }
+                        onPageChanged = { onPageChanged(it) },
+                        configCount = configCount,
+                        containerColor = if (useBlur) Color.Transparent else BottomAppBarDefaults.containerColor
                     )
                 }
+            ) { paddingValues ->
+                HorizontalPager(
+                    state = pagerState,
+                    userScrollEnabled = true,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    data[page].content(paddingValues, if (showExpressiveUI) hazeState else null)
+                }
+            }
+        } else {
+            Row(modifier = Modifier.fillMaxSize()) {
+                ColumnNavigation(
+                    isM3e = showExpressiveUI,
+                    windowInsets = navigationWindowInsets,
+                    data = data,
+                    currentPage = currentPage,
+                    onPageChanged = { onPageChanged(it) }
+                )
 
-                Column(
+                HorizontalPager(
+                    state = pagerState,
+                    userScrollEnabled = true,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxSize()
-                ) {
-                    HorizontalPager(
-                        state = pagerState,
-                        userScrollEnabled = true,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxSize()
-                    ) { page ->
-                        when (page) {
-                            0 -> data[page].content()
-                            1 -> data[page].content()
-                        }
-                    }
-                    if (isPortrait) {
-                        RowNavigation(
-                            isM3e = showExpressiveUI,
-                            windowInsets = navigationWindowInsets,
-                            data = data,
-                            currentPage = currentPage,
-                            onPageChanged = { onPageChanged(it) },
-                            configCount = configCount
-                        )
-                    }
+                ) { page ->
+                    data[page].content(PaddingValues(0.dp), if (showExpressiveUI) hazeState else null)
                 }
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RowNavigation(
+    modifier: Modifier = Modifier,
     isM3e: Boolean,
     windowInsets: WindowInsets,
     data: Array<NavigationData>,
     currentPage: Int,
     onPageChanged: (Int) -> Unit,
-    configCount: Int
+    configCount: Int,
+    containerColor: Color = if (isM3e) MaterialTheme.colorScheme.surfaceContainer else BottomAppBarDefaults.containerColor
 ) {
     FlexibleBottomAppBar(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .wrapContentSize(),
         windowInsets = windowInsets,
         expandedHeight = 72.dp,
-        containerColor = if (isM3e) MaterialTheme.colorScheme.surfaceContainer else BottomAppBarDefaults.containerColor,
+        containerColor = containerColor,
         horizontalArrangement = BottomAppBarDefaults.FlexibleFixedHorizontalArrangement,
         content = {
             data.forEachIndexed { index, navigationData ->
@@ -236,7 +251,6 @@ fun ColumnNavigation(
     WideNavigationRail(
         state = state,
         windowInsets = windowInsets,
-        // expandedHeaderTopPadding = 64.dp,
         colors = if (isM3e) WideNavigationRailColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -250,8 +264,6 @@ fun ColumnNavigation(
                     Modifier
                         .padding(start = 24.dp)
                         .semantics {
-                            // The button must announce the expanded or collapsed state of the rail
-                            // for accessibility.
                             stateDescription =
                                 if (state.currentValue == WideNavigationRailValue.Expanded) {
                                     "Expanded"

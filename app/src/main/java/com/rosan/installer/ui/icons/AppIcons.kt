@@ -32,6 +32,7 @@ import androidx.compose.material.icons.twotone.AutoAwesome
 import androidx.compose.material.icons.twotone.AutoFixHigh
 import androidx.compose.material.icons.twotone.Badge
 import androidx.compose.material.icons.twotone.BatterySaver
+import androidx.compose.material.icons.twotone.BlurOn
 import androidx.compose.material.icons.twotone.Bolt
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.ClearAll
@@ -112,6 +113,7 @@ object AppIcons {
     val Theme = Icons.TwoTone.ColorLens
     val ViewSourceCode = Icons.TwoTone.Code
     val OpenSourceLicense = Icons.TwoTone.Copyright
+    val Blur = Icons.TwoTone.BlurOn
 
     // --- 导航图标集合 ---
     val RoomPreferences = Icons.TwoTone.RoomPreferences

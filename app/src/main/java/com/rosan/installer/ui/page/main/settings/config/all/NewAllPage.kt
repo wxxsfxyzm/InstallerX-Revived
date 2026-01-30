@@ -6,6 +6,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
@@ -23,7 +24,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -44,25 +44,33 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.ScopeTipCard
 import com.rosan.installer.ui.page.main.widget.card.ShowDataWidget
+import com.rosan.installer.ui.page.main.widget.setting.DeleteEventCollector
+import com.rosan.installer.ui.theme.getM3TopBarColor
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewAllPage(
     navController: NavController,
-    viewModel: AllViewModel
+    viewModel: AllViewModel,
+    outerPadding: PaddingValues = PaddingValues(0.dp),
+    hazeState: HazeState? = null
 ) {
     LaunchedEffect(Unit) {
         viewModel.navController = navController
     }
 
-    val showFloatingState = remember { mutableStateOf(true) }
-    val showFloating by showFloatingState
     val listState = rememberLazyStaggeredGridState()
+    val hazeStyle = rememberMaterial3HazeStyle()
     val snackBarHostState = remember { SnackbarHostState() }
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val showFloatingState = remember { mutableStateOf(true) }
+    val showFloating by showFloatingState
 
     LaunchedEffect(listState) {
         var previousIndex = listState.firstVisibleItemIndex
@@ -86,26 +94,7 @@ fun NewAllPage(
             }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is AllViewEvent.DeletedConfig -> {
-                    val result = snackBarHostState.showSnackbar(
-                        message = viewModel.context.getString(R.string.delete_success),
-                        actionLabel = viewModel.context.getString(R.string.restore),
-                        withDismissAction = true
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        viewModel.dispatch(
-                            AllViewAction.RestoreDataConfig(
-                                configEntity = event.configEntity
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    }
+    DeleteEventCollector(viewModel, snackBarHostState)
 
     Scaffold(
         modifier = Modifier
@@ -115,17 +104,26 @@ fun NewAllPage(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(hazeState) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = { Text(text = stringResource(id = R.string.config)) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    containerColor = hazeState.getM3TopBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    scrolledContainerColor = hazeState.getM3TopBarColor()
                 )
             )
         },
         floatingActionButton = {
             AnimatedVisibility(
+                modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding()),
                 visible = showFloating,
                 enter = scaleIn(),
                 exit = scaleOut()
@@ -147,8 +145,8 @@ fun NewAllPage(
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-    ) {
-        Box(modifier = Modifier.padding(it)) {
+    ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize()) {
             when (viewModel.state.data.progress) {
                 is AllViewState.Data.Progress.Loading if viewModel.state.data.configs.isEmpty() -> {
                     Box(
@@ -185,7 +183,14 @@ fun NewAllPage(
                         }
                         ShowDataWidget(
                             viewModel = viewModel,
-                            listState = listState
+                            listState = listState,
+                            hazeState = hazeState,
+                            contentPadding = PaddingValues(
+                                top = innerPadding.calculateTopPadding() + 16.dp,
+                                bottom = outerPadding.calculateBottomPadding() + 16.dp,
+                                start = 16.dp,
+                                end = 16.dp
+                            )
                         )
                     }
                 }

@@ -50,8 +50,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
@@ -80,10 +78,10 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.Mi
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.lab.MiuixLabPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
+import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.flow.collectLatest
@@ -112,7 +110,7 @@ private object UIConstants {
 @Composable
 fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
     val navController = rememberNavController()
-
+    val useBlur = preferredViewModel.state.useBlur
     NavHost(
         navController = navController,
         startDestination = MiuixSettingsScreen.MiuixMain.route,
@@ -161,7 +159,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
 
             val pagerState = rememberPagerState(pageCount = { navigationItems.size })
             val snackBarHostState = remember { SnackbarHostState() }
-            val hazeState = remember { HazeState() }
+            val hazeState = if (useBlur) remember { HazeState() } else null
 
             // LaunchedEffect to handle snackbar events from AllViewModel
             LaunchedEffect(Unit) {
@@ -269,8 +267,8 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             val id = it.arguments?.getLong("id")
             MiuixEditPage(
                 navController = navController,
-                id = if (id != -1L) id
-                else null
+                id = if (id != -1L) id else null,
+                useBlur = useBlur
             )
         }
         composable(
@@ -291,7 +289,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             MiuixHomePage(navController = navController, viewModel = preferredViewModel)
         }
         composable(route = MiuixSettingsScreen.MiuixOpenSourceLicense.route) {
-            MiuixOpenSourceLicensePage(navController = navController)
+            MiuixOpenSourceLicensePage(navController = navController, viewModel = preferredViewModel)
         }
         composable(route = MiuixSettingsScreen.MiuixTheme.route) {
             MiuixThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
@@ -320,24 +318,23 @@ private fun SettingsCompactLayout(
     allViewModel: AllViewModel,
     preferredViewModel: PreferredViewModel,
     snackBarHostState: SnackbarHostState,
-    hazeState: HazeState
+    hazeState: HazeState?
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val hazeStyle = HazeStyle(
-        backgroundColor = MiuixTheme.colorScheme.surface,
-        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
-    )
+    val hazeStyle = rememberMiuixHazeStyle()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(
-                modifier = Modifier.hazeEffect(hazeState) {
-                    style = hazeStyle
-                    blurRadius = 30.dp
-                    noiseFactor = 0f
-                },
-                color = Color.Transparent,
+                modifier = hazeState?.let {
+                    Modifier.hazeEffect(hazeState) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
+                    }
+                } ?: Modifier,
+                color = hazeState.getMiuixAppBarColor(),
                 items = navigationItems,
                 selected = pagerState.currentPage,
                 showDivider = true,
@@ -397,7 +394,7 @@ private fun SettingsWideScreenLayout(
     allViewModel: AllViewModel,
     preferredViewModel: PreferredViewModel,
     snackBarHostState: SnackbarHostState,
-    hazeState: HazeState
+    hazeState: HazeState?
 ) {
     val windowInfo = LocalWindowInfo.current
     val layoutDirection = LocalLayoutDirection.current
@@ -518,7 +515,7 @@ private fun SettingsWideContent(
     allViewModel: AllViewModel,
     preferredViewModel: PreferredViewModel,
     snackBarHostState: SnackbarHostState,
-    hazeState: HazeState
+    hazeState: HazeState?
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -565,7 +562,7 @@ private fun SettingsWideContent(
 
 @Composable
 private fun InstallerPagerContent(
-    hazeState: HazeState,
+    hazeState: HazeState?,
     pagerState: PagerState,
     navController: NavController,
     allViewModel: AllViewModel,

@@ -90,7 +90,7 @@ fun HomePage(
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
-                            .padding(bottom = 12.dp)
+                            .padding(top = 8.dp, bottom = 12.dp)
                     ) {
                         StatusWidget(viewModel)
                     }
