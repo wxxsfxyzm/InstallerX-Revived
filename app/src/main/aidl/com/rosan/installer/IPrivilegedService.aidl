@@ -49,6 +49,15 @@ interface IPrivilegedService {
     boolean startActivityPrivileged(in Intent intent);
 
     /**
+     * Send an broadcast in a privileged process.
+     *
+     * @param intent the {@link Intent} describing what broadcast should be send
+     * @return {@code true} if the broadcast was send successfully,
+     *         {@code false} otherwise
+     */
+    boolean sendBroadcastPrivileged(in Intent intent);
+
+    /**
      * Executes a shell command with arguments.
      *
      * @param command an array of strings representing the command and its arguments

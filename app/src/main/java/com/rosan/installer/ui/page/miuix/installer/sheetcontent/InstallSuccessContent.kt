@@ -17,8 +17,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.util.openAppPrivileged
+import com.rosan.installer.data.recycle.util.openLSPosedPrivileged
+import com.rosan.installer.data.settings.model.room.entity.ext.isPrivileged
 import com.rosan.installer.ui.util.isGestureNavigation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,6 +38,8 @@ fun InstallSuccessContent(
     onClose: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val isXposedModule = if (appInfo.primaryEntity is AppEntity.BaseEntity) appInfo.primaryEntity.isXposedModule else false
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -54,6 +59,26 @@ fun InstallSuccessContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        if (isXposedModule && installer.config.isPrivileged) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(
+                    text = stringResource(R.string.open_lsposed),
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        coroutineScope.launch(Dispatchers.IO) {
+                            openLSPosedPrivileged(
+                                config = installer.config,
+                                onSuccess = onClose
+                            )
+                        }
+                    }
+                )
+            }
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -62,7 +87,6 @@ fun InstallSuccessContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val context = LocalContext.current
             val intent =
                 if (appInfo.packageName.isNotEmpty()) context.packageManager.getLaunchIntentForPackage(
                     appInfo.packageName

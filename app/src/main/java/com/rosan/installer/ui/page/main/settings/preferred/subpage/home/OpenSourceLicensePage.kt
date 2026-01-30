@@ -51,6 +51,7 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.m3.chipColors
 import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
 import com.rosan.installer.R
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 
@@ -58,7 +59,7 @@ import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 @Composable
 fun OpenSourceLicensePage(
     navController: NavController,
-    isM3E : Boolean,
+    isM3E: Boolean,
 ) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
@@ -157,8 +158,9 @@ fun OpenSourceLicensePage(
                     }
                 },
                 title = {
-                    Row(modifier = Modifier
-                        .fillMaxWidth(),
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
@@ -174,6 +176,7 @@ fun OpenSourceLicensePage(
                     ) {
                         item {
                             InfoTipCard(
+                                icon = AppIcons.License,
                                 text = stringResource(R.string.license, library.licenses.joinToString(separator = ", ") { it.name }),
                                 modifier = Modifier.fillMaxWidth(),
                                 noPadding = true
@@ -183,7 +186,7 @@ fun OpenSourceLicensePage(
                         items(library.licenses.toList()) { license ->
                             OutlinedCard(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.outlinedCardColors(
                                     containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
                                 )
@@ -196,11 +199,13 @@ fun OpenSourceLicensePage(
                                             text = license.name,
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable {
-                                                license.url?.let { url ->
-                                                    uriHandler.openUri(url)
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .clickable {
+                                                    license.url?.let { url ->
+                                                        uriHandler.openUri(url)
+                                                    }
                                                 }
-                                            }
                                         )
                                     }
 

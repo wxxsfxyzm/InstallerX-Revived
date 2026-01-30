@@ -568,7 +568,7 @@
     <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">O segmento de progresso da atividade ao vivo utilizará cores extraídas do ícone do pacote</string>
     <string name="config_install_mode_desc">Modo de Instalação Padrão e configurações relacionadas</string>
     <string name="installer_install_complete">Instalação concluída</string>
-    <string name="updating">Atualizando...</string>
+    <string name="updating">Atualizando…</string>
     <string name="update_available">Atualização Disponível: %1$s</string>
     <string name="get_update_directly">Obter atualização diretamente</string>
     <string name="get_update_directly_desc">Obter atualizações diretamente do GitHub e instalar, nenhum cache será deixado para trás</string>
@@ -652,4 +652,12 @@
     <string name="auth_summary_uninstall">Você está realizando uma operação de desinstalação. Para continuar, confirme esta ação usando a autenticação do seu dispositivo</string>
     <string name="exception_authentication_failed">Falha na autenticação do usuário</string>
     <string name="old_version_uninstalled">Desinstalado</string>
+    <string name="open_source_license_settings_description">Ver bibliotecas de código aberto de terceiros e suas licenças</string>
+    <string name="config_authorizer_none_system_app_tips">Ao executar como instalador do sistema, a maioria das opções aqui não é necessária.</string>
+    <string name="visit_home_page">Visite o Site</string>
+    <string name="license">Licença: %s</string>
+    <string name="no_license_text">Não há texto de licença disponível.</string>
+    <string name="installer_author">Autor: %1$s</string>
+    <string name="lab_module_always_use_root">Sempre usar root para atualizar módulos</string>
+    <string name="lab_module_always_use_root_desc">Ao trabalhar como instalador do sistema, utilizar sempre root para atualizar os módulos e obter melhor desempenho</string>
 </resources>

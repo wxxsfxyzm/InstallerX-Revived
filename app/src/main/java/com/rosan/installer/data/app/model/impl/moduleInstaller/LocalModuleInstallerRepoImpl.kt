@@ -27,16 +27,17 @@ object LocalModuleInstallerRepoImpl : ModuleInstallerRepo {
         val modulePath = ModuleInstallerUtils.getModulePathOrThrow(module)
 
         // 2. Determine Shell Binary
-        val shellBinary = if (config.authorizer == ConfigEntity.Authorizer.Customize) {
+        val shellBinaryString = if (config.authorizer == ConfigEntity.Authorizer.Customize) {
             config.customizeAuthorizer.ifBlank { SHELL_ROOT }
         } else {
             SHELL_ROOT
         }
 
         // 3. Construct Command String using Helper (Safe for Shell)
+        val shellParts = shellBinaryString.trim().split("\\s+".toRegex())
         val installCmd = ModuleInstallerUtils.buildShellCommandString(rootImplementation, modulePath)
 
-        val commandList = listOf(shellBinary, "-c", installCmd)
+        val commandList = shellParts + listOf("-c", installCmd)
         Timber.d("Locally executing module install: $commandList")
 
         var process: Process? = null

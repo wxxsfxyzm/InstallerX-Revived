@@ -4,11 +4,66 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   // --- 全局通用配置 (Global Config) ---
   head: [
-    ['link', { rel: 'icon', href: '/InstallerX-Revived/ic_launcher.png' }]
+    ['meta', { charset: 'utf-8' }],
+    ['meta', { name: 'viewport', content: 'width=device-width, initial-scale=1' }],
+    ['meta', { name: 'theme-color', content: '#3c3c3c' }],
+    
+    // SEO Meta Tags
+    ['meta', { name: 'keywords', content: 'InstallerX, Android installer, APK installer, XAPK, APKS, package manager, app installation' }],
+    ['meta', { name: 'author', content: 'iamr0s & InstallerX Revived Contributors' }],
+    ['meta', { name: 'robots', content: 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:url', content: 'https://wxxsfxyzm.github.io/InstallerX-Revived/' }],
+    ['meta', { property: 'og:title', content: 'InstallerX Revived - Modern Android Package Installer' }],
+    ['meta', { property: 'og:description', content: 'Universal Android APK installer with advanced features, Material 3 design, and Shizuku support' }],
+    ['meta', { property: 'og:image', content: 'https://wxxsfxyzm.github.io/InstallerX-Revived/ic_launcher.png' }],
+    ['meta', { property: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { property: 'twitter:url', content: 'https://wxxsfxyzm.github.io/InstallerX-Revived/' }],
+    ['meta', { property: 'twitter:title', content: 'InstallerX Revived' }],
+    ['meta', { property: 'twitter:description', content: 'Universal Android APK installer with advanced features' }],
+    ['meta', { property: 'twitter:image', content: 'https://wxxsfxyzm.github.io/InstallerX-Revived/ic_launcher.png' }],
+    
+    // Canonical URL
+    ['link', { rel: 'canonical', href: 'https://wxxsfxyzm.github.io/InstallerX-Revived/' }],
+    
+    // Preconnect to external resources
+    ['link', { rel: 'preconnect', href: 'https://github.com' }],
+    ['link', { rel: 'dns-prefetch', href: 'https://github.com' }],
+    
+    // Icon
+    ['link', { rel: 'icon', href: '/InstallerX-Revived/ic_launcher.png' }],
+    ['link', { rel: 'shortcut icon', href: '/InstallerX-Revived/ic_launcher.png' }],
+    ['link', { rel: 'apple-touch-icon', href: '/InstallerX-Revived/ic_launcher.png' }],
+    
+    // JSON-LD Structured Data
+    ['script', { type: 'application/ld+json' }, JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      'name': 'InstallerX Revived',
+      'description': 'A modern, feature-rich Android package installer with universal compatibility',
+      'applicationCategory': 'UtilitiesApplication',
+      'operatingSystem': 'Android',
+      'url': 'https://wxxsfxyzm.github.io/InstallerX-Revived/',
+      'image': 'https://wxxsfxyzm.github.io/InstallerX-Revived/ic_launcher.png',
+      'author': {
+        '@type': 'Organization',
+        'name': 'InstallerX Revived Contributors'
+      }
+    })],
+    
+    // Sitemap and RSS feed links
+    ['link', { rel: 'sitemap', href: '/InstallerX-Revived/sitemap.xml' }]
   ],
   base: '/InstallerX-Revived/',
-  title: "InstallerX Revived",
-  description: "A modern, feature-rich Android package installer",
+  title: "InstallerX Revived - Modern Android Package Installer",
+  description: "Universal Android APK installer supporting APK, APKS, APKM, XAPK formats. Features Material 3 design, Shizuku support, and advanced installation options.",
+
+  sitemap: {
+    hostname: 'https://wxxsfxyzm.github.io/InstallerX-Revived/',
+    lastmodDateOnly: false
+  },
+
+  lastUpdated: true,
 
   // 默认语言 (当不匹配任何路径时)
   lang: 'en-US',
@@ -166,7 +221,7 @@ export default defineConfig({
         // 中文页脚
         footer: {
           message: '基于 GPL-3.0 协议发布',
-          copyright: 'Copyright © 2023-now iamr0s & InstallerX Revived Contributors'
+          copyright: 'Copyright © 2023 - Present iamr0s & InstallerX Revived Contributors'
         },
 
         // 中文界面文字本地化

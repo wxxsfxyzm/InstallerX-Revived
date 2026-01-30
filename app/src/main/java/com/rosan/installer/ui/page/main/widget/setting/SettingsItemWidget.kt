@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -79,38 +80,12 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.util.MIN_FEEDBACK_DURATION_MS
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.getDirectorySize
-import com.rosan.installer.util.openUrl
+import com.rosan.installer.util.hasFlag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-
-/**
- * @author iamr0s
- */
-/*@Composable
-fun DataAuthorizerWidget(viewModel: PreferredViewModel) {
-    val authorizer = viewModel.state.authorizer
-    val data = mapOf(
-        ConfigEntity.Authorizer.None to stringResource(R.string.config_authorizer_none),
-        ConfigEntity.Authorizer.Root to stringResource(R.string.config_authorizer_root),
-        ConfigEntity.Authorizer.Shizuku to stringResource(R.string.config_authorizer_shizuku),
-        ConfigEntity.Authorizer.Dhizuku to stringResource(R.string.config_authorizer_dhizuku),
-        ConfigEntity.Authorizer.Customize to stringResource(R.string.config_authorizer_customize),
-    )
-    DropDownMenuWidget(
-        icon = Icons.TwoTone.Memory,
-        title = stringResource(R.string.config_authorizer),
-        description = if (data.containsKey(authorizer)) data[authorizer] else null,
-        choice = data.keys.toList().indexOf(authorizer),
-        data = data.values.toList(),
-    ) {
-        data.keys.toList().getOrNull(it)?.let {
-            viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(it))
-        }
-    }
-}*/
 
 data class AuthorizerInfo(
     @param:StringRes val labelResId: Int,
@@ -620,6 +595,7 @@ fun BottomSheetContent(
     onDirectUpdateClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val haptic = LocalHapticFeedback.current
     Column(
         modifier = Modifier
@@ -656,7 +632,7 @@ fun BottomSheetContent(
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                context.openUrl("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
+                uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -671,7 +647,7 @@ fun BottomSheetContent(
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                context.openUrl("https://t.me/installerx_revived")
+                uriHandler.openUri("https://t.me/installerx_revived")
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -1162,7 +1138,7 @@ fun UninstallKeepDataWidget(viewModel: PreferredViewModel, isM3E: Boolean = true
         icon = AppIcons.Save,
         title = stringResource(id = R.string.uninstall_keep_data),
         description = stringResource(id = R.string.uninstall_keep_data_desc),
-        checked = (viewModel.state.uninstallFlags and PackageManagerUtil.DELETE_KEEP_DATA) != 0,
+        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA),
         onCheckedChange = {
             viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_KEEP_DATA, it))
         },
@@ -1176,7 +1152,7 @@ fun UninstallForAllUsersWidget(viewModel: PreferredViewModel, isM3E: Boolean = t
         icon = AppIcons.InstallForAllUsers,
         title = stringResource(id = R.string.uninstall_all_users),
         description = stringResource(id = R.string.uninstall_all_users_desc),
-        checked = (viewModel.state.uninstallFlags and PackageManagerUtil.DELETE_ALL_USERS) != 0,
+        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS),
         onCheckedChange = {
             viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_ALL_USERS, it))
         },
@@ -1190,7 +1166,7 @@ fun UninstallSystemAppWidget(viewModel: PreferredViewModel, isM3E: Boolean = tru
         icon = AppIcons.BugReport,
         title = stringResource(id = R.string.uninstall_delete_system_app),
         description = stringResource(id = R.string.uninstall_delete_system_app_desc),
-        checked = (viewModel.state.uninstallFlags and PackageManagerUtil.DELETE_SYSTEM_APP) != 0,
+        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP),
         onCheckedChange = {
             viewModel.dispatch(
                 PreferredViewAction.ToggleGlobalUninstallFlag(

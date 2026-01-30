@@ -42,7 +42,7 @@ object ShizukuUserServiceRecycler : Recycler<ShizukuUserServiceRecycler.UserServ
             }
         }
 
-        private val privileged = DefaultPrivilegedService()
+        private val privileged = DefaultPrivilegedService(isHookMode = false)
 
         override fun destroy() {
             exitProcess(0)

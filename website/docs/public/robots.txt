@@ -1,0 +1,14 @@
+# robots.txt for InstallerX Revived Documentation
+# Allow search engines to crawl the entire site
+
+User-agent: *
+Allow: /
+Disallow: /.vitepress/
+Disallow: /.git/
+Disallow: /node_modules/
+
+# Crawl delay for bots
+Crawl-delay: 1
+
+# Specify sitemap location
+Sitemap: https://wxxsfxyzm.github.io/InstallerX-Revived/sitemap.xml

@@ -459,6 +459,7 @@ fun MenuItemWidget(
                                         )
 
                                     is InstallExtendedMenuAction.TextField -> {}
+                                    else -> {}
                                 }
                             }
                             Column(modifier = Modifier.weight(1f)) {

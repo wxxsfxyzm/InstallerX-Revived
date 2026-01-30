@@ -6,8 +6,9 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import com.rosan.installer.data.app.util.SignatureUtils
-import com.rosan.installer.data.common.util.compatVersionCode
-import com.rosan.installer.data.common.util.isPackageArchivedCompat
+import com.rosan.installer.util.compatVersionCode
+import com.rosan.installer.util.hasFlag
+import com.rosan.installer.util.isPackageArchivedCompat
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import java.io.File
@@ -18,7 +19,7 @@ data class InstalledAppInfo(
     val label: String,
     val versionCode: Long,
     val versionName: String,
-    val applicationInfo: ApplicationInfo?, // Add this field
+    val applicationInfo: ApplicationInfo?,
     val minSdk: Int?,
     val targetSdk: Int?,
     val signatureHash: String? = null,
@@ -44,10 +45,11 @@ data class InstalledAppInfo(
                 }
 
                 val applicationInfo = packageInfo.applicationInfo
+                val flags = applicationInfo?.flags ?: 0
 
                 // Check if the app is effectively "uninstalled" (but data kept).
                 // If FLAG_INSTALLED is NOT set, it means the app is not installed for the current user.
-                val isUninstalled = ((applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_INSTALLED) == 0
+                val isUninstalled = !flags.hasFlag(ApplicationInfo.FLAG_INSTALLED)
 
                 val packageSize = if (applicationInfo != null && !isUninstalled && applicationInfo.sourceDir != null) {
                     // Only calculate size if the app is actually installed and sourceDir is valid.
@@ -76,7 +78,7 @@ data class InstalledAppInfo(
                     minSdk = applicationInfo?.minSdkVersion,
                     targetSdk = applicationInfo?.targetSdkVersion,
                     signatureHash = signatureHash,
-                    isSystemApp = ((applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_SYSTEM) != 0,
+                    isSystemApp = flags.hasFlag(ApplicationInfo.FLAG_SYSTEM),
                     isUninstalled = isUninstalled,
                     isArchived = packageManager.isPackageArchivedCompat(packageName),
                     packageSize = packageSize

@@ -1,7 +1,19 @@
 ---
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
-title: Home
+title: InstallerX Revived - Modern Android Package Installer
+description: Universal APK installer with advanced features, Material 3 design, and Shizuku support
+
+head:
+  - - meta
+    - name: keywords
+      content: "InstallerX, Android installer, APK installer, XAPK, APKS, package manager"
+  - - meta
+    - property: og:title
+      content: "InstallerX Revived - Modern Android Package Installer"
+  - - meta
+    - property: og:description
+      content: "Universal Android APK installer supporting APK, APKS, APKM, XAPK formats"
 
 hero:
   name: "InstallerX Revived"

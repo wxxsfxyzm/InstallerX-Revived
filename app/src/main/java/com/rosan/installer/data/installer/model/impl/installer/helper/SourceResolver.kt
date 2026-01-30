@@ -64,47 +64,60 @@ class SourceResolver(
 
         when (action) {
             Intent.ACTION_SEND -> {
-                // 1. Prioritize EXTRA_STREAM (Handles file sharing, including text files like logcat.txt)
-                val streamUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-                } else {
-                    @Suppress("DEPRECATION")
-                    intent.getParcelableExtra(Intent.EXTRA_STREAM)
-                }
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()
 
-                if (streamUri != null) uris.add(streamUri)
-
-                // 2. Check ClipData (Common in modern Android sharing)
-                if (uris.isEmpty()) {
-                    intent.clipData?.let { clip ->
-                        for (i in 0 until clip.itemCount) {
-                            clip.getItemAt(i).uri?.let { uris.add(it) }
-                        }
+                // 1. Prioritize HTTP/HTTPS URLs (Fixes Chrome sharing screenshot + URL)
+                if (!text.isNullOrBlank() && (text.startsWith("http", true) || text.startsWith("https", true))) {
+                    try {
+                        val textUri = text.toUri()
+                        if (!textUri.scheme.isNullOrBlank()) uris.add(textUri)
+                    } catch (_: Exception) {
+                        Timber.w("Failed to parse EXTRA_TEXT as URI: $text")
                     }
                 }
 
-                // 3. Fallback to EXTRA_TEXT only if no file stream was found and type indicates text
-                if (uris.isEmpty() && intent.type?.startsWith("text/") == true) {
-                    val text = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()
-                    if (!text.isNullOrBlank()) {
-                        try {
-                            // Attempt to parse text as a URI
-                            val textUri = text.toUri()
-                            // Simple check to see if it looks like a valid URI scheme (http, file, content, etc.)
-                            if (!textUri.scheme.isNullOrBlank()) {
-                                uris.add(textUri)
-                            } else {
-                                Timber.w("Ignored plain text extra (no scheme): $text")
+                // 2. Fallback to Stream/ClipData if no URL found (Handles file sharing, including text files like logcat.txt)
+                if (uris.isEmpty()) {
+                    val streamUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                    }
+
+                    if (streamUri != null) uris.add(streamUri)
+
+                    // 3. Check ClipData (Common in modern Android sharing)
+                    if (uris.isEmpty()) {
+                        intent.clipData?.let { clip ->
+                            for (i in 0 until clip.itemCount) {
+                                clip.getItemAt(i).uri?.let { uris.add(it) }
                             }
-                        } catch (_: Exception) {
-                            Timber.w("Failed to parse EXTRA_TEXT as URI: $text")
+                        }
+                    }
+
+                    // 4. Fallback to EXTRA_TEXT only if no file stream was found and type indicates text
+                    if (uris.isEmpty() && intent.type?.startsWith("text/") == true) {
+                        val text = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()
+                        if (!text.isNullOrBlank()) {
+                            try {
+                                // Attempt to parse text as a URI
+                                val textUri = text.toUri()
+                                // Simple check to see if it looks like a valid URI scheme (http, file, content, etc.)
+                                if (!textUri.scheme.isNullOrBlank()) {
+                                    uris.add(textUri)
+                                } else {
+                                    Timber.w("Ignored plain text extra (no scheme): $text")
+                                }
+                            } catch (_: Exception) {
+                                Timber.w("Failed to parse EXTRA_TEXT as URI: $text")
+                            }
                         }
                     }
                 }
             }
 
             Intent.ACTION_SEND_MULTIPLE -> {
-                // Handle multiple streams
                 val streams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
                 } else {
@@ -113,7 +126,6 @@ class SourceResolver(
                 }
                 streams?.filterNotNull()?.let { uris.addAll(it) }
 
-                // Check ClipData for multiple items
                 if (uris.isEmpty()) {
                     intent.clipData?.let { clip ->
                         for (i in 0 until clip.itemCount) {
@@ -124,7 +136,6 @@ class SourceResolver(
             }
 
             else -> {
-                // Handle ACTION_VIEW and others
                 intent.data?.let { uris.add(it) }
                 if (uris.isEmpty()) {
                     intent.clipData?.let { clip ->

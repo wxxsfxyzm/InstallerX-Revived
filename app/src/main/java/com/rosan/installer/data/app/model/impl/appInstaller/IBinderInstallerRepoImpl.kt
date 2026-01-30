@@ -31,18 +31,19 @@ import com.rosan.installer.data.app.util.PackageInstallerUtil.abiOverride
 import com.rosan.installer.data.app.util.PackageInstallerUtil.installFlags
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
-import com.rosan.installer.data.common.util.isPackageArchivedCompat
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.recycle.util.requireDhizukuPermissionGranted
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.data.reflect.repo.getValue
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
+import com.rosan.installer.util.isPackageArchivedCompat
+import com.rosan.installer.util.removeFlag
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
 import timber.log.Timber
-import java.lang.reflect.Field
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
@@ -51,23 +52,6 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     private val reflect = get<ReflectRepo>()
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
-
-    private fun getField(targetClass: Class<*>, name: String, expectedType: Class<*>): Field? {
-        // Try to find the field directly by name
-        val directField = reflect.getDeclaredField(targetClass, name)?.apply {
-            isAccessible = true
-        }
-        // If found and the type matches, return it
-        if (directField != null && directField.type == expectedType) {
-            return directField
-        }
-        // Otherwise, search for the first field that matches the expected type
-        val matchedField = reflect.getDeclaredFields(targetClass)
-            .firstOrNull { it.type == expectedType }
-            ?.apply { isAccessible = true }
-        // Return the found field or null if none matched
-        return matchedField
-    }
 
     private suspend fun getPackageInstaller(
         config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
@@ -83,29 +67,24 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             else -> config.installer ?: BuildConfig.APPLICATION_ID
         }
 
-        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             reflect.getDeclaredConstructor(
                 PackageInstaller::class.java,
                 IPackageInstaller::class.java,
                 String::class.java,
                 String::class.java,
                 Int::class.java,
-            )!!.also {
-                it.isAccessible = true
-            }.newInstance(iPackageInstaller, installerPackageName, null, extra.userId)
-        } else
-            reflect.getDeclaredConstructor(
-                PackageInstaller::class.java,
-                IPackageInstaller::class.java,
-                String::class.java,
-                Int::class.java,
-            )!!.also {
-                it.isAccessible = true
-            }.newInstance(
-                iPackageInstaller,
-                installerPackageName,
-                extra.userId
-            )) as PackageInstaller
+            )!!.newInstance(iPackageInstaller, installerPackageName, null, extra.userId)
+        else reflect.getDeclaredConstructor(
+            PackageInstaller::class.java,
+            IPackageInstaller::class.java,
+            String::class.java,
+            Int::class.java,
+        )!!.newInstance(
+            iPackageInstaller,
+            installerPackageName,
+            extra.userId
+        )) as PackageInstaller
     }
 
     private suspend fun getDhizukuComponentName(): String =
@@ -114,11 +93,13 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         }
 
     private suspend fun setSessionIBinder(session: Session) {
-        val field = getField(session::class.java, "mSession", IPackageInstallerSession::class.java)
-            ?: return
-        val iBinder = (field.get(session) as IInterface).asBinder()
-        field.set(
-            session, IPackageInstallerSession.Stub.asInterface(iBinderWrapper(iBinder))
+        val iPackageInstallerSession = reflect.getValue<IInterface>(session, "mSession") ?: return
+        val iBinder = iPackageInstallerSession.asBinder()
+        reflect.setFieldValue(
+            session,
+            "mSession",
+            session::class.java,
+            IPackageInstallerSession.Stub.asInterface(iBinderWrapper(iBinder))
         )
     }
 
@@ -136,13 +117,14 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         try {
             Timber.d("Approving session $sessionId (granted: $granted) via Binder wrapper")
 
-            reflect.getDeclaredMethod(
-                IPackageInstaller::class.java,
+            reflect.invokeMethod(
+                iPackageInstaller,
                 "setPermissionsResult",
-                Int::class.java,
-                Boolean::class.java
-            )!!.invoke(iPackageInstaller, sessionId, granted)
-
+                IPackageInstaller::class.java,
+                arrayOf(Int::class.java, Boolean::class.java),
+                sessionId,
+                granted
+            )
         } catch (e: Exception) {
             Timber.e(e, "Failed to approve session via Binder")
 
@@ -248,12 +230,9 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             installIts(config, entities, extra, session)
             commit(config, entities, extra, session)
         } catch (e: Exception) {
-            // 如果在提交之前或期间发生任何错误，应该放弃会话
             session?.abandon()
-            // 将原始异常重新抛出，以便上层调用者可以处理（存疑）
             throw e
         } finally {
-            // 无论成功与否，都应关闭会话以释放本地资源（存疑）
             session?.runCatching { close() }
         }
     }
@@ -319,8 +298,8 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
 
         // --- Disable Dhizuku not supported stuff ---
         if (config.authorizer == ConfigEntity.Authorizer.Dhizuku)
-        // Dhizuku does not support GrantAllRequestedPermissions
-            params.installFlags = params.installFlags and InstallOption.GrantAllRequestedPermissions.value.inv()
+        // Dhizuku does not support GrantAllRequested permissions
+            params.installFlags = params.installFlags.removeFlag(InstallOption.GrantAllRequestedPermissions.value)
         // --- Dhizuku End ---
 
         // Android System will ignore INSTALL_ALLOW_DOWNGRADE for None ROOT/SYSTEM on Android 15+, no need to disable it here
@@ -399,9 +378,6 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     ) {
         Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
         if (result.isSuccess) {
-            Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
-            if (!result.isSuccess) return
-
             val packageName = entities.firstOrNull()?.packageName ?: return
 
             val isDeleteCapable = entities.firstOrNull()?.sourceType !in listOf(
@@ -410,7 +386,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
                 DataType.MIXED_MODULE_ZIP
             )
 
-            val shouldDelete = config.autoDelete && isDeleteCapable
+            val shouldDelete = config.autoDelete && (isDeleteCapable || config.autoDeleteZip)
 
             PrivilegedManager.executePostInstallTasksAsync(
                 authorizer = config.authorizer,
@@ -452,10 +428,6 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         private val queue = LinkedBlockingQueue<Intent>(1)
 
         private val localSender = object : IIntentSender.Stub() {
-            // this api only work for upper Android O (8.0)
-            // see this url:
-            // Android N (7.1): http://aospxref.com/android-7.1.2_r39/xref/frameworks/base/core/java/android/content/IIntentSender.aidl
-            // Android O (8.0): http://aospxref.com/android-8.0.0_r36/xref/frameworks/base/core/java/android/content/IIntentSender.aidl
             override fun send(
                 code: Int,
                 intent: Intent?,
@@ -469,22 +441,18 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             }
         }
 
-        fun getIntentSender(): IntentSender {
-            return reflect.getDeclaredConstructor(
+        fun getIntentSender(): IntentSender =
+            reflect.getDeclaredConstructor(
                 IntentSender::class.java, IIntentSender::class.java
-            )!!.also {
-                it.isAccessible = true
-            }.newInstance(localSender) as IntentSender
-        }
+            )!!.newInstance(localSender) as IntentSender
 
-        fun getResult(): Intent {
-            return try {
+        fun getResult(): Intent =
+            try {
                 val result = queue.take()
                 queue.remove(result)
                 result
             } catch (e: InterruptedException) {
                 throw RuntimeException(e)
             }
-        }
     }
 }

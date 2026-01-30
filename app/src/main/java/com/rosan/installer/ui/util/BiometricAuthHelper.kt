@@ -14,6 +14,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
 import kotlin.coroutines.resumeWithException
 
+private const val AUTHENTICATORS = BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+
 /**
  * Performs biometric authentication and throws an exception if authentication fails.
  *
@@ -28,7 +30,7 @@ import kotlin.coroutines.resumeWithException
  */
 suspend fun Context.doBiometricAuthOrThrow(title: String, subTitle: String) {
     val biometricManager = BiometricManager.from(this)
-    if (biometricManager.canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) != BiometricManager.BIOMETRIC_SUCCESS) {
+    if (biometricManager.canAuthenticate(AUTHENTICATORS) != BiometricManager.BIOMETRIC_SUCCESS) {
         Timber.tag("BiometricAuth")
             .w("Can't do biometricAuth, because device not support BiometricAuth or no biometric or device credential is enrolled.")
         return
@@ -38,11 +40,7 @@ suspend fun Context.doBiometricAuthOrThrow(title: String, subTitle: String) {
     val promptInfo = BiometricPrompt.PromptInfo.Builder()
         .setTitle(title)
         .setSubtitle(subTitle)
-        .setAllowedAuthenticators(
-            BIOMETRIC_STRONG or
-                    BIOMETRIC_WEAK or
-                    DEVICE_CREDENTIAL
-        )
+        .setAllowedAuthenticators(AUTHENTICATORS)
         .build()
 
     return suspendCancellableCoroutine { continuation ->

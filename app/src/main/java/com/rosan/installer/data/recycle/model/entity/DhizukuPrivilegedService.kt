@@ -65,6 +65,11 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
         return false
     }
 
+    // Dhizuku does not support privileged broadcast
+    override fun sendBroadcastPrivileged(intent: Intent): Boolean {
+        return false
+    }
+
     override fun setAdbVerify(enabled: Boolean) {
         throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
     }

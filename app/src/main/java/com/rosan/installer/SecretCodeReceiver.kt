@@ -3,12 +3,14 @@ package com.rosan.installer
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import com.rosan.installer.ui.activity.SettingsActivity
 import timber.log.Timber
 
 class SecretCodeReceiver : BroadcastReceiver() {
     companion object {
-        const val SECRET_CODE_ACTION = "android.provider.Telephony.SECRET_CODE"
+        const val SECRET_CODE_ACTION_OLD = "android.provider.Telephony.SECRET_CODE"
+        const val SECRET_CODE_ACTION = "android.telephony.action.SECRET_CODE"
     }
 
     // This method is called when the BroadcastReceiver receives an Intent broadcast.
@@ -16,7 +18,10 @@ class SecretCodeReceiver : BroadcastReceiver() {
         Timber.d("onReceive: $intent, action: ${intent.action}")
 
         // --- Check if the received intent's action is the one we expect. ---
-        if (intent.action == SECRET_CODE_ACTION) {
+        val isSecretCodeAction =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) intent.action == SECRET_CODE_ACTION
+            else intent.action == SECRET_CODE_ACTION_OLD
+        if (isSecretCodeAction) {
             // The action is correct, proceed to launch the activity.
             // Create an intent to launch the SettingsActivity.
             val i = Intent(context, SettingsActivity::class.java).apply {
