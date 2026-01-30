@@ -352,11 +352,15 @@
     <string name="installer_silent_install">Silent Install</string>
     <string name="installer_error_reason">Error Reason</string>
     <string name="installer_unknown_error">Unknown Error</string>
-    <string name="installer_notification_tap_to_disable">Foreground service notification, tap to disable.</string>
+    <string name="installer_notification_tap_to_disable">Foreground service notification, tap to disable</string>
     <string name="installer_channel_name">Install Notification</string>
+    <string name="installer_channel_name_desc">Shows the installation stage</string>
     <string name="installer_progress_channel_name">Install Process Notification</string>
+    <string name="installer_progress_channel_name_desc">Shows the installation process</string>
     <string name="installer_background_channel_name">Background Notification</string>
+    <string name="installer_notification_desc">Background service notification, useless</string>
     <string name="installer_live_channel_name">Install Progress Live Update</string>
+    <string name="installer_live_channel_name_desc">Show install progress as live update</string>
     <string name="installer_live_channel_short_text_resolving">Resolving</string>
     <string name="installer_live_channel_short_text_preparing">Preparing</string>
     <string name="installer_live_channel_short_text_analysing">Analysing</string>

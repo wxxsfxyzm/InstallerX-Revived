@@ -344,10 +344,14 @@
     <string name="installer_silent_install">静默安装</string>
     <string name="installer_unknown_error">未知错误</string>
     <string name="installer_channel_name">安装通知</string>
-    <string name="installer_notification_tap_to_disable">前台服务通知，点击以禁用。</string>
+    <string name="installer_channel_name_desc">显示安装的阶段</string>
+    <string name="installer_notification_tap_to_disable">前台服务通知，点击以禁用</string>
     <string name="installer_progress_channel_name">安装过程通知</string>
+    <string name="installer_progress_channel_desc">显示安装的进度</string>
     <string name="installer_background_channel_name">后台通知</string>
+    <string name="installer_notification_desc">无用的后台服务通知</string>
     <string name="installer_live_channel_name">安装进度实时活动</string>
+    <string name="installer_live_channel_name_desc">以实时活动形式展示通知进度</string>
     <string name="installer_live_channel_short_text_resolving">解析中</string>
     <string name="installer_live_channel_short_text_preparing">准备中</string>
     <string name="installer_live_channel_short_text_analysing">分析中</string>

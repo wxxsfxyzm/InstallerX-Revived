@@ -83,7 +83,7 @@ import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
-private const val SHEET_ANIMATION_DURATION = 200L
+private const val SHEET_ANIMATION_DURATION = 450L
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable

@@ -176,7 +176,11 @@ fun NewAllPage(
                 }
 
                 else -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = innerPadding.calculateTopPadding())
+                    ) {
                         if (!viewModel.state.userReadScopeTips) {
                             ScopeTipCard(viewModel = viewModel)
                             Spacer(modifier = Modifier.size(8.dp))
@@ -186,7 +190,7 @@ fun NewAllPage(
                             listState = listState,
                             hazeState = hazeState,
                             contentPadding = PaddingValues(
-                                top = innerPadding.calculateTopPadding() + 16.dp,
+                                top = 16.dp,
                                 bottom = outerPadding.calculateBottomPadding() + 16.dp,
                                 start = 16.dp,
                                 end = 16.dp

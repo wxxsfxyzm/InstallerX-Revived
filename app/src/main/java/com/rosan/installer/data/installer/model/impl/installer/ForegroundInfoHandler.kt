@@ -43,6 +43,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -115,7 +116,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         // Ticker flow for animation (approx 30fps cap for calculation, throttled by setNotificationThrottled)
         // Actual UI update rate is limited by NOTIFICATION_UPDATE_INTERVAL_MS (500ms)
-        val ticker = kotlinx.coroutines.flow.flow {
+        val ticker = flow {
             while (true) {
                 emit(Unit)
                 delay(200) // Trigger check every 200ms
@@ -231,17 +232,26 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             NotificationChannelCompat.Builder(
                 Channel.InstallerChannel.value,
                 NotificationManagerCompat.IMPORTANCE_HIGH
-            ).setName(getString(R.string.installer_channel_name)).build(),
+            )
+                .setName(getString(R.string.installer_channel_name))
+                .setDescription(getString(R.string.installer_channel_name_desc))
+                .build(),
 
             NotificationChannelCompat.Builder(
                 Channel.InstallerProgressChannel.value,
                 NotificationManagerCompat.IMPORTANCE_LOW
-            ).setName(getString(R.string.installer_progress_channel_name)).build(),
+            )
+                .setName(getString(R.string.installer_progress_channel_name))
+                .setDescription(getString(R.string.installer_progress_channel_name_desc))
+                .build(),
 
             NotificationChannelCompat.Builder(
                 Channel.InstallerLiveChannel.value,
                 NotificationManagerCompat.IMPORTANCE_HIGH
-            ).setName(getString(R.string.installer_live_channel_name)).build()
+            )
+                .setName(getString(R.string.installer_live_channel_name))
+                .setDescription(getString(R.string.installer_live_channel_name_desc))
+                .build()
         )
         channels.forEach { channel ->
             notificationManager.createNotificationChannel(channel)
