@@ -354,13 +354,13 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
 
             ) {
                 val radius = if (showBottomSheet.value) 30 else 0
-                AnimatedContent(targetState = radius,
-                        transitionSpec = {
-                    fadeIn(animationSpec = tween(durationMillis = 150)) togetherWith
-                            fadeOut(animationSpec = tween(durationMillis = 150))
-                }
-                ) {
-                        targetState ->
+                AnimatedContent(
+                    targetState = radius,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(durationMillis = 350)) togetherWith
+                                fadeOut(animationSpec = tween(durationMillis = 350))
+                    }
+                ) { targetState ->
                     WindowBlurEffect(useBlur = viewModel.viewSettings.useBlur, blurRadius = targetState)
                 }
                 AnimatedContent(
