@@ -68,6 +68,7 @@ import com.rosan.installer.ui.theme.LocalPaletteStyle
 import com.rosan.installer.ui.theme.m3color.dynamicColorScheme
 import com.rosan.installer.ui.theme.miuixSheetColorDark
 import com.rosan.installer.ui.theme.miuixSheetColorLight
+import com.rosan.installer.ui.util.WindowBlurEffect
 import com.rosan.installer.ui.util.getSupportTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -351,6 +352,7 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                     }
                 }
             ) {
+                WindowBlurEffect(useBlur = viewModel.viewSettings.useBlur)
                 AnimatedContent(
                     targetState = viewModel.state::class,
                     label = "MiuixSheetContentAnimation",

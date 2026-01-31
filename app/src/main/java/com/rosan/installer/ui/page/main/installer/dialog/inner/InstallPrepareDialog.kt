@@ -378,7 +378,7 @@ fun installPrepareDialog( // 小写开头
                 }
                 // else if app can be installed and extended menu is shown
                 if (canInstall && settings.showExtendedMenu && primaryEntity !is AppEntity.ModuleEntity) {
-                    add(DialogButton(stringResource(R.string.menu), 2f) {
+                    add(DialogButton(stringResource(R.string.menu), 1f) {
                         viewModel.dispatch(InstallerViewAction.InstallExtendedMenu)
                     })
                 }
