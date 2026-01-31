@@ -57,10 +57,9 @@ import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWid
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.theme.getM3TopBarColor
 import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import com.rosan.installer.util.OSUtils
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import org.koin.androidx.compose.koinViewModel
@@ -90,10 +89,7 @@ fun NewPreferredPage(
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
     }
 
-    val hazeStyle = HazeStyle(
-        backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
-        tint = HazeTint(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f))
-    )
+    val hazeStyle = rememberMaterial3HazeStyle()
 
     var updateErrorInfo by remember {
         mutableStateOf<PreferredViewEvent.ShowInAppUpdateErrorDetail?>(
@@ -146,7 +142,7 @@ fun NewPreferredPage(
         topBar = {
             LargeFlexibleTopAppBar(
                 modifier = hazeState?.let {
-                    Modifier.hazeEffect(hazeState) {
+                    Modifier.hazeEffect(it) {
                         style = hazeStyle
                         blurRadius = 30.dp
                         noiseFactor = 0f

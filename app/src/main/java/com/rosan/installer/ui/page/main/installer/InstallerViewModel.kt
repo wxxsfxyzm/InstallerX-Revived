@@ -220,6 +220,8 @@ class InstallerViewModel(
             viewSettings = viewSettings.copy(
                 uiExpressive =
                     appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true).first(),
+                useBlur =
+                    appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, true).first(),
                 preferSystemIconForUpdates =
                     appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first(),
                 autoCloseCountDown =

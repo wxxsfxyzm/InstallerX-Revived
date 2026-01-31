@@ -34,11 +34,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.rosan.installer.ui.util.WindowBlurEffect
 
 @Composable
 fun PositionDialog(
     modifier: Modifier = Modifier,
     properties: DialogProperties = DialogProperties(),
+    useBlur: Boolean = false,
     onDismissRequest: () -> Unit,
     shape: Shape = AlertDialogDefaults.shape,
     containerColor: Color = AlertDialogDefaults.containerColor,
@@ -66,6 +68,7 @@ fun PositionDialog(
     rightButton: @Composable (() -> Unit)? = null
 ) {
     Dialog(onDismissRequest = onDismissRequest, properties = properties) {
+        WindowBlurEffect(useBlur = useBlur)
         Box(
             modifier = Modifier
                 .fillMaxSize()

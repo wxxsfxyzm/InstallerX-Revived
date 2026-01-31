@@ -12,7 +12,7 @@ import java.util.Locale
 
 /**
  * A Timber Tree that logs to a file in the background.
- * Optimized to maintain only the single most recent log file within a 24-hour window.
+ * Optimized to maintain two most recent log files within a 24-hour window.
  */
 @Suppress("LogNotTimber")
 class FileLoggingTree(context: Context) : Timber.DebugTree() {
