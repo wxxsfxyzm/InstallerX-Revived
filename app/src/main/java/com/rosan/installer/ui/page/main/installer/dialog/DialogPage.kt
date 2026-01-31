@@ -51,7 +51,7 @@ fun DialogPage(
     }
 
     val state = viewModel.state
-    val useBlur = viewModel.viewSettings.useBlur
+    val useBlur = viewModel.viewSettings.useBlur && viewModel.viewSettings.uiExpressive
 
     CompositionLocalProvider(
         LocalInstallerColorScheme provides activeColorScheme
@@ -91,9 +91,8 @@ fun DialogPage(
                     containerColor = colorScheme.surfaceContainer,
                     contentColor = colorScheme.onSurface
                 ) {
-                    val blurRadius = if(sheetState.targetValue== SheetValue.Expanded)30 else 0
-                    AnimatedContent(targetState = blurRadius) {
-                        targetState ->
+                    val blurRadius = if (sheetState.targetValue == SheetValue.Expanded) 30 else 0
+                    AnimatedContent(targetState = blurRadius) { targetState ->
                         WindowBlurEffect(useBlur = useBlur, blurRadius = targetState)
                     }
 
