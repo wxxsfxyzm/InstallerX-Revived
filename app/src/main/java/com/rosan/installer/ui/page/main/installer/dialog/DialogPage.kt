@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.installer.dialog
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
@@ -90,7 +91,12 @@ fun DialogPage(
                     containerColor = colorScheme.surfaceContainer,
                     contentColor = colorScheme.onSurface
                 ) {
-                    WindowBlurEffect(useBlur = useBlur)
+                    val blurRadius = if(sheetState.targetValue== SheetValue.Expanded)30 else 0
+                    AnimatedContent(targetState = blurRadius) {
+                        targetState ->
+                        WindowBlurEffect(useBlur = useBlur, blurRadius = targetState)
+                    }
+
                     ModuleInstallSheetContent(
                         outputLines = state.output,
                         isFinished = state.isFinished,

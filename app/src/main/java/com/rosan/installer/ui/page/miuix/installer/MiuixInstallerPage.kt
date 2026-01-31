@@ -351,8 +351,18 @@ fun MiuixInstallerPage(installer: InstallerRepo) {
                         }
                     }
                 }
+
             ) {
-                WindowBlurEffect(useBlur = viewModel.viewSettings.useBlur)
+                val radius = if (showBottomSheet.value) 30 else 0
+                AnimatedContent(targetState = radius,
+                        transitionSpec = {
+                    fadeIn(animationSpec = tween(durationMillis = 150)) togetherWith
+                            fadeOut(animationSpec = tween(durationMillis = 150))
+                }
+                ) {
+                        targetState ->
+                    WindowBlurEffect(useBlur = viewModel.viewSettings.useBlur, blurRadius = targetState)
+                }
                 AnimatedContent(
                     targetState = viewModel.state::class,
                     label = "MiuixSheetContentAnimation",
