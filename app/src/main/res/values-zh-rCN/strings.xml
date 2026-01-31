@@ -355,7 +355,8 @@
     <string name="installer_live_channel_short_text_resolving">解析中</string>
     <string name="installer_live_channel_short_text_preparing">准备中</string>
     <string name="installer_live_channel_short_text_analysing">分析中</string>
-    <string name="installer_live_channel_short_text_pending">等待中</string>
+    <string name="installer_live_channel_short_text_pending">待处理</string>
+    <string name="installer_live_channel_short_text_pending_install">待安装</string>
     <string name="installer_live_channel_short_text_installing">安装中</string>
     <string name="installer_live_channel_short_text_success">已安装</string>
     <string name="installer_live_channel_short_text_resolve_failed">解析失败</string>
