@@ -20,7 +20,7 @@ hero:
   text: "A modern Android package installer"
   tagline: You know some birds are not meant to be caged, their feathers are just too bright.
   image:
-    src: /ic_launcher.png
+    src: /ic_launcher.svg
     alt: InstallerX Logo
   actions:
     - theme: brand

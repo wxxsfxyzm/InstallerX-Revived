@@ -16,12 +16,12 @@ export default defineConfig({
     ['meta', { property: 'og:url', content: 'https://wxxsfxyzm.github.io/InstallerX-Revived/' }],
     ['meta', { property: 'og:title', content: 'InstallerX Revived - Modern Android Package Installer' }],
     ['meta', { property: 'og:description', content: 'Universal Android APK installer with advanced features, Material 3 design, and Shizuku support' }],
-    ['meta', { property: 'og:image', content: 'https://wxxsfxyzm.github.io/InstallerX-Revived/ic_launcher.png' }],
+    ['meta', { property: 'og:image', content: 'https://wxxsfxyzm.github.io/InstallerX-Revived/ic_launcher.svg' }],
     ['meta', { property: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { property: 'twitter:url', content: 'https://wxxsfxyzm.github.io/InstallerX-Revived/' }],
     ['meta', { property: 'twitter:title', content: 'InstallerX Revived' }],
     ['meta', { property: 'twitter:description', content: 'Universal Android APK installer with advanced features' }],
-    ['meta', { property: 'twitter:image', content: 'https://wxxsfxyzm.github.io/InstallerX-Revived/ic_launcher.png' }],
+    ['meta', { property: 'twitter:image', content: 'https://wxxsfxyzm.github.io/InstallerX-Revived/ic_launcher.svg' }],
     
     // Canonical URL
     ['link', { rel: 'canonical', href: 'https://wxxsfxyzm.github.io/InstallerX-Revived/' }],
@@ -31,9 +31,9 @@ export default defineConfig({
     ['link', { rel: 'dns-prefetch', href: 'https://github.com' }],
     
     // Icon
-    ['link', { rel: 'icon', href: '/InstallerX-Revived/ic_launcher.png' }],
-    ['link', { rel: 'shortcut icon', href: '/InstallerX-Revived/ic_launcher.png' }],
-    ['link', { rel: 'apple-touch-icon', href: '/InstallerX-Revived/ic_launcher.png' }],
+    ['link', { rel: 'icon', href: '/InstallerX-Revived/ic_launcher.svg' }],
+    ['link', { rel: 'shortcut icon', href: '/InstallerX-Revived/ic_launcher.svg' }],
+    ['link', { rel: 'apple-touch-icon', href: '/InstallerX-Revived/ic_launcher.svg' }],
     
     // JSON-LD Structured Data
     ['script', { type: 'application/ld+json' }, JSON.stringify({
@@ -44,7 +44,7 @@ export default defineConfig({
       'applicationCategory': 'UtilitiesApplication',
       'operatingSystem': 'Android',
       'url': 'https://wxxsfxyzm.github.io/InstallerX-Revived/',
-      'image': 'https://wxxsfxyzm.github.io/InstallerX-Revived/ic_launcher.png',
+      'image': 'https://wxxsfxyzm.github.io/InstallerX-Revived/ic_launcher.svg',
       'author': {
         '@type': 'Organization',
         'name': 'InstallerX Revived Contributors'
