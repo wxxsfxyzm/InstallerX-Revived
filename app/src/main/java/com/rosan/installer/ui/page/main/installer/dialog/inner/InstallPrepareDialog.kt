@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
+import com.rosan.installer.build.model.entity.Architecture
 import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.enums.DataType
@@ -169,13 +170,17 @@ fun installPrepareDialog( // 小写开头
     val errorColor = MaterialTheme.colorScheme.error
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
 
+    val tagDowngrade = stringResource(R.string.tag_downgrade)
     val downgradeWarning = stringResource(R.string.installer_prepare_type_downgrade)
+    val tagSignature = stringResource(R.string.tag_signature)
     val sigMismatchWarning = stringResource(R.string.installer_prepare_signature_mismatch)
     val sigUnknownWarning = stringResource(R.string.installer_prepare_signature_unknown)
-    val sdkIncompatibleWarning = stringResource(R.string.installer_prepare_sdk_incompatible)
-    val tagDowngrade = stringResource(R.string.tag_downgrade)
-    val tagSignature = stringResource(R.string.tag_signature)
     val tagSdk = stringResource(R.string.tag_sdk)
+    val sdkIncompatibleWarning = stringResource(R.string.installer_prepare_sdk_incompatible)
+    val tagArch32 = stringResource(R.string.tag_arch_32)
+    val textArch32 = stringResource(R.string.installer_prepare_arch_32_notice)
+    val tagEmulated = stringResource(R.string.tag_arch_emulated)
+    val textArchMismatch = stringResource(R.string.installer_prepare_arch_mismatch_notice)
 
     val (warningModels, buttonTextId) = remember(currentPackage, entityToInstall, preInstallAppInfo) {
         val oldInfo = currentPackage.installedAppInfo
@@ -224,6 +229,40 @@ fun installPrepareDialog( // 小写开头
         if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
             // Add SDK Warning (Priority High)
             warnings.add(0, WarningModel(tagSdk, sdkIncompatibleWarning, errorColor))
+        }
+
+        val sysArch = RsConfig.currentArchitecture
+        val appArch = (primaryEntity as? AppEntity.BaseEntity)?.arch
+        if (appArch != null && appArch != Architecture.NONE && appArch != Architecture.UNKNOWN) {
+            val isSys64 = sysArch == Architecture.ARM64 || sysArch == Architecture.X86_64
+            val isApp32 = appArch == Architecture.ARM || appArch == Architecture.ARMEABI || appArch == Architecture.X86
+
+            if (isSys64 && isApp32) {
+                warnings.add(
+                    WarningModel(
+                        shortLabel = tagArch32,
+                        fullDescription = textArch32,
+                        color = tertiaryColor
+                    )
+                )
+            }
+
+            val sysIsArm = RsConfig.isArm
+            val appIsX86 = appArch == Architecture.X86 || appArch == Architecture.X86_64
+
+            val sysIsX86 = RsConfig.isX86
+            val appIsArm = appArch == Architecture.ARM || appArch == Architecture.ARM64 || appArch == Architecture.ARMEABI
+
+            if ((sysIsArm && appIsX86) || (sysIsX86 && appIsArm)) {
+                warnings.add(
+                    0,
+                    WarningModel(
+                        shortLabel = tagEmulated,
+                        fullDescription = textArchMismatch.format(appArch.name, sysArch.name),
+                        color = tertiaryColor
+                    )
+                )
+            }
         }
 
         Pair(warnings, finalButtonTextId)
