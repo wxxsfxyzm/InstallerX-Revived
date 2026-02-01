@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +45,8 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.widget.chip.Chip
+import com.rosan.installer.ui.page.main.widget.chip.WarningChipGroup
+import com.rosan.installer.ui.page.main.widget.chip.WarningModel
 
 // Assume pausingIcon is accessible
 
@@ -172,80 +173,59 @@ fun installPrepareDialog( // 小写开头
     val sigMismatchWarning = stringResource(R.string.installer_prepare_signature_mismatch)
     val sigUnknownWarning = stringResource(R.string.installer_prepare_signature_unknown)
     val sdkIncompatibleWarning = stringResource(R.string.installer_prepare_sdk_incompatible)
-    val (warningMessages, buttonTextId) = remember(currentPackage, entityToInstall, preInstallAppInfo) {
-        val oldInfo = currentPackage.installedAppInfo // Use currentPackage directly
+    val tagDowngrade = stringResource(R.string.tag_downgrade)
+    val tagSignature = stringResource(R.string.tag_signature)
+    val tagSdk = stringResource(R.string.tag_sdk)
+
+    val (warningModels, buttonTextId) = remember(currentPackage, entityToInstall, preInstallAppInfo) {
+        val oldInfo = currentPackage.installedAppInfo
         val signatureStatus = currentPackage.signatureMatchStatus
 
-        val warnings = mutableListOf<Pair<String, Color>>()
-        var finalButtonTextId = R.string.install // Default button text
+        // Change list type to WarningModel
+        val warnings = mutableListOf<WarningModel>()
+        var finalButtonTextId = R.string.install
 
-        // Determine the base operation type (upgrade, downgrade, etc.)
-        // This helps set the initial button text for non-error cases.
         if (entityToInstall != null) {
             if (oldInfo == null) {
-                finalButtonTextId = R.string.install // New install
+                finalButtonTextId = R.string.install
             } else {
                 when {
-                    entityToInstall.versionCode > oldInfo.versionCode -> {
-                        finalButtonTextId = R.string.upgrade
-                    }
-
+                    entityToInstall.versionCode > oldInfo.versionCode -> finalButtonTextId = R.string.upgrade
                     entityToInstall.versionCode < oldInfo.versionCode -> {
-                        warnings.add(downgradeWarning to errorColor)
+                        // Add Downgrade Warning
+                        warnings.add(WarningModel(tagDowngrade, downgradeWarning, errorColor))
                         finalButtonTextId = R.string.install_anyway
                     }
 
-                    oldInfo.isArchived -> {
-                        finalButtonTextId = R.string.unarchive
-                    }
-
-                    entityToInstall.versionName == oldInfo.versionName -> {
-                        finalButtonTextId = R.string.reinstall
-                    }
-
-                    else -> {
-                        finalButtonTextId = R.string.install // Sidegrade
-                    }
+                    oldInfo.isArchived -> finalButtonTextId = R.string.unarchive
+                    entityToInstall.versionName == oldInfo.versionName -> finalButtonTextId = R.string.reinstall
+                    else -> finalButtonTextId = R.string.install
                 }
             }
         }
 
-        // Check for signature status. This has HIGHER priority and can OVERRIDE the button text.
-        // Currently only enable for APK and APKS
-        if (!isSplitUpdateMode && (containerType == DataType.APK || containerType == DataType.APKS))
+        if (!isSplitUpdateMode && (containerType == DataType.APK || containerType == DataType.APKS)) {
             when (signatureStatus) {
                 SignatureMatchStatus.MISMATCH -> {
-                    // Add the signature warning to the top of the list for prominence.
-                    warnings.add(
-                        0, // Add to the beginning
-                        sigMismatchWarning to errorColor
-                    )
-                    // CRITICAL: If signatures mismatch, ALWAYS force the button to "Install Anyway".
+                    // Add Signature Warning (Priority High: Add to index 0)
+                    warnings.add(0, WarningModel(tagSignature, sigMismatchWarning, errorColor))
                     finalButtonTextId = R.string.install_anyway
                 }
 
                 SignatureMatchStatus.UNKNOWN_ERROR -> {
-                    warnings.add(
-                        0,
-                        sigUnknownWarning to tertiaryColor
-                    )
+                    warnings.add(0, WarningModel(tagSignature, sigUnknownWarning, tertiaryColor))
                 }
 
-                else -> {
-                    // Signatures match or app not installed, do nothing.
-                }
+                else -> {}
             }
-
-        // Final check for SDK incompatibility. This is a blocking error.
-        val newMinSdk = entityToInstall?.minSdk?.toIntOrNull()
-        if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
-            warnings.add(
-                0,
-                sdkIncompatibleWarning to errorColor
-            )
         }
 
-        // Return the final list of warnings and the determined button text ID
+        val newMinSdk = entityToInstall?.minSdk?.toIntOrNull()
+        if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
+            // Add SDK Warning (Priority High)
+            warnings.add(0, WarningModel(tagSdk, sdkIncompatibleWarning, errorColor))
+        }
+
         Pair(warnings, finalButtonTextId)
     }
 
@@ -255,7 +235,12 @@ fun installPrepareDialog( // 小写开头
             DialogParamsType.InstallerPrepareInstall.id
         ) {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-                item { WarningTextBlock(warnings = warningMessages) }
+                item {
+                    WarningChipGroup(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        warnings = warningModels
+                    )
+                }
                 item {
                     AnimatedVisibility(
                         visible = (primaryEntity is AppEntity.ModuleEntity) &&

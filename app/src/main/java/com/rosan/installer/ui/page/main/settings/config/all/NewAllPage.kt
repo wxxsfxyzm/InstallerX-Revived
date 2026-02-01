@@ -164,7 +164,6 @@ fun NewAllPage(
                 }
 
                 is AllViewState.Data.Progress.Loaded if viewModel.state.data.configs.isEmpty() -> {
-                    // TODO Add error handling
                     // Since we don't allow removing default profile,
                     // There is no need to handle an empty state.
                 }

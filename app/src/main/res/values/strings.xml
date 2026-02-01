@@ -329,6 +329,9 @@
     <string name="installer_prepare_install">Before you install</string>
     <string name="installer_prepare_install_empty">Please select at least one package</string>
     <string name="installer_prepare_install_too_many">Please select only one base.apk</string>
+    <string name="tag_downgrade">Downgrade</string>
+    <string name="tag_signature">Signature</string>
+    <string name="tag_sdk" translatable="false">SDK</string>
     <string name="installer_prepare_sdk_incompatible">System SDK lower than app requires</string>
     <string name="installer_prepare_type_new_install">Preparing to install new app</string>
     <string name="installer_prepare_type_upgrade">Preparing to upgrade app</string>
