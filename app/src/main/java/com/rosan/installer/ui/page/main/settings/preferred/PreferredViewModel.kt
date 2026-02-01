@@ -45,6 +45,7 @@ import com.rosan.installer.util.timber.FileLoggingTree.Companion.LOG_DIR_NAME
 import com.rosan.installer.util.timber.FileLoggingTree.Companion.LOG_SUFFIX
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -459,10 +460,19 @@ class PreferredViewModel(
      */
     private fun refreshIgnoreBatteryOptStatus() =
         viewModelScope.launch {
-            // Use .first() to get a single, up-to-date value from the flow.
-            val isIgnoring = getIsIgnoreBatteryOptAsFlow().first()
-            // Emit new value instead of updating state directly
-            isIgnoringBatteryOptFlow.value = isIgnoring
+            // Check once immediately for response speed
+            val firstCheck = getIsIgnoreBatteryOptAsFlow().first()
+            isIgnoringBatteryOptFlow.value = firstCheck
+
+            // Check again to compat for Xiaomi Devices
+            delay(500)
+
+            val secondCheck = getIsIgnoreBatteryOptAsFlow().first()
+            // Only update flow when the status has changed
+            if (firstCheck != secondCheck) {
+                isIgnoringBatteryOptFlow.value = secondCheck
+                Timber.d("Battery optimization status updated after delay: $secondCheck")
+            }
         }
 
     private suspend fun setAdbVerifyEnabled(enabled: Boolean, action: PreferredViewAction) =
