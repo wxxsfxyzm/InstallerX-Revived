@@ -229,7 +229,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     }
                 } else {
                     Timber.d("[id=${installer.id}] Foreground mode. Cancelling notification.")
-                    setNotificationImmediate(null)
+                    setNotificationThrottled(null, progress)
                 }
             }
         }
@@ -280,6 +280,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             lastProgressClass = null // Reset state class
             lastLogLine = null       // Reset module log
             lastNotifiedEntity = null
+            lastNotificationUpdateTime = 0
             return
         }
 
