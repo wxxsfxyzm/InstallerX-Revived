@@ -365,6 +365,7 @@
     <string name="installer_live_channel_short_text_preparing">Preparing</string>
     <string name="installer_live_channel_short_text_analysing">Analysing</string>
     <string name="installer_live_channel_short_text_pending">Pending</string>
+    <string name="installer_live_channel_short_text_pending_install">Pending</string>
     <string name="installer_live_channel_short_text_installing">Installing</string>
     <string name="installer_live_channel_short_text_success">Success</string>
     <string name="installer_live_channel_short_text_resolve_failed">Failed</string>

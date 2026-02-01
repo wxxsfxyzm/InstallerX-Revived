@@ -76,6 +76,15 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val tick: Unit // Only used to trigger a notification update
     )
 
+    private val baseNotificationBuilder by lazy {
+        NotificationCompat.Builder(context, Channel.InstallerLiveChannel.value)
+            .setSmallIcon(Icon.LOGO.resId)
+            .setSilent(true)
+            .setOnlyAlertOnce(true) // 默认闭嘴，静默更新
+            .setOngoing(true)       // 默认常驻
+            .setRequestPromotedOngoing(true)
+    }
+
     private var job: Job? = null
     private var sessionStartTime: Long = 0L
     private val context by inject<Context>()
@@ -395,6 +404,11 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         preferDynamicColor: Boolean = false,
         fakeItemProgress: Float = 0f
     ): NotificationCompat.Builder {
+        val baseBuilder = baseNotificationBuilder
+        baseBuilder.clearActions()
+        baseBuilder.setOnlyAlertOnce(true) // 先强制设为静默，下面特定状态再通过 false "破防"
+        baseBuilder.setSilent(true)
+        baseBuilder.setOngoing(true)
         val contentIntent = when (installer.config.installMode) {
             ConfigEntity.InstallMode.Notification,
             ConfigEntity.InstallMode.AutoNotification -> if (showDialog) openIntent else null
@@ -404,14 +418,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val isDarkTheme = context.resources.configuration.uiMode.hasFlag(Configuration.UI_MODE_NIGHT_YES)
         val brandColor = if (isDarkTheme) primaryDark else primaryLight
 
-        val baseBuilder = NotificationCompat.Builder(context, Channel.InstallerLiveChannel.value)
-            .setSmallIcon(Icon.LOGO.resId)
-            .setColor(brandColor.toArgb())
+        baseBuilder.setColor(brandColor.toArgb())
             .setContentIntent(contentIntent)
             .setDeleteIntent(finishIntent)
-            .setOnlyAlertOnce(true)
-            .setOngoing(true)
-            .setRequestPromotedOngoing(true)
 
         val seedColorInt = getCurrentSeedColor(progress)
 
@@ -427,7 +436,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
         val currentStageIndex = installStages.indexOfFirst { it.progressClass.isInstance(progress) }
         val segments = createInstallSegments(installStages, dynamicColorScheme)
-
         val progressStyle = NotificationCompat.ProgressStyle()
             .setProgressSegments(segments)
             .setStyledByProgress(true)
@@ -462,6 +470,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 contentTitle = getString(R.string.installer_resolve_failed)
                 shortText = getString(R.string.installer_live_channel_short_text_resolve_failed)
                 baseBuilder.setContentText(installer.error.getErrorMessage(context)).setOnlyAlertOnce(false)
+                    .setOnlyAlertOnce(false)
+                    .setSilent(false)
                     .addAction(0, getString(R.string.cancel), finishIntent)
             }
 
@@ -473,6 +483,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
 
             is ProgressEntity.InstallAnalysedSuccess -> {
+                baseBuilder.setOnlyAlertOnce(false).setSilent(false)
                 val allEntities = installer.analysisResults.flatMap { it.appEntities }
                 val selectedApps = allEntities.map { it.app }
                 val hasComplexType = allEntities.any {
@@ -481,7 +492,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 }
                 val isMultiPackage = selectedApps.groupBy { it.packageName }.size > 1
 
-                shortText = getString(R.string.installer_live_channel_short_text_pending)
+                shortText = if (hasComplexType || isMultiPackage) getString(R.string.installer_live_channel_short_text_pending)
+                else getString(R.string.installer_live_channel_short_text_pending_install)
                 val progressValue = installStages.subList(0, 3).sumOf { it.weight.toDouble() }.toFloat()
                 progressStyle.setProgress(progressValue.toInt())
 
@@ -562,6 +574,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
                 // Show icon for single install
                 baseBuilder.setOnlyAlertOnce(false)
+                    .setSilent(false)
                     .setLargeIcon(getLargeIconBitmap(preferSystemIcon))
             }
 
@@ -587,14 +600,14 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 progressStyle.setProgress(totalProgressWeight.toInt())
 
                 // Do not set large icon for batch completion
-                baseBuilder.setOnlyAlertOnce(false)
+                baseBuilder.setOnlyAlertOnce(false).setSilent(false)
             }
 
             is ProgressEntity.InstallFailed -> {
                 contentTitle = getString(R.string.installer_install_failed)
                 shortText = getString(R.string.installer_live_channel_short_text_install_failed)
                 progressStyle.setProgress(previousStagesWeight.toInt())
-                baseBuilder.setContentText(installer.error.getErrorMessage(context)).setOnlyAlertOnce(false)
+                baseBuilder.setContentText(installer.error.getErrorMessage(context)).setOnlyAlertOnce(false).setSilent(false)
             }
 
             else -> {
