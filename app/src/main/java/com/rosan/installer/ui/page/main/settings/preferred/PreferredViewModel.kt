@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -59,16 +60,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
 
 class PreferredViewModel(
+    private val context: Application,
     private val appDataStore: AppDataStore,
     private val updateChecker: UpdateChecker,
     private val appUpdater: AppUpdater
 ) : ViewModel(), KoinComponent {
-    private val context by inject<Context>()
     var state by mutableStateOf(PreferredViewState())
         private set
 
