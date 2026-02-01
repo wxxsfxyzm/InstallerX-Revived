@@ -107,6 +107,7 @@ fun NewAllPage(
                 modifier = hazeState?.let {
                     Modifier.hazeEffect(hazeState) {
                         style = hazeStyle
+                        blurEnabled = true
                         blurRadius = 30.dp
                         noiseFactor = 0f
                     }

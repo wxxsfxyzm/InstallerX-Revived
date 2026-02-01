@@ -85,6 +85,7 @@ fun NewLabPage(
                 modifier = hazeState?.let {
                     Modifier.hazeEffect(it) {
                         style = hazeStyle
+                        blurEnabled = true
                         blurRadius = 30.dp
                         noiseFactor = 0f
                     }
