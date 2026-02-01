@@ -673,4 +673,8 @@
     <string name="config_auto_delete_zip">Eliminación automática de archivos zip</string>
     <string name="config_auto_delete_zip_desc">Además de eliminar el paquete de instalación, también elimina el archivo comprimido que contiene el paquete de instalación.</string>
     <string name="open_lsposed">Abrir LSPosed</string>
+    <string name="debug">Depuración</string>
+    <string name="save_logs">Guardar registros</string>
+    <string name="save_logs_desc">Guardar el registro en un archivo local para fines de depuración</string>
+    <string name="export_logs">Exportar registros</string>
 </resources>
