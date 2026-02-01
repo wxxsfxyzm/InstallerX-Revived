@@ -108,7 +108,7 @@ private fun installPrepareTooManyDialog(
 fun installPrepareDialog( // 小写开头
     installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
-    val context = LocalContext.current
+    LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
     val settings = viewModel.viewSettings

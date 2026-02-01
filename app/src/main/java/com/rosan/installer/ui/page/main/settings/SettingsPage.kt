@@ -152,7 +152,7 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
                 scaleOut(targetScale = 0.9f) + fadeOut()
             }
         ) {
-            OpenSourceLicensePage(navController, preferredViewModel.state.showExpressiveUI)
+            OpenSourceLicensePage(navController, preferredViewModel.state.showExpressiveUI, preferredViewModel.state.useBlur)
         }
         composable(
             route = SettingsScreen.Theme.route,
