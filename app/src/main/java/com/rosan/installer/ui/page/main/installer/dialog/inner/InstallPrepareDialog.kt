@@ -32,11 +32,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Architecture
 import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.model.enums.SignatureMatchStatus
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.icons.AppIcons
@@ -47,7 +45,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.chip.WarningChipGroup
-import com.rosan.installer.ui.page.main.widget.chip.WarningModel
+import com.rosan.installer.ui.util.InstallLogicUtils
 
 // Assume pausingIcon is accessible
 
@@ -169,7 +167,6 @@ fun installPrepareDialog(
 
     val errorColor = MaterialTheme.colorScheme.error
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
-
     val tagDowngrade = stringResource(R.string.tag_downgrade)
     val downgradeWarning = stringResource(R.string.installer_prepare_type_downgrade)
     val tagSignature = stringResource(R.string.tag_signature)
@@ -182,88 +179,41 @@ fun installPrepareDialog(
     val tagEmulated = stringResource(R.string.tag_arch_emulated)
     val textArchMismatch = stringResource(R.string.installer_prepare_arch_mismatch_notice)
 
-    val (warningModels, buttonTextId) = remember(currentPackage, entityToInstall, preInstallAppInfo) {
-        val oldInfo = currentPackage.installedAppInfo
-        val signatureStatus = currentPackage.signatureMatchStatus
+    val installResources = remember(errorColor, tertiaryColor) {
+        InstallWarningResources(
+            tagDowngrade = tagDowngrade,
+            textDowngrade = downgradeWarning,
+            tagSignature = tagSignature,
+            textSigMismatch = sigMismatchWarning,
+            textSigUnknown = sigUnknownWarning,
+            tagSdk = tagSdk,
+            textSdkIncompatible = sdkIncompatibleWarning,
+            tagArch32 = tagArch32,
+            textArch32 = textArch32,
+            tagEmulated = tagEmulated,
+            textArchMismatchFormat = textArchMismatch,
+            errorColor = errorColor,
+            tertiaryColor = tertiaryColor
+        )
+    }
 
-        // Change list type to WarningModel
-        val warnings = mutableListOf<WarningModel>()
-        var finalButtonTextId = R.string.install
-
-        if (entityToInstall != null) {
-            if (oldInfo == null) {
-                finalButtonTextId = R.string.install
-            } else {
-                when {
-                    entityToInstall.versionCode > oldInfo.versionCode -> finalButtonTextId = R.string.upgrade
-                    entityToInstall.versionCode < oldInfo.versionCode -> {
-                        // Add Downgrade Warning
-                        warnings.add(WarningModel(tagDowngrade, downgradeWarning, errorColor))
-                        finalButtonTextId = R.string.install_anyway
-                    }
-
-                    oldInfo.isArchived -> finalButtonTextId = R.string.unarchive
-                    entityToInstall.versionName == oldInfo.versionName -> finalButtonTextId = R.string.reinstall
-                    else -> finalButtonTextId = R.string.install
-                }
-            }
-        }
-
-        if (!isSplitUpdateMode && (containerType == DataType.APK || containerType == DataType.APKS)) {
-            when (signatureStatus) {
-                SignatureMatchStatus.MISMATCH -> {
-                    // Add Signature Warning (Priority High: Add to index 0)
-                    warnings.add(0, WarningModel(tagSignature, sigMismatchWarning, errorColor))
-                    finalButtonTextId = R.string.install_anyway
-                }
-
-                SignatureMatchStatus.UNKNOWN_ERROR -> {
-                    warnings.add(0, WarningModel(tagSignature, sigUnknownWarning, tertiaryColor))
-                }
-
-                else -> {}
-            }
-        }
-
-        val newMinSdk = entityToInstall?.minSdk?.toIntOrNull()
-        if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
-            // Add SDK Warning (Priority High)
-            warnings.add(0, WarningModel(tagSdk, sdkIncompatibleWarning, errorColor))
-        }
-
-        val sysArch = RsConfig.currentArchitecture
-        val appArch = (primaryEntity as? AppEntity.BaseEntity)?.arch
-        if (appArch != null && appArch != Architecture.NONE && appArch != Architecture.UNKNOWN) {
-            val isSys64 = sysArch == Architecture.ARM64 || sysArch == Architecture.X86_64
-            val isApp32 = appArch == Architecture.ARM || appArch == Architecture.ARMEABI || appArch == Architecture.X86
-
-            if (isSys64 && isApp32) {
-                warnings.add(
-                    WarningModel(
-                        shortLabel = tagArch32,
-                        fullDescription = textArch32,
-                        color = tertiaryColor
-                    )
-                )
-            }
-
-            val sysIsArm = RsConfig.isArm
-            val appIsX86 = appArch == Architecture.X86 || appArch == Architecture.X86_64
-            val sysIsX86 = RsConfig.isX86
-            val appIsArm = appArch == Architecture.ARM || appArch == Architecture.ARM64 || appArch == Architecture.ARMEABI
-            if ((sysIsArm && appIsX86) || (sysIsX86 && appIsArm)) {
-                warnings.add(
-                    0,
-                    WarningModel(
-                        shortLabel = tagEmulated,
-                        fullDescription = textArchMismatch.format(appArch.name, sysArch.name),
-                        color = tertiaryColor
-                    )
-                )
-            }
-        }
-
-        Pair(warnings, finalButtonTextId)
+    val (warningModels, buttonTextId) = remember(
+        currentPackage,
+        entityToInstall,
+        isSplitUpdateMode,
+        containerType,
+        installResources
+    ) {
+        InstallLogicUtils.analyzeInstallState(
+            currentPackage = currentPackage,
+            entityToInstall = entityToInstall,
+            primaryEntity = primaryEntity,
+            isSplitUpdateMode = isSplitUpdateMode,
+            containerType = containerType,
+            systemArch = RsConfig.currentArchitecture,
+            systemSdkInt = Build.VERSION.SDK_INT,
+            resources = installResources
+        )
     }
 
     return baseParams.copy(
