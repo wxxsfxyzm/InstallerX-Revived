@@ -8,4 +8,12 @@
         <!--沉浸状态栏和导航栏-->
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
+
+    <style name="Theme.Installer.Translucent.AppCompat" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
 </resources>
