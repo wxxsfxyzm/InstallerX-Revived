@@ -57,3 +57,25 @@ fun PackageManager.isPackageArchivedCompat(packageName: String): Boolean {
         false
     }
 }
+
+/**
+ * Check whether a package is a system-level fresh install candidate.
+ *
+ * Definition:
+ * - Not currently installed
+ * - Not archived (Android 14+)
+ */
+fun PackageManager.isFreshInstallCandidate(packageName: String): Boolean {
+    val installed = try {
+        getPackageInfo(packageName, 0)
+        true
+    } catch (_: PackageManager.NameNotFoundException) {
+        false
+    }
+
+    if (installed) return false
+
+    if (isPackageArchivedCompat(packageName)) return false
+
+    return true
+}

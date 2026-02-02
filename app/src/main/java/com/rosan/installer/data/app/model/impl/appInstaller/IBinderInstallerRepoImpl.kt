@@ -38,6 +38,7 @@ import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.getValue
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
+import com.rosan.installer.util.isFreshInstallCandidate
 import com.rosan.installer.util.isPackageArchivedCompat
 import com.rosan.installer.util.removeFlag
 import org.koin.core.component.KoinComponent
@@ -244,6 +245,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         packageInstaller: PackageInstaller,
         packageName: String
     ): Session {
+        val pm = context.packageManager
         val containerType = entities.first().sourceType
         val params = if (containerType == DataType.MULTI_APK_ZIP || containerType == DataType.MULTI_APK)
             PackageInstaller.SessionParams(
@@ -297,9 +299,16 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         // --- InstallFlags End ---
 
         // --- Disable not supported stuff ---
-        if (config.authorizer == ConfigEntity.Authorizer.Dhizuku || config.authorizer == ConfigEntity.Authorizer.None)
-        // Dhizuku/None does not support GrantAllRequested permissions
-            params.installFlags = params.installFlags.removeFlag(InstallOption.GrantAllRequestedPermissions.value)
+        val shouldGrantAll =
+            config.allowAllRequestedPermissions &&
+                    config.authorizer != ConfigEntity.Authorizer.Dhizuku &&
+                    config.authorizer != ConfigEntity.Authorizer.None &&
+                    pm.isFreshInstallCandidate(packageName)
+
+        if (!shouldGrantAll) {
+            params.installFlags =
+                params.installFlags.removeFlag(InstallOption.GrantAllRequestedPermissions.value)
+        }
         // --- Disable End ---
 
         // Android System will ignore INSTALL_ALLOW_DOWNGRADE for None ROOT/SYSTEM on Android 15+, no need to disable it here
