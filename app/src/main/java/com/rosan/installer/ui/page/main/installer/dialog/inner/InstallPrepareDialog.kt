@@ -356,6 +356,13 @@ fun installPrepareDialog(
                         }
                     }
                 }
+                val isInvalidSplitInstall = currentPackage.installedAppInfo == null &&
+                        entityToInstall == null &&
+                        selectedEntities.any { it is AppEntity.SplitEntity }
+                if (isInvalidSplitInstall)
+                    item {
+                        WarningTextBlock(listOf(Pair(stringResource(R.string.installer_splits_invalid_tip), MaterialTheme.colorScheme.error)))
+                    }
             }
         },
         buttons = dialogButtons(
