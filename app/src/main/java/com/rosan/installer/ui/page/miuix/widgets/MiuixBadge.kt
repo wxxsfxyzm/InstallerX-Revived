@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -67,10 +69,12 @@ fun MiuixWarningChipGroup(
     warnings: List<WarningModel>
 ) {
     var selectedWarning by remember { mutableStateOf<WarningModel?>(null) }
-    // 专门用于 WindowDialog 的显示状态控制
     val showDialog = remember { mutableStateOf(false) }
 
-    if (warnings.isEmpty()) return
+    if (warnings.isEmpty()) {
+        Spacer(modifier = Modifier.height(12.dp))
+        return
+    }
 
     FlowRow(
         modifier = modifier.fillMaxWidth(),

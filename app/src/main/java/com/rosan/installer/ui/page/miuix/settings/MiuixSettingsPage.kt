@@ -309,7 +309,6 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
 /**
  * Compact Screen Layout (Portrait/Phone)
  */
-@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 private fun SettingsCompactLayout(
     navController: NavController,
