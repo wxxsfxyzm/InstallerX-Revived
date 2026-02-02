@@ -49,6 +49,7 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallWarningResources
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixWarningChipGroup
 import com.rosan.installer.ui.theme.LocalIsDark
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.InstallLogicUtils
@@ -173,8 +174,13 @@ fun InstallPrepareContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item { AppInfoSlot(appInfo = appInfo) }
-        item { Spacer(modifier = Modifier.height(16.dp)) }
-        item { MiuixWarningTextBlock(warnings = warningModels) }
+        item { Spacer(modifier = Modifier.height(4.dp)) }
+        item {
+            MiuixWarningChipGroup(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+                warnings = warningModels
+            )
+        }
         item {
             Card(
                 modifier = Modifier

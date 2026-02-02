@@ -32,6 +32,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewState
+import com.rosan.installer.ui.page.miuix.widgets.MiuixBadge
 import com.rosan.installer.ui.page.miuix.widgets.MiuixScopeTipCard
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
@@ -40,7 +41,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -175,21 +175,7 @@ private fun DataItemWidget(
                     )
                     if (isDefault) {
                         Spacer(modifier = Modifier.size(8.dp))
-                        Card(
-                            colors = CardDefaults.defaultColors(
-                                color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
-                                contentColor = MiuixTheme.colorScheme.onSurface
-                            )
-                        ) {
-                            Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                                Text(
-                                    text = stringResource(R.string.config_global_default),
-                                    color = MiuixTheme.colorScheme.primary,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
+                        MiuixBadge(stringResource(id = R.string.config_global_default))
                     }
                 }
                 Spacer(modifier = Modifier.size(4.dp))
