@@ -107,7 +107,7 @@ private fun installPrepareTooManyDialog(
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun installPrepareDialog( // 小写开头
+fun installPrepareDialog(
     installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
     LocalContext.current
@@ -249,10 +249,8 @@ fun installPrepareDialog( // 小写开头
 
             val sysIsArm = RsConfig.isArm
             val appIsX86 = appArch == Architecture.X86 || appArch == Architecture.X86_64
-
             val sysIsX86 = RsConfig.isX86
             val appIsArm = appArch == Architecture.ARM || appArch == Architecture.ARM64 || appArch == Architecture.ARMEABI
-
             if ((sysIsArm && appIsX86) || (sysIsX86 && appIsArm)) {
                 warnings.add(
                     0,
