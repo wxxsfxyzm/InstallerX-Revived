@@ -7,6 +7,7 @@ on:
       - 'weblate-dev'
     paths:
       - 'app/**'
+      - 'module/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle.properties'
@@ -96,7 +97,7 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease -PVERSION_NAME="${{ env.NEW_VERSION }}"
+        run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease -PVERSION_NAME="${{ env.NEW_VERSION }}" -PAPP_ID="${{ vars.APP_ID }}"
 
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4

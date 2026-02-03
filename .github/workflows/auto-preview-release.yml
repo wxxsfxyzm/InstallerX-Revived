@@ -6,6 +6,7 @@ on:
     # 仅在以下路径发生变更时触发发布，忽略文档修改
     paths:
       - 'app/**'                # 监听 app 模块源码
+      - 'module/**'             # 监听 Magisk 模块
       - 'build.gradle.kts'      # 监听根目录构建脚本
       - 'settings.gradle.kts'   # 监听项目设置
       - 'gradle.properties'     # 监听 Gradle 属性
@@ -71,7 +72,7 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease -PVERSION_NAME="${{ env.NEW_VERSION }}"
+        run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease -PVERSION_NAME="${{ env.NEW_VERSION }}" -PAPP_ID="${{ vars.APP_ID }}"
 
       - name: Find and Rename Preview APKs
         id: rename_apks
@@ -93,15 +94,65 @@ jobs:
 
           NEW_ONLINE_APK_NAME="${PROJECT_NAME}-online-${VERSION_TAG}.apk"
           NEW_OFFLINE_APK_NAME="${PROJECT_NAME}-offline-${VERSION_TAG}.apk"
+          NEW_PACKAGE_INSTALLER_ONLINE_APK_NAME="Packageinstaller_Online.apk"
+          NEW_PACKAGE_INSTALLER_OFFLINE_APK_NAME="Packageinstaller_Offline.apk"
 
           NEW_ONLINE_APK_PATH="${ONLINE_APK_DIR}${NEW_ONLINE_APK_NAME}"
           NEW_OFFLINE_APK_PATH="${OFFLINE_APK_DIR}${NEW_OFFLINE_APK_NAME}"
+          NEW_ONLINE_PACKAGE_INSTALLER_APK_PATH="${ONLINE_APK_DIR}${NEW_PACKAGE_INSTALLER_ONLINE_APK_NAME}"
+          NEW_OFFLINE_PACKAGE_INSTALLER_APK_PATH="${OFFLINE_APK_DIR}${NEW_PACKAGE_INSTALLER_OFFLINE_APK_NAME}"
 
           mv "$ONLINE_APK_PATH" "$NEW_ONLINE_APK_PATH"
           mv "$OFFLINE_APK_PATH" "$NEW_OFFLINE_APK_PATH"
+          cp "$NEW_ONLINE_APK_PATH" "$NEW_ONLINE_PACKAGE_INSTALLER_APK_PATH"
+          cp "$NEW_OFFLINE_APK_PATH" "$NEW_OFFLINE_PACKAGE_INSTALLER_APK_PATH"
 
           echo "online_apk=${NEW_ONLINE_APK_PATH}" >> $GITHUB_OUTPUT
           echo "offline_apk=${NEW_OFFLINE_APK_PATH}" >> $GITHUB_OUTPUT
+          echo "package_installer_online_apk=${NEW_ONLINE_PACKAGE_INSTALLER_APK_PATH}" >> $GITHUB_OUTPUT
+          echo "package_installer_offline_apk=${NEW_OFFLINE_PACKAGE_INSTALLER_APK_PATH}" >> $GITHUB_OUTPUT
+
+      - name: Replace OnlineAPK in module and pack Magisk module
+        id: pack_online_module
+        run: |
+          PACKAGE_INSTALLER_APK="${{ steps.rename_apks.outputs.package_installer_online_apk }}"
+          MODULE_APK_PATH="module/InstallerX-Revived.apk"
+          cp "$PACKAGE_INSTALLER_APK" "$MODULE_APK_PATH"
+          echo "Replaced $MODULE_APK_PATH with built APK"
+
+          # 更新 module.prop 版本与本次构建一致
+          NEW_VERSION="${{ env.NEW_VERSION }}"
+          VERSION_CODE=$(date +%s)
+          sed -i "s/^version=.*/version=${NEW_VERSION}/" module/module.prop
+          sed -i "s/^versionCode=.*/versionCode=${VERSION_CODE}/" module/module.prop
+          echo "Updated module.prop: version=${NEW_VERSION}, versionCode=${VERSION_CODE}"
+
+          MODULE_ZIP_NAME="InstallerX-Revived_Systemly_Online-v${NEW_VERSION}.zip"
+          cd module && zip -r "../${MODULE_ZIP_NAME}" . -x "*.git*" && rm InstallerX-Revived.apk
+          cd ..
+          echo "online_module_zip=${MODULE_ZIP_NAME}" >> $GITHUB_OUTPUT
+          echo "Created ${MODULE_ZIP_NAME}"
+      
+      - name: Replace OnlineAPK in module and pack Magisk module
+        id: pack_offline_module
+        run: |
+          PACKAGE_INSTALLER_APK="${{ steps.rename_apks.outputs.package_installer_offline_apk }}"
+          MODULE_APK_PATH="module/InstallerX-Revived.apk"
+          cp "$PACKAGE_INSTALLER_APK" "$MODULE_APK_PATH"
+          echo "Replaced $MODULE_APK_PATH with built APK"
+
+          # 更新 module.prop 版本与本次构建一致
+          NEW_VERSION="${{ env.NEW_VERSION }}"
+          VERSION_CODE=$(date +%s)
+          sed -i "s/^version=.*/version=${NEW_VERSION}/" module/module.prop
+          sed -i "s/^versionCode=.*/versionCode=${VERSION_CODE}/" module/module.prop
+          echo "Updated module.prop: version=${NEW_VERSION}, versionCode=${VERSION_CODE}"
+
+          MODULE_ZIP_NAME="InstallerX-Revived_Systemly_Offline-v${{ env.NEW_VERSION }}.zip"
+          cd module && zip -r "../${MODULE_ZIP_NAME}" . -x "*.git*" && rm InstallerX-Revived.apk
+          cd ..
+          echo "offline_module_zip=${MODULE_ZIP_NAME}" >> $GITHUB_OUTPUT
+          echo "Created ${MODULE_ZIP_NAME}"
 
       - name: Delete old alpha release and tag
         env:
@@ -129,7 +180,7 @@ jobs:
 
           CHANGELOG_LIST=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | head -n 5)
           CHANGELOG_COUNT=$(git log $LOG_RANGE --pretty=format:"- %s (%an)" | grep -v '^-\s*Merge' | wc -l)
-          
+
           CHANGELOG_BODY_OUTPUT=""
           if [ -z "$CHANGELOG_LIST" ]; then
             CHANGELOG_BODY_OUTPUT="No changes since the last stable release."
@@ -146,7 +197,7 @@ jobs:
             fi
             CHANGELOG_LINK_OUTPUT="\n\n**Full Changelog:** [\`${PREV_TAG}...${CURR_TAG}\`]($COMPARE_URL)"
           fi
-          
+
           {
             echo "changelog_body<<EOF"
             echo -e "$CHANGELOG_BODY_OUTPUT"
@@ -172,25 +223,29 @@ jobs:
             ## 这是自动构建的最新 Alpha 测试版。
             - **这是一个预发布版本，并非为生产环境准备就绪。**
             - 我们非常鼓励您分享您的看法！
-            
+
             ## This is an automatically built latest Alpha pre-release.
             - **This is a pre-release version and is not intended for production use.**
             - We appreciate any feedback!
-            
+
             **更新日志（Changelog）:**
             ${{ steps.changelog.outputs.changelog_body }}${{ steps.changelog.outputs.changelog_full_link }}
           prerelease: true
           files: |
             ${{ steps.rename_apks.outputs.online_apk }}
             ${{ steps.rename_apks.outputs.offline_apk }}
+            ${{ steps.rename_apks.outputs.package_installer_online_apk }}
+            ${{ steps.rename_apks.outputs.package_installer_offline_apk }}
+            ${{ steps.pack_online_module.outputs.online_module_zip }}
+            ${{ steps.pack_offline_module.outputs.offline_module_zip }}
 
-      - name: Upload to Telegram
-        env:
-          API_ID: ${{ secrets.API_ID }}
-          API_HASH: ${{ secrets.API_HASH }}
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
-          BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
-        run: |
-          pip3 install telethon
-          python3 .github/bot.py "${{ steps.rename_apks.outputs.online_apk }}" "${{ steps.rename_apks.outputs.offline_apk }}"
+      # - name: Upload to Telegram
+      #   env:
+      #     API_ID: ${{ secrets.API_ID }}
+      #     API_HASH: ${{ secrets.API_HASH }}
+      #     BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      #     CHAT_ID: ${{ secrets.CHAT_ID }}
+      #     BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
+      #   run: |
+      #     pip3 install telethon
+      #     python3 .github/bot.py "${{ steps.rename_apks.outputs.online_apk }}" "${{ steps.rename_apks.outputs.offline_apk }}" "${{ steps.rename_apks.outputs.package_installer_apk }}"

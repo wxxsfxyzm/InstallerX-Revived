@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug
+        run: ./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug -PAPP_ID="${{ vars.APP_ID }}"
 
       # 上传 APK 供人工测试
       - name: Upload Debug APKs

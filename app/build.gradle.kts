@@ -34,7 +34,7 @@ android {
         // 请换一个applicationId，不要和官方的任何发布版本产生冲突。
         // If you use InstallerX source code, package it into apk or other installation package format
         // Please change the applicationId to one that does not conflict with any official release.
-        applicationId = project.findProperty("APP_ID") as String?
+        applicationId = (project.findProperty("APP_ID") as String?).takeIf { !it.isNullOrBlank() }
             ?: "com.rosan.installer.x.revived"
         namespace = "com.rosan.installer"
         minSdk = 26
