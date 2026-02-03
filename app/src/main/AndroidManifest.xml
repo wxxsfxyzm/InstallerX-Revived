@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="PackageVisibilityPolicy,QueryAllPackagesPermission" />
+    <uses-permission
+        android:name="android.permission.INSTALL_PACKAGES"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.DELETE_PACKAGES"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <uses-permission
+        android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:ignore="RequestInstallPackagesPolicy" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <uses-permission
+        android:name="android.permission.MANAGE_USERS"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-permission android:name="android.permission.READ_INSTALL_SESSIONS" />
+    <uses-permission
+        android:name="android.permission.READ_INSTALLED_SESSION_PATHS"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-permission android:name="com.rosan.dhizuku.permission.API" />
+
+    <uses-sdk tools:overrideLibrary="rikka.shizuku.api, rikka.shizuku.provider, rikka.shizuku.shared, rikka.shizuku.aidl" />
+
+    <application
+        android:name=".App"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Installer"
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="36">
+
+        <activity
+            android:name="com.rosan.installer.ui.activity.SettingsActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity-alias
+            android:name="com.rosan.installer.ui.activity.LauncherAlias"
+            android:targetActivity="com.rosan.installer.ui.activity.SettingsActivity"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity
+            android:name="com.rosan.installer.ui.activity.InstallerActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Installer.Translucent">
+            <!--<intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>-->
+
+            <intent-filter android:priority="10">
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.INSTALL_PACKAGE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="application/vnd.android.package-archive" />
+                <data android:pathPattern=".*" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="application/vnd.android.package-archive" />
+
+                <data android:pathPattern=".*" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+
+            <intent-filter android:priority="10">
+                <action android:name="android.content.pm.action.CONFIRM_INSTALL" />
+                <action android:name="android.content.pm.action.CONFIRM_PERMISSIONS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.activity.UninstallerActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Installer.Translucent">
+
+            <intent-filter android:priority="10">
+                <action android:name="android.intent.action.DELETE" />
+                <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+            </intent-filter>
+
+        </activity>
+
+        <activity
+            android:name=".ui.activity.BiometricsAuthenticationActivity"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Installer.Translucent.AppCompat"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true" />
+
+        <service
+            android:name="com.rosan.installer.data.installer.model.impl.InstallerService"
+            android:foregroundServiceType="specialUse">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="installer_processing" />
+        </service>
+
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:enabled="true"
+            android:exported="true"
+            android:multiprocess="false"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <receiver
+            android:name=".SecretCodeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SECRET_CODE" />
+                <data
+                    android:scheme="android_secret_code"
+                    android:host="46789" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.telephony.action.SECRET_CODE" />
+                <data
+                    android:scheme="android_secret_code"
+                    android:host="46789" />
+            </intent-filter>
+        </receiver>
+
+        <meta-data
+            android:name="ScopedStorage"
+            android:value="true" />
+
+        <meta-data
+            android:name="app_description_title"
+            android:resource="@string/uninstall_title" />
+
+        <meta-data
+            android:name="app_description_content"
+            android:resource="@string/uninstall_content" />
+
+    </application>
+
+</manifest>

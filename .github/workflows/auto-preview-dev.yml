@@ -1,0 +1,109 @@
+name: Dev Branch Build & Artifact
+
+on:
+  push:
+    branches-ignore:
+      - 'main'
+      - 'weblate-dev'
+    paths:
+      - 'app/**'
+      - 'module/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - '.github/workflows/auto-preview-dev.yml'
+
+jobs:
+  pre_job:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          # 核心参数：如果发现完全相同的 Commit 已经成功跑过，则跳过
+          skip_after_successful_duplicate: 'true'
+          # 可选：如果同一个 Commit 正在跑，是否取消旧的？
+          # 'never' = 不取消，两者都跑（适合 dev 合并场景）
+          # 'same_content' = 内容一样就取消旧的
+          concurrent_skipping: 'never'
+          # 可选：忽略某些路径的变更（因为你已经在 on.push.paths 里配置了，这里通常不需要再配）
+          do_not_skip: '[]'
+
+  build_and_upload_artifact:
+    needs: pre_job
+    # 只有当 should_skip 不为 true 时才运行
+    if: needs.pre_job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Get commit short SHA
+        id: commit_sha
+        run: echo "SHORT_SHA=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          # dev 分支允许写入缓存
+          cache-read-only: ${{ github.ref_name != 'dev' }}
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Update versionName format
+        id: version
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(./gradlew -q properties | grep '^BASE_VERSION:' | awk '{print $2}')
+          A=$(echo $VERSION | cut -d. -f1)
+          B=$(echo $VERSION | cut -d. -f2)
+          C=$(echo $VERSION | cut -d. -f3)
+          C_NEW=$((C + 1))
+          NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "Generated Version: $NEW_VERSION"
+
+      - name: Decode and set up signing key
+        run: |
+          mkdir -p keystore
+          echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > keystore/carlyu.jks
+          echo "storeFile=keystore/carlyu.jks" > keystore.properties
+          echo "keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}" >> keystore.properties
+          echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> keystore.properties
+          echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> keystore.properties
+
+      - name: Build Dev Release APK
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease -PVERSION_NAME="${{ env.NEW_VERSION }}" -PAPP_ID="${{ vars.APP_ID }}"
+
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-apk-${{ steps.commit_sha.outputs.SHORT_SHA }}
+          path: |
+            app/build/outputs/apk/onlineUnstable/release/*.apk
+            app/build/outputs/apk/offlineUnstable/release/*.apk
+          retention-days: 15

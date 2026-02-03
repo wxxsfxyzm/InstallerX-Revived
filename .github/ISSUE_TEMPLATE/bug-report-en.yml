@@ -1,0 +1,61 @@
+name: Bug report
+description: Create a report to help us improve
+title: "[BUG]"
+labels: bug
+
+body:
+  - type: textarea
+    id: describe
+    attributes:
+      label: |
+        Describe the bug
+      description: |
+        A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: recurrence
+    attributes:
+      label: |
+        To Reproduce
+      description: |
+        Example of problem reproduction steps:
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expectation
+    attributes:
+      label: |
+        Expected behavior
+      description: |
+        A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: smartphone-info
+    attributes:
+      label: |
+        Smartphone Info
+      description: |
+        example:\
+        Device: Xiaomi\
+        OS: HyperOS 2.0.200, Android 15\
+        InstallerX Version: latest alpha/latest stable
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: |
+        Screenshots or ScreenCAP
+      description: |
+        If applicable, add screenshots or ScreenCAP to help explain your problem.
+    validations:

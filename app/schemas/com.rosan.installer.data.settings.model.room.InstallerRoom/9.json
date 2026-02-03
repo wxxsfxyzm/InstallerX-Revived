@@ -1,0 +1,280 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 9,
+    "identityHash": "70e61c5dbf64ee0ec270f0ff6887a4bb",
+    "entities": [
+      {
+        "tableName": "app",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `package_name` TEXT, `config_id` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL, FOREIGN KEY(`config_id`) REFERENCES `config`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "package_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "configId",
+            "columnName": "config_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifiedAt",
+            "columnName": "modified_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_app_package_name",
+            "unique": true,
+            "columnNames": [
+              "package_name"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_app_package_name` ON `${TABLE_NAME}` (`package_name`)"
+          },
+          {
+            "name": "index_app_config_id",
+            "unique": false,
+            "columnNames": [
+              "config_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_app_config_id` ON `${TABLE_NAME}` (`config_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "config",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "config_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "config",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL DEFAULT 'Default', `description` TEXT NOT NULL, `authorizer` TEXT NOT NULL, `customize_authorizer` TEXT NOT NULL, `install_mode` TEXT NOT NULL, `enable_customize_install_reason` INTEGER NOT NULL DEFAULT 0, `install_reason` INTEGER NOT NULL DEFAULT 0, `enable_customize_package_source` INTEGER NOT NULL DEFAULT 0, `package_source` INTEGER NOT NULL DEFAULT 1, `install_requester` TEXT, `installer` TEXT, `enable_customize_user` INTEGER NOT NULL DEFAULT 0, `target_user_id` INTEGER NOT NULL DEFAULT 0, `enable_manual_dexopt` INTEGER NOT NULL DEFAULT 0, `force_dexopt` INTEGER NOT NULL DEFAULT 0, `dexopt_mode` TEXT NOT NULL DEFAULT 'speed-profile', `auto_delete` INTEGER NOT NULL, `display_size` INTEGER NOT NULL DEFAULT 0, `display_sdk` INTEGER NOT NULL DEFAULT 0, `for_all_user` INTEGER NOT NULL, `allow_test_only` INTEGER NOT NULL, `allow_downgrade` INTEGER NOT NULL, `bypass_low_target_sdk` INTEGER NOT NULL DEFAULT 0, `allow_all_requested_permissions` INTEGER NOT NULL DEFAULT 0, `split_choose_all` INTEGER NOT NULL DEFAULT 0, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'Default'"
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorizer",
+            "columnName": "authorizer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customizeAuthorizer",
+            "columnName": "customize_authorizer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "installMode",
+            "columnName": "install_mode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enableCustomizeInstallReason",
+            "columnName": "enable_customize_install_reason",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "installReason",
+            "columnName": "install_reason",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "enableCustomizePackageSource",
+            "columnName": "enable_customize_package_source",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "packageSource",
+            "columnName": "package_source",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "installRequester",
+            "columnName": "install_requester",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "installer",
+            "columnName": "installer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "enableCustomizeUser",
+            "columnName": "enable_customize_user",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "targetUserId",
+            "columnName": "target_user_id",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "enableManualDexopt",
+            "columnName": "enable_manual_dexopt",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "forceDexopt",
+            "columnName": "force_dexopt",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "dexoptMode",
+            "columnName": "dexopt_mode",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'speed-profile'"
+          },
+          {
+            "fieldPath": "autoDelete",
+            "columnName": "auto_delete",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displaySize",
+            "columnName": "display_size",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "displaySdk",
+            "columnName": "display_sdk",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "forAllUser",
+            "columnName": "for_all_user",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "allowTestOnly",
+            "columnName": "allow_test_only",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "allowDowngrade",
+            "columnName": "allow_downgrade",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bypassLowTargetSdk",
+            "columnName": "bypass_low_target_sdk",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "allowAllRequestedPermissions",
+            "columnName": "allow_all_requested_permissions",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "splitChooseAll",
+            "columnName": "split_choose_all",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifiedAt",
+            "columnName": "modified_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '70e61c5dbf64ee0ec270f0ff6887a4bb')"
+    ]
+  }
+}

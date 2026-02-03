@@ -1,0 +1,156 @@
+name: Manual Stable Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: '输入版本标签 (例如 v2.2.3)'
+        required: true
+      changelog:
+        description: '填写更新日志 (支持 Markdown)'
+        required: true
+        type: string
+      packagename:
+        description: '输入固化模块使用的包名 (例如 com.rosan.installer.x.revived)'
+        required: false
+        type: string
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          # 手动发布版本无需写入构建缓存
+          cache-read-only: true
+
+      - name: Verify Keystore
+        run: |
+          if [ -z "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" ]; then
+            echo "ERROR: SIGNING_KEY_STORE_BASE64 secret is missing"
+            exit 1
+          fi
+
+      - name: Setup Signing Keys
+        run: |
+          mkdir -p keystore
+          echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > keystore/carlyu.jks
+          cat <<EOF > keystore.properties
+          storeFile=keystore/carlyu.jks
+          keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}
+          keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}
+          storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}
+          EOF
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build Stable Release APKs
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease -PAPP_ID="${{ inputs.packagename }}" -PNEW_VERSION="${{ inputs.version_tag }}"
+
+      - name: Find and Rename Universal APKs
+        id: rename_apk
+        run: |
+          PROJECT_NAME="InstallerX-Revived"
+          VERSION_TAG="${{ inputs.version_tag }}"
+          for FLAVOR in online offline; do
+            APK_DIR="app/build/outputs/apk/${FLAVOR}Stable/release/"
+            ORIGINAL_APK=$(find "$APK_DIR" -maxdepth 1 -type f -name "*.apk" | head -n 1)
+
+            if [ -z "$ORIGINAL_APK" ]; then
+              echo "ERROR: APK not found in $APK_DIR!"
+              ls -R app/build/outputs/apk
+              exit 1
+            fi
+
+            NEW_APK_NAME="${PROJECT_NAME}-${FLAVOR}-${VERSION_TAG}.apk"
+            NEW_APK_PATH="${APK_DIR}${NEW_APK_NAME}"
+
+            echo "Renaming $ORIGINAL_APK -> $NEW_APK_PATH"
+            mv "$ORIGINAL_APK" "$NEW_APK_PATH"
+          done
+
+      - name: Clone Module Repository
+        uses: actions/checkout@v5
+        with:
+          repository: furrybluelan/InstallerX-Revived_Module
+          path: module
+          ref: main
+          fetch-depth: 0
+      
+      - name: Replace OnlineAPK in module and pack Magisk module
+        id: pack_online_module
+        run: |
+          PACKAGE_INSTALLER_APK="app/build/outputs/apk/onlineStable/release/Packageinstaller_Online.apk"
+          MODULE_APK_PATH="module/InstallerX-Revived.apk"
+          cp "$PACKAGE_INSTALLER_APK" "$MODULE_APK_PATH"
+          echo "Replaced $MODULE_APK_PATH with built APK"
+
+          # 更新 module.prop 版本与本次构建一致
+          NEW_VERSION="${{ inputs.version_tag }}"
+          VERSION_CODE=$(date +%s)
+          sed -i "s/^version=.*/version=${NEW_VERSION}/" module/module.prop
+          sed -i "s/^versionCode=.*/versionCode=${VERSION_CODE}/" module/module.prop
+          echo "${{ inputs.packagename }}" > module/package.txt
+          echo "Updated module.prop: version=${NEW_VERSION}, versionCode=${VERSION_CODE}"
+
+          MODULE_ZIP_NAME="InstallerX-Revived_Systemly_Online-v${NEW_VERSION}.zip"
+          cd module && zip -r "../${MODULE_ZIP_NAME}" . -x "*.git*" && rm InstallerX-Revived.apk
+          cd ..
+          echo "online_module_zip=${MODULE_ZIP_NAME}" >> $GITHUB_OUTPUT
+          echo "Created ${MODULE_ZIP_NAME}"
+      
+      - name: Replace OnlineAPK in module and pack Magisk module
+        id: pack_offline_module
+        run: |
+          PACKAGE_INSTALLER_APK="${{ steps.rename_apks.outputs.package_installer_offline_apk }}"
+          MODULE_APK_PATH="module/InstallerX-Revived.apk"
+          cp "$PACKAGE_INSTALLER_APK" "$MODULE_APK_PATH"
+          echo "Replaced $MODULE_APK_PATH with built APK"
+
+          # 更新 module.prop 版本与本次构建一致
+          NEW_VERSION="${{ inputs.version_tag }}"
+          VERSION_CODE=$(date +%s)
+          sed -i "s/^version=.*/version=${NEW_VERSION}/" module/module.prop
+          sed -i "s/^versionCode=.*/versionCode=${VERSION_CODE}/" module/module.prop
+          echo "${{ inputs.packagename }}" > module/package.txt
+          echo "Updated module.prop: version=${NEW_VERSION}, versionCode=${VERSION_CODE}"
+          MODULE_ZIP_NAME="InstallerX-Revived_Systemly_Offline-v${NEW_VERSION}.zip"
+          cd module && zip -r "../${MODULE_ZIP_NAME}" . -x "*.git*" && rm InstallerX-Revived.apk
+          cd ..
+          echo "offline_module_zip=${MODULE_ZIP_NAME}" >> $GITHUB_OUTPUT
+          echo "Created ${MODULE_ZIP_NAME}"
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "InstallerX Revived stable ${{ inputs.version_tag }}"
+          tag_name: ${{ inputs.version_tag }}
+          body: ${{ inputs.changelog }}
+          prerelease: false
+          files: |
+            app/build/outputs/apk/onlineStable/release/InstallerX-Revived-online-${{ inputs.version_tag }}.apk
+            app/build/outputs/apk/offlineStable/release/InstallerX-Revived-offline-${{ inputs.version_tag }}.apk
+            app/build/outputs/apk/offlineStable/release/Packageinstaller_Offline.apk
+            app/build/outputs/apk/onlineStable/release/Packageinstaller_Online.apk
+            ${{ steps.pack_online_module.outputs.online_module_zip }}
+            ${{ steps.pack_offline_module.outputs.offline_module_zip }}

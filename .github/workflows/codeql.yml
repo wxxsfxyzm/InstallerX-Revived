@@ -1,0 +1,81 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+  schedule:
+    - cron: '30 1 * * 0'
+
+jobs:
+  pre_job:
+    # Do not skip if triggered by schedule, AND skip if the PR source branch is 'weblate-dev'
+    if: github.event_name != 'schedule' && github.head_ref != 'weblate-dev'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          skip_after_successful_duplicate: 'true'
+          concurrent_skipping: 'never'
+
+  analyze:
+    name: Analyze
+    # 依赖检查
+    needs: pre_job
+    # 如果是定时任务(schedule)直接跑，或者 skip 检查说不跳过才跑
+    if: false
+    # if: github.event_name == 'schedule' || needs.pre_job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+      packages: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java-kotlin' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+
+      # 新增：Gradle 设置与缓存管理
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          # CodeQL 分析只读缓存
+          cache-read-only: true
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build Android Project
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew assembleOnlinePreviewDebug --no-daemon
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{matrix.language}}"

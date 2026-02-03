@@ -1,0 +1,28 @@
+name: Feature request
+description: Suggest an idea for this project
+title: "[Feature Request]"
+labels: enhancement
+
+body:
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: |
+        New feature description
+      description: |
+        Clearly describe all the new features or improvements you want\
+        Clearly describe the alternatives you have considered\
+        example:\
+        What are the scenarios I've encountered in my usage, what features I'd like to add, and what does this feature do?\
+        I've considered other options, such as...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: |
+        Screenshots or ScreenCAP
+      description: |
+        If applicable, add screenshots or ScreenCAP to help explain your problem.
+    validations:
