@@ -10,6 +10,10 @@ on:
         description: '填写更新日志 (支持 Markdown)'
         required: true
         type: string
+      packagename:
+        description: '输入固化模块使用的包名 (例如 com.rosan.installer.x.revived)'
+        required: false
+        type: string
 
 jobs:
   build_and_release:
@@ -61,7 +65,7 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease
+        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease -PAPP_ID="${{ vars.APP_ID }}"
 
       - name: Find and Rename Universal APKs
         id: rename_apk
@@ -84,7 +88,48 @@ jobs:
             echo "Renaming $ORIGINAL_APK -> $NEW_APK_PATH"
             mv "$ORIGINAL_APK" "$NEW_APK_PATH"
           done
+      
+      - name: Replace OnlineAPK in module and pack Magisk module
+        id: pack_online_module
+        run: |
+          PACKAGE_INSTALLER_APK="app/build/outputs/apk/onlineStable/release/Packageinstaller_Online.apk"
+          MODULE_APK_PATH="module/InstallerX-Revived.apk"
+          cp "$PACKAGE_INSTALLER_APK" "$MODULE_APK_PATH"
+          echo "Replaced $MODULE_APK_PATH with built APK"
 
+          # 更新 module.prop 版本与本次构建一致
+          NEW_VERSION="${{ inputs.version_tag }}"
+          VERSION_CODE=$(date +%s)
+          sed -i "s/^version=.*/version=${NEW_VERSION}/" module/module.prop
+          sed -i "s/^versionCode=.*/versionCode=${VERSION_CODE}/" module/module.prop
+          echo "Updated module.prop: version=${NEW_VERSION}, versionCode=${VERSION_CODE}"
+
+          MODULE_ZIP_NAME="InstallerX-Revived_Systemly_Online-v${NEW_VERSION}.zip"
+          cd module && zip -r "../${MODULE_ZIP_NAME}" . -x "*.git*" && rm InstallerX-Revived.apk
+          cd ..
+          echo "online_module_zip=${MODULE_ZIP_NAME}" >> $GITHUB_OUTPUT
+          echo "Created ${MODULE_ZIP_NAME}"
+      
+      - name: Replace OnlineAPK in module and pack Magisk module
+        id: pack_offline_module
+        run: |
+          PACKAGE_INSTALLER_APK="${{ steps.rename_apks.outputs.package_installer_offline_apk }}"
+          MODULE_APK_PATH="module/InstallerX-Revived.apk"
+          cp "$PACKAGE_INSTALLER_APK" "$MODULE_APK_PATH"
+          echo "Replaced $MODULE_APK_PATH with built APK"
+
+          # 更新 module.prop 版本与本次构建一致
+          NEW_VERSION="${{ inputs.version_tag }}"
+          VERSION_CODE=$(date +%s)
+          sed -i "s/^version=.*/version=${NEW_VERSION}/" module/module.prop
+          sed -i "s/^versionCode=.*/versionCode=${VERSION_CODE}/" module/module.prop
+          echo "Updated module.prop: version=${NEW_VERSION}, versionCode=${VERSION_CODE}"
+          MODULE_ZIP_NAME="InstallerX-Revived_Systemly_Offline-v${NEW_VERSION}.zip"
+          cd module && zip -r "../${MODULE_ZIP_NAME}" . -x "*.git*" && rm InstallerX-Revived.apk
+          cd ..
+          echo "offline_module_zip=${MODULE_ZIP_NAME}" >> $GITHUB_OUTPUT
+          echo "Created ${MODULE_ZIP_NAME}"
+      
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -95,3 +140,7 @@ jobs:
           files: |
             app/build/outputs/apk/onlineStable/release/InstallerX-Revived-online-${{ inputs.version_tag }}.apk
             app/build/outputs/apk/offlineStable/release/InstallerX-Revived-offline-${{ inputs.version_tag }}.apk
+            app/build/outputs/apk/offlineStable/release/Packageinstaller_Offline.apk
+            app/build/outputs/apk/onlineStable/release/Packageinstaller_Online.apk
+            ${{ steps.pack_online_module.outputs.online_module_zip }}
+            ${{ steps.pack_offline_module.outputs.offline_module_zip }}
