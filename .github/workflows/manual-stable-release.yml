@@ -65,7 +65,7 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease -PAPP_ID="${{ vars.APP_ID }}"
+        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease -PAPP_ID="${{ inputs.packagename }}" -PNEW_VERSION="${{ inputs.version_tag }}"
 
       - name: Find and Rename Universal APKs
         id: rename_apk
@@ -88,6 +88,14 @@ jobs:
             echo "Renaming $ORIGINAL_APK -> $NEW_APK_PATH"
             mv "$ORIGINAL_APK" "$NEW_APK_PATH"
           done
+
+      - name: Clone Module Repository
+        uses: actions/checkout@v5
+        with:
+          repository: furrybluelan/InstallerX-Revived_Module
+          path: module
+          ref: main
+          fetch-depth: 0
       
       - name: Replace OnlineAPK in module and pack Magisk module
         id: pack_online_module
@@ -102,6 +110,7 @@ jobs:
           VERSION_CODE=$(date +%s)
           sed -i "s/^version=.*/version=${NEW_VERSION}/" module/module.prop
           sed -i "s/^versionCode=.*/versionCode=${VERSION_CODE}/" module/module.prop
+          echo "${{ inputs.packagename }}" > module/package.txt
           echo "Updated module.prop: version=${NEW_VERSION}, versionCode=${VERSION_CODE}"
 
           MODULE_ZIP_NAME="InstallerX-Revived_Systemly_Online-v${NEW_VERSION}.zip"
@@ -123,6 +132,7 @@ jobs:
           VERSION_CODE=$(date +%s)
           sed -i "s/^version=.*/version=${NEW_VERSION}/" module/module.prop
           sed -i "s/^versionCode=.*/versionCode=${VERSION_CODE}/" module/module.prop
+          echo "${{ inputs.packagename }}" > module/package.txt
           echo "Updated module.prop: version=${NEW_VERSION}, versionCode=${VERSION_CODE}"
           MODULE_ZIP_NAME="InstallerX-Revived_Systemly_Offline-v${NEW_VERSION}.zip"
           cd module && zip -r "../${MODULE_ZIP_NAME}" . -x "*.git*" && rm InstallerX-Revived.apk

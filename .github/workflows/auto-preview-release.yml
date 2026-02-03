@@ -112,6 +112,14 @@ jobs:
           echo "package_installer_online_apk=${NEW_ONLINE_PACKAGE_INSTALLER_APK_PATH}" >> $GITHUB_OUTPUT
           echo "package_installer_offline_apk=${NEW_OFFLINE_PACKAGE_INSTALLER_APK_PATH}" >> $GITHUB_OUTPUT
 
+      - name: Clone Module Repository
+        uses: actions/checkout@v5
+        with:
+          repository: furrybluelan/InstallerX-Revived_Module
+          path: module
+          ref: main
+          fetch-depth: 0
+
       - name: Replace OnlineAPK in module and pack Magisk module
         id: pack_online_module
         run: |
@@ -125,6 +133,7 @@ jobs:
           VERSION_CODE=$(date +%s)
           sed -i "s/^version=.*/version=${NEW_VERSION}/" module/module.prop
           sed -i "s/^versionCode=.*/versionCode=${VERSION_CODE}/" module/module.prop
+          echo ${{ vars.APP_ID }} > module/package.txt
           echo "Updated module.prop: version=${NEW_VERSION}, versionCode=${VERSION_CODE}"
 
           MODULE_ZIP_NAME="InstallerX-Revived_Systemly_Online-v${NEW_VERSION}.zip"
@@ -146,6 +155,7 @@ jobs:
           VERSION_CODE=$(date +%s)
           sed -i "s/^version=.*/version=${NEW_VERSION}/" module/module.prop
           sed -i "s/^versionCode=.*/versionCode=${VERSION_CODE}/" module/module.prop
+          echo ${{ vars.APP_ID }} > module/package.txt
           echo "Updated module.prop: version=${NEW_VERSION}, versionCode=${VERSION_CODE}"
 
           MODULE_ZIP_NAME="InstallerX-Revived_Systemly_Offline-v${{ env.NEW_VERSION }}.zip"
