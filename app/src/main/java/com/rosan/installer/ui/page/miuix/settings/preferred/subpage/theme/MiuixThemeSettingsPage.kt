@@ -40,9 +40,9 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeEngineWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeModeWidget
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
+import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -76,13 +76,7 @@ fun MiuixThemeSettingsPage(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = hazeState?.let {
-                    Modifier.hazeEffect(hazeState) {
-                        style = hazeStyle
-                        blurRadius = 30.dp
-                        noiseFactor = 0f
-                    }
-                } ?: Modifier,
+                modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
                 color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(R.string.theme_settings),
                 navigationIcon = {

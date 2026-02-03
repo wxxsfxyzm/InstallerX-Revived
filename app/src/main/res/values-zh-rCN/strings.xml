@@ -321,6 +321,12 @@
     <string name="installer_prepare_install">准备安装</string>
     <string name="installer_prepare_install_empty">请至少选择一个安装包</string>
     <string name="installer_prepare_install_too_many">请仅选择一个主包（base.apk）</string>
+    <string name="tag_downgrade">降级</string>
+    <string name="tag_signature">签名验证</string>
+    <string name="tag_arch_32">32位应用</string>
+    <string name="tag_arch_emulated">架构转译</string>
+    <string name="installer_prepare_arch_32_notice">此应用将以 32 位模式运行。在 64 位设备上，这可能会增加内存消耗或降低性能</string>
+    <string name="installer_prepare_arch_mismatch_notice">应用架构 (%1$s) 与本机 (%2$s) 不匹配，将需要转译。不保证能成功安装或运行，且可能会导致发热增加或闪退</string>
     <string name="installer_prepare_sdk_incompatible">系统 SDK 不满足应用要求</string>
     <string name="installer_prepare_type_new_install">准备安装新应用</string>
     <string name="installer_prepare_type_upgrade">准备升级应用</string>

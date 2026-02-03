@@ -338,6 +338,10 @@ object ApkParser : KoinComponent {
 
         if (RsConfig.isX86 && apkArchs.contains(Architecture.X86)) return Architecture.X86
 
-        return null
+        return apkArchs.firstOrNull { it == Architecture.ARM64 }
+            ?: apkArchs.firstOrNull { it == Architecture.ARM }
+            ?: apkArchs.firstOrNull { it == Architecture.X86_64 }
+            ?: apkArchs.firstOrNull { it == Architecture.X86 }
+            ?: apkArchs.firstOrNull()
     }
 }

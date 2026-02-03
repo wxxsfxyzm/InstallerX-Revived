@@ -329,6 +329,13 @@
     <string name="installer_prepare_install">Before you install</string>
     <string name="installer_prepare_install_empty">Please select at least one package</string>
     <string name="installer_prepare_install_too_many">Please select only one base.apk</string>
+    <string name="tag_downgrade">Downgrade</string>
+    <string name="tag_signature">Signature</string>
+    <string name="tag_sdk" translatable="false">SDK</string>
+    <string name="tag_arch_32">32-Bit</string>
+    <string name="tag_arch_emulated">Arch Emulated</string>
+    <string name="installer_prepare_arch_32_notice">This app will run in 32-bit mode. This may increase memory usage or reduce performance on 64-bit devices</string>
+    <string name="installer_prepare_arch_mismatch_notice">The app architecture (%1$s) does not match your device (%2$s). It will run via translation. Installation or execution is not guaranteed, and issues like overheating or crashes may occur</string>
     <string name="installer_prepare_sdk_incompatible">System SDK lower than app requires</string>
     <string name="installer_prepare_type_new_install">Preparing to install new app</string>
     <string name="installer_prepare_type_upgrade">Preparing to upgrade app</string>

@@ -54,12 +54,6 @@ val workingIcon: @Composable () -> Unit = {
     )
 }
 
-val menuIcon: @Composable () -> Unit = {
-    Icon(
-        imageVector = AppIcons.MenuOpen, contentDescription = null, modifier = Modifier.size(32.dp)
-    )
-}
-
 val permissionIcon: @Composable () -> Unit = {
     Icon(
         imageVector = AppIcons.Permission,

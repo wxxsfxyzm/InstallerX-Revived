@@ -72,7 +72,9 @@ fun UpdateLoadingIndicator(
                             blurRadius = 25.dp,
                             noiseFactor = 0f
                         )
-                    )
+                    ) {
+                        blurEnabled = true
+                    }
                 } ?: Modifier)
                 .background(Color.Black.copy(alpha = 0.3f))
                 .clickable(

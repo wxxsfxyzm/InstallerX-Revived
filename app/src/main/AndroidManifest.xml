@@ -141,7 +141,7 @@
             android:name=".ui.activity.BiometricsAuthenticationActivity"
             android:exported="false"
             android:launchMode="singleInstance"
-            android:theme="@style/Theme.Installer.Translucent"
+            android:theme="@style/Theme.Installer.Translucent.AppCompat"
             android:excludeFromRecents="true"
             android:finishOnTaskLaunch="true" />
 

@@ -47,11 +47,11 @@ import com.rosan.installer.ui.page.main.widget.setting.UninstallKeepDataWidget
 import com.rosan.installer.ui.page.main.widget.setting.UninstallRequireBiometricAuthWidget
 import com.rosan.installer.ui.page.main.widget.setting.UninstallSystemAppWidget
 import com.rosan.installer.ui.theme.getM3TopBarColor
+import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import com.rosan.installer.util.toast
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -102,13 +102,7 @@ fun NewUninstallerGlobalSettingsPage(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
-                modifier = hazeState?.let {
-                    Modifier.hazeEffect(it) {
-                        style = hazeStyle
-                        blurRadius = 30.dp
-                        noiseFactor = 0f
-                    }
-                } ?: Modifier,
+                modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = {
                     Text(stringResource(R.string.uninstaller_settings))

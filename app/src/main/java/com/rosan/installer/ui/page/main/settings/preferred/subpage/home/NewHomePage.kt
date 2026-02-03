@@ -52,9 +52,9 @@ import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
 import com.rosan.installer.ui.theme.getM3TopBarColor
+import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -84,17 +84,9 @@ fun NewHomePage(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
             topBar = {
                 LargeFlexibleTopAppBar(
-                    modifier = topBarHazeState?.let {
-                        Modifier.hazeEffect(it) {
-                            style = hazeStyle
-                            blurRadius = 30.dp
-                            noiseFactor = 0f
-                        }
-                    } ?: Modifier,
+                    modifier = Modifier.installerHazeEffect(topBarHazeState, hazeStyle),
                     windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                    title = {
-                        Text(text = stringResource(id = R.string.about))
-                    },
+                    title = { Text(text = stringResource(id = R.string.about)) },
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         Row {

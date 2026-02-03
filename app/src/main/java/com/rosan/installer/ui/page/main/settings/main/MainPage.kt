@@ -55,9 +55,9 @@ import com.rosan.installer.ui.page.main.settings.config.all.NewAllPage
 import com.rosan.installer.ui.page.main.settings.preferred.NewPreferredPage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredPage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -129,13 +129,7 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
                 modifier = Modifier.fillMaxSize(),
                 bottomBar = {
                     RowNavigation(
-                        modifier = hazeState?.let {
-                            Modifier.hazeEffect(hazeState) {
-                                style = hazeStyle
-                                blurRadius = 30.dp
-                                noiseFactor = 0f
-                            }
-                        } ?: Modifier,
+                        modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
                         isM3e = showExpressiveUI,
                         windowInsets = navigationWindowInsets,
                         data = data,

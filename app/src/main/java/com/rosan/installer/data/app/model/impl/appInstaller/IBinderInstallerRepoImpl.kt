@@ -38,6 +38,7 @@ import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.getValue
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
+import com.rosan.installer.util.isFreshInstallCandidate
 import com.rosan.installer.util.isPackageArchivedCompat
 import com.rosan.installer.util.removeFlag
 import org.koin.core.component.KoinComponent
@@ -244,6 +245,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         packageInstaller: PackageInstaller,
         packageName: String
     ): Session {
+        val pm = context.packageManager
         val containerType = entities.first().sourceType
         val params = if (containerType == DataType.MULTI_APK_ZIP || containerType == DataType.MULTI_APK)
             PackageInstaller.SessionParams(
@@ -296,26 +298,43 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         Timber.tag("InstallFlags").d("Install flags after customization: ${params.installFlags}")
         // --- InstallFlags End ---
 
-        // --- Disable Dhizuku not supported stuff ---
-        if (config.authorizer == ConfigEntity.Authorizer.Dhizuku)
-        // Dhizuku does not support GrantAllRequested permissions
-            params.installFlags = params.installFlags.removeFlag(InstallOption.GrantAllRequestedPermissions.value)
-        // --- Dhizuku End ---
+        // --- Disable not supported stuff ---
+        val shouldGrantAll =
+            config.allowAllRequestedPermissions &&
+                    config.authorizer != ConfigEntity.Authorizer.Dhizuku &&
+                    config.authorizer != ConfigEntity.Authorizer.None &&
+                    pm.isFreshInstallCandidate(packageName)
+
+        if (!shouldGrantAll) {
+            params.installFlags =
+                params.installFlags.removeFlag(InstallOption.GrantAllRequestedPermissions.value)
+        }
+        // --- Disable End ---
 
         // Android System will ignore INSTALL_ALLOW_DOWNGRADE for None ROOT/SYSTEM on Android 15+, no need to disable it here
 
         // --- Set abiOverride ---
+        // Get the architecture of the base APK.
+        // With the updated ApkParser logic, this accurately reflects the actual native libraries in the APK.
         val baseApkArch = entities.firstOrNull { it.name == "base.apk" }?.arch
         Timber.d("Current Arch to install: $baseApkArch")
 
+        // Only set abiOverride if the APK actually contains native libraries.
+        // Pure Java/Kotlin apps (Architecture.NONE) should be left to the system to decide.
         if ((containerType == DataType.APK || containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP) &&
-            baseApkArch != null && baseApkArch != Architecture.NONE
+            baseApkArch != null &&
+            baseApkArch != Architecture.NONE
         ) {
             val abiToOverride = if (baseApkArch != Architecture.UNKNOWN) {
+                // Trust the parser result.
+                // Even for mismatched architectures (e.g., x86 on ARM), passing the actual arch string (e.g., "x86")
+                // allows the system to attempt binary translation (like Houdini) if available.
                 baseApkArch.arch
             } else {
-                "armeabi-v7a" // Retain original fallback for UNKNOWN
+                // Fallback for extremely rare cases where arch cannot be identified but native libs exist.
+                "armeabi-v7a"
             }
+
             Timber.d("Setting abiOverride to $abiToOverride")
             params.abiOverride = abiToOverride
         }

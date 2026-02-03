@@ -190,7 +190,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
                 if (background) {
                     val isModernEligible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
-
+                    val isSameState = lastNotifiedEntity?.let { it::class == progress::class } == true
                     val notification =
                         if (isModernEligible && settings.showLiveActivity) {
                             buildModernNotification(
@@ -198,7 +198,8 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                                 showDialog = settings.showDialog,
                                 preferSystemIcon = settings.preferSystemIcon,
                                 preferDynamicColor = settings.preferDynamicColor,
-                                fakeItemProgress = fakeItemProgress
+                                fakeItemProgress = fakeItemProgress,
+                                isSameState = isSameState
                             )
                         } else {
                             buildLegacyNotification(progress, true, settings.showDialog, settings.preferSystemIcon)
@@ -229,7 +230,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     }
                 } else {
                     Timber.d("[id=${installer.id}] Foreground mode. Cancelling notification.")
-                    setNotificationImmediate(null)
+                    setNotificationThrottled(null, progress)
                 }
             }
         }
@@ -280,6 +281,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             lastProgressClass = null // Reset state class
             lastLogLine = null       // Reset module log
             lastNotifiedEntity = null
+            lastNotificationUpdateTime = 0
             return
         }
 
@@ -381,12 +383,13 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         showDialog: Boolean,
         preferSystemIcon: Boolean = false,
         preferDynamicColor: Boolean = false,
-        fakeItemProgress: Float = 0f
+        fakeItemProgress: Float = 0f,
+        isSameState: Boolean = false
     ): Notification? {
         if (progress is ProgressEntity.Finish || progress is ProgressEntity.Error || progress is ProgressEntity.InstallAnalysedUnsupported)
             return null
 
-        val builder = newModernNotificationBuilder(progress, showDialog, preferSystemIcon, preferDynamicColor, fakeItemProgress)
+        val builder = newModernNotificationBuilder(progress, showDialog, preferSystemIcon, preferDynamicColor, fakeItemProgress, isSameState)
 
         return when (progress) {
             is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
@@ -402,11 +405,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         showDialog: Boolean,
         preferSystemIcon: Boolean = false,
         preferDynamicColor: Boolean = false,
-        fakeItemProgress: Float = 0f
+        fakeItemProgress: Float = 0f,
+        isSameState: Boolean = false
     ): NotificationCompat.Builder {
         val baseBuilder = baseNotificationBuilder
         baseBuilder.clearActions()
-        baseBuilder.setOnlyAlertOnce(true) // 先强制设为静默，下面特定状态再通过 false "破防"
+        baseBuilder.setOnlyAlertOnce(true)
         baseBuilder.setSilent(true)
         baseBuilder.setOngoing(true)
         val contentIntent = when (installer.config.installMode) {
@@ -483,7 +487,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
             }
 
             is ProgressEntity.InstallAnalysedSuccess -> {
-                baseBuilder.setOnlyAlertOnce(false).setSilent(false)
+                baseBuilder.setOnlyAlertOnce(isSameState).setSilent(false)
                 val allEntities = installer.analysisResults.flatMap { it.appEntities }
                 val selectedApps = allEntities.map { it.app }
                 val hasComplexType = allEntities.any {

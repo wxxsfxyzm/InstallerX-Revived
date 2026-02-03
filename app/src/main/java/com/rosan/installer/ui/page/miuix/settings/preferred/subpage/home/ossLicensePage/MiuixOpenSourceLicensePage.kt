@@ -15,9 +15,9 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
+import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -39,13 +39,7 @@ fun MiuixOpenSourceLicensePage(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = hazeState?.let {
-                    Modifier.hazeEffect(hazeState) {
-                        style = hazeStyle
-                        blurRadius = 30.dp
-                        noiseFactor = 0f
-                    }
-                } ?: Modifier,
+                modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
                 color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(id = R.string.open_source_license),
                 scrollBehavior = scrollBehavior,

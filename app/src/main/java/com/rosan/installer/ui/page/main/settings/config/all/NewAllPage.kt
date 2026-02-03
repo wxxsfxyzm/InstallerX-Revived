@@ -46,10 +46,10 @@ import com.rosan.installer.ui.page.main.widget.card.ScopeTipCard
 import com.rosan.installer.ui.page.main.widget.card.ShowDataWidget
 import com.rosan.installer.ui.page.main.widget.setting.DeleteEventCollector
 import com.rosan.installer.ui.theme.getM3TopBarColor
+import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -104,13 +104,7 @@ fun NewAllPage(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
-                modifier = hazeState?.let {
-                    Modifier.hazeEffect(hazeState) {
-                        style = hazeStyle
-                        blurRadius = 30.dp
-                        noiseFactor = 0f
-                    }
-                } ?: Modifier,
+                modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = { Text(text = stringResource(id = R.string.config)) },
                 scrollBehavior = scrollBehavior,
@@ -170,7 +164,6 @@ fun NewAllPage(
                 }
 
                 is AllViewState.Data.Progress.Loaded if viewModel.state.data.configs.isEmpty() -> {
-                    // TODO Add error handling
                     // Since we don't allow removing default profile,
                     // There is no need to handle an empty state.
                 }

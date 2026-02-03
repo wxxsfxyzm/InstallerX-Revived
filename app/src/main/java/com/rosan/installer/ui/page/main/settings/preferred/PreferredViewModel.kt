@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -45,6 +46,7 @@ import com.rosan.installer.util.timber.FileLoggingTree.Companion.LOG_DIR_NAME
 import com.rosan.installer.util.timber.FileLoggingTree.Companion.LOG_SUFFIX
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,16 +60,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
 
 class PreferredViewModel(
+    private val context: Application,
     private val appDataStore: AppDataStore,
     private val updateChecker: UpdateChecker,
     private val appUpdater: AppUpdater
 ) : ViewModel(), KoinComponent {
-    private val context by inject<Context>()
     var state by mutableStateOf(PreferredViewState())
         private set
 
@@ -459,10 +460,19 @@ class PreferredViewModel(
      */
     private fun refreshIgnoreBatteryOptStatus() =
         viewModelScope.launch {
-            // Use .first() to get a single, up-to-date value from the flow.
-            val isIgnoring = getIsIgnoreBatteryOptAsFlow().first()
-            // Emit new value instead of updating state directly
-            isIgnoringBatteryOptFlow.value = isIgnoring
+            // Check once immediately for response speed
+            val firstCheck = getIsIgnoreBatteryOptAsFlow().first()
+            isIgnoringBatteryOptFlow.value = firstCheck
+
+            // Check again to compat for Xiaomi Devices
+            delay(500)
+
+            val secondCheck = getIsIgnoreBatteryOptAsFlow().first()
+            // Only update flow when the status has changed
+            if (firstCheck != secondCheck) {
+                isIgnoringBatteryOptFlow.value = secondCheck
+                Timber.d("Battery optimization status updated after delay: $secondCheck")
+            }
         }
 
     private suspend fun setAdbVerifyEnabled(enabled: Boolean, action: PreferredViewAction) =

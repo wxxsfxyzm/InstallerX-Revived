@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -36,7 +35,6 @@ import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.model.enums.SignatureMatchStatus
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.ui.icons.AppIcons
@@ -46,6 +44,8 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.widget.chip.Chip
+import com.rosan.installer.ui.page.main.widget.chip.WarningChipGroup
+import com.rosan.installer.ui.util.InstallLogicUtils
 
 // Assume pausingIcon is accessible
 
@@ -105,10 +105,10 @@ private fun installPrepareTooManyDialog(
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun installPrepareDialog( // 小写开头
+fun installPrepareDialog(
     installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
-    val context = LocalContext.current
+    LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
     val settings = viewModel.viewSettings
@@ -167,86 +167,53 @@ fun installPrepareDialog( // 小写开头
 
     val errorColor = MaterialTheme.colorScheme.error
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
-
+    val tagDowngrade = stringResource(R.string.tag_downgrade)
     val downgradeWarning = stringResource(R.string.installer_prepare_type_downgrade)
+    val tagSignature = stringResource(R.string.tag_signature)
     val sigMismatchWarning = stringResource(R.string.installer_prepare_signature_mismatch)
     val sigUnknownWarning = stringResource(R.string.installer_prepare_signature_unknown)
+    val tagSdk = stringResource(R.string.tag_sdk)
     val sdkIncompatibleWarning = stringResource(R.string.installer_prepare_sdk_incompatible)
-    val (warningMessages, buttonTextId) = remember(currentPackage, entityToInstall, preInstallAppInfo) {
-        val oldInfo = currentPackage.installedAppInfo // Use currentPackage directly
-        val signatureStatus = currentPackage.signatureMatchStatus
+    val tagArch32 = stringResource(R.string.tag_arch_32)
+    val textArch32 = stringResource(R.string.installer_prepare_arch_32_notice)
+    val tagEmulated = stringResource(R.string.tag_arch_emulated)
+    val textArchMismatch = stringResource(R.string.installer_prepare_arch_mismatch_notice)
 
-        val warnings = mutableListOf<Pair<String, Color>>()
-        var finalButtonTextId = R.string.install // Default button text
+    val installResources = remember(errorColor, tertiaryColor) {
+        InstallWarningResources(
+            tagDowngrade = tagDowngrade,
+            textDowngrade = downgradeWarning,
+            tagSignature = tagSignature,
+            textSigMismatch = sigMismatchWarning,
+            textSigUnknown = sigUnknownWarning,
+            tagSdk = tagSdk,
+            textSdkIncompatible = sdkIncompatibleWarning,
+            tagArch32 = tagArch32,
+            textArch32 = textArch32,
+            tagEmulated = tagEmulated,
+            textArchMismatchFormat = textArchMismatch,
+            errorColor = errorColor,
+            tertiaryColor = tertiaryColor
+        )
+    }
 
-        // Determine the base operation type (upgrade, downgrade, etc.)
-        // This helps set the initial button text for non-error cases.
-        if (entityToInstall != null) {
-            if (oldInfo == null) {
-                finalButtonTextId = R.string.install // New install
-            } else {
-                when {
-                    entityToInstall.versionCode > oldInfo.versionCode -> {
-                        finalButtonTextId = R.string.upgrade
-                    }
-
-                    entityToInstall.versionCode < oldInfo.versionCode -> {
-                        warnings.add(downgradeWarning to errorColor)
-                        finalButtonTextId = R.string.install_anyway
-                    }
-
-                    oldInfo.isArchived -> {
-                        finalButtonTextId = R.string.unarchive
-                    }
-
-                    entityToInstall.versionName == oldInfo.versionName -> {
-                        finalButtonTextId = R.string.reinstall
-                    }
-
-                    else -> {
-                        finalButtonTextId = R.string.install // Sidegrade
-                    }
-                }
-            }
-        }
-
-        // Check for signature status. This has HIGHER priority and can OVERRIDE the button text.
-        // Currently only enable for APK and APKS
-        if (!isSplitUpdateMode && (containerType == DataType.APK || containerType == DataType.APKS))
-            when (signatureStatus) {
-                SignatureMatchStatus.MISMATCH -> {
-                    // Add the signature warning to the top of the list for prominence.
-                    warnings.add(
-                        0, // Add to the beginning
-                        sigMismatchWarning to errorColor
-                    )
-                    // CRITICAL: If signatures mismatch, ALWAYS force the button to "Install Anyway".
-                    finalButtonTextId = R.string.install_anyway
-                }
-
-                SignatureMatchStatus.UNKNOWN_ERROR -> {
-                    warnings.add(
-                        0,
-                        sigUnknownWarning to tertiaryColor
-                    )
-                }
-
-                else -> {
-                    // Signatures match or app not installed, do nothing.
-                }
-            }
-
-        // Final check for SDK incompatibility. This is a blocking error.
-        val newMinSdk = entityToInstall?.minSdk?.toIntOrNull()
-        if (newMinSdk != null && newMinSdk > Build.VERSION.SDK_INT) {
-            warnings.add(
-                0,
-                sdkIncompatibleWarning to errorColor
-            )
-        }
-
-        // Return the final list of warnings and the determined button text ID
-        Pair(warnings, finalButtonTextId)
+    val (warningModels, buttonTextId) = remember(
+        currentPackage,
+        entityToInstall,
+        isSplitUpdateMode,
+        containerType,
+        installResources
+    ) {
+        InstallLogicUtils.analyzeInstallState(
+            currentPackage = currentPackage,
+            entityToInstall = entityToInstall,
+            primaryEntity = primaryEntity,
+            isSplitUpdateMode = isSplitUpdateMode,
+            containerType = containerType,
+            systemArch = RsConfig.currentArchitecture,
+            systemSdkInt = Build.VERSION.SDK_INT,
+            resources = installResources
+        )
     }
 
     return baseParams.copy(
@@ -255,7 +222,12 @@ fun installPrepareDialog( // 小写开头
             DialogParamsType.InstallerPrepareInstall.id
         ) {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-                item { WarningTextBlock(warnings = warningMessages) }
+                item {
+                    WarningChipGroup(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        warnings = warningModels
+                    )
+                }
                 item {
                     AnimatedVisibility(
                         visible = (primaryEntity is AppEntity.ModuleEntity) &&
@@ -334,6 +306,13 @@ fun installPrepareDialog( // 小写开头
                         }
                     }
                 }
+                val isInvalidSplitInstall = currentPackage.installedAppInfo == null &&
+                        entityToInstall == null &&
+                        selectedEntities.any { it is AppEntity.SplitEntity }
+                if (isInvalidSplitInstall)
+                    item {
+                        WarningTextBlock(listOf(Pair(stringResource(R.string.installer_splits_invalid_tip), MaterialTheme.colorScheme.error)))
+                    }
             }
         },
         buttons = dialogButtons(

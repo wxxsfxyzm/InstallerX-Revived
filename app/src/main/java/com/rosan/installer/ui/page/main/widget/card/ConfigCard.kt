@@ -1,9 +1,7 @@
 package com.rosan.installer.ui.page.main.widget.card
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,7 +15,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -29,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
@@ -37,6 +33,7 @@ import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
+import com.rosan.installer.ui.page.main.widget.chip.CapsuleTag
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 
@@ -54,7 +51,7 @@ fun ShowDataWidget(
     LazyVerticalStaggeredGrid(
         modifier = Modifier
             .fillMaxSize()
-            .then(if (hazeState != null) Modifier.hazeSource(hazeState) else Modifier),
+            .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
         columns = StaggeredGridCells.Adaptive(350.dp),
         contentPadding = contentPadding,
         verticalItemSpacing = 16.dp,
@@ -71,7 +68,6 @@ fun ShowDataWidget(
     }
 }
 
-// ... DataItemWidget 保持不变 ...
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun DataItemWidget(
@@ -99,18 +95,10 @@ private fun DataItemWidget(
                     )
                     if (isDefault) {
                         Spacer(modifier = Modifier.size(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50)) // 50%的圆角使其成为胶囊形状
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.config_global_default),
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.labelMediumEmphasized
-                            )
-                        }
+                        CapsuleTag(
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            text = stringResource(R.string.config_global_default),
+                        )
                     }
                 }
                 if (entity.description.isNotEmpty()) {
