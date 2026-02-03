@@ -247,13 +247,13 @@ jobs:
             ${{ steps.pack_online_module.outputs.online_module_zip }}
             ${{ steps.pack_offline_module.outputs.offline_module_zip }}
 
-      # - name: Upload to Telegram
-      #   env:
-      #     API_ID: ${{ secrets.API_ID }}
-      #     API_HASH: ${{ secrets.API_HASH }}
-      #     BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-      #     CHAT_ID: ${{ secrets.CHAT_ID }}
-      #     BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
-      #   run: |
-      #     pip3 install telethon
-      #     python3 .github/bot.py "${{ steps.rename_apks.outputs.online_apk }}" "${{ steps.rename_apks.outputs.offline_apk }}" "${{ steps.rename_apks.outputs.package_installer_apk }}"
+      - name: Upload to Telegram
+        env:
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
+        run: |
+          pip3 install telethon
+          python3 .github/bot.py "${{ steps.rename_apks.outputs.online_apk }}" "${{ steps.rename_apks.outputs.offline_apk }}" "${{ steps.rename_apks.outputs.package_installer_apk }}"
