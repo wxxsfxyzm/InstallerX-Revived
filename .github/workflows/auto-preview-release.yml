@@ -112,12 +112,10 @@ jobs:
           echo "package_installer_online_apk=${NEW_ONLINE_PACKAGE_INSTALLER_APK_PATH}" >> $GITHUB_OUTPUT
           echo "package_installer_offline_apk=${NEW_OFFLINE_PACKAGE_INSTALLER_APK_PATH}" >> $GITHUB_OUTPUT
 
-      - name: Clone Module Repository
+      - name: Checkout with Submodules
         uses: actions/checkout@v5
         with:
-          repository: furrybluelan/InstallerX-Revived_Module
-          path: module
-          ref: main
+          submodules: recursive  # 自动处理了原本需要手动 clone 的 InstallerX-Revived_Module
           fetch-depth: 0
 
       - name: Replace OnlineAPK in module and pack Magisk module

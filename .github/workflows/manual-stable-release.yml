@@ -89,12 +89,10 @@ jobs:
             mv "$ORIGINAL_APK" "$NEW_APK_PATH"
           done
 
-      - name: Clone Module Repository
+      - name: Checkout with Submodules
         uses: actions/checkout@v5
         with:
-          repository: furrybluelan/InstallerX-Revived_Module
-          path: module
-          ref: main
+          submodules: recursive  # 自动处理了原本需要手动 clone 的 InstallerX-Revived_Module
           fetch-depth: 0
       
       - name: Replace OnlineAPK in module and pack Magisk module
