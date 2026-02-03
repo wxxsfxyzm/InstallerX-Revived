@@ -1,0 +1,3 @@
+[submodule "module"]
+	path = module
+	url = git@github.com:furrybluelan/InstallerX-Revived_Module.git
