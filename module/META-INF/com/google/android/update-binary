@@ -1,0 +1,164 @@
+#!/sbin/sh
+
+####################################################
+#
+# Magisk 模块安装脚本模板
+# by topjohnwu
+# 20.3+版本适配汉化: Pinkdoge
+#
+#####################################################
+
+umask 022
+
+# 全局变量
+TMPDIR=/dev/tmp
+PERSISTDIR=/sbin/.magisk/mirror/persist
+
+rm -rf $TMPDIR 2>/dev/null
+mkdir -p $TMPDIR
+
+# 在加载 util_functions 前 echo
+ui_print() { echo "$1"; }
+
+require_new_magisk() {
+  ui_print "*******************************"
+  ui_print " 请安装 Magisk v20.3+! "
+  ui_print "*******************************"
+  exit 1
+}
+
+is_legacy_script() {
+  unzip -l "$ZIPFILE" install.sh | grep -q install.sh
+  return $?
+}
+
+print_modname() {
+  local len
+  len=`echo -n $MODNAME | wc -c`
+  len=$((len + 2))
+  local pounds=`printf "%${len}s" | tr ' ' '*'`
+  ui_print "$pounds"
+  ui_print " $MODNAME "
+  ui_print "$pounds"
+  ui_print "******************************"
+  ui_print " 由 Magisk 提供技术支持(在安装模块时打印作者信息) "
+  ui_print "******************************"
+}
+
+##############
+# 环境设置
+##############
+
+OUTFD=$2
+ZIPFILE=$3
+
+mount /data 2>/dev/null
+
+# 加载公用函数
+[ -f /data/adb/magisk/util_functions.sh ] || require_new_magisk
+. /data/adb/magisk/util_functions.sh
+[ $MAGISK_VER_CODE -gt 18100 ] || require_new_magisk
+
+# 准备卡刷 zip 包
+setup_flashable
+
+# 挂载分区
+mount_partitions
+
+# 检测版本和架构
+api_level_arch_detect
+
+# 安装 busybox 和二进制文件
+$BOOTMODE && boot_actions || recovery_actions
+
+##############
+# 准备
+##############
+
+# 提取公共文件
+unzip -o "$ZIPFILE" module.prop -d $TMPDIR >&2
+[ ! -f $TMPDIR/module.prop ] && abort "! 从 zip 中提取文件失败!"
+
+$BOOTMODE && MODDIRNAME=modules_update || MODDIRNAME=modules
+MODULEROOT=$NVBASE/$MODDIRNAME
+MODID=`grep_prop id $TMPDIR/module.prop`
+MODPATH=$MODULEROOT/$MODID
+MODNAME=`grep_prop name $TMPDIR/module.prop`
+
+# 创建模块路径
+rm -rf $MODPATH 2>/dev/null
+mkdir -p $MODPATH
+
+##########
+# 安装
+##########
+
+if is_legacy_script; then
+  unzip -oj "$ZIPFILE" module.prop install.sh uninstall.sh 'common/*' -d $TMPDIR >&2
+
+  # 加载安装脚本
+  . $TMPDIR/install.sh
+
+  # 打印模块名称
+  print_modname
+  on_install
+
+  # 加载自定义卸载脚本
+  [ -f $TMPDIR/uninstall.sh ] && cp -af $TMPDIR/uninstall.sh $MODPATH/uninstall.sh
+
+  # 取消挂载
+  $SKIPMOUNT && touch $MODPATH/skip_mount
+
+  # prop 文件
+  $PROPFILE && cp -af $TMPDIR/system.prop $MODPATH/system.prop
+
+  # 模块信息
+  cp -af $TMPDIR/module.prop $MODPATH/module.prop
+
+  # post-fs-data 模式脚本
+  $POSTFSDATA && cp -af $TMPDIR/post-fs-data.sh $MODPATH/post-fs-data.sh
+
+  # service 模式脚本
+  $LATESTARTSERVICE && cp -af $TMPDIR/service.sh $MODPATH/service.sh
+
+  ui_print "- 正在设置权限"
+  set_permissions
+else
+  print_modname
+
+  unzip -o "$ZIPFILE" customize.sh -d $MODPATH >&2
+
+  if ! grep -q '^SKIPUNZIP=1$' $MODPATH/customize.sh 2>/dev/null; then
+    ui_print "- 正在提取模块文件"
+    unzip -o "$ZIPFILE" -x 'META-INF/*' -d $MODPATH >&2
+
+    # 默认权限
+    set_perm_recursive $MODPATH 0 0 0755 0644
+  fi
+
+  # 加载 customization 脚本
+  [ -f $MODPATH/customize.sh ] && . $MODPATH/customize.sh
+fi
+
+# 处理 replace 文件夹
+for TARGET in $REPLACE; do
+  ui_print "- 正在删除目标文件: $TARGET"
+  mktouch $MODPATH$TARGET/.replace
+done
+
+if $BOOTMODE; then
+  # Update info for Magisk Manager
+  mktouch $NVBASE/modules/$MODID/update
+  cp -af $MODPATH/module.prop $NVBASE/modules/$MODID/module.prop
+fi
+
+##############
+# 结束
+##############
+
+cd /
+$BOOTMODE || recovery_cleanup
+rm -rf $TMPDIR
+
+ui_print "- 完成"
+exit 0
