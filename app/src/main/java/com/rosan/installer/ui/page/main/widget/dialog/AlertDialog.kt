@@ -337,3 +337,33 @@ fun UninstallPackageDialog(
         }
     )
 }
+
+/**
+ * A dialog to warn the user about unstable blur effects on Android 11 and below.
+ */
+@Composable
+fun BlurWarningDialog(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    if (show) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(text = stringResource(R.string.warning)) },
+            text = {
+                Text(text = stringResource(R.string.theme_settings_use_blur_warning))
+            },
+            confirmButton = {
+                TextButton(onClick = onConfirm) {
+                    Text(text = stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+}

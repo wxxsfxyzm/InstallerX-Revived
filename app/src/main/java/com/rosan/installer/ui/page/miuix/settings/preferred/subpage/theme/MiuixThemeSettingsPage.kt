@@ -35,6 +35,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.MiuixBlurWarningDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixHideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeEngineWidget
@@ -63,6 +64,7 @@ fun MiuixThemeSettingsPage(
     val hazeState = if (state.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMiuixHazeStyle()
     val showHideLauncherIconDialog = remember { mutableStateOf(false) }
+    val showBlurWarningDialog = remember { mutableStateOf(false) }
 
     MiuixHideLauncherIconWarningDialog(
         showState = showHideLauncherIconDialog,
@@ -70,6 +72,15 @@ fun MiuixThemeSettingsPage(
         onConfirm = {
             showHideLauncherIconDialog.value = false
             viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(false))
+        }
+    )
+
+    MiuixBlurWarningDialog(
+        showState = showBlurWarningDialog,
+        onDismiss = { showBlurWarningDialog.value = false },
+        onConfirm = {
+            showBlurWarningDialog.value = false
+            viewModel.dispatch(PreferredViewAction.SetUseBlur(true))
         }
     )
 
@@ -129,7 +140,13 @@ fun MiuixThemeSettingsPage(
                         title = stringResource(R.string.theme_settings_use_blur),
                         description = stringResource(R.string.theme_settings_use_blur_desc),
                         checked = state.useBlur,
-                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetUseBlur(it)) }
+                        onCheckedChange = { isChecked ->
+                            if (isChecked && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+                                showBlurWarningDialog.value = true
+                            } else {
+                                viewModel.dispatch(PreferredViewAction.SetUseBlur(isChecked))
+                            }
+                        }
                     )
                     MiuixSwitchWidget(
                         title = stringResource(R.string.theme_settings_miuix_custom_colors),

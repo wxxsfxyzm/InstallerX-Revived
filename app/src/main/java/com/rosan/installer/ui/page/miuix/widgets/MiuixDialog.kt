@@ -514,3 +514,46 @@ fun MiuixUninstallPackageDialog(
         }
     )
 }
+
+/**
+ * A miuix-style dialog to warn the user about unstable blur effects on Android 11 and below.
+ */
+@Composable
+fun MiuixBlurWarningDialog(
+    showState: MutableState<Boolean>,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    SuperDialog(
+        show = showState,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.warning),
+        content = {
+            Column {
+                Text(stringResource(R.string.theme_settings_use_blur_warning))
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss,
+                        text = stringResource(R.string.cancel)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onConfirm,
+                        text = stringResource(R.string.confirm),
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
+                }
+            }
+        }
+    )
+}

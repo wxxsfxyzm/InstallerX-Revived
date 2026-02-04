@@ -65,6 +65,7 @@
     <string name="theme_settings_use_expressive_ui_desc">Use the new M3 Expressive style</string>
     <string name="theme_settings_use_blur">Enable Blur</string>
     <string name="theme_settings_use_blur_desc">Enable blur for the app</string>
+    <string name="theme_settings_use_blur_warning">The blur effect may be unstable and cause unexpected issues on Android 11 and below. You may need to clear app data if problems occur. Do you want to continue?</string>
     <string name="theme_settings_google_ui_style">Google UI style</string>
     <string name="theme_settings_theme_mode">Theme Mode</string>
     <string name="theme_settings_theme_mode_desc">Select theme mode</string>

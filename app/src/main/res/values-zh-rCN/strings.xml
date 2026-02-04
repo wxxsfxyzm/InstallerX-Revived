@@ -61,6 +61,7 @@
     <string name="theme_settings_use_expressive_ui_desc">使用全新 Material 3 Expressive 设计风格</string>
     <string name="theme_settings_use_blur">启用模糊</string>
     <string name="theme_settings_use_blur_desc">为应用启用模糊效果</string>
+    <string name="theme_settings_use_blur_warning">在 Android 11 及以下系统中，模糊效果不稳定并可能导致异常。如果出现问题，可能需要清除应用数据。是否继续启用？</string>
     <string name="theme_settings_google_ui_style">Google UI 风格</string>
     <string name="theme_settings_theme_mode">主题模式</string>
     <string name="theme_settings_theme_mode_desc">选择主题模式</string>
