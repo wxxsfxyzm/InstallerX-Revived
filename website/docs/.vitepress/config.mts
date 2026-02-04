@@ -55,7 +55,7 @@ export default defineConfig({
     ['link', { rel: 'sitemap', href: '/InstallerX-Revived/sitemap.xml' }]
   ],
   base: '/InstallerX-Revived/',
-  title: "InstallerX Revived - Modern Android Package Installer",
+  title: "InstallerX Revived",
   description: "Universal Android APK installer supporting APK, APKS, APKM, XAPK formats. Features Material 3 design, Shizuku support, and advanced installation options.",
 
   sitemap: {
@@ -198,18 +198,18 @@ export default defineConfig({
             text: '高级功能',
             items: [
               { text: '用户配置文件', link: '/zh/guide/profiles' },
-              { text: '应用设置', link: '/zh/guide/app-settings' },
-              { text: '实验室', link: '/zh/guide/laboratory' },
-              { text: '系统集成', link: '/zh/guide/system-integration' }
+              // { text: '应用设置', link: '/zh/guide/app-settings' },
+              // { text: '实验室', link: '/zh/guide/laboratory' },
+              // { text: '系统集成', link: '/zh/guide/system-integration' }
             ]
           },
-          {
-            text: '安装选项',
-            items: [
-              { text: '参数设定', link: '/zh/guide/install-options' },
-              { text: '异常处理', link: '/zh/guide/exceptions' }
-            ]
-          },
+          // {
+          //   text: '安装选项',
+          //   items: [
+          //     { text: '参数设定', link: '/zh/guide/install-options' },
+          //     { text: '异常处理', link: '/zh/guide/exceptions' }
+          //   ]
+          // },
           {
             text: '支持',
             items: [
