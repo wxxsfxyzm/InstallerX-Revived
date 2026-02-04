@@ -55,7 +55,7 @@ export default defineConfig({
     ['link', { rel: 'sitemap', href: '/InstallerX-Revived/sitemap.xml' }]
   ],
   base: '/InstallerX-Revived/',
-  title: "InstallerX Revived - Modern Android Package Installer",
+  title: "InstallerX Revived",
   description: "Universal Android APK installer supporting APK, APKS, APKM, XAPK formats. Features Material 3 design, Shizuku support, and advanced installation options.",
 
   sitemap: {
