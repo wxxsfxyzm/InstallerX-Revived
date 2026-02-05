@@ -873,7 +873,11 @@ class PreferredViewModel(
 
                 val effectiveSeedColor = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                     if (!wallpaperColors.isNullOrEmpty()) {
-                        Color(wallpaperColors[0])
+                        if (wallpaperColors.contains(manualSeedColor.toArgb())) {
+                            manualSeedColor
+                        } else {
+                            Color(wallpaperColors[0])
+                        }
                     } else {
                         manualSeedColor
                     }

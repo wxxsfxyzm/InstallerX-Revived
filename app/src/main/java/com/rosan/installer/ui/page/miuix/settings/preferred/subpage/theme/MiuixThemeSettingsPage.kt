@@ -222,9 +222,8 @@ fun MiuixThemeSettingsPage(
                                                         currentStyle = state.paletteStyle,
                                                         textStyle = MiuixTheme.textStyles.footnote1,
                                                         textColor = MiuixTheme.colorScheme.onSurface,
-                                                        isSelected = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-                                                            state.seedColor == rawColor.color
-                                                        else !state.useDynamicColor && state.seedColor == rawColor.color,
+                                                        isSelected = state.seedColor == rawColor.color &&
+                                                                !(state.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
                                                     ) {
                                                         viewModel.dispatch(
                                                             PreferredViewAction.SetSeedColor(

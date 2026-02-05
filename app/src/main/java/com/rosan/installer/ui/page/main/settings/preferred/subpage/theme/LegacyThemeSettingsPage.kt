@@ -254,9 +254,8 @@ fun LegacyThemeSettingsPage(
                                                     currentStyle = state.paletteStyle,
                                                     textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
                                                     textColor = MaterialTheme.colorScheme.onSurface,
-                                                    isSelected = if (state.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-                                                        state.seedColor == rawColor.color
-                                                    else !state.useDynamicColor && state.seedColor == rawColor.color,
+                                                    isSelected = state.seedColor == rawColor.color &&
+                                                            !(state.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
                                                 ) {
                                                     viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
                                                 }
