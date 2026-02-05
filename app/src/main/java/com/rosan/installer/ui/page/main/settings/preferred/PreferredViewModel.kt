@@ -871,18 +871,16 @@ class PreferredViewModel(
                 val useBlur = values[idx++] as Boolean
                 val updateResult = values[idx] as UpdateChecker.CheckResult?
 
-                val effectiveSeedColor = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                val effectiveSeedColor: Color = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                     if (!wallpaperColors.isNullOrEmpty()) {
                         if (wallpaperColors.contains(manualSeedColor.toArgb())) {
                             manualSeedColor
-                        } else {
-                            Color(wallpaperColors[0])
-                        }
-                    } else {
-                        manualSeedColor
-                    }
+                        } else Color(wallpaperColors[0])
+                    } else manualSeedColor
                 } else {
-                    manualSeedColor
+                    if (PresetColors.any { it.color == manualSeedColor }) {
+                        manualSeedColor
+                    } else PresetColors[0].color
                 }
 
                 val availableColors: List<RawColor> = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
