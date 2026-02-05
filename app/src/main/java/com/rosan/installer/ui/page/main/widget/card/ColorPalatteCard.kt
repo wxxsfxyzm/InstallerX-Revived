@@ -112,13 +112,16 @@ fun ColorSwatchPreview(
                 }
             }
         }
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = rawColor.getDisplayName(),
-            style = textStyle,
-            color = textColor,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+
+        if (rawColor.getDisplayName() !== rawColor.key) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = rawColor.getDisplayName(),
+                style = textStyle,
+                color = textColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
