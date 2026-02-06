@@ -9,6 +9,11 @@
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Ignore AndroidAppProcess updates",
+      "matchPackageNames": ["com.github.wxxsfxyzm:AndroidAppProcess"],
+      "enabled": false
     }
   ],
   "ignoreUnstable": true
