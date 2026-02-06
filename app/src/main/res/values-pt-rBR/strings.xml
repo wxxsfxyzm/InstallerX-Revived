@@ -638,7 +638,7 @@
     <string name="uninstall_progress_text">Desinstalando...</string>
     <string name="uninstall_enter_package_name">Digite o nome do pacote para desinstalar</string>
     <string name="performance">Desempenho</string>
-    <string name="installer_notification_tap_to_disable">Notificação de serviço em primeiro plano, toque para desativar.</string>
+    <string name="installer_notification_tap_to_disable">Notificação de serviço em primeiro plano, toque para desativar</string>
     <string name="lab_module_flashing_show_art">Exibir arte ASCII</string>
     <string name="lab_module_flashing_show_art_desc">Exibir arte ASCII do InstallerX quando a instalação começar</string>
     <string name="installer_settings_require_biometric_auth">Exigir Autenticação Biométrica para Instalar</string>
@@ -664,4 +664,23 @@
     <string name="config_auto_delete_zip_desc">Além de excluir o pacote de instalação, exclua também o arquivo compactado que contém o pacote de instalação.</string>
     <string name="open_lsposed">Abrir o LSPosed</string>
     <string name="exception_zip_exception">Não foi possível abrir o zip como arquivo</string>
+    <string name="debug">Depuração</string>
+    <string name="save_logs">Salvar Registros</string>
+    <string name="save_logs_desc">Salvar log em arquivo local para fins de depuração</string>
+    <string name="export_logs">Exportar Registros</string>
+    <string name="export_logs_desc">Exportar registros do app</string>
+    <string name="theme_settings_use_blur">Ativar Desfoque</string>
+    <string name="theme_settings_use_blur_desc">Ativar desfoque para o app</string>
+    <string name="tag_downgrade">Fazer Downgrade</string>
+    <string name="tag_signature">Assinatura</string>
+    <string name="tag_arch_32">32-Bit</string>
+    <string name="tag_arch_emulated">Arquitetura Emulada</string>
+    <string name="installer_prepare_arch_32_notice">Este app será executado no modo de 32 bits. Isso pode aumentar o uso de memória ou reduzir o desempenho em dispositivos de 64 bits</string>
+    <string name="installer_prepare_arch_mismatch_notice">A arquitetura do app (%1$s) não é compatível com o seu dispositivo (%2$s). Ele será executado por meio de tradução. A instalação ou execução não é garantida, e podem ocorrer problemas como superaquecimento ou falhas</string>
+    <string name="installer_channel_name_desc">Mostra o estágio da instalação</string>
+    <string name="installer_progress_channel_name_desc">Mostra o processo de instalação</string>
+    <string name="installer_notification_desc">Notificação de serviço em segundo plano, inútil</string>
+    <string name="installer_live_channel_name_desc">Mostrar o progresso da instalação como atualização em tempo real</string>
+    <string name="installer_live_channel_short_text_pending_install">Pendente</string>
+    <string name="theme_settings_use_blur_warning">O efeito de desfoque pode ser instável e causar problemas inesperados no Android 11 e versões anteriores. Pode ser necessário limpar os dados do app se ocorrerem problemas. Deseja continuar?</string>
 </resources>

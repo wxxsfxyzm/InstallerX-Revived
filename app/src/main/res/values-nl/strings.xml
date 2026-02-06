@@ -630,7 +630,7 @@
     <string name="uninstaller_settings_desc">Verander de globale instellingen van de verwijderaar</string>
     <string name="installer_settings_auto_clear_time_never_desc">Nooit de melding van succesvolle installatie verwijderen</string>
     <string name="installer_settings_auto_clear_time_seconds_format_desc">Verwijder melding van succesvolle installatie na %d seconden</string>
-    <string name="installer_notification_tap_to_disable">Voorgrondservicemelding, klik om uit te schakelen.</string>
+    <string name="installer_notification_tap_to_disable">Voorgrondservicemelding, klik om uit te schakelen</string>
     <string name="uninstall_authorizer_tip">De verwijderaar gebruikt altijd de autorisatiegever die is ingesteld in het standaardprofiel</string>
     <string name="uninstall_all_users_disabled">Verwijdering voor alle gebruikers was uitgeschakeld</string>
     <string name="uninstall_system_app_disabled">Het verwijderen van systeemapps was uitgeschakeld</string>
@@ -664,4 +664,22 @@
     <string name="config_auto_delete_zip_desc">Naast het verwijderen van het installatiepakket, ook het gecomprimeerde bestand waarin het installatiepakket zit verwijderen.</string>
     <string name="open_lsposed">LSPosed openen</string>
     <string name="exception_zip_exception">Openen van zip als bestand mislukt</string>
+    <string name="debug">Foutopsporing</string>
+    <string name="save_logs">Logboek opslaan</string>
+    <string name="save_logs_desc">Logboek opslaan naar een lokaal bestand voor debuggen</string>
+    <string name="export_logs">Logboeken exporteren</string>
+    <string name="export_logs_desc">Logboeken exporteren van de app</string>
+    <string name="theme_settings_use_blur">Vervaging inschakelen</string>
+    <string name="theme_settings_use_blur_desc">Vervaging inschakelen voor de app</string>
+    <string name="installer_channel_name_desc">Laat de installatiestaat zien</string>
+    <string name="installer_progress_channel_name_desc">Laat het installatieproces zien</string>
+    <string name="installer_notification_desc">Achtergrondservicemelding, nutteloos</string>
+    <string name="installer_live_channel_name_desc">Laat de installatievooruitgang zien als een live update</string>
+    <string name="installer_live_channel_short_text_pending_install">In behandeling</string>
+    <string name="tag_downgrade">Downgraden</string>
+    <string name="tag_signature">Ondertekening</string>
+    <string name="tag_arch_32">32-Bit</string>
+    <string name="tag_arch_emulated">Geëmuleerde architectuur</string>
+    <string name="installer_prepare_arch_32_notice">Deze app zal uitgevoerd worden in 32-bit modus. Dit kan geheugengebruik verhogen of prestaties verminderen op 64-bit apparaten</string>
+    <string name="installer_prepare_arch_mismatch_notice">De apparchitectuur (%1$s) komt niet overeen met die van je apparaat (%2$s). Het zal daarom uitgevoerd worden via een vertaallaag. Installeren of uitvoeren van de app is niet gegarandeerd en problemen zoals oververhitten en crashes kunnen voorkomen</string>
 </resources>
