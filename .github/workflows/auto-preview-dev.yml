@@ -107,7 +107,7 @@ jobs:
         run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease -PVERSION_NAME="${{ env.NEW_VERSION }}"
 
       - name: Upload APK as Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: dev-apk-${{ steps.commit_sha.outputs.SHORT_SHA }}
           path: |
