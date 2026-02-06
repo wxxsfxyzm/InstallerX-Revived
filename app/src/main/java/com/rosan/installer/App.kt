@@ -68,7 +68,7 @@ class App : Application() {
         // 2. File Logging
         // Controlled dynamically by User Preference (DataStore)
         appScope.launch {
-            appDataStore.getBoolean(AppDataStore.ENABLE_FILE_LOGGING).collectLatest { enabled ->
+            appDataStore.getBoolean(AppDataStore.ENABLE_FILE_LOGGING, true).collectLatest { enabled ->
                 updateFileLoggingState(enabled)
             }
         }
