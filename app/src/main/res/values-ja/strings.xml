@@ -659,4 +659,6 @@
     <string name="lab_http_profile_desc">セキュリティのため、平文の HTTP アクセスを制限します</string>
     <string name="lab_http_profile_secure">安全な接続のみ (HTTPS)</string>
     <string name="lab_http_profile_local">ローカルクリアテキストを許可 (ローカルホスト)</string>
+    <string name="tag_downgrade">ダウングレード</string>
+    <string name="tag_arch_32">32ビット</string>
 </resources>
