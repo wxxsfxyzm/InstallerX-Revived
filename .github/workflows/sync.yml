@@ -1,0 +1,47 @@
+name: Scheduled Repo Sync
+
+on:
+  schedule:
+    - cron: '0 0 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  sync_and_check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      has_updates: ${{ steps.check_step.outputs.has_updates }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git Bot
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync and Detect Updates
+        id: check_step
+        run: |
+          git remote add upstream https://github.com/wxxsfxyzm/InstallerX-Revived.git
+          git fetch upstream
+          
+          COUNT=$(git rev-list --count HEAD..upstream/main)
+          
+          if [ "$COUNT" -gt 0 ]; then
+            git checkout main
+            git merge upstream/main --no-edit --allow-unrelated-histories
+            git push origin main
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+          fi
+  trigger-build:
+    needs: sync_and_check
+    if: needs.sync_and_check.outputs.has_updates == 'true'
+    uses: ./.github/workflows/staging.yml
+    secrets: inherit

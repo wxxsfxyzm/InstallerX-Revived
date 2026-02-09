@@ -1,0 +1,52 @@
+name: Magisk Module Build
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build_magisk_module:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Export Configuration
+        run: |
+          echo "${{ secrets.PASSWORD }}" | base64 -d > keystore.properties
+          echo "${{ secrets.KEY }}" | base64 -d > TanakaLun.keystore
+          chmod 777 keystore.properties TanakaLun.keystore
+
+      - name: Build and Package
+        id: build_assets
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleOnlinePreviewRelease -PVERSION_NAME="${{ env.NEW_VERSION }}" -PAPP_ID="com.android.packageinstaller"
+          APK_PATH=$(find app/build/outputs/apk/onlinePreview/release -name "*.apk" | head -n 1)
+          # ZIP_PATH="InstallerX-Revived-Online.zip"
+          
+          echo "apk=$APK_PATH" >> $GITHUB_OUTPUT
+          # echo "zip=$ZIP_PATH" >> $GITHUB_OUTPUT
+
+      - name: Send to Telegram
+        run: |
+          export API_ID=$(grep 'API_ID' keystore.properties | cut -d'=' -f2)
+          export API_HASH=$(grep 'API_HASH' keystore.properties | cut -d'=' -f2)
+          export BOT_TOKEN=$(grep 'BOT_TOKEN' keystore.properties | cut -d'=' -f2)
+          export CHAT_ID=$(grep 'CHAT_ID' keystore.properties | cut -d'=' -f2)
+          export MESSAGE_THREAD_ID=$(grep 'MESSAGE_THREAD_ID' keystore.properties | cut -d'=' -f2)
+          
+          python3 .github/module_bot.py \
+            "${{ steps.build_assets.outputs.apk }}"
