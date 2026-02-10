@@ -1,9 +1,14 @@
 package com.rosan.installer.util.timber
 
 import android.content.Context
-import android.os.Handler
-import android.os.HandlerThread
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
@@ -11,92 +16,89 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * A Timber Tree that logs to a file in the background.
- * Optimized to maintain two most recent log files within a 24-hour window.
+ * A Timber Tree that logs to files asynchronously using Coroutines and Channels.
+ * Combines high performance (non-blocking) with robust file rotation logic.
  */
 @Suppress("LogNotTimber")
-class FileLoggingTree(context: Context) : Timber.DebugTree() {
+class FileLoggingTree(
+    private val context: Context
+) : Timber.DebugTree() {
 
-    private val logDir: File = File(context.cacheDir, LOG_DIR_NAME)
-    private val backgroundHandler: Handler
-    private var currentLogFile: File? = null
-    private val handlerThread: HandlerThread
+    companion object {
+        const val LOG_DIR_NAME = "logs"
+        const val LOG_SUFFIX = ".log"
+        private const val MAX_LOG_FILES = 2
+        private const val MAX_FILE_SIZE = 4 * 1024 * 1024L
+        private const val MAX_LOG_AGE_MS = 24 * 60 * 60 * 1000L
 
-    private val fileNameDateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
-    private val entryDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
-
-    init {
-        if (!logDir.exists()) {
-            logDir.mkdirs()
-        }
-
-        handlerThread = HandlerThread("AndroidFileLogger.Thread")
-        handlerThread.start()
-        backgroundHandler = Handler(handlerThread.looper)
-
-        backgroundHandler.post {
-            // Attempt to resume the most recent file regardless of the calendar day
-            initializeFromExistingFile()
-            ensureLogFileReady()
-            cleanOldLogFiles()
-        }
+        // 调试用的 TAG
+        private const val DEBUG_TAG = "FileLoggingTree_Internal"
     }
 
-    /**
-     * Finds the most recent log file and checks if it's still valid for writing.
-     * It ignores the "today" constraint to support late-night operations.
-     */
-    private fun initializeFromExistingFile() {
-        try {
-            val lastFile = logDir.listFiles { _, name -> name.endsWith(LOG_SUFFIX) }
-                ?.maxByOrNull { it.lastModified() }
+    private val logDir: File by lazy { File(context.filesDir, LOG_DIR_NAME) }
+    private val entryDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
+    private val fileNameDateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
+    private val logChannel = Channel<String>(Channel.UNLIMITED)
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var currentLogFile: File? = null
 
-            if (lastFile != null && lastFile.exists()) {
-                val lastModifiedTime = lastFile.lastModified()
-                val currentTime = System.currentTimeMillis()
+    init {
+        Log.v(DEBUG_TAG, "🚀 FileLoggingTree 初始化启动！")
 
-                // Check if the file was modified within the last 24 hours and is under the size limit
-                if (currentTime - lastModifiedTime < MAX_LOG_AGE_MS && lastFile.length() < MAX_FILE_SIZE) {
-                    currentLogFile = lastFile
-                }
+        if (!logDir.exists()) {
+            val created = logDir.mkdirs()
+            Log.v(DEBUG_TAG, "📁 创建日志目录: ${logDir.absolutePath} -> 结果: $created")
+        } else {
+            Log.v(DEBUG_TAG, "📁 日志目录已存在: ${logDir.absolutePath}")
+        }
+
+        scope.launch {
+            Log.v(DEBUG_TAG, "🧵 消费者协程启动，准备写入文件...")
+            initializeFromExistingFile()
+
+            logChannel.consumeEach { logContent ->
+                // 这里是真正的写入操作
+                writeToFile(logContent)
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize from existing file", e)
         }
     }
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        backgroundHandler.post {
-            doLog(priority, tag, message, t)
+        // 1. 收到 Timber 的日志
+        Log.v(DEBUG_TAG, "📥 收到 Timber 日志: $message")
+
+        if (priority < Log.DEBUG) {
+            Log.v(DEBUG_TAG, "🚫 优先级太低，忽略")
+            return
         }
+
+        val timestamp = getCurrentTimestamp()
+        val priorityStr = priorityToString(priority)
+        val finalTag = tag ?: "Unknown"
+        var logLine = "$timestamp $priorityStr/$finalTag: $message\n"
+        if (t != null) {
+            logLine += Log.getStackTraceString(t) + "\n"
+        }
+
+        // 2. 发送到通道
+        val result = logChannel.trySend(logLine)
+        Log.v(DEBUG_TAG, "📤 发送至写入通道结果: ${result.isSuccess}")
     }
 
-    private fun doLog(priority: Int, tag: String?, message: String, t: Throwable?) {
+    private fun writeToFile(content: String) {
         try {
             ensureLogFileReady()
-            val file = currentLogFile ?: return
-
-            val timestamp = entryDateFormat.format(Date())
-            val priorityStr = priorityToString(priority)
-            val logLine = "$timestamp $priorityStr/${tag ?: "Unknown"}: $message\n"
-
-            file.appendText(logLine)
-            if (t != null) {
-                file.appendText(Log.getStackTraceString(t) + "\n")
-            }
+            currentLogFile?.appendText(content)
+            // 调试：告诉我们写进去了
+            Log.v(DEBUG_TAG, "💾 [写入成功] >> ${currentLogFile?.name}")
         } catch (e: Exception) {
-            Log.e(TAG, "Error writing to log file", e)
+            Log.e(DEBUG_TAG, "❌ [写入失败]", e)
         }
     }
 
-    /**
-     * Ensures a log file is available.
-     * Creates a new one if the current file is missing, older than 24h, or too large.
-     */
     private fun ensureLogFileReady() {
         val now = System.currentTimeMillis()
-        val file = currentLogFile
-
+        var file = currentLogFile
         var needNewFile = false
 
         if (!logDir.exists()) {
@@ -106,50 +108,86 @@ class FileLoggingTree(context: Context) : Timber.DebugTree() {
 
         if (file == null || !file.exists()) {
             needNewFile = true
+            Log.v(DEBUG_TAG, "📝 需要新文件：当前文件不存在")
         } else {
-            val lastModified = file.lastModified()
-            // Check if the file has aged more than 24 hours or exceeded size limit
-            if (now - lastModified > MAX_LOG_AGE_MS) {
+            if (file.length() > MAX_FILE_SIZE) {
                 needNewFile = true
-            } else if (file.length() > MAX_FILE_SIZE) {
+                Log.v(DEBUG_TAG, "📝 需要新文件：当前文件过大")
+            } else if (now - file.lastModified() > MAX_LOG_AGE_MS) {
                 needNewFile = true
+                Log.v(DEBUG_TAG, "📝 需要新文件：当前文件过期")
             }
         }
 
         if (needNewFile) {
-            createNewLogFile(Date(now))
+            createNewLogFile()
             cleanOldLogFiles()
         }
     }
 
-    private fun createNewLogFile(date: Date) {
+    private fun initializeFromExistingFile() {
         try {
-            val fileName = fileNameDateFormat.format(date) + LOG_SUFFIX
-            val newFile = File(logDir, fileName)
-            if (newFile.createNewFile()) {
-                currentLogFile = newFile
+            val lastFile = logDir.listFiles { _, name -> name.endsWith(LOG_SUFFIX) }
+                ?.maxByOrNull { it.lastModified() }
+
+            if (lastFile != null && lastFile.exists()) {
+                val now = System.currentTimeMillis()
+                // Resume writing if file is fresh and small enough
+                if (now - lastFile.lastModified() < MAX_LOG_AGE_MS && lastFile.length() < MAX_FILE_SIZE) {
+                    currentLogFile = lastFile
+                }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to create new log file", e)
+            Log.e("FileLoggingTree", "Failed to init from existing file", e)
         }
     }
 
+    private fun createNewLogFile() {
+        try {
+            val fileName = fileNameDateFormat.format(Date()) + LOG_SUFFIX
+            val newFile = File(logDir, fileName)
+            if (newFile.exists()) {
+                val uniqueName = fileNameDateFormat.format(Date()) + "_" + System.currentTimeMillis() + LOG_SUFFIX
+                currentLogFile = File(logDir, uniqueName)
+            } else {
+                currentLogFile = newFile
+            }
+            // 只有这里创建了，文件才会真正出现在磁盘上
+            currentLogFile?.createNewFile()
+            Log.v(DEBUG_TAG, "🆕 创建新日志文件: ${currentLogFile?.absolutePath}")
+        } catch (e: Exception) {
+            Log.e(DEBUG_TAG, "❌ 创建文件失败", e)
+        }
+    }
+
+    /**
+     * Maintains only the most recent MAX_LOG_FILES.
+     */
     private fun cleanOldLogFiles() {
         try {
             val files = logDir.listFiles { _, name -> name.endsWith(LOG_SUFFIX) } ?: return
             if (files.size > MAX_LOG_FILES) {
-                // Keep only the most recently modified file
+                // Sort by modification time (descending)
                 files.sortByDescending { it.lastModified() }
+
+                // Delete everything after the Nth file
                 for (i in MAX_LOG_FILES until files.size) {
                     files[i].delete()
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to clean old logs", e)
+            Log.e("FileLoggingTree", "Failed to clean old logs", e)
         }
     }
 
-    private fun priorityToString(priority: Int): String = when (priority) {
+    // Helper to format date safely
+    private fun getCurrentTimestamp(): String {
+        return synchronized(entryDateFormat) {
+            entryDateFormat.format(Date())
+        }
+    }
+
+    private fun priorityToString(priority: Int) = when (priority) {
         Log.VERBOSE -> "V"
         Log.DEBUG -> "D"
         Log.INFO -> "I"
@@ -159,17 +197,11 @@ class FileLoggingTree(context: Context) : Timber.DebugTree() {
         else -> "?"
     }
 
+    /**
+     * Call this when you want to stop logging (e.g. user disabled feature).
+     */
     fun release() {
-        handlerThread.quitSafely()
-    }
-
-    companion object {
-        private const val TAG = "FileLoggingTree"
-        private const val MAX_LOG_FILES = 2
-        private const val MAX_FILE_SIZE = 4 * 1024 * 1024L // 4MB
-        private const val MAX_LOG_AGE_MS = 24 * 60 * 60 * 1000L // 24 Hours
-
-        const val LOG_DIR_NAME = "logs"
-        const val LOG_SUFFIX = ".log"
+        scope.cancel()
+        logChannel.close()
     }
 }

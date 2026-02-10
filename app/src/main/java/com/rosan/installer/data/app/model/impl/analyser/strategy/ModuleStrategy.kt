@@ -93,7 +93,6 @@ object ModuleStrategy : AnalysisStrategy {
                 val properties = Properties().apply {
                     load(inputStream.reader(Charsets.UTF_8))
                 }
-
                 val id = properties.getProperty("id", "")
                 val name = properties.getProperty("name", "")
 
