@@ -35,7 +35,7 @@ android {
         // If you use InstallerX source code, package it into apk or other installation package format
         // Please change the applicationId to one that does not conflict with any official release.
         applicationId = project.findProperty("APP_ID") as String?
-            ?: "com.rosan.installer.x.revived"
+            ?: "com.android.packageinstaller"
         namespace = "com.rosan.installer"
         minSdk = 26
         targetSdk = 36
