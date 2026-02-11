@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
@@ -16,89 +17,86 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * A Timber Tree that logs to files asynchronously using Coroutines and Channels.
- * Combines high performance (non-blocking) with robust file rotation logic.
+ * A Timber Tree that logs to files asynchronously.
+ * Uses a buffered Channel to prevent blocking the UI thread and OOM issues.
  */
-@Suppress("LogNotTimber")
 class FileLoggingTree(
     private val context: Context
 ) : Timber.DebugTree() {
 
     companion object {
+        private const val TAG = "FileLoggingTree"
         const val LOG_DIR_NAME = "logs"
         const val LOG_SUFFIX = ".log"
         private const val MAX_LOG_FILES = 2
-        private const val MAX_FILE_SIZE = 4 * 1024 * 1024L
-        private const val MAX_LOG_AGE_MS = 24 * 60 * 60 * 1000L
-
-        // 调试用的 TAG
-        private const val DEBUG_TAG = "FileLoggingTree_Internal"
+        private const val MAX_FILE_SIZE = 4 * 1024 * 1024L // 4MB
+        private const val MAX_LOG_AGE_MS = 24 * 60 * 60 * 1000L // 24 Hours
+        private const val CHANNEL_CAPACITY = 1000
     }
 
-    private val logDir: File by lazy { File(context.filesDir, LOG_DIR_NAME) }
+    private val logDir: File by lazy { File(context.cacheDir, LOG_DIR_NAME) }
+
     private val entryDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
     private val fileNameDateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
-    private val logChannel = Channel<String>(Channel.UNLIMITED)
+
+    // Drop oldest logs if the consumer can't keep up with the producer.
+    private val logChannel = Channel<String>(
+        capacity = CHANNEL_CAPACITY,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var currentLogFile: File? = null
 
     init {
-        Log.v(DEBUG_TAG, "🚀 FileLoggingTree 初始化启动！")
-
-        if (!logDir.exists()) {
-            val created = logDir.mkdirs()
-            Log.v(DEBUG_TAG, "📁 创建日志目录: ${logDir.absolutePath} -> 结果: $created")
-        } else {
-            Log.v(DEBUG_TAG, "📁 日志目录已存在: ${logDir.absolutePath}")
-        }
-
         scope.launch {
-            Log.v(DEBUG_TAG, "🧵 消费者协程启动，准备写入文件...")
+            ensureDirectoryExists()
             initializeFromExistingFile()
 
             logChannel.consumeEach { logContent ->
-                // 这里是真正的写入操作
                 writeToFile(logContent)
             }
         }
     }
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        // 1. 收到 Timber 的日志
-        Log.v(DEBUG_TAG, "📥 收到 Timber 日志: $message")
-
-        if (priority < Log.DEBUG) {
-            Log.v(DEBUG_TAG, "🚫 优先级太低，忽略")
-            return
-        }
+        // Filter out low priority logs in production if needed, generally INFO/WARN/ERROR
+        // For debugging builds, keeping DEBUG/VERBOSE is fine.
 
         val timestamp = getCurrentTimestamp()
         val priorityStr = priorityToString(priority)
         val finalTag = tag ?: "Unknown"
-        var logLine = "$timestamp $priorityStr/$finalTag: $message\n"
+
+        val logBuilder = StringBuilder()
+        logBuilder.append("$timestamp $priorityStr/$finalTag: $message\n")
+
         if (t != null) {
-            logLine += Log.getStackTraceString(t) + "\n"
+            logBuilder.append(Log.getStackTraceString(t)).append("\n")
         }
 
-        // 2. 发送到通道
-        val result = logChannel.trySend(logLine)
-        Log.v(DEBUG_TAG, "📤 发送至写入通道结果: ${result.isSuccess}")
+        // Non-blocking send
+        logChannel.trySend(logBuilder.toString())
+    }
+
+    private fun ensureDirectoryExists() {
+        if (!logDir.exists()) {
+            logDir.mkdirs()
+        }
     }
 
     private fun writeToFile(content: String) {
         try {
             ensureLogFileReady()
             currentLogFile?.appendText(content)
-            // 调试：告诉我们写进去了
-            Log.v(DEBUG_TAG, "💾 [写入成功] >> ${currentLogFile?.name}")
         } catch (e: Exception) {
-            Log.e(DEBUG_TAG, "❌ [写入失败]", e)
+            // Only log critical IO failures to Logcat
+            Log.e(TAG, "Failed to write log to file", e)
         }
     }
 
     private fun ensureLogFileReady() {
         val now = System.currentTimeMillis()
-        var file = currentLogFile
+        val file = currentLogFile
         var needNewFile = false
 
         if (!logDir.exists()) {
@@ -108,20 +106,14 @@ class FileLoggingTree(
 
         if (file == null || !file.exists()) {
             needNewFile = true
-            Log.v(DEBUG_TAG, "📝 需要新文件：当前文件不存在")
         } else {
-            if (file.length() > MAX_FILE_SIZE) {
+            if (file.length() > MAX_FILE_SIZE || now - file.lastModified() > MAX_LOG_AGE_MS) {
                 needNewFile = true
-                Log.v(DEBUG_TAG, "📝 需要新文件：当前文件过大")
-            } else if (now - file.lastModified() > MAX_LOG_AGE_MS) {
-                needNewFile = true
-                Log.v(DEBUG_TAG, "📝 需要新文件：当前文件过期")
             }
         }
 
         if (needNewFile) {
-            createNewLogFile()
-            cleanOldLogFiles()
+            rotateLogs()
         }
     }
 
@@ -138,49 +130,49 @@ class FileLoggingTree(
                 }
             }
         } catch (e: Exception) {
-            Log.e("FileLoggingTree", "Failed to init from existing file", e)
+            Log.e(TAG, "Failed to init from existing file", e)
         }
+    }
+
+    private fun rotateLogs() {
+        createNewLogFile()
+        cleanOldLogFiles()
     }
 
     private fun createNewLogFile() {
         try {
             val fileName = fileNameDateFormat.format(Date()) + LOG_SUFFIX
             val newFile = File(logDir, fileName)
-            if (newFile.exists()) {
-                val uniqueName = fileNameDateFormat.format(Date()) + "_" + System.currentTimeMillis() + LOG_SUFFIX
-                currentLogFile = File(logDir, uniqueName)
+
+            // Handle naming collision rare edge case
+            currentLogFile = if (newFile.exists()) {
+                val uniqueName = "${fileNameDateFormat.format(Date())}_${System.currentTimeMillis()}$LOG_SUFFIX"
+                File(logDir, uniqueName)
             } else {
-                currentLogFile = newFile
+                newFile
             }
-            // 只有这里创建了，文件才会真正出现在磁盘上
+
             currentLogFile?.createNewFile()
-            Log.v(DEBUG_TAG, "🆕 创建新日志文件: ${currentLogFile?.absolutePath}")
         } catch (e: Exception) {
-            Log.e(DEBUG_TAG, "❌ 创建文件失败", e)
+            Log.e(TAG, "Failed to create new log file", e)
         }
     }
 
-    /**
-     * Maintains only the most recent MAX_LOG_FILES.
-     */
     private fun cleanOldLogFiles() {
         try {
             val files = logDir.listFiles { _, name -> name.endsWith(LOG_SUFFIX) } ?: return
             if (files.size > MAX_LOG_FILES) {
-                // Sort by modification time (descending)
                 files.sortByDescending { it.lastModified() }
-
-                // Delete everything after the Nth file
+                // Keep the newest N files, delete the rest
                 for (i in MAX_LOG_FILES until files.size) {
                     files[i].delete()
                 }
             }
         } catch (e: Exception) {
-            Log.e("FileLoggingTree", "Failed to clean old logs", e)
+            Log.e(TAG, "Failed to clean old logs", e)
         }
     }
 
-    // Helper to format date safely
     private fun getCurrentTimestamp(): String {
         return synchronized(entryDateFormat) {
             entryDateFormat.format(Date())
@@ -197,9 +189,6 @@ class FileLoggingTree(
         else -> "?"
     }
 
-    /**
-     * Call this when you want to stop logging (e.g. user disabled feature).
-     */
     fun release() {
         scope.cancel()
         logChannel.close()
