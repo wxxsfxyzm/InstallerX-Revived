@@ -1,104 +1,50 @@
 package com.rosan.installer.data.installer.model.impl
 
 import android.app.Activity
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.content.ContextCompat
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
+import com.rosan.installer.data.app.util.IconColorExtractor
 import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
-import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
-class InstallerRepoImpl private constructor(override val id: String) : InstallerRepo,
-    KoinComponent {
-    companion object : KoinComponent {
-        @Volatile
-        private var impls = mutableMapOf<String, InstallerRepoImpl>()
-
-        private val context by inject<Context>()
-
-        fun getOrCreate(id: String? = null): InstallerRepo {
-            Timber.d("getOrCreate called with id: ${id ?: "null (new instance requested)"}")
-
-            // If an ID is provided, retrieve the existing instance or create a new one with that ID.
-            if (id != null) {
-                return synchronized(this) { // Synchronize to ensure thread-safe access to the map
-                    impls.getOrPut(id) {
-                        // The 'create' function handles the actual instantiation and service start.
-                        create(id) as InstallerRepoImpl
-                    }
-                }
-            }
-
-            // If no ID is provided, this signifies a request for a new, independent installation session.
-            // Always create a new instance with a unique ID to allow for parallel installations.
-            val newId = UUID.randomUUID().toString()
-            Timber.d("No ID provided. Creating a new instance with generated ID: $newId")
-            return create(newId)
-        }
-
-        fun get(id: String): InstallerRepo? {
-            return synchronized(this) {
-                val instance = impls[id]
-                Timber.d("get() called for id: $id. Found: ${instance != null}")
-                instance
-            }
-        }
-
-        private fun create(id: String): InstallerRepo {
-            // This function is now the single, synchronized point of creation and registration.
-            return synchronized(this) {
-                // Double-check if another thread created it in the meantime before creating a new one.
-                impls[id]?.let {
-                    Timber.w("Instance with id $id already exists. Returning it.")
-                    return@synchronized it
-                }
-
-                Timber.d("create() called for id: $id")
-                val impl = InstallerRepoImpl(id)
-                // Every new instance, regardless of how it was created, is now tracked in the map.
-                impls[id] = impl
-                Timber.d("Instance for id: $id created. Starting InstallerService.")
-                val intent = Intent(InstallerService.Action.Ready.value)
-                intent.component = ComponentName(context, InstallerService::class.java)
-                intent.putExtra(InstallerService.EXTRA_ID, impl.id)
-                ContextCompat.startForegroundService(context, intent)
-                impl
-            }
-        }
-
-        fun remove(id: String) {
-            synchronized(this) {
-                Timber.d("remove() called for id: $id")
-                impls.remove(id)
-            }
-        }
-    }
+/**
+ * Implementation of InstallerRepo.
+ * Now receives dependencies via constructor instead of internal injection.
+ */
+class InstallerRepoImpl(
+    override val id: String,
+    val context: Context,
+    val appDataStore: AppDataStore,
+    val iconColorExtractor: IconColorExtractor,
+    private val onClose: () -> Unit
+) : InstallerRepo {
 
     private val isClosed = AtomicBoolean(false)
 
+    // Properties implementation
     override var error: Throwable = Throwable()
     override var config: ConfigEntity = ConfigEntity.default
     override var data: List<DataEntity> by mutableStateOf(emptyList())
     override var analysisResults: List<PackageAnalysisResult> by mutableStateOf(emptyList())
     override val progress: MutableSharedFlow<ProgressEntity> = MutableStateFlow(ProgressEntity.Ready)
+
+    // Action flow for communication with Handlers
     val action: MutableSharedFlow<Action> = MutableSharedFlow(replay = 1, extraBufferCapacity = 1)
+
     override val background: MutableSharedFlow<Boolean> = MutableStateFlow(false)
     override var multiInstallQueue: List<SelectInstallEntity> = emptyList()
     override var multiInstallResults: MutableList<InstallResult> = mutableListOf()
@@ -170,12 +116,23 @@ class InstallerRepoImpl private constructor(override val id: String) : Installer
     }
 
     override fun close() {
-        // 确保 close 只执行一次
+        // Ensure close is only executed once
         if (isClosed.compareAndSet(false, true)) {
-            Timber.d("[id=$id] close() called for the first time. Emitting Action.Finish.")
+            Timber.d("[id=$id] close() called. Emitting Action.Finish and triggering cleanup.")
+
+            // 1. Notify UI and Service that we are done
             action.tryEmit(Action.Finish)
+
+            // 2. Trigger the callback to remove from SessionManager
+            // We run this slightly later or immediately depending on requirements.
+            // Here we run it immediately to ensure Manager is clean.
+            onClose()
+
+            // 3. Mark progress as finished (if not already) to satisfy Service collection loop
+            // This acts as a fallback if the Action.Finish handler didn't set Progress.
+            // (Optional, depends on your ProgressHandler logic)
         } else {
-            Timber.w("[id=$id] close() called on an already closing instance. Ignoring.")
+            Timber.w("[id=$id] close() called on an already closed instance.")
         }
     }
 

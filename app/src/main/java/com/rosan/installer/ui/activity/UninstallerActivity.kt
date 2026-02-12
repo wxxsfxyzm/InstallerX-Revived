@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
+import com.rosan.installer.data.installer.model.impl.InstallerSessionManager
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.ui.activity.themestate.ThemeUiState
@@ -32,9 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
 import org.koin.core.component.inject
-import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
 class UninstallerActivity : ComponentActivity(), KoinComponent {
@@ -45,7 +44,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
     private val appDataStore: AppDataStore by inject()
     private var uiState by mutableStateOf(ThemeUiState())
-
+    private val sessionManager: InstallerSessionManager by inject()
     private var installer: InstallerRepo? = null
     private var job: Job? = null
 
@@ -76,7 +75,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         }
 
         val installerId = savedInstanceState?.getString(KEY_ID)
-        installer = get { parametersOf(installerId) }
+        installer = sessionManager.getOrCreate(installerId)
 
         // Start the process only if it's a fresh launch, not a configuration change
         if (savedInstanceState == null) {
