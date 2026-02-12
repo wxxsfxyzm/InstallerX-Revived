@@ -123,18 +123,14 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         permissionManager.requestEssentialPermissions(
             onGranted = {
                 Timber.d("All essential permissions are granted.")
-                if (intent.action == ACTION_CONFIRM_INSTALL || intent.action == ACTION_CONFIRM_PERMISSIONS) {
-                    val sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
-                    if (sessionId != -1) {
-                        Timber.d("onCreate: Dispatching resolveConfirmInstall for session $sessionId")
-                        installer?.resolveConfirmInstall(this, sessionId)
-                    } else {
-                        Timber.e("CONFIRM_INSTALL intent missing EXTRA_SESSION_ID")
-                        finish()
+                when (intent.action) {
+                    ACTION_CONFIRM_INSTALL,
+                    ACTION_CONFIRM_PERMISSIONS -> resolveConfirm(intent)
+
+                    else -> {
+                        Timber.d("onCreate: Dispatching resolveInstall")
+                        installer?.resolveInstall(this)
                     }
-                } else {
-                    Timber.d("onCreate: Dispatching resolveInstall")
-                    installer?.resolveInstall(this)
                 }
             },
             onDenied = { reason ->
@@ -293,6 +289,23 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             }
         }
     }
+
+    private fun resolveConfirm(intent: Intent) {
+        val sessionId = intent.getIntExtra(
+            PackageInstaller.EXTRA_SESSION_ID,
+            -1
+        )
+
+        if (sessionId == -1) {
+            Timber.e("CONFIRM_INSTALL intent missing EXTRA_SESSION_ID")
+            finish()
+            return
+        }
+
+        Timber.d("onCreate: Dispatching resolveConfirmInstall for session $sessionId")
+        installer?.resolveConfirmInstall(this, sessionId)
+    }
+
 
     private fun showContent() {
         setContent {
