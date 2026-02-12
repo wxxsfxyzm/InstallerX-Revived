@@ -60,6 +60,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
+import com.rosan.installer.ui.page.main.widget.dialog.BlurWarningDialog
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
@@ -92,6 +93,7 @@ fun NewThemeSettingsPage(
     var showHideLauncherIconDialog by remember { mutableStateOf(false) }
     var showPaletteDialog by remember { mutableStateOf(false) }
     var showThemeModeDialog by remember { mutableStateOf(false) }
+    var showBlurWarningDialog by remember { mutableStateOf(false) }
 
     if (showPaletteDialog) {
         PaletteStyleDialog(
@@ -125,6 +127,15 @@ fun NewThemeSettingsPage(
         onConfirm = {
             showHideLauncherIconDialog = false
             viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(false))
+        }
+    )
+
+    BlurWarningDialog(
+        show = showBlurWarningDialog,
+        onDismiss = { showBlurWarningDialog = false },
+        onConfirm = {
+            showBlurWarningDialog = false
+            viewModel.dispatch(PreferredViewAction.SetUseBlur(true))
         }
     )
 
@@ -223,7 +234,13 @@ fun NewThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_use_blur),
                             description = stringResource(R.string.theme_settings_use_blur_desc),
                             checked = state.useBlur,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetUseBlur(it)) }
+                            onCheckedChange = { isChecked ->
+                                if (isChecked && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+                                    showBlurWarningDialog = true
+                                } else {
+                                    viewModel.dispatch(PreferredViewAction.SetUseBlur(isChecked))
+                                }
+                            }
                         )
                     }
                     item {

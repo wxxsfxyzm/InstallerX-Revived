@@ -1,7 +1,6 @@
 package com.rosan.installer.data.installer.model.impl.installer
 
 import android.app.Activity
-import android.content.ComponentName
 import android.content.Context
 import android.os.Build
 import android.system.Os
@@ -26,10 +25,10 @@ import com.rosan.installer.data.installer.model.impl.installer.helper.SourceReso
 import com.rosan.installer.data.installer.model.impl.installer.processor.InstallationProcessor
 import com.rosan.installer.data.installer.model.impl.installer.processor.SessionProcessor
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.recycle.model.impl.AutoLockManager
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.ui.util.doBiometricAuthOrThrow
 import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.CancellationException
@@ -223,7 +222,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             installer.config.installMode = ConfigEntity.InstallMode.Dialog
         }
 
-        autoLockInstallerIfNeeded()
+        Timber.d("[id=$installerId] resolve: Requesting AutoLockManager check.")
+        AutoLockManager.onResolveInstall(installer.config.authorizer)
 
         if (installer.config.installMode.isNotification) {
             Timber.d("[id=$installerId] Notification mode detected early. Switching to background.")
@@ -535,30 +535,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 Timber.d("[id=$installerId] Cache directory deleted ($cacheDirectory): $deleted")
             } else {
                 Timber.d("[id=$installerId] Cache directory not found, already cleared.")
-            }
-        }
-    }
-
-    /**
-     * * Automatically locks the default installer if enabled.
-     */
-    private fun autoLockInstallerIfNeeded() {
-        scope.launch {
-            if (appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER).first()) {
-                Timber.d("[id=$installerId] resolve: Attempting to auto-lock default installer.")
-                runCatching {
-                    withContext(Dispatchers.IO) {
-                        val component = ComponentName(context, InstallerActivity::class.java)
-                        PrivilegedManager.setDefaultInstaller(
-                            installer.config.authorizer,
-                            component,
-                            true // enable = true (Lock)
-                        )
-                    }
-                    Timber.d("[id=$installerId] resolve: Auto-lock attempt finished successfully.")
-                }.onFailure {
-                    Timber.w(it, "[id=$installerId] resolve: Failed to auto-lock default installer. This is non-fatal.")
-                }
             }
         }
     }

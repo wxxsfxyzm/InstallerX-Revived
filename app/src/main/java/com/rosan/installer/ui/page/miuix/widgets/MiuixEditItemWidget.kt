@@ -22,9 +22,9 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
 import com.rosan.installer.ui.util.isDhizukuActive
+import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.extra.SpinnerEntry
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -592,7 +592,7 @@ fun MiuixDataAutoDeleteWidget(viewModel: EditViewModel) {
         }
     )
 
-    AnimatedVisibility (
+    AnimatedVisibility(
         visible = viewModel.state.data.autoDelete,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()

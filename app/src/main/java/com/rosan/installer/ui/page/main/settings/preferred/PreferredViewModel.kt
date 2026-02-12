@@ -769,7 +769,7 @@ class PreferredViewModel(
             val useDynColorFollowPkgIconForLiveActivityFlow =
                 appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false)
             val useBlurFlow =
-                appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, true)
+                appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
             combine(
                 authorizerFlow,

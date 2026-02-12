@@ -1,3 +1,8 @@
+---
+title: What is InstallerX Revived?
+description: Learn about InstallerX Revived - a modern, feature-rich Android package installer with universal compatibility and advanced features
+---
+
 # What is InstallerX Revived?
 
 InstallerX Revived is a modern, feature-rich package installer for Android. It is a community-maintained continuation of the original InstallerX project, designed to replace the often lackluster default package installers found in customized Android ROMs.

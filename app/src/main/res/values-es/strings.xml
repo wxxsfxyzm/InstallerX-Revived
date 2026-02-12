@@ -41,8 +41,8 @@
     <string name="disable_adb_install_verify_desc">Desactiva la verificación de instalación ADB, útil en algunos sistemas donde una instalación activa un escaneo (Play Protect)</string>
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">No compatible con Dhizuku</string>
     <string name="disable_adb_install_verify_failed">No se pudo desactivar la verificación de instalación ADB</string>
-    <string name="ignore_battery_optimizations">Ignorar optimizaciones de batería</string>
-    <string name="ignore_battery_optimizations_desc">Útil en algunas ROMs personalizadas que tienen una política estricta de segundo plano</string>
+    <string name="ignore_battery_optimizations">Ignorar optimización de batería</string>
+    <string name="ignore_battery_optimizations_desc">Útil en ROMs con políticas estrictas de segundo plano. Si la notificación se queda atascada, prueba a ignorar la optimización de la batería</string>
     <string name="ignore_battery_optimizations_desc_disabled">Ya ignorado</string>
     <string name="lock_default_installer">Establecer como instalador predeterminado</string>
     <string name="lock_default_installer_desc">Establece InstallerX como la aplicación predeterminada para instalar APKs</string>
@@ -648,7 +648,7 @@
     <string name="lab_set_install_requester_desc">Rellena el campo originatingUid con el paquete del llamador para que coincida con el comportamiento del sistema</string>
     <string name="uninstall_system_app_disabled">Se deshabilitó la eliminación de la aplicación del sistema</string>
     <string name="performance">Rendimiento</string>
-    <string name="installer_notification_tap_to_disable">Notificación de servicio en primer plano, toca para desactivar.</string>
+    <string name="installer_notification_tap_to_disable">Notificación de servicio en primer plano, toca para desactivar</string>
     <string name="lab_module_flashing_show_art">Mostrar arte ASCII</string>
     <string name="lab_module_flashing_show_art_desc">Mostrar arte ASCII de InstallerX cuando comience la instalación</string>
     <string name="installer_settings_require_biometric_auth">Requiere autenticación biométrica para instalar</string>
@@ -673,4 +673,24 @@
     <string name="config_auto_delete_zip">Eliminación automática de archivos zip</string>
     <string name="config_auto_delete_zip_desc">Además de eliminar el paquete de instalación, también elimina el archivo comprimido que contiene el paquete de instalación.</string>
     <string name="open_lsposed">Abrir LSPosed</string>
+    <string name="debug">Depuración</string>
+    <string name="save_logs">Guardar registros</string>
+    <string name="save_logs_desc">Guardar el registro en un archivo local para fines de depuración</string>
+    <string name="export_logs">Exportar registros</string>
+    <string name="export_logs_desc">Exportar registros de la aplicación</string>
+    <string name="theme_settings_use_blur">Activar el desenfoque</string>
+    <string name="theme_settings_use_blur_desc">Activa el desenfoque en la app</string>
+    <string name="installer_channel_name_desc">Muestra la etapa de instalación</string>
+    <string name="installer_progress_channel_name_desc">Muestra el proceso de instalación</string>
+    <string name="installer_notification_desc">Notificación de servicio en segundo plano, inútil</string>
+    <string name="installer_live_channel_name_desc">Mostrar el progreso de la instalación como actualización en vivo</string>
+    <string name="installer_live_channel_short_text_pending_install">Pendiente</string>
+    <string name="exception_zip_exception">No se ha conseguido abrir zip como archivo</string>
+    <string name="theme_settings_use_blur_warning">El efecto de desenfoque puede ser inestable y causar problemas inesperados en Android 11 y versiones posteriores. Puede que necesites borrar los datos de la app si surgen problemas. ¿Quieres continuar?</string>
+    <string name="tag_downgrade">Degradación</string>
+    <string name="tag_signature">Firma</string>
+    <string name="tag_arch_32">32-Bit</string>
+    <string name="tag_arch_emulated">Arch Emulado</string>
+    <string name="installer_prepare_arch_32_notice">Esta aplicación funcionará en modo de 32 bits. Esto puede aumentar el uso de memoria o reducir el rendimiento en dispositivos de 64 bits</string>
+    <string name="installer_prepare_arch_mismatch_notice">La arquitectura de la app (%1$s) no coincide con tu dispositivo (%2$s). Se ejecutará mediante traducción. La instalación o ejecución no está garantizada, y pueden ocurrir problemas como sobrecalentamiento o fallos</string>
 </resources>

@@ -1,19 +1,25 @@
 {
   "name": "website",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "android",
+    "installer",
+    "apk",
+    "xapk",
+    "package-manager"
+  ],
+  "author": "iamr0s & InstallerX Revived Contributors",
+  "license": "GPL-3.0",
+  "description": "InstallerX Revived documentation",
   "devDependencies": {
-    "vitepress": "^1.6.4",
-    "vue": "^3.5.26"
+    "@types/node": "^25.1.0",
+    "vitepress": "^2.0.0-alpha.15",
+    "vue": "^3.5.27"
   }
 }
