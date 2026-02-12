@@ -22,6 +22,7 @@ import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.build.model.impl.DeviceCapabilityChecker
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
+import com.rosan.installer.data.installer.model.impl.InstallerSessionManager
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.ui.activity.themestate.ThemeUiState
@@ -41,9 +42,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
 import org.koin.core.component.inject
-import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
 class InstallerActivity : ComponentActivity(), KoinComponent {
@@ -57,6 +56,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     private var uiState by mutableStateOf(ThemeUiState())
     private var disableNotificationOnDismiss = false
 
+    private val sessionManager: InstallerSessionManager by inject()
     private var installer by mutableStateOf<InstallerRepo?>(null)
     private var job: Job? = null
 
@@ -96,17 +96,18 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             isRequestingPermission = true
         }
 
-        Timber.d("onCreate: Handling all flows via restoreInstaller and action dispatch.")
+        val originalInstallerId = if (savedInstanceState == null) {
+            intent?.getStringExtra(KEY_ID)
+        } else {
+            savedInstanceState.getString(KEY_ID)
+        }
+
         restoreInstaller(savedInstanceState)
-
-        val installerId =
-            if (savedInstanceState == null) intent?.getStringExtra(KEY_ID) else savedInstanceState.getString(KEY_ID)
-
-        if (installerId == null) {
-            Timber.d("onCreate: This is a fresh launch. Starting permission and resolve process.")
+        if (originalInstallerId == null) {
+            Timber.d("onCreate: This is a fresh launch (originalId is null). Starting permission and resolve process.")
             checkPermissionsAndStartProcess()
         } else {
-            Timber.d("onCreate: Re-attaching to existing installer ($installerId).")
+            Timber.d("onCreate: Re-attaching to existing installer ($originalInstallerId).")
         }
 
         showContent()
@@ -221,7 +222,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                         currentProgress is ProgressEntity.Installing ||
                         currentProgress is ProgressEntity.InstallConfirming ||
                         currentProgress is ProgressEntity.InstallingModule
-                
+
                 // If the task is still running and hasn't finished or errored
                 if (isRunning) {
                     Timber.d("onStop: User left activity while running. Triggering background mode.")
@@ -262,9 +263,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         job?.cancel()
         Timber.d("restoreInstaller: Old job cancelled. Getting new installer instance.")
 
-        val installer: InstallerRepo = get { parametersOf(installerId) }
+        val installer = sessionManager.getOrCreate(installerId)
         installer.background(false)
         this.installer = installer
+        intent?.putExtra(KEY_ID, installer.id)
+
         Timber.d("restoreInstaller: New installer instance [id=${installer.id}] set. Starting collectors.")
 
         val scope = CoroutineScope(Dispatchers.Main.immediate)

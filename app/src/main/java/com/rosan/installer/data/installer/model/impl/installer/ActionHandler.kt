@@ -13,7 +13,6 @@ import com.rosan.installer.data.app.model.enums.SessionMode
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.exception.AuthenticationFailedException
 import com.rosan.installer.data.app.model.impl.AnalyserRepoImpl
-import com.rosan.installer.data.app.util.IconColorExtractor
 import com.rosan.installer.data.app.util.sourcePath
 import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
@@ -47,7 +46,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
 
@@ -56,9 +54,6 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     override val installer: InstallerRepoImpl = super.installer as InstallerRepoImpl
     private val mutableProgressFlow: MutableSharedFlow<ProgressEntity>
         get() = installer.progress
-    private val context by inject<Context>()
-    private val appDataStore by inject<AppDataStore>()
-    private val iconColorExtractor by inject<IconColorExtractor>()
 
     private var job: Job? = null
 
@@ -67,6 +62,9 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     // Helper property to get ID for logging
     private val installerId get() = installer.id
+    private val context: Context get() = installer.context
+    private val appDataStore get() = installer.appDataStore
+    private val iconColorExtractor get() = installer.iconColorExtractor
 
     // Cache directory
     private val cacheDirectory = File(context.cacheDir, "installer_sessions/$installerId")
