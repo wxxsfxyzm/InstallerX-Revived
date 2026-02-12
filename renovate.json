@@ -3,16 +3,30 @@
   "extends": [
     "config:base"
   ],
-  "baseBranches": ["dev"],
+  "baseBranches": [
+    "dev"
+  ],
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch"
     },
     {
       "description": "Ignore AndroidAppProcess updates",
-      "matchPackageNames": ["com.github.wxxsfxyzm:AndroidAppProcess"],
+      "matchPackageNames": [
+        "com.github.wxxsfxyzm:AndroidAppProcess"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable all npm dependencies updates",
+      "matchManagers": [
+        "npm"
+      ],
       "enabled": false
     }
   ],
