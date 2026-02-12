@@ -757,7 +757,7 @@ class PreferredViewModel(
                 appDataStore.getString(AppDataStore.THEME_PALETTE_STYLE, PaletteStyle.TonalSpot.name)
                     .map { runCatching { PaletteStyle.valueOf(it) }.getOrDefault(PaletteStyle.TonalSpot) }
             val useDynamicColorFlow =
-                appDataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                appDataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, true)
             val useMiuixMonetFlow =
                 appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false)
             val seedColorFlow =
@@ -883,7 +883,7 @@ class PreferredViewModel(
                     } else PresetColors[0].color
                 }
 
-                val availableColors: List<RawColor> = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                val availableColors: List<RawColor> = if (useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                     if (!wallpaperColors.isNullOrEmpty()) {
                         wallpaperColors.map { colorInt ->
                             RawColor(
@@ -892,7 +892,7 @@ class PreferredViewModel(
                             )
                         }
                     } else PresetColors
-                else PresetColors
+                } else PresetColors
                 val hasUpdate = updateResult?.hasUpdate ?: false
                 val remoteVersion = updateResult?.remoteVersion ?: ""
                 val customizeAuthorizer =
