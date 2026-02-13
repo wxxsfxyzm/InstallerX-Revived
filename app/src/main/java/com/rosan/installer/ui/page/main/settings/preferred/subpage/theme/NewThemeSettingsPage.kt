@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.filled.DarkMode
@@ -419,7 +421,7 @@ fun PaletteStyleDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.theme_settings_palette_style_desc)) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 PaletteStyle.entries.forEach { style ->
                     Row(
                         Modifier
@@ -456,7 +458,7 @@ fun ThemeModeDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.theme_settings_theme_mode_desc)) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 ThemeMode.entries.forEach { mode ->
                     val modeText = when (mode) {
                         ThemeMode.LIGHT -> stringResource(R.string.theme_settings_theme_mode_light)
