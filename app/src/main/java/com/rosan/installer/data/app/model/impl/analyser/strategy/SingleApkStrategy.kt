@@ -14,7 +14,5 @@ object SingleApkStrategy : AnalysisStrategy {
         data: DataEntity,
         zipFile: ZipFile?,
         extra: AnalyseExtraEntity
-    ): List<AppEntity> {
-        return ApkParser.parseFull(config, data, extra)
-    }
+    ): List<AppEntity> = ApkParser.parseFull(config, data, extra)
 }
