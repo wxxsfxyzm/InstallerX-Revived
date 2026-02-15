@@ -8,29 +8,21 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -40,14 +32,11 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -76,7 +65,6 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixT
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
-import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
@@ -84,20 +72,18 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationItem
+import top.yukonga.miuix.kmp.basic.NavigationRail
+import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SnackbarDuration
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.SnackbarResult
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.basic.VerticalDivider
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private object UIConstants {
@@ -327,16 +313,24 @@ private fun SettingsCompactLayout(
         bottomBar = {
             NavigationBar(
                 modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
-                color = hazeState.getMiuixAppBarColor(),
-                items = navigationItems,
-                selected = pagerState.currentPage,
-                showDivider = true,
-                onClick = { index ->
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
+                // Keep the color configuration from the original installer code
+                // to maintain the haze blur effect.
+                color = hazeState.getMiuixAppBarColor()
+            ) {
+                // Iterate through items and use NavigationBarItem to align with the Miuix library example
+                navigationItems.forEachIndexed { index, item ->
+                    NavigationBarItem(
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        },
+                        icon = item.icon,
+                        label = item.label
+                    )
                 }
-            )
+            }
         },
         snackbarHost = { SnackbarHost(state = snackBarHostState) },
         floatingActionButton = {
@@ -389,113 +383,42 @@ private fun SettingsWideScreenLayout(
     snackBarHostState: SnackbarHostState,
     hazeState: HazeState?
 ) {
-    val windowInfo = LocalWindowInfo.current
-    val layoutDirection = LocalLayoutDirection.current
-    val windowWidth = windowInfo.containerSize.width
-
-    var weight by remember(windowWidth) { mutableFloatStateOf(0.4f) }
-    var potentialWeight by remember { mutableFloatStateOf(weight) }
-    val dragState = rememberDraggableState { delta ->
-        val nextPotentialWeight = potentialWeight + delta / windowWidth
-        potentialWeight = nextPotentialWeight
-        val clampedWeight = nextPotentialWeight.coerceIn(0.2f, 0.5f)
-        if (clampedWeight == nextPotentialWeight) {
-            weight = clampedWeight
-        }
-    }
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize()
-    ) { padding ->
-        Row(
-            modifier = Modifier
-                .background(MiuixTheme.colorScheme.surface)
-                .padding(
-                    start = padding.calculateStartPadding(layoutDirection),
-                    end = padding.calculateEndPadding(layoutDirection)
-                )
-        ) {
-            // Left Panel: Navigation Menu
-            Box(modifier = Modifier.weight(weight)) {
-                SettingsSidePanel(
-                    pagerState = pagerState,
-                    navigationItems = navigationItems
-                )
-            }
-
-            // Draggable Divider
-            VerticalDivider(
-                modifier = Modifier
-                    .draggable(
-                        state = dragState,
-                        orientation = Orientation.Horizontal
-                    )
-                    .padding(horizontal = 6.dp)
-            )
-
-            // Right Panel: Content + FAB + Snackbar
-            Box(modifier = Modifier.weight(1f - weight)) {
-                SettingsWideContent(
-                    navController = navController,
-                    pagerState = pagerState,
-                    navigationItems = navigationItems,
-                    allViewModel = allViewModel,
-                    preferredViewModel = preferredViewModel,
-                    snackBarHostState = snackBarHostState,
-                    hazeState = hazeState
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettingsSidePanel(
-    pagerState: PagerState,
-    navigationItems: List<NavigationItem>
-) {
     val coroutineScope = rememberCoroutineScope()
-    val scrollBehavior = MiuixScrollBehavior()
-    val layoutDirection = LocalLayoutDirection.current
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets.none,
-        topBar = {
-            TopAppBar(
-                title = stringResource(R.string.app_name),
-                scrollBehavior = scrollBehavior
-            )
-        }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(start = padding.calculateStartPadding(layoutDirection))
-                .fillMaxHeight(),
-            contentPadding = PaddingValues(
-                top = padding.calculateTopPadding(),
-                bottom = padding.calculateBottomPadding() + 12.dp
-            )
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MiuixTheme.colorScheme.surface)
+    ) {
+        // Left Panel: Navigation Rail
+        NavigationRail(
+            modifier = Modifier.fillMaxHeight()
         ) {
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-                Card(
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                ) {
-                    navigationItems.forEachIndexed { index, item ->
-                        BasicComponent(
-                            title = item.label,
-                            onClick = {
-                                coroutineScope.launch {
-                                    pagerState.scrollToPage(index)
-                                }
-                            },
-                            // Highlight selected item
-                            holdDownState = pagerState.currentPage == index
-                        )
-                    }
-                }
+            navigationItems.forEachIndexed { index, item ->
+                NavigationRailItem(
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    },
+                    icon = item.icon,
+                    label = item.label
+                )
             }
+        }
+
+        // Right Panel: Content + FAB + Snackbar
+        Box(modifier = Modifier.weight(1f)) {
+            SettingsWideContent(
+                navController = navController,
+                pagerState = pagerState,
+                navigationItems = navigationItems,
+                allViewModel = allViewModel,
+                preferredViewModel = preferredViewModel,
+                snackBarHostState = snackBarHostState,
+                hazeState = hazeState
+            )
         }
     }
 }

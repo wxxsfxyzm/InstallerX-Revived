@@ -189,9 +189,9 @@ fun RowNavigation(
             .fillMaxWidth()
             .wrapContentSize(),
         windowInsets = windowInsets,
-        expandedHeight = 72.dp,
+        expandedHeight = if (isM3e) BottomAppBarDefaults.FlexibleBottomAppBarHeight else 72.dp,
         containerColor = containerColor,
-        horizontalArrangement = BottomAppBarDefaults.FlexibleFixedHorizontalArrangement,
+        horizontalArrangement = BottomAppBarDefaults.FlexibleHorizontalArrangement,
         content = {
             data.forEachIndexed { index, navigationData ->
                 NavigationBarItem(
