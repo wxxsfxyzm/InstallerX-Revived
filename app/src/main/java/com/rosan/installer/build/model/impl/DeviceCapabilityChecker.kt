@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
+import com.rosan.installer.util.OSUtils
 import timber.log.Timber
 
 /**
@@ -24,7 +25,7 @@ class DeviceCapabilityChecker(private val context: Context) {
      * runs only once per app lifecycle in a thread-safe manner.
      */
     val isSessionInstallSupported: Boolean by lazy {
-        calculateSessionInstallSupport()
+        calculateSessionInstallSupport() || OSUtils.isSystemApp
     }
 
     /**
