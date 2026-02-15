@@ -105,9 +105,10 @@ fun AppInfoSlot(
             modifier = Modifier.size(72.dp)
         )
         Text(
+            modifier = Modifier.basicMarquee(),
             text = appInfo.label,
             style = MiuixTheme.textStyles.title2,
-            modifier = Modifier.basicMarquee()
+            color = MiuixTheme.colorScheme.onSurface
         )
         Text(
             text = appInfo.packageName,
