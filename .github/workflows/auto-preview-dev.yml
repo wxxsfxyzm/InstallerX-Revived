@@ -37,7 +37,9 @@ jobs:
   build_and_upload_artifact:
     needs: pre_job
     # 只有当 should_skip 不为 true 时才运行
-    if: needs.pre_job.outputs.should_skip != 'true'
+    if: |
+      needs.pre_job.outputs.should_skip != 'true' &&
+      !contains(github.event.head_commit.message, '[skip dev]')
     runs-on: ubuntu-latest
     permissions:
       contents: read
