@@ -67,6 +67,7 @@ import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -146,6 +147,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
             val pagerState = rememberPagerState(pageCount = { navigationItems.size })
             val snackBarHostState = remember { SnackbarHostState() }
             val hazeState = if (useBlur) remember { HazeState() } else null
+            val hazeStyle = rememberMiuixHazeStyle()
 
             // LaunchedEffect to handle snackbar events from AllViewModel
             LaunchedEffect(Unit) {
@@ -211,7 +213,8 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                         allViewModel = allViewModel,
                         preferredViewModel = preferredViewModel,
                         snackBarHostState = snackBarHostState,
-                        hazeState = hazeState
+                        hazeState = hazeState,
+                        hazeStyle = hazeStyle
                     )
                 } else {
                     SettingsCompactLayout(
@@ -221,7 +224,8 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                         allViewModel = allViewModel,
                         preferredViewModel = preferredViewModel,
                         snackBarHostState = snackBarHostState,
-                        hazeState = hazeState
+                        hazeState = hazeState,
+                        hazeStyle = hazeStyle
                     )
                 }
             }
@@ -303,21 +307,18 @@ private fun SettingsCompactLayout(
     allViewModel: AllViewModel,
     preferredViewModel: PreferredViewModel,
     snackBarHostState: SnackbarHostState,
-    hazeState: HazeState?
+    hazeState: HazeState?,
+    hazeStyle: HazeStyle
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val hazeStyle = rememberMiuixHazeStyle()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(
                 modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
-                // Keep the color configuration from the original installer code
-                // to maintain the haze blur effect.
                 color = hazeState.getMiuixAppBarColor()
             ) {
-                // Iterate through items and use NavigationBarItem to align with the Miuix library example
                 navigationItems.forEachIndexed { index, item ->
                     NavigationBarItem(
                         selected = pagerState.currentPage == index,
@@ -381,7 +382,8 @@ private fun SettingsWideScreenLayout(
     allViewModel: AllViewModel,
     preferredViewModel: PreferredViewModel,
     snackBarHostState: SnackbarHostState,
-    hazeState: HazeState?
+    hazeState: HazeState?,
+    hazeStyle: HazeStyle
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -392,7 +394,10 @@ private fun SettingsWideScreenLayout(
     ) {
         // Left Panel: Navigation Rail
         NavigationRail(
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier
+                .fillMaxHeight()
+                .installerHazeEffect(hazeState, hazeStyle),
+            color = hazeState.getMiuixAppBarColor()
         ) {
             navigationItems.forEachIndexed { index, item ->
                 NavigationRailItem(
