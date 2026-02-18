@@ -61,6 +61,7 @@ fun InstallPreparingContent(
 
             Text(
                 text = stringResource(R.string.installer_preparing_desc),
+                color = MiuixTheme.colorScheme.onSurface,
                 style = MiuixTheme.textStyles.body1
             )
         }
