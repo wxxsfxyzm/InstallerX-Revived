@@ -97,7 +97,7 @@ fun MiuixPreferredPage(
             overscrollEffect = null
         ) {
             item { Spacer(modifier = Modifier.size(12.dp)) }
-            item { SmallTitle(stringResource(R.string.global)) }
+            item { SmallTitle(stringResource(R.string.personalization)) }
             item {
                 Card(
                     modifier = Modifier
