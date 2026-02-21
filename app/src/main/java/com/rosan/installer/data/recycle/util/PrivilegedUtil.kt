@@ -5,8 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.system.ErrnoException
 import android.util.Log
 import androidx.core.net.toUri
+import com.rosan.installer.Natives
 import com.rosan.installer.SecretCodeReceiver
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -31,32 +33,12 @@ private const val PRIVILEGED_START_TIMEOUT_MS = 2500L
 @Suppress("LogNotTimber")
 fun deletePaths(paths: Array<out String>) {
     for (path in paths) {
-        val file = File(path)
-
-        Log.d("DELETE_PATH", "Processing path for deletion: $path")
-
         try {
-            // Check if the file exists before attempting to delete.
-            if (file.exists()) {
-                // Call delete() and check its boolean return value.
-                if (file.delete()) {
-                    // This is the true success case.
-                    Log.d("DELETE_PATH", "Successfully deleted file: $path")
-                } else {
-                    // The file existed, but deletion failed.
-                    // This is a critical case to log as a warning.
-                    Log.w(
-                        "DELETE_PATH",
-                        "Failed to delete file: $path. Check for permissions or if it is a non-empty directory."
-                    )
-                }
-            } else {
-                // If the file doesn't exist, it's already in the desired state. No error needed.
-                Log.d("DELETE_PATH", "File does not exist, no action needed: $path")
-            }
-        } catch (e: SecurityException) {
-            // Specifically catch permission errors. This is crucial for debugging.
-            Log.e("DELETE_PATH", "SecurityException on deleting $path. Permission denied.", e)
+            Natives.deleteFile(path)
+            Log.i("DELETE_PATH", "Path delete was successful complete. Path: $path")
+        } catch (e: ErrnoException) {
+            // Catch kernel errnoException
+            Log.e("DELETE_PATH", "File deleted failed with errno ${e.errno} when processing $path", e)
         } catch (e: Exception) {
             // Catch any other unexpected errors during the process.
             Log.e("DELETE_PATH", "An unexpected error occurred while processing $path", e)
