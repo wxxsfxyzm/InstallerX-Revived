@@ -123,7 +123,7 @@
     <string name="config_error_name">لا يمكن ترك الاسم فارغًا</string>
     <string name="config_error_customize_authorizer">لا يمكن ترك المُفوِّض المخصص فارغًا</string>
     <string name="config_error_installer">لا يمكن ترك مصدر المُثبِّت فارغًا</string>
-    <string name="discard">تجاهل التغييرات</string>
+    <string name="discard">تجاهل</string>
     <string name="confirm">تأكيد</string>
     <string name="cancel">إلغاء</string>
     <string name="retry">إعادة المحاولة</string>
@@ -132,7 +132,7 @@
     <string name="next">التالي</string>
     <string name="previous">السابق</string>
     <string name="close">إغلاق</string>
-    <string name="finish">إنهاء</string>
+    <string name="finish">تم</string>
     <string name="open">فتح</string>
     <string name="select">تحديد</string>
     <string name="clear">مسح</string>
@@ -421,7 +421,7 @@
     <string name="performance">الأداء</string>
     <string name="lab">المختبر</string>
     <string name="lab_desc">الوصول إلى الميزات التجريبية والمطورة</string>
-    <string name="updating">جاري التحديث...</string>
+    <string name="updating">جاري التحديث. . .</string>
     <string name="update_available">تحديث متاح: %1$s</string>
     <string name="get_update_directly">احصل على التحديث مباشرة</string>
     <string name="get_update_directly_desc">احصل على تحديث مباشرة من GitHub وثبت، لن يبقى أي ذاكرة تخزين مؤقت</string>
@@ -437,4 +437,26 @@
     <string name="color_orange">برتقالي</string>
     <string name="color_amber">العنبر</string>
     <string name="color_yellow">الأصفر</string>
+    <string name="install_anyway">تثبيت على أي حال</string>
+    <string name="open_source_license_settings_description">عرض مكتبات المصدر المفتوح من طرف ثالث ورخصها</string>
+    <string name="debug">تصحيح الأخطاء</string>
+    <string name="save_logs">سجلات الحفظ</string>
+    <string name="save_logs_desc">حفظ سجل السجلات في ملف محلي لأغراض التصحيح</string>
+    <string name="export_logs">سجلات التصدير</string>
+    <string name="export_logs_desc">تصدير سجلات التطبيق</string>
+    <string name="theme_settings_use_blur">تمكين التأثير الضبابي</string>
+    <string name="config_error_package_not_found">لم يتم العثور على الحزمة</string>
+    <string name="config_error_package_name_empty">اسم الحزمة لا يمكن أن يكون فارغاً</string>
+    <string name="upgrade">تحديث</string>
+    <string name="reinstall">إعادة التثبيت</string>
+    <string name="visit_home_page">زيارة الصفحة الرئيسية</string>
+    <string name="open_lsposed">فتح LSPosed</string>
+    <string name="expand">توسيع</string>
+    <string name="collapse">الانهيار</string>
+    <string name="scope_tips">الملف الأول هو الافتراضي، لا حاجة لاختيار يدوي. يمكن تعيين ملف تعريف جديد لتطبيقات محددة للتثبيت التي يبدأونها.</string>
+    <string name="got_it">فهمت</string>
+    <string name="pull_to_refresh_hint1">اسحب للأسفل للتحديث</string>
+    <string name="pull_to_refresh_hint2">الإصدار للتحديث</string>
+    <string name="pull_to_refresh_hint3">جارٍ الإنعاش…</string>
+    <string name="pull_to_refresh_hint4">تم تحديثه بنجاح</string>
 </resources>

@@ -45,11 +45,11 @@
     <string name="ignore_battery_optimizations_desc">Útil en ROMs con políticas estrictas de segundo plano. Si la notificación se queda atascada, prueba a ignorar la optimización de la batería</string>
     <string name="ignore_battery_optimizations_desc_disabled">Ya ignorado</string>
     <string name="lock_default_installer">Establecer como instalador predeterminado</string>
-    <string name="lock_default_installer_desc">Establece InstallerX como la aplicación predeterminada para instalar APKs</string>
+    <string name="lock_default_installer_desc">Establece InstallerX como la aplicación predeterminada para instalar apks</string>
     <string name="lock_default_installer_success">Establecido exitosamente como Instalador predeterminado</string>
     <string name="lock_default_installer_failed">No se pudo establecer como instalador predeterminado</string>
     <string name="unlock_default_installer">Quitar como instalador predeterminado</string>
-    <string name="unlock_default_installer_desc">Quitar InstallerX como el instalador predeterminado para APKs</string>
+    <string name="unlock_default_installer_desc">Quitar InstallerX como el instalador predeterminado para apks</string>
     <string name="unlock_default_installer_success">Quitado exitosamente como Instalador predeterminado</string>
     <string name="unlock_default_installer_failed">No se pudo quitar como instalador predeterminado</string>
     <string name="clear_cache">Limpiar caché</string>
@@ -77,7 +77,7 @@
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
     <string name="config_authorizer_none">Ninguno</string>
     <string name="config_authorizer_root">Root</string>
-    <string name="config_authorizer_shizuku">Shizuku.</string>
+    <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku.</string>
     <string name="config_authorizer_customize">Personalizado</string>
     <string name="config_customize_authorizer">Autorizador personalizado</string>
@@ -419,7 +419,7 @@
     <string name="config_target_user">Usuario de destino</string>
     <string name="config_manual_dexopt">Optimización manual de Dex</string>
     <string name="config_manual_dexopt_desc">Inicie manualmente el proceso dex2oat después de la instalación</string>
-    <string name="theme_settings_miuix_ui">Miuix.</string>
+    <string name="theme_settings_miuix_ui">Miuix</string>
     <string name="config_dexopt_mode">Modo de optimización</string>
     <string name="config_force_dexopt">Forzar optimización</string>
     <string name="config_force_dexopt_desc">Forzar la recompilación aunque el sistema lo considere innecesario</string>
