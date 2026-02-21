@@ -50,6 +50,12 @@ android {
 
     }
 
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
+    }
+
     signingConfigs {
         if (hasCustomSigning) {
             register("releaseCustom") {
