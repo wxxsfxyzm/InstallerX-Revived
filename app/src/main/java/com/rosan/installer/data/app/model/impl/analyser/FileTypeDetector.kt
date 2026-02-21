@@ -3,13 +3,19 @@ package com.rosan.installer.data.app.model.impl.analyser
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.enums.DataType
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
 
-object FileTypeDetector {
+object FileTypeDetector : KoinComponent {
+
+    private val json: Json by inject()
 
     fun detect(data: DataEntity, extra: AnalyseExtraEntity): DataType {
         val fileEntity = data as? DataEntity.FileEntity ?: return DataType.NONE
@@ -55,17 +61,17 @@ object FileTypeDetector {
         return when {
             // Module and APK mixed
             hasAndroidManifest -> {
-                Timber.Forest.d("Detected MIXED_MODULE_APK")
+                Timber.d("Detected MIXED_MODULE_APK")
                 DataType.MIXED_MODULE_APK
             }
             // Module containing APKs
             hasApksInside -> {
-                Timber.Forest.d("Detected MIXED_MODULE_ZIP")
+                Timber.d("Detected MIXED_MODULE_ZIP")
                 DataType.MIXED_MODULE_ZIP
             }
             // Pure module
             else -> {
-                Timber.Forest.d("Detected MODULE_ZIP")
+                Timber.d("Detected MODULE_ZIP")
                 DataType.MODULE_ZIP
             }
         }
@@ -73,19 +79,46 @@ object FileTypeDetector {
 
     private fun detectStandardType(zipFile: ZipFile, entries: List<ZipEntry>): DataType {
         // 1. XAPK (manifest.json)
-        if (zipFile.getEntry("manifest.json") != null) return DataType.XAPK
+        val manifestEntry = zipFile.getEntry("manifest.json")
+        if (manifestEntry != null) {
+            try {
+                val content = zipFile.getInputStream(manifestEntry).use { input ->
+                    input.reader().readText()
+                }
 
-        // 2. APKM (info.json) - Validate content to distinguish from generic info.json
+                // Parse as a dynamic JsonElement tree instead of strict deserialization
+                val jsonObject = json.parseToJsonElement(content).jsonObject
+
+                // A valid XAPK must have basic package identification
+                val hasBaseInfo = jsonObject.containsKey("package_name") && jsonObject.containsKey("version_code")
+
+                // A valid XAPK must define its installation payload.
+                // It either contains 'split_apks' (modern) or 'expansions' (OBB format).
+                val hasSplitApks = jsonObject.containsKey("split_apks")
+                val hasExpansions = jsonObject.containsKey("expansions")
+
+                if (hasBaseInfo && (hasSplitApks || hasExpansions)) {
+                    return DataType.XAPK
+                } else {
+                    Timber.d("manifest.json found, but missing payload definitions (split_apks or expansions). Skipping XAPK detection.")
+                }
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to parse manifest.json via kotlinx.serialization. Skipping XAPK detection.")
+            }
+        }
+
+        // 2. APKM (info.json)
         val infoEntry = zipFile.getEntry("info.json")
         if (infoEntry != null) {
             try {
-                // Read content to verify mandatory APKM fields exist
-                // This prevents misidentifying other formats (like some APKS/ZIPs) that happen to have an info.json
-                val isValidApkm = zipFile.getInputStream(infoEntry).use { input ->
-                    val content = input.reader().readText()
-                    // "pname" and "versioncode" are strictly required by ApkmStrategy
-                    content.contains("\"pname\"") && content.contains("\"versioncode\"")
+                val content = zipFile.getInputStream(infoEntry).use { input ->
+                    input.reader().readText()
                 }
+
+                val jsonObject = json.parseToJsonElement(content).jsonObject
+
+                // APKM requires these specific keys
+                val isValidApkm = jsonObject.containsKey("pname") && jsonObject.containsKey("versioncode")
 
                 if (isValidApkm) {
                     return DataType.APKM
@@ -93,7 +126,7 @@ object FileTypeDetector {
                     Timber.d("Found info.json but missing APKM keys (pname/versioncode). Skipping APKM detection.")
                 }
             } catch (e: Exception) {
-                Timber.w(e, "Failed to read info.json content. Skipping APKM detection.")
+                Timber.w(e, "Failed to parse info.json via kotlinx.serialization. Skipping APKM detection.")
             }
         }
 
@@ -101,14 +134,16 @@ object FileTypeDetector {
         if (zipFile.getEntry("AndroidManifest.xml") != null) return DataType.APK
 
         // 4. APKS (Split APKs)
-        // Feature: contains base.apk or base-master.apk
+        val hasTocPb = zipFile.getEntry("toc.pb") != null
+        if (hasTocPb) return DataType.APKS
+
         val hasBaseApk = entries.any {
             val name = File(it.name).name
             name.equals("base.apk", true) || name.startsWith("base-master")
         }
         if (hasBaseApk) return DataType.APKS
 
-        // 5. Multi-APK Zip (Zip containing arbitrary APKs)
+        // 5. Multi-APK Zip
         val hasApkFiles = entries.any {
             !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true)
         }
