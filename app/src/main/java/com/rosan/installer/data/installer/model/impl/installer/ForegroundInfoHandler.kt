@@ -470,7 +470,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                 baseBuilder.addAction(0, getString(R.string.cancel), cancelIntent)
             }
 
-            is ProgressEntity.InstallResolvedFailed -> {
+            is ProgressEntity.InstallResolvedFailed, ProgressEntity.InstallAnalysedFailed -> {
                 contentTitle = getString(R.string.installer_resolve_failed)
                 shortText = getString(R.string.installer_live_channel_short_text_resolve_failed)
                 baseBuilder.setContentText(installer.error.getErrorMessage(context)).setOnlyAlertOnce(false)
