@@ -25,7 +25,11 @@ fun LoadingContent(statusText: String) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             InfiniteProgressIndicator()
             Spacer(modifier = Modifier.height(16.dp))
-            Text(statusText, style = MiuixTheme.textStyles.body1)
+            Text(
+                text = statusText,
+                color = MiuixTheme.colorScheme.onSurface,
+                style = MiuixTheme.textStyles.body1
+            )
         }
     }
 }
