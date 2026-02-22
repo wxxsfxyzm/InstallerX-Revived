@@ -19,7 +19,7 @@
     <string name="lab">Laboratorium</string>
     <string name="lab_desc">Toegang tot experimentele en ontwikkelaarsfuncties</string>
     <string name="about_detail">Over InstallerX Revived</string>
-    <string name="updating">Updaten…</string>
+    <string name="updating">Bijwerken…</string>
     <string name="get_update">Update krijgen</string>
     <string name="get_update_detail">Naar software-updates en nieuwe functies zoeken</string>
     <string name="update_available">Update beschikbaar:%1$s</string>
@@ -67,7 +67,7 @@
     <string name="theme_settings_dynamic_color_follow_icon">Kleurvolle dialoog</string>
     <string name="theme_settings_dynamic_color_follow_icon_desc">De installatiedialoog zal niet langer de themakleuren van de app opvolgen. In plaats daarvan zal het kleuren die gevonden zijn in het icoon van het te installeren pakket gebruiken</string>
     <string name="theme_settings_live_activity_dynamic_color_follow_icon">Kleurvolle live-activiteitsvoortgang</string>
-    <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">Het voortgangsgedeelte van de live-activiteit zal kleuren gebruiken die gevonden zijn in het het icoon van het pakket</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">Het voortgangsgedeelte van de live-activiteit zal kleuren gebruiken die gevonden zijn in het icoon van het pakket</string>
     <string name="color_default">Standaard</string>
     <string name="color_pink">Roze</string>
     <string name="color_red">Rood</string>
@@ -130,7 +130,7 @@
     <string name="success">Succes</string>
     <string name="details">Details</string>
     <string name="add">Toevoegen</string>
-    <string name="update">Update</string>
+    <string name="update">Bijwerken</string>
     <string name="save">Opslaan</string>
     <string name="more">Meer</string>
     <string name="edit">Bewerken</string>
@@ -227,7 +227,7 @@
     <string name="cancel">Annuleren</string>
     <string name="retry">Opnieuw proberen</string>
     <string name="install">Installeren</string>
-    <string name="upgrade">Updaten</string>
+    <string name="upgrade">Update installeren</string>
     <string name="reinstall">Herinstalleren</string>
     <string name="install_anyway">Toch installeren</string>
     <string name="uninstall">Verwijderen</string>
@@ -276,7 +276,7 @@
     <string name="installer_prepare_install_too_many">Selecteer alsjeblieft alleen één base.apk</string>
     <string name="installer_prepare_sdk_incompatible">Systeem-SDK lager dan het vereiste van de app</string>
     <string name="installer_prepare_type_new_install">Voorbereiden om een nieuwe app te installeren</string>
-    <string name="installer_prepare_type_upgrade">Voorbereiden om app te updaten</string>
+    <string name="installer_prepare_type_upgrade">Voorbereiden om app bij te werken</string>
     <string name="installer_prepare_type_downgrade">Dit is een downgrade, wat mogelijk gegevensverlies of appinstabiliteit kan veroorzaken</string>
     <string name="installer_prepare_type_reinstall">Huidige versie van de app herinstalleren</string>
     <string name="installer_prepare_type_sidegrade">Huidige versie van de app veranderen</string>
@@ -308,7 +308,7 @@
     <string name="installer_live_channel_short_text_resolve_failed">Mislukt</string>
     <string name="installer_live_channel_short_text_install_failed">Mislukt</string>
     <string name="installer_uninstall_app">App verwijderen</string>
-    <string name="installer_uninstalling">Verwijderen</string>
+    <string name="installer_uninstalling">Wordt verwijdert</string>
     <string name="uninstall_keep_data">Gegevens houden</string>
     <string name="uninstall_keep_data_desc">Appgegevens en cache zal bewaard blijven</string>
     <string name="uninstall_all_users">Voor alle gebruikers</string>
@@ -436,7 +436,7 @@
     <string name="exception_module_install_failed_incompatible_authorizer">Incompatibele autorisateur</string>
     <string name="old_version_prefix">Huidige</string>
     <string name="old_version_archived">Gearchiveerd</string>
-    <string name="upgrade_version_prefix">Update</string>
+    <string name="upgrade_version_prefix">Nieuwe</string>
     <string name="downgrade_version_prefix">Downgrade</string>
     <string name="install_choice">Selecteer pakket</string>
     <string name="show_dialog_when_pressing_notification">Laat dialoog zien bij het drukken van de melding</string>
@@ -506,7 +506,7 @@
     <string name="config_all_whitelist_restricted_permissions">Beperkte machtigingen toestaan</string>
     <string name="config_all_whitelist_restricted_permissions_desc">Beperkte machtigingen toestaan voor het te installeren pakket</string>
     <string name="disable_allowed_apex_update_check">Zet de verificatie van de APEX-updatezoeker uit</string>
-    <string name="disable_allowed_apex_update_check_desc">Controleer niet of de geïnstalleerde APEX geüpdatet kan worden</string>
+    <string name="disable_allowed_apex_update_check_desc">Controleer niet of de geïnstalleerde APEX bijgewerkt kan worden</string>
     <string name="config_bypass_low_target_sdk">Blokkering van lage SDK-versies omzeilen</string>
     <string name="config_bypass_low_target_sdk_desc">Staat apps bedoelt voor oude SDK-versies toe om geïnstalleerd te worden</string>
     <string name="dry_run">Droogloop</string>
