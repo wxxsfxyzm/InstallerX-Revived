@@ -313,13 +313,14 @@
     <string name="auth_summary_install">You are doing an install operation, To continue, please confirm this action using your device authentication</string>
     <string name="auth_summary_uninstall">You are doing an uninstall operation, To continue, please confirm this action using your device authentication</string>
     <string name="installer_ready">Ready</string>
-    <string name="installer_resolving">Checking…</string>
+    <string name="installer_resolving">Resolving…</string>
     <string name="installer_resolve_failed">Resolve failed</string>
     <string name="installer_resolve_success">Resolve passed</string>
     <string name="installer_preparing">Preparing</string>
     <string name="installer_preparing_desc">Preparing files, please wait…</string>
     <string name="installer_analysing">Analysing…</string>
     <string name="installer_analyse_failed">Analyse failed</string>
+    <string name="installer_analyse_success">Analyse success</string>
     <string name="installer_select_install">Select apps to install</string>
     <string name="installer_select_split">Select APK splits</string>
     <string name="installer_select_split_desc">Re-select the APK splits to install</string>
@@ -377,6 +378,7 @@
     <string name="installer_live_channel_short_text_installing">Installing</string>
     <string name="installer_live_channel_short_text_success">Success</string>
     <string name="installer_live_channel_short_text_resolve_failed">Failed</string>
+    <string name="installer_live_channel_short_text_analyse_failed">Failed</string>
     <string name="installer_live_channel_short_text_install_failed">Failed</string>
     <string name="installer_uninstall_app">Uninstall App</string>
     <string name="installer_uninstalling">Uninstalling</string>

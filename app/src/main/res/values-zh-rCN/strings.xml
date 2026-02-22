@@ -305,13 +305,14 @@
     <string name="auth_summary_install">你正在进行安装操作, 若要继续，请通过你的设备认证以确认此操作</string>
     <string name="auth_summary_uninstall">你正在进行卸载操作, 若要继续，请通过你的设备认证以确认此操作</string>
     <string name="installer_ready">准备就绪</string>
-    <string name="installer_resolving">分析中…</string>
-    <string name="installer_resolve_failed">分析失败</string>
-    <string name="installer_resolve_success">分析成功</string>
+    <string name="installer_resolving">解析中…</string>
+    <string name="installer_resolve_failed">解析失败</string>
+    <string name="installer_resolve_success">解析成功</string>
     <string name="installer_preparing">正在读取文件</string>
     <string name="installer_preparing_desc">正在读取文件，请稍候…</string>
-    <string name="installer_analysing">解析中…</string>
-    <string name="installer_analyse_failed">解析失败</string>
+    <string name="installer_analysing">分析中…</string>
+    <string name="installer_analyse_failed">分析失败</string>
+    <string name="installer_analyse_success">分析成功</string>
     <string name="installer_select_install">选择要安装的应用</string>
     <string name="installer_select_split">选择分包</string>
     <string name="installer_select_split_desc">重新选择要安装的分包</string>
@@ -367,6 +368,7 @@
     <string name="installer_live_channel_short_text_installing">安装中</string>
     <string name="installer_live_channel_short_text_success">已安装</string>
     <string name="installer_live_channel_short_text_resolve_failed">解析失败</string>
+    <string name="installer_live_channel_short_text_analyse_failed">分析失败</string>
     <string name="installer_live_channel_short_text_install_failed">安装失败</string>
     <string name="installer_uninstall_app">卸载应用</string>
     <string name="installer_uninstalling">正在卸载</string>
