@@ -572,20 +572,7 @@ private fun MixedModuleZip_InitialChoice(
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.installer_choice_install_as_app),
                         description = stringResource(R.string.installer_choice_install_as_app_desc),
-                        onClick = {
-                            analysisResults.flatMap { it.appEntities }
-                                .filter { it.app !is AppEntity.ModuleEntity }
-                                .forEach { entity ->
-                                    viewModel.dispatch(
-                                        InstallerViewAction.ToggleSelection(
-                                            packageName = entity.app.packageName,
-                                            entity = entity,
-                                            isMultiSelect = true
-                                        )
-                                    )
-                                }
-                            onSelectApk()
-                        }
+                        onClick = { onSelectApk() }
                     )
                 }
             }
