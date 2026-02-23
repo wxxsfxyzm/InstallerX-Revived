@@ -9,9 +9,11 @@ import com.rosan.installer.data.app.model.enums.HttpProfile
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.exception.HttpNotAllowedException
 import com.rosan.installer.data.installer.model.exception.HttpRestrictedForLocalhostException
+import com.rosan.installer.data.installer.model.exception.ResolveFailedLinkNotValidException
 import com.rosan.installer.data.installer.repo.NetworkResolver
 import com.rosan.installer.data.installer.util.copyToWithProgress
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.util.ArchiveUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -76,6 +78,11 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
         val preFlight = performPreFlightCheck(client, uri.toString())
         val contentLength = preFlight.first
         val supportsRange = preFlight.second
+
+        if (!verifyArchiveMagicNumber(client, uri.toString())) {
+            // Throw a custom exception or handle the error
+            throw ResolveFailedLinkNotValidException("The target file is not a valid ZIP/APK archive.")
+        }
 
         val tempFile = File(cacheDirectory, UUID.randomUUID().toString())
         tempFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
@@ -337,6 +344,51 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
                     /* Allowed */
                 }
             }
+        }
+    }
+
+    /**
+     * Verify if the remote file is a valid archive by checking common ZIP signatures.
+     * Requesting only the first 4 bytes is highly efficient for rejecting HTML/JSON error pages.
+     *
+     * @param client The OkHttpClient instance.
+     * @param url The target download URL.
+     * @return true if the header matches known ZIP signatures, false otherwise.
+     */
+    private fun verifyArchiveMagicNumber(client: OkHttpClient, url: String): Boolean {
+        val request = Request.Builder()
+            .url(url)
+            .addDefaultHeaders()
+            // Request the first 4 bytes
+            .header("Range", "bytes=0-3")
+            .build()
+
+        return try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return false
+
+                val body = response.body ?: return false
+                val stream = body.byteStream()
+                val buffer = ByteArray(4)
+                var bytesRead = 0
+
+                while (bytesRead < 4) {
+                    val read = stream.read(buffer, bytesRead, 4 - bytesRead)
+                    if (read == -1) break
+                    bytesRead += read
+                }
+
+                if (bytesRead >= 4) {
+                    ArchiveUtils.isZipMagicNumber(buffer)
+                } else {
+                    false
+                }
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to verify archive magic number.")
+            // Assume true on network failure to avoid blocking valid downloads
+            // if the server simply mishandled the Range request.
+            true
         }
     }
 }

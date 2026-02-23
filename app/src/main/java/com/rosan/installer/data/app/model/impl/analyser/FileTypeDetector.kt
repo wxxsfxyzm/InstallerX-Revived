@@ -3,6 +3,8 @@ package com.rosan.installer.data.app.model.impl.analyser
 import com.rosan.installer.data.app.model.entity.AnalyseExtraEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.enums.DataType
+import com.rosan.installer.data.app.model.exception.AnalyseFailedCorruptedArchiveException
+import com.rosan.installer.util.ArchiveUtils
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import org.koin.core.component.KoinComponent
@@ -19,6 +21,7 @@ object FileTypeDetector : KoinComponent {
 
     fun detect(data: DataEntity, extra: AnalyseExtraEntity): DataType {
         val fileEntity = data as? DataEntity.FileEntity ?: return DataType.NONE
+        val isZip = ArchiveUtils.isZipArchive(File(fileEntity.path))
 
         return try {
             ZipFile(fileEntity.path).use { zip ->
@@ -34,13 +37,19 @@ object FileTypeDetector : KoinComponent {
                 detectStandardType(zip, entries)
             }
         } catch (e: Exception) {
-            // Fallback: assume APK if path ends with .apk and zip open failed
-            if (fileEntity.path.endsWith(".apk", true)) {
-                DataType.APK
+            if (e is ZipException) {
+                if (isZip) {
+                    // The file contains the ZIP magic number but failed to open.
+                    // This typically means the file is truncated or corrupted.
+                    Timber.e(e, "Archive is corrupted or truncated: ${fileEntity.path}")
+                    throw AnalyseFailedCorruptedArchiveException("Archive is corrupted or truncated", e)
+                } else {
+                    // The file does not have the ZIP magic number, so it is not a ZIP file at all.
+                    handleNonZipFallback(fileEntity, e)
+                }
             } else {
-                Timber.Forest.e(e, "Failed to detect file type for path: ${fileEntity.path}")
-                if (e is ZipException) throw e
-                else DataType.NONE
+                Timber.e(e, "Failed to detect file type for path: ${fileEntity.path}")
+                DataType.NONE
             }
         }
     }
@@ -151,4 +160,13 @@ object FileTypeDetector : KoinComponent {
 
         return DataType.NONE
     }
+
+    private fun handleNonZipFallback(fileEntity: DataEntity.FileEntity, e: Exception): DataType =
+        if (fileEntity.path.endsWith(".apk", ignoreCase = true)) {
+            // Fallback: assume APK if path ends with .apk and zip open failed
+            DataType.APK
+        } else {
+            Timber.e(e, "File is not a valid ZIP archive: ${fileEntity.path}")
+            DataType.NONE
+        }
 }

@@ -55,6 +55,7 @@ import com.rosan.installer.data.app.model.exception.UninstallFailedInternalError
 import com.rosan.installer.data.installer.model.exception.HttpNotAllowedException
 import com.rosan.installer.data.installer.model.exception.HttpRestrictedForLocalhostException
 import com.rosan.installer.data.installer.model.exception.ResolveException
+import com.rosan.installer.data.installer.model.exception.ResolveFailedLinkNotValidException
 import com.rosan.installer.data.installer.model.exception.ResolvedFailedNoInternetAccessException
 import com.rosan.installer.data.recycle.model.exception.AppProcessNotWorkException
 import com.rosan.installer.data.recycle.model.exception.DhizukuDeadServiceException
@@ -76,6 +77,7 @@ import java.util.zip.ZipException
 private fun Throwable.getStringRes() =
     when (this) {
         is ResolveException -> R.string.exception_resolve_failed
+        is ResolveFailedLinkNotValidException -> R.string.exception_resolve_failed_link_not_valid
         is ResolvedFailedNoInternetAccessException -> R.string.exception_resolve_failed_no_internet_access
         is AnalyseFailedAllFilesUnsupportedException -> R.string.exception_analyse_failed_all_files_unsupported
         is AuthenticationFailedException -> R.string.exception_authentication_failed

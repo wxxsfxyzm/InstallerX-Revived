@@ -1,4 +1,4 @@
-package com.rosan.installer.util
+package com.rosan.installer.util.pm
 
 import android.content.Context
 import android.content.pm.PackageManager

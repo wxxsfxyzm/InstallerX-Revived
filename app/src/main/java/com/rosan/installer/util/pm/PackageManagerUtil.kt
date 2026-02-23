@@ -1,4 +1,4 @@
-package com.rosan.installer.util
+package com.rosan.installer.util.pm
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo

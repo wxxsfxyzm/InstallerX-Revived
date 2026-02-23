@@ -38,8 +38,8 @@ import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.getValue
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
-import com.rosan.installer.util.isFreshInstallCandidate
-import com.rosan.installer.util.isPackageArchivedCompat
+import com.rosan.installer.util.pm.isFreshInstallCandidate
+import com.rosan.installer.util.pm.isPackageArchivedCompat
 import com.rosan.installer.util.removeFlag
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get

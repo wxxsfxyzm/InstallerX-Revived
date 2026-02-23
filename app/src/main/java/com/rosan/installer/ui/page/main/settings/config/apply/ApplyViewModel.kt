@@ -12,9 +12,9 @@ import com.rosan.installer.data.settings.model.room.entity.AppEntity
 import com.rosan.installer.data.settings.repo.AppRepo
 import com.rosan.installer.data.settings.repo.ConfigRepo
 import com.rosan.installer.ui.common.ViewContent
-import com.rosan.installer.util.compatVersionCode
-import com.rosan.installer.util.getCompatInstalledPackages
 import com.rosan.installer.util.hasFlag
+import com.rosan.installer.util.pm.compatVersionCode
+import com.rosan.installer.util.pm.getCompatInstalledPackages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

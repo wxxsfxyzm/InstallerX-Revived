@@ -6,9 +6,9 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import com.rosan.installer.data.app.util.SignatureUtils
-import com.rosan.installer.util.compatVersionCode
 import com.rosan.installer.util.hasFlag
-import com.rosan.installer.util.isPackageArchivedCompat
+import com.rosan.installer.util.pm.compatVersionCode
+import com.rosan.installer.util.pm.isPackageArchivedCompat
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import java.io.File

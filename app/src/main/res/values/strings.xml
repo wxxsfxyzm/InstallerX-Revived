@@ -475,6 +475,7 @@
     <string name="installer_file_path">Path: %1$s</string>
     <string name="exception_install_failed_unknown">Unknown error</string>
     <string name="exception_resolve_failed">Resolve URI failed</string>
+    <string name="exception_resolve_failed_link_not_valid">This link does not contain a valid file</string>
     <string name="exception_resolve_failed_no_internet_access">This version cannot access Internet, to use this feature, reinstall another version</string>
     <string name="exception_analyse_failed_all_files_unsupported">File not supported</string>
     <string name="exception_authentication_failed">User authentication failed</string>
