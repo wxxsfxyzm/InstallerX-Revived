@@ -700,3 +700,13 @@ fun MiuixDataSplitChooseAllWidget(viewModel: EditViewModel) {
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeSplitChooseAll(it)) }
     )
 }
+
+@Composable
+fun MiuixDataApkChooseAllWidget(viewModel: EditViewModel) {
+    MiuixSwitchWidget(
+        title = stringResource(id = R.string.config_apk_choose_all),
+        description = stringResource(id = R.string.config_apk_choose_all_desc),
+        checked = viewModel.state.data.apkChooseAll,
+        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeApkChooseAll(it)) }
+    )
+}

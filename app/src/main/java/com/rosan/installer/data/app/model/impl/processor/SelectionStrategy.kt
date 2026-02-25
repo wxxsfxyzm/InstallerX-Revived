@@ -12,6 +12,7 @@ object SelectionStrategy {
 
     fun select(
         splitChooseAll: Boolean,
+        apkChooseAll: Boolean,
         entities: List<AppEntity>,
         sessionType: DataType
     ): List<SelectInstallEntity> {
@@ -69,7 +70,7 @@ object SelectionStrategy {
 
         return entities.map { entity ->
             val isSelected = when (entity) {
-                is AppEntity.BaseEntity -> true // Base APK is always selected
+                is AppEntity.BaseEntity -> apkChooseAll // Select Base APK based on apkChooseAll setting
                 is AppEntity.DexMetadataEntity -> true // Metadata is always selected
                 is AppEntity.SplitEntity -> entity in selectedSplits // Only optimal splits are selected
                 is AppEntity.ModuleEntity -> true // Modules are usually selected

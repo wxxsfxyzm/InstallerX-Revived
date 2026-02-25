@@ -77,6 +77,7 @@ fun installChoiceDialog(
     val isModuleApk = sourceType == DataType.MIXED_MODULE_APK
     val isMixedModuleZip = sourceType == DataType.MIXED_MODULE_ZIP
     var selectionMode by remember(sourceType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
+    val apkChooseAll = installer.config.apkChooseAll
 
     val primaryButtonText = if (isMultiApk) R.string.install else R.string.next
     val primaryButtonAction = if (isMultiApk) {
@@ -123,6 +124,7 @@ fun installChoiceDialog(
                 isModuleApk = isModuleApk,
                 isMultiApk = isMultiApk,
                 isMixedModuleZip = isMixedModuleZip,
+                apkChooseAll = apkChooseAll,
                 selectionMode = selectionMode,
                 onSetSelectionMode = { selectionMode = it }
             )
@@ -146,6 +148,7 @@ private fun ChoiceContent(
     isModuleApk: Boolean = false,
     isMultiApk: Boolean,
     isMixedModuleZip: Boolean,
+    apkChooseAll: Boolean,
     selectionMode: MmzSelectionMode,
     onSetSelectionMode: (MmzSelectionMode) -> Unit
 ) {
@@ -229,6 +232,19 @@ private fun ChoiceContent(
                         title = stringResource(R.string.installer_choice_install_as_app),
                         description = stringResource(R.string.installer_choice_install_as_app_desc),
                         onClick = {
+                            if (apkChooseAll) {
+                                analysisResults.flatMap { it.appEntities }
+                                    .filter { it.app !is AppEntity.ModuleEntity && !it.selected }
+                                    .forEach { entity ->
+                                        viewModel.dispatch(
+                                            InstallerViewAction.ToggleSelection(
+                                                packageName = entity.app.packageName,
+                                                entity = entity,
+                                                isMultiSelect = true
+                                            )
+                                        )
+                                    }
+                            }
                             onSetSelectionMode(MmzSelectionMode.APK_CHOICE)
                         }
                     )

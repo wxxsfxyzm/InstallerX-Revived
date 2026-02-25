@@ -29,6 +29,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowAllRequestedPermissionsWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowDowngradeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowTestOnlyWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixDataApkChooseAllWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAuthorizerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAutoDeleteWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataBypassLowTargetSdkWidget
@@ -217,7 +218,7 @@ fun MiuixEditPage(
                     MiuixDataAllowAllRequestedPermissionsWidget(viewModel = viewModel)
                 }
             }
-            item { SmallTitle(stringResource(R.string.config_label_app_bundle_settings)) }
+            item { SmallTitle(stringResource(R.string.config_label_preferences)) }
             item {
                 Card(
                     modifier = Modifier
@@ -225,6 +226,7 @@ fun MiuixEditPage(
                         .padding(bottom = 16.dp)
                 ) {
                     MiuixDataSplitChooseAllWidget(viewModel = viewModel)
+                    MiuixDataApkChooseAllWidget(viewModel = viewModel)
                 }
             }
             item { Spacer(Modifier.navigationBarsPadding()) }

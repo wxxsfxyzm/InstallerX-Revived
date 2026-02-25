@@ -2,6 +2,7 @@ package com.rosan.installer.ui.icons
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
+import androidx.compose.material.icons.automirrored.outlined.PlaylistAddCheck
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.NotificationsOff
+import androidx.compose.material.icons.outlined.PlaylistAddCheck
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.Tag
@@ -172,6 +174,7 @@ object AppIcons {
     val InstallAllowAllRequestedPermissions = Icons.TwoTone.LibraryAddCheck
 
     val InstallSplitChooseAll = Icons.AutoMirrored.TwoTone.PlaylistAdd
+    val InstallApkChooseAll = Icons.AutoMirrored.Outlined.PlaylistAddCheck
     // --- 结束 ---
 
     // --- 箭头图标集合 ---

@@ -72,6 +72,7 @@ object AnalyserRepoImpl : AnalyserRepo {
         val finalResults = processedGroups.map { group ->
             val selectableEntities = SelectionStrategy.select(
                 splitChooseAll = config.splitChooseAll,
+                apkChooseAll = config.apkChooseAll,
                 entities = group.entities,
                 sessionDataType.sessionType
             )

@@ -234,6 +234,7 @@
     <string name="config_label_install_options">安装选项</string>
     <string name="config_label_install_options_desc">配置安装参数，如安装来源，安装用户等</string>
     <string name="config_label_app_bundle_settings">拆分安装包</string>
+    <string name="config_label_preferences">偏好设置</string>
     <string name="config_dialog_title_invalid">有错误输入项</string>
     <string name="config_dialog_title_unsaved_changes">有未保存的修改</string>
     <string name="config_dialog_message_unsaved_changes">不保存就退出吗？</string>
@@ -574,6 +575,8 @@
     <string name="config_grant_all_permissions_desc">自动授予包请求的所有权限。请注意只适用于运行时权限，特殊权限如所有文件访问或无障碍不会自动授予</string>
     <string name="config_split_choose_all">默认选中所有分包</string>
     <string name="config_split_choose_all_desc">安装时默认选中所有分包而不是选中最合适的</string>
+    <string name="config_apk_choose_all">默认选择所有 APK</string>
+    <string name="config_apk_choose_all_desc">安装时默认勾选所有 APK 文件</string>
     <string name="force_volume_uuid">指定卷 UUID</string>
     <string name="force_volume_uuid_desc">允许指定卷 UUID 并将软件包安装到该卷</string>
     <string name="force_permission_prompt">强制权限提示</string>

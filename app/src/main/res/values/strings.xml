@@ -242,6 +242,7 @@
     <string name="config_label_install_options">Install Options</string>
     <string name="config_label_install_options_desc">Configure installation parameters such as source, user</string>
     <string name="config_label_app_bundle_settings">Split APK Packages</string>
+    <string name="config_label_preferences">Preferences</string>
     <string name="config_dialog_title_invalid">Invalid Input</string>
     <string name="config_dialog_title_unsaved_changes">Unsaved changes</string>
     <string name="config_dialog_message_unsaved_changes">Quit without saving?</string>
@@ -589,6 +590,8 @@
     <string name="config_grant_all_permissions_desc">Automatically grant all permissions the package is requesting. Note that this only applies to runtime permissions. Special permissions like All Files Access or Accessibility won\'t be automatically granted</string>
     <string name="config_split_choose_all">Select all splits by default</string>
     <string name="config_split_choose_all_desc">Select all splits by default instead of selecting best suitable</string>
+    <string name="config_apk_choose_all">Select all APKs by default</string>
+    <string name="config_apk_choose_all_desc">Automatically select all APK files instead of manual selection</string>
     <string name="force_volume_uuid">Force Volume UUID</string>
     <string name="force_volume_uuid_desc">Allows specifying a volume UUID to install the package to</string>
     <string name="force_permission_prompt">Force Permission Prompt</string>

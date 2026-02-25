@@ -38,7 +38,8 @@ data class EditViewState(
         val allowDowngrade: Boolean,
         val bypassLowTargetSdk: Boolean,
         val allowAllRequestedPermissions: Boolean,
-        val splitChooseAll: Boolean
+        val splitChooseAll: Boolean,
+        val apkChooseAll: Boolean
     ) {
         val errorName = name.isEmpty()// || name == "Default"
 
@@ -77,7 +78,8 @@ data class EditViewState(
             allowDowngrade = this.allowDowngrade,
             bypassLowTargetSdk = this.bypassLowTargetSdk,
             allowAllRequestedPermissions = this.allowAllRequestedPermissions,
-            splitChooseAll = this.splitChooseAll
+            splitChooseAll = this.splitChooseAll,
+            apkChooseAll = this.apkChooseAll
         )
 
         companion object {
@@ -110,7 +112,8 @@ data class EditViewState(
                 allowDowngrade = config.allowDowngrade,
                 bypassLowTargetSdk = config.bypassLowTargetSdk,
                 allowAllRequestedPermissions = config.allowAllRequestedPermissions,
-                splitChooseAll = config.splitChooseAll
+                splitChooseAll = config.splitChooseAll,
+                apkChooseAll = config.apkChooseAll
             )
         }
     }

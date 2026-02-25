@@ -698,3 +698,15 @@ fun DataSplitChooseAllWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
         onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeSplitChooseAll(it)) }
     )
 }
+
+@Composable
+fun DataApkChooseAllWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+    SwitchWidget(
+        icon = AppIcons.InstallApkChooseAll,
+        title = stringResource(id = R.string.config_apk_choose_all),
+        description = stringResource(id = R.string.config_apk_choose_all_desc),
+        checked = viewModel.state.data.apkChooseAll,
+        isM3E = isM3E,
+        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeApkChooseAll(it)) }
+    )
+}

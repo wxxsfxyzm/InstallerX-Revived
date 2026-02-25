@@ -51,6 +51,7 @@ data class ConfigEntity(
     @ColumnInfo(name = "bypass_low_target_sdk", defaultValue = "0") var bypassLowTargetSdk: Boolean,
     @ColumnInfo(name = "allow_all_requested_permissions", defaultValue = "0") var allowAllRequestedPermissions: Boolean,
     @ColumnInfo(name = "split_choose_all", defaultValue = "0") var splitChooseAll: Boolean,
+    @ColumnInfo(name = "apk_choose_all", defaultValue = "0") var apkChooseAll: Boolean,
     @ColumnInfo(name = "created_at") var createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "modified_at") var modifiedAt: Long = System.currentTimeMillis(),
 ) {
@@ -80,6 +81,7 @@ data class ConfigEntity(
             bypassLowTargetSdk = false,
             allowAllRequestedPermissions = false,
             splitChooseAll = false,
+            apkChooseAll = false
         )
 
         val XiaomiDefault = ConfigEntity(
@@ -107,6 +109,7 @@ data class ConfigEntity(
             bypassLowTargetSdk = false,
             allowAllRequestedPermissions = false,
             splitChooseAll = false,
+            apkChooseAll = false
         )
     }
 

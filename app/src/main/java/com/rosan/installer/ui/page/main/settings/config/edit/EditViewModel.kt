@@ -117,6 +117,7 @@ class EditViewModel(
                     )
 
                     is EditViewAction.ChangeSplitChooseAll -> changeSplitChooseAll(action.splitChooseAll)
+                    is EditViewAction.ChangeApkChooseAll -> changeApkChooseAll(action.apkChooseAll)
 
                     is EditViewAction.LoadData -> loadData()
                     is EditViewAction.SaveData -> saveData()
@@ -445,6 +446,14 @@ class EditViewModel(
         state = state.copy(
             data = state.data.copy(
                 splitChooseAll = splitChooseAll
+            )
+        )
+    }
+
+    private fun changeApkChooseAll(apkChooseAll: Boolean) {
+        state = state.copy(
+            data = state.data.copy(
+                apkChooseAll = apkChooseAll
             )
         )
     }

@@ -58,6 +58,7 @@ import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowAllRequestedPermissionsWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowDowngradeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAllowTestOnlyWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataApkChooseAllWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAuthorizerWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAutoDeleteWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataBypassLowTargetSdkWidget
@@ -328,12 +329,13 @@ fun NewEditPage(
                 }
             }
 
-            // --- Group 4: App Bundle Settings ---
+            // --- Group 4: Preferences Settings ---
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.config_label_app_bundle_settings)
+                    title = stringResource(R.string.config_label_preferences)
                 ) {
                     item { DataSplitChooseAllWidget(viewModel) }
+                    item { DataApkChooseAllWidget(viewModel) }
                 }
             }
 
