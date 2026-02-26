@@ -172,7 +172,7 @@
     <string name="sort_by_show_system_app">Mostrar apps do sistema</string>
     <string name="sort_by_show_package_name">Mostrar nome do pacote</string>
     <string name="installer_ready">Pronto</string>
-    <string name="installer_resolving">Verificando…</string>
+    <string name="installer_resolving">Resolvendo…</string>
     <string name="installer_resolve_failed">Falha na resolução</string>
     <string name="installer_resolve_success">Passou na resolução</string>
     <string name="installer_preparing">Preparando</string>
@@ -316,8 +316,8 @@
     <string name="show_dialog_install_extended_menu">Mostrar menu estendido</string>
     <string name="show_dialog_install_extended_menu_desc">Mostrar mais opções na caixa de diálogo de instalação</string>
     <string name="extended_menu">Menu Extendido</string>
-    <string name="disable_notification_on_dismiss">Fechar na caixa de diálogo Descartar</string>
-    <string name="close_notification_immediately_on_dialog_dismiss">A caixa de diálogo de recusa sairá silenciosamente</string>
+    <string name="disable_notification_on_dismiss">Cancelar instalação ao Fechar</string>
+    <string name="close_notification_immediately_on_dialog_dismiss">Fechar a caixa de diálogo cancelará a instalação em vez de minimizá-la para as notificações</string>
     <string name="set_countdown">Definir contagem regressiva</string>
     <string name="dhizuku_auto_close_countdown_desc">Contagem regressiva para fechamento automático após instalação bem-sucedida do Dhizuku</string>
     <string name="dhizuku_cannot_set_installer_desc">O modo Dhizuku não suporta a configuração do instalador!</string>
@@ -681,4 +681,8 @@
     <string name="installer_live_channel_name_desc">Mostrar o progresso da instalação como atualização em tempo real</string>
     <string name="installer_live_channel_short_text_pending_install">Pendente</string>
     <string name="theme_settings_use_blur_warning">O efeito de desfoque pode ser instável e causar problemas inesperados no Android 11 e versões anteriores. Pode ser necessário limpar os dados do app se ocorrerem problemas. Deseja continuar?</string>
+    <string name="installer_analyse_success">Sucesso na análise</string>
+    <string name="installer_live_channel_short_text_analyse_failed">Falha</string>
+    <string name="exception_resolve_failed_link_not_valid">Este link não contém um arquivo válido</string>
+    <string name="version_with_prefix_format">%1$s %2$s</string>
 </resources>

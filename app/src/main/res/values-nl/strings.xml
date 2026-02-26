@@ -257,7 +257,7 @@
     <string name="sort_by_show_system_app">Systeemapp weergeven</string>
     <string name="sort_by_show_package_name">Pakketnaam weergeven</string>
     <string name="installer_ready">Bereid</string>
-    <string name="installer_resolving">Controleren…</string>
+    <string name="installer_resolving">Oplossen…</string>
     <string name="installer_resolve_failed">Oplossen mislukt</string>
     <string name="installer_resolve_success">Oplossen gelukt</string>
     <string name="installer_preparing">Voorbereiden</string>
@@ -450,8 +450,8 @@
     <string name="extended_menu">Uitgebreid menu</string>
     <string name="auto_silent_install">Automatische stille installatie</string>
     <string name="auto_silent_install_desc">Automatische stille installatie bij het starten van de installatie in de dialoog</string>
-    <string name="disable_notification_on_dismiss">Sluiten bij sluiten van dialoog</string>
-    <string name="close_notification_immediately_on_dialog_dismiss">Het sluiten van de dialoog zal de melding sluiten</string>
+    <string name="disable_notification_on_dismiss">Installatie annuleren bij sluiten</string>
+    <string name="close_notification_immediately_on_dialog_dismiss">Het sluiten van de dialoog zal de installatie annuleren, in plaats van het te minimaliseren naar de meldingen</string>
     <string name="set_countdown">Aftelling instellen</string>
     <string name="dhizuku_auto_close_countdown_desc">Aftelling naar automatisch sluiten nadat de Dhizuku-installatie succesvol is</string>
     <string name="dhizuku_cannot_set_package_source_desc">De Dhizuku-modus ondersteunt niet het aanpassen van de pakketbron!</string>
@@ -681,4 +681,8 @@
     <string name="installer_prepare_arch_32_notice">Deze app zal uitgevoerd worden in 32-bit modus. Dit kan geheugengebruik verhogen of prestaties verminderen op 64-bit apparaten</string>
     <string name="installer_prepare_arch_mismatch_notice">De apparchitectuur (%1$s) komt niet overeen met die van je apparaat (%2$s). Het zal daarom uitgevoerd worden via een vertaallaag. Installeren of uitvoeren van de app is niet gegarandeerd en problemen zoals oververhitten en crashes kunnen voorkomen</string>
     <string name="theme_settings_use_blur_warning">Het vervagingseffect kan instabiel zijn en onverwachte problemen veroorzaken op Android 11 of lager. Mogelijk moet je de appgegevens wissen als er problemen zijn. Wil je doorgaan?</string>
+    <string name="installer_analyse_success">Succesvolle analyse</string>
+    <string name="installer_live_channel_short_text_analyse_failed">Mislukt</string>
+    <string name="version_with_prefix_format">%1$s%2$s</string>
+    <string name="exception_resolve_failed_link_not_valid">Deze link bevat geen geldig bestand</string>
 </resources>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agreement_title">પૌલિસી</string>
+    <string name="user_terms">યુસર પૌલિસી</string>
+    <string name="privacy_policy">પ્રાઇવસી પૌલિસી</string>
+    <string name="agree">સહમત</string>
+    <string name="warning">ચેતવણી</string>
+    <string name="open_source_license">ઓપન સોર્સ લાઇસન્સ</string>
+    <string name="back">પાછડ</string>
+    <string name="home">હોમ</string>
+    <string name="config">પ્રોફાઇલ</string>
+    <string name="app">ઍપ</string>
+    <string name="preferred">પસંદગી</string>
+    <string name="personalization">વૈયક્તિકૃતતા</string>
+    <string name="search">શોદ</string>
+    <string name="menu">મેન્યુ</string>
+    <string name="about">ઍપ વિશે</string>
+    <string name="other">બીજું</string>
+    <string name="performance">પરફૉર્મન્સ</string>
+    <string name="lab">પ્રયોગશાળા</string>
+    <string name="lab_desc">પ્રાયોગિક અને વિકાસકર્તા સુવિધાઓ ઍક્સેસ કરો</string>
+    <string name="about_detail">InstallerX Revived ના વિશે</string>
+    <string name="updating">અપડેટ થઈ રહ્યું છે…</string>
+    <string name="get_update">અપડેટ મેળવો</string>
+    <string name="update_available">અપડેટ ઉપલબ્ધ છે: %1$s</string>
+    <string name="get_update_directly">સીધું અપડેટ મેળવો</string>
+    <string name="save_logs">લોગ્સ સાચવો</string>
+    <string name="internet_access_enabled">ઓનલાઇન</string>
+    <string name="internet_access_disabled">ઓફલાઈન</string>
+    <string name="uninstall_title">InstallerX Revived ને કાઢી કાઢો</string>
+    <string name="uninstall_content">આ ઍપ ને કાઢી નાખ્યા પછી, તમે InstallerX Revived નો ઉપયોગ ઍપ ને ઇન્સ્ટોલ કરવા, નહીં કરી શકો.</string>
+    <string name="stable">સ્થિર</string>
+    <string name="preview">પ્રિવ્યૂ</string>
+    <string name="unstable">અસ્થિર</string>
+    <string name="enable_notification_hint">ઇન્સટલ કરવા કૃપા કરી ને સૂચના મંજૂરી આપો!</string>
+    <string name="enable_storage_permission_hint">ઇન્સ્ટોલ કરવા કૃપા કરીને બધી ફાઇલ જોવાની મંજૂરી આપો!</string>
+    <string name="discuss">વાતો અને પ્રતિસાદ અને આપડેટ</string>
+    <string name="telegram_group">ટેલિગ્રામ સમૂહ</string>
+    <string name="telegram_group_desc">સમૂહ માં જોડાવો!</string>
+    <string name="telegram_channel">ટેલિગ્રામ ચૈનલ</string>
+    <string name="telegram_channel_desc">સમાચાર અને અપડેટ મેળવા માટે ચૈનલ માં જોડાવો!</string>
+    <string name="theme_settings_miuix_ui_desc">હાયપર ઓએસ જેવુ</string>
+    <string name="theme_settings_google_ui">ગૂગલ મટિરિયલ ૩</string>
+    <string name="theme_settings_use_expressive_ui">એક્સ્પ્રેસીવ યુઆઈ વાપરો</string>
+    <string name="theme_settings_use_blur">ઝાંખું ચાલુ કરો</string>
+</resources>
