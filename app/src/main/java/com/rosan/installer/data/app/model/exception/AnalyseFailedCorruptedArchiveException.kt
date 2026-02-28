@@ -2,7 +2,9 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.app.model.exception
 
-class AnalyseFailedCorruptedArchiveException : Exception {
+import com.rosan.installer.R
+
+class AnalyseFailedCorruptedArchiveException : InstallerException {
     // Basic constructor
     constructor() : super()
 
@@ -14,4 +16,8 @@ class AnalyseFailedCorruptedArchiveException : Exception {
 
     // Constructor with cause only
     constructor(cause: Throwable?) : super(cause)
+
+    override fun getStringResId(): Int {
+        return R.string.installer_analyse_failed_corrupted_archive
+    }
 }

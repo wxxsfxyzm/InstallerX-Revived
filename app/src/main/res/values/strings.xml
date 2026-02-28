@@ -323,6 +323,7 @@
     <string name="installer_preparing_desc">Preparing files, please wait…</string>
     <string name="installer_analysing">Analysing…</string>
     <string name="installer_analyse_failed">Analyse failed</string>
+    <string name="installer_analyse_failed_corrupted_archive">Corrupted archive</string>
     <string name="installer_analyse_success">Analyse success</string>
     <string name="installer_select_install">Select apps to install</string>
     <string name="installer_select_split">Select APK splits</string>

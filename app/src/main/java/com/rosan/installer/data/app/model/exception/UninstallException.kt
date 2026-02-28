@@ -10,4 +10,8 @@ import com.rosan.installer.data.app.model.enums.UninstallErrorType
 class UninstallException(
     val errorType: UninstallErrorType,
     message: String
-) : Exception(message)
+) : InstallerException(message) {
+    override fun getStringResId(): Int {
+        return errorType.stringResId
+    }
+}

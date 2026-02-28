@@ -2,4 +2,11 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.installer.model.exception
 
-class ResolveFailedLinkNotValidException(message: String) : Exception(message)
+import com.rosan.installer.R
+import com.rosan.installer.data.app.model.exception.InstallerException
+
+class ResolveFailedLinkNotValidException(message: String) : InstallerException(message) {
+    override fun getStringResId(): Int {
+        return R.string.exception_resolve_failed_link_not_valid
+    }
+}
