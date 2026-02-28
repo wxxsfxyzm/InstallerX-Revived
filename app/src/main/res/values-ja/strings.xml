@@ -5,7 +5,7 @@
     <string name="open_source_license">オープンソースライセンス</string>
     <string name="back">戻る</string>
     <string name="home">ホーム</string>
-    <string name="config">プロフィール</string>
+    <string name="config">プロファイル</string>
     <string name="app">アプリ</string>
     <string name="preferred">設定</string>
     <string name="personalization">パーソナライゼーション</string>
@@ -164,10 +164,10 @@
     <string name="config_install_mode_ignore">無視</string>
     <string name="config_customize_install_reason">インストール理由をカスタマイズ</string>
     <string name="config_install_reason_unknown">不明</string>
-    <string name="config_name">プロフィール名</string>
+    <string name="config_name">プロファイル名</string>
     <string name="config_info">情報</string>
     <string name="config_scope">スコープ</string>
-    <string name="config_description">プロフィールの説明</string>
+    <string name="config_description">プロファイルの説明</string>
     <string name="config_authorizer">承認者</string>
     <string name="config_authorizer_global">グローバル</string>
     <string name="config_authorizer_global_desc">グローバル (%1$s)</string>
@@ -248,7 +248,7 @@
     <string name="installer_background_channel_name">バックグラウンド通知</string>
     <string name="performance">パフォーマンス</string>
     <string name="theme_settings_prefer_system_icon">アプリをインストールする際はシステムアイコンを優先する</string>
-    <string name="empty_configs">プロフィールはありません。以下に追加してください</string>
+    <string name="empty_configs">プロファイルがありません。以下にプロファイルを追加してください</string>
     <string name="config_global_default">グローバルのデフォルト</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
@@ -352,7 +352,7 @@
     <string name="sort_by_show_package_name">パッケージ名を表示する</string>
     <string name="auth_to_continue_work">この操作を確認するには認証してください</string>
     <string name="installer_ready">準備完了</string>
-    <string name="installer_resolving">チェック中…</string>
+    <string name="installer_resolving">解決中…</string>
     <string name="installer_resolve_failed">解決に失敗しました</string>
     <string name="installer_resolve_success">解決しました</string>
     <string name="installer_preparing">準備中</string>
@@ -550,8 +550,8 @@
     <string name="extended_menu">拡張メニュー</string>
     <string name="auto_silent_install">自動サイレントインストール</string>
     <string name="auto_silent_install_desc">ダイアログインストール開始時に自動サイレントインストール</string>
-    <string name="disable_notification_on_dismiss">ダイアログを閉じる</string>
-    <string name="close_notification_immediately_on_dialog_dismiss">ダイアログを閉じると、何も表示されずに終了します</string>
+    <string name="disable_notification_on_dismiss">ダイアログを閉じたときにインストールをキャンセル</string>
+    <string name="close_notification_immediately_on_dialog_dismiss">ダイアログを閉じると、通知に最小化されるのではなく、インストールがキャンセルされます</string>
     <string name="set_countdown">カウントダウンを設定</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku 経由でのインストールが成功した後、自動的に閉じるまでのカウントダウン</string>
     <string name="dhizuku_cannot_set_package_source_desc">Dhizuku モードではパッケージ ソースのカスタマイズはサポートされていません!</string>
@@ -658,5 +658,23 @@
     <string name="lab_http_profile_secure">安全な接続のみ (HTTPS)</string>
     <string name="lab_http_profile_local">ローカルクリアテキストを許可 (ローカルホスト)</string>
     <string name="tag_downgrade">ダウングレード</string>
-    <string name="tag_arch_32">32ビット</string>
+    <string name="tag_arch_32">32 ビット</string>
+    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="theme_settings_use_blur_warning">Android 11 以前では、ぼかし効果が不安定になり、予期せぬ問題が発生する可能性があります。問題が発生した場合は、アプリデータを消去する必要があるかもしれません。続行してもよろしいですか？</string>
+    <string name="installer_analyse_success">分析に成功しました</string>
+    <string name="tag_signature">署名</string>
+    <string name="installer_prepare_arch_32_notice">このアプリは 32 ビットモードで実行されます。これにより、64 ビットデバイスではメモリ使用量が増加したり、パフォーマンスが低下したりする可能性があります</string>
+    <string name="installer_prepare_arch_mismatch_notice">アプリのアーキテクチャ (%1$s) がお使いのデバイス (%2$s) と一致していません。変換を介して実行されます。インストールや実行は保証されず、過熱やクラッシュなどの問題が発生する可能性があります</string>
+    <string name="installer_live_channel_short_text_analyse_failed">失敗</string>
+    <string name="permission_access_location_extra_commands">位置情報の追加コマンドへのアクセス</string>
+    <string name="version_with_prefix_format">%1$s %2$s</string>
+    <string name="exception_resolve_failed_link_not_valid">このリンクには有効なファイルが含まれていません</string>
+    <string name="exception_install_failed_package_changed">呼び出し元のプログラムは、呼び出しのラッパーが変更されることを想定しています</string>
+    <string name="config_request_update_ownership">所有権の更新をリクエスト</string>
+    <string name="lab_mi_island">Xiaomi HyperIsland</string>
+    <string name="lab_mi_island_desc">グローバル通知スタイルを上書きします。カスタムアプリ認証が Shizuku に設定されている場合のみ、システム署名検証をバイパスできます。Root ユーザーは、署名制限を手動で無効にした後、これを直接有効にできます</string>
+    <string name="suggestion_bypass_low_target_sdk">制限の回避を許可</string>
+    <string name="suggestion_bypass_low_target_sdk_desc">一時的に制限を回避して再試行します</string>
+    <string name="suggestion_bypass_blacklist_set_by_user">一度限りのインストールを許可</string>
+    <string name="suggestion_bypass_blacklist_set_by_user_desc">一時的に一度限りのインストールを許可します</string>
 </resources>

@@ -685,4 +685,7 @@
     <string name="installer_live_channel_short_text_analyse_failed">Mislukt</string>
     <string name="version_with_prefix_format">%1$s%2$s</string>
     <string name="exception_resolve_failed_link_not_valid">Deze link bevat geen geldig bestand</string>
+    <string name="app_version_info_format">%1$s%2$s %3$s (%4$s)</string>
+    <string name="lab_mi_island">Xiaomi Super Island</string>
+    <string name="lab_mi_island_desc">Globale meldingsstijl. Verificatie van systeemondertekening kan alleen omzeilt worden wanneer de autorisatiegever is ingesteld op Shizuku. Root-gebruikers kunnen dit meteen inschakelen nadat ze manueel de ondertekeningsrestricties hebben uitgeschakeld</string>
 </resources>

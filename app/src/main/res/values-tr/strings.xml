@@ -185,7 +185,7 @@
     <string name="sort_by_show_package_name">Paket adlarını göster</string>
     <string name="installer_live_channel_name">Canlı Yükleme İlerlemesi</string>
     <string name="installer_ready">Hazır</string>
-    <string name="installer_resolving">Kontrol ediliyor…</string>
+    <string name="installer_resolving">Çözümleniyor…</string>
     <string name="installer_resolve_failed">Çözüm başarısız oldu</string>
     <string name="installer_resolve_success">Çözüm başarılı oldu</string>
     <string name="installer_preparing">Hazırlanıyor</string>
@@ -339,8 +339,8 @@
     <string name="show_dialog_install_extended_menu">Genişletilmiş menüyü göster</string>
     <string name="show_dialog_install_extended_menu_desc">Yükleme diyaloğunda daha fazla seçenek gösterir</string>
     <string name="extended_menu">Genişletilmiş Menü</string>
-    <string name="disable_notification_on_dismiss">Diyaloğu Kapat</string>
-    <string name="close_notification_immediately_on_dialog_dismiss">Kapatma Diyaloğu sessizce kapanacaktır</string>
+    <string name="disable_notification_on_dismiss">Kapatıldığında Yüklemeyi İptal Et</string>
+    <string name="close_notification_immediately_on_dialog_dismiss">Diyaloğu kapatmak bildirim görünümüne geçmek yerine yüklemeyi iptal edecektir</string>
     <string name="set_countdown">Geri sayım ayarla</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku yüklemesi başarılı olduktan sonra otomatik kapanma için geri sayım</string>
     <string name="dhizuku_cannot_set_package_source_desc">Dhizuku modu paket kaynağının özelleştirilmesini desteklemiyor!</string>
@@ -681,4 +681,11 @@
     <string name="lab_unstable_features">Kararsız özellikler</string>
     <string name="lab_set_install_requester">Yükleme İsteği Göndericisini Ayarla</string>
     <string name="lab_set_install_requester_desc">Sistem davranışına uyacak şekilde OriginatingUid alanını çağıran paketle doldurun</string>
+    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="installer_analyse_success">Analiz başarılı</string>
+    <string name="installer_live_channel_short_text_analyse_failed">Başarısız</string>
+    <string name="version_with_prefix_format">%1$s %2$s</string>
+    <string name="exception_resolve_failed_link_not_valid">Bu link geçerli bir dosya içermiyor</string>
+    <string name="lab_mi_island">Mi Süper Ada</string>
+    <string name="lab_mi_island_desc">Global bildirim stili. Sistem imza doğrulaması yalnızca özel uygulama kimlik doğrulayıcısı Shizuku olarak ayarlandığında atlanabilir. Root kullanıcıları, imza kısıtlamalarını manuel olarak devre dışı bıraktıktan sonra bunu doğrudan etkinleştirebilir</string>
 </resources>
