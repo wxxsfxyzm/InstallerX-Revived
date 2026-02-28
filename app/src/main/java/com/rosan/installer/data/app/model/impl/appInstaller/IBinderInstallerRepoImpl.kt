@@ -24,7 +24,8 @@ import com.rosan.installer.build.model.entity.Architecture
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
+import com.rosan.installer.data.app.model.enums.InstallErrorType
+import com.rosan.installer.data.app.model.exception.InstallException
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.app.util.PackageInstallerUtil.abiOverride
@@ -208,7 +209,10 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             // Blacklisted package names
             if (managedBlacklistPackages.contains(packageName)) {
                 Timber.w("Installation blocked for $packageName because it is in the blacklist.")
-                throw InstallFailedBlacklistedPackageException("Installation blocked for $packageName because it is in the blacklist.")
+                throw InstallException(
+                    InstallErrorType.BLACKLISTED_PACKAGE,
+                    "Installation blocked for $packageName because it is in the blacklist."
+                )
             }
 
             // Blacklisted SharedUserID
@@ -218,7 +222,10 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             if (sharedUid != null) {
                 if (sharedUserIdBlacklist.contains(sharedUid) && !sharedUserIdExemption.contains(packageName)) {
                     Timber.w("Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted.")
-                    throw InstallFailedBlacklistedPackageException("Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted.")
+                    throw InstallException(
+                        InstallErrorType.BLACKLISTED_PACKAGE,
+                        "Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted."
+                    )
                 }
             }
         }

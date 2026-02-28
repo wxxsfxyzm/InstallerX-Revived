@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.util
 
 import android.content.Context
@@ -5,6 +7,7 @@ import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
+import com.rosan.installer.data.app.model.enums.InstallErrorType
 import com.rosan.installer.data.app.model.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.data.app.model.exception.AuthenticationFailedException
 import com.rosan.installer.data.app.model.exception.InstallException
@@ -71,7 +74,6 @@ private fun Throwable.getStringRes() =
  * @receiver The [Throwable] to be converted into a readable message.
  * @return A localized error message string.
  *
- * @author iamr0s
  */
 @Composable
 fun Throwable.help() = stringResource(this.getStringRes())
@@ -88,6 +90,12 @@ fun Throwable.help() = stringResource(this.getStringRes())
  * @param context The [Context] used to resolve the string resource.
  * @return A localized error message string.
  *
- * @author wxxsfxyzm
  */
 fun Throwable.getErrorMessage(context: Context) = context.getString(this.getStringRes())
+
+/**
+ * Returns a [Boolean] indicating whether this [Throwable]
+ * has a specific [InstallErrorType].
+ */
+fun Throwable.hasErrorType(vararg types: InstallErrorType): Boolean =
+    this is InstallException && this.errorType in types

@@ -10,7 +10,8 @@ import androidx.core.net.toUri
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.model.exception.InstallFailedMissingInstallPermissionException
+import com.rosan.installer.data.app.model.enums.InstallErrorType
+import com.rosan.installer.data.app.model.exception.InstallException
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
@@ -44,7 +45,10 @@ object NoneInstallerRepoImpl : InstallerRepo, KoinComponent {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(intent)
-                throw InstallFailedMissingInstallPermissionException("Please make sure you have granted \"Install unknown apps\" permission!")
+                throw InstallException(
+                    InstallErrorType.BLACKLISTED_PACKAGE,
+                    "Please make sure you have granted \"Install unknown apps\" permission!"
+                )
             }
 
             val packageInstaller = context.packageManager.packageInstaller

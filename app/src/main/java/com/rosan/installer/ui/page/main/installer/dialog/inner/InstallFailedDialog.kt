@@ -27,16 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.app.model.exception.InstallFailedBlacklistedPackageException
-import com.rosan.installer.data.app.model.exception.InstallFailedConflictingProviderException
-import com.rosan.installer.data.app.model.exception.InstallFailedDeprecatedSdkVersion
-import com.rosan.installer.data.app.model.exception.InstallFailedDuplicatePermissionException
-import com.rosan.installer.data.app.model.exception.InstallFailedHyperOSIsolationViolationException
-import com.rosan.installer.data.app.model.exception.InstallFailedMissingInstallPermissionException
-import com.rosan.installer.data.app.model.exception.InstallFailedTestOnlyException
-import com.rosan.installer.data.app.model.exception.InstallFailedUpdateIncompatibleException
-import com.rosan.installer.data.app.model.exception.InstallFailedUserRestrictedException
-import com.rosan.installer.data.app.model.exception.InstallFailedVersionDowngradeException
+import com.rosan.installer.data.app.model.enums.InstallErrorType
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
@@ -49,15 +40,14 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.dialog.UninstallConfirmationDialog
+import com.rosan.installer.util.hasErrorType
 import kotlinx.coroutines.delay
 import timber.log.Timber
-import kotlin.reflect.KClass
 
 @Composable
-fun installFailedDialog( // 小写开头
+fun installFailedDialog(
     installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
-    // val preInstallAppInfo by viewModel.preInstallAppInfo.collectAsState()
     installer.analysisResults.firstOrNull()?.packageName ?: ""
 
     // Call InstallInfoDialog for base structure
@@ -110,8 +100,9 @@ private fun ErrorSuggestions(
     val hasMiPackageInstaller = LocalMiPackageInstallerPresent.current
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
+    // Refactored SuggestionChipInfo to use a matching lambda predicate
     class SuggestionChipInfo(
-        vararg val errorClasses: KClass<out Throwable>,
+        val isMatch: (Throwable) -> Boolean,
         val selected: () -> Boolean,
         val onClick: () -> Unit,
         @param:StringRes val labelRes: Int,
@@ -119,11 +110,12 @@ private fun ErrorSuggestions(
     )
 
     var pendingConflictingPackage by remember { mutableStateOf<String?>(null) }
+
     val possibleSuggestions = remember(installer) {
         buildList {
             add(
                 SuggestionChipInfo(
-                    InstallFailedTestOnlyException::class,
+                    isMatch = { it.hasErrorType(InstallErrorType.TEST_ONLY) },
                     selected = { true },
                     onClick = {
                         viewModel.toggleInstallFlag(InstallOption.AllowTest.value, true)
@@ -133,13 +125,14 @@ private fun ErrorSuggestions(
                     icon = AppIcons.BugReport
                 )
             )
+
             if (installer.config.authorizer != ConfigEntity.Authorizer.None ||
                 (installer.config.authorizer == ConfigEntity.Authorizer.None &&
                         !(RsConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
             ) {
                 add(
                     SuggestionChipInfo(
-                        InstallFailedConflictingProviderException::class,
+                        isMatch = { it.hasErrorType(InstallErrorType.CONFLICTING_PROVIDER) },
                         selected = { true }, // This is an action, not a state toggle.
                         onClick = {
                             val conflictingPkg = Regex("used by ([\\w.]+)")
@@ -148,13 +141,13 @@ private fun ErrorSuggestions(
                             pendingConflictingPackage = conflictingPkg
                             showUninstallConfirmDialog = true
                         },
-                        labelRes = R.string.suggestion_uninstall_and_retry,// Not keep data
+                        labelRes = R.string.suggestion_uninstall_and_retry, // Not keep data
                         icon = AppIcons.Delete
                     )
                 )
                 add(
                     SuggestionChipInfo(
-                        InstallFailedDuplicatePermissionException::class,
+                        isMatch = { it.hasErrorType(InstallErrorType.DUPLICATE_PERMISSION) },
                         selected = { true },
                         onClick = {
                             val conflictingPkg = Regex("already owned by ([\\w.]+)")
@@ -170,49 +163,52 @@ private fun ErrorSuggestions(
                 )
                 add(
                     SuggestionChipInfo(
-                        InstallFailedUpdateIncompatibleException::class,
-                        InstallFailedVersionDowngradeException::class,
+                        isMatch = {
+                            it.hasErrorType(
+                                InstallErrorType.UPDATE_INCOMPATIBLE,
+                                InstallErrorType.VERSION_DOWNGRADE
+                            )
+                        },
                         selected = { true }, // This is an action, not a state toggle.
                         onClick = {
                             confirmKeepData = false
                             showUninstallConfirmDialog = true
-                        },// onUninstall,
-                        labelRes = R.string.suggestion_uninstall_and_retry,// Not keep data
+                        },
+                        labelRes = R.string.suggestion_uninstall_and_retry, // Not keep data
                         icon = AppIcons.Delete
                     )
                 )
             }
+
             if (
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA && // Must be lower than Android 16
-
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && // Must be Android 14 or higher
-
                 !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && // And is Android 15 or higher
                         (RsConfig.currentManufacturer == Manufacturer.SAMSUNG ||         // and the manufacturer is Samsung
                                 RsConfig.currentManufacturer == Manufacturer.REALME)) &&        // or the manufacturer is realme -> This combination is excluded
-
                 (installer.config.authorizer == ConfigEntity.Authorizer.Root ||    // Authorization must be
                         installer.config.authorizer == ConfigEntity.Authorizer.Shizuku)   // Root or Shizuku
             ) {
                 add(
                     SuggestionChipInfo(
-                        InstallFailedVersionDowngradeException::class,
+                        isMatch = { it.hasErrorType(InstallErrorType.VERSION_DOWNGRADE) },
                         selected = { true }, // This is an action, not a state toggle.
                         onClick = {
                             confirmKeepData = true
                             showUninstallConfirmDialog = true
-                        },// onUninstall,
+                        },
                         labelRes = R.string.suggestion_uninstall_and_retry_keep_data, // Keep data
                         icon = AppIcons.Delete
                     )
                 )
             }
+
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
                 (installer.config.authorizer == ConfigEntity.Authorizer.Root || installer.config.authorizer == ConfigEntity.Authorizer.Shizuku)
             ) {
                 add(
                     SuggestionChipInfo(
-                        InstallFailedVersionDowngradeException::class,
+                        isMatch = { it.hasErrorType(InstallErrorType.VERSION_DOWNGRADE) },
                         selected = { true }, // This is an action, not a state toggle.
                         onClick = {
                             viewModel.toggleInstallFlag(InstallOption.AllowDowngrade.value, true)
@@ -223,10 +219,11 @@ private fun ErrorSuggestions(
                     )
                 )
             }
-            if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku)
+
+            if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku) {
                 add(
                     SuggestionChipInfo(
-                        InstallFailedHyperOSIsolationViolationException::class,
+                        isMatch = { it.hasErrorType(InstallErrorType.HYPEROS_ISOLATION_VIOLATION) },
                         selected = { true },
                         onClick = {
                             // Set available installer
@@ -239,10 +236,10 @@ private fun ErrorSuggestions(
                         icon = AppIcons.InstallSource
                     )
                 )
-            else
+            } else {
                 add(
                     SuggestionChipInfo(
-                        InstallFailedHyperOSIsolationViolationException::class,
+                        isMatch = { it.hasErrorType(InstallErrorType.HYPEROS_ISOLATION_VIOLATION) },
                         selected = { true },
                         onClick = {
                             installer.config.installer = "com.miui.packageinstaller"
@@ -253,9 +250,11 @@ private fun ErrorSuggestions(
                         icon = shizukuIcon
                     )
                 )
+            }
+
             add(
                 SuggestionChipInfo(
-                    InstallFailedUserRestrictedException::class,
+                    isMatch = { it.hasErrorType(InstallErrorType.USER_RESTRICTED) },
                     selected = { true }, // This is an action, not a state toggle.
                     onClick = {
                         try {
@@ -264,7 +263,7 @@ private fun ErrorSuggestions(
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             context.startActivity(intent)
                             viewModel.dispatch(InstallerViewAction.Close)
-                        } catch (e: ActivityNotFoundException) {
+                        } catch (_: ActivityNotFoundException) {
                             // In case the activity is not found on some strange devices,
                             // show a toast to the user.
                             viewModel.toast("Developer options screen not found.")
@@ -274,9 +273,10 @@ private fun ErrorSuggestions(
                     icon = AppIcons.Developer
                 )
             )
+
             add(
                 SuggestionChipInfo(
-                    InstallFailedDeprecatedSdkVersion::class,
+                    isMatch = { it.hasErrorType(InstallErrorType.DEPRECATED_SDK_VERSION) },
                     selected = { true }, // This is an action, not a state toggle.
                     onClick = {
                         viewModel.toggleInstallFlag(InstallOption.BypassLowTargetSdkBlock.value, true)
@@ -286,9 +286,11 @@ private fun ErrorSuggestions(
                     icon = AppIcons.InstallBypassLowTargetSdk
                 )
             )
+
+            // Custom internal exceptions implemented via positive error codes
             add(
                 SuggestionChipInfo(
-                    InstallFailedBlacklistedPackageException::class,
+                    isMatch = { it.hasErrorType(InstallErrorType.BLACKLISTED_PACKAGE) },
                     selected = { true }, // This is an action, not a state toggle.
                     onClick = {
                         viewModel.toggleBypassBlacklist(true)
@@ -298,9 +300,10 @@ private fun ErrorSuggestions(
                     icon = AppIcons.BugReport
                 )
             )
+
             add(
                 SuggestionChipInfo(
-                    InstallFailedMissingInstallPermissionException::class,
+                    isMatch = { it.hasErrorType(InstallErrorType.MISSING_INSTALL_PERMISSION) },
                     selected = { true },
                     onClick = { viewModel.dispatch(InstallerViewAction.Install(false)) },
                     labelRes = R.string.retry,
@@ -311,14 +314,12 @@ private fun ErrorSuggestions(
     }
 
     val visibleSuggestions = remember(error) {
-        possibleSuggestions.filter { suggestion ->
-            suggestion.errorClasses.any { errorClass ->
-                errorClass.isInstance(error)
-            }
-        }
+        possibleSuggestions.filter { suggestion -> suggestion.isMatch(error) }
     }
+
     Timber.tag("suggestion")
         .d("Visible suggestions: ${visibleSuggestions.size} for error: ${error::class.java.simpleName}")
+
     // Requirement: If there is at least one chip to show, create the FlowRow.
     if (visibleSuggestions.isNotEmpty()) {
         FlowRow(

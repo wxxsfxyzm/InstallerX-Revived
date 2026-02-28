@@ -45,6 +45,10 @@ enum class InstallErrorType(val legacyCode: Int, val stringResId: Int) {
     HYPEROS_ISOLATION_VIOLATION(-1000, R.string.exception_install_failed_hyperos_isolation_violation),
     REJECTED_BY_BUILDTYPE(-3001, R.string.exception_install_failed_rejected_by_build_type),
 
+    // --- Custom Internal Errors (Positive Codes) ---
+    BLACKLISTED_PACKAGE(1, R.string.exception_install_failed_blacklisted_package),
+    MISSING_INSTALL_PERMISSION(2, R.string.exception_install_failed_missing_install_permission),
+
     // Fallback for unknown status codes
     UNKNOWN(Int.MAX_VALUE, R.string.exception_install_failed_unknown);
 
