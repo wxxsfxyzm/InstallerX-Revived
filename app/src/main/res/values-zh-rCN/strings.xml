@@ -226,7 +226,7 @@
     <string name="config_auto_delete">自动删除</string>
     <string name="config_auto_delete_desc">安装成功后自动删除安装包</string>
     <string name="config_auto_delete_zip">删除压缩包</string>
-    <string name="config_auto_delete_zip_desc">除删除安装包之外，删除包含安装包的压缩文件</string>
+    <string name="config_auto_delete_zip_desc">不仅删除安装包，还删除包含安装包的压缩文件。</string>
     <string name="config_display_sdk_version">显示 SDK 信息</string>
     <string name="config_display_sdk_version_desc">在安装界面显示 target 与 min 信息</string>
     <string name="config_display_module_extra_info_desc">如果是模块则显示额外信息</string>
@@ -478,7 +478,7 @@
     <string name="exception_install_failed_duplicate_package">签名冲突（包名相同、签名不同），请先卸载原应用</string>
     <string name="exception_install_failed_no_shared_user">共享 UID 的程序不存在，请先下载主 UID 应用</string>
     <string name="exception_install_failed_update_incompatible">更新失败（签名或其他原因），请卸载后安装</string>
-    <string name="exception_install_failed_shared_user_incompatible">与共享 UID 的程序签名冲突</string>
+    <string name="exception_install_failed_shared_user_incompatible">与共享 UID 的程序签名不一致</string>
     <string name="exception_install_failed_missing_shared_library">缺失共享库</string>
     <string name="exception_install_failed_missing_install_permission">请授予未知安装来源权限然后重试</string>
     <string name="exception_install_failed_replace_couldnt_delete">无效的共享库</string>

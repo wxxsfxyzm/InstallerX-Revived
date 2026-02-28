@@ -118,7 +118,7 @@
     <string name="exception_install_failed_duplicate_permission">Пакет повторно запрашивает разрешение, уже заявленное другим приложением!</string>
     <string name="exception_install_failed_hyperos_isolation_violation">Добавьте правильный источник для установки системного приложения Xiaomi</string>
     <string name="exception_install_failed_insufficient_storage">Хранилище заполнено, попробуйте освободить немного места</string>
-    <string name="exception_install_failed_invalid_apk">Эта версия приложения уже установлена, пожалуйста, удалите ее и повторите попытку</string>
+    <string name="exception_install_failed_invalid_apk">Файл APK повреждён или недействителен. Пожалуйста, загрузите его заново и повторите попытку</string>
     <string name="exception_install_failed_invalid_install_location">Недопустимое место установки</string>
     <string name="exception_install_failed_invalid_uri">Недействительный идентификатор</string>
     <string name="exception_install_failed_media_unavailable">Не удалось найти SD-карту</string>
@@ -684,7 +684,7 @@
     <string name="lab_mi_island">Xiaomi Super Island</string>
     <string name="config_label_preferences">Настройки</string>
     <string name="config_apk_choose_all">Выбирать все APK по умолчанию</string>
-    <string name="config_apk_choose_all_desc">По умолчанию при пакетной установке выбираются все APK-файлы</string>
+    <string name="config_apk_choose_all_desc">По умолчанию при пакетной установке выбираются все APK-файлы.</string>
     <string name="installer_analyse_failed_corrupted_archive">Архив поврежден</string>
     <string name="installer_analyse_success">Успешно проанализировано</string>
 </resources>
