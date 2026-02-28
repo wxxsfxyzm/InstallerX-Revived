@@ -598,7 +598,7 @@
     <string name="config_split_choose_all">Select all splits by default</string>
     <string name="config_split_choose_all_desc">Select all splits by default instead of selecting best suitable</string>
     <string name="config_apk_choose_all">Select all APKs by default during batch install</string>
-    <string name="config_apk_choose_all_desc">Automatically select all APK files instead of manual selection</string>
+    <string name="config_apk_choose_all_desc">Select all APKs by default for multiple-file sessions.</string>
     <string name="force_volume_uuid">Force Volume UUID</string>
     <string name="force_volume_uuid_desc">Allows specifying a volume UUID to install the package to</string>
     <string name="force_permission_prompt">Force Permission Prompt</string>

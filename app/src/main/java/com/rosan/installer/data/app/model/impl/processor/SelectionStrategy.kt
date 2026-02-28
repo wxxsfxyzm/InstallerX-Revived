@@ -18,22 +18,28 @@ object SelectionStrategy {
     ): List<SelectInstallEntity> {
         Timber.d("SelectionStrategy: Starting selection for ${entities.size} entities. ContainerType: $sessionType")
 
-        // 1. Mixed Modules: Default unselected
+        // Check if the current session type is a batch mode (may contain multiple apks in this case)
+        val isBatchMode = sessionType == DataType.MULTI_APK ||
+                sessionType == DataType.MULTI_APK_ZIP ||
+                sessionType == DataType.MIXED_MODULE_APK ||
+                sessionType == DataType.MIXED_MODULE_ZIP
+
+        // 1. Mixed Modules: Apply apkChooseAll for bases
         if (sessionType == DataType.MIXED_MODULE_APK || sessionType == DataType.MIXED_MODULE_ZIP) {
-            Timber.d("Mixed Module detected. All entities deselected by default.")
-            return entities.map { SelectInstallEntity(it, selected = false) }
+            Timber.d("Mixed Module detected. Applying batch apkChooseAll logic.")
+            return entities.map {
+                val isSelected = if (it is AppEntity.BaseEntity) apkChooseAll else false
+                SelectInstallEntity(it, selected = isSelected)
+            }
         }
 
         // Identify Base entities count
         val bases = entities.filterIsInstance<AppEntity.BaseEntity>()
 
-        // 2. Multi-App Mode: Best Base only
-        // Only trigger "Best Base Selection" if there is actually more than one base to choose from.
-        // If it's MULTI_APK but only has 1 base (e.g. batch installing App Bundles), allow it to fall through to split selection.
+        // 2. Multi-App Mode: Best Base only or All based on apkChooseAll
         val isMultiAppMode = (sessionType == DataType.MULTI_APK || sessionType == DataType.MULTI_APK_ZIP)
-        // Only apply strict filtering if we have conflict (multiple bases for same package)
         if (isMultiAppMode && bases.size > 1) {
-            Timber.d("Multi-App Mode detected. Selecting best base entity.")
+            Timber.d("Multi-App Mode detected. Selecting based on apkChooseAll.")
             val bestBase = findBestBase(bases)
 
             if (bestBase != null) {
@@ -43,7 +49,12 @@ object SelectionStrategy {
             }
 
             return entities.map { entity ->
-                SelectInstallEntity(entity, selected = (entity == bestBase))
+                val isSelected = if (entity is AppEntity.BaseEntity) {
+                    if (apkChooseAll) true else (entity == bestBase)
+                } else {
+                    false
+                }
+                SelectInstallEntity(entity, selected = isSelected)
             }
         }
 
@@ -70,7 +81,7 @@ object SelectionStrategy {
 
         return entities.map { entity ->
             val isSelected = when (entity) {
-                is AppEntity.BaseEntity -> apkChooseAll // Select Base APK based on apkChooseAll setting
+                is AppEntity.BaseEntity -> if (isBatchMode) apkChooseAll else true // Only apply apkChooseAll to batch modes
                 is AppEntity.DexMetadataEntity -> true // Metadata is always selected
                 is AppEntity.SplitEntity -> entity in selectedSplits // Only optimal splits are selected
                 is AppEntity.ModuleEntity -> true // Modules are usually selected

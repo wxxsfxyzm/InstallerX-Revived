@@ -583,7 +583,7 @@
     <string name="config_split_choose_all">默认选中所有分包</string>
     <string name="config_split_choose_all_desc">安装时默认选中所有分包而不是选中最合适的</string>
     <string name="config_apk_choose_all">默认选择所有 APK</string>
-    <string name="config_apk_choose_all_desc">批量安装时默认勾选所有 APK 文件</string>
+    <string name="config_apk_choose_all_desc">单词安装会话含有多个 APK 文件时默认勾选所有 APK 文件</string>
     <string name="force_volume_uuid">指定卷 UUID</string>
     <string name="force_volume_uuid_desc">允许指定卷 UUID 并将软件包安装到该卷</string>
     <string name="force_permission_prompt">强制权限提示</string>
