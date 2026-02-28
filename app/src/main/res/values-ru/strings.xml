@@ -682,4 +682,9 @@
     <string name="installer_live_channel_short_text_pending_install">В ожидании</string>
     <string name="lab_mi_island_desc">Переопределение общего стиля уведомлений. Эта функция для обхода ограничений системной подписи сработает правильно, если авторизатором установлен Shizuku. Пользователи с root-правами могут включить её только после отключения проверки системной подписи</string>
     <string name="lab_mi_island">Xiaomi Super Island</string>
+    <string name="config_label_preferences">Настройки</string>
+    <string name="config_apk_choose_all">Выбирать все APK по умолчанию</string>
+    <string name="config_apk_choose_all_desc">По умолчанию при пакетной установке выбираются все APK-файлы</string>
+    <string name="installer_analyse_failed_corrupted_archive">Архив поврежден</string>
+    <string name="installer_analyse_success">Успешно проанализировано</string>
 </resources>
