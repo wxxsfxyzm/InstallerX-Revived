@@ -133,7 +133,6 @@ fun installExtendedMenuDialog(
                 )
             }
 
-            // 动态安装选项
             if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
                 installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
             ) {
@@ -154,7 +153,6 @@ fun installExtendedMenuDialog(
         }.toMutableStateList()
     }
 
-
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.IconMenu.id, /*menuIcon*/{}),
         title = DialogInnerParams(
@@ -165,7 +163,8 @@ fun installExtendedMenuDialog(
                 style = MaterialTheme.typography.headlineMediumEmphasized
             )
         },
-        content = DialogInnerParams(DialogParamsType.InstallExtendedMenu.id) {
+        // Move content to subtitle to place it on the left pane in landscape mode
+        subtitle = DialogInnerParams(DialogParamsType.InstallExtendedMenu.id) {
             MenuItemWidget(menuEntities, viewModel, installFlags, managedPackages, availableUsers)
         },
         buttons = dialogButtons(
@@ -184,7 +183,7 @@ fun installExtendedMenuDialog(
 fun MenuItemWidget(
     entities: SnapshotStateList<ExtendedMenuEntity>,
     viewmodel: InstallerViewModel,
-    installFlags: Int, // flags from viewmodel
+    installFlags: Int,
     managedPackages: List<NamedPackage>,
     availableUsers: Map<Int, String>
 ) {
@@ -209,18 +208,18 @@ fun MenuItemWidget(
     )
     val singleShape = RoundedCornerShape(cornerRadius)
 
+    // Replaced LazyColumn with Column to avoid infinity constraints crash
+    // when nested inside the left pane's verticalScroll modifier
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(4.dp), // 卡片之间的间距
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            // Restore height limit to constrain the LazyColumn bounds properly
             .heightIn(max = 325.dp)
             .clip(
-                // Clip the whole column to ensure content stays within the rounded bounds.
                 if (entities.size == 1) singleShape else RoundedCornerShape(cornerRadius)
             ),
     ) {
         itemsIndexed(entities, key = { _, item -> item.menuItem.nameResourceId }) { index, item ->
-            // Determine the shape based on the item's position.
             val shape = when {
                 entities.size == 1 -> singleShape
                 index == 0 -> topShape
@@ -239,7 +238,7 @@ fun MenuItemWidget(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable), // This is important for the dropdown position
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                             onClick = { /* Card itself is not clickable, dropdown handles it */ },
                             shape = shape,
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -263,7 +262,6 @@ fun MenuItemWidget(
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
-                                    // Use the dynamic description from the entity
                                     item.menuItem.description?.let { description ->
                                         Text(
                                             text = description,
@@ -279,13 +277,10 @@ fun MenuItemWidget(
                             }
                         }
 
-                        // The actual dropdown menu
                         ExposedDropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }
                         ) {
-                            // "System Default" option
-                            // Not needed for the moment
                             DropdownMenuItem(
                                 text = { Text(text = stringResource(id = R.string.config_follow_settings)) },
                                 onClick = {
@@ -293,7 +288,6 @@ fun MenuItemWidget(
                                     expanded = false
                                 }
                             )
-                            // Options from managed packages
                             managedPackages.forEach { pkg ->
                                 DropdownMenuItem(
                                     text = { Text(text = pkg.name) },
@@ -373,13 +367,12 @@ fun MenuItemWidget(
                     }
                 }
 
-                else -> { // Logic for other card types (PermissionList, InstallOption)
+                else -> {
                     val option = when (item.action) {
                         is InstallExtendedMenuAction.InstallOption -> item.menuItem.action
                         else -> null
                     }
 
-                    // 判断是否选中，仅对安装选项有效
                     val isSelected = option?.let { (installFlags and it.value) != 0 } ?: false
 
                     Card(
@@ -407,7 +400,7 @@ fun MenuItemWidget(
                             }
                         },
                         elevation = CardDefaults.cardElevation(
-                            defaultElevation = 0.dp, // if (option != null && isSelected) 1.dp else 2.dp
+                            defaultElevation = 0.dp,
                         ),
                         colors = CardDefaults.cardColors(
                             containerColor = if (option != null && isSelected)
@@ -455,7 +448,7 @@ fun MenuItemWidget(
                                     is InstallExtendedMenuAction.InstallOption ->
                                         Checkbox(
                                             checked = isSelected,
-                                            onCheckedChange = null, // 交互处理在 Card 的 onClick 中
+                                            onCheckedChange = null,
                                         )
 
                                     is InstallExtendedMenuAction.TextField -> {}
@@ -502,29 +495,30 @@ fun installExtendedMenuSubMenuDialog(
             ?: mutableStateListOf()
     }
     return DialogParams(
-        icon = DialogInnerParams(DialogParamsType.IconMenu.id, permissionIcon),
+        // Keep permissionIcon or whatever icon you had configured
+        icon = DialogInnerParams(DialogParamsType.IconMenu.id, {}),
         title = DialogInnerParams(
             DialogParamsType.InstallExtendedSubMenu.id,
         ) {
             Text(stringResource(R.string.permission_list))
         },
-        content = DialogInnerParams(
+        // Same here, use subtitle to ensure the list displays on the left side
+        subtitle = DialogInnerParams(
             DialogParamsType.InstallExtendedSubMenu.id
         ) {
-            LazyColumn(
+            // Changed LazyColumn to Column to prevent crashing within parent's ScrollBox
+            Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 0.dp)
-                    .heightIn(max = 400.dp),
+                    .heightIn(max = 400.dp)
             ) {
-                itemsIndexed(permissionList) { index, permission ->
+                permissionList.forEachIndexed { _, permission ->
                     PermissionCard(
                         permission = permission,
-                        // 从 ViewModel 的 state 中读取是否选中
                         isHighlight = false
                     )
                 }
-                item { Spacer(modifier = Modifier.size(1.dp)) }
+                Spacer(modifier = Modifier.size(1.dp))
             }
         },
         buttons = dialogButtons(
@@ -550,7 +544,7 @@ fun PermissionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(
-            0.dp, // if (isHighlight) 1.dp else 4.dp
+            0.dp,
         ),
         colors = CardDefaults.cardColors(
             containerColor = if (isHighlight)
@@ -566,13 +560,11 @@ fun PermissionCard(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                // 直接使用我们计算好的标签
                 text = permissionLabel,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                // 副标题仍然显示原始权限字符串
                 text = permission,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

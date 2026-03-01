@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -212,23 +210,20 @@ private fun LandscapeLayout(
     Row(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
-                // Increase left weight to give content more space
                 .weight(1.3f)
-                .verticalScroll(rememberScrollState())
         ) {
             RenderHeader(
                 iconContentColor, titleContentColor,
                 leftIcon, centerIcon, rightIcon,
                 leftTitle, centerTitle, rightTitle,
-                leftSubtitle, centerSubtitle, rightSubtitle
+                leftSubtitle, centerSubtitle, rightSubtitle,
+                isLandscape = true // Pass true to remove the bottom padding of subtitle
             )
         }
 
         Box(
             modifier = Modifier
-                // Decrease right weight to make the button column narrower
                 .weight(1f)
-                // Stretch the right box to the bottom to sink the buttons
                 .fillMaxHeight()
         ) {
             var buttonHeightPx by remember { mutableIntStateOf(0) }
@@ -265,12 +260,14 @@ private fun LandscapeLayout(
     }
 }
 
+// Added isLandscape parameter with a default value of false
 @Composable
 private fun RenderHeader(
     iconContentColor: Color, titleContentColor: Color,
     leftIcon: @Composable (() -> Unit)?, centerIcon: @Composable (() -> Unit)?, rightIcon: @Composable (() -> Unit)?,
     leftTitle: @Composable (() -> Unit)?, centerTitle: @Composable (() -> Unit)?, rightTitle: @Composable (() -> Unit)?,
-    leftSubtitle: @Composable (() -> Unit)?, centerSubtitle: @Composable (() -> Unit)?, rightSubtitle: @Composable (() -> Unit)?
+    leftSubtitle: @Composable (() -> Unit)?, centerSubtitle: @Composable (() -> Unit)?, rightSubtitle: @Composable (() -> Unit)?,
+    isLandscape: Boolean = false
 ) {
     PositionChildWidget(left = leftIcon, center = centerIcon, right = rightIcon) { icon ->
         CompositionLocalProvider(LocalContentColor provides iconContentColor) {
@@ -287,7 +284,13 @@ private fun RenderHeader(
     PositionChildWidget(left = leftSubtitle, center = centerSubtitle, right = rightSubtitle) { subtitle ->
         CompositionLocalProvider(LocalContentColor provides titleContentColor) {
             ProvideTextStyle(MaterialTheme.typography.bodyMedium) {
-                Box(modifier = Modifier.padding(SubtitlePadding)) { subtitle?.invoke() }
+                // Remove bottom padding dynamically if in landscape mode
+                val padding = if (isLandscape) {
+                    PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 0.dp)
+                } else {
+                    SubtitlePadding
+                }
+                Box(modifier = Modifier.padding(padding)) { subtitle?.invoke() }
             }
         }
     }
