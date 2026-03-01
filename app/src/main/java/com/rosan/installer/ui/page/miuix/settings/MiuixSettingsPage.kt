@@ -66,9 +66,9 @@ import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
+import com.rosan.installer.ui.util.UIConstants
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -87,13 +87,6 @@ import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.SnackbarResult
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-private object UIConstants {
-    val WIDE_SCREEN_THRESHOLD = 840.dp
-    val MEDIUM_WIDTH_THRESHOLD = 600.dp
-    const val PORTRAIT_ASPECT_RATIO_THRESHOLD = 1.2f
-}
-
-@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
     val navController = rememberNavController()
