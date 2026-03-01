@@ -6,12 +6,19 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.rosan.installer.ui.util.WindowBlurEffect
+import com.rosan.installer.ui.util.isPhoneLandscape
 
 @Composable
 fun PositionDialog(
@@ -67,7 +75,14 @@ fun PositionDialog(
     centerButton: @Composable (() -> Unit)? = null,
     rightButton: @Composable (() -> Unit)? = null
 ) {
-    Dialog(onDismissRequest = onDismissRequest, properties = properties) {
+    val dialogProperties = DialogProperties(
+        dismissOnBackPress = properties.dismissOnBackPress,
+        dismissOnClickOutside = properties.dismissOnClickOutside,
+        securePolicy = properties.securePolicy,
+        usePlatformDefaultWidth = false // Disable system width constraints
+    )
+
+    Dialog(onDismissRequest = onDismissRequest, properties = dialogProperties) {
         WindowBlurEffect(useBlur = useBlur)
         Box(
             modifier = Modifier
@@ -80,6 +95,10 @@ fun PositionDialog(
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
+                    // Add padding so the dialog doesn't touch screen edges in landscape
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
+                    // Set a reasonable maximum width for landscape and tablets
+                    .widthIn(max = 640.dp)
                     .pointerInput(null) {
                         detectTapGestures(onTap = {})
                     }) {
@@ -89,122 +108,33 @@ fun PositionDialog(
                     color = containerColor,
                     tonalElevation = tonalElevation
                 ) {
-                    Box(
+                    BoxWithConstraints(
                         modifier = Modifier
                             .sizeIn(minWidth = MinWidth, maxHeight = MaxHeight)
                             .padding(DialogPadding)
                     ) {
-                        // set the button always in bottom
-                        var buttonHeightPx by remember {
-                            mutableIntStateOf(0)
-                        }
-                        val buttonHeight = (buttonHeightPx / LocalDensity.current.density).dp
-                        val animatedButtonHeight by animateDpAsState(
-                            targetValue = buttonHeight,
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                                stiffness = Spring.StiffnessMediumLow
-                            ),
-                            label = "button_height"
-                        )
+                        val isLandscape = isPhoneLandscape
 
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .onSizeChanged {
-                                    buttonHeightPx = it.height
-                                }) {
-                            PositionChildWidget(
+                        if (isLandscape) {
+                            LandscapeLayout(
+                                iconContentColor, titleContentColor, textContentColor,
+                                leftIcon, centerIcon, rightIcon,
+                                leftTitle, centerTitle, rightTitle,
+                                leftSubtitle, centerSubtitle, rightSubtitle,
+                                leftText, centerText, rightText,
+                                leftContent, centerContent, rightContent,
                                 leftButton, centerButton, rightButton
-                            ) { button ->
-                                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
-                                    val textStyle = MaterialTheme.typography.labelLarge
-                                    ProvideTextStyle(value = textStyle) {
-                                        Box(
-                                            modifier = Modifier.padding(ButtonPadding)
-                                        ) {
-                                            button?.invoke()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = animatedButtonHeight.coerceAtLeast(0.dp))
-                                .animateContentSize(
-                                    animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessLow
-                                    )
-                                )
-                        ) {
-                            PositionChildWidget(
-                                leftIcon, centerIcon, rightIcon
-                            ) { icon ->
-                                CompositionLocalProvider(LocalContentColor provides iconContentColor) {
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(IconPadding)
-                                            .align(Alignment.CenterHorizontally)
-                                    ) {
-                                        icon?.invoke()
-                                    }
-                                }
-                            }
-                            PositionChildWidget(
-                                leftTitle, centerTitle, rightTitle
-                            ) { title ->
-                                CompositionLocalProvider(LocalContentColor provides titleContentColor) {
-                                    ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
-                                        Box(
-                                            modifier = Modifier
-                                                .padding(TitlePadding)
-                                                .align(Alignment.CenterHorizontally)
-                                        ) {
-                                            title?.invoke()
-                                        }
-                                    }
-                                }
-                            }
-                            PositionChildWidget(
-                                leftSubtitle, centerSubtitle, rightSubtitle
-                            ) { subtitle ->
-                                CompositionLocalProvider(LocalContentColor provides titleContentColor) {
-                                    val textStyle = MaterialTheme.typography.bodyMedium
-                                    ProvideTextStyle(textStyle) {
-                                        Box(
-                                            modifier = Modifier
-                                                .padding(SubtitlePadding)
-                                                .align(Alignment.CenterHorizontally)
-                                        ) {
-                                            subtitle?.invoke()
-                                        }
-                                    }
-                                }
-                            }
-                            val contentMode =
-                                leftContent != null || centerContent != null || rightContent != null
-                            PositionChildWidget(
-                                if (contentMode) leftContent else leftText,
-                                if (contentMode) centerContent else centerText,
-                                if (contentMode) rightContent else rightText
-                            ) { text ->
-                                CompositionLocalProvider(LocalContentColor provides textContentColor) {
-                                    val textStyle = MaterialTheme.typography.bodyMedium
-                                    ProvideTextStyle(textStyle) {
-                                        Box(
-                                            modifier = Modifier
-                                                .weight(weight = 1f, fill = false)
-                                                .padding(if (contentMode) ContentPadding else TextPadding)
-                                        ) {
-                                            text?.invoke()
-                                        }
-                                    }
-                                }
-                            }
+                            )
+                        } else {
+                            PortraitLayout(
+                                iconContentColor, titleContentColor, textContentColor,
+                                leftIcon, centerIcon, rightIcon,
+                                leftTitle, centerTitle, rightTitle,
+                                leftSubtitle, centerSubtitle, rightSubtitle,
+                                leftText, centerText, rightText,
+                                leftContent, centerContent, rightContent,
+                                leftButton, centerButton, rightButton
+                            )
                         }
                     }
                 }
@@ -214,14 +144,206 @@ fun PositionDialog(
 }
 
 @Composable
+private fun PortraitLayout(
+    iconContentColor: Color, titleContentColor: Color, textContentColor: Color,
+    leftIcon: @Composable (() -> Unit)?, centerIcon: @Composable (() -> Unit)?, rightIcon: @Composable (() -> Unit)?,
+    leftTitle: @Composable (() -> Unit)?, centerTitle: @Composable (() -> Unit)?, rightTitle: @Composable (() -> Unit)?,
+    leftSubtitle: @Composable (() -> Unit)?, centerSubtitle: @Composable (() -> Unit)?, rightSubtitle: @Composable (() -> Unit)?,
+    leftText: @Composable (() -> Unit)?, centerText: @Composable (() -> Unit)?, rightText: @Composable (() -> Unit)?,
+    leftContent: @Composable (() -> Unit)?, centerContent: @Composable (() -> Unit)?, rightContent: @Composable (() -> Unit)?,
+    leftButton: @Composable (() -> Unit)?, centerButton: @Composable (() -> Unit)?, rightButton: @Composable (() -> Unit)?
+) {
+    var buttonHeightPx by remember { mutableIntStateOf(0) }
+    val buttonHeight = (buttonHeightPx / LocalDensity.current.density).dp
+    val animatedButtonHeight by animateDpAsState(
+        targetValue = buttonHeight,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "button_height"
+    )
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .onSizeChanged { buttonHeightPx = it.height }
+        ) {
+            RenderButtons(leftButton, centerButton, rightButton)
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = animatedButtonHeight.coerceAtLeast(0.dp))
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
+        ) {
+            RenderHeader(
+                iconContentColor, titleContentColor,
+                leftIcon, centerIcon, rightIcon,
+                leftTitle, centerTitle, rightTitle,
+                leftSubtitle, centerSubtitle, rightSubtitle
+            )
+            RenderContent(
+                textContentColor,
+                leftText, centerText, rightText,
+                leftContent, centerContent, rightContent
+            )
+        }
+    }
+}
+
+@Composable
+private fun LandscapeLayout(
+    iconContentColor: Color, titleContentColor: Color, textContentColor: Color,
+    leftIcon: @Composable (() -> Unit)?, centerIcon: @Composable (() -> Unit)?, rightIcon: @Composable (() -> Unit)?,
+    leftTitle: @Composable (() -> Unit)?, centerTitle: @Composable (() -> Unit)?, rightTitle: @Composable (() -> Unit)?,
+    leftSubtitle: @Composable (() -> Unit)?, centerSubtitle: @Composable (() -> Unit)?, rightSubtitle: @Composable (() -> Unit)?,
+    leftText: @Composable (() -> Unit)?, centerText: @Composable (() -> Unit)?, rightText: @Composable (() -> Unit)?,
+    leftContent: @Composable (() -> Unit)?, centerContent: @Composable (() -> Unit)?, rightContent: @Composable (() -> Unit)?,
+    leftButton: @Composable (() -> Unit)?, centerButton: @Composable (() -> Unit)?, rightButton: @Composable (() -> Unit)?
+) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                // Increase left weight to give content more space
+                .weight(1.3f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            RenderHeader(
+                iconContentColor, titleContentColor,
+                leftIcon, centerIcon, rightIcon,
+                leftTitle, centerTitle, rightTitle,
+                leftSubtitle, centerSubtitle, rightSubtitle
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                // Decrease right weight to make the button column narrower
+                .weight(1f)
+                // Stretch the right box to the bottom to sink the buttons
+                .fillMaxHeight()
+        ) {
+            var buttonHeightPx by remember { mutableIntStateOf(0) }
+            val buttonHeight = (buttonHeightPx / LocalDensity.current.density).dp
+            val animatedButtonHeight by animateDpAsState(
+                targetValue = buttonHeight,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    stiffness = Spring.StiffnessMediumLow
+                ),
+                label = "button_height_landscape"
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .onSizeChanged { buttonHeightPx = it.height }
+            ) {
+                RenderButtons(leftButton, centerButton, rightButton)
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = animatedButtonHeight.coerceAtLeast(0.dp))
+            ) {
+                RenderContent(
+                    textContentColor,
+                    leftText, centerText, rightText,
+                    leftContent, centerContent, rightContent
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RenderHeader(
+    iconContentColor: Color, titleContentColor: Color,
+    leftIcon: @Composable (() -> Unit)?, centerIcon: @Composable (() -> Unit)?, rightIcon: @Composable (() -> Unit)?,
+    leftTitle: @Composable (() -> Unit)?, centerTitle: @Composable (() -> Unit)?, rightTitle: @Composable (() -> Unit)?,
+    leftSubtitle: @Composable (() -> Unit)?, centerSubtitle: @Composable (() -> Unit)?, rightSubtitle: @Composable (() -> Unit)?
+) {
+    PositionChildWidget(left = leftIcon, center = centerIcon, right = rightIcon) { icon ->
+        CompositionLocalProvider(LocalContentColor provides iconContentColor) {
+            Box(modifier = Modifier.padding(IconPadding)) { icon?.invoke() }
+        }
+    }
+    PositionChildWidget(left = leftTitle, center = centerTitle, right = rightTitle) { title ->
+        CompositionLocalProvider(LocalContentColor provides titleContentColor) {
+            ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
+                Box(modifier = Modifier.padding(TitlePadding)) { title?.invoke() }
+            }
+        }
+    }
+    PositionChildWidget(left = leftSubtitle, center = centerSubtitle, right = rightSubtitle) { subtitle ->
+        CompositionLocalProvider(LocalContentColor provides titleContentColor) {
+            ProvideTextStyle(MaterialTheme.typography.bodyMedium) {
+                Box(modifier = Modifier.padding(SubtitlePadding)) { subtitle?.invoke() }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.RenderContent(
+    textContentColor: Color,
+    leftText: @Composable (() -> Unit)?, centerText: @Composable (() -> Unit)?, rightText: @Composable (() -> Unit)?,
+    leftContent: @Composable (() -> Unit)?, centerContent: @Composable (() -> Unit)?, rightContent: @Composable (() -> Unit)?
+) {
+    val contentMode = leftContent != null || centerContent != null || rightContent != null
+    PositionChildWidget(
+        // The weight modifier MUST be passed to the top-level Box inside PositionChildWidget
+        modifier = Modifier.weight(1f, fill = false),
+        left = if (contentMode) leftContent else leftText,
+        center = if (contentMode) centerContent else centerText,
+        right = if (contentMode) rightContent else rightText
+    ) { text ->
+        CompositionLocalProvider(LocalContentColor provides textContentColor) {
+            ProvideTextStyle(MaterialTheme.typography.bodyMedium) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(if (contentMode) ContentPadding else TextPadding)
+                ) {
+                    text?.invoke()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RenderButtons(
+    leftButton: @Composable (() -> Unit)?, centerButton: @Composable (() -> Unit)?, rightButton: @Composable (() -> Unit)?
+) {
+    PositionChildWidget(left = leftButton, center = centerButton, right = rightButton) { button ->
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
+            ProvideTextStyle(value = MaterialTheme.typography.labelLarge) {
+                Box(modifier = Modifier.padding(ButtonPadding)) { button?.invoke() }
+            }
+        }
+    }
+}
+
+@Composable
 private fun PositionChildWidget(
+    modifier: Modifier = Modifier,
     left: @Composable (() -> Unit)? = null,
     center: @Composable (() -> Unit)? = null,
     right: @Composable (() -> Unit)? = null,
     parent: @Composable ((child: @Composable (() -> Unit)?) -> Unit)
 ) {
     if (left == null && center == null && right == null) return
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = modifier.fillMaxWidth()) {
         Box(modifier = Modifier.align(Alignment.TopStart)) {
             parent.invoke(left)
         }
@@ -240,14 +362,10 @@ private val ButtonsCrossAxisSpacing = 12.dp
 private val DialogSinglePadding = 16.dp
 
 private val DialogPadding = PaddingValues(top = DialogSinglePadding, bottom = DialogSinglePadding)
-private val IconPadding =
-    PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
-private val TitlePadding =
-    PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
-private val SubtitlePadding =
-    PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
-private val TextPadding =
-    PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
+private val IconPadding = PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
+private val TitlePadding = PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
+private val SubtitlePadding = PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
+private val TextPadding = PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)
 private val ContentPadding = PaddingValues.Absolute(bottom = 8.dp)
 private val ButtonPadding = PaddingValues(start = DialogSinglePadding, end = DialogSinglePadding, bottom = 0.dp)
 
