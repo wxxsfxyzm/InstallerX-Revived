@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 
@@ -26,40 +28,44 @@ fun dialogButtons(
     content: (@Composable () -> List<DialogButton>)
 ) = DialogInnerParams(id) {
     val buttons = content.invoke()
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     Column(
         modifier = Modifier.clip(RoundedCornerShape(12.dp)),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        val single = if (buttons.size > 2) buttons.size % 2 else buttons.size
+        if (isLandscape) {
+            // Landscape layout: Stack all buttons vertically to save horizontal space
+            buttons.forEach { button ->
+                InnerButton(button)
+            }
+        } else {
+            // Portrait layout: Preserve original 1+2 grid logic
+            val single = if (buttons.size > 2) buttons.size % 2 else buttons.size
 
-        // Render single buttons (top section)
-        for (i in 0 until single) {
-            InnerButton(buttons[i])
-        }
+            // Render single buttons (top section)
+            for (i in 0 until single) {
+                InnerButton(buttons[i])
+            }
 
-        // Render paired buttons (bottom section)
-        for (i in single until buttons.size step 2) {
-            Box {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    // Key Change 1: Force the Row to be as tall as its tallest child
-                    modifier = Modifier.height(IntrinsicSize.Max)
-                ) {
-                    buttons[i].let {
-                        InnerButton(
-                            it,
-                            Modifier
+            // Render paired buttons (bottom section)
+            for (i in single until buttons.size step 2) {
+                Box {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.height(IntrinsicSize.Max)
+                    ) {
+                        buttons[i].let {
+                            InnerButton(it, Modifier
                                 .weight(it.weight)
-                                .fillMaxHeight() // Key Change 2: Stretch to fill the parent Row's height
-                        )
-                    }
-                    buttons[i + 1].let {
-                        InnerButton(
-                            it,
-                            Modifier
+                                .fillMaxHeight())
+                        }
+                        buttons[i + 1].let {
+                            InnerButton(it, Modifier
                                 .weight(it.weight)
-                                .fillMaxHeight() // Key Change 2: Stretch here too
-                        )
+                                .fillMaxHeight())
+                        }
                     }
                 }
             }
