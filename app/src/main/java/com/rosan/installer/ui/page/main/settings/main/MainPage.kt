@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.main
 
 import androidx.compose.animation.fadeIn
@@ -27,7 +29,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationItemIconPosition
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarArrangement
+import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.WideNavigationRail
 import androidx.compose.material3.WideNavigationRailColors
@@ -109,20 +115,24 @@ fun MainPage(navController: NavController) {
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
     ) {
-        val isPortrait = maxWidth < maxHeight || (maxHeight / maxWidth > 1.4f)
+        // Expanded layout: >= 840dp OR medium devices in landscape (like foldables)
+        val showRail = maxWidth >= 840.dp || (maxWidth >= 600.dp && maxWidth > maxHeight)
+
+        // Medium layout: >= 600dp but in portrait mode (like foldables in portrait or small tablets)
+        val isMedium = maxWidth >= 600.dp && !showRail
 
         val navigationSide =
-            if (isPortrait) WindowInsetsSides.Bottom
-            else WindowInsetsSides.Start
+            if (showRail) WindowInsetsSides.Start
+            else WindowInsetsSides.Bottom
 
         val navigationWindowInsets = WindowInsets.safeDrawing.only(
-            (if (isPortrait) WindowInsetsSides.Horizontal
-            else WindowInsetsSides.Vertical) + navigationSide
+            (if (showRail) WindowInsetsSides.Vertical
+            else WindowInsetsSides.Horizontal) + navigationSide
         )
 
         val hazeStyle = rememberMaterial3HazeStyle()
 
-        if (isPortrait) {
+        if (!showRail) {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 bottomBar = {
@@ -134,7 +144,8 @@ fun MainPage(navController: NavController) {
                         currentPage = currentPage,
                         onPageChanged = { onPageChanged(it) },
                         configCount = configCount,
-                        containerColor = if (useBlur) Color.Transparent else BottomAppBarDefaults.containerColor
+                        containerColor = if (useBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
+                        isMedium = isMedium // Pass layout state
                     )
                 }
             ) { paddingValues ->
@@ -180,21 +191,23 @@ fun RowNavigation(
     currentPage: Int,
     onPageChanged: (Int) -> Unit,
     configCount: Int,
-    containerColor: Color = if (isM3e) MaterialTheme.colorScheme.surfaceContainer else BottomAppBarDefaults.containerColor
+    containerColor: Color = if (isM3e) MaterialTheme.colorScheme.surfaceContainer else BottomAppBarDefaults.containerColor,
+    isMedium: Boolean = false
 ) {
-    FlexibleBottomAppBar(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentSize(),
-        windowInsets = windowInsets,
-        expandedHeight = if (isM3e) BottomAppBarDefaults.FlexibleBottomAppBarHeight else 72.dp,
-        containerColor = containerColor,
-        horizontalArrangement = BottomAppBarDefaults.FlexibleHorizontalArrangement,
-        content = {
+    if (isM3e) {
+        ShortNavigationBar(
+            modifier = modifier
+                .fillMaxWidth()
+                .wrapContentSize(),
+            windowInsets = windowInsets,
+            containerColor = containerColor,
+            arrangement = if (isMedium) ShortNavigationBarArrangement.Centered else ShortNavigationBarArrangement.EqualWeight
+        ) {
             data.forEachIndexed { index, navigationData ->
-                NavigationBarItem(
+                ShortNavigationBarItem(
                     selected = currentPage == index,
                     onClick = { onPageChanged(index) },
+                    iconPosition = if (isMedium) NavigationItemIconPosition.Start else NavigationItemIconPosition.Top,
                     icon = {
                         val showBadge = index == 0 && configCount > 1
 
@@ -221,12 +234,58 @@ fun RowNavigation(
                     },
                     label = {
                         Text(text = navigationData.label)
-                    },
-                    alwaysShowLabel = isM3e
+                    }
                 )
             }
         }
-    )
+    } else {
+        // Fallback for non-expressive UI
+        FlexibleBottomAppBar(
+            modifier = modifier
+                .fillMaxWidth()
+                .wrapContentSize(),
+            windowInsets = windowInsets,
+            expandedHeight = 72.dp,
+            containerColor = containerColor,
+            horizontalArrangement = BottomAppBarDefaults.FlexibleHorizontalArrangement,
+            content = {
+                data.forEachIndexed { index, navigationData ->
+                    NavigationBarItem(
+                        selected = currentPage == index,
+                        onClick = { onPageChanged(index) },
+                        icon = {
+                            val showBadge = index == 0 && configCount > 1
+
+                            BadgedBox(
+                                badge = {
+                                    androidx.compose.animation.AnimatedVisibility(
+                                        visible = showBadge,
+                                        enter = scaleIn() + fadeIn(),
+                                        exit = scaleOut() + fadeOut(),
+                                        label = "badge"
+                                    ) {
+                                        Badge(
+                                            containerColor = MaterialTheme.colorScheme.secondary,
+                                            contentColor = MaterialTheme.colorScheme.onSecondary
+                                        ) { Text(configCount.toString()) }
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = navigationData.icon,
+                                    contentDescription = navigationData.label
+                                )
+                            }
+                        },
+                        label = {
+                            Text(text = navigationData.label)
+                        },
+                        alwaysShowLabel = false
+                    )
+                }
+            }
+        )
+    }
 }
 
 @Composable
