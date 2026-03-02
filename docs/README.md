@@ -29,6 +29,7 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 - Block the installation of specific app's packageName or by sharedUID
 - Auto-delete APK after installation
 - No shell commands, native API calls only
+- bypasses Google's developer verification requirements and other play protect popups
 
 ## Supported Versions
 
