@@ -32,7 +32,7 @@ timber = "5.0.1"
 miuix = "0.8.5"
 okhttp = "5.3.2"
 monetcompat = "0.4.1"
-materialKolor = "5.0.0-alpha06"
+materialKolor = "5.0.0-alpha07"
 
 [plugins]
 agp-lib = { id = "com.android.library", version.ref = "agp" }
