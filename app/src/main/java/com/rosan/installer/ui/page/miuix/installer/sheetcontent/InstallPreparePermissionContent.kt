@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,6 +56,10 @@ fun InstallPreparePermissionContent(
     val permissionList = remember(entity) {
         (entity as? AppEntity.BaseEntity)?.permissions?.sorted()?.toMutableStateList()
             ?: mutableStateListOf()
+    }
+
+    BackHandler {
+        onBack()
     }
 
     Column(

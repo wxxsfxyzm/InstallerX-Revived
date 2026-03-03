@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -120,6 +121,10 @@ fun InstallExtendedMenuContent(
                 }
             }
         }.toMutableStateList()
+    }
+
+    BackHandler {
+        viewModel.dispatch(InstallerViewAction.InstallPrepare)
     }
 
     Column(
