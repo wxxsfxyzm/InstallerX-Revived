@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,7 @@ import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.LocalIsDark
@@ -42,6 +44,10 @@ fun PrepareSettingsContent(
     var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
     var displaySize by remember { mutableStateOf(installer.config.displaySize) }
     var showOPPOSpecial by remember { mutableStateOf(settings.showOPPOSpecial) }
+
+    BackHandler {
+        viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
+    }
 
     LaunchedEffect(autoDelete, displaySdk) {
         val currentConfig = installer.config
