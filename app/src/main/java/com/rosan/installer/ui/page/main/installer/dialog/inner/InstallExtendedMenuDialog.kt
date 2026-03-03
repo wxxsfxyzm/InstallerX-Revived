@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -506,19 +506,23 @@ fun installExtendedMenuSubMenuDialog(
         subtitle = DialogInnerParams(
             DialogParamsType.InstallExtendedSubMenu.id
         ) {
-            // Changed LazyColumn to Column to prevent crashing within parent's ScrollBox
-            Column(
+
+            // Use LazyColumn for better performance with long lists.
+            // The .heightIn(max = 400.dp) prevents the infinite constraints crash.
+            LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .heightIn(max = 400.dp)
             ) {
-                permissionList.forEachIndexed { _, permission ->
+                items(permissionList) { permission ->
                     PermissionCard(
                         permission = permission,
                         isHighlight = false
                     )
                 }
-                Spacer(modifier = Modifier.size(1.dp))
+                item {
+                    Spacer(modifier = Modifier.size(1.dp))
+                }
             }
         },
         buttons = dialogButtons(
@@ -556,7 +560,8 @@ fun PermissionCard(
         Column(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxSize(),
+                // Fix: Use fillMaxWidth instead of fillMaxSize to wrap content vertically
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
             Text(

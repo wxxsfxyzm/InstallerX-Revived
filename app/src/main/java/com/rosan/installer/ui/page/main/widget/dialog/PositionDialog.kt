@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -208,17 +211,27 @@ private fun LandscapeLayout(
     leftButton: @Composable (() -> Unit)?, centerButton: @Composable (() -> Unit)?, rightButton: @Composable (() -> Unit)?
 ) {
     Row(modifier = Modifier.fillMaxWidth()) {
-        Column(
+        // Wrap the left column in a Box to fill max height and center content vertically
+        Box(
             modifier = Modifier
                 .weight(1.3f)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
         ) {
-            RenderHeader(
-                iconContentColor, titleContentColor,
-                leftIcon, centerIcon, rightIcon,
-                leftTitle, centerTitle, rightTitle,
-                leftSubtitle, centerSubtitle, rightSubtitle,
-                isLandscape = true // Pass true to remove the bottom padding of subtitle
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Add vertical scroll to the left column to prevent clipping of long App Info Cards
+                    .verticalScroll(rememberScrollState())
+            ) {
+                RenderHeader(
+                    iconContentColor, titleContentColor,
+                    leftIcon, centerIcon, rightIcon,
+                    leftTitle, centerTitle, rightTitle,
+                    leftSubtitle, centerSubtitle, rightSubtitle,
+                    isLandscape = true // Pass true to enable horizontal compact layout
+                )
+            }
         }
 
         Box(
@@ -260,7 +273,6 @@ private fun LandscapeLayout(
     }
 }
 
-// Added isLandscape parameter with a default value of false
 @Composable
 private fun RenderHeader(
     iconContentColor: Color, titleContentColor: Color,
@@ -269,22 +281,48 @@ private fun RenderHeader(
     leftSubtitle: @Composable (() -> Unit)?, centerSubtitle: @Composable (() -> Unit)?, rightSubtitle: @Composable (() -> Unit)?,
     isLandscape: Boolean = false
 ) {
-    PositionChildWidget(left = leftIcon, center = centerIcon, right = rightIcon) { icon ->
-        CompositionLocalProvider(LocalContentColor provides iconContentColor) {
-            Box(modifier = Modifier.padding(IconPadding)) { icon?.invoke() }
+    // Check if we can safely combine center icon and center title horizontally in landscape
+    val canCombineIconAndTitle = isLandscape && centerIcon != null && centerTitle != null
+
+    if (canCombineIconAndTitle) {
+        // Smart horizontal layout for Landscape mode: Icon on left, Title on right
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 12.dp)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            CompositionLocalProvider(LocalContentColor provides iconContentColor) {
+                Box(modifier = Modifier.padding(end = 16.dp)) { centerIcon?.invoke() }
+            }
+            CompositionLocalProvider(LocalContentColor provides titleContentColor) {
+                ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
+                    Box { centerTitle.invoke() }
+                }
+            }
         }
-    }
-    PositionChildWidget(left = leftTitle, center = centerTitle, right = rightTitle) { title ->
-        CompositionLocalProvider(LocalContentColor provides titleContentColor) {
-            ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
-                Box(modifier = Modifier.padding(TitlePadding)) { title?.invoke() }
+    } else {
+        // Default vertical stacking logic (Portrait or missing components)
+        PositionChildWidget(left = leftIcon, center = centerIcon, right = rightIcon) { icon ->
+            CompositionLocalProvider(LocalContentColor provides iconContentColor) {
+                Box(modifier = Modifier.padding(IconPadding)) { icon?.invoke() }
+            }
+        }
+        PositionChildWidget(left = leftTitle, center = centerTitle, right = rightTitle) { title ->
+            CompositionLocalProvider(LocalContentColor provides titleContentColor) {
+                ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
+                    Box(modifier = Modifier.padding(TitlePadding)) { title?.invoke() }
+                }
             }
         }
     }
+
+    // Subtitle rendering (App Info Card + Chips)
     PositionChildWidget(left = leftSubtitle, center = centerSubtitle, right = rightSubtitle) { subtitle ->
         CompositionLocalProvider(LocalContentColor provides titleContentColor) {
             ProvideTextStyle(MaterialTheme.typography.bodyMedium) {
-                // Remove bottom padding dynamically if in landscape mode
+                // Remove bottom padding dynamically if in landscape mode to save vertical space
                 val padding = if (isLandscape) {
                     PaddingValues.Absolute(left = DialogSinglePadding, right = DialogSinglePadding, bottom = 0.dp)
                 } else {
