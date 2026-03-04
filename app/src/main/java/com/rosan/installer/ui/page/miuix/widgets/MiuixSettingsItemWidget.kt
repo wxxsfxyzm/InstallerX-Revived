@@ -674,9 +674,7 @@ fun MiuixColorSpecWidget(
     // 4. Use a static localized string for the unsupported state
     val descriptionText = if (!isSpec2025Supported) {
         stringResource(id = R.string.theme_settings_color_spec_only_2021)
-    } else {
-        activeSpec.displayName
-    }
+    } else null
 
     val spinnerEntries = remember(availableSpecs) {
         availableSpecs.map { SpinnerEntry(title = it.displayName) }

@@ -13,10 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Checkbox
+import top.yukonga.miuix.kmp.basic.CheckboxDefaults
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -84,9 +86,9 @@ fun MiuixCheckboxWidget(
         onClick = toggleAction,
         endActions = {
             Checkbox(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                enabled = enabled
+                state = ToggleableState(value = checked), onClick = run {
+                    { onCheckedChange(!checked) }
+                }, modifier = Modifier, colors = CheckboxDefaults.checkboxColors(), enabled = enabled
             )
         }
     )
@@ -157,8 +159,10 @@ fun MiuixMultiApkCheckboxWidget(
             modifier = Modifier.padding(start = textToCheckboxPadding)
         ) {
             Checkbox(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
+                state = ToggleableState(value = checked),
+                onClick = run { { onCheckedChange(!checked) } },
+                modifier = Modifier,
+                colors = CheckboxDefaults.checkboxColors(),
                 enabled = enabled
             )
         }

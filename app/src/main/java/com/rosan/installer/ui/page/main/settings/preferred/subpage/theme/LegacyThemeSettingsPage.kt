@@ -140,6 +140,7 @@ fun LegacyThemeSettingsPage(
                         selected = state.showMiuixUI,
                         onClick = {
                             if (!state.showMiuixUI) { // Only dispatch if changing state
+                                viewModel.markPendingNavigateToTheme(true)
                                 viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(true))
                             }
                         }

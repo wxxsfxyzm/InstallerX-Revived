@@ -86,6 +86,9 @@ class PreferredViewModel(
 
     private var initialized = false
 
+    var pendingNavigateToTheme by mutableStateOf(false)
+        private set
+
     fun dispatch(action: PreferredViewAction) =
         when (action) {
             is PreferredViewAction.Init -> init()
@@ -201,6 +204,10 @@ class PreferredViewModel(
         refreshAdbVerifyStatus()
         checkUpdate()
         getAndCombineState()
+    }
+
+    fun markPendingNavigateToTheme(pending: Boolean) {
+        pendingNavigateToTheme = pending
     }
 
     private fun performInAppUpdate() = viewModelScope.launch(Dispatchers.IO) {

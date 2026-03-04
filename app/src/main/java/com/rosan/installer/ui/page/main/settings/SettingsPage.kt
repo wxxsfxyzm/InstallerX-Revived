@@ -6,6 +6,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,6 +34,16 @@ import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.NewThem
 fun SettingsPage(preferredViewModel: PreferredViewModel) {
     val navController = rememberNavController()
     val useBlur = preferredViewModel.state.useBlur
+
+    LaunchedEffect(navController) {
+        if (preferredViewModel.pendingNavigateToTheme) {
+            navController.navigate(SettingsScreen.Theme.route) {
+                popUpTo(SettingsScreen.Main.route)
+            }
+            preferredViewModel.markPendingNavigateToTheme(false)
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = SettingsScreen.Main.route,

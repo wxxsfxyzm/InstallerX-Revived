@@ -98,6 +98,16 @@ private object UIConstants {
 fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
     val navController = rememberNavController()
     val useBlur = preferredViewModel.state.useBlur
+
+    LaunchedEffect(navController) {
+        if (preferredViewModel.pendingNavigateToTheme) {
+            navController.navigate(MiuixSettingsScreen.MiuixTheme.route) {
+                popUpTo(MiuixSettingsScreen.MiuixMain.route)
+            }
+            preferredViewModel.markPendingNavigateToTheme(false)
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = MiuixSettingsScreen.MiuixMain.route,

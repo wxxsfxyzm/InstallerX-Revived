@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.activity.themestate
 
 import android.os.Build
@@ -23,6 +25,7 @@ import timber.log.Timber
 data class ThemeUiState(
     val isLoaded: Boolean = false,
     val useMiuix: Boolean = false,
+    val isExpressive: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val colorSpec: ThemeColorSpec = ThemeColorSpec.SPEC_2025,
@@ -34,11 +37,10 @@ data class ThemeUiState(
 /**
  * A reusable factory function that encapsulates the logic for creating
  * a Flow of theme UI state from AppDataStore.
- * @param dataStore The instance of AppDataStore to read settings from.
- * @return A Flow that emits ThemeUiState updates.
  */
 fun createThemeUiStateFlow(dataStore: AppDataStore): Flow<ThemeUiState> {
     val useMiuixFlow = dataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
+    val showExpressiveUIFlow = dataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true) // Flow for Expressive UI
     val themeModeFlow = dataStore.getString(AppDataStore.THEME_MODE, ThemeMode.SYSTEM.name)
         .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
     val paletteStyleFlow = dataStore.getString(AppDataStore.THEME_PALETTE_STYLE, PaletteStyle.TonalSpot.name)
@@ -49,11 +51,11 @@ fun createThemeUiStateFlow(dataStore: AppDataStore): Flow<ThemeUiState> {
     val useMiuixMonetFlow = dataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false)
     val manualSeedColorFlow = dataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
         .map { Color(it) }
-    // Dynamic wallpaper color (only for < Android 12)
     val wallpaperColorsFlow = getWallpaperColorsFlow()
 
     return combine(
         useMiuixFlow,
+        showExpressiveUIFlow, // Include in combine
         themeModeFlow,
         paletteStyleFlow,
         colorSpecFlow,
@@ -64,6 +66,7 @@ fun createThemeUiStateFlow(dataStore: AppDataStore): Flow<ThemeUiState> {
     ) { values: Array<Any?> ->
         var idx = 0
         val useMiuix = values[idx++] as Boolean
+        val showExpressiveUI = values[idx++] as Boolean // Extract Expressive UI value
         val themeMode = values[idx++] as ThemeMode
         val paletteStyle = values[idx++] as PaletteStyle
         val colorSpec = values[idx++] as ThemeColorSpec
@@ -71,10 +74,7 @@ fun createThemeUiStateFlow(dataStore: AppDataStore): Flow<ThemeUiState> {
         val useMonet = values[idx++] as Boolean
         val manualSeedColor = values[idx++] as Color
         @Suppress("UNCHECKED_CAST") val wallpaperColors = values[idx] as? List<Int>
-        // Calculate the effective seed color logic here.
-        // 1. If dynamic color is ON and Android < 12, try to use the fetched wallpaper color.
-        // 2. Otherwise (Dynamic OFF or Android 12+), use the manual seed color.
-        // Note: For Android 12+, the UI layer will override this with system resources anyway if dynamic is ON.
+
         val effectiveSeedColor =
             if (useDynamic && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) if (!wallpaperColors.isNullOrEmpty()) Color(
                 wallpaperColors[0]
@@ -84,19 +84,17 @@ fun createThemeUiStateFlow(dataStore: AppDataStore): Flow<ThemeUiState> {
         ThemeUiState(
             isLoaded = true,
             useMiuix = useMiuix,
+            isExpressive = showExpressiveUI, // Pass to state
             themeMode = themeMode,
             paletteStyle = paletteStyle,
             colorSpec = colorSpec,
             useDynamicColor = useDynamic,
             useMiuixMonet = useMonet,
-            seedColor = effectiveSeedColor // Pass the resolved color
+            seedColor = effectiveSeedColor
         )
     }
 }
 
-/**
- * Helper flow to fetch wallpaper colors asynchronously for Android 11 and below.
- */
 private fun getWallpaperColorsFlow(): Flow<List<Int>?> = flow {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
         val colors = try {

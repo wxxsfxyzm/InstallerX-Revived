@@ -209,6 +209,7 @@ fun NewThemeSettingsPage(
                             selected = state.showMiuixUI,
                             onClick = {
                                 if (!state.showMiuixUI) {
+                                    viewModel.markPendingNavigateToTheme(true)
                                     viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(true))
                                 }
                             }

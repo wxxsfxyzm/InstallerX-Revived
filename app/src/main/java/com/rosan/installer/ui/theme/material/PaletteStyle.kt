@@ -15,4 +15,10 @@ enum class PaletteStyle(
     Monochrome("Monochrome"),
     Fidelity("Fidelity"),
     Content("Content");
+
+    val supportsSpec2025: Boolean
+        get() = this == TonalSpot ||
+                this == Neutral ||
+                this == Vibrant ||
+                this == Expressive
 }
