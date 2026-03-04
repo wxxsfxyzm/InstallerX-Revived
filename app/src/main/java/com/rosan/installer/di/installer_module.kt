@@ -16,8 +16,8 @@ val installerModule = module {
         InstallerRepoImpl(
             id = id,
             context = androidContext(), // Inject Application Context automatically
-            appDataStore = get(),       // Inject AppDataStore automatically
             iconColorExtractor = get(), // Inject IconColorExtractor automatically
+            appSettingsRepo = get(),
             onClose = onClose
         )
     }

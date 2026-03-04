@@ -6,7 +6,6 @@ import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SU_ARGS
 import com.rosan.installer.data.recycle.util.getSpecialAuth
 import com.rosan.installer.data.recycle.util.useUserService
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +18,7 @@ import timber.log.Timber
  * A centralized manager for handling all privileged actions.
  *
  * This singleton object implements [KoinComponent] to self-inject dependencies
- * like [AppDataStore], without the need for the UI layer to pass configuration
+ * like [AppSettingsRepo], without the need for the UI layer to pass configuration
  * flags manually.
  */
 object PrivilegedManager : KoinComponent {

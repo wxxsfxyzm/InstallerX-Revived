@@ -14,7 +14,7 @@ import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,8 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 class InstallerRepoImpl(
     override val id: String,
     val context: Context,
-    val appDataStore: AppDataStore,
     val iconColorExtractor: IconColorExtractor,
+    val appSettingsRepo: AppSettingsRepo,
     private val onClose: () -> Unit
 ) : InstallerRepo {
 

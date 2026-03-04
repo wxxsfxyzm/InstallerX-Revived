@@ -26,7 +26,7 @@ import com.rosan.installer.data.installer.model.impl.installer.processor.Session
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.impl.AutoLockManager
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.BooleanSetting
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.util.doBiometricAuthOrThrow
 import com.rosan.installer.util.OSUtils
@@ -63,7 +63,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     // Helper property to get ID for logging
     private val installerId get() = installer.id
     private val context: Context get() = installer.context
-    private val appDataStore get() = installer.appDataStore
+    private val appSettingsRepo get() = installer.appSettingsRepo
     private val iconColorExtractor get() = installer.iconColorExtractor
 
     // Cache directory
@@ -243,7 +243,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         Timber.d("[id=$installerId] analyse: Starting. Emitting ProgressEntity.InstallAnalysing.")
         installer.progress.emit(ProgressEntity.InstallAnalysing)
 
-        val isModuleEnabled = appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false).first()
+        val isModuleEnabled = appSettingsRepo.getBoolean(BooleanSetting.LabEnableModuleFlash, false).first()
         Timber.d("[id=$installerId] Module flashing enabled: $isModuleEnabled")
 
         val extra = AnalyseExtraEntity(cacheDirectory, isModuleFlashEnabled = isModuleEnabled)
@@ -259,12 +259,12 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
 
         // Handle Dynamic Colors
-        val useDynamicColor = appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+        val useDynamicColor = appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first()
         val useDynamicColorForLiveActivity =
-            appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+            appSettingsRepo.getBoolean(BooleanSetting.LiveActivityDynColorFollowPkgIcon, false).first()
         val enableDynamicColorAnalyse = useDynamicColor || useDynamicColorForLiveActivity
 
-        val preferSystemIcon = appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first()
+        val preferSystemIcon = appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first()
 
         installer.analysisResults = if (enableDynamicColorAnalyse) {
             Timber.d("[id=$installerId] analyse: Dynamic color is enabled. Extracting colors from icons.")
@@ -303,8 +303,8 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         isInstall: Boolean
     ) {
         val requireBiometricAuth =
-            if (isInstall) appDataStore.getBoolean(AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH, false).first()
-            else appDataStore.getBoolean(AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH, false).first()
+            if (isInstall) appSettingsRepo.getBoolean(BooleanSetting.InstallerRequireBiometricAuth, false).first()
+            else appSettingsRepo.getBoolean(BooleanSetting.UninstallerRequireBiometricAuth, false).first()
 
         if (!requireBiometricAuth) return
 
@@ -454,7 +454,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val pInfo = pm.getPackageInfo(packageName, 0)
         val icon = pm.getApplicationIcon(appInfo)
 
-        val color = if (appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()) {
+        val color = if (appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first()) {
             Timber.d("[id=$installerId] resolveUninstall: Dynamic color enabled, extracting color.")
             with(iconColorExtractor) { icon.extractColor() }
         } else null
@@ -489,7 +489,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private suspend fun handleReboot(reason: String) {
         Timber.d("[id=$installerId] handleReboot: Starting cleanup before reboot.")
-        val systemUseRoot = OSUtils.isSystemApp && appDataStore.getBoolean(AppDataStore.LAB_MODULE_ALWAYS_ROOT, false).first()
+        val systemUseRoot = OSUtils.isSystemApp && appSettingsRepo.getBoolean(BooleanSetting.LabModuleAlwaysRoot, false).first()
         if (systemUseRoot) installer.config.authorizer = ConfigEntity.Authorizer.Root
         // Execute cleanup immediately
         // Call clearCache() explicitly to ensure temporary files are removed

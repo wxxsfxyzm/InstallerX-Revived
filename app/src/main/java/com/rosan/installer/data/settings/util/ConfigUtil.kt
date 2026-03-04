@@ -1,7 +1,10 @@
 package com.rosan.installer.data.settings.util
 
 import android.content.Context
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.data.settings.repo.IntSetting
+import com.rosan.installer.data.settings.repo.StringSetting
 import com.rosan.installer.data.settings.model.room.entity.AppEntity
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
@@ -39,10 +42,10 @@ import org.koin.core.component.inject
 object ConfigUtil : KoinComponent {
     private val context by inject<Context>()
 
-    private val appDataStore by inject<AppDataStore>()
+    private val appSettingsRepo by inject<AppSettingsRepo>()
 
     suspend fun getGlobalAuthorizer(): ConfigEntity.Authorizer {
-        val str = appDataStore.getString(AppDataStore.AUTHORIZER, "").first()
+        val str = appSettingsRepo.getString(StringSetting.Authorizer, "").first()
         return AuthorizerConverter.revert(str)
     }
 
@@ -53,11 +56,11 @@ object ConfigUtil : KoinComponent {
             this
 
     suspend fun getGlobalCustomizeAuthorizer(): String {
-        return appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER, "").first()
+        return appSettingsRepo.getString(StringSetting.CustomizeAuthorizer, "").first()
     }
 
     suspend fun getGlobalInstallMode(): ConfigEntity.InstallMode {
-        val str = appDataStore.getString(AppDataStore.INSTALL_MODE, "").first()
+        val str = appSettingsRepo.getString(StringSetting.InstallMode, "").first()
         return InstallModeConverter.revert(str)
     }
 
@@ -76,9 +79,9 @@ object ConfigUtil : KoinComponent {
         // Apply runtime properties
         return entity.apply {
             // Resolve uninstallFlags set by user
-            uninstallFlags = appDataStore.getInt(AppDataStore.UNINSTALL_FLAGS, 0).first()
+            uninstallFlags = appSettingsRepo.getInt(IntSetting.UninstallFlags, 0).first()
             // Check if the Install Requester feature is enabled in DataStore
-            val isRequesterEnabled = appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER).first()
+            val isRequesterEnabled = appSettingsRepo.getBoolean(BooleanSetting.LabSetInstallRequester).first()
 
             if (isRequesterEnabled) {
                 // Try to resolve UID from the custom 'installRequester' defined in ConfigEntity

@@ -23,7 +23,10 @@ import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.data.settings.repo.IntSetting
+import com.rosan.installer.data.settings.repo.NamedPackageListSetting
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
@@ -48,7 +51,7 @@ import timber.log.Timber
 
 class InstallerViewModel(
     private var repo: InstallerRepo,
-    private val appDataStore: AppDataStore,
+    private val appSettingsRepo: AppSettingsRepo,
     private val appIconRepo: AppIconRepo
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
@@ -167,7 +170,7 @@ class InstallerViewModel(
         settingsLoadingJob = loadInitialSettings()
         viewModelScope.launch {
             // Load managed packages for installer selection.
-            appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
+            appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedInstallerPackages).collect { packages ->
                 _managedInstallerPackages.value = packages
             }
         }
@@ -219,26 +222,26 @@ class InstallerViewModel(
         viewModelScope.launch {
             viewSettings = viewSettings.copy(
                 uiExpressive =
-                    appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.UiExpressiveSwitch, true).first(),
                 useBlur =
-                    appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, true).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.UiUseBlur, true).first(),
                 preferSystemIconForUpdates =
-                    appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first(),
                 autoCloseCountDown =
-                    appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first(),
+                    appSettingsRepo.getInt(IntSetting.DialogAutoCloseCountdown, 3).first(),
                 showExtendedMenu =
-                    appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.DialogShowExtendedMenu, false).first(),
                 showSmartSuggestion =
-                    appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.DialogShowIntelligentSuggestion, true).first(),
                 disableNotificationOnDismiss =
-                    appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.DialogDisableNotificationOnDismiss, false).first(),
                 versionCompareInSingleLine =
-                    appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false).first(),
-                sdkCompareInMultiLine = appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false).first(),
-                showOPPOSpecial = appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false).first(),
-                autoSilentInstall = appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false).first(),
-                enableModuleInstall = appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false).first(),
-                useDynColorFollowPkgIcon = appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+                    appSettingsRepo.getBoolean(BooleanSetting.DialogVersionCompareSingleLine, false).first(),
+                sdkCompareInMultiLine = appSettingsRepo.getBoolean(BooleanSetting.DialogSdkCompareMultiLine, false).first(),
+                showOPPOSpecial = appSettingsRepo.getBoolean(BooleanSetting.DialogShowOppoSpecial, false).first(),
+                autoSilentInstall = appSettingsRepo.getBoolean(BooleanSetting.DialogAutoSilentInstall, false).first(),
+                enableModuleInstall = appSettingsRepo.getBoolean(BooleanSetting.LabEnableModuleFlash, false).first(),
+                useDynColorFollowPkgIcon = appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first()
             )
         }
 

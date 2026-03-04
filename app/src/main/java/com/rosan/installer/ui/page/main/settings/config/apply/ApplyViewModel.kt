@@ -7,7 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.data.settings.repo.StringSetting
 import com.rosan.installer.data.settings.model.room.entity.AppEntity
 import com.rosan.installer.data.settings.repo.AppRepo
 import com.rosan.installer.data.settings.repo.ConfigRepo
@@ -28,7 +30,7 @@ class ApplyViewModel(
     private val configRepo: ConfigRepo,
     private val appRepo: AppRepo,
     private val id: Long,
-    private val appDataStore: AppDataStore
+    private val appSettingsRepo: AppSettingsRepo
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
@@ -138,16 +140,16 @@ class ApplyViewModel(
     private fun loadAndObserveSettings() {
         viewModelScope.launch {
             val initialState = ApplyViewState(
-                orderType = appDataStore.getString(AppDataStore.APPLY_ORDER_TYPE)
+                orderType = appSettingsRepo.getString(StringSetting.ApplyOrderType)
                     .first()
                     .let { name ->
                         runCatching { ApplyViewState.OrderType.valueOf(name) }
                             .getOrDefault(ApplyViewState.OrderType.Label)
                     },
-                orderInReverse = appDataStore.getBoolean(AppDataStore.APPLY_ORDER_IN_REVERSE).first(),
-                selectedFirst = appDataStore.getBoolean(AppDataStore.APPLY_SELECTED_FIRST, default = true).first(),
-                showSystemApp = appDataStore.getBoolean(AppDataStore.APPLY_SHOW_SYSTEM_APP).first(),
-                showPackageName = appDataStore.getBoolean(AppDataStore.APPLY_SHOW_PACKAGE_NAME, default = false).first()
+                orderInReverse = appSettingsRepo.getBoolean(BooleanSetting.ApplyOrderInReverse).first(),
+                selectedFirst = appSettingsRepo.getBoolean(BooleanSetting.ApplySelectedFirst, default = true).first(),
+                showSystemApp = appSettingsRepo.getBoolean(BooleanSetting.ApplyShowSystemApp).first(),
+                showPackageName = appSettingsRepo.getBoolean(BooleanSetting.ApplyShowPackageName, default = false).first()
             )
 
             state = state.copy(
@@ -163,35 +165,35 @@ class ApplyViewModel(
     private fun order(type: ApplyViewState.OrderType) {
         state = state.copy(orderType = type)
         viewModelScope.launch {
-            appDataStore.putString(AppDataStore.APPLY_ORDER_TYPE, type.name)
+            appSettingsRepo.putString(StringSetting.ApplyOrderType, type.name)
         }
     }
 
     private fun orderInReverse(enabled: Boolean) {
         state = state.copy(orderInReverse = enabled)
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.APPLY_ORDER_IN_REVERSE, enabled)
+            appSettingsRepo.putBoolean(BooleanSetting.ApplyOrderInReverse, enabled)
         }
     }
 
     private fun selectedFirst(enabled: Boolean) {
         state = state.copy(selectedFirst = enabled)
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.APPLY_SELECTED_FIRST, enabled)
+            appSettingsRepo.putBoolean(BooleanSetting.ApplySelectedFirst, enabled)
         }
     }
 
     private fun showSystemApp(enabled: Boolean) {
         state = state.copy(showSystemApp = enabled)
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.APPLY_SHOW_SYSTEM_APP, enabled)
+            appSettingsRepo.putBoolean(BooleanSetting.ApplyShowSystemApp, enabled)
         }
     }
 
     private fun showPackageName(enabled: Boolean) {
         state = state.copy(showPackageName = enabled)
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.APPLY_SHOW_PACKAGE_NAME, enabled)
+            appSettingsRepo.putBoolean(BooleanSetting.ApplyShowPackageName, enabled)
         }
     }
 

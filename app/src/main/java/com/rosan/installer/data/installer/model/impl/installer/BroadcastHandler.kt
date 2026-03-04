@@ -9,7 +9,8 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.installer.util.pendingActivity
 import com.rosan.installer.data.installer.util.pendingBroadcast
 import com.rosan.installer.data.recycle.util.openAppPrivileged
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.IntSetting
 import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -77,7 +78,7 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private class Receiver(private val installer: InstallerRepo) :
         BroadcastReceiver(), KoinComponent {
-        private val appDataStore: AppDataStore by inject()
+        private val appSettingsRepo: AppSettingsRepo by inject()
         private val receiverScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         override fun onReceive(context: Context?, intent: Intent?) {
             intent ?: return
@@ -133,7 +134,7 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
             Timber.d("[id=${installer.id}] Starting privileged launch for $packageName")
 
-            val autoCloseSeconds = appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first()
+            val autoCloseSeconds = appSettingsRepo.getInt(IntSetting.DialogAutoCloseCountdown, 3).first()
 
             openAppPrivileged(
                 context = context,

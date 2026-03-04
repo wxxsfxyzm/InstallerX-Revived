@@ -4,6 +4,8 @@ import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.model.datastore.repo.AppSettingsRepoImpl
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -21,5 +23,9 @@ val datastoreModule = module {
 
     single {
         AppDataStore(get(), get())
+    }
+
+    single<AppSettingsRepo> {
+        AppSettingsRepoImpl(get())
     }
 }

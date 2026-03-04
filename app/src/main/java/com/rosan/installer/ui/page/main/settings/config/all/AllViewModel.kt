@@ -7,7 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.repo.ConfigRepo
 import com.rosan.installer.data.settings.util.ConfigOrder
@@ -25,7 +26,7 @@ import org.koin.core.component.inject
 class AllViewModel(
     var navController: NavController,
     private val repo: ConfigRepo,
-    private val appDataStore: AppDataStore
+    private val appSettingsRepo: AppSettingsRepo
 ) : ViewModel(), KoinComponent {
     val context by inject<Context>()
 
@@ -70,7 +71,7 @@ class AllViewModel(
         )
         loadDataJob = viewModelScope.launch(Dispatchers.IO) {
             val initialState = AllViewState(
-                userReadScopeTips = appDataStore.getBoolean(AppDataStore.USER_READ_SCOPE_TIPS, default = false).first(),
+                userReadScopeTips = appSettingsRepo.getBoolean(BooleanSetting.UserReadScopeTips, default = false).first(),
             )
             repo.flowAll(state.data.configOrder).collect {
                 state = state.copy(
@@ -87,7 +88,7 @@ class AllViewModel(
     private fun userReadTips() {
         state = state.copy(userReadScopeTips = true)
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.USER_READ_SCOPE_TIPS, true)
+            appSettingsRepo.putBoolean(BooleanSetting.UserReadScopeTips, true)
         }
     }
 

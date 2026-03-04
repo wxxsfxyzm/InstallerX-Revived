@@ -6,7 +6,10 @@ import android.os.Build
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.kieronquinn.monetcompat.core.MonetCompat
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.data.settings.repo.IntSetting
+import com.rosan.installer.data.settings.repo.StringSetting
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
@@ -36,20 +39,20 @@ data class ThemeUiState(
 
 /**
  * A reusable factory function that encapsulates the logic for creating
- * a Flow of theme UI state from AppDataStore.
+ * a Flow of theme UI state from AppSettingsRepo.
  */
-fun createThemeUiStateFlow(dataStore: AppDataStore): Flow<ThemeUiState> {
-    val useMiuixFlow = dataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
-    val showExpressiveUIFlow = dataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true) // Flow for Expressive UI
-    val themeModeFlow = dataStore.getString(AppDataStore.THEME_MODE, ThemeMode.SYSTEM.name)
+fun createThemeUiStateFlow(dataStore: AppSettingsRepo): Flow<ThemeUiState> {
+    val useMiuixFlow = dataStore.getBoolean(BooleanSetting.UiUseMiuix, false)
+    val showExpressiveUIFlow = dataStore.getBoolean(BooleanSetting.UiExpressiveSwitch, true) // Flow for Expressive UI
+    val themeModeFlow = dataStore.getString(StringSetting.ThemeMode, ThemeMode.SYSTEM.name)
         .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
-    val paletteStyleFlow = dataStore.getString(AppDataStore.THEME_PALETTE_STYLE, PaletteStyle.TonalSpot.name)
+    val paletteStyleFlow = dataStore.getString(StringSetting.ThemePaletteStyle, PaletteStyle.TonalSpot.name)
         .map { runCatching { PaletteStyle.valueOf(it) }.getOrDefault(PaletteStyle.TonalSpot) }
-    val colorSpecFlow = dataStore.getString(AppDataStore.THEME_COLOR_SPEC, ThemeColorSpec.SPEC_2025.name)
+    val colorSpecFlow = dataStore.getString(StringSetting.ThemeColorSpec, ThemeColorSpec.SPEC_2025.name)
         .map { runCatching { ThemeColorSpec.valueOf(it) }.getOrDefault(ThemeColorSpec.SPEC_2025) }
-    val useDynamicColorFlow = dataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, true)
-    val useMiuixMonetFlow = dataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false)
-    val manualSeedColorFlow = dataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
+    val useDynamicColorFlow = dataStore.getBoolean(BooleanSetting.ThemeUseDynamicColor, true)
+    val useMiuixMonetFlow = dataStore.getBoolean(BooleanSetting.UiUseMiuixMonet, false)
+    val manualSeedColorFlow = dataStore.getInt(IntSetting.ThemeSeedColor, PresetColors.first().color.toArgb())
         .map { Color(it) }
     val wallpaperColorsFlow = getWallpaperColorsFlow()
 

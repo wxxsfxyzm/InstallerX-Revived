@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.data.settings.repo.NamedPackageListSetting
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.repo.ConfigRepo
 import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalAuthorizer
@@ -30,7 +32,7 @@ import timber.log.Timber
 
 class EditViewModel(
     private val repo: ConfigRepo,
-    private val appDataStore: AppDataStore,
+    private val appSettingsRepo: AppSettingsRepo,
     private val id: Long? = null
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
@@ -495,8 +497,8 @@ class EditViewModel(
             // Fetch all necessary data in parallel/sequence
             val configEntity = fetchConfigEntity(id)
             val managedPackages =
-                appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).firstOrNull() ?: emptyList()
-            val isCustomInstallRequesterEnabled = appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER).first()
+                appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedInstallerPackages).firstOrNull() ?: emptyList()
+            val isCustomInstallRequesterEnabled = appSettingsRepo.getBoolean(BooleanSetting.LabSetInstallRequester).first()
 
             // Update global state side-effects
             globalAuthorizer = getGlobalAuthorizer()

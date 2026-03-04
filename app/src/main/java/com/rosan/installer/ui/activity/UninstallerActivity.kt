@@ -19,7 +19,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.impl.InstallerSessionManager
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
 import com.rosan.installer.ui.activity.themestate.ThemeUiState
 import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
 import com.rosan.installer.ui.page.main.installer.InstallerPage
@@ -42,7 +42,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         private const val EXTRA_PACKAGE_NAME = "package_name"
     }
 
-    private val appDataStore: AppDataStore by inject()
+    private val appSettingsRepo: AppSettingsRepo by inject()
     private var uiState by mutableStateOf(ThemeUiState())
     private val sessionManager: InstallerSessionManager by inject()
     private var installer: InstallerRepo? = null
@@ -62,7 +62,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         Timber.d("UninstallerActivity onCreate.")
 
         lifecycleScope.launch {
-            createThemeUiStateFlow(appDataStore).collect { newState ->
+            createThemeUiStateFlow(appSettingsRepo).collect { newState ->
                 uiState = newState
             }
         }

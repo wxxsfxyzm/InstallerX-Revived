@@ -3,7 +3,8 @@ package com.rosan.installer.data.recycle.model.impl
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.InstallerActivity
@@ -20,7 +21,7 @@ import timber.log.Timber
 
 object AutoLockManager : KoinComponent {
     private val context by inject<Context>()
-    private val appDataStore by inject<AppDataStore>()
+    private val appSettingsRepo by inject<AppSettingsRepo>()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private var isInitialized = false
@@ -82,7 +83,7 @@ object AutoLockManager : KoinComponent {
     }
 
     private suspend fun isAutoLockEnabled() =
-        appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER, false).first()
+        appSettingsRepo.getBoolean(BooleanSetting.AutoLockInstaller, false).first()
 
     private suspend fun executeLock(authorizer: ConfigEntity.Authorizer, source: String) {
         withContext(Dispatchers.IO) {

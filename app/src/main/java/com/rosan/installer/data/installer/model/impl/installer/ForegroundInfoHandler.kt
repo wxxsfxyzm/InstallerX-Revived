@@ -19,7 +19,9 @@ import com.rosan.installer.data.installer.model.impl.installer.helper.ModernNoti
 import com.rosan.installer.data.installer.model.impl.installer.helper.NotificationHelper
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.data.settings.repo.IntSetting
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
@@ -67,7 +69,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private var job: Job? = null
     private var sessionStartTime: Long = 0L
     private val context by inject<Context>()
-    private val appDataStore by inject<AppDataStore>()
+    private val appSettingsRepo by inject<AppSettingsRepo>()
     private val appIconRepo by inject<AppIconRepo>()
 
     private val notificationManager = NotificationManagerCompat.from(context)
@@ -114,12 +116,12 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         globalAuthorizer = ConfigUtil.getGlobalAuthorizer()
 
         val settings = NotificationSettings(
-            showDialog = appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true).first(),
-            showLiveActivity = appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false).first(),
-            showMiIsland = appDataStore.getBoolean(AppDataStore.SHOW_MI_ISLAND, false).first(),
-            autoCloseNotification = appDataStore.getInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, 0).first(),
-            preferSystemIcon = appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first(),
-            preferDynamicColor = appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+            showDialog = appSettingsRepo.getBoolean(BooleanSetting.ShowDialogWhenPressingNotification, true).first(),
+            showLiveActivity = appSettingsRepo.getBoolean(BooleanSetting.ShowLiveActivity, false).first(),
+            showMiIsland = appSettingsRepo.getBoolean(BooleanSetting.ShowMiIsland, false).first(),
+            autoCloseNotification = appSettingsRepo.getInt(IntSetting.NotificationSuccessAutoClearSeconds, 0).first(),
+            preferSystemIcon = appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first(),
+            preferDynamicColor = appSettingsRepo.getBoolean(BooleanSetting.LiveActivityDynColorFollowPkgIcon, false).first()
         )
 
         val ticker = flow {

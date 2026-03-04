@@ -24,7 +24,8 @@ import com.rosan.installer.build.model.impl.DeviceCapabilityChecker
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.impl.InstallerSessionManager
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
 import com.rosan.installer.ui.activity.themestate.ThemeUiState
 import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
 import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
@@ -52,7 +53,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         private const val ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS"
     }
 
-    private val appDataStore: AppDataStore by inject()
+    private val appSettingsRepo: AppSettingsRepo by inject()
     private var uiState by mutableStateOf(ThemeUiState())
     private var disableNotificationOnDismiss = false
 
@@ -77,13 +78,13 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
         lifecycleScope.launch {
             launch { // Collect theme state
-                createThemeUiStateFlow(appDataStore).collect { newState ->
+                createThemeUiStateFlow(appSettingsRepo).collect { newState ->
                     uiState = newState
                 }
             }
 
             launch { // Collect disable notification on dismiss state
-                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS).collect {
+                appSettingsRepo.getBoolean(BooleanSetting.DialogDisableNotificationOnDismiss).collect {
                     disableNotificationOnDismiss = it
                 }
             }

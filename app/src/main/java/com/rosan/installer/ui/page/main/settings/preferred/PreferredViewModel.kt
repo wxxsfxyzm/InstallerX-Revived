@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kieronquinn.monetcompat.core.MonetCompat
@@ -26,12 +25,17 @@ import com.rosan.installer.data.app.model.enums.HttpProfile
 import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
 import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
 import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.data.settings.repo.IntSetting
+import com.rosan.installer.data.settings.repo.NamedPackageListSetting
+import com.rosan.installer.data.settings.repo.SharedUidListSetting
+import com.rosan.installer.data.settings.repo.StringSetting
 import com.rosan.installer.data.updater.repo.AppUpdater
 import com.rosan.installer.data.updater.repo.UpdateChecker
 import com.rosan.installer.ui.activity.InstallerActivity
@@ -66,7 +70,7 @@ import java.io.File
 
 class PreferredViewModel(
     private val context: Application,
-    private val appDataStore: AppDataStore,
+    private val appSettingsRepo: AppSettingsRepo,
     private val updateChecker: UpdateChecker,
     private val appUpdater: AppUpdater
 ) : ViewModel(), KoinComponent {
@@ -116,25 +120,25 @@ class PreferredViewModel(
 
             is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
                 state.managedInstallerPackages,
-                AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST,
+                NamedPackageListSetting.ManagedInstallerPackages,
                 action.pkg
             )
 
             is PreferredViewAction.RemoveManagedInstallerPackage -> removeManagedPackage(
                 state.managedInstallerPackages,
-                AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST,
+                NamedPackageListSetting.ManagedInstallerPackages,
                 action.pkg
             )
 
             is PreferredViewAction.AddManagedBlacklistPackage -> addManagedPackage(
                 state.managedBlacklistPackages,
-                AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST,
+                NamedPackageListSetting.ManagedBlacklistPackages,
                 action.pkg
             )
 
             is PreferredViewAction.RemoveManagedBlacklistPackage -> removeManagedPackage(
                 state.managedBlacklistPackages,
-                AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST,
+                NamedPackageListSetting.ManagedBlacklistPackages,
                 action.pkg
             )
 
@@ -148,13 +152,13 @@ class PreferredViewModel(
 
             is PreferredViewAction.AddManagedSharedUserIdExemptedPackages -> addManagedPackage(
                 state.managedSharedUserIdExemptedPackages,
-                AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST,
+                NamedPackageListSetting.ManagedSharedUserIdExemptedPackages,
                 action.pkg
             )
 
             is PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages -> removeManagedPackage(
                 state.managedSharedUserIdExemptedPackages,
-                AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST,
+                NamedPackageListSetting.ManagedSharedUserIdExemptedPackages,
                 action.pkg
             )
 
@@ -236,63 +240,63 @@ class PreferredViewModel(
 
     private fun changeGlobalAuthorizer(authorizer: ConfigEntity.Authorizer) =
         viewModelScope.launch {
-            appDataStore.putString(AppDataStore.AUTHORIZER, AuthorizerConverter.convert(authorizer))
+            appSettingsRepo.putString(StringSetting.Authorizer, AuthorizerConverter.convert(authorizer))
         }
 
     private fun changeGlobalCustomizeAuthorizer(customizeAuthorizer: String) =
         viewModelScope.launch {
             if (state.authorizerCustomize)
-                appDataStore.putString(AppDataStore.CUSTOMIZE_AUTHORIZER, customizeAuthorizer)
+                appSettingsRepo.putString(StringSetting.CustomizeAuthorizer, customizeAuthorizer)
             else
-                appDataStore.putString(AppDataStore.CUSTOMIZE_AUTHORIZER, "")
+                appSettingsRepo.putString(StringSetting.CustomizeAuthorizer, "")
         }
 
     private fun changeGlobalInstallMode(installMode: ConfigEntity.InstallMode) =
         viewModelScope.launch {
-            appDataStore.putString(AppDataStore.INSTALL_MODE, InstallModeConverter.convert(installMode))
+            appSettingsRepo.putString(StringSetting.InstallMode, InstallModeConverter.convert(installMode))
         }
 
     private fun changeShowDialogInstallExtendedMenu(installExtendedMenu: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, installExtendedMenu)
+            appSettingsRepo.putBoolean(BooleanSetting.DialogShowExtendedMenu, installExtendedMenu)
         }
 
     private fun changeShowSuggestionState(showSmartSuggestion: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, showSmartSuggestion)
+            appSettingsRepo.putBoolean(BooleanSetting.DialogShowIntelligentSuggestion, showSmartSuggestion)
         }
 
     private fun changeDisableNotificationState(showDisableNotification: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, showDisableNotification)
+            appSettingsRepo.putBoolean(BooleanSetting.DialogDisableNotificationOnDismiss, showDisableNotification)
         }
 
     private fun changeShowDialog(showDialog: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, showDialog)
+            appSettingsRepo.putBoolean(BooleanSetting.ShowDialogWhenPressingNotification, showDialog)
         }
 
     private fun changeDhizukuAutoCloseCountDown(countDown: Int) =
         viewModelScope.launch {
             // Ensure countDown is within the valid range
             if (countDown in 1..10) {
-                appDataStore.putInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, countDown)
+                appSettingsRepo.putInt(IntSetting.DialogAutoCloseCountdown, countDown)
             }
         }
 
     private fun changeNotificationSuccessAutoClearSeconds(seconds: Int) =
         viewModelScope.launch {
-            appDataStore.putInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, seconds)
+            appSettingsRepo.putInt(IntSetting.NotificationSuccessAutoClearSeconds, seconds)
         }
 
     private fun changeUseExpressiveUI(showRefreshedUI: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, showRefreshedUI)
+            appSettingsRepo.putBoolean(BooleanSetting.UiExpressiveSwitch, showRefreshedUI)
         }
 
     private fun changeUseLiveActivity(showLiveActivity: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, showLiveActivity)
+            appSettingsRepo.putBoolean(BooleanSetting.ShowLiveActivity, showLiveActivity)
         }
 
     private fun changeBiometricAuth(biometricAuth: Boolean, installer: Boolean) {
@@ -303,8 +307,8 @@ class PreferredViewModel(
                 )
             ) return@launch
 
-            appDataStore.putBoolean(
-                key = if (installer) AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH else AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH,
+            appSettingsRepo.putBoolean(
+                setting = if (installer) BooleanSetting.InstallerRequireBiometricAuth else BooleanSetting.UninstallerRequireBiometricAuth,
                 value = biometricAuth
             )
         }
@@ -312,17 +316,17 @@ class PreferredViewModel(
 
     private fun changeUseMiuix(useMiuix: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.UI_USE_MIUIX, useMiuix)
+            appSettingsRepo.putBoolean(BooleanSetting.UiUseMiuix, useMiuix)
         }
 
     private fun changePreferSystemIcon(preferSystemIcon: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, preferSystemIcon)
+            appSettingsRepo.putBoolean(BooleanSetting.PreferSystemIconForInstall, preferSystemIcon)
         }
 
     private fun changeShowLauncherIcon(show: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.SHOW_LAUNCHER_ICON, show)
+            appSettingsRepo.putBoolean(BooleanSetting.ShowLauncherIcon, show)
             val componentName = ComponentName(context, "com.rosan.installer.ui.activity.LauncherAlias")
             val newState = if (show) {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED
@@ -338,32 +342,32 @@ class PreferredViewModel(
 
     private fun changeVersionCompareInSingleLine(singleLine: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, singleLine)
+            appSettingsRepo.putBoolean(BooleanSetting.DialogVersionCompareSingleLine, singleLine)
         }
 
     private fun changeSdkCompareInMultiLine(singleLine: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, singleLine)
+            appSettingsRepo.putBoolean(BooleanSetting.DialogSdkCompareMultiLine, singleLine)
         }
 
     private fun changeShowOPPOSpecial(show: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, show)
+            appSettingsRepo.putBoolean(BooleanSetting.DialogShowOppoSpecial, show)
         }
 
     private fun changeAutoLockInstaller(autoLockInstaller: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.AUTO_LOCK_INSTALLER, autoLockInstaller)
+            appSettingsRepo.putBoolean(BooleanSetting.AutoLockInstaller, autoLockInstaller)
         }
 
     private fun changeAutoSilentInstall(enabled: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, enabled)
+            appSettingsRepo.putBoolean(BooleanSetting.DialogAutoSilentInstall, enabled)
         }
 
     private fun addManagedPackage(
         list: List<NamedPackage>,
-        key: Preferences.Key<String>,
+        key: NamedPackageListSetting,
         pkg: NamedPackage
     ) = viewModelScope.launch {
         // Create a new list from the current state
@@ -372,13 +376,13 @@ class PreferredViewModel(
         if (!currentList.contains(pkg)) {
             currentList.add(pkg)
             // Save the updated list back to DataStore
-            appDataStore.putNamedPackageList(key, currentList)
+            appSettingsRepo.putNamedPackageList(key, currentList)
         }
     }
 
     private fun removeManagedPackage(
         list: List<NamedPackage>,
-        key: Preferences.Key<String>,
+        key: NamedPackageListSetting,
         pkg: NamedPackage
     ) = viewModelScope.launch {
         // Create a new list from the current state
@@ -386,7 +390,7 @@ class PreferredViewModel(
         // Remove the pkg
         currentList.remove(pkg)
         // Save the updated list back to DataStore
-        appDataStore.putNamedPackageList(key, currentList)
+        appSettingsRepo.putNamedPackageList(key, currentList)
     }
 
     private fun addSharedUserIdToBlacklist(uid: SharedUid) =
@@ -395,7 +399,7 @@ class PreferredViewModel(
             if (uid in currentList) return@launch
 
             val newList = currentList + uid
-            appDataStore.putSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST, newList)
+            appSettingsRepo.putSharedUidList(SharedUidListSetting.ManagedSharedUserIdBlacklist, newList)
         }
 
 
@@ -405,11 +409,11 @@ class PreferredViewModel(
             if (uid !in currentList) return@launch
 
             val newList = currentList.toMutableList().apply { remove(uid) }
-            appDataStore.putSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST, newList)
+            appSettingsRepo.putSharedUidList(SharedUidListSetting.ManagedSharedUserIdBlacklist, newList)
         }
 
     private fun toggleGlobalUninstallFlag(flag: Int, enable: Boolean) = viewModelScope.launch {
-        appDataStore.updateUninstallFlags { currentFlags ->
+        appSettingsRepo.updateUninstallFlags { currentFlags ->
             var newFlags = currentFlags
 
             if (enable) {
@@ -530,50 +534,50 @@ class PreferredViewModel(
 
     private fun labChangeRootModuleFlash(enabled: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, enabled)
+            appSettingsRepo.putBoolean(BooleanSetting.LabEnableModuleFlash, enabled)
         }
 
     private fun labChangeRootShowModuleArt(enabled: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART, enabled)
+            appSettingsRepo.putBoolean(BooleanSetting.LabModuleFlashShowArt, enabled)
         }
 
     private fun labChangeRootModuleAlwaysUseRoot(enabled: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.LAB_MODULE_ALWAYS_ROOT, enabled)
+            appSettingsRepo.putBoolean(BooleanSetting.LabModuleAlwaysRoot, enabled)
         }
 
     private fun labChangeRootImplementation(implementation: RootImplementation) =
         viewModelScope.launch {
-            appDataStore.putString(
-                AppDataStore.LAB_ROOT_IMPLEMENTATION,
+            appSettingsRepo.putString(
+                StringSetting.LabRootImplementation,
                 implementation.name
             )
         }
 
     private fun labChangeUseMiIsland(enabled: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.SHOW_MI_ISLAND, enabled)
+            appSettingsRepo.putBoolean(BooleanSetting.ShowMiIsland, enabled)
         }
 
     private fun labChangeHttpProfile(profile: HttpProfile) =
         viewModelScope.launch {
-            appDataStore.putString(AppDataStore.LAB_HTTP_PROFILE, profile.name)
+            appSettingsRepo.putString(StringSetting.LabHttpProfile, profile.name)
         }
 
     private fun labChangeHttpSaveFile(enable: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.LAB_HTTP_SAVE_FILE, enable)
+            appSettingsRepo.putBoolean(BooleanSetting.LabHttpSaveFile, enable)
         }
 
     private fun labChangeSetInstallRequester(enable: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER, enable)
+            appSettingsRepo.putBoolean(BooleanSetting.LabSetInstallRequester, enable)
         }
 
     private fun setEnableFileLogging(enable: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.ENABLE_FILE_LOGGING, enable)
+            appSettingsRepo.putBoolean(BooleanSetting.EnableFileLogging, enable)
         }
 
     private fun shareLog() = viewModelScope.launch(Dispatchers.IO) {
@@ -611,42 +615,42 @@ class PreferredViewModel(
     }
 
     private fun setThemeMode(mode: ThemeMode) = viewModelScope.launch {
-        appDataStore.putString(AppDataStore.THEME_MODE, mode.name)
+        appSettingsRepo.putString(StringSetting.ThemeMode, mode.name)
     }
 
     private fun setPaletteStyle(style: PaletteStyle) = viewModelScope.launch {
-        appDataStore.putString(AppDataStore.THEME_PALETTE_STYLE, style.name)
+        appSettingsRepo.putString(StringSetting.ThemePaletteStyle, style.name)
     }
 
     private fun setColorSpec(spec: ThemeColorSpec) = viewModelScope.launch {
-        appDataStore.putString(AppDataStore.THEME_COLOR_SPEC, spec.name)
+        appSettingsRepo.putString(StringSetting.ThemeColorSpec, spec.name)
     }
 
     private fun setUseDynamicColor(use: Boolean) = viewModelScope.launch {
-        appDataStore.putBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, use)
+        appSettingsRepo.putBoolean(BooleanSetting.ThemeUseDynamicColor, use)
     }
 
     private fun setUseMiuixMonet(use: Boolean) = viewModelScope.launch {
-        appDataStore.putBoolean(AppDataStore.UI_USE_MIUIX_MONET, use)
+        appSettingsRepo.putBoolean(BooleanSetting.UiUseMiuixMonet, use)
     }
 
     private fun setSeedColor(color: Color) = viewModelScope.launch {
-        appDataStore.putInt(AppDataStore.THEME_SEED_COLOR, color.toArgb())
+        appSettingsRepo.putInt(IntSetting.ThemeSeedColor, color.toArgb())
     }
 
     private fun setDynColorFollowPkgIcon(enable: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, enable)
+            appSettingsRepo.putBoolean(BooleanSetting.UiDynColorFollowPkgIcon, enable)
         }
 
     private fun setDynColorFollowPkgIconForLiveActivity(enable: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, enable)
+            appSettingsRepo.putBoolean(BooleanSetting.LiveActivityDynColorFollowPkgIcon, enable)
         }
 
     private fun setUseBlur(enable: Boolean) =
         viewModelScope.launch {
-            appDataStore.putBoolean(AppDataStore.UI_USE_BLUR, enable)
+            appSettingsRepo.putBoolean(BooleanSetting.UiUseBlur, enable)
         }
 
     private suspend fun runPrivilegedAction(
@@ -700,99 +704,99 @@ class PreferredViewModel(
 
     private fun getAndCombineState() =
         viewModelScope.launch {
-            val authorizerFlow = appDataStore.getString(AppDataStore.AUTHORIZER)
+            val authorizerFlow = appSettingsRepo.getString(StringSetting.Authorizer)
                 .map { AuthorizerConverter.revert(it) }
-            val customizeAuthorizerFlow = appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER)
-            val installModeFlow = appDataStore.getString(AppDataStore.INSTALL_MODE)
+            val customizeAuthorizerFlow = appSettingsRepo.getString(StringSetting.CustomizeAuthorizer)
+            val installModeFlow = appSettingsRepo.getString(StringSetting.InstallMode)
                 .map { InstallModeConverter.revert(it) }
             val showDialogInstallExtendedMenuFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU)
+                appSettingsRepo.getBoolean(BooleanSetting.DialogShowExtendedMenu)
             val showIntelligentSuggestionFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true)
+                appSettingsRepo.getBoolean(BooleanSetting.DialogShowIntelligentSuggestion, true)
             val showNotificationForDialogInstallFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false)
+                appSettingsRepo.getBoolean(BooleanSetting.DialogDisableNotificationOnDismiss, false)
             val showDialogWhenPressingNotificationFlow =
-                appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true)
+                appSettingsRepo.getBoolean(BooleanSetting.ShowDialogWhenPressingNotification, true)
             val dhizukuAutoCloseCountDownFlow =
-                appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3)
+                appSettingsRepo.getInt(IntSetting.DialogAutoCloseCountdown, 3)
             val notificationSuccessAutoClearSecondsFlow =
-                appDataStore.getInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, 0)
+                appSettingsRepo.getInt(IntSetting.NotificationSuccessAutoClearSeconds, 0)
             val versionCompareInSingleLineFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false)
+                appSettingsRepo.getBoolean(BooleanSetting.DialogVersionCompareSingleLine, false)
             val sdkCompareInSingleLineFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false)
+                appSettingsRepo.getBoolean(BooleanSetting.DialogSdkCompareMultiLine, false)
             val showOPPOSpecialFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false)
+                appSettingsRepo.getBoolean(BooleanSetting.DialogShowOppoSpecial, false)
             val showExpressiveUIFlow =
-                appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true)
+                appSettingsRepo.getBoolean(BooleanSetting.UiExpressiveSwitch, true)
             val installerRequireBiometricAuthFlow =
-                appDataStore.getBoolean(AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH, false)
+                appSettingsRepo.getBoolean(BooleanSetting.InstallerRequireBiometricAuth, false)
             val uninstallerRequireBiometricAuthFlow =
-                appDataStore.getBoolean(AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH, false)
+                appSettingsRepo.getBoolean(BooleanSetting.UninstallerRequireBiometricAuth, false)
             val showLiveActivityFlow =
-                appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false)
+                appSettingsRepo.getBoolean(BooleanSetting.ShowLiveActivity, false)
             val autoLockInstallerFlow =
-                appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER, false)
+                appSettingsRepo.getBoolean(BooleanSetting.AutoLockInstaller, false)
             val autoSilentInstallFlow =
-                appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false)
+                appSettingsRepo.getBoolean(BooleanSetting.DialogAutoSilentInstall, false)
             val showMiuixUIFlow =
-                appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false)
+                appSettingsRepo.getBoolean(BooleanSetting.UiUseMiuix, false)
             val preferSystemIconFlow =
-                appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false)
+                appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false)
             val showLauncherIconFlow =
-                appDataStore.getBoolean(AppDataStore.SHOW_LAUNCHER_ICON, true)
+                appSettingsRepo.getBoolean(BooleanSetting.ShowLauncherIcon, true)
             val managedInstallerPackagesFlow =
-                appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST)
+                appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedInstallerPackages)
             val managedBlacklistPackagesFlow =
-                appDataStore.getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
+                appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedBlacklistPackages)
             val managedSharedUserIdBlacklistFlow =
-                appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
+                appSettingsRepo.getSharedUidList(SharedUidListSetting.ManagedSharedUserIdBlacklist)
             val managedSharedUserIdExemptPkgFlow =
-                appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
+                appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedSharedUserIdExemptedPackages)
             val uninstallFlagsFlow =
-                appDataStore.getInt(AppDataStore.UNINSTALL_FLAGS, 0)
+                appSettingsRepo.getInt(IntSetting.UninstallFlags, 0)
             val labRootModuleFlashFlow =
-                appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false)
+                appSettingsRepo.getBoolean(BooleanSetting.LabEnableModuleFlash, false)
             val labRootShowModuleArtFlow =
-                appDataStore.getBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART, true)
+                appSettingsRepo.getBoolean(BooleanSetting.LabModuleFlashShowArt, true)
             val labRootModuleAlwaysUseRootFlow =
-                appDataStore.getBoolean(AppDataStore.LAB_MODULE_ALWAYS_ROOT, false)
+                appSettingsRepo.getBoolean(BooleanSetting.LabModuleAlwaysRoot, false)
             val enableFileLoggingFlow =
-                appDataStore.getBoolean(AppDataStore.ENABLE_FILE_LOGGING, true)
+                appSettingsRepo.getBoolean(BooleanSetting.EnableFileLogging, true)
             val labRootImplementationFlow =
-                appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION)
+                appSettingsRepo.getString(StringSetting.LabRootImplementation)
                     .map { RootImplementation.fromString(it) }
             val labUseMiIslandFlow =
-                appDataStore.getBoolean(AppDataStore.SHOW_MI_ISLAND, false)
+                appSettingsRepo.getBoolean(BooleanSetting.ShowMiIsland, false)
             val labHttpProfileFlow =
-                appDataStore.getString(AppDataStore.LAB_HTTP_PROFILE)
+                appSettingsRepo.getString(StringSetting.LabHttpProfile)
                     .map { HttpProfile.fromString(it) }
             val labHttpSaveFileFlow =
-                appDataStore.getBoolean(AppDataStore.LAB_HTTP_SAVE_FILE, false)
+                appSettingsRepo.getBoolean(BooleanSetting.LabHttpSaveFile, false)
             val labSetInstallRequesterFlow =
-                appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER, false)
+                appSettingsRepo.getBoolean(BooleanSetting.LabSetInstallRequester, false)
             val themeModeFlow =
-                appDataStore.getString(AppDataStore.THEME_MODE, ThemeMode.SYSTEM.name)
+                appSettingsRepo.getString(StringSetting.ThemeMode, ThemeMode.SYSTEM.name)
                     .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
             val paletteStyleFlow =
-                appDataStore.getString(AppDataStore.THEME_PALETTE_STYLE, PaletteStyle.TonalSpot.name)
+                appSettingsRepo.getString(StringSetting.ThemePaletteStyle, PaletteStyle.TonalSpot.name)
                     .map { runCatching { PaletteStyle.valueOf(it) }.getOrDefault(PaletteStyle.TonalSpot) }
-            val colorSpecFlow = appDataStore.getString(AppDataStore.THEME_COLOR_SPEC, ThemeColorSpec.SPEC_2025.name)
+            val colorSpecFlow = appSettingsRepo.getString(StringSetting.ThemeColorSpec, ThemeColorSpec.SPEC_2025.name)
                 .map { runCatching { ThemeColorSpec.valueOf(it) }.getOrDefault(ThemeColorSpec.SPEC_2025) }
             val useDynamicColorFlow =
-                appDataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, true)
+                appSettingsRepo.getBoolean(BooleanSetting.ThemeUseDynamicColor, true)
             val useMiuixMonetFlow =
-                appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false)
+                appSettingsRepo.getBoolean(BooleanSetting.UiUseMiuixMonet, false)
             val seedColorFlow =
-                appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb())
+                appSettingsRepo.getInt(IntSetting.ThemeSeedColor, PresetColors.first().color.toArgb())
                     .map { Color(it) }
             val wallpaperColorsFlow = getWallpaperColorsFlow()
             val useDynColorFollowPkgIconFlow =
-                appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false)
+                appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false)
             val useDynColorFollowPkgIconForLiveActivityFlow =
-                appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false)
+                appSettingsRepo.getBoolean(BooleanSetting.LiveActivityDynColorFollowPkgIcon, false)
             val useBlurFlow =
-                appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                appSettingsRepo.getBoolean(BooleanSetting.UiUseBlur, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
             combine(
                 authorizerFlow,

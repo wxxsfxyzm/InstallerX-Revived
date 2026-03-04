@@ -10,7 +10,11 @@ import com.rosan.installer.data.app.model.impl.ModuleInstallerRepoImpl
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.data.settings.repo.NamedPackageListSetting
+import com.rosan.installer.data.settings.repo.SharedUidListSetting
+import com.rosan.installer.data.settings.repo.StringSetting
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -40,7 +44,7 @@ class InstallationProcessor(
             """
     }
 
-    private val appDataStore by inject<AppDataStore>()
+    private val appSettingsRepo by inject<AppSettingsRepo>()
 
     /**
      * Performs the installation.
@@ -78,7 +82,7 @@ class InstallationProcessor(
         // Initialize output list
         val output = mutableListOf<String>()
         // Check if user enabled the ASCII art display in settings
-        val showArt = appDataStore.getBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART, true).first()
+        val showArt = appSettingsRepo.getBoolean(BooleanSetting.LabModuleFlashShowArt, true).first()
 
         if (showArt) {
             val banner = MODULE_INSTALL_BANNER.trimIndent()
@@ -94,8 +98,8 @@ class InstallationProcessor(
         // Emit the initial state with the current log.
         progressFlow.emit(ProgressEntity.InstallingModule(output.toList()))
 
-        val rootImpl = RootImplementation.fromString(appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION).first())
-        val systemUseRoot = OSUtils.isSystemApp && appDataStore.getBoolean(AppDataStore.LAB_MODULE_ALWAYS_ROOT, false).first()
+        val rootImpl = RootImplementation.fromString(appSettingsRepo.getString(StringSetting.LabRootImplementation).first())
+        val systemUseRoot = OSUtils.isSystemApp && appSettingsRepo.getBoolean(BooleanSetting.LabModuleAlwaysRoot, false).first()
 
         // Collect logs from the underlying implementation and emit full updates.
         ModuleInstallerRepoImpl.doInstallWork(
@@ -138,16 +142,16 @@ class InstallationProcessor(
             )
         )
 
-        Timber.d("install: Loading package name blacklist from AppDataStore.")
-        val blacklist = appDataStore.getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST)
+        Timber.d("install: Loading package name blacklist from AppSettingsRepo.")
+        val blacklist = appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedBlacklistPackages)
             .first().map { it.packageName }
 
-        Timber.d("install: Loading SharedUID blacklist from AppDataStore.")
-        val sharedUidBlacklist = appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST)
+        Timber.d("install: Loading SharedUID blacklist from AppSettingsRepo.")
+        val sharedUidBlacklist = appSettingsRepo.getSharedUidList(SharedUidListSetting.ManagedSharedUserIdBlacklist)
             .first().map { it.uidName }
 
-        Timber.d("install: Loading SharedUID whitelist from AppDataStore.")
-        val sharedUidWhitelist = appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST)
+        Timber.d("install: Loading SharedUID whitelist from AppSettingsRepo.")
+        val sharedUidWhitelist = appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedSharedUserIdExemptedPackages)
             .first().map { it.packageName }
 
         val installEntities = selectedEntities.map {
