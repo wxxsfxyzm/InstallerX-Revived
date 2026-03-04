@@ -3,8 +3,8 @@ package com.rosan.installer.ui.page.main.settings.preferred
 import androidx.compose.ui.graphics.Color
 import com.rosan.installer.data.app.model.enums.HttpProfile
 import com.rosan.installer.data.app.model.enums.RootImplementation
-import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
-import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
+import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.model.SharedUid
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.PresetColors

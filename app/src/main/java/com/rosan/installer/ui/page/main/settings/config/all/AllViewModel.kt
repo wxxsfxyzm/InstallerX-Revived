@@ -7,10 +7,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
-import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.repo.ConfigRepo
+import com.rosan.installer.domain.settings.repository.ConfigRepo
 import com.rosan.installer.data.settings.util.ConfigOrder
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen

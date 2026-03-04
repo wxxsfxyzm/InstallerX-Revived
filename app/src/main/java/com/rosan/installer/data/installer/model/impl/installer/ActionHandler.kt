@@ -26,7 +26,7 @@ import com.rosan.installer.data.installer.model.impl.installer.processor.Session
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.impl.AutoLockManager
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.ui.util.doBiometricAuthOrThrow
 import com.rosan.installer.util.OSUtils

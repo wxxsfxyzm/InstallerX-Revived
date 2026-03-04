@@ -1,4 +1,4 @@
-package com.rosan.installer.data.settings.model.datastore.entity
+package com.rosan.installer.domain.settings.model
 
 import kotlinx.serialization.Serializable
 

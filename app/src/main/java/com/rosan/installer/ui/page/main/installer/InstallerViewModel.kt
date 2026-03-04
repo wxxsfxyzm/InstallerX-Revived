@@ -23,11 +23,11 @@ import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
-import com.rosan.installer.data.settings.repo.BooleanSetting
-import com.rosan.installer.data.settings.repo.IntSetting
-import com.rosan.installer.data.settings.repo.NamedPackageListSetting
-import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.settings.repository.IntSetting
+import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
+import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
 import com.rosan.installer.util.addFlag

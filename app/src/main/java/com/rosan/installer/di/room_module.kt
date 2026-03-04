@@ -1,10 +1,10 @@
 package com.rosan.installer.di
 
 import com.rosan.installer.data.settings.model.room.InstallerRoom
-import com.rosan.installer.data.settings.model.room.repo.AppRepoImpl
-import com.rosan.installer.data.settings.model.room.repo.ConfigRepoImpl
-import com.rosan.installer.data.settings.repo.AppRepo
-import com.rosan.installer.data.settings.repo.ConfigRepo
+import com.rosan.installer.data.settings.repository.AppRepoImpl
+import com.rosan.installer.data.settings.repository.ConfigRepoImpl
+import com.rosan.installer.domain.settings.repository.AppRepo
+import com.rosan.installer.domain.settings.repository.ConfigRepo
 import org.koin.dsl.module
 
 val roomModule = module {

@@ -1,15 +1,15 @@
-package com.rosan.installer.data.settings.model.datastore.repo
+package com.rosan.installer.data.settings.repository
 
 import androidx.datastore.preferences.core.Preferences
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
-import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
-import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
-import com.rosan.installer.data.settings.repo.BooleanSetting
-import com.rosan.installer.data.settings.repo.IntSetting
-import com.rosan.installer.data.settings.repo.NamedPackageListSetting
-import com.rosan.installer.data.settings.repo.SharedUidListSetting
-import com.rosan.installer.data.settings.repo.StringSetting
+import com.rosan.installer.data.settings.local.datastore.AppDataStore
+import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.model.SharedUid
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.settings.repository.IntSetting
+import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
+import com.rosan.installer.domain.settings.repository.SharedUidListSetting
+import com.rosan.installer.domain.settings.repository.StringSetting
 import kotlinx.coroutines.flow.Flow
 
 class AppSettingsRepoImpl(

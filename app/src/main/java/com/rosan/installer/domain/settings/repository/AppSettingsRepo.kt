@@ -1,7 +1,7 @@
-package com.rosan.installer.data.settings.repo
+package com.rosan.installer.domain.settings.repository
 
-import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
-import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
+import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.model.SharedUid
 import kotlinx.coroutines.flow.Flow
 
 enum class StringSetting {

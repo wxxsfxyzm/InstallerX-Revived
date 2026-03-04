@@ -1,8 +1,8 @@
 package com.rosan.installer.util.timber
 
 import android.content.Context
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
-import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

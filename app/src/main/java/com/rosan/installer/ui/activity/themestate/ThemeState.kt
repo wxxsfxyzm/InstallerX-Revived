@@ -6,10 +6,10 @@ import android.os.Build
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.kieronquinn.monetcompat.core.MonetCompat
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
-import com.rosan.installer.data.settings.repo.BooleanSetting
-import com.rosan.installer.data.settings.repo.IntSetting
-import com.rosan.installer.data.settings.repo.StringSetting
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.settings.repository.IntSetting
+import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.material.ThemeColorSpec

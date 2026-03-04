@@ -9,8 +9,8 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.installer.util.pendingActivity
 import com.rosan.installer.data.installer.util.pendingBroadcast
 import com.rosan.installer.data.recycle.util.openAppPrivileged
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
-import com.rosan.installer.data.settings.repo.IntSetting
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

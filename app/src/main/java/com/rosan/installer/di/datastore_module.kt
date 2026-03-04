@@ -3,9 +3,9 @@ package com.rosan.installer.di
 import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
-import com.rosan.installer.data.settings.model.datastore.repo.AppSettingsRepoImpl
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
+import com.rosan.installer.data.settings.local.datastore.AppDataStore
+import com.rosan.installer.data.settings.repository.AppSettingsRepoImpl
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 

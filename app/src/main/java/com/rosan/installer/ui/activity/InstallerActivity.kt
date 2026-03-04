@@ -24,8 +24,8 @@ import com.rosan.installer.build.model.impl.DeviceCapabilityChecker
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.impl.InstallerSessionManager
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
-import com.rosan.installer.data.settings.repo.BooleanSetting
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.ui.activity.themestate.ThemeUiState
 import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
 import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent

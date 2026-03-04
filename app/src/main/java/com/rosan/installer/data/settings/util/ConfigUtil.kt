@@ -1,16 +1,16 @@
 package com.rosan.installer.data.settings.util
 
 import android.content.Context
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
-import com.rosan.installer.data.settings.repo.BooleanSetting
-import com.rosan.installer.data.settings.repo.IntSetting
-import com.rosan.installer.data.settings.repo.StringSetting
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.settings.repository.IntSetting
+import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.data.settings.model.room.entity.AppEntity
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
-import com.rosan.installer.data.settings.repo.AppRepo
-import com.rosan.installer.data.settings.repo.ConfigRepo
+import com.rosan.installer.domain.settings.repository.AppRepo
+import com.rosan.installer.domain.settings.repository.ConfigRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext

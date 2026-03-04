@@ -1,8 +1,8 @@
-package com.rosan.installer.data.settings.model.room.repo
+package com.rosan.installer.data.settings.repository
 
 import com.rosan.installer.data.settings.model.room.dao.ConfigDao
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.repo.ConfigRepo
+import com.rosan.installer.domain.settings.repository.ConfigRepo
 import com.rosan.installer.data.settings.util.ConfigOrder
 import com.rosan.installer.data.settings.util.OrderType
 import kotlinx.coroutines.flow.Flow

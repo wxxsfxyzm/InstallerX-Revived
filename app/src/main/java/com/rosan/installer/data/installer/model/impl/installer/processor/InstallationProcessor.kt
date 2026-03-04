@@ -10,11 +10,11 @@ import com.rosan.installer.data.app.model.impl.ModuleInstallerRepoImpl
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
-import com.rosan.installer.data.settings.repo.BooleanSetting
-import com.rosan.installer.data.settings.repo.NamedPackageListSetting
-import com.rosan.installer.data.settings.repo.SharedUidListSetting
-import com.rosan.installer.data.settings.repo.StringSetting
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
+import com.rosan.installer.domain.settings.repository.SharedUidListSetting
+import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -7,12 +7,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rosan.installer.data.settings.repo.AppSettingsRepo
-import com.rosan.installer.data.settings.repo.BooleanSetting
-import com.rosan.installer.data.settings.repo.StringSetting
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.data.settings.model.room.entity.AppEntity
-import com.rosan.installer.data.settings.repo.AppRepo
-import com.rosan.installer.data.settings.repo.ConfigRepo
+import com.rosan.installer.domain.settings.repository.AppRepo
+import com.rosan.installer.domain.settings.repository.ConfigRepo
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.util.hasFlag
 import com.rosan.installer.util.pm.compatVersionCode

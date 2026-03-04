@@ -1,4 +1,4 @@
-package com.rosan.installer.data.settings.repo
+package com.rosan.installer.domain.settings.repository
 
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigOrder

@@ -1,6 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.config.edit
 
-import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
+import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
 
 data class EditViewState(

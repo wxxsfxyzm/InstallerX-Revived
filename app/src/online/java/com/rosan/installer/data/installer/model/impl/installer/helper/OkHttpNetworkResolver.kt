@@ -12,7 +12,8 @@ import com.rosan.installer.data.installer.model.exception.HttpRestrictedForLocal
 import com.rosan.installer.data.installer.model.exception.ResolveFailedLinkNotValidException
 import com.rosan.installer.data.installer.repo.NetworkResolver
 import com.rosan.installer.data.installer.util.copyToWithProgress
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.util.ArchiveUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -42,7 +43,7 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
 
     private val context by inject<Context>()
     private val okHttpClient by inject<OkHttpClient>()
-    private val appDataStore by inject<AppDataStore>()
+    private val appSettings by inject<AppSettingsRepo>()
 
     // Mutex to ensure thread-safe progress emission
     private val progressMutex = Mutex()
@@ -69,7 +70,7 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
         progressFlow.emit(ProgressEntity.InstallPreparing(-1f))
 
         // 1. Security & Config Checks
-        val httpProfileName = appDataStore.getString(AppDataStore.LAB_HTTP_PROFILE).first()
+        val httpProfileName = appSettings.getString(StringSetting.LabHttpProfile).first()
         validateSecurity(uri, HttpProfile.fromString(httpProfileName))
 
         val client = buildClientForScheme(uri, HttpProfile.fromString(httpProfileName))
