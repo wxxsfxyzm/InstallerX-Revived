@@ -1,4 +1,4 @@
-package com.rosan.installer.data.settings.model.room
+package com.rosan.installer.data.settings.local.room
 
 import androidx.room.AutoMigration
 import androidx.room.Database
@@ -10,15 +10,15 @@ import androidx.room.migration.AutoMigrationSpec
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.settings.model.room.dao.AppDao
-import com.rosan.installer.data.settings.model.room.dao.ConfigDao
-import com.rosan.installer.data.settings.model.room.entity.AppEntity
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
-import com.rosan.installer.data.settings.model.room.entity.converter.DexoptModeConverter
-import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
-import com.rosan.installer.data.settings.model.room.entity.converter.InstallReasonConverter
-import com.rosan.installer.data.settings.model.room.entity.converter.PackageSourceConverter
+import com.rosan.installer.data.settings.local.room.dao.AppDao
+import com.rosan.installer.data.settings.local.room.dao.ConfigDao
+import com.rosan.installer.data.settings.local.room.entity.AppEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.converter.AuthorizerConverter
+import com.rosan.installer.data.settings.local.room.entity.converter.DexoptModeConverter
+import com.rosan.installer.data.settings.local.room.entity.converter.InstallModeConverter
+import com.rosan.installer.data.settings.local.room.entity.converter.InstallReasonConverter
+import com.rosan.installer.data.settings.local.room.entity.converter.PackageSourceConverter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,7 +56,6 @@ abstract class InstallerRoom : RoomDatabase() {
                 "installer.db",
             ).addCallback(object : Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
-                    // 延迟获取已初始化的 Database 实例
                     val database = get<InstallerRoom>()
                     val defaultConfig = when (RsConfig.currentManufacturer) {
                         Manufacturer.XIAOMI -> ConfigEntity.XiaomiDefault

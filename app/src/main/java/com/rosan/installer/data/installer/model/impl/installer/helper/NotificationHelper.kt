@@ -13,7 +13,7 @@ import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.model.impl.installer.BroadcastHandler
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 
 class NotificationHelper(
     private val context: Context,

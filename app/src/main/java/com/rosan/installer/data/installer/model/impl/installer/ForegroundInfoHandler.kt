@@ -22,7 +22,7 @@ import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -10,7 +10,7 @@ import com.rosan.installer.data.app.model.impl.analyser.strategy.ModuleStrategy
 import com.rosan.installer.data.app.model.impl.analyser.strategy.MultiApkZipStrategy
 import com.rosan.installer.data.app.model.impl.analyser.strategy.SingleApkStrategy
 import com.rosan.installer.data.app.model.impl.analyser.strategy.XApkStrategy
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.zip.ZipFile

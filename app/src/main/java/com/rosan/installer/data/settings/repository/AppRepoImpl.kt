@@ -1,7 +1,7 @@
 package com.rosan.installer.data.settings.repository
 
-import com.rosan.installer.data.settings.model.room.dao.AppDao
-import com.rosan.installer.data.settings.model.room.entity.AppEntity
+import com.rosan.installer.data.settings.local.room.dao.AppDao
+import com.rosan.installer.data.settings.local.room.entity.AppEntity
 import com.rosan.installer.domain.settings.repository.AppRepo
 import com.rosan.installer.data.settings.util.AppOrder
 import com.rosan.installer.data.settings.util.OrderType

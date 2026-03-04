@@ -37,7 +37,7 @@ import com.rosan.installer.data.recycle.util.requireDhizukuPermissionGranted
 import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.getValue
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.pm.isFreshInstallCandidate

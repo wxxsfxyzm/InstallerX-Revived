@@ -7,7 +7,7 @@ import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.util.sourcePath
 import com.rosan.installer.data.recycle.util.deletePaths
 import com.rosan.installer.data.recycle.util.requireDhizukuPermissionGranted
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import org.koin.core.component.KoinComponent
 import timber.log.Timber
 

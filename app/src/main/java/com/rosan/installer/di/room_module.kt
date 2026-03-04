@@ -1,6 +1,6 @@
 package com.rosan.installer.di
 
-import com.rosan.installer.data.settings.model.room.InstallerRoom
+import com.rosan.installer.data.settings.local.room.InstallerRoom
 import com.rosan.installer.data.settings.repository.AppRepoImpl
 import com.rosan.installer.data.settings.repository.ConfigRepoImpl
 import com.rosan.installer.domain.settings.repository.AppRepo

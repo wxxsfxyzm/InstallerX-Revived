@@ -6,7 +6,7 @@ import android.os.Bundle
 import com.rosan.installer.data.app.model.impl.InstallerRepoImpl
 import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
 import com.rosan.installer.data.recycle.util.useUserService
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import org.koin.core.component.KoinComponent
 import timber.log.Timber
 

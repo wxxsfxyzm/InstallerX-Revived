@@ -43,7 +43,7 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
 
     private val context by inject<Context>()
     private val okHttpClient by inject<OkHttpClient>()
-    private val appSettings by inject<AppSettingsRepo>()
+    private val appSettingsRepo by inject<AppSettingsRepo>()
 
     // Mutex to ensure thread-safe progress emission
     private val progressMutex = Mutex()
@@ -70,7 +70,7 @@ class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
         progressFlow.emit(ProgressEntity.InstallPreparing(-1f))
 
         // 1. Security & Config Checks
-        val httpProfileName = appSettings.getString(StringSetting.LabHttpProfile).first()
+        val httpProfileName = appSettingsRepo.getString(StringSetting.LabHttpProfile).first()
         validateSecurity(uri, HttpProfile.fromString(httpProfileName))
 
         val client = buildClientForScheme(uri, HttpProfile.fromString(httpProfileName))

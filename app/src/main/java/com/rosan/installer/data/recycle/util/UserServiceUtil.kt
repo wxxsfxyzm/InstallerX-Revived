@@ -10,7 +10,7 @@ import com.rosan.installer.data.recycle.model.impl.recycler.ShizukuHookRecycler
 import com.rosan.installer.data.recycle.model.impl.recycler.ShizukuUserServiceRecycler
 import com.rosan.installer.data.recycle.repo.Recyclable
 import com.rosan.installer.data.recycle.repo.recyclable.UserService
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
 import timber.log.Timber
 import java.lang.reflect.InvocationTargetException

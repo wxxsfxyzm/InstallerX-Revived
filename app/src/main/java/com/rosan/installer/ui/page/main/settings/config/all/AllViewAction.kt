@@ -1,6 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.config.all
 
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigOrder
 
 sealed class AllViewAction {

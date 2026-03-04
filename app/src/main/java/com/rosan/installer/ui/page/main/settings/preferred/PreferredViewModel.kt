@@ -25,9 +25,9 @@ import com.rosan.installer.data.app.model.enums.HttpProfile
 import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.model.room.entity.converter.AuthorizerConverter
-import com.rosan.installer.data.settings.model.room.entity.converter.InstallModeConverter
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.converter.AuthorizerConverter
+import com.rosan.installer.data.settings.local.room.entity.converter.InstallModeConverter
 import com.rosan.installer.data.updater.repo.AppUpdater
 import com.rosan.installer.data.updater.repo.UpdateChecker
 import com.rosan.installer.domain.settings.model.NamedPackage

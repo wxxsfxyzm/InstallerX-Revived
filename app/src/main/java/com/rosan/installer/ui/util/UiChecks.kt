@@ -1,6 +1,6 @@
 package com.rosan.installer.ui.util
 
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 
 /**
  * Returns true if the Dhizuku authorizer is active, which disables certain features.

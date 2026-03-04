@@ -2,7 +2,7 @@ package com.rosan.installer.data.installer.model.impl.installer.helper
 
 import android.app.Activity
 import android.content.Intent
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.UninstallerActivity
 import timber.log.Timber

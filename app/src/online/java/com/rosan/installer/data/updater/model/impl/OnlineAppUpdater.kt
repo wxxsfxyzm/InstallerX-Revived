@@ -5,7 +5,7 @@ import android.os.Process
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.updater.repo.AppUpdater
 import com.rosan.installer.data.updater.repo.UpdateChecker
 import kotlinx.coroutines.Dispatchers

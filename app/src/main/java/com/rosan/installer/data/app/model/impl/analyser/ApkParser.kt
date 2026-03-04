@@ -21,7 +21,7 @@ import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.invoke
 import com.rosan.installer.data.res.model.impl.AxmlTreeRepoImpl
 import com.rosan.installer.data.res.repo.AxmlTreeRepo
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber

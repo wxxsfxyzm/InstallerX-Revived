@@ -1,6 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.config.apply
 
-import com.rosan.installer.data.settings.model.room.entity.AppEntity
+import com.rosan.installer.data.settings.local.room.entity.AppEntity
 import com.rosan.installer.ui.common.ViewContent
 
 data class ApplyViewState(

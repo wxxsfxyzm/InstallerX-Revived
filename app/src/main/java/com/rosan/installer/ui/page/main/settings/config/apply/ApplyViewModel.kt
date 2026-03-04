@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.data.settings.model.room.entity.AppEntity
+import com.rosan.installer.data.settings.local.room.entity.AppEntity
 import com.rosan.installer.domain.settings.repository.AppRepo
 import com.rosan.installer.domain.settings.repository.ConfigRepo
 import com.rosan.installer.ui.common.ViewContent

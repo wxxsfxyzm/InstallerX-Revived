@@ -42,7 +42,7 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel

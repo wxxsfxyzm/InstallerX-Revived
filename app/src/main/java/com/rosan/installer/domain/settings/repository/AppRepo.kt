@@ -1,6 +1,6 @@
 package com.rosan.installer.domain.settings.repository
 
-import com.rosan.installer.data.settings.model.room.entity.AppEntity
+import com.rosan.installer.data.settings.local.room.entity.AppEntity
 import com.rosan.installer.data.settings.util.AppOrder
 import com.rosan.installer.data.settings.util.OrderType
 import kotlinx.coroutines.flow.Flow

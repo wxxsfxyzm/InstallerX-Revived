@@ -28,7 +28,7 @@ import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.model.NamedPackage
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
 import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.getErrorMessage

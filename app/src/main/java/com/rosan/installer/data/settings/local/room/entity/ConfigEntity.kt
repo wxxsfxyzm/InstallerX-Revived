@@ -1,4 +1,4 @@
-package com.rosan.installer.data.settings.model.room.entity
+package com.rosan.installer.data.settings.local.room.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

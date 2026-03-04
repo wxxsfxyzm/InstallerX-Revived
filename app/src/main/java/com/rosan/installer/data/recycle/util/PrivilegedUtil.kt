@@ -8,7 +8,7 @@ import android.os.Build
 import androidx.core.net.toUri
 import com.rosan.installer.SecretCodeReceiver
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.Dispatchers

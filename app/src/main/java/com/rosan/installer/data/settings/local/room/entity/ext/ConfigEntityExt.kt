@@ -1,7 +1,7 @@
-package com.rosan.installer.data.settings.model.room.entity.ext
+package com.rosan.installer.data.settings.local.room.entity.ext
 
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity.Authorizer
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity.Authorizer
 import com.rosan.installer.util.OSUtils
 
 val ConfigEntity.isPrivileged: Boolean

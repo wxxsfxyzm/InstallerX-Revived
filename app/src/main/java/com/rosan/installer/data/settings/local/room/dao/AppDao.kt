@@ -1,7 +1,7 @@
-package com.rosan.installer.data.settings.model.room.dao
+package com.rosan.installer.data.settings.local.room.dao
 
 import androidx.room.*
-import com.rosan.installer.data.settings.model.room.entity.AppEntity
+import com.rosan.installer.data.settings.local.room.entity.AppEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -8,7 +8,7 @@ import com.rosan.installer.data.app.repo.ModuleInstallerRepo
 import com.rosan.installer.data.app.util.ModuleInstallerUtils
 import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SU_ARGS // Make sure to import this
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow

@@ -16,7 +16,7 @@ import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
 import com.rosan.installer.data.recycle.util.deletePaths
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

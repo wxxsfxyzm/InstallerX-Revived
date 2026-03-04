@@ -2,7 +2,7 @@ package com.rosan.installer.data.installer.model.impl.installer
 
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch

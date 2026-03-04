@@ -1,7 +1,7 @@
-package com.rosan.installer.data.settings.model.room.entity.converter
+package com.rosan.installer.data.settings.local.room.entity.converter
 
 import androidx.room.TypeConverter
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 
 object DexoptModeConverter {
     @TypeConverter

@@ -21,7 +21,7 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.util.openAppPrivileged
 import com.rosan.installer.data.recycle.util.openLSPosedPrivileged
-import com.rosan.installer.data.settings.model.room.entity.ext.isPrivileged
+import com.rosan.installer.data.settings.local.room.entity.ext.isPrivileged
 import com.rosan.installer.ui.util.isGestureNavigation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -6,7 +6,7 @@ import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SU_ARGS
 import com.rosan.installer.data.recycle.util.getSpecialAuth
 import com.rosan.installer.data.recycle.util.useUserService
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope

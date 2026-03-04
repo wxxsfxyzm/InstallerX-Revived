@@ -45,7 +45,7 @@ import com.rosan.installer.R
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.SharedUid
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction

@@ -10,7 +10,7 @@ import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.util.getInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.util.getErrorMessage
 
 class LegacyNotificationBuilder(

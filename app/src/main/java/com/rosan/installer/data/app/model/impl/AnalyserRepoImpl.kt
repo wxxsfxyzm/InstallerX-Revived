@@ -12,7 +12,7 @@ import com.rosan.installer.data.app.model.impl.analyser.UnifiedContainerAnalyser
 import com.rosan.installer.data.app.model.impl.processor.PackagePreprocessor
 import com.rosan.installer.data.app.model.impl.processor.SelectionStrategy
 import com.rosan.installer.data.app.repo.AnalyserRepo
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

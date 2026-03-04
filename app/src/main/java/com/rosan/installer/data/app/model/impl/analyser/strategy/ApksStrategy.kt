@@ -6,7 +6,7 @@ import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.impl.analyser.ApkParser
 import com.rosan.installer.data.app.repo.AnalysisStrategy
 import com.rosan.installer.data.app.util.parseSplitMetadata
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber

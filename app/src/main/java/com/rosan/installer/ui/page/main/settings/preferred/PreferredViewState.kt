@@ -5,7 +5,7 @@ import com.rosan.installer.data.app.model.enums.HttpProfile
 import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.SharedUid
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.material.RawColor

@@ -27,7 +27,7 @@ import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.impl.AutoLockManager
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.ui.util.doBiometricAuthOrThrow
 import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.CancellationException

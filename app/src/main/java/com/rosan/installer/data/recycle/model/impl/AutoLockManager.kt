@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.CoroutineScope

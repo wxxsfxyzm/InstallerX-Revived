@@ -6,7 +6,7 @@ import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.recycle.model.impl.recycler.ProcessHookRecycler
 import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SHELL_SH
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 

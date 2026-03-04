@@ -1,6 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.config.edit
 
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 
 sealed class EditViewAction {
     object Init : EditViewAction()

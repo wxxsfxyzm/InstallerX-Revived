@@ -31,7 +31,7 @@ import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.enums.InstallErrorType
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel

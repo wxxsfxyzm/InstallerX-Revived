@@ -9,7 +9,7 @@ import com.rosan.installer.data.app.model.impl.appInstaller.ShizukuInstallerRepo
 import com.rosan.installer.data.app.model.impl.appInstaller.SystemInstallerRepoImpl
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
 import org.koin.core.component.KoinComponent
 

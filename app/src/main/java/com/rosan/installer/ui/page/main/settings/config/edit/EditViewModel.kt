@@ -11,7 +11,7 @@ import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.domain.settings.repository.ConfigRepo
 import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalAuthorizer
 import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalInstallMode
