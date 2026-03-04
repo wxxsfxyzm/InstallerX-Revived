@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rosan.installer.R
-import com.rosan.installer.ui.theme.LocalIsDark
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.util.KeyEventBlocker
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Button
@@ -70,7 +70,7 @@ fun InstallModuleContent(
         }
     }
 
-    val isDarkMode = LocalIsDark.current
+    val isDarkMode = InstallerTheme.isDark
     val cardColor = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
         if (isDarkMode) Color.Black else Color.White
 

@@ -323,6 +323,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 return@setContent
 
             InstallerTheme(
+                isExpressive = uiState.isExpressive,
                 useMiuix = uiState.useMiuix,
                 themeMode = uiState.themeMode,
                 paletteStyle = uiState.paletteStyle,

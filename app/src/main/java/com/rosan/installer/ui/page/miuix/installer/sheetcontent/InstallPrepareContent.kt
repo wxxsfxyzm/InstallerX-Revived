@@ -50,7 +50,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallWarningRes
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixWarningChipGroup
-import com.rosan.installer.ui.theme.LocalIsDark
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.InstallLogicUtils
 import com.rosan.installer.ui.util.formatSize
@@ -73,7 +73,7 @@ fun InstallPrepareContent(
     onCancel: () -> Unit,
     onInstall: () -> Unit
 ) {
-    val isDarkMode = LocalIsDark.current
+    val isDarkMode = InstallerTheme.isDark
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
     val settings = viewModel.viewSettings

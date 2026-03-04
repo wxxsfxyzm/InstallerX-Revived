@@ -36,7 +36,7 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewAction.SetTargetU
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallExtendedMenuAction
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
-import com.rosan.installer.ui.theme.LocalIsDark
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -55,7 +55,7 @@ fun InstallExtendedMenuContent(
     installer: InstallerRepo,
     viewModel: InstallerViewModel
 ) {
-    val isDarkMode = LocalIsDark.current
+    val isDarkMode = InstallerTheme.isDark
     val installOptions = rememberInstallOptions(installer.config.authorizer)
     val installFlags by viewModel.installFlags.collectAsState()
     val managedPackages by viewModel.managedInstallerPackages.collectAsState()

@@ -43,7 +43,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixMultiApkCheckboxWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.WarningCard
-import com.rosan.installer.ui.theme.LocalIsDark
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.getSupportSubtitle
 import com.rosan.installer.ui.util.isGestureNavigation
@@ -66,7 +66,7 @@ fun InstallChoiceContent(
     viewModel: InstallerViewModel,
     onCancel: () -> Unit
 ) {
-    val isDarkMode = LocalIsDark.current
+    val isDarkMode = InstallerTheme.isDark
     val analysisResults = installer.analysisResults
     val sourceType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
     val currentSessionMode = analysisResults.firstOrNull()?.sessionMode ?: SessionMode.Single

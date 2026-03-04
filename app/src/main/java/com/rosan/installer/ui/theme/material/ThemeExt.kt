@@ -33,17 +33,9 @@ fun dynamicColorScheme(
         PaletteStyle.Content -> MaterialKolorPaletteStyle.Content
     }
 
-    // Check if the selected style supports SPEC_2025
-    val isSpec2025Supported = style in listOf(
-        PaletteStyle.TonalSpot,
-        PaletteStyle.Neutral,
-        PaletteStyle.Vibrant,
-        PaletteStyle.Expressive
-    )
-
     // Apply SPEC_2025 only if explicitly requested AND supported by the style
     val specVersion = when (colorSpec) {
-        ThemeColorSpec.SPEC_2025 -> if (isSpec2025Supported) ColorSpec.SpecVersion.SPEC_2025 else ColorSpec.SpecVersion.SPEC_2021
+        ThemeColorSpec.SPEC_2025 -> if (style.supportsSpec2025) ColorSpec.SpecVersion.SPEC_2025 else ColorSpec.SpecVersion.SPEC_2021
         ThemeColorSpec.SPEC_2021 -> ColorSpec.SpecVersion.SPEC_2021
     }
 
@@ -58,7 +50,8 @@ fun dynamicColorScheme(
 }
 
 /**
- * Extension function to animate all colors inside a ColorScheme smoothly.
+ * Extension function to animate all colors inside a ColorScheme smoothly,
+ * including the newly added fixed container roles in Material 3.
  */
 @Composable
 fun ColorScheme.animateAsState(): ColorScheme {
@@ -106,6 +99,20 @@ fun ColorScheme.animateAsState(): ColorScheme {
         surfaceContainerHigh = animateColor(surfaceContainerHigh),
         surfaceContainerHighest = animateColor(surfaceContainerHighest),
         surfaceContainerLow = animateColor(surfaceContainerLow),
-        surfaceContainerLowest = animateColor(surfaceContainerLowest)
+        surfaceContainerLowest = animateColor(surfaceContainerLowest),
+
+        // New fixed color roles for Material 3
+        primaryFixed = animateColor(primaryFixed),
+        primaryFixedDim = animateColor(primaryFixedDim),
+        onPrimaryFixed = animateColor(onPrimaryFixed),
+        onPrimaryFixedVariant = animateColor(onPrimaryFixedVariant),
+        secondaryFixed = animateColor(secondaryFixed),
+        secondaryFixedDim = animateColor(secondaryFixedDim),
+        onSecondaryFixed = animateColor(onSecondaryFixed),
+        onSecondaryFixedVariant = animateColor(onSecondaryFixedVariant),
+        tertiaryFixed = animateColor(tertiaryFixed),
+        tertiaryFixedDim = animateColor(tertiaryFixedDim),
+        onTertiaryFixed = animateColor(onTertiaryFixed),
+        onTertiaryFixedVariant = animateColor(onTertiaryFixedVariant)
     )
 }

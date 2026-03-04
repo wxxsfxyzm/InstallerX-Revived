@@ -16,7 +16,6 @@ kotlin = "2.3.10"
 ksp = "2.3.6"
 composeBom = "2026.02.01"
 compose = "1.10.4"
-m3color = "2025.4"
 haze = "1.7.2"
 splashScreen = "1.2.0"
 material3 = "1.5.0-alpha15"
@@ -29,7 +28,7 @@ datastore = "1.2.0"
 aboutLibraries = "14.0.0-b02"
 appiconloader = "1.5.0"
 timber = "5.0.1"
-miuix = "0.8.5"
+miuix = "0.8.5-9d8e5bf7-SNAPSHOT"
 okhttp = "5.3.2"
 monetcompat = "0.4.1"
 materialKolor = "5.0.0-alpha07"
@@ -54,7 +53,6 @@ androix-splashscreen = { group = "androidx.core", name = "core-splashscreen", ve
 
 capsule = { module = "io.github.kyant0:capsule", version.ref = "capsule" }
 focus-api = { module = "com.xzakota.hyper.notification:focus-api", version.ref = "focusApi" }
-m3color = { module = "com.github.Kyant0:m3color", version.ref = "m3color" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }

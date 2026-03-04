@@ -22,9 +22,10 @@ import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCheckboxWidget
-import com.rosan.installer.ui.theme.LocalIsDark
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.isGestureNavigation
+import com.rosan.installer.util.hasFlag
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
@@ -38,14 +39,14 @@ fun UninstallPrepareContent(
     onCancel: () -> Unit,
     onUninstall: () -> Unit
 ) {
-    val isDarkMode = LocalIsDark.current
+    val isDarkMode = InstallerTheme.isDark
     val uninstallInfo by viewModel.uiUninstallInfo.collectAsState()
     val info = uninstallInfo ?: return
 
     val uninstallFlags by viewModel.uninstallFlags.collectAsState()
-    val deleteKeepData = (uninstallFlags and PackageManagerUtil.DELETE_KEEP_DATA) != 0
-    val deleteAllUsers = (uninstallFlags and PackageManagerUtil.DELETE_ALL_USERS) != 0
-    val deleteSystemApp = (uninstallFlags and PackageManagerUtil.DELETE_SYSTEM_APP) != 0
+    val deleteKeepData = uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA)
+    val deleteAllUsers = uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS)
+    val deleteSystemApp = uninstallFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP)
 
     Column(
         modifier = Modifier.fillMaxWidth(),

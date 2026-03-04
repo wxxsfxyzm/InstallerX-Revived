@@ -48,6 +48,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                 }
                 val state = preferredViewModel.state
                 InstallerTheme(
+                    isExpressive = state.showExpressiveUI,
                     useMiuix = state.showMiuixUI,
                     themeMode = state.themeMode,
                     paletteStyle = state.paletteStyle,

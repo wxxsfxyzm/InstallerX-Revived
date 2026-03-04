@@ -36,7 +36,9 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBlurWarningDialog
+import com.rosan.installer.ui.page.miuix.widgets.MiuixColorSpecWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixHideLauncherIconWarningDialog
+import com.rosan.installer.ui.page.miuix.widgets.MiuixPaletteStyleWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeEngineWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixThemeModeWidget
@@ -118,6 +120,7 @@ fun MiuixThemeSettingsPage(
                     MiuixThemeEngineWidget(
                         currentThemeIsMiuix = state.showMiuixUI,
                         onThemeChange = { useMiuix ->
+                            viewModel.markPendingNavigateToTheme(true)
                             viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(useMiuix))
                         }
                     )
@@ -170,7 +173,7 @@ fun MiuixThemeSettingsPage(
                             }
                         )
                     }
-                    /*AnimatedVisibility(
+                    AnimatedVisibility(
                         visible = state.useMiuixMonet,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
@@ -181,8 +184,8 @@ fun MiuixThemeSettingsPage(
                                 viewModel.dispatch(PreferredViewAction.SetPaletteStyle(newStyle))
                             }
                         )
-                    }*/
-                    /*AnimatedVisibility(
+                    }
+                    AnimatedVisibility(
                         visible = state.useMiuixMonet,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
@@ -194,7 +197,7 @@ fun MiuixThemeSettingsPage(
                                 viewModel.dispatch(PreferredViewAction.SetColorSpec(newSpec))
                             }
                         )
-                    }*/
+                    }
                     AnimatedVisibility(
                         visible = state.useMiuixMonet,
                         enter = fadeIn() + expandVertically(),
