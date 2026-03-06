@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.session.resolver
 
 import android.content.Context
@@ -11,7 +13,6 @@ import android.system.Os
 import android.system.OsConstants
 import androidx.core.net.toUri
 import com.rosan.installer.build.RsConfig
-import com.rosan.installer.domain.session.repository.NetworkResolver
 import com.rosan.installer.data.session.util.copyToWithProgress
 import com.rosan.installer.data.session.util.getRealPathFromUri
 import com.rosan.installer.data.session.util.pathUnify
@@ -20,6 +21,7 @@ import com.rosan.installer.domain.engine.model.DataEntity
 import com.rosan.installer.domain.session.exception.ResolveException
 import com.rosan.installer.domain.session.exception.ResolvedFailedNoInternetAccessException
 import com.rosan.installer.domain.session.model.ProgressEntity
+import com.rosan.installer.domain.session.repository.NetworkResolver
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext

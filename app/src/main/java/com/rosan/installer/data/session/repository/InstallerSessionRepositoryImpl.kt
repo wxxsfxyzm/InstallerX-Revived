@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.data.session.repository
 
 import android.app.Activity
@@ -18,10 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-/**
- * Implementation of InstallerRepo.
- * Now receives dependencies via constructor instead of internal injection.
- */
 class InstallerSessionRepositoryImpl(
     override val id: String,
     private val onClose: () -> Unit

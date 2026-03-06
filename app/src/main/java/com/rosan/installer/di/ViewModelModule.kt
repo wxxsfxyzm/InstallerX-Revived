@@ -35,7 +35,11 @@ val viewModelModule = module {
     }
 
     viewModel { (navController: NavController) ->
-        AllViewModel(navController, get(), get())
+        AllViewModel(
+            navController = navController,
+            repo = get(),
+            appSettingsRepo = get()
+        )
     }
 
     viewModel { (id: Long?) ->
@@ -49,6 +53,11 @@ val viewModelModule = module {
     }
 
     viewModel { (id: Long) ->
-        ApplyViewModel(get(), get(), id, get())
+        ApplyViewModel(
+            configRepo = get(),
+            appRepo = get(),
+            id = id,
+            appSettingsRepo = get()
+        )
     }
 }
