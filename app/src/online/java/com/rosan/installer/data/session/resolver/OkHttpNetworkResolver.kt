@@ -27,8 +27,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -39,12 +37,11 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.max
 import kotlin.math.min
 
-class OkHttpNetworkResolver : NetworkResolver, KoinComponent {
-
-    private val context by inject<Context>()
-    private val okHttpClient by inject<OkHttpClient>()
-    private val appSettingsRepo by inject<AppSettingsRepo>()
-
+class OkHttpNetworkResolver(
+    private val context: Context,
+    private val okHttpClient: OkHttpClient,
+    private val appSettingsRepo: AppSettingsRepo
+) : NetworkResolver {
     // Mutex to ensure thread-safe progress emission
     private val progressMutex = Mutex()
 

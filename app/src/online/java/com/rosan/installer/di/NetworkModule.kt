@@ -31,7 +31,13 @@ val networkModule = module {
             .build()
     }
 
-    single<NetworkResolver> { OkHttpNetworkResolver() }
+    single<NetworkResolver> {
+        OkHttpNetworkResolver(
+            context = get(),
+            okHttpClient = get(),
+            appSettingsRepo = get()
+        )
+    }
 }
 
 val updateModule = module {
