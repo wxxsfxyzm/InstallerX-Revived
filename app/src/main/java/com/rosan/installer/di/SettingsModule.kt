@@ -14,6 +14,7 @@ import com.rosan.installer.data.settings.repository.AppSettingsRepoImpl
 import com.rosan.installer.data.settings.repository.ConfigRepoImpl
 import com.rosan.installer.domain.settings.provider.PrivilegedProvider
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
+import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.AppRepo
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.ConfigRepo
@@ -63,7 +64,8 @@ val settingsModule = module {
     // Providers
     single<SystemEnvProvider> { SystemEnvProviderImpl(androidContext()) }
     single<PrivilegedProvider> { PrivilegedProviderImpl(androidContext(), get()) }
-
+    single { ThemeStateProvider(get()) }
+    
     // UseCases
     factory { GetConfigDraftUseCase(get(), get()) }
     factory { SaveConfigUseCase(get()) }
