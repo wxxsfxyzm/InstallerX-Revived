@@ -5,9 +5,9 @@ import android.os.Process
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.updater.repo.AppUpdater
 import com.rosan.installer.data.updater.repo.UpdateChecker
+import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -17,7 +17,7 @@ class OnlineAppUpdater(
     private val context: Context,
     private val updateChecker: UpdateChecker
 ) : AppUpdater {
-    override suspend fun performInAppUpdate(url: String, config: ConfigEntity) {
+    override suspend fun performInAppUpdate(url: String, config: ConfigModel) {
         // Get download stream entity (DataEntity)
         // This is the StreamDataEntity obtained from UpdateChecker
         val downloadDataEntity = withContext(Dispatchers.IO) {

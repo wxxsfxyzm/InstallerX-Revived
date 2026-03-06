@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -97,7 +98,8 @@ private object UIConstants {
 @Composable
 fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
     val navController = rememberNavController()
-    val useBlur = preferredViewModel.state.useBlur
+    val uiState by preferredViewModel.state.collectAsStateWithLifecycle()
+    val useBlur = uiState.useBlur
 
     LaunchedEffect(navController) {
         if (preferredViewModel.pendingNavigateToTheme) {
@@ -171,7 +173,7 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
                             )
                             if (result == SnackbarResult.ActionPerformed) {
                                 allViewModel.dispatch(
-                                    AllViewAction.RestoreDataConfig(configEntity = event.configEntity)
+                                    AllViewAction.RestoreDataConfig(configModel = event.configModel)
                                 )
                             }
                         }

@@ -1,26 +1,29 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.domain.settings.repository
 
-import com.rosan.installer.data.settings.local.room.entity.AppEntity
-import com.rosan.installer.data.settings.util.AppOrder
-import com.rosan.installer.data.settings.util.OrderType
+import com.rosan.installer.domain.settings.model.AppModel
+import com.rosan.installer.domain.settings.util.AppOrder
+import com.rosan.installer.domain.settings.util.OrderType
 import kotlinx.coroutines.flow.Flow
 
 interface AppRepo {
-    fun all(order: AppOrder = AppOrder.Id(OrderType.Ascending)): List<AppEntity>
+    // Added suspend keyword and changed return type to AppModel
+    suspend fun all(order: AppOrder = AppOrder.Id(OrderType.Ascending)): List<AppModel>
 
-    fun flowAll(order: AppOrder = AppOrder.Id(OrderType.Ascending)): Flow<List<AppEntity>>
+    fun flowAll(order: AppOrder = AppOrder.Id(OrderType.Ascending)): Flow<List<AppModel>>
 
-    fun find(id: Long): AppEntity?
+    suspend fun find(id: Long): AppModel?
 
-    fun flowFind(id: Long): Flow<AppEntity?>
+    fun flowFind(id: Long): Flow<AppModel?>
 
-    fun findByPackageName(packageName: String?): AppEntity?
+    suspend fun findByPackageName(packageName: String?): AppModel?
 
-    fun flowFindByPackageName(packageName: String?): Flow<AppEntity?>
+    fun flowFindByPackageName(packageName: String?): Flow<AppModel?>
 
-    suspend fun update(entity: AppEntity)
+    suspend fun update(model: AppModel)
 
-    suspend fun insert(entity: AppEntity)
+    suspend fun insert(model: AppModel)
 
-    suspend fun delete(entity: AppEntity)
+    suspend fun delete(model: AppModel)
 }

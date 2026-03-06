@@ -16,7 +16,7 @@ import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.util.getInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.dynamicColorScheme
 import com.rosan.installer.ui.theme.primaryDark
@@ -102,8 +102,8 @@ class ModernNotificationBuilder(
             .setOngoing(true)
 
         val contentIntent = when (installer.config.installMode) {
-            ConfigEntity.InstallMode.Notification,
-            ConfigEntity.InstallMode.AutoNotification -> if (showDialog) helper.openIntent else null
+            InstallMode.Notification,
+            InstallMode.AutoNotification -> if (showDialog) helper.openIntent else null
 
             else -> helper.openIntent
         }

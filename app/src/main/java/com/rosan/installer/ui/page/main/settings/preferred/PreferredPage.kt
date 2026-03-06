@@ -35,11 +35,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
@@ -65,7 +66,7 @@ fun PreferredPage(
     viewModel: PreferredViewModel = koinViewModel(),
     outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     OnLifecycleEvent(Lifecycle.Event.ON_RESUME) {
@@ -137,7 +138,7 @@ fun PreferredPage(
             )
         },
     ) { paddingValues ->
-        when (state.progress) {
+        when (uiState.progress) {
             is PreferredViewState.Progress.Loading -> {
                 Box(
                     modifier = Modifier
@@ -202,7 +203,7 @@ fun PreferredPage(
                             }
                         )
                     }
-                    if (viewModel.state.authorizer == ConfigEntity.Authorizer.None)
+                    if (uiState.authorizer == Authorizer.None)
                         item {
                             val tip = if (OSUtils.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
                             else stringResource(R.string.config_authorizer_none_tips)
@@ -211,10 +212,10 @@ fun PreferredPage(
                     item { LabelWidget(stringResource(R.string.basic)) }
                     item {
                         DisableAdbVerify(
-                            checked = !state.adbVerifyEnabled,
-                            isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                            enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
-                                    state.authorizer != ConfigEntity.Authorizer.None,
+                            checked = !uiState.adbVerifyEnabled,
+                            isError = uiState.authorizer == Authorizer.Dhizuku,
+                            enabled = uiState.authorizer != Authorizer.Dhizuku &&
+                                    uiState.authorizer != Authorizer.None,
                             isM3E = false,
                             onCheckedChange = { isDisabled ->
                                 viewModel.dispatch(
@@ -225,28 +226,28 @@ fun PreferredPage(
                     }
                     item {
                         IgnoreBatteryOptimizationSetting(
-                            checked = state.isIgnoringBatteryOptimizations,
-                            enabled = !state.isIgnoringBatteryOptimizations,
+                            checked = uiState.isIgnoringBatteryOptimizations,
+                            enabled = !uiState.isIgnoringBatteryOptimizations,
                             isM3E = false,
                         ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
                     }
                     item {
                         AutoLockInstaller(
-                            checked = state.autoLockInstaller,
-                            enabled = state.authorizer != ConfigEntity.Authorizer.None,
+                            checked = uiState.autoLockInstaller,
+                            enabled = uiState.authorizer != Authorizer.None,
                             isM3E = false
-                        ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
+                        ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!uiState.autoLockInstaller)) }
                     }
                     item {
                         DefaultInstaller(
                             lock = true,
-                            enabled = state.authorizer != ConfigEntity.Authorizer.None
+                            enabled = uiState.authorizer != Authorizer.None
                         ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
                     }
                     item {
                         DefaultInstaller(
                             lock = false,
-                            enabled = state.authorizer != ConfigEntity.Authorizer.None
+                            enabled = uiState.authorizer != Authorizer.None
                         ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
                     }
                     item { ClearCache() }
@@ -263,11 +264,11 @@ fun PreferredPage(
                         SettingsAboutItemWidget(
                             imageVector = AppIcons.Info,
                             headlineContentText = stringResource(R.string.about_detail),
-                            supportingContentText = if (state.hasUpdate) stringResource(
+                            supportingContentText = if (uiState.hasUpdate) stringResource(
                                 R.string.update_available,
-                                state.remoteVersion
+                                uiState.remoteVersion
                             ) else "$revLevel ${RsConfig.VERSION_NAME}",
-                            supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            supportingContentColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             onClick = { navController.navigate(SettingsScreen.About.route) }
                         )
                     }
@@ -291,7 +292,7 @@ fun PreferredPage(
         ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
             BottomSheetContent(
                 title = stringResource(R.string.get_update),
-                hasUpdate = state.hasUpdate,
+                hasUpdate = uiState.hasUpdate,
                 onDirectUpdateClick = {
                     showBottomSheet = false
                     viewModel.dispatch(PreferredViewAction.Update)

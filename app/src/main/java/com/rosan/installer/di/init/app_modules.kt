@@ -7,10 +7,12 @@ import com.rosan.installer.di.iconColorExtractorModule
 import com.rosan.installer.di.installerModule
 import com.rosan.installer.di.logModule
 import com.rosan.installer.di.networkModule
+import com.rosan.installer.di.providerModule
 import com.rosan.installer.di.reflectModule
 import com.rosan.installer.di.roomModule
 import com.rosan.installer.di.serializationModule
 import com.rosan.installer.di.updateModule
+import com.rosan.installer.di.useCaseModule
 import com.rosan.installer.di.viewModelModule
 
 val appModules = listOf(
@@ -25,5 +27,7 @@ val appModules = listOf(
     networkModule,
     updateModule,
     deviceCapabilityCheckerModule,
-    logModule
+    logModule,
+    providerModule,
+    useCaseModule
 )

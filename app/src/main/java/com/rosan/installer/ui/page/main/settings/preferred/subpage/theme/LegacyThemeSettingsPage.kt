@@ -42,6 +42,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
@@ -64,7 +65,7 @@ fun LegacyThemeSettingsPage(
     navController: NavController,
     viewModel: PreferredViewModel,
 ) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showHideLauncherIconDialog by remember { mutableStateOf(false) }
 
@@ -73,7 +74,7 @@ fun LegacyThemeSettingsPage(
 
     if (showPaletteDialog) {
         PaletteStyleDialog(
-            currentStyle = state.paletteStyle,
+            currentStyle = uiState.paletteStyle,
             onDismiss = { showPaletteDialog = false },
             onSelect = { style ->
                 viewModel.dispatch(PreferredViewAction.SetPaletteStyle(style))
@@ -84,7 +85,7 @@ fun LegacyThemeSettingsPage(
 
     if (showThemeModeDialog) {
         ThemeModeDialog(
-            currentMode = state.themeMode,
+            currentMode = uiState.themeMode,
             onDismiss = { showThemeModeDialog = false },
             onSelect = { mode ->
                 viewModel.dispatch(PreferredViewAction.SetThemeMode(mode))
@@ -126,9 +127,9 @@ fun LegacyThemeSettingsPage(
                     SelectableSettingItem(
                         title = stringResource(R.string.theme_settings_google_ui),
                         description = stringResource(R.string.theme_settings_google_ui_desc),
-                        selected = !state.showMiuixUI,
+                        selected = !uiState.showMiuixUI,
                         onClick = {
-                            if (state.showMiuixUI) { // Only dispatch if changing state
+                            if (uiState.showMiuixUI) { // Only dispatch if changing state
                                 viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(false))
                             }
                         }
@@ -137,9 +138,9 @@ fun LegacyThemeSettingsPage(
                     SelectableSettingItem(
                         title = stringResource(R.string.theme_settings_miuix_ui),
                         description = stringResource(R.string.theme_settings_miuix_ui_desc),
-                        selected = state.showMiuixUI,
+                        selected = uiState.showMiuixUI,
                         onClick = {
-                            if (!state.showMiuixUI) { // Only dispatch if changing state
+                            if (!uiState.showMiuixUI) { // Only dispatch if changing state
                                 viewModel.markPendingNavigateToTheme(true)
                                 viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(true))
                             }
@@ -153,7 +154,7 @@ fun LegacyThemeSettingsPage(
                     icon = AppIcons.Theme,
                     title = stringResource(R.string.theme_settings_use_expressive_ui),
                     description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
-                    checked = state.showExpressiveUI,
+                    checked = uiState.showExpressiveUI,
                     isM3E = false,
                     onCheckedChange = {
                         viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))
@@ -164,7 +165,7 @@ fun LegacyThemeSettingsPage(
                 BaseWidget(
                     icon = Icons.Default.DarkMode,
                     title = stringResource(R.string.theme_settings_theme_mode),
-                    description = when (state.themeMode) {
+                    description = when (uiState.themeMode) {
                         ThemeMode.LIGHT -> stringResource(R.string.theme_settings_theme_mode_light)
                         ThemeMode.DARK -> stringResource(R.string.theme_settings_theme_mode_dark)
                         ThemeMode.SYSTEM -> stringResource(R.string.theme_settings_theme_mode_system)
@@ -176,7 +177,7 @@ fun LegacyThemeSettingsPage(
                 BaseWidget(
                     icon = Icons.Default.Style,
                     title = stringResource(R.string.theme_settings_palette_style),
-                    description = state.paletteStyle.displayName,
+                    description = uiState.paletteStyle.displayName,
                     onClick = { showPaletteDialog = true }
                 ) {}
             }
@@ -187,7 +188,7 @@ fun LegacyThemeSettingsPage(
                     title = stringResource(R.string.theme_settings_dynamic_color),
                     description = stringResource(R.string.theme_settings_dynamic_color_desc),
                     isM3E = false,
-                    checked = state.useDynamicColor,
+                    checked = uiState.useDynamicColor,
                     onCheckedChange = {
                         viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
                     }
@@ -199,20 +200,20 @@ fun LegacyThemeSettingsPage(
                     title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
                     description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
                     isM3E = false,
-                    checked = state.useDynColorFollowPkgIcon,
+                    checked = uiState.useDynColorFollowPkgIcon,
                     onCheckedChange = {
                         viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIcon(it))
                     }
                 )
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && state.showLiveActivity)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && uiState.showLiveActivity)
                 item {
                     SwitchWidget(
                         icon = Icons.TwoTone.Colorize,
                         title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
                         description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
                         isM3E = false,
-                        checked = state.useDynColorFollowPkgIconForLiveActivity,
+                        checked = uiState.useDynColorFollowPkgIconForLiveActivity,
                         onCheckedChange = {
                             viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity(it))
                         }
@@ -221,7 +222,7 @@ fun LegacyThemeSettingsPage(
 
             item {
                 AnimatedVisibility(
-                    visible = !state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S,
+                    visible = !uiState.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S,
                     enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
                             expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
                     exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
@@ -236,7 +237,7 @@ fun LegacyThemeSettingsPage(
                         ) {
                             val itemMinWidth = 88.dp
                             val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
-                            val chunkedColors = state.availableColors.chunked(columns)
+                            val chunkedColors = uiState.availableColors.chunked(columns)
 
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
@@ -254,11 +255,11 @@ fun LegacyThemeSettingsPage(
                                             ) {
                                                 ColorSwatchPreview(
                                                     rawColor,
-                                                    currentStyle = state.paletteStyle,
+                                                    currentStyle = uiState.paletteStyle,
                                                     textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
                                                     textColor = MaterialTheme.colorScheme.onSurface,
-                                                    isSelected = state.seedColor == rawColor.color &&
-                                                            !(state.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+                                                    isSelected = uiState.seedColor == rawColor.color &&
+                                                            !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
                                                 ) {
                                                     viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
                                                 }
@@ -284,7 +285,7 @@ fun LegacyThemeSettingsPage(
                     icon = AppIcons.IconPack,
                     title = stringResource(R.string.theme_settings_prefer_system_icon),
                     description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
-                    checked = state.preferSystemIcon,
+                    checked = uiState.preferSystemIcon,
                     isM3E = false,
                     onCheckedChange = {
                         viewModel.dispatch(
@@ -299,7 +300,7 @@ fun LegacyThemeSettingsPage(
                     icon = AppIcons.BugReport,
                     title = stringResource(R.string.theme_settings_hide_launcher_icon),
                     description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
-                    checked = !state.showLauncherIcon,
+                    checked = !uiState.showLauncherIcon,
                     isM3E = false,
                     onCheckedChange = { newCheckedState ->
                         if (newCheckedState) {

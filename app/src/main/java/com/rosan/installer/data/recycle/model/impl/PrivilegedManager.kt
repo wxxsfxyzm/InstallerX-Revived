@@ -6,7 +6,8 @@ import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SU_ARGS
 import com.rosan.installer.data.recycle.util.getSpecialAuth
 import com.rosan.installer.data.recycle.util.useUserService
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -28,7 +29,7 @@ object PrivilegedManager : KoinComponent {
      * Sets the app as the default installer.
      */
     fun setDefaultInstaller(
-        authorizer: ConfigEntity.Authorizer,
+        authorizer: Authorizer,
         component: ComponentName,
         enable: Boolean
     ) {
@@ -45,7 +46,7 @@ object PrivilegedManager : KoinComponent {
      * Note: useHookMode is forced to true.
      */
     fun setAdbVerify(
-        authorizer: ConfigEntity.Authorizer,
+        authorizer: Authorizer,
         customizeAuthorizer: String = "",
         enabled: Boolean
     ) {
@@ -69,7 +70,7 @@ object PrivilegedManager : KoinComponent {
      * Grants a runtime permission to a specific package.
      */
     fun grantRuntimePermission(
-        authorizer: ConfigEntity.Authorizer,
+        authorizer: Authorizer,
         packageName: String,
         permission: String
     ) {
@@ -90,7 +91,7 @@ object PrivilegedManager : KoinComponent {
      * Checks if a specific permission is granted.
      */
     fun isPermissionGranted(
-        authorizer: ConfigEntity.Authorizer,
+        authorizer: Authorizer,
         packageName: String,
         permission: String
     ): Boolean {
@@ -113,13 +114,13 @@ object PrivilegedManager : KoinComponent {
     /**
      * Executes a shell command array (safer).
      */
-    fun execArr(config: ConfigEntity, command: Array<String>): String {
-        if (config.authorizer == ConfigEntity.Authorizer.Root || config.authorizer == ConfigEntity.Authorizer.Customize) {
+    fun execArr(config: ConfigModel, command: Array<String>): String {
+        if (config.authorizer == Authorizer.Root || config.authorizer == Authorizer.Customize) {
             return try {
                 // 1. Determine Shell Binary Parts
                 // Use split for Customize to handle inputs like "/path/to/su --arg"
                 // Use listOf(SHELL_ROOT, SU_ARGS) for default to ensure "su -M" is passed correctly
-                val shellParts = if (config.authorizer == ConfigEntity.Authorizer.Customize && config.customizeAuthorizer.isNotBlank()) {
+                val shellParts = if (config.authorizer == Authorizer.Customize && config.customizeAuthorizer.isNotBlank()) {
                     config.customizeAuthorizer.trim().split("\\s+".toRegex())
                 } else {
                     listOf(SHELL_ROOT, SU_ARGS)
@@ -175,7 +176,7 @@ object PrivilegedManager : KoinComponent {
     /**
      * Starts an activity using a privileged context.
      */
-    fun startActivityPrivileged(config: ConfigEntity, intent: Intent): Boolean {
+    fun startActivityPrivileged(config: ConfigModel, intent: Intent): Boolean {
         var success = false
         useUserService(
             authorizer = config.authorizer,
@@ -195,7 +196,7 @@ object PrivilegedManager : KoinComponent {
     /**
      * Send a broadcast using a privileged context.
      */
-    fun sendBroadcastPrivileged(config: ConfigEntity, intent: Intent): Boolean {
+    fun sendBroadcastPrivileged(config: ConfigModel, intent: Intent): Boolean {
         var success = false
         useUserService(
             authorizer = config.authorizer,
@@ -215,7 +216,7 @@ object PrivilegedManager : KoinComponent {
     /**
      * Fetches the list of users on the device.
      */
-    fun getUsers(authorizer: ConfigEntity.Authorizer): Map<Int, String> {
+    fun getUsers(authorizer: Authorizer): Map<Int, String> {
         var users: Map<Int, String> = emptyMap()
         useUserService(authorizer) {
             try {
@@ -246,7 +247,7 @@ object PrivilegedManager : KoinComponent {
      * Concurrently performs Dexopt and file cleanup tasks to improve efficiency.
      */
     suspend fun executePostInstallTasks(
-        authorizer: ConfigEntity.Authorizer,
+        authorizer: Authorizer,
         customizeAuthorizer: String = "",
         config: PostInstallTaskConfig
     ) = coroutineScope { // coroutineScope automatically waits for all inner launch blocks to complete
@@ -303,7 +304,7 @@ object PrivilegedManager : KoinComponent {
      * Asynchronously executes post-install tasks.
      */
     fun executePostInstallTasksAsync(
-        authorizer: ConfigEntity.Authorizer,
+        authorizer: Authorizer,
         customizeAuthorizer: String = "",
         config: PostInstallTaskConfig
     ) {
@@ -322,7 +323,7 @@ object PrivilegedManager : KoinComponent {
      * Toggles network access for a specific package using the dedicated AIDL method.
      */
     fun setPackageNetworkingEnabled(
-        authorizer: ConfigEntity.Authorizer,
+        authorizer: Authorizer,
         uid: Int,
         enabled: Boolean
     ) {

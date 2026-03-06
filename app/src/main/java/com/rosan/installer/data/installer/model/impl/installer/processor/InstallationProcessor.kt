@@ -5,17 +5,17 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.data.app.model.impl.ModuleInstallerRepoImpl
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.RootImplementation
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
@@ -54,7 +54,7 @@ class InstallationProcessor(
      * @param total The total number of items in the batch queue. Default is 1.
      */
     suspend fun install(
-        config: ConfigEntity,
+        config: ConfigModel,
         analysisResults: List<PackageAnalysisResult>,
         cacheDirectory: String,
         current: Int = 1,
@@ -77,7 +77,7 @@ class InstallationProcessor(
         }
     }
 
-    private suspend fun installModule(config: ConfigEntity, module: AppEntity.ModuleEntity) {
+    private suspend fun installModule(config: ConfigModel, module: AppEntity.ModuleEntity) {
         Timber.d("installModule: Starting module installation for ${module.name}")
         // Initialize output list
         val output = mutableListOf<String>()
@@ -120,7 +120,7 @@ class InstallationProcessor(
     }
 
     private suspend fun installApp(
-        config: ConfigEntity,
+        config: ConfigModel,
         selectedEntities: List<SelectInstallEntity>,
         cacheDirectory: String,
         current: Int,

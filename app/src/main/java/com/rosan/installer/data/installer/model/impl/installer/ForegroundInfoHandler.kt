@@ -19,11 +19,12 @@ import com.rosan.installer.data.installer.model.impl.installer.helper.ModernNoti
 import com.rosan.installer.data.installer.model.impl.installer.helper.NotificationHelper
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
+import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.util.ConfigUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -85,7 +86,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private var currentInstallStartTime: Long = 0L
 
     // Mi island magic
-    private lateinit var globalAuthorizer: ConfigEntity.Authorizer
+    private lateinit var globalAuthorizer: Authorizer
     private val networkMutex = Mutex()
     private var isXiaomiNetworkBlocked = false
     private val xmsfUid: Int? by lazy {
@@ -168,7 +169,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
                     return@collect
                 }
 
-                if (progress is ProgressEntity.InstallAnalysedSuccess && installer.config.installMode == ConfigEntity.InstallMode.AutoNotification) return@collect
+                if (progress is ProgressEntity.InstallAnalysedSuccess && installer.config.installMode == InstallMode.AutoNotification) return@collect
 
                 if (background) {
                     val isModernEligible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
@@ -315,7 +316,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun notifyWithXiaomiMagic(notificationId: Int, notification: Notification) {
-        val hasPrivilege = globalAuthorizer == ConfigEntity.Authorizer.Shizuku
+        val hasPrivilege = globalAuthorizer == Authorizer.Shizuku
         val targetUid = xmsfUid
 
         // Abort magic if no privilege or if the target package UID cannot be resolved
@@ -375,7 +376,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val targetUid = xmsfUid
 
         // Double-check initialization to be absolutely safe, though onStart now guarantees it
-        if (::globalAuthorizer.isInitialized && globalAuthorizer == ConfigEntity.Authorizer.Shizuku && targetUid != null) {
+        if (::globalAuthorizer.isInitialized && globalAuthorizer == Authorizer.Shizuku && targetUid != null) {
             withContext(Dispatchers.IO + NonCancellable) {
                 networkMutex.withLock {
                     if (isXiaomiNetworkBlocked) {

@@ -9,13 +9,14 @@ import com.rosan.installer.data.app.model.impl.appInstaller.ShizukuInstallerRepo
 import com.rosan.installer.data.app.model.impl.appInstaller.SystemInstallerRepoImpl
 import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.exception.ShizukuNotWorkException
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.util.OSUtils
 import org.koin.core.component.KoinComponent
 
 object InstallerRepoImpl : InstallerRepo, KoinComponent {
     override suspend fun doInstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         blacklist: List<String>,
@@ -33,7 +34,7 @@ object InstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     override suspend fun doUninstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         packageName: String,
         extra: InstallExtraInfoEntity,
     ) = executeWithRepo(config) { repo ->
@@ -41,7 +42,7 @@ object InstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     override suspend fun approveSession(
-        config: ConfigEntity,
+        config: ConfigModel,
         sessionId: Int,
         granted: Boolean
     ) = executeWithRepo(config) { repo ->
@@ -49,10 +50,10 @@ object InstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     /**
-     * Execute an action with the InstallerRepo based on the provided ConfigEntity.
+     * Execute an action with the InstallerRepo based on the provided 
      */
     private suspend fun <T> executeWithRepo(
-        config: ConfigEntity,
+        config: ConfigModel,
         action: suspend (InstallerRepo) -> T
     ): T {
         val repo = resolveRepo(config)
@@ -70,13 +71,13 @@ object InstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     /**
-     * Resolve the InstallerRepo based on the provided ConfigEntity.
+     * Resolve the InstallerRepo based on the provided 
      */
-    private fun resolveRepo(config: ConfigEntity): InstallerRepo {
+    private fun resolveRepo(config: ConfigModel): InstallerRepo {
         return when (config.authorizer) {
-            ConfigEntity.Authorizer.Shizuku -> ShizukuInstallerRepoImpl
-            ConfigEntity.Authorizer.Dhizuku -> DhizukuInstallerRepoImpl
-            ConfigEntity.Authorizer.None -> {
+            Authorizer.Shizuku -> ShizukuInstallerRepoImpl
+            Authorizer.Dhizuku -> DhizukuInstallerRepoImpl
+            Authorizer.None -> {
                 if (OSUtils.isSystemApp) SystemInstallerRepoImpl
                 else NoneInstallerRepoImpl
             }

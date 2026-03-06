@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
@@ -57,6 +58,7 @@ fun HomePage(
     viewModel: PreferredViewModel
 ) {
     val context = LocalContext.current
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val hazeState = remember { HazeState() }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val uriHandler = LocalUriHandler.current
@@ -120,7 +122,7 @@ fun HomePage(
                         onClick = { showBottomSheet = true }
                     )
                 }
-                if (viewModel.state.hasUpdate)
+                if (uiState.hasUpdate)
                     item {
                         SettingsAboutItemWidget(
                             imageVector = AppIcons.Download,
@@ -136,13 +138,13 @@ fun HomePage(
                             icon = AppIcons.BugReport,
                             title = stringResource(R.string.save_logs),
                             description = stringResource(R.string.save_logs_desc),
-                            checked = viewModel.state.enableFileLogging,
+                            checked = uiState.enableFileLogging,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetEnableFileLogging(it)) }
                         )
                     }
                     item {
                         AnimatedVisibility(
-                            visible = viewModel.state.enableFileLogging,
+                            visible = uiState.enableFileLogging,
                             enter = fadeIn() + expandVertically(),
                             exit = fadeOut() + shrinkVertically()
                         ) { ExportLogsWidget(viewModel) }
@@ -157,7 +159,7 @@ fun HomePage(
             ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
                 BottomSheetContent(
                     title = stringResource(R.string.get_update),
-                    hasUpdate = viewModel.state.hasUpdate,
+                    hasUpdate = uiState.hasUpdate,
                     onDirectUpdateClick = {
                         showBottomSheet = false
                         viewModel.dispatch(PreferredViewAction.Update)

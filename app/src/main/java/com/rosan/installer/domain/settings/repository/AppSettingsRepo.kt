@@ -1,5 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.repository
 
+import com.rosan.installer.domain.settings.model.AppPreferences
 import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.SharedUid
 import kotlinx.coroutines.flow.Flow
@@ -70,6 +73,8 @@ enum class SharedUidListSetting {
 }
 
 interface AppSettingsRepo {
+    val preferencesFlow: Flow<AppPreferences>
+
     suspend fun putString(setting: StringSetting, value: String)
     fun getString(setting: StringSetting, default: String = ""): Flow<String>
 

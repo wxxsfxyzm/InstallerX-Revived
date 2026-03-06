@@ -7,16 +7,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -58,7 +60,7 @@ fun MiuixPreferredPage(
     title: String,
     outerPadding: PaddingValues
 ) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
 
     OnLifecycleEvent(Lifecycle.Event.ON_RESUME) {
         viewModel.dispatch(PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus)
@@ -130,7 +132,7 @@ fun MiuixPreferredPage(
                     )
                 }
             }
-            if (viewModel.state.authorizer == ConfigEntity.Authorizer.None)
+            if (uiState.authorizer == Authorizer.None)
                 item {
                     val tip = if (OSUtils.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
                     else stringResource(R.string.config_authorizer_none_tips)
@@ -144,10 +146,10 @@ fun MiuixPreferredPage(
                         .padding(bottom = 12.dp)
                 ) {
                     MiuixDisableAdbVerify(
-                        checked = !state.adbVerifyEnabled,
-                        isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                        enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
-                                state.authorizer != ConfigEntity.Authorizer.None,
+                        checked = !uiState.adbVerifyEnabled,
+                        isError = uiState.authorizer == Authorizer.Dhizuku,
+                        enabled = uiState.authorizer != Authorizer.Dhizuku &&
+                                uiState.authorizer != Authorizer.None,
                         onCheckedChange = { isDisabled ->
                             viewModel.dispatch(
                                 PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
@@ -155,20 +157,20 @@ fun MiuixPreferredPage(
                         }
                     )
                     MiuixIgnoreBatteryOptimizationSetting(
-                        checked = state.isIgnoringBatteryOptimizations,
-                        enabled = !state.isIgnoringBatteryOptimizations,
+                        checked = uiState.isIgnoringBatteryOptimizations,
+                        enabled = !uiState.isIgnoringBatteryOptimizations,
                     ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
                     MiuixAutoLockInstaller(
-                        checked = state.autoLockInstaller,
-                        enabled = state.authorizer != ConfigEntity.Authorizer.None,
-                    ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
+                        checked = uiState.autoLockInstaller,
+                        enabled = uiState.authorizer != Authorizer.None,
+                    ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!uiState.autoLockInstaller)) }
                     MiuixDefaultInstaller(
                         lock = true,
-                        enabled = state.authorizer != ConfigEntity.Authorizer.None,
+                        enabled = uiState.authorizer != Authorizer.None,
                     ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
                     MiuixDefaultInstaller(
                         lock = false,
-                        enabled = state.authorizer != ConfigEntity.Authorizer.None,
+                        enabled = uiState.authorizer != Authorizer.None,
                     ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
                     MiuixClearCache()
                 }
@@ -186,12 +188,12 @@ fun MiuixPreferredPage(
                     ) { navController.navigate(SettingsScreen.Lab.route) }
                     MiuixSettingsAboutItemWidget(
                         title = stringResource(R.string.about_detail),
-                        summary = if (state.hasUpdate) stringResource(
+                        summary = if (uiState.hasUpdate) stringResource(
                             R.string.update_available,
-                            state.remoteVersion
+                            uiState.remoteVersion
                         ) else "$revLevel ${RsConfig.VERSION_NAME}",
                         summaryColor = BasicComponentColors(
-                            color = if (state.hasUpdate) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                            color = if (uiState.hasUpdate) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant
                         )
                     ) { navController.navigate(MiuixSettingsScreen.MiuixAbout.route) }

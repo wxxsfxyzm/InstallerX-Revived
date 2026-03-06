@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -61,9 +63,9 @@ fun MiuixThemeSettingsPage(
     navController: NavController,
     viewModel: PreferredViewModel,
 ) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMiuixHazeStyle()
     val showHideLauncherIconDialog = remember { mutableStateOf(false) }
     val showBlurWarningDialog = remember { mutableStateOf(false) }
@@ -118,7 +120,7 @@ fun MiuixThemeSettingsPage(
                         .padding(bottom = 12.dp)
                 ) {
                     MiuixThemeEngineWidget(
-                        currentThemeIsMiuix = state.showMiuixUI,
+                        currentThemeIsMiuix = uiState.showMiuixUI,
                         onThemeChange = { useMiuix ->
                             viewModel.markPendingNavigateToTheme(true)
                             viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(useMiuix))
@@ -134,7 +136,7 @@ fun MiuixThemeSettingsPage(
                         .padding(bottom = 12.dp)
                 ) {
                     MiuixThemeModeWidget(
-                        currentThemeMode = state.themeMode,
+                        currentThemeMode = uiState.themeMode,
                         onThemeModeChange = { newMode ->
                             viewModel.dispatch(PreferredViewAction.SetThemeMode(newMode))
                         }
@@ -142,7 +144,7 @@ fun MiuixThemeSettingsPage(
                     MiuixSwitchWidget(
                         title = stringResource(R.string.theme_settings_use_blur),
                         description = stringResource(R.string.theme_settings_use_blur_desc),
-                        checked = state.useBlur,
+                        checked = uiState.useBlur,
                         onCheckedChange = { isChecked ->
                             if (isChecked && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
                                 showBlurWarningDialog.value = true
@@ -154,69 +156,69 @@ fun MiuixThemeSettingsPage(
                     MiuixSwitchWidget(
                         title = stringResource(R.string.theme_settings_miuix_custom_colors),
                         description = stringResource(R.string.theme_settings_miuix_custom_colors_desc),
-                        checked = state.useMiuixMonet,
+                        checked = uiState.useMiuixMonet,
                         onCheckedChange = {
                             viewModel.dispatch(PreferredViewAction.SetUseMiuixMonet(it))
                         }
                     )
                     AnimatedVisibility(
-                        visible = state.useMiuixMonet,
+                        visible = uiState.useMiuixMonet,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(R.string.theme_settings_dynamic_color),
                             description = stringResource(R.string.theme_settings_dynamic_color_desc),
-                            checked = state.useDynamicColor,
+                            checked = uiState.useDynamicColor,
                             onCheckedChange = {
                                 viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
                             }
                         )
                     }
                     AnimatedVisibility(
-                        visible = state.useMiuixMonet,
+                        visible = uiState.useMiuixMonet,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
                         MiuixPaletteStyleWidget(
-                            currentPaletteStyle = state.paletteStyle,
+                            currentPaletteStyle = uiState.paletteStyle,
                             onPaletteStyleChange = { newStyle ->
                                 viewModel.dispatch(PreferredViewAction.SetPaletteStyle(newStyle))
                             }
                         )
                     }
                     AnimatedVisibility(
-                        visible = state.useMiuixMonet,
+                        visible = uiState.useMiuixMonet,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
                         MiuixColorSpecWidget(
-                            currentColorSpec = state.colorSpec,
-                            currentPaletteStyle = state.paletteStyle,
+                            currentColorSpec = uiState.colorSpec,
+                            currentPaletteStyle = uiState.paletteStyle,
                             onColorSpecChange = { newSpec ->
                                 viewModel.dispatch(PreferredViewAction.SetColorSpec(newSpec))
                             }
                         )
                     }
                     AnimatedVisibility(
-                        visible = state.useMiuixMonet,
+                        visible = uiState.useMiuixMonet,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
                             description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
-                            checked = state.useDynColorFollowPkgIcon,
+                            checked = uiState.useDynColorFollowPkgIcon,
                             onCheckedChange = {
                                 viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIcon(it))
                             }
                         )
                     }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && state.showLiveActivity)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && uiState.showLiveActivity)
                         MiuixSwitchWidget(
                             title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
                             description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
-                            checked = state.useDynColorFollowPkgIconForLiveActivity,
+                            checked = uiState.useDynColorFollowPkgIconForLiveActivity,
                             onCheckedChange = {
                                 viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity(it))
                             }
@@ -226,7 +228,7 @@ fun MiuixThemeSettingsPage(
 
             item {
                 AnimatedVisibility(
-                    visible = state.useMiuixMonet && (!state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S),
+                    visible = uiState.useMiuixMonet && (!uiState.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S),
                     enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
                             expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
                     exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
@@ -246,7 +248,7 @@ fun MiuixThemeSettingsPage(
                             ) {
                                 val itemMinWidth = 88.dp
                                 val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
-                                val chunkedColors = state.availableColors.chunked(columns)
+                                val chunkedColors = uiState.availableColors.chunked(columns)
 
                                 Column(
                                     modifier = Modifier.fillMaxWidth(),
@@ -264,11 +266,11 @@ fun MiuixThemeSettingsPage(
                                                 ) {
                                                     ColorSwatchPreview(
                                                         rawColor = rawColor,
-                                                        currentStyle = state.paletteStyle,
+                                                        currentStyle = uiState.paletteStyle,
                                                         textStyle = MiuixTheme.textStyles.footnote1,
                                                         textColor = MiuixTheme.colorScheme.onSurface,
-                                                        isSelected = state.seedColor == rawColor.color &&
-                                                                !(state.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+                                                        isSelected = uiState.seedColor == rawColor.color &&
+                                                                !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
                                                     ) {
                                                         viewModel.dispatch(
                                                             PreferredViewAction.SetSeedColor(
@@ -303,7 +305,7 @@ fun MiuixThemeSettingsPage(
                     MiuixSwitchWidget(
                         title = stringResource(R.string.theme_settings_prefer_system_icon),
                         description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
-                        checked = state.preferSystemIcon,
+                        checked = uiState.preferSystemIcon,
                         onCheckedChange = {
                             viewModel.dispatch(
                                 PreferredViewAction.ChangePreferSystemIcon(it)
@@ -322,7 +324,7 @@ fun MiuixThemeSettingsPage(
                     MiuixSwitchWidget(
                         title = stringResource(R.string.theme_settings_hide_launcher_icon),
                         description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
-                        checked = !state.showLauncherIcon,
+                        checked = !uiState.showLauncherIcon,
                         onCheckedChange = { newCheckedState ->
                             if (newCheckedState) {
                                 showHideLauncherIconDialog.value = true

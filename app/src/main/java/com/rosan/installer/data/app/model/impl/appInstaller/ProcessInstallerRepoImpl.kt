@@ -6,7 +6,8 @@ import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
 import com.rosan.installer.data.recycle.model.impl.recycler.ProcessHookRecycler
 import com.rosan.installer.data.recycle.util.SHELL_ROOT
 import com.rosan.installer.data.recycle.util.SHELL_SH
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 
@@ -14,7 +15,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     private val localService = ThreadLocal<ProcessHookRecycler.HookedUserService>()
 
     override suspend fun doInstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         blacklist: List<String>,
@@ -25,7 +26,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     }
 
     override suspend fun doUninstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         packageName: String,
         extra: InstallExtraInfoEntity
     ) = runWithProcess(config) {
@@ -33,7 +34,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     }
 
     override suspend fun approveSession(
-        config: ConfigEntity,
+        config: ConfigModel,
         sessionId: Int,
         granted: Boolean
     ) = runWithProcess(config) {
@@ -51,7 +52,7 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     }
 
     override suspend fun doFinishWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extraInfo: InstallExtraInfoEntity,
         result: Result<Unit>
@@ -60,13 +61,13 @@ object ProcessInstallerRepoImpl : IBinderInstallerRepoImpl() {
     }
 
     private suspend fun <T> runWithProcess(
-        config: ConfigEntity,
+        config: ConfigModel,
         rootShell: String = SHELL_ROOT,
         block: suspend () -> T
     ): T {
         val shell = when (config.authorizer) {
-            ConfigEntity.Authorizer.Root -> rootShell
-            ConfigEntity.Authorizer.Customize -> config.customizeAuthorizer
+            Authorizer.Root -> rootShell
+            Authorizer.Customize -> config.customizeAuthorizer
             else -> SHELL_SH
         }
 

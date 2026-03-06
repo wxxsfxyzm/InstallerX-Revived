@@ -31,7 +31,7 @@ import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.app.model.enums.InstallErrorType
 import com.rosan.installer.data.app.util.InstallOption
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -129,8 +129,8 @@ private fun MiuixErrorSuggestions(
                 )
             )
 
-            if (installer.config.authorizer != ConfigEntity.Authorizer.None ||
-                (installer.config.authorizer == ConfigEntity.Authorizer.None &&
+            if (installer.config.authorizer != Authorizer.None ||
+                (installer.config.authorizer == Authorizer.None &&
                         !(RsConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
             ) {
                 add(
@@ -185,7 +185,7 @@ private fun MiuixErrorSuggestions(
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
                 !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM &&
                         (RsConfig.currentManufacturer == Manufacturer.SAMSUNG || RsConfig.currentManufacturer == Manufacturer.REALME)) &&
-                (installer.config.authorizer == ConfigEntity.Authorizer.Root || installer.config.authorizer == ConfigEntity.Authorizer.Shizuku)
+                (installer.config.authorizer == Authorizer.Root || installer.config.authorizer == Authorizer.Shizuku)
             ) {
                 add(
                     SuggestionItem(
@@ -201,7 +201,7 @@ private fun MiuixErrorSuggestions(
             }
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
-                (installer.config.authorizer == ConfigEntity.Authorizer.Root || installer.config.authorizer == ConfigEntity.Authorizer.Shizuku)
+                (installer.config.authorizer == Authorizer.Root || installer.config.authorizer == Authorizer.Shizuku)
             ) {
                 add(
                     SuggestionItem(
@@ -216,13 +216,13 @@ private fun MiuixErrorSuggestions(
                 )
             }
 
-            if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku) {
+            if (installer.config.authorizer != Authorizer.Dhizuku) {
                 add(
                     SuggestionItem(
                         isMatch = { it.hasErrorType(InstallErrorType.HYPEROS_ISOLATION_VIOLATION) },
                         onClick = {
                             // Set available installer
-                            installer.config.installer = "com.android.shell"
+                            installer.config = installer.config.copy(installer = "com.android.shell")
                             // Wipe originatingUid
                             installer.config.callingFromUid = null
                             viewModel.dispatch(InstallerViewAction.Install(false))
@@ -236,8 +236,8 @@ private fun MiuixErrorSuggestions(
                     SuggestionItem(
                         isMatch = { it.hasErrorType(InstallErrorType.HYPEROS_ISOLATION_VIOLATION) },
                         onClick = {
-                            installer.config.installer = "com.android.shell"
-                            installer.config.authorizer = ConfigEntity.Authorizer.Shizuku
+                            installer.config = installer.config.copy(installer = "com.android.shell")
+                            installer.config = installer.config.copy(authorizer = Authorizer.Shizuku)
                             viewModel.dispatch(InstallerViewAction.Install(false))
                         },
                         labelRes = R.string.suggestion_shizuku_isolation,

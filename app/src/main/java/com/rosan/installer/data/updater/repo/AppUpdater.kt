@@ -1,7 +1,7 @@
 package com.rosan.installer.data.updater.repo
 
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 
 interface AppUpdater {
-    suspend fun performInAppUpdate(url: String, config: ConfigEntity)
+    suspend fun performInAppUpdate(url: String, config: ConfigModel)
 }

@@ -42,7 +42,7 @@ import com.rosan.installer.data.app.model.entity.InstalledAppInfo
 import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -335,8 +335,8 @@ fun InstallPrepareContent(
                         )
 
                     // Install Options
-                    if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku &&
-                        installer.config.authorizer != ConfigEntity.Authorizer.None
+                    if (installer.config.authorizer != Authorizer.Dhizuku &&
+                        installer.config.authorizer != Authorizer.None
                     )
                         MiuixNavigationItemWidget(
                             title = stringResource(R.string.config_label_install_options),

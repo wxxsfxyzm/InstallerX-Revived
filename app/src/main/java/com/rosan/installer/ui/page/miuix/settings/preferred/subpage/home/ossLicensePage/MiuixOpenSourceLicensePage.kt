@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.rosan.installer.R
@@ -30,10 +31,10 @@ fun MiuixOpenSourceLicensePage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val libraries by produceLibraries(R.raw.aboutlibraries)
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMiuixHazeStyle()
 
     Scaffold(

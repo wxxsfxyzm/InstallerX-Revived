@@ -10,7 +10,7 @@ import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.util.getInfo
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.util.getErrorMessage
 
 class LegacyNotificationBuilder(
@@ -55,7 +55,7 @@ class LegacyNotificationBuilder(
             if (isImportance && background) NotificationHelper.Channel.InstallerChannel else NotificationHelper.Channel.InstallerProgressChannel
         val icon = (if (isWorking) NotificationHelper.Icon.Working else NotificationHelper.Icon.Pausing).resId
         val contentIntent =
-            if (installer.config.installMode == ConfigEntity.InstallMode.Notification || installer.config.installMode == ConfigEntity.InstallMode.AutoNotification) {
+            if (installer.config.installMode == InstallMode.Notification || installer.config.installMode == InstallMode.AutoNotification) {
                 if (showDialog) helper.openIntent else null
             } else helper.openIntent
 

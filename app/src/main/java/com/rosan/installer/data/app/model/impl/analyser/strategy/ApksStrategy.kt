@@ -6,7 +6,7 @@ import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.impl.analyser.ApkParser
 import com.rosan.installer.data.app.repo.AnalysisStrategy
 import com.rosan.installer.data.app.util.parseSplitMetadata
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
@@ -15,7 +15,7 @@ import java.util.zip.ZipFile
 
 object ApksStrategy : AnalysisStrategy {
     override suspend fun analyze(
-        config: ConfigEntity,
+        config: ConfigModel,
         data: DataEntity,
         zipFile: ZipFile?,
         extra: AnalyseExtraEntity

@@ -26,8 +26,10 @@ import com.rosan.installer.data.installer.model.impl.installer.processor.Session
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.impl.AutoLockManager
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.ConfigModel.Companion.default
+import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.ui.util.doBiometricAuthOrThrow
 import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.CancellationException
@@ -217,7 +219,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         val forceDialog = data.size > 1 || data.any { it.sourcePath()?.endsWith(".zip", true) == true }
         if (forceDialog) {
             Timber.d("[id=$installerId] resolve: Batch share or module file detected. Forcing install mode to Dialog.")
-            installer.config.installMode = ConfigEntity.InstallMode.Dialog
+            installer.config = installer.config.copy(installMode = InstallMode.Dialog)
         }
 
         Timber.d("[id=$installerId] resolve: Requesting AutoLockManager check.")
@@ -228,7 +230,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
             installer.background(true)
         }
 
-        if (installer.config.installMode == ConfigEntity.InstallMode.Ignore) {
+        if (installer.config.installMode == InstallMode.Ignore) {
             Timber.d("[id=$installerId] resolve: InstallMode is Ignore. Finishing task.")
             installer.progress.emit(ProgressEntity.Finish)
             return
@@ -490,7 +492,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
     private suspend fun handleReboot(reason: String) {
         Timber.d("[id=$installerId] handleReboot: Starting cleanup before reboot.")
         val systemUseRoot = OSUtils.isSystemApp && appSettingsRepo.getBoolean(BooleanSetting.LabModuleAlwaysRoot, false).first()
-        if (systemUseRoot) installer.config.authorizer = ConfigEntity.Authorizer.Root
+        if (systemUseRoot) installer.config = installer.config.copy(authorizer = Authorizer.Root)
         // Execute cleanup immediately
         // Call clearCache() explicitly to ensure temporary files are removed
         // before the system goes down
@@ -518,7 +520,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
 
     private fun resetState() {
         installer.error = Throwable()
-        installer.config = ConfigEntity.default
+        installer.config = default
         installer.data = emptyList()
         installer.analysisResults = emptyList()
         installer.progress.tryEmit(ProgressEntity.Ready)
@@ -537,5 +539,5 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerRepo) :
         }
     }
 
-    private val ConfigEntity.InstallMode.isNotification get() = this == ConfigEntity.InstallMode.Notification || this == ConfigEntity.InstallMode.AutoNotification
+    private val InstallMode.isNotification get() = this == InstallMode.Notification || this == InstallMode.AutoNotification
 }

@@ -8,7 +8,7 @@ import com.rosan.installer.data.installer.model.entity.InstallResult
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
@@ -16,7 +16,7 @@ import java.io.Closeable
 interface InstallerRepo : Closeable {
     val id: String
     var error: Throwable
-    var config: ConfigEntity
+    var config: ConfigModel
     var data: List<DataEntity>
     var analysisResults: List<PackageAnalysisResult>
     val progress: Flow<ProgressEntity>

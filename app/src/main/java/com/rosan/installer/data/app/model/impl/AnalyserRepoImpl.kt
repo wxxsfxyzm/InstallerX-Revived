@@ -6,13 +6,12 @@ import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
 import com.rosan.installer.data.app.model.enums.DataType
 import com.rosan.installer.data.app.model.enums.SessionMode
-import com.rosan.installer.data.app.model.exception.InstallerException
 import com.rosan.installer.data.app.model.impl.analyser.FileTypeDetector
 import com.rosan.installer.data.app.model.impl.analyser.UnifiedContainerAnalyser
 import com.rosan.installer.data.app.model.impl.processor.PackagePreprocessor
 import com.rosan.installer.data.app.model.impl.processor.SelectionStrategy
 import com.rosan.installer.data.app.repo.AnalyserRepo
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -22,7 +21,7 @@ import java.util.zip.ZipException
 
 object AnalyserRepoImpl : AnalyserRepo {
     override suspend fun doWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         data: List<DataEntity>,
         extra: AnalyseExtraEntity
     ): List<PackageAnalysisResult> = coroutineScope {
@@ -115,7 +114,7 @@ object AnalyserRepoImpl : AnalyserRepo {
     }
 
     private suspend fun analyzeSingleSource(
-        config: ConfigEntity,
+        config: ConfigModel,
         data: DataEntity,
         extra: AnalyseExtraEntity
     ): List<AppEntity> =

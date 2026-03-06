@@ -1,15 +1,20 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.data.settings.local.room.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import org.koin.core.component.KoinComponent
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.DexoptMode
+import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.InstallReason
+import com.rosan.installer.domain.settings.model.PackageSource
 
 @Entity(
     tableName = "config",
-    indices = [
-    ]
+    indices = []
 )
 data class ConfigEntity(
     @PrimaryKey(autoGenerate = true)
@@ -55,64 +60,6 @@ data class ConfigEntity(
     @ColumnInfo(name = "created_at") var createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "modified_at") var modifiedAt: Long = System.currentTimeMillis(),
 ) {
-    companion object : KoinComponent {
-        var default = ConfigEntity(
-            description = "",
-            authorizer = Authorizer.Global,
-            customizeAuthorizer = "",
-            installMode = InstallMode.Global,
-            enableCustomizeInstallReason = false,
-            installReason = InstallReason.UNKNOWN,
-            enableCustomizePackageSource = false,
-            packageSource = PackageSource.OTHER,
-            installer = null,
-            enableCustomizeUser = false,
-            targetUserId = 0,
-            enableManualDexopt = false,
-            forceDexopt = false,
-            dexoptMode = DexoptMode.SpeedProfile,
-            autoDelete = false,
-            autoDeleteZip = false,
-            displaySize = false,
-            displaySdk = false,
-            forAllUser = false,
-            allowTestOnly = false,
-            allowDowngrade = false,
-            bypassLowTargetSdk = false,
-            allowAllRequestedPermissions = false,
-            splitChooseAll = false,
-            apkChooseAll = false
-        )
-
-        val XiaomiDefault = ConfigEntity(
-            description = "",
-            authorizer = Authorizer.Global,
-            customizeAuthorizer = "",
-            installMode = InstallMode.Global,
-            enableCustomizeInstallReason = false,
-            installReason = InstallReason.UNKNOWN,
-            enableCustomizePackageSource = false,
-            packageSource = PackageSource.OTHER,
-            installer = "com.miui.packageinstaller",
-            enableCustomizeUser = false,
-            targetUserId = 0,
-            enableManualDexopt = false,
-            forceDexopt = false,
-            dexoptMode = DexoptMode.SpeedProfile,
-            autoDelete = false,
-            autoDeleteZip = false,
-            displaySize = false,
-            displaySdk = false,
-            forAllUser = false,
-            allowTestOnly = false,
-            allowDowngrade = false,
-            bypassLowTargetSdk = false,
-            allowAllRequestedPermissions = false,
-            splitChooseAll = false,
-            apkChooseAll = false
-        )
-    }
-
     @Ignore
     var installFlags: Int = 0
 
@@ -128,67 +75,73 @@ data class ConfigEntity(
     @Ignore
     var callingFromUid: Int? = null
 
-    enum class Authorizer(val value: String) {
-        Global("global"),
-        None("none"),
-        Root("root"),
-        Shizuku("shizuku"),
-        Dhizuku("dhizuku"),
-        Customize("customize");
-    }
+    /*    enum class Authorizer(val value: String) {
+            Global("global"),
+            None("none"),
+            Root("root"),
+            Shizuku("shizuku"),
+            Dhizuku("dhizuku"),
+            Customize("customize");
+        }
 
-    enum class InstallMode(val value: String) {
-        Global("global"),
-        Dialog("dialog"),
-        AutoDialog("auto_dialog"),
-        Notification("notification"),
-        AutoNotification("auto_notification"),
-        Ignore("ignore");
-    }
+        enum class InstallMode(val value: String) {
+            Global("global"),
+            Dialog("dialog"),
+            AutoDialog("auto_dialog"),
+            Notification("notification"),
+            AutoNotification("auto_notification"),
+            Ignore("ignore");
+        }
 
-    enum class DexoptMode(val value: String) {
-        Verify("verify"),
-        SpeedProfile("speed-profile"),
-        Speed("speed"),
-        Everything("everything");
-    }
+        enum class DexoptMode(val value: String) {
+            Verify("verify"),
+            SpeedProfile("speed-profile"),
+            Speed("speed"),
+            Everything("everything");
+        }
 
+        */
     /**
      * Define Install Reasons,
      * Sync with Android's Install Reason
      *
      * @see android.content.pm.PackageInstaller.SessionParams.setInstallReason
-     */
+     *//*
     enum class InstallReason(val value: Int) {
-        /**
-         * Code indicating that the reason for installing this package is unknown.
-         * @see android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN
-         */
+        */
+    /**
+     * Code indicating that the reason for installing this package is unknown.
+     * @see android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN
+     *//*
         UNKNOWN(0),
 
-        /**
-         * Code indicating that this package was installed due to enterprise policy.
-         * @see android.content.pm.PackageManager.INSTALL_REASON_POLICY
-         */
+        */
+    /**
+     * Code indicating that this package was installed due to enterprise policy.
+     * @see android.content.pm.PackageManager.INSTALL_REASON_POLICY
+     *//*
         POLICY(1),
 
-        /**
-         * Code indicating that this package was installed as part of restoring from another device.
-         * @see android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE
-         */
+        */
+    /**
+     * Code indicating that this package was installed as part of restoring from another device.
+     * @see android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE
+     *//*
         DEVICE_RESTORE(2),
 
-        /**
-         * Code indicating that this package was installed as part of device setup.
-         * @see android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP
-         */
+        */
+    /**
+     * Code indicating that this package was installed as part of device setup.
+     * @see android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP
+     *//*
         DEVICE_SETUP(3),
 
-        /**
-         * Code indicating that the package installation was initiated by the user.
-         * NOTE: this will cause launcher release desktop icon
-         * @see android.content.pm.PackageManager.INSTALL_REASON_USER
-         */
+        */
+    /**
+     * Code indicating that the package installation was initiated by the user.
+     * NOTE: this will cause launcher release desktop icon
+     * @see android.content.pm.PackageManager.INSTALL_REASON_USER
+     *//*
         USER(4);
 
         companion object {
@@ -206,5 +159,5 @@ data class ConfigEntity(
         companion object {
             fun fromInt(value: Int) = entries.find { it.value == value } ?: OTHER
         }
-    }
+    }*/
 }

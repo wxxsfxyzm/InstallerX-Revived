@@ -23,13 +23,14 @@ import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
+import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
-import com.rosan.installer.domain.settings.model.NamedPackage
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
 import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.getErrorMessage
 import com.rosan.installer.util.hasFlag
@@ -441,7 +442,7 @@ class InstallerViewModel(
 
         // --- Manage auto-install job ---
         autoInstallJob?.cancel() // Cancel any previous auto-install job by default.
-        if (newState is InstallerViewState.InstallPrepare && repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
+        if (newState is InstallerViewState.InstallPrepare && repo.config.installMode == InstallMode.AutoDialog) {
             autoInstallJob = viewModelScope.launch {
                 delay(500)
                 if (state is InstallerViewState.InstallPrepare) {
@@ -581,12 +582,12 @@ class InstallerViewModel(
     }
 
     private fun selectInstaller(packageName: String?) {
-        repo.config.installer = packageName // Update the repository
+        repo.config = repo.config.copy(installer = packageName) // Update the repository
         _selectedInstaller.value = packageName // Update the StateFlow
     }
 
     private fun selectTargetUser(userId: Int) {
-        repo.config.targetUserId = userId
+        repo.config = repo.config.copy(targetUserId = userId)
         _selectedUserId.value = userId
     }
 
@@ -594,13 +595,13 @@ class InstallerViewModel(
      * Loads available users for the selected authorizer.
      * @param authorizer The authorizer to use for the check.
      */
-    private fun loadAvailableUsers(authorizer: ConfigEntity.Authorizer) {
+    private fun loadAvailableUsers(authorizer: Authorizer) {
         viewModelScope.launch {
             // getAuthorizer() is a suspend function that correctly resolves 'Global' to the actual authorizer.
             val effectiveAuthorizer = authorizer.readGlobal()
 
             // If the effective authorizer is Dhizuku, disable the feature and do not proceed.
-            if (effectiveAuthorizer == ConfigEntity.Authorizer.Dhizuku) {
+            if (effectiveAuthorizer == Authorizer.Dhizuku) {
                 _availableUsers.value = emptyMap()
                 if (_selectedUserId.value != 0) {
                     selectTargetUser(0)

@@ -38,6 +38,9 @@ import com.rosan.installer.data.recycle.util.useUserService
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.getValue
 import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.PackageSource
 import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.pm.isFreshInstallCandidate
@@ -56,7 +59,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
 
     private suspend fun getPackageInstaller(
-        config: ConfigEntity, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
+        config: ConfigModel, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
     ): PackageInstaller {
         val iPackageManager =
             IPackageManager.Stub.asInterface(iBinderWrapper(ServiceManager.getService("package")))
@@ -64,8 +67,8 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             IPackageInstaller.Stub.asInterface(iBinderWrapper(iPackageManager.packageInstaller.asBinder()))
 
         val installerPackageName = when (config.authorizer) {
-            ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName()
-            ConfigEntity.Authorizer.None -> if (OSUtils.isSystemApp) context.packageName else BuildConfig.APPLICATION_ID
+            Authorizer.Dhizuku -> getDhizukuComponentName()
+            Authorizer.None -> if (OSUtils.isSystemApp) context.packageName else BuildConfig.APPLICATION_ID
             else -> config.installer ?: BuildConfig.APPLICATION_ID
         }
 
@@ -106,7 +109,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     override suspend fun approveSession(
-        config: ConfigEntity,
+        config: ConfigModel,
         sessionId: Int,
         granted: Boolean
     ) {
@@ -142,7 +145,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     override suspend fun doInstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         blacklist: List<String>,
@@ -162,7 +165,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
 
     @SuppressLint("MissingPermission")
     override suspend fun doUninstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         packageName: String,
         extra: InstallExtraInfoEntity,
     ) {
@@ -177,7 +180,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         val flags = config.uninstallFlags
         val versionedPackage = VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST)
         val callerPackageName = when (config.authorizer) {
-            ConfigEntity.Authorizer.Dhizuku -> getDhizukuComponentName()
+            Authorizer.Dhizuku -> getDhizukuComponentName()
             else -> context.packageName
         }
 
@@ -197,7 +200,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     private suspend fun doInnerWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         packageName: String,
@@ -246,7 +249,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     private suspend fun createSession(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         packageInstaller: PackageInstaller,
@@ -277,12 +280,12 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
             params.setInstallReason(PackageManager.INSTALL_REASON_UNKNOWN)
         // --- Customize PackageSource ---
         // Only available on Android 13+, Dhizuku need test
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && config.authorizer != ConfigEntity.Authorizer.Dhizuku) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && config.authorizer != Authorizer.Dhizuku) {
             Timber.d("Setting packageSource to ${config.packageSource.name} (${config.packageSource.value})")
             if (config.enableCustomizePackageSource)
                 params.setPackageSource(config.packageSource.value)
             else
-                params.setPackageSource(ConfigEntity.PackageSource.UNSPECIFIED.value)
+                params.setPackageSource(PackageSource.UNSPECIFIED.value)
         }
         // --- PackageSource End ---
 
@@ -308,8 +311,8 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
         // --- Disable not supported stuff ---
         val shouldGrantAll =
             config.allowAllRequestedPermissions &&
-                    config.authorizer != ConfigEntity.Authorizer.Dhizuku &&
-                    config.authorizer != ConfigEntity.Authorizer.None &&
+                    config.authorizer != Authorizer.Dhizuku &&
+                    config.authorizer != Authorizer.None &&
                     pm.isFreshInstallCandidate(packageName)
 
         if (!shouldGrantAll) {
@@ -353,7 +356,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     private fun installIts(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         session: Session
@@ -362,7 +365,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     private fun installIt(
-        config: ConfigEntity, entity: InstallEntity, extra: InstallExtraInfoEntity, session: Session
+        config: ConfigModel, entity: InstallEntity, extra: InstallExtraInfoEntity, session: Session
     ) {
         Timber.d("Installing entity: ${entity.name}, data path: ${entity.data}, top source: ${entity.data.getSourceTop()}")
         val inputStream = entity.data.getInputStreamWhileNotEmpty()
@@ -385,7 +388,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
 
     @SuppressLint("RequestInstallPackagesPolicy")
     private suspend fun commit(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         session: Session
@@ -396,7 +399,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     open suspend fun doFinishWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extraInfo: InstallExtraInfoEntity,
         result: Result<Unit>
@@ -438,8 +441,8 @@ abstract class IBinderInstallerRepoImpl : InstallerRepo, KoinComponent {
 
         useUserService(
             authorizer = authorizer,
-            special = if (authorizer == ConfigEntity.Authorizer.None
-                || authorizer == ConfigEntity.Authorizer.Dhizuku
+            special = if (authorizer == Authorizer.None
+                || authorizer == Authorizer.Dhizuku
             ) ::special else null,
             useHookMode = false
         ) {

@@ -19,6 +19,8 @@ import com.rosan.installer.data.settings.local.room.entity.converter.DexoptModeC
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallModeConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallReasonConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.PackageSourceConverter
+import com.rosan.installer.data.settings.mapper.toEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -58,8 +60,8 @@ abstract class InstallerRoom : RoomDatabase() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     val database = get<InstallerRoom>()
                     val defaultConfig = when (RsConfig.currentManufacturer) {
-                        Manufacturer.XIAOMI -> ConfigEntity.XiaomiDefault
-                        else -> ConfigEntity.default
+                        Manufacturer.XIAOMI -> ConfigModel.XiaomiDefault.toEntity()
+                        else -> ConfigModel.default.toEntity()
                     }
                     CoroutineScope(Dispatchers.IO).launch {
                         database.configDao.insert(defaultConfig)

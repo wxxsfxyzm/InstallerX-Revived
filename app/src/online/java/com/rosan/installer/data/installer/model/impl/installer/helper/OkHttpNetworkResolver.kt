@@ -5,13 +5,13 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import com.rosan.installer.data.app.model.entity.DataEntity
-import com.rosan.installer.data.app.model.enums.HttpProfile
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.exception.HttpNotAllowedException
 import com.rosan.installer.data.installer.model.exception.HttpRestrictedForLocalhostException
 import com.rosan.installer.data.installer.model.exception.ResolveFailedLinkNotValidException
 import com.rosan.installer.data.installer.repo.NetworkResolver
 import com.rosan.installer.data.installer.util.copyToWithProgress
+import com.rosan.installer.domain.settings.model.HttpProfile
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.util.ArchiveUtils

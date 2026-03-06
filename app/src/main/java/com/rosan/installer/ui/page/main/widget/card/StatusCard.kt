@@ -18,12 +18,14 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
@@ -36,7 +38,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StatusWidget(viewModel: PreferredViewModel) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val containerColor = when (RsConfig.LEVEL) {
         Level.STABLE -> MaterialTheme.colorScheme.primaryContainer
         Level.PREVIEW -> MaterialTheme.colorScheme.secondaryContainer
@@ -100,9 +102,9 @@ fun StatusWidget(viewModel: PreferredViewModel) {
                     text = versionInfoText,
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                if (state.hasUpdate)
+                if (uiState.hasUpdate)
                     Text(
-                        text = stringResource(R.string.update_available, state.remoteVersion),
+                        text = stringResource(R.string.update_available, uiState.remoteVersion),
                         style = MaterialTheme.typography.bodyMediumEmphasized,
                         color = MaterialTheme.colorScheme.primary
                     )

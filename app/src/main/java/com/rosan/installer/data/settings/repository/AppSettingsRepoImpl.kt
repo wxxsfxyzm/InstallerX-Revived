@@ -1,8 +1,15 @@
 package com.rosan.installer.data.settings.repository
 
+import android.os.Build
+import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.preferences.core.Preferences
 import com.rosan.installer.data.settings.local.datastore.AppDataStore
+import com.rosan.installer.domain.settings.model.AppPreferences
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.HttpProfile
+import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.model.RootImplementation
 import com.rosan.installer.domain.settings.model.SharedUid
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
@@ -10,11 +17,132 @@ import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
+import com.rosan.installer.ui.theme.material.PaletteStyle
+import com.rosan.installer.ui.theme.material.PresetColors
+import com.rosan.installer.ui.theme.material.ThemeColorSpec
+import com.rosan.installer.ui.theme.material.ThemeMode
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
 class AppSettingsRepoImpl(
     private val appDataStore: AppDataStore
 ) : AppSettingsRepo {
+    override val preferencesFlow: Flow<AppPreferences> = combine(
+        listOf(
+            appDataStore.getString(AppDataStore.AUTHORIZER, Authorizer.Global.value),
+            appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER, ""),
+            appDataStore.getString(AppDataStore.INSTALL_MODE, InstallMode.Global.value),
+            appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false),
+            appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true),
+            appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false),
+            appDataStore.getBoolean(AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION, true),
+            appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3),
+            appDataStore.getInt(AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS, 0),
+            appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false),
+            appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false),
+            appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false),
+            appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true),
+            appDataStore.getBoolean(AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH, false),
+            appDataStore.getBoolean(AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH, false),
+            appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false),
+            appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER, false),
+            appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false),
+            appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false),
+            appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false),
+            appDataStore.getBoolean(AppDataStore.SHOW_LAUNCHER_ICON, true),
+
+            // Lists
+            appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST),
+            appDataStore.getNamedPackageList(AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST),
+            appDataStore.getSharedUidList(AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST),
+            appDataStore.getNamedPackageList(AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST),
+
+            appDataStore.getInt(AppDataStore.UNINSTALL_FLAGS, 0),
+
+            // Lab settings
+            appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false),
+            appDataStore.getBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART, true),
+            appDataStore.getBoolean(AppDataStore.LAB_MODULE_ALWAYS_ROOT, false),
+            appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION, "Default"),
+            appDataStore.getBoolean(AppDataStore.SHOW_MI_ISLAND, false),
+            appDataStore.getString(AppDataStore.LAB_HTTP_PROFILE, "Default"),
+            appDataStore.getBoolean(AppDataStore.LAB_HTTP_SAVE_FILE, false),
+            appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER, false),
+            appDataStore.getBoolean(AppDataStore.ENABLE_FILE_LOGGING, true),
+
+            // Theme settings
+            appDataStore.getString(AppDataStore.THEME_MODE, ThemeMode.SYSTEM.name),
+            appDataStore.getString(AppDataStore.THEME_PALETTE_STYLE, PaletteStyle.TonalSpot.name),
+            appDataStore.getString(AppDataStore.THEME_COLOR_SPEC, ThemeColorSpec.SPEC_2025.name),
+            appDataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, true),
+            appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false),
+            appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb()),
+            appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false),
+            appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false),
+            appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        )
+    ) { values: Array<Any?> ->
+        var idx = 0
+
+        // Map raw strings back to Domain Enums
+        val authorizerStr = values[idx++] as String
+        val authorizer = Authorizer.entries.find { it.value == authorizerStr } ?: Authorizer.Global
+        val customizeAuthorizer = values[idx++] as String
+        val installModeStr = values[idx++] as String
+        val installMode = InstallMode.entries.find { it.value == installModeStr } ?: InstallMode.Global
+
+        @Suppress("UNCHECKED_CAST")
+        AppPreferences(
+            authorizer = authorizer,
+            customizeAuthorizer = customizeAuthorizer,
+            installMode = installMode,
+            showDialogInstallExtendedMenu = values[idx++] as Boolean,
+            showSmartSuggestion = values[idx++] as Boolean,
+            disableNotificationForDialogInstall = values[idx++] as Boolean,
+            showDialogWhenPressingNotification = values[idx++] as Boolean,
+            dhizukuAutoCloseCountDown = values[idx++] as Int,
+            notificationSuccessAutoClearSeconds = values[idx++] as Int,
+            versionCompareInSingleLine = values[idx++] as Boolean,
+            sdkCompareInMultiLine = values[idx++] as Boolean,
+            showOPPOSpecial = values[idx++] as Boolean,
+            showExpressiveUI = values[idx++] as Boolean,
+            installerRequireBiometricAuth = values[idx++] as Boolean,
+            uninstallerRequireBiometricAuth = values[idx++] as Boolean,
+            showLiveActivity = values[idx++] as Boolean,
+            autoLockInstaller = values[idx++] as Boolean,
+            autoSilentInstall = values[idx++] as Boolean,
+            showMiuixUI = values[idx++] as Boolean,
+            preferSystemIcon = values[idx++] as Boolean,
+            showLauncherIcon = values[idx++] as Boolean,
+
+            managedInstallerPackages = values[idx++] as List<NamedPackage>,
+            managedBlacklistPackages = values[idx++] as List<NamedPackage>,
+            managedSharedUserIdBlacklist = values[idx++] as List<SharedUid>,
+            managedSharedUserIdExemptedPackages = values[idx++] as List<NamedPackage>,
+
+            uninstallFlags = values[idx++] as Int,
+            labRootEnableModuleFlash = values[idx++] as Boolean,
+            labRootShowModuleArt = values[idx++] as Boolean,
+            labRootModuleAlwaysUseRoot = values[idx++] as Boolean,
+            labRootImplementation = RootImplementation.fromString(values[idx++] as String),
+            labUseMiIsland = values[idx++] as Boolean,
+            labHttpProfile = HttpProfile.fromString(values[idx++] as String),
+            labHttpSaveFile = values[idx++] as Boolean,
+            labSetInstallRequester = values[idx++] as Boolean,
+            enableFileLogging = values[idx++] as Boolean,
+
+            themeMode = runCatching { ThemeMode.valueOf(values[idx++] as String) }.getOrDefault(ThemeMode.SYSTEM),
+            paletteStyle = runCatching { PaletteStyle.valueOf(values[idx++] as String) }.getOrDefault(PaletteStyle.TonalSpot),
+            colorSpec = runCatching { ThemeColorSpec.valueOf(values[idx++] as String) }.getOrDefault(ThemeColorSpec.SPEC_2025),
+            useDynamicColor = values[idx++] as Boolean,
+            useMiuixMonet = values[idx++] as Boolean,
+            seedColorInt = values[idx++] as Int,
+            useDynColorFollowPkgIcon = values[idx++] as Boolean,
+            useDynColorFollowPkgIconForLiveActivity = values[idx++] as Boolean,
+            useBlur = values[idx++] as Boolean
+        )
+    }
+
     override suspend fun putString(setting: StringSetting, value: String) =
         appDataStore.putString(stringKey(setting), value)
 

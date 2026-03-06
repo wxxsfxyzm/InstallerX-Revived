@@ -7,11 +7,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.domain.settings.repository.ConfigRepo
-import com.rosan.installer.data.settings.util.ConfigOrder
+import com.rosan.installer.domain.settings.util.ConfigOrder
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import kotlinx.coroutines.Dispatchers
@@ -42,11 +42,11 @@ class AllViewModel(
             is AllViewAction.LoadData -> loadData()
             is AllViewAction.UserReadScopeTips -> userReadTips()
             is AllViewAction.ChangeDataConfigOrder -> changeDataConfigOrder(action.configOrder)
-            is AllViewAction.DeleteDataConfig -> deleteDataConfig(action.configEntity)
-            is AllViewAction.RestoreDataConfig -> restoreDataConfig(action.configEntity)
-            is AllViewAction.EditDataConfig -> editDataConfig(action.configEntity)
-            is AllViewAction.MiuixEditDataConfig -> editMiuixDataConfig(action.configEntity)
-            is AllViewAction.ApplyConfig -> applyConfig(action.configEntity)
+            is AllViewAction.DeleteDataConfig -> deleteDataConfig(action.configModel)
+            is AllViewAction.RestoreDataConfig -> restoreDataConfig(action.configModel)
+            is AllViewAction.EditDataConfig -> editDataConfig(action.configModel)
+            is AllViewAction.MiuixEditDataConfig -> editMiuixDataConfig(action.configModel)
+            is AllViewAction.ApplyConfig -> applyConfig(action.configModel)
         }
     }
 
@@ -92,56 +92,48 @@ class AllViewModel(
         }
     }
 
-    private fun editDataConfig(configEntity: ConfigEntity) {
+    private fun editDataConfig(configModel: ConfigModel) {
         viewModelScope.launch {
             navController.navigate(
                 SettingsScreen.Builder.EditConfig(
-                    configEntity.id
+                    configModel.id
                 ).route
             )
         }
     }
 
-    private fun editMiuixDataConfig(configEntity: ConfigEntity) {
+    private fun editMiuixDataConfig(configModel: ConfigModel) {
         viewModelScope.launch {
             navController.navigate(
                 MiuixSettingsScreen.Builder.MiuixEditConfig(
-                    configEntity.id
+                    configModel.id
                 ).route
             )
         }
     }
 
     private fun changeDataConfigOrder(configOrder: ConfigOrder) {
-        state = state.copy(
-            data = state.data.copy(
-                configOrder = configOrder
-            )
-        )
+        state = state.copy(data = state.data.copy(configOrder = configOrder))
     }
 
-    private fun deleteDataConfig(configEntity: ConfigEntity) {
+    private fun deleteDataConfig(configModel: ConfigModel) {
         viewModelScope.launch(Dispatchers.IO) {
-            repo.delete(configEntity)
-            _eventFlow.emit(
-                AllViewEvent.DeletedConfig(
-                    configEntity = configEntity
-                )
-            )
+            repo.delete(configModel)
+            _eventFlow.emit(AllViewEvent.DeletedConfig(configModel))
         }
     }
 
-    private fun restoreDataConfig(configEntity: ConfigEntity) {
+    private fun restoreDataConfig(configModel: ConfigModel) {
         viewModelScope.launch(Dispatchers.IO) {
-            repo.insert(configEntity)
+            repo.insert(configModel)
         }
     }
 
-    private fun applyConfig(configEntity: ConfigEntity) {
+    private fun applyConfig(configModel: ConfigModel) {
         viewModelScope.launch {
             navController.navigate(
                 SettingsScreen.Builder.ApplyConfig(
-                    configEntity.id
+                    configModel.id
                 ).route
             )
         }

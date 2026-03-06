@@ -14,8 +14,8 @@ import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
 import com.rosan.installer.data.installer.model.entity.UninstallInfo
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import timber.log.Timber
@@ -37,7 +37,7 @@ class InstallerRepoImpl(
 
     // Properties implementation
     override var error: Throwable = Throwable()
-    override var config: ConfigEntity = ConfigEntity.default
+    override var config: ConfigModel = ConfigModel.default
     override var data: List<DataEntity> by mutableStateOf(emptyList())
     override var analysisResults: List<PackageAnalysisResult> by mutableStateOf(emptyList())
     override val progress: MutableSharedFlow<ProgressEntity> = MutableStateFlow(ProgressEntity.Ready)

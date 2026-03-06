@@ -34,12 +34,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.rosan.installer.R
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.util.OSUtils
 
 @SuppressLint("LocalContextResourcesRead")
 @Composable
-fun rememberInstallOptions(authorizer: ConfigEntity.Authorizer): List<InstallOption> {
+fun rememberInstallOptions(authorizer: Authorizer): List<InstallOption> {
     val context = LocalContext.current
 
     return remember(authorizer) {
@@ -49,7 +49,7 @@ fun rememberInstallOptions(authorizer: ConfigEntity.Authorizer): List<InstallOpt
     }
 }
 
-private fun getInstallOptions(authorizer: ConfigEntity.Authorizer) = InstallOption.entries
+private fun getInstallOptions(authorizer: Authorizer) = InstallOption.entries
     .filter {
         // First, check if the option is compatible with the current SDK version.
         val sdkVersionMatch = Build.VERSION.SDK_INT >= it.minSdk && Build.VERSION.SDK_INT <= it.maxSdk
@@ -61,7 +61,7 @@ private fun getInstallOptions(authorizer: ConfigEntity.Authorizer) = InstallOpti
         when (it) {
             // The AllowDowngrade option should only be available when the authorizer is Root, Shizuku(running as root).
             // Or running as SystemApp.
-            InstallOption.AllowDowngrade -> authorizer == ConfigEntity.Authorizer.Root || authorizer == ConfigEntity.Authorizer.Shizuku || (authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
+            InstallOption.AllowDowngrade -> authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku || (authorizer == Authorizer.None && OSUtils.isSystemApp)
             // All other options are available by default.
             else -> true
         }

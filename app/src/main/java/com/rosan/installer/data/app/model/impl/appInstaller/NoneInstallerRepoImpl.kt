@@ -16,7 +16,7 @@ import com.rosan.installer.data.app.repo.InstallerRepo
 import com.rosan.installer.data.app.util.PackageManagerUtil
 import com.rosan.installer.data.app.util.sourcePath
 import com.rosan.installer.data.recycle.util.deletePaths
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,7 +31,7 @@ object NoneInstallerRepoImpl : InstallerRepo, KoinComponent {
 
     @SuppressLint("RequestInstallPackagesPolicy")
     override suspend fun doInstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         blacklist: List<String>,
@@ -91,7 +91,7 @@ object NoneInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     private fun doFinishWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extraInfo: InstallExtraInfoEntity,
         result: Result<Unit>
@@ -133,7 +133,7 @@ object NoneInstallerRepoImpl : InstallerRepo, KoinComponent {
     }
 
     override suspend fun doUninstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         packageName: String,
         extra: InstallExtraInfoEntity
     ) {
@@ -158,7 +158,7 @@ object NoneInstallerRepoImpl : InstallerRepo, KoinComponent {
         }
     }
 
-    override suspend fun approveSession(config: ConfigEntity, sessionId: Int, granted: Boolean) {
+    override suspend fun approveSession(config: ConfigModel, sessionId: Int, granted: Boolean) {
         throw UnsupportedOperationException("Session Approve is not supported in None authorizer")
     }
 }

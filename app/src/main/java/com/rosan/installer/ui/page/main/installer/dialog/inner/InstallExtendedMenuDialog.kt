@@ -52,8 +52,8 @@ import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.model.entity.ExtendedMenuEntity
 import com.rosan.installer.data.installer.model.entity.ExtendedMenuItemEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.NamedPackage
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -99,8 +99,8 @@ fun installExtendedMenuDialog(
                 )
 
             // Installer selection
-            if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+            if (installer.config.authorizer == Authorizer.Root ||
+                installer.config.authorizer == Authorizer.Shizuku
             ) {
                 add(
                     ExtendedMenuEntity(
@@ -116,8 +116,8 @@ fun installExtendedMenuDialog(
             }
 
             // User selection
-            if ((installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                        installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+            if ((installer.config.authorizer == Authorizer.Root ||
+                        installer.config.authorizer == Authorizer.Shizuku
                         ) && customizeUserEnabled
             ) {
                 add(
@@ -134,8 +134,8 @@ fun installExtendedMenuDialog(
             }
 
             // 动态安装选项
-            if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+            if (installer.config.authorizer == Authorizer.Root ||
+                installer.config.authorizer == Authorizer.Shizuku
             ) {
                 installOptions.forEach { option ->
                     add(

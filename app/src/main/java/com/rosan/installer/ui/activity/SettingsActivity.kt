@@ -8,13 +8,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.build.model.impl.DeviceCapabilityChecker
 import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.page.main.settings.SettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewState
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsPage
@@ -35,7 +35,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             window.isNavigationBarContrastEnforced = false
         // Keep splash screen visible until data (theme setting) is loaded.
-        splashScreen.setKeepOnScreenCondition { preferredViewModel.state.progress != PreferredViewState.Progress.Loaded }
+        splashScreen.setKeepOnScreenCondition { preferredViewModel.state.value.progress != PreferredViewState.Progress.Loaded }
 
         super.onCreate(savedInstanceState)
         setContent {
@@ -43,10 +43,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
             CompositionLocalProvider(
                 LocalSessionInstallSupported provides capabilityChecker.isSessionInstallSupported
             ) {
-                LaunchedEffect(Unit) {
-                    preferredViewModel.dispatch(PreferredViewAction.Init)
-                }
-                val state = preferredViewModel.state
+                val state by preferredViewModel.state.collectAsStateWithLifecycle()
                 InstallerTheme(
                     isExpressive = state.showExpressiveUI,
                     useMiuix = state.showMiuixUI,

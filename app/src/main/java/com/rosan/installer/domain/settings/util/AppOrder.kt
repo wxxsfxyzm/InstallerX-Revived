@@ -1,4 +1,6 @@
-package com.rosan.installer.data.settings.util
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
+package com.rosan.installer.domain.settings.util
 
 sealed class AppOrder(val orderType: OrderType) {
     class Id(orderType: OrderType) : AppOrder(orderType)

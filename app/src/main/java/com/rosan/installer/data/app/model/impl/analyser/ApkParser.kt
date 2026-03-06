@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.app.model.impl.analyser
 
 import android.annotation.SuppressLint
@@ -21,7 +23,7 @@ import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.invoke
 import com.rosan.installer.data.res.model.impl.AxmlTreeRepoImpl
 import com.rosan.installer.data.res.repo.AxmlTreeRepo
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -37,7 +39,6 @@ object ApkParser : KoinComponent {
 
     @SuppressLint("DiscouragedPrivateApi")
     fun parseFull(
-        config: ConfigEntity,
         data: DataEntity,
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
@@ -73,7 +74,7 @@ object ApkParser : KoinComponent {
     }
 
     fun parseZipEntryFull(
-        config: ConfigEntity,
+        config: ConfigModel,
         zipFile: ZipFile,
         entry: ZipEntry,
         parentData: DataEntity,
@@ -90,7 +91,7 @@ object ApkParser : KoinComponent {
                 source = DataEntity.ZipFileEntity(entry.name, parentData as DataEntity.FileEntity)
             }
 
-            val results = parseFull(config, tempData, extra)
+            val results = parseFull(tempData, extra)
 
             if (results.isEmpty()) tempFile.delete()
             results

@@ -1,22 +1,22 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
 import androidx.compose.ui.graphics.Color
-import com.rosan.installer.data.app.model.enums.HttpProfile
-import com.rosan.installer.data.app.model.enums.RootImplementation
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.HttpProfile
+import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.model.RootImplementation
 import com.rosan.installer.domain.settings.model.SharedUid
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
 import com.rosan.installer.ui.theme.material.ThemeMode
 
 sealed class PreferredViewAction {
-    data object Init : PreferredViewAction()
     data object Update : PreferredViewAction()
 
-    data class ChangeGlobalAuthorizer(val authorizer: ConfigEntity.Authorizer) : PreferredViewAction()
+    data class ChangeGlobalAuthorizer(val authorizer: Authorizer) : PreferredViewAction()
     data class ChangeGlobalCustomizeAuthorizer(val customizeAuthorizer: String) : PreferredViewAction()
-    data class ChangeGlobalInstallMode(val installMode: ConfigEntity.InstallMode) : PreferredViewAction()
+    data class ChangeGlobalInstallMode(val installMode: InstallMode) : PreferredViewAction()
     data class ChangeShowDialogInstallExtendedMenu(val showMenu: Boolean) : PreferredViewAction()
     data class ChangeShowSuggestion(val showSuggestion: Boolean) : PreferredViewAction()
     data class ChangeShowDisableNotification(val showDisableNotification: Boolean) : PreferredViewAction()

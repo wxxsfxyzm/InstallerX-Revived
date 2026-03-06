@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.config.apply
 
 import android.content.Context
@@ -7,12 +9,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rosan.installer.domain.settings.model.AppModel
+import com.rosan.installer.domain.settings.repository.AppRepo
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.data.settings.local.room.entity.AppEntity
-import com.rosan.installer.domain.settings.repository.AppRepo
 import com.rosan.installer.domain.settings.repository.ConfigRepo
+import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.ui.common.ViewContent
 import com.rosan.installer.util.hasFlag
 import com.rosan.installer.util.pm.compatVersionCode
@@ -106,10 +108,12 @@ class ApplyViewModel(
                     progress = ViewContent.Progress.Loading
                 )
             )
-            appRepo.flowAll().collect {
+            // Retrieve Flow<List<AppModel>> from the repository
+            appRepo.flowAll().collect { models ->
                 state = state.copy(
                     appEntities = state.appEntities.copy(
-                        data = it.filter { it.configId == id },
+                        // Filter the list in memory
+                        data = models.filter { it.configId == id },
                         progress = ViewContent.Progress.Loaded
                     )
                 )
@@ -119,20 +123,28 @@ class ApplyViewModel(
 
     private fun applyPackageName(packageName: String?, applied: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            val entity = appRepo.findByPackageName(packageName)
+            // Renamed 'entity' to 'model' for architectural clarity
+            val model = appRepo.findByPackageName(packageName)
+
             if (applied) {
-                if (entity != null) {
-                    entity.configId = id
-                    appRepo.update(entity)
+                if (model != null) {
+                    // Use copy() to safely create a new instance with the updated configId
+                    val updatedModel = model.copy(configId = id)
+                    appRepo.update(updatedModel)
                 } else {
+                    // Instantiate AppModel instead of AppEntity
                     appRepo.insert(
-                        AppEntity(
-                            packageName = packageName, configId = id
+                        AppModel(
+                            id = 0L, // Assuming 0L triggers auto-generate in Room when mapped back
+                            packageName = packageName,
+                            configId = id,
+                            createdAt = System.currentTimeMillis(),
+                            modifiedAt = System.currentTimeMillis()
                         )
                     )
                 }
             } else {
-                entity?.let { appRepo.delete(it) }
+                model?.let { appRepo.delete(it) }
             }
         }
     }

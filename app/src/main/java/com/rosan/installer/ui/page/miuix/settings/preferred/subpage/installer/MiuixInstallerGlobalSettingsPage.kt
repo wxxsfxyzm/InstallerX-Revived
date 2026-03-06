@@ -21,17 +21,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -62,15 +65,15 @@ fun MiuixInstallerGlobalSettingsPage(
     navController: NavController,
     viewModel: PreferredViewModel,
 ) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMiuixHazeStyle()
 
-    val isDialogMode = state.installMode == ConfigEntity.InstallMode.Dialog ||
-            state.installMode == ConfigEntity.InstallMode.AutoDialog
-    val isNotificationMode = state.installMode == ConfigEntity.InstallMode.Notification ||
-            state.installMode == ConfigEntity.InstallMode.AutoNotification
+    val isDialogMode = uiState.installMode == InstallMode.Dialog ||
+            uiState.installMode == InstallMode.AutoDialog
+    val isNotificationMode = uiState.installMode == InstallMode.Notification ||
+            uiState.installMode == InstallMode.AutoNotification
 
     Scaffold(
         topBar = {
@@ -104,20 +107,20 @@ fun MiuixInstallerGlobalSettingsPage(
                         .padding(bottom = 12.dp)
                 ) {
                     MiuixDataAuthorizerWidget(
-                        currentAuthorizer = state.authorizer,
+                        currentAuthorizer = uiState.authorizer,
                         changeAuthorizer = { newAuthorizer ->
                             viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(newAuthorizer))
                         }
                     ) {
                         AnimatedVisibility(
-                            visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                            visible = uiState.authorizer == Authorizer.Dhizuku,
                             enter = fadeIn() + expandVertically(),
                             exit = fadeOut() + shrinkVertically()
                         ) {
                             MiuixIntNumberPickerWidget(
                                 title = stringResource(R.string.set_countdown),
                                 description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                                value = state.dhizukuAutoCloseCountDown,
+                                value = uiState.dhizukuAutoCloseCountDown,
                                 startInt = 1,
                                 endInt = 10
                             ) {
@@ -128,7 +131,7 @@ fun MiuixInstallerGlobalSettingsPage(
                         }
                     }
                     MiuixDataInstallModeWidget(
-                        currentInstallMode = state.installMode,
+                        currentInstallMode = uiState.installMode,
                         changeInstallMode = { newMode ->
                             viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(newMode))
                         }
@@ -137,7 +140,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             MiuixSwitchWidget(
                                 title = stringResource(R.string.theme_settings_use_live_activity),
                                 description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                                checked = state.showLiveActivity,
+                                checked = uiState.showLiveActivity,
                                 onCheckedChange = {
                                     viewModel.dispatch(
                                         PreferredViewAction.ChangeShowLiveActivity(it)
@@ -152,14 +155,14 @@ fun MiuixInstallerGlobalSettingsPage(
                                 icon = AppIcons.BiometricAuth,
                                 title = stringResource(R.string.installer_settings_require_biometric_auth),
                                 description = stringResource(R.string.installer_settings_require_biometric_auth_desc),
-                                checked = state.installerRequireBiometricAuth,
+                                checked = uiState.installerRequireBiometricAuth,
                                 onCheckedChange = {
                                     viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, true))
                                 }
                             )
                         }
                         MiuixAutoClearNotificationTimeWidget(
-                            currentValue = state.notificationSuccessAutoClearSeconds,
+                            currentValue = uiState.notificationSuccessAutoClearSeconds,
                             onValueChange = { seconds ->
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(
@@ -191,14 +194,14 @@ fun MiuixInstallerGlobalSettingsPage(
                         .padding(bottom = 12.dp)
                 ) {
                     AnimatedVisibility(
-                        visible = state.installMode == ConfigEntity.InstallMode.Dialog,
+                        visible = uiState.installMode == InstallMode.Dialog,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(id = R.string.show_dialog_install_extended_menu),
                             description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
-                            checked = viewModel.state.showDialogInstallExtendedMenu,
+                            checked = uiState.showDialogInstallExtendedMenu,
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
@@ -212,7 +215,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             icon = AppIcons.Suggestion,
                             title = stringResource(id = R.string.show_intelligent_suggestion),
                             description = stringResource(id = R.string.show_intelligent_suggestion_desc),
-                            checked = viewModel.state.showSmartSuggestion,
+                            checked = uiState.showSmartSuggestion,
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeShowSuggestion(it)
@@ -229,7 +232,7 @@ fun MiuixInstallerGlobalSettingsPage(
                         MiuixSwitchWidget(
                             title = stringResource(id = R.string.show_dialog_when_pressing_notification),
                             description = stringResource(id = R.string.change_notification_touch_behavior),
-                            checked = viewModel.state.showDialogWhenPressingNotification,
+                            checked = uiState.showDialogWhenPressingNotification,
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
@@ -246,7 +249,7 @@ fun MiuixInstallerGlobalSettingsPage(
                         MiuixSwitchWidget(
                             title = stringResource(id = R.string.auto_silent_install),
                             description = stringResource(id = R.string.auto_silent_install_desc),
-                            checked = state.autoSilentInstall,
+                            checked = uiState.autoSilentInstall,
                             onCheckedChange = {
                                 viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it))
                             }
@@ -254,7 +257,7 @@ fun MiuixInstallerGlobalSettingsPage(
                     }
 
                     AnimatedVisibility(
-                        visible = isDialogMode || viewModel.state.showDialogWhenPressingNotification,
+                        visible = isDialogMode || uiState.showDialogWhenPressingNotification,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
@@ -262,7 +265,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             icon = AppIcons.NotificationDisabled,
                             title = stringResource(id = R.string.disable_notification_on_dismiss),
                             description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
-                            checked = viewModel.state.disableNotificationForDialogInstall,
+                            checked = uiState.disableNotificationForDialogInstall,
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     PreferredViewAction.ChangeShowDisableNotification(it)
@@ -284,7 +287,7 @@ fun MiuixInstallerGlobalSettingsPage(
                         MiuixSwitchWidget(
                             title = stringResource(id = R.string.installer_show_oem_special),
                             description = stringResource(id = R.string.installer_show_oem_special_desc),
-                            checked = state.showOPPOSpecial,
+                            checked = uiState.showOPPOSpecial,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowOPPOSpecial(it)) }
                         )
                     }
@@ -300,7 +303,7 @@ fun MiuixInstallerGlobalSettingsPage(
                 ) {
                     MiuixManagedPackagesWidget(
                         noContentTitle = stringResource(R.string.config_no_preset_install_sources),
-                        packages = state.managedInstallerPackages,
+                        packages = uiState.managedInstallerPackages,
                         onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
                         onRemovePackage = {
                             viewModel.dispatch(
@@ -320,7 +323,7 @@ fun MiuixInstallerGlobalSettingsPage(
                 ) {
                     MiuixManagedPackagesWidget(
                         noContentTitle = stringResource(R.string.config_no_managed_blacklist),
-                        packages = state.managedBlacklistPackages,
+                        packages = uiState.managedBlacklistPackages,
                         onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it)) },
                         onRemovePackage = {
                             viewModel.dispatch(
@@ -340,7 +343,7 @@ fun MiuixInstallerGlobalSettingsPage(
                 ) {
                     MiuixManagedUidsWidget(
                         noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
-                        uids = state.managedSharedUserIdBlacklist,
+                        uids = uiState.managedSharedUserIdBlacklist,
                         onAddUid = {
                             viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
                         },
@@ -349,7 +352,7 @@ fun MiuixInstallerGlobalSettingsPage(
                         }
                     )
                     AnimatedVisibility(
-                        visible = state.managedSharedUserIdBlacklist.isNotEmpty(),
+                        visible = uiState.managedSharedUserIdBlacklist.isNotEmpty(),
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
@@ -362,9 +365,9 @@ fun MiuixInstallerGlobalSettingsPage(
                         MiuixManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
                             noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
-                            packages = state.managedSharedUserIdExemptedPackages,
+                            packages = uiState.managedSharedUserIdExemptedPackages,
                             infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
-                            isInfoVisible = state.managedSharedUserIdExemptedPackages.isNotEmpty(),
+                            isInfoVisible = uiState.managedSharedUserIdExemptedPackages.isNotEmpty(),
                             onAddPackage = {
                                 viewModel.dispatch(
                                     PreferredViewAction.AddManagedSharedUserIdExemptedPackages(

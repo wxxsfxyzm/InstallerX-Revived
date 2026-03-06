@@ -14,17 +14,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
-import com.rosan.installer.data.app.model.enums.HttpProfile
-import com.rosan.installer.data.app.model.enums.RootImplementation
+import com.rosan.installer.domain.settings.model.HttpProfile
+import com.rosan.installer.domain.settings.model.RootImplementation
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
@@ -52,9 +54,9 @@ fun MiuixLabPage(
     navController: NavHostController,
     viewModel: PreferredViewModel
 ) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMiuixHazeStyle()
     val showRootImplementationDialog = remember { mutableStateOf(false) }
     val isMiIslandSupported = remember { OSUtils.isSupportMiIsland() }
@@ -106,7 +108,7 @@ fun MiuixLabPage(
                     MiuixSwitchWidget(
                         title = stringResource(R.string.lab_module_flashing),
                         description = stringResource(R.string.lab_module_flashing_desc),
-                        checked = state.labRootEnableModuleFlash,
+                        checked = uiState.labRootEnableModuleFlash,
                         onCheckedChange = { isEnabling ->
                             if (isEnabling) {
                                 showRootImplementationDialog.value = true
@@ -116,11 +118,11 @@ fun MiuixLabPage(
                         }
                     )
                     AnimatedVisibility(
-                        visible = state.labRootEnableModuleFlash,
+                        visible = uiState.labRootEnableModuleFlash,
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut()
                     ) {
-                        val currentRootImpl = state.labRootImplementation
+                        val currentRootImpl = uiState.labRootImplementation
                         val data = remember {
                             mapOf(
                                 RootImplementation.Magisk to "Magisk",
@@ -153,14 +155,14 @@ fun MiuixLabPage(
                             MiuixSwitchWidget(
                                 title = stringResource(R.string.lab_module_flashing_show_art),
                                 description = stringResource(R.string.lab_module_flashing_show_art_desc),
-                                checked = state.labRootShowModuleArt,
+                                checked = uiState.labRootShowModuleArt,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
                             )
                             if (OSUtils.isSystemApp)
                                 MiuixSwitchWidget(
                                     title = stringResource(R.string.lab_module_always_use_root),
                                     description = stringResource(R.string.lab_module_always_use_root_desc),
-                                    checked = state.labRootModuleAlwaysUseRoot,
+                                    checked = uiState.labRootModuleAlwaysUseRoot,
                                     onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(it)) }
                                 )
                         }
@@ -178,13 +180,13 @@ fun MiuixLabPage(
                         MiuixSwitchWidget(
                             title = stringResource(R.string.lab_mi_island),
                             description = stringResource(R.string.lab_mi_island_desc),
-                            checked = state.labUseMiIsland,
+                            checked = uiState.labUseMiIsland,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeUseMiIsland(it)) }
                         )
                     MiuixSwitchWidget(
                         title = stringResource(R.string.lab_set_install_requester),
                         description = stringResource(R.string.lab_set_install_requester_desc),
-                        checked = state.labSetInstallRequester,
+                        checked = uiState.labSetInstallRequester,
                         onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
                     )
                 }
@@ -201,10 +203,10 @@ fun MiuixLabPage(
                         /*MiuixSwitchWidget(
                             title = stringResource(R.string.lab_http_save_file),
                             description = stringResource(R.string.lab_http_save_file_desc),
-                            checked = state.labHttpSaveFile,
+                            checked = uiState.labHttpSaveFile,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeHttpSaveFile(it)) }
                         )*/
-                        val currentProfile = state.labHttpProfile
+                        val currentProfile = uiState.labHttpProfile
                         val allowSecureString = stringResource(R.string.lab_http_profile_secure)
                         val allowLocalString = stringResource(R.string.lab_http_profile_local)
                         val allowAllString = stringResource(R.string.lab_http_profile_all)

@@ -59,7 +59,7 @@ fun DeleteEventCollector(viewModel: AllViewModel, snackBarHostState: SnackbarHos
                     if (result == SnackbarResult.ActionPerformed) {
                         viewModel.dispatch(
                             AllViewAction.RestoreDataConfig(
-                                configEntity = event.configEntity
+                                configModel = event.configModel
                             )
                         )
                     }

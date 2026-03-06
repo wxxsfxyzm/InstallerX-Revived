@@ -10,7 +10,7 @@ import com.rosan.installer.data.recycle.model.impl.recycler.ShizukuHookRecycler
 import com.rosan.installer.data.recycle.model.impl.recycler.ShizukuUserServiceRecycler
 import com.rosan.installer.data.recycle.repo.Recyclable
 import com.rosan.installer.data.recycle.repo.recyclable.UserService
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.util.OSUtils
 import timber.log.Timber
 import java.lang.reflect.InvocationTargetException
@@ -23,13 +23,13 @@ private object DefaultUserService : UserService {
 }
 
 fun useUserService(
-    authorizer: ConfigEntity.Authorizer,
+    authorizer: Authorizer,
     customizeAuthorizer: String = "",
     useHookMode: Boolean = true,
     special: (() -> String?)? = null,
     action: (UserService) -> Unit
 ) {
-    if (authorizer == ConfigEntity.Authorizer.None) {
+    if (authorizer == Authorizer.None) {
         if (OSUtils.isSystemApp) {
             Timber.tag(TAG).d("Running as System App with None Authorizer. Executing direct calls.")
             action.invoke(DefaultUserService)
@@ -44,7 +44,7 @@ fun useUserService(
 }
 
 private fun processRecycler(
-    authorizer: ConfigEntity.Authorizer,
+    authorizer: Authorizer,
     recycler: Recyclable<out UserService>?,
     action: (UserService) -> Unit
 ) {
@@ -59,7 +59,7 @@ private fun processRecycler(
     } catch (e: Exception) {
         if (e is InvocationTargetException) {
             val target = e.targetException
-            if (authorizer == ConfigEntity.Authorizer.Shizuku &&
+            if (authorizer == Authorizer.Shizuku &&
                 target is IllegalStateException &&
                 target.message?.contains("binder haven't been received") == true
             ) {
@@ -69,7 +69,7 @@ private fun processRecycler(
         }
 
         if (e is IllegalStateException) {
-            if (authorizer == ConfigEntity.Authorizer.Shizuku && e.message?.contains("binder haven't been received") == true) {
+            if (authorizer == Authorizer.Shizuku && e.message?.contains("binder haven't been received") == true) {
                 throw ShizukuNotWorkException("Shizuku service connection lost during privileged action.", e)
             }
         }
@@ -79,7 +79,7 @@ private fun processRecycler(
 }
 
 private fun getRecyclableInstance(
-    authorizer: ConfigEntity.Authorizer,
+    authorizer: Authorizer,
     customizeAuthorizer: String,
     useHookMode: Boolean,
     special: (() -> String?)?
@@ -87,9 +87,9 @@ private fun getRecyclableInstance(
     val specialShell = special?.invoke()
 
     return when (authorizer) {
-        ConfigEntity.Authorizer.None -> null
+        Authorizer.None -> null
 
-        ConfigEntity.Authorizer.Root -> {
+        Authorizer.Root -> {
             val targetShell = specialShell ?: SHELL_ROOT
 
             if (useHookMode) {
@@ -101,7 +101,7 @@ private fun getRecyclableInstance(
             }
         }
 
-        ConfigEntity.Authorizer.Shizuku -> {
+        Authorizer.Shizuku -> {
             if (useHookMode) {
                 Timber.tag(TAG).i("Using Shizuku Hook Mode.")
                 ShizukuHookRecycler.make()
@@ -111,9 +111,9 @@ private fun getRecyclableInstance(
             }
         }
 
-        ConfigEntity.Authorizer.Dhizuku -> DhizukuUserServiceRecycler.make()
+        Authorizer.Dhizuku -> DhizukuUserServiceRecycler.make()
 
-        ConfigEntity.Authorizer.Customize -> {
+        Authorizer.Customize -> {
             val targetShell = customizeAuthorizer.ifBlank { SHELL_ROOT }
             ProcessUserServiceRecyclers.get(targetShell).make()
         }

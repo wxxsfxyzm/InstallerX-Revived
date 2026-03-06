@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewState
@@ -153,7 +153,7 @@ fun MiuixAllPage(
 @Composable
 private fun DataItemWidget(
     viewModel: AllViewModel,
-    entity: ConfigEntity,
+    entity: ConfigModel,
     isDefault: Boolean
 ) {
     Card(

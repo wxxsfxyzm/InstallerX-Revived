@@ -10,7 +10,7 @@ import com.rosan.installer.data.app.model.impl.analyser.strategy.ModuleStrategy
 import com.rosan.installer.data.app.model.impl.analyser.strategy.MultiApkZipStrategy
 import com.rosan.installer.data.app.model.impl.analyser.strategy.SingleApkStrategy
 import com.rosan.installer.data.app.model.impl.analyser.strategy.XApkStrategy
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.zip.ZipFile
@@ -33,7 +33,7 @@ object UnifiedContainerAnalyser {
     )
 
     suspend fun analyze(
-        config: ConfigEntity,
+        config: ConfigModel,
         data: DataEntity,
         type: DataType,
         extra: AnalyseExtraEntity

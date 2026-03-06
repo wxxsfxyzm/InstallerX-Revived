@@ -1,14 +1,15 @@
 package com.rosan.installer.data.app.model.impl.moduleInstaller
 
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
 import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.data.app.repo.ModuleInstallerRepo
 import com.rosan.installer.data.app.util.ModuleInstallerUtils
 import com.rosan.installer.data.recycle.util.SHELL_ROOT
-import com.rosan.installer.data.recycle.util.SU_ARGS // Make sure to import this
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.data.recycle.util.SU_ARGS
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.RootImplementation
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -19,7 +20,7 @@ import timber.log.Timber
  */
 object LocalModuleInstallerRepoImpl : ModuleInstallerRepo {
     override fun doInstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         module: AppEntity.ModuleEntity,
         useRoot: Boolean,
         rootImplementation: RootImplementation
@@ -30,7 +31,7 @@ object LocalModuleInstallerRepoImpl : ModuleInstallerRepo {
         // 2. Determine Shell Binary Parts
         // If customizing, we still need to split user input (e.g. "su -c") to ensure ProcessBuilder works correctly.
         // If default, we directly concatenate the constants (SHELL_ROOT + SU_ARGS).
-        val shellParts = if (config.authorizer == ConfigEntity.Authorizer.Customize && config.customizeAuthorizer.isNotBlank()) {
+        val shellParts = if (config.authorizer == Authorizer.Customize && config.customizeAuthorizer.isNotBlank()) {
             config.customizeAuthorizer.trim().split("\\s+".toRegex())
         } else {
             listOf(SHELL_ROOT, SU_ARGS)

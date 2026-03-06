@@ -2,8 +2,8 @@ package com.rosan.installer.data.installer.model.impl.installer.helper
 
 import android.app.Activity
 import android.content.Intent
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.ui.activity.UninstallerActivity
 import timber.log.Timber
 
@@ -16,7 +16,7 @@ object ConfigResolver {
         "com.android.externalstorage.documents"
     )
 
-    suspend fun resolve(activity: Activity): ConfigEntity {
+    suspend fun resolve(activity: Activity): ConfigModel {
         Timber.tag(TAG).d("resolveConfig: Starting.")
         // 0. Special Check: Is this UninstallerActivity?
         if (activity is UninstallerActivity) {
@@ -76,7 +76,7 @@ object ConfigResolver {
                 authority.startsWith("com.android.providers")
     }
 
-    private suspend fun getConfigForPackage(packageName: String?): ConfigEntity {
+    private suspend fun getConfigForPackage(packageName: String?): ConfigModel {
         val config = ConfigUtil.getByPackageName(packageName)
         Timber.tag(TAG).d("Resolved config for '${packageName ?: "default"}': $config")
         return config

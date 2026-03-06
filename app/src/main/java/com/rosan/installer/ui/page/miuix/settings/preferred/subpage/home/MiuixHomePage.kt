@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.BuildConfig
@@ -72,9 +73,9 @@ fun MiuixHomePage(
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMiuixHazeStyle()
     val showUpdateDialog = remember { mutableStateOf(false) }
 
@@ -175,9 +176,9 @@ fun MiuixHomePage(
                         style = MiuixTheme.textStyles.subtitle,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                     )
-                    if (state.hasUpdate)
+                    if (uiState.hasUpdate)
                         Text(
-                            text = stringResource(R.string.update_available, state.remoteVersion),
+                            text = stringResource(R.string.update_available, uiState.remoteVersion),
                             style = MiuixTheme.textStyles.subtitle,
                             color = MiuixTheme.colorScheme.primary
                         )
@@ -207,7 +208,7 @@ fun MiuixHomePage(
                         description = stringResource(R.string.get_update_detail),
                         onClick = { showUpdateDialog.value = true }
                     )
-                    if (state.hasUpdate)
+                    if (uiState.hasUpdate)
                         MiuixNavigationItemWidget(
                             title = stringResource(R.string.get_update_directly),
                             description = stringResource(R.string.get_update_directly_desc),
@@ -226,11 +227,11 @@ fun MiuixHomePage(
                         MiuixSwitchWidget(
                             title = stringResource(R.string.save_logs),
                             description = stringResource(R.string.save_logs_desc),
-                            checked = viewModel.state.enableFileLogging,
+                            checked = uiState.enableFileLogging,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetEnableFileLogging(it)) }
                         )
                         AnimatedVisibility(
-                            visible = viewModel.state.enableFileLogging,
+                            visible = uiState.enableFileLogging,
                             enter = fadeIn() + expandVertically(),
                             exit = fadeOut() + shrinkVertically()
                         ) {

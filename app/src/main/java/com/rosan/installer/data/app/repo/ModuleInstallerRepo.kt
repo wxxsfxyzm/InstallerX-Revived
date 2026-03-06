@@ -1,8 +1,8 @@
 package com.rosan.installer.data.app.repo
 
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.enums.RootImplementation
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.RootImplementation
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -15,7 +15,7 @@ interface ModuleInstallerRepo {
      * It completes successfully if the exit code is 0, otherwise it emits a ModuleInstallException.
      */
     fun doInstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         module: AppEntity.ModuleEntity,
         useRoot: Boolean,
         rootImplementation: RootImplementation

@@ -7,6 +7,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,7 +35,9 @@ import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.NewThem
 @Composable
 fun SettingsPage(preferredViewModel: PreferredViewModel) {
     val navController = rememberNavController()
-    val useBlur = preferredViewModel.state.useBlur
+    val uiState by preferredViewModel.state.collectAsStateWithLifecycle()
+    val useBlur = uiState.useBlur
+    val isExpressive = uiState.showExpressiveUI
 
     LaunchedEffect(navController) {
         if (preferredViewModel.pendingNavigateToTheme) {
@@ -89,7 +93,7 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             }
         ) {
             val id = it.arguments?.getLong("id")
-            if (preferredViewModel.state.showExpressiveUI)
+            if (isExpressive)
                 NewEditPage(
                     navController = navController,
                     id = if (id != -1L) id else null,
@@ -123,7 +127,7 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             }
         ) {
             val id = it.arguments?.getLong("id")!!
-            if (preferredViewModel.state.showExpressiveUI)
+            if (isExpressive)
                 NewApplyPage(navController = navController, id = id)
             else
                 ApplyPage(navController = navController, id = id)
@@ -143,7 +147,7 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
                 scaleOut(targetScale = 0.9f) + fadeOut()
             }
         ) {
-            if (preferredViewModel.state.showExpressiveUI)
+            if (isExpressive)
                 NewHomePage(navController = navController, viewModel = preferredViewModel)
             else
                 HomePage(navController = navController, viewModel = preferredViewModel)
@@ -163,14 +167,14 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
                 scaleOut(targetScale = 0.9f) + fadeOut()
             }
         ) {
-            OpenSourceLicensePage(navController, preferredViewModel.state.showExpressiveUI, preferredViewModel.state.useBlur)
+            OpenSourceLicensePage(navController, isExpressive, uiState.useBlur)
         }
         composable(
             route = SettingsScreen.Theme.route,
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
             popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
         ) {
-            if (preferredViewModel.state.showExpressiveUI) {
+            if (isExpressive) {
                 NewThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
             } else {
                 LegacyThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
@@ -181,7 +185,7 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
             popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
         ) {
-            if (preferredViewModel.state.showExpressiveUI) {
+            if (isExpressive) {
                 NewInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
             } else {
                 LegacyInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
@@ -192,7 +196,7 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
             popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
         ) {
-            if (preferredViewModel.state.showExpressiveUI) {
+            if (isExpressive) {
                 NewUninstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
             } else {
                 LegacyUninstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
@@ -203,7 +207,7 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
             popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
         ) {
-            if (preferredViewModel.state.showExpressiveUI) {
+            if (isExpressive) {
                 NewLabPage(navController = navController, viewModel = preferredViewModel)
             } else {
                 LegacyLabPage(navController = navController, viewModel = preferredViewModel)

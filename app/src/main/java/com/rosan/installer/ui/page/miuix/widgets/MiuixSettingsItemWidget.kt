@@ -41,11 +41,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.data.app.util.PackageManagerUtil
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.SharedUid
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -82,8 +84,8 @@ data class AuthorizerInfo(
 @Composable
 fun MiuixDataAuthorizerWidget(
     modifier: Modifier = Modifier,
-    currentAuthorizer: ConfigEntity.Authorizer,
-    changeAuthorizer: (ConfigEntity.Authorizer) -> Unit,
+    currentAuthorizer: Authorizer,
+    changeAuthorizer: (Authorizer) -> Unit,
     trailingContent: @Composable () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -94,19 +96,19 @@ fun MiuixDataAuthorizerWidget(
         buildMap {
             if (isSessionInstallSupported)
                 put(
-                    ConfigEntity.Authorizer.None,
+                    Authorizer.None,
                     AuthorizerInfo(R.string.config_authorizer_none, AppIcons.None)
                 )
             put(
-                ConfigEntity.Authorizer.Root,
+                Authorizer.Root,
                 AuthorizerInfo(R.string.config_authorizer_root, AppIcons.Root)
             )
             put(
-                ConfigEntity.Authorizer.Shizuku,
+                Authorizer.Shizuku,
                 AuthorizerInfo(R.string.config_authorizer_shizuku, shizukuIcon)
             )
             put(
-                ConfigEntity.Authorizer.Dhizuku,
+                Authorizer.Dhizuku,
                 AuthorizerInfo(R.string.config_authorizer_dhizuku, AppIcons.InstallAllowRestrictedPermissions)
             )
         }
@@ -155,27 +157,27 @@ data class InstallModeInfo(
 @Composable
 fun MiuixDataInstallModeWidget(
     modifier: Modifier = Modifier,
-    currentInstallMode: ConfigEntity.InstallMode,
-    changeInstallMode: (ConfigEntity.InstallMode) -> Unit,
+    currentInstallMode: InstallMode,
+    changeInstallMode: (InstallMode) -> Unit,
     trailingContent: @Composable () -> Unit = {},
 ) {
     val context = LocalContext.current
 
     val installModeOptions = remember {
         mapOf(
-            ConfigEntity.InstallMode.Dialog to InstallModeInfo(
+            InstallMode.Dialog to InstallModeInfo(
                 R.string.config_install_mode_dialog,
                 AppIcons.Dialog
             ),
-            ConfigEntity.InstallMode.AutoDialog to InstallModeInfo(
+            InstallMode.AutoDialog to InstallModeInfo(
                 R.string.config_install_mode_auto_dialog,
                 AppIcons.AutoDialog
             ),
-            ConfigEntity.InstallMode.Notification to InstallModeInfo(
+            InstallMode.Notification to InstallModeInfo(
                 R.string.config_install_mode_notification,
                 AppIcons.Notification
             ),
-            ConfigEntity.InstallMode.AutoNotification to InstallModeInfo(
+            InstallMode.AutoNotification to InstallModeInfo(
                 R.string.config_install_mode_auto_notification,
                 AppIcons.AutoNotification
             )
@@ -1033,10 +1035,11 @@ private fun MiuixDeleteSharedUidConfirmationDialog(
 
 @Composable
 fun MiuixUninstallKeepDataWidget(viewModel: PreferredViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     MiuixSwitchWidget(
         title = stringResource(id = R.string.uninstall_keep_data),
         description = stringResource(id = R.string.uninstall_keep_data_desc),
-        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA),
+        checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA),
         onCheckedChange = {
             viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_KEEP_DATA, it))
         }
@@ -1045,11 +1048,12 @@ fun MiuixUninstallKeepDataWidget(viewModel: PreferredViewModel) {
 
 @Composable
 fun MiuixUninstallForAllUsersWidget(viewModel: PreferredViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     MiuixSwitchWidget(
         icon = AppIcons.InstallForAllUsers,
         title = stringResource(id = R.string.uninstall_all_users),
         description = stringResource(id = R.string.uninstall_all_users_desc),
-        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS),
+        checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS),
         onCheckedChange = {
             viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_ALL_USERS, it))
         }
@@ -1058,10 +1062,11 @@ fun MiuixUninstallForAllUsersWidget(viewModel: PreferredViewModel) {
 
 @Composable
 fun MiuixUninstallSystemAppWidget(viewModel: PreferredViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     MiuixSwitchWidget(
         title = stringResource(id = R.string.uninstall_delete_system_app),
         description = stringResource(id = R.string.uninstall_delete_system_app_desc),
-        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP),
+        checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP),
         onCheckedChange = {
             viewModel.dispatch(
                 PreferredViewAction.ToggleGlobalUninstallFlag(
@@ -1075,6 +1080,7 @@ fun MiuixUninstallSystemAppWidget(viewModel: PreferredViewModel) {
 
 @Composable
 fun MiuixUninstallRequireBiometricAuthWidget(viewModel: PreferredViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     if (BiometricManager
             .from(LocalContext.current)
             .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
@@ -1083,7 +1089,7 @@ fun MiuixUninstallRequireBiometricAuthWidget(viewModel: PreferredViewModel) {
             icon = AppIcons.BiometricAuth,
             title = stringResource(R.string.uninstaller_settings_require_biometric_auth),
             description = stringResource(R.string.uninstaller_settings_require_biometric_auth_desc),
-            checked = viewModel.state.uninstallerRequireBiometricAuth,
+            checked = uiState.uninstallerRequireBiometricAuth,
             onCheckedChange = {
                 viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, false))
             }

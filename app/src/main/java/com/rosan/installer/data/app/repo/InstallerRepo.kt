@@ -2,7 +2,7 @@ package com.rosan.installer.data.app.repo
 
 import com.rosan.installer.data.app.model.entity.InstallEntity
 import com.rosan.installer.data.app.model.entity.InstallExtraInfoEntity
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 
 interface InstallerRepo {
     /**
@@ -10,7 +10,7 @@ interface InstallerRepo {
      * Renamed from doWork for clarity.
      */
     suspend fun doInstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         entities: List<InstallEntity>,
         extra: InstallExtraInfoEntity,
         blacklist: List<String>,
@@ -22,7 +22,7 @@ interface InstallerRepo {
      * Performs the uninstallation of a package.
      */
     suspend fun doUninstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         packageName: String,
         extra: InstallExtraInfoEntity,
     )
@@ -31,7 +31,7 @@ interface InstallerRepo {
      * Approve or deny a session.
      */
     suspend fun approveSession(
-        config: ConfigEntity,
+        config: ConfigModel,
         sessionId: Int,
         granted: Boolean
     )

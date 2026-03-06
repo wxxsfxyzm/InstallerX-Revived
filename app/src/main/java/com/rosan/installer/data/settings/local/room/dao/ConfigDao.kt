@@ -4,12 +4,20 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Update
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ConfigDao {
+    @RawQuery
+    suspend fun getAllDynamically(query: SupportSQLiteQuery): List<ConfigEntity>
+
+    @RawQuery(observedEntities = [ConfigEntity::class])
+    fun flowAllDynamically(query: SupportSQLiteQuery): Flow<List<ConfigEntity>>
+
     @Query("select * from config")
     suspend fun all(): List<ConfigEntity>
 

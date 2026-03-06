@@ -8,7 +8,8 @@ import android.os.Build
 import androidx.core.net.toUri
 import com.rosan.installer.SecretCodeReceiver
 import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.Dispatchers
@@ -67,7 +68,7 @@ fun deletePaths(paths: Array<out String>) {
  * @param onSuccess A lambda function to be executed after the app is launched and the calling UI should be closed.
  */
 suspend fun openLSPosedPrivileged(
-    config: ConfigEntity,
+    config: ConfigModel,
     onSuccess: () -> Unit
 ) {
     val intent = Intent()
@@ -78,9 +79,9 @@ suspend fun openLSPosedPrivileged(
     }
     intent.setData("android_secret_code://5776733".toUri())
 
-    val shouldAttemptPrivileged = config.authorizer == ConfigEntity.Authorizer.Root ||
-            config.authorizer == ConfigEntity.Authorizer.Shizuku ||
-            (config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
+    val shouldAttemptPrivileged = config.authorizer == Authorizer.Root ||
+            config.authorizer == Authorizer.Shizuku ||
+            (config.authorizer == Authorizer.None && OSUtils.isSystemApp)
     if (!shouldAttemptPrivileged) return
 
     // timeoutResult will be Boolean? (true/false on completion, or null on timeout)
@@ -105,7 +106,7 @@ suspend fun openLSPosedPrivileged(
  */
 suspend fun openAppPrivileged(
     context: Context,
-    config: ConfigEntity,
+    config: ConfigModel,
     packageName: String,
     dhizukuAutoCloseSeconds: Int,
     onSuccess: () -> Unit
@@ -117,9 +118,9 @@ suspend fun openAppPrivileged(
 
     var forceStartSuccess = false
 
-    val shouldAttemptPrivileged = config.authorizer == ConfigEntity.Authorizer.Root ||
-            config.authorizer == ConfigEntity.Authorizer.Shizuku ||
-            (config.authorizer == ConfigEntity.Authorizer.None && OSUtils.isSystemApp)
+    val shouldAttemptPrivileged = config.authorizer == Authorizer.Root ||
+            config.authorizer == Authorizer.Shizuku ||
+            (config.authorizer == Authorizer.None && OSUtils.isSystemApp)
 
     // Only attempt privileged start for Root or Shizuku
     if (shouldAttemptPrivileged) {
@@ -152,7 +153,7 @@ suspend fun openAppPrivileged(
         // Switch to Main dispatcher for UI operations
         withContext(Dispatchers.Main) {
             context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            if (config.authorizer == ConfigEntity.Authorizer.Dhizuku) {
+            if (config.authorizer == Authorizer.Dhizuku) {
                 // Wait for the auto-close countdown only for Dhizuku
                 delay(dhizukuAutoCloseSeconds * 1000L)
                 Timber.tag("HybridStart").d(
@@ -182,9 +183,9 @@ val InstallIntentFilter = IntentFilter().apply {
  * This ensures different methods reuse the same 'su 1000' service process.
  */
 fun getSpecialAuth(
-    authorizer: ConfigEntity.Authorizer,
+    authorizer: Authorizer,
     specialAuth: String = SHELL_SYSTEM
 ): (() -> String?)? =
-    if (authorizer == ConfigEntity.Authorizer.Root) {
+    if (authorizer == Authorizer.Root) {
         { specialAuth }
     } else null

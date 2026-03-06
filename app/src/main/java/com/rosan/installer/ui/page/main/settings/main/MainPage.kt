@@ -37,6 +37,7 @@ import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -45,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
@@ -72,8 +74,9 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
     LaunchedEffect(Unit) {
         allViewModel.dispatch(AllViewAction.Init)
     }
-    val showExpressiveUI = preferredViewModel.state.showExpressiveUI
-    val useBlur = showExpressiveUI && preferredViewModel.state.useBlur
+    val uiState by preferredViewModel.state.collectAsStateWithLifecycle()
+    val showExpressiveUI = uiState.showExpressiveUI
+    val useBlur = showExpressiveUI && uiState.useBlur
     val hazeState = if (useBlur) remember { HazeState() } else null
 
     val configCount = allViewModel.state.data.configs.size

@@ -2,13 +2,13 @@ package com.rosan.installer.data.app.model.impl.moduleInstaller
 
 import com.rosan.installer.ICommandOutputListener
 import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.enums.RootImplementation
 import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
 import com.rosan.installer.data.app.model.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.data.app.repo.ModuleInstallerRepo
 import com.rosan.installer.data.app.util.ModuleInstallerUtils
 import com.rosan.installer.data.recycle.util.useUserService
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.RootImplementation
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -19,7 +19,7 @@ import timber.log.Timber
  */
 object ShizukuModuleInstallerRepoImpl : ModuleInstallerRepo {
     override fun doInstallWork(
-        config: ConfigEntity,
+        config: ConfigModel,
         module: AppEntity.ModuleEntity,
         useRoot: Boolean,
         rootImplementation: RootImplementation

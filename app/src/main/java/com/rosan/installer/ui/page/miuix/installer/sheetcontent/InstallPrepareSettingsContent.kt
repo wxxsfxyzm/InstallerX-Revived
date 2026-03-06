@@ -51,8 +51,8 @@ fun PrepareSettingsContent(
 
     LaunchedEffect(autoDelete, displaySdk) {
         val currentConfig = installer.config
-        if (currentConfig.autoDelete != autoDelete) installer.config.autoDelete = autoDelete
-        if (currentConfig.displaySdk != displaySdk) installer.config.displaySdk = displaySdk
+        if (currentConfig.autoDelete != autoDelete) installer.config = installer.config.copy(autoDelete = autoDelete)
+        if (currentConfig.displaySdk != displaySdk) installer.config = installer.config.copy(displaySdk = displaySdk)
     }
 
     Column(
@@ -80,7 +80,7 @@ fun PrepareSettingsContent(
                 onCheckedChange = {
                     val newValue = !displaySdk
                     displaySdk = newValue
-                    installer.config.displaySdk = newValue
+                    installer.config = installer.config.copy(displaySdk = newValue)
                 }
             )
             MiuixSwitchWidget(
@@ -90,7 +90,7 @@ fun PrepareSettingsContent(
                 onCheckedChange = {
                     val newValue = !displaySize
                     displaySize = newValue
-                    installer.config.displaySize = newValue
+                    installer.config = installer.config.copy(displaySize = newValue)
                 }
             )
             MiuixSwitchWidget(
@@ -100,7 +100,7 @@ fun PrepareSettingsContent(
                 onCheckedChange = {
                     val newValue = !autoDelete
                     autoDelete = newValue
-                    installer.config.autoDelete = newValue
+                    installer.config = installer.config.copy(autoDelete = newValue)
                 }
             )
             if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)

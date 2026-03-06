@@ -20,12 +20,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
@@ -53,9 +55,9 @@ fun NewLabPage(
     navController: NavHostController,
     viewModel: PreferredViewModel
 ) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
-    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMaterial3HazeStyle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val showRootImplementationDialog = remember { mutableStateOf(false) }
@@ -63,7 +65,7 @@ fun NewLabPage(
 
     if (showRootImplementationDialog.value) {
         RootImplementationSelectionDialog(
-            currentSelection = state.labRootImplementation,
+            currentSelection = uiState.labRootImplementation,
             onDismiss = { showRootImplementationDialog.value = false },
             onConfirm = { selectedImplementation ->
                 showRootImplementationDialog.value = false
@@ -126,7 +128,7 @@ fun NewLabPage(
                             icon = AppIcons.Root,
                             title = stringResource(R.string.lab_module_flashing),
                             description = stringResource(R.string.lab_module_flashing_desc),
-                            checked = state.labRootEnableModuleFlash,
+                            checked = uiState.labRootEnableModuleFlash,
                             onCheckedChange = { isChecking ->
                                 if (isChecking) {
                                     showRootImplementationDialog.value = true
@@ -136,26 +138,26 @@ fun NewLabPage(
                             }
                         )
                     }
-                    item(visible = state.labRootEnableModuleFlash) {
+                    item(visible = uiState.labRootEnableModuleFlash) {
                         LabRootImplementationWidget(viewModel)
                     }
-                    item(visible = state.labRootEnableModuleFlash) {
+                    item(visible = uiState.labRootEnableModuleFlash) {
                         SwitchWidget(
                             icon = AppIcons.Terminal,
                             title = stringResource(R.string.lab_module_flashing_show_art),
                             description = stringResource(R.string.lab_module_flashing_show_art_desc),
-                            checked = state.labRootShowModuleArt,
+                            checked = uiState.labRootShowModuleArt,
                             onCheckedChange = {
                                 viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it))
                             }
                         )
                     }
-                    item(visible = state.labRootEnableModuleFlash && OSUtils.isSystemApp) {
+                    item(visible = uiState.labRootEnableModuleFlash && OSUtils.isSystemApp) {
                         SwitchWidget(
                             icon = AppIcons.FlashPreferRoot,
                             title = stringResource(R.string.lab_module_always_use_root),
                             description = stringResource(R.string.lab_module_always_use_root_desc),
-                            checked = state.labRootModuleAlwaysUseRoot,
+                            checked = uiState.labRootModuleAlwaysUseRoot,
                             onCheckedChange = {
                                 viewModel.dispatch(PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(it))
                             }
@@ -171,7 +173,7 @@ fun NewLabPage(
                         SwitchWidget(
                             title = stringResource(R.string.lab_mi_island),
                             description = stringResource(R.string.lab_mi_island_desc),
-                            checked = state.labUseMiIsland,
+                            checked = uiState.labUseMiIsland,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeUseMiIsland(it)) }
                         )
                     }
@@ -180,7 +182,7 @@ fun NewLabPage(
                             icon = AppIcons.InstallRequester,
                             title = stringResource(R.string.lab_set_install_requester),
                             description = stringResource(R.string.lab_set_install_requester_desc),
-                            checked = state.labSetInstallRequester,
+                            checked = uiState.labSetInstallRequester,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
                         )
                     }
@@ -197,7 +199,7 @@ fun NewLabPage(
                                 icon = Icons.Default.Download,
                                 title = stringResource(R.string.lab_http_save_file),
                                 description = stringResource(R.string.lab_http_save_file_desc),
-                                checked = state.labHttpSaveFile,
+                                checked = uiState.labHttpSaveFile,
                                 isM3E = false,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeHttpSaveFile(it)) }
                             )

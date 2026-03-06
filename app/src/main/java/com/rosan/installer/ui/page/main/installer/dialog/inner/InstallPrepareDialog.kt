@@ -153,9 +153,9 @@ fun installPrepareDialog(
 
     LaunchedEffect(autoDelete, displaySdk, displaySize) {
         val currentConfig = installer.config
-        if (currentConfig.autoDelete != autoDelete) installer.config.autoDelete = autoDelete
-        if (currentConfig.displaySdk != displaySdk) installer.config.displaySdk = displaySdk
-        if (currentConfig.displaySize != displaySize) installer.config.displaySize = displaySize
+        if (currentConfig.autoDelete != autoDelete) installer.config = installer.config.copy(autoDelete = autoDelete)
+        if (currentConfig.displaySdk != displaySdk) installer.config = installer.config.copy(displaySdk = displaySdk)
+        if (currentConfig.displaySize != displaySize) installer.config = installer.config.copy(displaySize = displaySize)
     }
 
     // Call InstallInfoDialog for base structure
@@ -274,7 +274,7 @@ fun installPrepareDialog(
                                 onClick = {
                                     val newValue = !autoDelete
                                     autoDelete = newValue
-                                    installer.config.autoDelete = newValue
+                                    installer.config = installer.config.copy(autoDelete = newValue)
                                 },
                                 label = stringResource(id = R.string.config_auto_delete),
                                 icon = AppIcons.Delete
@@ -284,7 +284,7 @@ fun installPrepareDialog(
                                 onClick = {
                                     val newValue = !displaySdk
                                     displaySdk = newValue
-                                    installer.config.displaySdk = newValue
+                                    installer.config = installer.config.copy(displaySdk = newValue)
                                 },
                                 label = stringResource(id = R.string.config_display_sdk_version),
                                 icon = AppIcons.Info
@@ -294,7 +294,7 @@ fun installPrepareDialog(
                                 onClick = {
                                     val newValue = !displaySize
                                     displaySize = newValue
-                                    installer.config.displaySize = newValue
+                                    installer.config = installer.config.copy(displaySize = newValue)
                                 },
                                 label = stringResource(id = R.string.config_display_size),
                                 icon = AppIcons.ShowSize

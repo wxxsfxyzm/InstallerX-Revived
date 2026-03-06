@@ -3,10 +3,10 @@ package com.rosan.installer.data.recycle.model.impl
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import com.rosan.installer.data.settings.util.ConfigUtil
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,8 +47,8 @@ object AutoLockManager : KoinComponent {
                 if (!isAutoLockEnabled()) return@launch
 
                 val globalAuthorizer = ConfigUtil.getGlobalAuthorizer()
-                if (globalAuthorizer == ConfigEntity.Authorizer.Shizuku) {
-                    executeLock(ConfigEntity.Authorizer.Shizuku, "ShizukuStartup")
+                if (globalAuthorizer == Authorizer.Shizuku) {
+                    executeLock(Authorizer.Shizuku, "ShizukuStartup")
                 }
             } catch (e: Exception) {
                 Timber.e(e, "AutoLockManager: Failed during Shizuku startup check.")
@@ -56,19 +56,19 @@ object AutoLockManager : KoinComponent {
         }
     }
 
-    fun onResolveInstall(sessionAuthorizer: ConfigEntity.Authorizer) {
+    fun onResolveInstall(sessionAuthorizer: Authorizer) {
         scope.launch {
             try {
                 if (!isAutoLockEnabled()) return@launch
 
                 val allowedAuthorizers = listOf(
-                    ConfigEntity.Authorizer.Root,
-                    ConfigEntity.Authorizer.Shizuku,
-                    ConfigEntity.Authorizer.Dhizuku
+                    Authorizer.Root,
+                    Authorizer.Shizuku,
+                    Authorizer.Dhizuku
                 )
 
                 if (sessionAuthorizer in allowedAuthorizers) {
-                    if (sessionAuthorizer == ConfigEntity.Authorizer.Shizuku &&
+                    if (sessionAuthorizer == Authorizer.Shizuku &&
                         Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED
                     ) {
                         return@launch
@@ -85,7 +85,7 @@ object AutoLockManager : KoinComponent {
     private suspend fun isAutoLockEnabled() =
         appSettingsRepo.getBoolean(BooleanSetting.AutoLockInstaller, false).first()
 
-    private suspend fun executeLock(authorizer: ConfigEntity.Authorizer, source: String) {
+    private suspend fun executeLock(authorizer: Authorizer, source: String) {
         withContext(Dispatchers.IO) {
             try {
                 val component = ComponentName(context, InstallerActivity::class.java)

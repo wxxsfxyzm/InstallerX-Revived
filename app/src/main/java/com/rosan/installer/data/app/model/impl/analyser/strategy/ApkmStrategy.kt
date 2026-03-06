@@ -6,7 +6,9 @@ import com.rosan.installer.data.app.model.entity.AppEntity
 import com.rosan.installer.data.app.model.entity.DataEntity
 import com.rosan.installer.data.app.repo.AnalysisStrategy
 import com.rosan.installer.data.app.util.parseSplitMetadata
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -22,7 +24,7 @@ object ApkmStrategy : AnalysisStrategy, KoinComponent {
 
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun analyze(
-        config: ConfigEntity,
+        config: ConfigModel,
         data: DataEntity,
         zipFile: ZipFile?,
         extra: AnalyseExtraEntity
@@ -32,7 +34,9 @@ object ApkmStrategy : AnalysisStrategy, KoinComponent {
 
         // 1. Parse Info
         val infoEntry = zipFile.getEntry("info.json") ?: return emptyList()
-        val manifest = zipFile.getInputStream(infoEntry).use {
+        val manifest = withContext(Dispatchers.IO) {
+            zipFile.getInputStream(infoEntry)
+        }.use {
             json.decodeFromStream<Manifest>(it)
         }
 

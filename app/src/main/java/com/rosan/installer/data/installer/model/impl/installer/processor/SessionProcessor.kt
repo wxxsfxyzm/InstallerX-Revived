@@ -6,13 +6,13 @@ import android.os.Bundle
 import com.rosan.installer.data.app.model.impl.InstallerRepoImpl
 import com.rosan.installer.data.installer.model.entity.ConfirmationDetails
 import com.rosan.installer.data.recycle.util.useUserService
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import org.koin.core.component.KoinComponent
 import timber.log.Timber
 
 class SessionProcessor : KoinComponent {
 
-    fun getSessionDetails(sessionId: Int, config: ConfigEntity): ConfirmationDetails {
+    fun getSessionDetails(sessionId: Int, config: ConfigModel): ConfirmationDetails {
         var label: CharSequence? = "N/A"
         var icon: Bitmap? = null
 
@@ -49,7 +49,7 @@ class SessionProcessor : KoinComponent {
         return ConfirmationDetails(sessionId, label ?: "N/A", icon)
     }
 
-    suspend fun approveSession(sessionId: Int, granted: Boolean, config: ConfigEntity) {
+    suspend fun approveSession(sessionId: Int, granted: Boolean, config: ConfigModel) {
         Timber.d("Approving session $sessionId (granted: $granted) via ${config.authorizer}")
 
         try {

@@ -2,7 +2,7 @@ package com.rosan.installer.data.installer.model.impl.installer
 
 import com.rosan.installer.data.installer.model.entity.ProgressEntity
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.InstallMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -36,7 +36,7 @@ class ProgressHandler(scope: CoroutineScope, installer: InstallerRepo) : Handler
     private fun onResolved(success: Boolean) {
         Timber.d("[id=${installer.id}] onResolved called with success: $success")
         val installMode = installer.config.installMode
-        if (installMode == ConfigEntity.InstallMode.Notification || installMode == ConfigEntity.InstallMode.AutoNotification) {
+        if (installMode == InstallMode.Notification || installMode == InstallMode.AutoNotification) {
             Timber.d("[id=${installer.id}] onResolved: Notification mode detected. Setting background(true).")
             installer.background(true)
         }
@@ -49,7 +49,7 @@ class ProgressHandler(scope: CoroutineScope, installer: InstallerRepo) : Handler
     private fun onAnalysedSuccess() {
         Timber.d("[id=${installer.id}] onAnalysedSuccess called.")
         val installMode = installer.config.installMode
-        if (installMode != ConfigEntity.InstallMode.AutoDialog && installMode != ConfigEntity.InstallMode.AutoNotification) {
+        if (installMode != InstallMode.AutoDialog && installMode != InstallMode.AutoNotification) {
             Timber
                 .d("[id=${installer.id}] onAnalysedSuccess: Not an auto-install mode ($installMode). Doing nothing.")
             return

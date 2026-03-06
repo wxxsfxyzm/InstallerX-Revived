@@ -30,19 +30,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -62,12 +64,6 @@ import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 
-@Immutable
-private data class DynamicSettingItem(
-    val visible: Boolean,
-    val content: @Composable () -> Unit
-)
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewInstallerGlobalSettingsPage(
@@ -75,9 +71,9 @@ fun NewInstallerGlobalSettingsPage(
     viewModel: PreferredViewModel
 ) {
     val context = LocalContext.current
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
-    val hazeState = if (state.useBlur) remember { HazeState() } else null
+    val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMaterial3HazeStyle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
 
@@ -85,10 +81,10 @@ fun NewInstallerGlobalSettingsPage(
         topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
     }
 
-    val isDialogMode = state.installMode == ConfigEntity.InstallMode.Dialog ||
-            state.installMode == ConfigEntity.InstallMode.AutoDialog
-    val isNotificationMode = state.installMode == ConfigEntity.InstallMode.Notification ||
-            state.installMode == ConfigEntity.InstallMode.AutoNotification
+    val isDialogMode = uiState.installMode == InstallMode.Dialog ||
+            uiState.installMode == InstallMode.AutoDialog
+    val isNotificationMode = uiState.installMode == InstallMode.Notification ||
+            uiState.installMode == InstallMode.AutoNotification
 
     Scaffold(
         modifier = Modifier
@@ -143,14 +139,14 @@ fun NewInstallerGlobalSettingsPage(
                 ) {
                     item {
                         DataAuthorizerWidget(
-                            currentAuthorizer = state.authorizer,
+                            currentAuthorizer = uiState.authorizer,
                             changeAuthorizer = {
                                 viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(it))
                             }
                         ) {
                             // Nesting specific animations inside a widget is fine if the widget supports it
                             AnimatedVisibility(
-                                visible = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
+                                visible = uiState.authorizer == Authorizer.Dhizuku,
                                 enter = fadeIn() + expandVertically(),
                                 exit = fadeOut() + shrinkVertically()
                             ) {
@@ -158,7 +154,7 @@ fun NewInstallerGlobalSettingsPage(
                                     icon = AppIcons.Working,
                                     title = stringResource(R.string.set_countdown),
                                     description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                                    value = state.dhizukuAutoCloseCountDown,
+                                    value = uiState.dhizukuAutoCloseCountDown,
                                     startInt = 1,
                                     endInt = 10,
                                     onValueChange = {
@@ -171,7 +167,7 @@ fun NewInstallerGlobalSettingsPage(
 
                     item {
                         DataInstallModeWidget(
-                            currentInstallMode = state.installMode,
+                            currentInstallMode = uiState.installMode,
                             changeInstallMode = { viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(it)) }
                         )
                     }
@@ -182,7 +178,7 @@ fun NewInstallerGlobalSettingsPage(
                             icon = AppIcons.LiveActivity,
                             title = stringResource(R.string.theme_settings_use_live_activity),
                             description = stringResource(R.string.theme_settings_use_live_activity_desc),
-                            checked = state.showLiveActivity,
+                            checked = uiState.showLiveActivity,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowLiveActivity(it)) }
                         )
                     }
@@ -193,7 +189,7 @@ fun NewInstallerGlobalSettingsPage(
                             icon = AppIcons.BiometricAuth,
                             title = stringResource(R.string.installer_settings_require_biometric_auth),
                             description = stringResource(R.string.installer_settings_require_biometric_auth_desc),
-                            checked = state.installerRequireBiometricAuth,
+                            checked = uiState.installerRequireBiometricAuth,
                             isM3E = true,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, true)) }
                         )
@@ -201,7 +197,7 @@ fun NewInstallerGlobalSettingsPage(
 
                     item {
                         AutoClearNotificationTimeWidget(
-                            currentValue = state.notificationSuccessAutoClearSeconds,
+                            currentValue = uiState.notificationSuccessAutoClearSeconds,
                             onValueChange = { seconds ->
                                 viewModel.dispatch(PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(seconds))
                             }
@@ -233,7 +229,7 @@ fun NewInstallerGlobalSettingsPage(
                                 icon = AppIcons.SingleLineSettingIcon,
                                 title = stringResource(id = R.string.version_compare_in_single_line),
                                 description = stringResource(id = R.string.version_compare_in_single_line_desc),
-                                checked = state.versionCompareInSingleLine,
+                                checked = uiState.versionCompareInSingleLine,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it)) }
                             )
                         }
@@ -244,18 +240,18 @@ fun NewInstallerGlobalSettingsPage(
                                 icon = AppIcons.MultiLineSettingIcon,
                                 title = stringResource(id = R.string.sdk_compare_in_multi_line),
                                 description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
-                                checked = state.sdkCompareInMultiLine,
+                                checked = uiState.sdkCompareInMultiLine,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it)) }
                             )
                         }
 
                         // 3. Extended Menu (Strictly Dialog Mode)
-                        item(visible = state.installMode == ConfigEntity.InstallMode.Dialog) {
+                        item(visible = uiState.installMode == InstallMode.Dialog) {
                             SwitchWidget(
                                 icon = AppIcons.MenuOpen,
                                 title = stringResource(id = R.string.show_dialog_install_extended_menu),
                                 description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
-                                checked = state.showDialogInstallExtendedMenu,
+                                checked = uiState.showDialogInstallExtendedMenu,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)) }
                             )
                         }
@@ -266,7 +262,7 @@ fun NewInstallerGlobalSettingsPage(
                                 icon = AppIcons.Suggestion,
                                 title = stringResource(id = R.string.show_intelligent_suggestion),
                                 description = stringResource(id = R.string.show_intelligent_suggestion_desc),
-                                checked = state.showSmartSuggestion,
+                                checked = uiState.showSmartSuggestion,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowSuggestion(it)) }
                             )
                         }
@@ -277,7 +273,7 @@ fun NewInstallerGlobalSettingsPage(
                                 icon = AppIcons.Dialog,
                                 title = stringResource(id = R.string.show_dialog_when_pressing_notification),
                                 description = stringResource(id = R.string.change_notification_touch_behavior),
-                                checked = state.showDialogWhenPressingNotification,
+                                checked = uiState.showDialogWhenPressingNotification,
                                 onCheckedChange = {
                                     viewModel.dispatch(
                                         PreferredViewAction.ChangeShowDialogWhenPressingNotification(
@@ -294,18 +290,18 @@ fun NewInstallerGlobalSettingsPage(
                                 icon = AppIcons.Silent,
                                 title = stringResource(id = R.string.auto_silent_install),
                                 description = stringResource(id = R.string.auto_silent_install_desc),
-                                checked = state.autoSilentInstall,
+                                checked = uiState.autoSilentInstall,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it)) }
                             )
                         }
 
                         // 7. Disable Notification
-                        item(visible = isDialogMode || state.showDialogWhenPressingNotification) {
+                        item(visible = isDialogMode || uiState.showDialogWhenPressingNotification) {
                             SwitchWidget(
                                 icon = AppIcons.NotificationDisabled,
                                 title = stringResource(id = R.string.disable_notification_on_dismiss),
                                 description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
-                                checked = state.disableNotificationForDialogInstall,
+                                checked = uiState.disableNotificationForDialogInstall,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowDisableNotification(it)) }
                             )
                         }
@@ -324,7 +320,7 @@ fun NewInstallerGlobalSettingsPage(
                                 icon = AppIcons.OEMSpecial,
                                 title = stringResource(id = R.string.installer_show_oem_special),
                                 description = stringResource(id = R.string.installer_show_oem_special_desc),
-                                checked = state.showOPPOSpecial,
+                                checked = uiState.showOPPOSpecial,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowOPPOSpecial(it)) }
                             )
                         }
@@ -340,7 +336,7 @@ fun NewInstallerGlobalSettingsPage(
                     item {
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_preset_install_sources),
-                            packages = state.managedInstallerPackages,
+                            packages = uiState.managedInstallerPackages,
                             onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
                             onRemovePackage = { viewModel.dispatch(PreferredViewAction.RemoveManagedInstallerPackage(it)) }
                         )
@@ -356,7 +352,7 @@ fun NewInstallerGlobalSettingsPage(
                     item {
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_blacklist),
-                            packages = state.managedBlacklistPackages,
+                            packages = uiState.managedBlacklistPackages,
                             onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it)) },
                             onRemovePackage = { viewModel.dispatch(PreferredViewAction.RemoveManagedBlacklistPackage(it)) }
                         )
@@ -372,20 +368,20 @@ fun NewInstallerGlobalSettingsPage(
                     item {
                         ManagedUidsWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
-                            uids = state.managedSharedUserIdBlacklist,
+                            uids = uiState.managedSharedUserIdBlacklist,
                             onAddUid = { viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it)) },
                             onRemoveUid = { viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it)) }
                         )
                     }
 
                     // Show exempted packages only if UID blacklist is not empty
-                    item(visible = state.managedSharedUserIdBlacklist.isNotEmpty()) {
+                    item(visible = uiState.managedSharedUserIdBlacklist.isNotEmpty()) {
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
                             noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
-                            packages = state.managedSharedUserIdExemptedPackages,
+                            packages = uiState.managedSharedUserIdExemptedPackages,
                             infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
-                            isInfoVisible = state.managedSharedUserIdExemptedPackages.isNotEmpty(),
+                            isInfoVisible = uiState.managedSharedUserIdExemptedPackages.isNotEmpty(),
                             onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdExemptedPackages(it)) },
                             onRemovePackage = {
                                 viewModel.dispatch(

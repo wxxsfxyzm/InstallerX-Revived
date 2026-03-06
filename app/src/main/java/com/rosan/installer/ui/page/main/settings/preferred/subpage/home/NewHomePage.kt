@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
@@ -63,12 +64,12 @@ fun NewHomePage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
-    val state = viewModel.state
     val context = LocalContext.current
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
-    val topBarHazeState = if (state.useBlur) remember { HazeState() } else null
-    val indicatorHazeState = if (state.useBlur) remember { HazeState() } else null
+    val topBarHazeState = if (uiState.useBlur) remember { HazeState() } else null
+    val indicatorHazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMaterial3HazeStyle()
     val uriHandler = LocalUriHandler.current
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -153,7 +154,7 @@ fun NewHomePage(
                                 onClick = { showBottomSheet = true }
                             )
                         }
-                        if (viewModel.state.hasUpdate)
+                        if (uiState.hasUpdate)
                             item {
                                 SettingsNavigationItemWidget(
                                     icon = AppIcons.Download,
@@ -174,11 +175,11 @@ fun NewHomePage(
                                     icon = AppIcons.BugReport,
                                     title = stringResource(R.string.save_logs),
                                     description = stringResource(R.string.save_logs_desc),
-                                    checked = viewModel.state.enableFileLogging,
+                                    checked = uiState.enableFileLogging,
                                     onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetEnableFileLogging(it)) }
                                 )
                             }
-                            item(visible = viewModel.state.enableFileLogging) {
+                            item(visible = uiState.enableFileLogging) {
                                 ExportLogsWidget(viewModel)
                             }
                         }
@@ -190,7 +191,7 @@ fun NewHomePage(
             ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
                 BottomSheetContent(
                     title = stringResource(R.string.get_update),
-                    hasUpdate = viewModel.state.hasUpdate,
+                    hasUpdate = uiState.hasUpdate,
                     onDirectUpdateClick = {
                         showBottomSheet = false
                         viewModel.dispatch(PreferredViewAction.Update)

@@ -1,11 +1,12 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
 import androidx.compose.ui.graphics.Color
-import com.rosan.installer.data.app.model.enums.HttpProfile
-import com.rosan.installer.data.app.model.enums.RootImplementation
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.HttpProfile
+import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.model.RootImplementation
 import com.rosan.installer.domain.settings.model.SharedUid
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.material.RawColor
@@ -14,9 +15,9 @@ import com.rosan.installer.ui.theme.material.ThemeMode
 
 data class PreferredViewState(
     val progress: Progress = Progress.Loading,
-    val authorizer: ConfigEntity.Authorizer = ConfigEntity.Authorizer.Shizuku,
+    val authorizer: Authorizer = Authorizer.Shizuku,
     val customizeAuthorizer: String = "",
-    val installMode: ConfigEntity.InstallMode = ConfigEntity.InstallMode.Dialog,
+    val installMode: InstallMode = InstallMode.Dialog,
     val adbVerifyEnabled: Boolean = true,
     val isIgnoringBatteryOptimizations: Boolean = false,
     val showDialogInstallExtendedMenu: Boolean = false,
@@ -64,7 +65,7 @@ data class PreferredViewState(
     val uninstallFlags: Int = 0,
     val enableFileLogging: Boolean = true
 ) {
-    val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
+    val authorizerCustomize = authorizer == Authorizer.Customize
 
     sealed class Progress {
         data object Loading : Progress()

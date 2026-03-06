@@ -13,7 +13,7 @@ import com.rosan.installer.data.app.repo.AppIconRepo
 import com.rosan.installer.data.app.util.sortedBest
 import com.rosan.installer.data.installer.model.impl.installer.BroadcastHandler
 import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
 
 class NotificationHelper(
     private val context: Context,
@@ -45,9 +45,9 @@ class NotificationHelper(
         } ?: return null
 
         val supportsPrivileged = installer.config.authorizer in listOf(
-            ConfigEntity.Authorizer.Root,
-            ConfigEntity.Authorizer.Shizuku,
-            ConfigEntity.Authorizer.Customize
+            Authorizer.Root,
+            Authorizer.Shizuku,
+            Authorizer.Customize
         )
 
         return if (supportsPrivileged) {

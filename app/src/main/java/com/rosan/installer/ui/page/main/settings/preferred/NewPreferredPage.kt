@@ -36,11 +36,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
-import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
@@ -71,7 +72,7 @@ fun NewPreferredPage(
     outerPadding: PaddingValues = PaddingValues(0.dp),
     hazeState: HazeState? = null
 ) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
 
@@ -155,7 +156,7 @@ fun NewPreferredPage(
             )
         },
     ) { paddingValues ->
-        when (state.progress) {
+        when (uiState.progress) {
             is PreferredViewState.Progress.Loading -> {
                 Box(
                     modifier = Modifier
@@ -221,7 +222,7 @@ fun NewPreferredPage(
                         }
                     }
 
-                    if (viewModel.state.authorizer == ConfigEntity.Authorizer.None)
+                    if (uiState.authorizer == Authorizer.None)
                         item {
                             val tip = if (OSUtils.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
                             else stringResource(R.string.config_authorizer_none_tips)
@@ -235,10 +236,10 @@ fun NewPreferredPage(
                         ) {
                             item {
                                 DisableAdbVerify(
-                                    checked = !state.adbVerifyEnabled,
-                                    isError = state.authorizer == ConfigEntity.Authorizer.Dhizuku,
-                                    enabled = state.authorizer != ConfigEntity.Authorizer.Dhizuku &&
-                                            state.authorizer != ConfigEntity.Authorizer.None,
+                                    checked = !uiState.adbVerifyEnabled,
+                                    isError = uiState.authorizer == Authorizer.Dhizuku,
+                                    enabled = uiState.authorizer != Authorizer.Dhizuku &&
+                                            uiState.authorizer != Authorizer.None,
                                     onCheckedChange = { isDisabled ->
                                         viewModel.dispatch(PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled))
                                     }
@@ -246,26 +247,26 @@ fun NewPreferredPage(
                             }
                             item {
                                 IgnoreBatteryOptimizationSetting(
-                                    checked = state.isIgnoringBatteryOptimizations,
-                                    enabled = !state.isIgnoringBatteryOptimizations,
+                                    checked = uiState.isIgnoringBatteryOptimizations,
+                                    enabled = !uiState.isIgnoringBatteryOptimizations,
                                 ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
                             }
                             item {
                                 AutoLockInstaller(
-                                    checked = state.autoLockInstaller,
-                                    enabled = state.authorizer != ConfigEntity.Authorizer.None
-                                ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!state.autoLockInstaller)) }
+                                    checked = uiState.autoLockInstaller,
+                                    enabled = uiState.authorizer != Authorizer.None
+                                ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!uiState.autoLockInstaller)) }
                             }
                             item {
                                 DefaultInstaller(
                                     lock = true,
-                                    enabled = state.authorizer != ConfigEntity.Authorizer.None
+                                    enabled = uiState.authorizer != Authorizer.None
                                 ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
                             }
                             item {
                                 DefaultInstaller(
                                     lock = false,
-                                    enabled = state.authorizer != ConfigEntity.Authorizer.None
+                                    enabled = uiState.authorizer != Authorizer.None
                                 ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
                             }
                             item { ClearCache() }
@@ -288,11 +289,11 @@ fun NewPreferredPage(
                                 SettingsAboutItemWidget(
                                     imageVector = AppIcons.Info,
                                     headlineContentText = stringResource(R.string.about_detail),
-                                    supportingContentText = if (state.hasUpdate) stringResource(
+                                    supportingContentText = if (uiState.hasUpdate) stringResource(
                                         R.string.update_available,
-                                        state.remoteVersion
+                                        uiState.remoteVersion
                                     ) else "$revLevel ${RsConfig.VERSION_NAME}",
-                                    supportingContentColor = if (state.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    supportingContentColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     onClick = { navController.navigate(SettingsScreen.About.route) }
                                 )
                             }
