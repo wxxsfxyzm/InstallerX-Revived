@@ -10,6 +10,7 @@ import android.provider.Settings
 import androidx.core.net.toUri
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.data.privileged.util.deletePaths
+import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallEntity
@@ -21,13 +22,13 @@ import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.IOException
 
-object NoneInstallerRepoImpl : InstallerRepository, KoinComponent {
-    private val context by inject<Context>()
+class NoneInstallerRepoImpl(
+    private val context: Context,
+    private val reflect: ReflectRepo
+) : InstallerRepository {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     @SuppressLint("RequestInstallPackagesPolicy")
@@ -71,7 +72,7 @@ object NoneInstallerRepoImpl : InstallerRepository, KoinComponent {
                     }
                 }
 
-                val receiver = IBinderInstallerRepoImpl.LocalIntentReceiver()
+                val receiver = LocalIntentReceiver(reflect)
                 session.commit(receiver.getIntentSender())
 
                 PackageManagerUtil.installResultVerify(context, receiver)
@@ -142,8 +143,8 @@ object NoneInstallerRepoImpl : InstallerRepository, KoinComponent {
             // Get the standard PackageInstaller
             val packageInstaller = context.packageManager.packageInstaller
 
-            // Create a receiver to handle the result (Reusing the one from IBinderInstallerRepoImpl as you did in doInstallWork)
-            val receiver = IBinderInstallerRepoImpl.LocalIntentReceiver()
+            // Instantiate the receiver
+            val receiver = LocalIntentReceiver(reflect)
 
             // Request uninstallation using the standard API
             // This will trigger a system dialog asking the user to confirm uninstallation

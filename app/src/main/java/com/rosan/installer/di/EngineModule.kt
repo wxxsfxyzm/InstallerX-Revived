@@ -20,7 +20,7 @@ val engineModule = module {
     // Repositories
     single<AppIconRepository> { AppIconRepositoryImpl(androidContext()) }
     single<AnalyserRepository> { AnalyserRepositoryImpl(get()) }
-    single<InstallerRepository> { InstallerRepositoryImpl(get()) }
+    single<InstallerRepository> { InstallerRepositoryImpl(get(), get(), get(), get()) }
     single<ModuleInstallerRepository> { ModuleInstallerRepositoryImpl(get()) }
 
     // UseCases

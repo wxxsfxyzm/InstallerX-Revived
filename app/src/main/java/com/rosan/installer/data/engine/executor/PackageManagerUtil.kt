@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInstaller
 import androidx.core.content.IntentCompat
-import com.rosan.installer.data.engine.executor.appInstaller.IBinderInstallerRepoImpl
+import com.rosan.installer.data.engine.executor.appInstaller.LocalIntentReceiver
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.exception.UninstallException
 import com.rosan.installer.domain.engine.model.InstallErrorType
@@ -32,7 +32,7 @@ object PackageManagerUtil {
 
     suspend fun installResultVerify(
         context: Context,
-        receiver: IBinderInstallerRepoImpl.LocalIntentReceiver
+        receiver: LocalIntentReceiver
     ) {
         val intent = receiver.getResult()
         val status =
@@ -59,7 +59,7 @@ object PackageManagerUtil {
 
     suspend fun uninstallResultVerify(
         context: Context,
-        receiver: IBinderInstallerRepoImpl.LocalIntentReceiver
+        receiver: LocalIntentReceiver
     ) {
         val intent = receiver.getResult()
         val status =

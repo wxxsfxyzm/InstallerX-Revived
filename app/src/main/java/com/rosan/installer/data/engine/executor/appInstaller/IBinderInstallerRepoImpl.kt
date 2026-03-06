@@ -4,10 +4,6 @@ package com.rosan.installer.data.engine.executor.appInstaller
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.IIntentReceiver
-import android.content.IIntentSender
-import android.content.Intent
-import android.content.IntentSender
 import android.content.pm.IPackageInstaller
 import android.content.pm.IPackageInstallerSession
 import android.content.pm.IPackageManager
@@ -16,7 +12,6 @@ import android.content.pm.PackageInstaller.Session
 import android.content.pm.PackageManager
 import android.content.pm.VersionedPackage
 import android.os.Build
-import android.os.Bundle
 import android.os.IBinder
 import android.os.IInterface
 import android.os.ServiceManager
@@ -49,18 +44,15 @@ import com.rosan.installer.util.pm.isPackageArchivedCompat
 import com.rosan.installer.util.removeFlag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
-import org.koin.core.component.inject
 import timber.log.Timber
 
-abstract class IBinderInstallerRepoImpl : InstallerRepository, KoinComponent {
-    private val context by inject<Context>()
-    private val reflect by inject<ReflectRepo>()
-    private val capabilityProvider by inject<DeviceCapabilityProvider>()
-    private val postInstallTaskProvider by inject<PostInstallTaskProvider>()
+abstract class IBinderInstallerRepoImpl(
+    protected val context: Context,
+    protected val reflect: ReflectRepo,
+    protected val capabilityProvider: DeviceCapabilityProvider,
+    protected val postInstallTaskProvider: PostInstallTaskProvider
+) : InstallerRepository {
     private val taskScope = CoroutineScope(Dispatchers.IO)
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
@@ -183,7 +175,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepository, KoinComponent {
             IPackageInstaller.Stub.asInterface(iBinderWrapper(iPackageManager.packageInstaller.asBinder()))
 
         // Prepare parameters for the direct AIDL call.
-        val receiver = LocalIntentReceiver()
+        val receiver = LocalIntentReceiver(reflect)
         val flags = config.uninstallFlags
         val versionedPackage = VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST)
         val callerPackageName = when (config.authorizer) {
@@ -400,7 +392,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepository, KoinComponent {
         extra: InstallExtraInfoEntity,
         session: Session
     ) {
-        val receiver = LocalIntentReceiver()
+        val receiver = LocalIntentReceiver(reflect)
         session.commit(receiver.getIntentSender())
         PackageManagerUtil.installResultVerify(context, receiver)
     }
@@ -463,43 +455,5 @@ abstract class IBinderInstallerRepoImpl : InstallerRepository, KoinComponent {
                 deletePaths = pathsToDelete
             )
         )
-    }
-
-    class LocalIntentReceiver : KoinComponent {
-        private val reflect = get<ReflectRepo>()
-
-        // Use a Channel with UNLIMITED capacity to safely queue multiple intents
-        // without dropping them or suspending the sender.
-        private val channel = Channel<Intent>(Channel.UNLIMITED)
-
-        private val localSender = object : IIntentSender.Stub() {
-            override fun send(
-                code: Int,
-                intent: Intent?,
-                resolvedType: String?,
-                whitelistToken: IBinder?,
-                finishedReceiver: IIntentReceiver?,
-                requiredPermission: String?,
-                options: Bundle?
-            ) {
-                // Null safety check, then send to the channel non-blockingly
-                if (intent != null) {
-                    channel.trySend(intent)
-                }
-            }
-        }
-
-        fun getIntentSender(): IntentSender =
-            reflect.getDeclaredConstructor(
-                IntentSender::class.java, IIntentSender::class.java
-            )!!.newInstance(localSender) as IntentSender
-
-        /**
-         * Suspends the coroutine until an intent is received.
-         * This avoids physically blocking the underlying thread.
-         */
-        suspend fun getResult(): Intent {
-            return channel.receive()
-        }
     }
 }

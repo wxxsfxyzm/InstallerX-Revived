@@ -2,8 +2,14 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.executor.appInstaller
 
+import android.content.Context
 import android.os.IBinder
+import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 
-object SystemInstallerRepoImpl : IBinderInstallerRepoImpl() {
+class SystemInstallerRepoImpl(
+    context: Context, reflect: ReflectRepo, capabilityProvider: DeviceCapabilityProvider, postInstallTaskProvider: PostInstallTaskProvider
+) : IBinderInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider) {
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder = iBinder
 }
