@@ -1,17 +1,19 @@
-package com.rosan.installer.data.reflect.repo
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
+package com.rosan.installer.core.reflection
 
 /**
- * Extensions for ReflectRepo
+ * Extensions for ReflectionProvider
  * Pattern: (Target: Any/Class) -> (Name: String) -> (Optional: Class/Types) -> (Args)
  */
 
-inline fun <reified T> ReflectRepo.getStaticValue(name: String, clazz: Class<*>): T? =
+inline fun <reified T> ReflectionProvider.getStaticValue(name: String, clazz: Class<*>): T? =
     getStaticFieldValue(name, clazz) as? T
 
-inline fun <reified T> ReflectRepo.getValue(obj: Any, name: String, clazz: Class<*>? = null): T? =
+inline fun <reified T> ReflectionProvider.getValue(obj: Any, name: String, clazz: Class<*>? = null): T? =
     getFieldValue(obj, name, clazz ?: obj.javaClass) as? T
 
-inline fun <reified T> ReflectRepo.invoke(
+inline fun <reified T> ReflectionProvider.invoke(
     obj: Any,
     name: String,
     clazz: Class<*>? = null,
@@ -19,7 +21,7 @@ inline fun <reified T> ReflectRepo.invoke(
     vararg args: Any?
 ): T? = invokeMethod(obj, name, clazz ?: obj.javaClass, parameterTypes, *args) as? T
 
-inline fun <reified T> ReflectRepo.invokeStatic(
+inline fun <reified T> ReflectionProvider.invokeStatic(
     name: String,
     clazz: Class<*>,
     parameterTypes: Array<Class<*>> = emptyArray(),

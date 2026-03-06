@@ -17,12 +17,13 @@ import android.os.IInterface
 import android.os.ServiceManager
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.BuildConfig
+import com.rosan.installer.core.reflection.ReflectionProvider
+import com.rosan.installer.core.reflection.getValue
 import com.rosan.installer.data.engine.executor.PackageInstallerUtil.abiOverride
 import com.rosan.installer.data.engine.executor.PackageInstallerUtil.installFlags
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.data.privileged.util.requireDhizukuPermissionGranted
-import com.rosan.installer.data.reflect.repo.ReflectRepo
-import com.rosan.installer.data.reflect.repo.getValue
+
 import com.rosan.installer.domain.device.model.Architecture
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.InstallException
@@ -49,7 +50,7 @@ import timber.log.Timber
 
 abstract class IBinderInstallerRepoImpl(
     protected val context: Context,
-    protected val reflect: ReflectRepo,
+    protected val reflect: ReflectionProvider,
     protected val capabilityProvider: DeviceCapabilityProvider,
     protected val postInstallTaskProvider: PostInstallTaskProvider
 ) : InstallerRepository {

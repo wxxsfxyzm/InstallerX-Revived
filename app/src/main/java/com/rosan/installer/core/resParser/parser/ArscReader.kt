@@ -1,7 +1,9 @@
-package com.rosan.installer.data.res.repo
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+package com.rosan.installer.core.resParser.parser
 
 import android.content.res.Configuration
-import com.rosan.installer.data.res.model.entity.Entry
+import com.rosan.installer.core.resParser.model.ArscEntry
 
 /**
  * @id = 0xPPTTEEEE
@@ -9,12 +11,12 @@ import com.rosan.installer.data.res.model.entity.Entry
  * @typeId = 0xTT
  * @packageId = 0xPP
  * */
-interface ArscRepo {
+interface ArscReader {
     fun getValue(
         id: Int,
         configuration: Configuration,
         densityDpi: Int? = null
-    ): Entry? = getValue(id2PackageId(id), id2TypeId(id), id2ValueId(id), configuration, densityDpi)
+    ): ArscEntry? = getValue(id2PackageId(id), id2TypeId(id), id2ValueId(id), configuration, densityDpi)
 
     fun getValue(
         packageId: Int,
@@ -22,7 +24,7 @@ interface ArscRepo {
         valueId: Int,
         configuration: Configuration,
         densityDpi: Int? = null
-    ): Entry?
+    ): ArscEntry?
 
     fun getValueName(
         id: Int,

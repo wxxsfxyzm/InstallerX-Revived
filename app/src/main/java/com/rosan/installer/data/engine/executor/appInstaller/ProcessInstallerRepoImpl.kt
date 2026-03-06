@@ -4,10 +4,11 @@ package com.rosan.installer.data.engine.executor.appInstaller
 
 import android.content.Context
 import android.os.IBinder
+import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.data.privileged.repository.recycler.ProcessHookRecycler
 import com.rosan.installer.data.privileged.util.SHELL_ROOT
 import com.rosan.installer.data.privileged.util.SHELL_SH
-import com.rosan.installer.data.reflect.repo.ReflectRepo
+
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.InstallEntity
 import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
@@ -17,7 +18,7 @@ import com.rosan.installer.domain.settings.model.ConfigModel
 
 class ProcessInstallerRepoImpl(
     context: Context,
-    reflect: ReflectRepo,
+    reflect: ReflectionProvider,
     capabilityProvider: DeviceCapabilityProvider,
     postInstallTaskProvider: PostInstallTaskProvider
 ) : IBinderInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider) {

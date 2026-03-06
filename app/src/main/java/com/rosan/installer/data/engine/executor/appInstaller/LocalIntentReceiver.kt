@@ -8,10 +8,11 @@ import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
 import android.os.IBinder
-import com.rosan.installer.data.reflect.repo.ReflectRepo
+import com.rosan.installer.core.reflection.ReflectionProvider
+
 import kotlinx.coroutines.channels.Channel
 
-class LocalIntentReceiver(private val reflect: ReflectRepo) {
+class LocalIntentReceiver(private val reflect: ReflectionProvider) {
     private val channel = Channel<Intent>(Channel.UNLIMITED)
 
     private val localSender = object : IIntentSender.Stub() {

@@ -1,9 +1,11 @@
-package com.rosan.installer.data.res.model.entity
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+package com.rosan.installer.core.resParser.model
 
-data class ValueEntity(
+data class ArscValueEntity(
     val type: Type,
     val data: Int
-) : Entry {
+) : ArscEntry {
     enum class Type(val value: UByte) {
         NULL(0x00u),
         REFERENCE(0x01u),

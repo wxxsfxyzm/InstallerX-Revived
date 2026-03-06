@@ -1,13 +1,14 @@
-package com.rosan.installer.data.reflect.model.impl
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
+package com.rosan.installer.core.reflection
 
-import com.rosan.installer.data.reflect.repo.ReflectRepo
 import timber.log.Timber
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
 
-class ReflectRepoImpl : ReflectRepo {
+class ReflectionProviderImpl : ReflectionProvider {
     private val fieldCache = ConcurrentHashMap<String, Field>()
     private val methodCache = ConcurrentHashMap<String, Method>()
     private val constructorCache = ConcurrentHashMap<String, Constructor<*>>()
@@ -122,7 +123,6 @@ class ReflectRepoImpl : ReflectRepo {
     override fun getFieldValue(obj: Any?, name: String, clazz: Class<*>): Any? =
         (getDeclaredField(name, clazz) ?: getField(name, clazz))?.get(obj)
 
-
     override fun setFieldValue(obj: Any?, name: String, clazz: Class<*>, value: Any?) {
         (getDeclaredField(name, clazz) ?: getField(name, clazz))?.set(obj, value)
     }
@@ -160,3 +160,4 @@ class ReflectRepoImpl : ReflectRepo {
         return putIfAbsent(key, newValue) ?: newValue
     }
 }
+

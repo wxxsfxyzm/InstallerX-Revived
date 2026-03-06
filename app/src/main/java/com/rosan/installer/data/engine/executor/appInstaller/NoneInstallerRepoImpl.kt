@@ -8,9 +8,10 @@ import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.provider.Settings
 import androidx.core.net.toUri
+import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.data.privileged.util.deletePaths
-import com.rosan.installer.data.reflect.repo.ReflectRepo
+
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallEntity
@@ -27,7 +28,7 @@ import java.io.IOException
 
 class NoneInstallerRepoImpl(
     private val context: Context,
-    private val reflect: ReflectRepo
+    private val reflect: ReflectionProvider
 ) : InstallerRepository {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 

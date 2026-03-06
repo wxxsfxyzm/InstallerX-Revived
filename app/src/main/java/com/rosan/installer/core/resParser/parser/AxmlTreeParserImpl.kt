@@ -1,23 +1,25 @@
-package com.rosan.installer.data.res.model.impl
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+package com.rosan.installer.core.resParser.parser
 
 import android.content.res.XmlResourceParser
-import com.rosan.installer.data.res.repo.AxmlTreeRepo
-import org.koin.core.component.KoinComponent
 import org.xmlpull.v1.XmlPullParser
 
-class AxmlTreeRepoImpl(private val xmlPull: XmlResourceParser, private val rootPath: String = "") :
-    AxmlTreeRepo, KoinComponent {
+class AxmlTreeParserImpl(
+    private val xmlPull: XmlResourceParser,
+    private val rootPath: String = ""
+) : AxmlTreeParser {
 
     private val names = mutableListOf<String>()
 
     private val registers = mutableMapOf<String, XmlResourceParser.() -> Unit>()
 
-    override fun register(path: String, action: XmlResourceParser.() -> Unit): AxmlTreeRepo {
+    override fun register(path: String, action: XmlResourceParser.() -> Unit): AxmlTreeParser {
         registers[path] = action
         return this
     }
 
-    override fun unregister(path: String): AxmlTreeRepo {
+    override fun unregister(path: String): AxmlTreeParser {
         registers.remove(path)
         return this
     }
@@ -36,9 +38,9 @@ class AxmlTreeRepoImpl(private val xmlPull: XmlResourceParser, private val rootP
                     if (namespace.isNullOrEmpty()) names.add("$name")
                     else names.add("$namespace:$name")
                     val path = getCurrentPath()
-                    registers.map {
-                        if (it.key == path) {
-                            it.value.let { xmlPull.it() }
+                    registers.forEach { (regPath, regAction) ->
+                        if (regPath == path) {
+                            xmlPull.regAction()
                         }
                     }
                     xmlPull.action(path)

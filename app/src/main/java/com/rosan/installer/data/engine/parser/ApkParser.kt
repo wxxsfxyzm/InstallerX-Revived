@@ -11,10 +11,10 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.core.content.res.ResourcesCompat
 import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.data.reflect.repo.ReflectRepo
-import com.rosan.installer.data.reflect.repo.invoke
-import com.rosan.installer.data.res.model.impl.AxmlTreeRepoImpl
-import com.rosan.installer.data.res.repo.AxmlTreeRepo
+import com.rosan.installer.core.reflection.ReflectionProvider
+import com.rosan.installer.core.reflection.invoke
+import com.rosan.installer.core.resParser.parser.AxmlTreeParser
+import com.rosan.installer.core.resParser.parser.AxmlTreeParserImpl
 import com.rosan.installer.domain.device.model.Architecture
 import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.engine.exception.AnalyseFailedAllFilesUnsupportedException
@@ -32,7 +32,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 object ApkParser : KoinComponent {
-    private val reflect by inject<ReflectRepo>()
+    private val reflect by inject<ReflectionProvider>()
     private val context by inject<Context>()
 
     @SuppressLint("DiscouragedPrivateApi")
@@ -182,51 +182,51 @@ object ApkParser : KoinComponent {
             SignatureUtils.getApkSignatureHash(context, it)
         }
 
-        AxmlTreeRepoImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml"))
+        AxmlTreeParserImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml"))
             .register("/manifest") {
                 packageName = getAttributeValue(null, "package")
-                sharedUserId = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "sharedUserId")
+                sharedUserId = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "sharedUserId")
                 splitName = getAttributeValue(null, "split")
-                val versionCodeMajor = getAttributeIntValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionCodeMajor", 0).toLong()
-                val versionCodeMinor = getAttributeIntValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionCode", 0).toLong()
+                val versionCodeMajor = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCodeMajor", 0).toLong()
+                val versionCodeMinor = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCode", 0).toLong()
                 versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
 
-                versionName = when (val resId = getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName", -1)) {
-                    -1 -> getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName") ?: versionName
+                versionName = when (val resId = getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName", -1)) {
+                    -1 -> getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName") ?: versionName
                     0 -> versionName
                     else -> try {
                         resources.getString(resId)
                     } catch (_: Exception) {
-                        getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "versionName") ?: versionName
+                        getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName") ?: versionName
                     }
                 }
             }
             .register("/manifest/uses-sdk") {
-                minSdk = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "minSdkVersion")
-                targetSdk = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "targetSdkVersion")
+                minSdk = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "minSdkVersion")
+                targetSdk = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "targetSdkVersion")
             }
             .register("/manifest/application") {
                 label = resolveString(
                     resources,
-                    getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "label", -1),
-                    getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "label")
+                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "label", -1),
+                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "label")
                 )
-                icon = resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "icon", -1))
+                icon = resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "icon", -1))
                 roundIcon =
-                    resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "roundIcon", -1))
+                    resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "roundIcon", -1))
             }
             .register("/manifest/application/meta-data") {
                 if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                    if ("minOsdkVersion" == getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")) {
+                    if ("minOsdkVersion" == getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")) {
                         minOsdkVersion = resolveString(
                             resources,
-                            getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "value", -1),
-                            getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "value")
+                            getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "value", -1),
+                            getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
                         )
                     }
                 }
 
-                val metaDataName = getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")
+                val metaDataName = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")
 
                 if ("xposedmodule" == metaDataName ||
                     "xposedminversion" == metaDataName ||
@@ -236,7 +236,7 @@ object ApkParser : KoinComponent {
                 }
             }
             .register("/manifest/uses-permission") {
-                getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")?.let { if (it.isNotBlank()) permissions.add(it) }
+                getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")?.let { if (it.isNotBlank()) permissions.add(it) }
             }
             .map { }
 

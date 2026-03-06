@@ -3,13 +3,13 @@
 package com.rosan.installer.data.engine.executor
 
 import android.content.pm.PackageInstaller
-import com.rosan.installer.data.reflect.repo.ReflectRepo
-import com.rosan.installer.data.reflect.repo.getValue
+import com.rosan.installer.core.reflection.ReflectionProvider
+import com.rosan.installer.core.reflection.getValue
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
 object PackageInstallerUtil : KoinComponent {
-    private val reflect = get<ReflectRepo>()
+    private val reflect = get<ReflectionProvider>()
 
     var PackageInstaller.SessionParams.installFlags: Int
         get() = reflect.getValue(this, "installFlags") ?: 0

@@ -27,16 +27,16 @@ import android.provider.Settings
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.rosan.installer.ICommandOutputListener
+import com.rosan.installer.core.reflection.ReflectionProvider
+import com.rosan.installer.core.reflection.getValue
+import com.rosan.installer.core.reflection.invoke
+import com.rosan.installer.core.reflection.invokeStatic
 import com.rosan.installer.data.privileged.util.InstallIntentFilter
 import com.rosan.installer.data.privileged.util.ShizukuContext
 import com.rosan.installer.data.privileged.util.ShizukuHook
 import com.rosan.installer.data.privileged.util.SystemContext
 import com.rosan.installer.data.privileged.util.deletePaths
 import com.rosan.installer.data.privileged.util.resolveSettingsBinder
-import com.rosan.installer.data.reflect.repo.ReflectRepo
-import com.rosan.installer.data.reflect.repo.getValue
-import com.rosan.installer.data.reflect.repo.invoke
-import com.rosan.installer.data.reflect.repo.invokeStatic
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -54,7 +54,7 @@ class DefaultPrivilegedService(
         private const val TAG = "PrivilegedService"
     }
 
-    private val reflect by inject<ReflectRepo>()
+    private val reflect by inject<ReflectionProvider>()
     private val capabilityProvider by inject<DeviceCapabilityProvider>()
 
     private val iPackageManager: IPackageManager by lazy {

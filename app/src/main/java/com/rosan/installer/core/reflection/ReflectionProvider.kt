@@ -1,4 +1,6 @@
-package com.rosan.installer.data.reflect.repo
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
+package com.rosan.installer.core.reflection
 
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
@@ -8,7 +10,7 @@ import java.lang.reflect.Method
  * Project-exclusive accessor for system private APIs.
  * Provides caching and automatic accessibility handling.
  */
-interface ReflectRepo {
+interface ReflectionProvider {
     // --- Cached Reflection Object Accessors ---
 
     fun getConstructor(clazz: Class<*>, vararg parameterTypes: Class<*>): Constructor<*>?

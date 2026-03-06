@@ -14,10 +14,10 @@ import android.os.IBinder
 import android.os.IUserManager
 import android.provider.Settings
 import com.rosan.installer.BuildConfig
+import com.rosan.installer.core.reflection.ReflectionProvider
+import com.rosan.installer.core.reflection.getStaticValue
+import com.rosan.installer.core.reflection.getValue
 import com.rosan.installer.data.privileged.model.exception.ShizukuNotWorkException
-import com.rosan.installer.data.reflect.repo.ReflectRepo
-import com.rosan.installer.data.reflect.repo.getStaticValue
-import com.rosan.installer.data.reflect.repo.getValue
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
@@ -84,7 +84,7 @@ class ShizukuContext(base: Context) : ContextWrapper(base) {
 
 @SuppressLint("PrivateApi", "DiscouragedPrivateApi")
 object ShizukuHook : KoinComponent {
-    private val reflect by inject<ReflectRepo>()
+    private val reflect by inject<ReflectionProvider>()
 
     val hookedPackageManager: IPackageManager by lazy {
         Timber.tag("ShizukuHook").d("Creating on-demand hooked IPackageManager...")
@@ -159,7 +159,7 @@ data class SettingsReflectionInfo(
     val originalBinder: IBinder
 )
 
-fun ReflectRepo.resolveSettingsBinder(): SettingsReflectionInfo? {
+fun ReflectionProvider.resolveSettingsBinder(): SettingsReflectionInfo? {
     val holder = this.getStaticValue<Any>("sProviderHolder", Settings.Global::class.java) ?: return null
     val provider = this.getValue<Any>(holder, "mContentProvider") ?: return null
 

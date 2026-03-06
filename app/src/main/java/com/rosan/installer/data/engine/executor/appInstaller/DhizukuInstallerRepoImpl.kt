@@ -5,9 +5,9 @@ package com.rosan.installer.data.engine.executor.appInstaller
 import android.content.Context
 import android.os.IBinder
 import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.data.privileged.util.deletePaths
 import com.rosan.installer.data.privileged.util.requireDhizukuPermissionGranted
-import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.InstallEntity
 import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
@@ -17,7 +17,7 @@ import com.rosan.installer.domain.settings.model.ConfigModel
 import timber.log.Timber
 
 class DhizukuInstallerRepoImpl(
-    context: Context, reflect: ReflectRepo, capabilityProvider: DeviceCapabilityProvider, postInstallTaskProvider: PostInstallTaskProvider
+    context: Context, reflect: ReflectionProvider, capabilityProvider: DeviceCapabilityProvider, postInstallTaskProvider: PostInstallTaskProvider
 ) : IBinderInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider) {
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder =
         requireDhizukuPermissionGranted {

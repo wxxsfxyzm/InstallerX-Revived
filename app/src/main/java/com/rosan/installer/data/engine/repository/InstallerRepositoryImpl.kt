@@ -3,13 +3,14 @@
 package com.rosan.installer.data.engine.repository
 
 import android.content.Context
+import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.data.engine.executor.appInstaller.DhizukuInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appInstaller.NoneInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appInstaller.ProcessInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appInstaller.ShizukuInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appInstaller.SystemInstallerRepoImpl
 import com.rosan.installer.data.privileged.model.exception.ShizukuNotWorkException
-import com.rosan.installer.data.reflect.repo.ReflectRepo
+
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.InstallEntity
 import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
@@ -20,7 +21,7 @@ import com.rosan.installer.domain.settings.model.ConfigModel
 
 class InstallerRepositoryImpl(
     private val context: Context,
-    private val reflect: ReflectRepo,
+    private val reflect: ReflectionProvider,
     private val deviceCapabilityProvider: DeviceCapabilityProvider,
     private val postInstallTaskProvider: PostInstallTaskProvider
 ) : InstallerRepository {

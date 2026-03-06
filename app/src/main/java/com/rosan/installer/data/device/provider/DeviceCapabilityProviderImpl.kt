@@ -9,8 +9,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.data.reflect.repo.ReflectRepo
-import com.rosan.installer.data.reflect.repo.invokeStatic
+import com.rosan.installer.core.reflection.ReflectionProvider
+import com.rosan.installer.core.reflection.invokeStatic
 import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.util.hasFlag
@@ -18,7 +18,7 @@ import timber.log.Timber
 
 class DeviceCapabilityProviderImpl(
     private val context: Context,
-    private val reflect: ReflectRepo
+    private val reflect: ReflectionProvider
 ) : DeviceCapabilityProvider {
     companion object {
         private const val MIUI_PACKAGE_INSTALLER = "com.miui.packageinstaller"
