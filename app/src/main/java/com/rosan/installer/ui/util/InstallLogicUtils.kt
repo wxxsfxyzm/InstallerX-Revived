@@ -6,11 +6,11 @@ package com.rosan.installer.ui.util
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Architecture
-import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.model.enums.PackageIdentityStatus
-import com.rosan.installer.data.app.model.enums.SignatureMatchStatus
+import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.DataType
+import com.rosan.installer.domain.engine.model.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.PackageIdentityStatus
+import com.rosan.installer.domain.engine.model.SignatureMatchStatus
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallStateResult
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallWarningResources
 import com.rosan.installer.ui.page.main.widget.chip.WarningModel

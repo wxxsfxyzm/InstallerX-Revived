@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.app.model.enums.InstallErrorType
-import com.rosan.installer.data.app.util.InstallOption
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.engine.model.InstallErrorType
+import com.rosan.installer.domain.engine.model.InstallOption
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.icons.AppIcons
@@ -46,7 +46,7 @@ import timber.log.Timber
 
 @Composable
 fun installFailedDialog(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     installer.analysisResults.firstOrNull()?.packageName ?: ""
 
@@ -92,7 +92,7 @@ fun installFailedDialog(
 private fun ErrorSuggestions(
     error: Throwable,
     viewModel: InstallerViewModel,
-    installer: InstallerRepo
+    installer: InstallerSessionRepository
 ) {
     val context = LocalContext.current
     var showUninstallConfirmDialog by remember { mutableStateOf(false) }

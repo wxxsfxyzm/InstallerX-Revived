@@ -9,9 +9,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
-import com.rosan.installer.data.app.util.PackageManagerUtil
-import com.rosan.installer.data.updater.repo.UpdateChecker
+import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.SharedUid
 import com.rosan.installer.domain.settings.provider.PrivilegedProvider
@@ -22,9 +22,11 @@ import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.domain.settings.usecase.settings.PerformAppUpdateUseCase
 import com.rosan.installer.domain.settings.usecase.settings.SetLauncherIconUseCase
 import com.rosan.installer.domain.settings.usecase.settings.ToggleUninstallFlagUseCase
+import com.rosan.installer.domain.updater.model.UpdateInfo
+import com.rosan.installer.domain.updater.repository.UpdateRepository
+import com.rosan.installer.domain.updater.usecase.PerformAppUpdateUseCase
 import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.material.RawColor
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +43,7 @@ import timber.log.Timber
 
 class PreferredViewModel(
     private val appSettingsRepo: AppSettingsRepo,
-    private val updateChecker: UpdateChecker,
+    private val updateRepo: UpdateRepository,
     private val systemEnvProvider: SystemEnvProvider,
     private val privilegedProvider: PrivilegedProvider,
     private val toggleUninstallFlagUseCase: ToggleUninstallFlagUseCase,
@@ -60,7 +62,7 @@ class PreferredViewModel(
         private set
 
     // --- External Environment State Flows ---
-    private val updateResultFlow = MutableStateFlow<UpdateChecker.CheckResult?>(null)
+    private val updateInfoFlow = MutableStateFlow<UpdateInfo?>(null)
     private val adbVerifyEnabledFlow = MutableStateFlow(true)
     private val isIgnoringBatteryOptFlow = MutableStateFlow(true)
 
@@ -69,7 +71,7 @@ class PreferredViewModel(
         val adbVerifyEnabled: Boolean = true,
         val isIgnoringBatteryOpt: Boolean = true,
         val wallpaperColors: List<Int>? = null,
-        val updateResult: UpdateChecker.CheckResult? = null
+        val updateInfo: UpdateInfo? = null
     )
 
     // 2. Aggregate all environment flows into a single flow
@@ -77,13 +79,13 @@ class PreferredViewModel(
         adbVerifyEnabledFlow,
         isIgnoringBatteryOptFlow,
         systemEnvProvider.getWallpaperColorsFlow(),
-        updateResultFlow
-    ) { adbVerify, batteryOpt, wallpaperColors, updateResult ->
+        updateInfoFlow
+    ) { adbVerify, batteryOpt, wallpaperColors, updateInfo ->
         EnvState(
             adbVerifyEnabled = adbVerify,
             isIgnoringBatteryOpt = batteryOpt,
             wallpaperColors = wallpaperColors,
-            updateResult = updateResult
+            updateInfo = updateInfo
         )
     }
 
@@ -166,8 +168,8 @@ class PreferredViewModel(
             // Extract external states from the aggregated EnvState
             adbVerifyEnabled = env.adbVerifyEnabled,
             isIgnoringBatteryOptimizations = env.isIgnoringBatteryOpt,
-            hasUpdate = env.updateResult?.hasUpdate ?: false,
-            remoteVersion = env.updateResult?.remoteVersion ?: ""
+            hasUpdate = env.updateInfo?.hasUpdate ?: false,
+            remoteVersion = env.updateInfo?.remoteVersion ?: ""
         )
     }.stateIn(
         scope = viewModelScope,
@@ -326,7 +328,9 @@ class PreferredViewModel(
     private fun performInAppUpdate() = viewModelScope.launch {
         _uiEvents.emit(PreferredViewEvent.ShowUpdateLoading)
         runCatching {
-            performAppUpdateUseCase(updateResultFlow.value, state.value.authorizer)
+            // Build the ConfigModel required by the new UseCase
+            val config = ConfigModel.default.copy(authorizer = state.value.authorizer)
+            performAppUpdateUseCase(updateInfoFlow.value, config)
         }.onFailure { e ->
             Timber.e(e, "In-app update failed")
             _uiEvents.emit(PreferredViewEvent.ShowInAppUpdateErrorDetail("Update Failed", e))
@@ -372,8 +376,9 @@ class PreferredViewModel(
     }
 
     private fun checkUpdate() = viewModelScope.launch(Dispatchers.IO) {
-        val result = updateChecker.check()
-        if (result != null) updateResultFlow.value = result
+        // Use the new repository
+        val result = updateRepo.checkUpdate()
+        if (result != null) updateInfoFlow.value = result
     }
 
     private fun setDefaultInstaller(lock: Boolean, action: PreferredViewAction) = viewModelScope.launch {

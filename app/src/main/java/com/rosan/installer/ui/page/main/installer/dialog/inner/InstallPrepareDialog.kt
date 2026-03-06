@@ -33,10 +33,10 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.util.sortedBest
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.DataType
+import com.rosan.installer.domain.engine.model.sortedBest
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -77,7 +77,7 @@ private fun installPrepareEmptyDialog(
 
 @Composable
 private fun installPrepareTooManyDialog(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(
@@ -106,7 +106,7 @@ private fun installPrepareTooManyDialog(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun installPrepareDialog(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()

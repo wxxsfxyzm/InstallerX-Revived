@@ -8,7 +8,7 @@ import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import com.rosan.installer.data.app.model.exception.AuthenticationFailedException
+import com.rosan.installer.domain.engine.exception.AuthenticationFailedException
 import com.rosan.installer.ui.activity.BiometricsAuthenticationActivity
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber

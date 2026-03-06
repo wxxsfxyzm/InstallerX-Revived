@@ -1,10 +1,10 @@
 package com.rosan.installer.ui.page.main.installer
 
-import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.session.model.SelectInstallEntity
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 
 sealed class InstallerViewAction {
-    data class CollectRepo(val repo: InstallerRepo) : InstallerViewAction()
+    data class CollectRepo(val repo: InstallerSessionRepository) : InstallerViewAction()
     data object Close : InstallerViewAction()
     data object Analyse : InstallerViewAction()
     data object InstallChoice : InstallerViewAction()
@@ -15,7 +15,7 @@ sealed class InstallerViewAction {
      * Install multiple module/apk
      *
      * **This ViewAction will forward to ActionHandler to actually process**
-     * @see com.rosan.installer.data.installer.model.impl.InstallerRepoImpl.Action.InstallMultiple
+     * @see com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl.Action.InstallMultiple
      */
     data object InstallMultiple : InstallerViewAction()
     data object InstallPrepare : InstallerViewAction()
@@ -26,7 +26,7 @@ sealed class InstallerViewAction {
      * **This ViewAction will forward to ActionHandler to actually process**
      *
      * @param triggerAuth request or not request user biometric auth
-     * @see com.rosan.installer.data.installer.model.impl.InstallerRepoImpl.Action.Install
+     * @see com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl.Action.Install
      */
     data class Install(val triggerAuth: Boolean) : InstallerViewAction()
     data object Background : InstallerViewAction()

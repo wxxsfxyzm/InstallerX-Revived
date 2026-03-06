@@ -7,7 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
@@ -17,7 +17,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 @ExperimentalMaterial3ExpressiveApi
 @Composable
 fun resolvingDialog(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(

@@ -1,6 +1,6 @@
 package com.rosan.installer.domain.settings.usecase.settings
 
-import com.rosan.installer.data.app.util.PackageManagerUtil
+import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.removeFlag

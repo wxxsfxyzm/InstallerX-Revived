@@ -8,9 +8,9 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.enums.InstallErrorType
-import com.rosan.installer.data.app.model.exception.InstallException
-import com.rosan.installer.data.app.model.exception.InstallerException
+import com.rosan.installer.domain.engine.exception.InstallException
+import com.rosan.installer.domain.engine.exception.InstallerException
+import com.rosan.installer.domain.engine.model.InstallErrorType
 import java.util.zip.ZipException
 
 /**

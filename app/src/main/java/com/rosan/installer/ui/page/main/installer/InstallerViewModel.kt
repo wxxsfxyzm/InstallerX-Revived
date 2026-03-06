@@ -12,18 +12,18 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.repo.AppIconRepo
-import com.rosan.installer.data.app.util.InstallOption
-import com.rosan.installer.data.app.util.PackageManagerUtil
-import com.rosan.installer.data.installer.model.entity.ProgressEntity
-import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
-import com.rosan.installer.data.installer.model.entity.UninstallInfo
-import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
+import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
+import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.DataType
+import com.rosan.installer.domain.engine.model.InstallOption
+import com.rosan.installer.domain.engine.model.PackageAnalysisResult
+import com.rosan.installer.domain.engine.repository.AppIconRepository
+import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
+import com.rosan.installer.domain.session.model.ProgressEntity
+import com.rosan.installer.domain.session.model.SelectInstallEntity
+import com.rosan.installer.domain.session.model.UninstallInfo
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage
@@ -51,9 +51,10 @@ import org.koin.core.component.inject
 import timber.log.Timber
 
 class InstallerViewModel(
-    private var repo: InstallerRepo,
+    private var repo: InstallerSessionRepository,
     private val appSettingsRepo: AppSettingsRepo,
-    private val appIconRepo: AppIconRepo
+    private val appIconRepo: AppIconRepository,
+    private val systemInfoProvider: SystemInfoProvider
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
@@ -452,7 +453,7 @@ class InstallerViewModel(
         }
     }
 
-    private fun collectRepo(repo: InstallerRepo) {
+    private fun collectRepo(repo: InstallerSessionRepository) {
         this.repo = repo
         if (repo.config.enableCustomizeUser) {
             loadAvailableUsers(repo.config.authorizer)
@@ -612,7 +613,7 @@ class InstallerViewModel(
             // Proceed with fetching users for other authorizers.
             runCatching {
                 withContext(Dispatchers.IO) {
-                    PrivilegedManager.getUsers(effectiveAuthorizer)
+                    systemInfoProvider.getUsers(effectiveAuthorizer)
                 }
             }.onSuccess { users ->
                 _availableUsers.value = users

@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.data.app.util.PackageManagerUtil
+import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage

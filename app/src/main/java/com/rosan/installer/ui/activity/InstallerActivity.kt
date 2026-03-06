@@ -21,9 +21,9 @@ import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Level
 import com.rosan.installer.build.model.impl.DeviceCapabilityChecker
-import com.rosan.installer.data.installer.model.entity.ProgressEntity
-import com.rosan.installer.data.installer.model.impl.InstallerSessionManager
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.session.manager.InstallerSessionManager
+import com.rosan.installer.domain.session.model.ProgressEntity
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.ui.activity.themestate.ThemeUiState
@@ -58,7 +58,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     private var disableNotificationOnDismiss = false
 
     private val sessionManager: InstallerSessionManager by inject()
-    private var installer by mutableStateOf<InstallerRepo?>(null)
+    private var installer by mutableStateOf<InstallerSessionRepository?>(null)
     private var job: Job? = null
 
     private lateinit var permissionManager: PermissionManager

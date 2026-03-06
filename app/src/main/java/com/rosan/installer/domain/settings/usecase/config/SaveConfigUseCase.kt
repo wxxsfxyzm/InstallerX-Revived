@@ -21,7 +21,7 @@ class SaveConfigUseCase(private val configRepo: ConfigRepo) {
         if (model.authorizer == Authorizer.Customize && model.customizeAuthorizer.isEmpty()) {
             return Result.failure(Exception(Error.CUSTOM_AUTHORIZER_EMPTY.name))
         }
-        if (model.installer != null && model.installer!!.isEmpty()) {
+        if (model.installer != null && model.installer.isEmpty()) {
             return Result.failure(Exception(Error.INSTALLER_EMPTY.name))
         }
         if (model.installRequester != null && !hasRequesterUid) {

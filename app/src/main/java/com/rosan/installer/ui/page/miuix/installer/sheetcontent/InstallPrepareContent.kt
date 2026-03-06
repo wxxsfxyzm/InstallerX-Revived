@@ -37,11 +37,11 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.InstalledAppInfo
-import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.util.sortedBest
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.DataType
+import com.rosan.installer.domain.engine.model.InstalledAppInfo
+import com.rosan.installer.domain.engine.model.sortedBest
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
@@ -67,7 +67,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun InstallPrepareContent(
-    installer: InstallerRepo,
+    installer: InstallerSessionRepository,
     viewModel: InstallerViewModel,
     appInfo: AppInfoState,
     onCancel: () -> Unit,
@@ -624,7 +624,7 @@ private fun AdaptiveInfoRow(
 private fun SDKComparison(
     entityToInstall: AppEntity,
     preInstallAppInfo: InstalledAppInfo?,
-    installer: InstallerRepo
+    installer: InstallerSessionRepository
 ) {
     AnimatedVisibility(visible = installer.config.displaySdk) {
         Column(

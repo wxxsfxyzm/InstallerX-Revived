@@ -42,7 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import com.rosan.installer.data.app.util.AppIconCache
+import com.rosan.installer.data.engine.repository.AppIconCache
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.build.RsConfig
 import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
@@ -35,7 +35,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun PrepareSettingsContent(
-    installer: InstallerRepo,
+    installer: InstallerSessionRepository,
     viewModel: InstallerViewModel
 ) {
     val isDarkMode = InstallerTheme.isDark

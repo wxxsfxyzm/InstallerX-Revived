@@ -3,7 +3,7 @@
 package com.rosan.installer.di
 
 import androidx.navigation.NavController
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
@@ -13,14 +13,19 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    viewModel { (installer: InstallerRepo) ->
-        InstallerViewModel(installer, get(), get())
+    viewModel { (installer: InstallerSessionRepository) ->
+        InstallerViewModel(
+            repo = installer,
+            appSettingsRepo = get(),
+            appIconRepo = get(),
+            systemInfoProvider = get()
+        )
     }
 
     viewModel {
         PreferredViewModel(
             appSettingsRepo = get(),
-            updateChecker = get(),
+            updateRepo = get(),
             systemEnvProvider = get(),
             privilegedProvider = get(),
             toggleUninstallFlagUseCase = get(),
@@ -34,7 +39,13 @@ val viewModelModule = module {
     }
 
     viewModel { (id: Long?) ->
-        EditViewModel(get(), get(), get(), id)
+        EditViewModel(
+            appSettingsRepo = get(),
+            getConfigDraftUseCase = get(),
+            saveConfigUseCase = get(),
+            systemInfoProvider = get(),
+            id = id
+        )
     }
 
     viewModel { (id: Long) ->

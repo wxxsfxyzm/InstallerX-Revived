@@ -13,9 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.util.sortedBest
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.sortedBest
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -38,7 +38,7 @@ data class AppInfoState(
  */
 @Composable
 fun rememberAppInfoState(
-    installer: InstallerRepo,
+    installer: InstallerSessionRepository,
     currentPackageName: String?,
     displayIcons: Map<String, Drawable?>
 ): AppInfoState {

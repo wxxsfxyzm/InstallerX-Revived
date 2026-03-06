@@ -16,9 +16,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
-import com.rosan.installer.data.installer.model.entity.ProgressEntity
-import com.rosan.installer.data.installer.model.impl.InstallerSessionManager
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.data.session.manager.InstallerSessionManager
+import com.rosan.installer.domain.session.model.ProgressEntity
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.ui.activity.themestate.ThemeUiState
 import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
@@ -45,7 +45,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
     private val appSettingsRepo: AppSettingsRepo by inject()
     private var uiState by mutableStateOf(ThemeUiState())
     private val sessionManager: InstallerSessionManager by inject()
-    private var installer: InstallerRepo? = null
+    private var installer: InstallerSessionRepository? = null
     private var job: Job? = null
 
     private lateinit var permissionManager: PermissionManager

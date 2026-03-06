@@ -7,10 +7,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
-import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
 import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalAuthorizer
 import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalInstallMode
 import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
+import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.DexoptMode
 import com.rosan.installer.domain.settings.model.InstallMode
@@ -39,6 +39,7 @@ class EditViewModel(
     private val appSettingsRepo: AppSettingsRepo,
     private val getConfigDraftUseCase: GetConfigDraftUseCase,
     private val saveConfigUseCase: SaveConfigUseCase,
+    private val systemInfoProvider: SystemInfoProvider,
     private val id: Long? = null
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
@@ -471,7 +472,7 @@ class EditViewModel(
             Timber.i("[LOAD_USERS] Starting to load available users.")
             val newAvailableUsers = runCatching {
                 val authorizer = state.data.authorizer.readGlobal()
-                withContext(Dispatchers.IO) { PrivilegedManager.getUsers(authorizer) }
+                withContext(Dispatchers.IO) { systemInfoProvider.getUsers(authorizer) }
             }.getOrElse {
                 Timber.e(it, "Failed to load available users.")
                 _eventFlow.emit(EditViewEvent.SnackBar(message = it.getErrorMessage(context)))

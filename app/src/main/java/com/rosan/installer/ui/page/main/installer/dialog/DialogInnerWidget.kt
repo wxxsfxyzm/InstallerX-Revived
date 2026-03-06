@@ -3,7 +3,7 @@ package com.rosan.installer.ui.page.main.installer.dialog
 import android.annotation.SuppressLint
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.inner.analyseFailedDialog
@@ -30,7 +30,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.inner.uninstallingDialo
 // change the content when the id been changed
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 fun dialogInnerWidget(
-    installer: InstallerRepo,
+    installer: InstallerSessionRepository,
     params: DialogInnerParams
 ): @Composable (() -> Unit)? =
     if (params.content == null) null
@@ -47,7 +47,7 @@ fun dialogInnerWidget(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun dialogGenerateParams(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams =
     when (viewModel.state) {
         is InstallerViewState.Ready -> readyDialog(viewModel)
