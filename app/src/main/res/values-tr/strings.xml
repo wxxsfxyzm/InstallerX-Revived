@@ -121,7 +121,7 @@
     <string name="config_force_dexopt">Optimizasyonu Zorla</string>
     <string name="config_force_dexopt_desc">Sistem gereksiz görse bile yeniden derlemeyi zorla</string>
     <string name="config_auto_delete">Otomatik sil</string>
-    <string name="config_auto_delete_desc">Uygulama yüklendikten sonra APK otomatik olarak silinir</string>
+    <string name="config_auto_delete_desc">APK dosyası yüklendikten sonra otomatik olarak silinir</string>
     <string name="config_display_sdk_version">SDK bilgilerini görüntüle</string>
     <string name="config_display_sdk_version_desc">Yükleme arayüzünde hedef ve minimum bilgilerini göster</string>
     <string name="config_label_main_settings">Ana Ayarlar</string>
@@ -291,7 +291,7 @@
     <string name="exception_analyse_failed_all_files_unsupported">Dosya desteklenmiyor</string>
     <string name="exception_install_failed_already_exists">Bu uygulama sürümü zaten yüklü, lütfen kaldırıp tekrar deneyin</string>
     <string name="exception_install_failed_blacklisted_package">Uygulamanın kurulumuna izin vermiyorsunuz!</string>
-    <string name="exception_install_failed_invalid_apk">Bu uygulama sürümü zaten yüklü, lütfen kaldırıp tekrar deneyin</string>
+    <string name="exception_install_failed_invalid_apk">Geçersiz APK (paket bozuk). Lütfen yeniden indirip tekrar deneyin</string>
     <string name="exception_install_failed_invalid_uri">Geçersiz URI</string>
     <string name="exception_install_failed_insufficient_storage">Depolama alanı dolu, biraz yer açmayı deneyin</string>
     <string name="exception_install_failed_duplicate_package">Paket imzası değişti, paketinizin güvenli olduğundan emin olun veya uygulamayı kaldırın, ardından tekrar deneyin</string>
@@ -468,7 +468,7 @@
     <string name="auto_lock_default_installer_desc">Yeni bir yükleme başlatıldığında bu uygulamayı otomatikmen yükleyici olarak ayarlar</string>
     <string name="config_label_install_options_desc">Kaynak, kullanıcı gibi yükleme parametrelerini yapılandırın</string>
     <string name="expand">Genişlet</string>
-    <string name="collapse">Küçült</string>
+    <string name="collapse">Daralt</string>
     <string name="installer_select_split">APK bölümlerini seçin</string>
     <string name="installer_select_split_desc">Yüklemek için APK bölümlerini yeniden seçin</string>
     <string name="installer_install_app">Uygulamayı Yükle</string>
@@ -688,4 +688,12 @@
     <string name="exception_resolve_failed_link_not_valid">Bu link geçerli bir dosya içermiyor</string>
     <string name="lab_mi_island">Mi Süper Ada</string>
     <string name="lab_mi_island_desc">Global bildirim stili. Sistem imza doğrulaması yalnızca özel uygulama kimlik doğrulayıcısı Shizuku olarak ayarlandığında atlanabilir. Root kullanıcıları, imza kısıtlamalarını manuel olarak devre dışı bıraktıktan sonra bunu doğrudan etkinleştirebilir</string>
+    <string name="theme_settings_color_spec">Renk Özelliği</string>
+    <string name="theme_settings_color_spec_only_2021">Mevcut palet stili yalnızca Özellik 2021\'i desteklemektedir</string>
+    <string name="config_label_preferences">Tercihler</string>
+    <string name="installer_analyse_failed_corrupted_archive">Bozulmuş arşiv</string>
+    <string name="tag_identical">Birebir aynı</string>
+    <string name="installer_prepare_identical_notice">Bu paket, yüklü olan uygulamayla tamamen aynıdır. Bu yüklemeyi güvenle atlayabilirsiniz.</string>
+    <string name="config_apk_choose_all">Toplu yükleme sırasında varsayılan olarak tüm APK\'ları seçin</string>
+    <string name="config_apk_choose_all_desc">Çoklu dosya oturumlarında varsayılan olarak tüm APK\'lar seçilir.</string>
 </resources>

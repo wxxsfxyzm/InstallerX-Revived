@@ -483,7 +483,7 @@
     <string name="exception_authentication_failed">ユーザー認証に失敗しました</string>
     <string name="exception_install_failed_already_exists">このアプリのバージョンは既にインストールされています。アンインストールしてもう一度お試しください</string>
     <string name="exception_install_failed_blacklisted_package">アプリのインストールを許可していません!</string>
-    <string name="exception_install_failed_invalid_apk">このアプリのバージョンは既にインストールされています。アンインストールしてもう一度お試しください</string>
+    <string name="exception_install_failed_invalid_apk">無効なAPKです（パッケージが破損しています）。再度ダウンロードしてみてください</string>
     <string name="exception_install_failed_invalid_uri">無効なURI</string>
     <string name="exception_install_failed_insufficient_storage">ストレージがいっぱいです。空き容量を増やしてください</string>
     <string name="exception_install_failed_duplicate_package">パッケージの署名が変更されました。パッケージが安全であることを確認してアプリケーションをアンインストールしてから、もう一度お試しください</string>
@@ -677,4 +677,7 @@
     <string name="suggestion_bypass_low_target_sdk_desc">一時的に制限を回避して再試行します</string>
     <string name="suggestion_bypass_blacklist_set_by_user">一度限りのインストールを許可</string>
     <string name="suggestion_bypass_blacklist_set_by_user_desc">一時的に一度限りのインストールを許可します</string>
+    <string name="theme_settings_color_spec">カラー仕様</string>
+    <string name="config_label_preferences">詳細設定</string>
+    <string name="config_apk_choose_all_desc">複数ファイルのセッションで、デフォルトですべての APK を選択します。</string>
 </resources>
