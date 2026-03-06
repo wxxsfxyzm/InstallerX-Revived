@@ -1,19 +1,22 @@
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
-import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,7 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -101,14 +104,10 @@ private fun installPrepareTooManyDialog(
         })
 }
 
-
-@SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun installPrepareDialog(
     installer: InstallerRepo, viewModel: InstallerViewModel
 ): DialogParams {
-    LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
     val settings = viewModel.viewSettings
@@ -158,13 +157,7 @@ fun installPrepareDialog(
         if (currentConfig.displaySize != displaySize) installer.config.displaySize = displaySize
     }
 
-    // Call InstallInfoDialog for base structure
-    val baseParams = installInfoDialog(
-        installer = installer,
-        viewModel = viewModel,
-        onTitleExtraClick = { showChips = !showChips }
-    )
-
+    // 提早计算资源和警告信息，这样可以同时喂给 InfoDialog 的插槽和底部的按钮
     val primaryColor = MaterialTheme.colorScheme.primary
     val errorColor = MaterialTheme.colorScheme.error
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
@@ -223,103 +216,143 @@ fun installPrepareDialog(
         )
     }
 
+    // Call InstallInfoDialog for base structure, 并传入警告插槽
+    val baseParams = installInfoDialog(
+        installer = installer,
+        viewModel = viewModel,
+        warningContent = {
+            if (warningModels.isNotEmpty()) {
+                WarningChipGroup(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    warnings = warningModels
+                )
+            }
+        },
+        onTitleExtraClick = { showChips = !showChips }
+    )
+
     return baseParams.copy(
         // Subtitle is inherited from InstallInfoDialog (shows new version + package name)
         text = DialogInnerParams(
             DialogParamsType.InstallerPrepareInstall.id
         ) {
-            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-                item {
-                    WarningChipGroup(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        warnings = warningModels
-                    )
-                }
-                item {
-                    AnimatedVisibility(
-                        visible = (primaryEntity is AppEntity.ModuleEntity) &&
-                                primaryEntity.description.isNotBlank() &&
-                                displaySdk,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+            // The scroll state for the column
+            val scrollState = rememberScrollState()
+
+            // 1. Inner size animation MUST NOT bounce.
+            // It provides a strict, smooth target for the outer bouncy container.
+            val sizeAnimationSpec = remember {
+                spring<androidx.compose.ui.unit.IntSize>(
+                    dampingRatio = Spring.DampingRatioNoBouncy, // Strictly no bounce
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            }
+
+            // 2. Simple linear fade for alpha transition
+            val alphaAnimationSpec = remember {
+                tween<Float>(durationMillis = 200)
+            }
+
+            Column(
+                modifier = Modifier.verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // WarningChipGroup 已经通过插槽移至 InstallInfoDialog
+
+                // Module description part
+                AnimatedVisibility(
+                    visible = (primaryEntity is AppEntity.ModuleEntity) &&
+                            primaryEntity.description.isNotBlank() &&
+                            displaySdk,
+                    enter = fadeIn(animationSpec = alphaAnimationSpec) +
+                            expandVertically(animationSpec = sizeAnimationSpec, expandFrom = Alignment.Top),
+                    exit = fadeOut(animationSpec = alphaAnimationSpec) +
+                            shrinkVertically(animationSpec = sizeAnimationSpec, shrinkTowards = Alignment.Top)
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            // Isolate graphics layer for performance
+                            .graphicsLayer(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ) {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        ) {
-                            Text(
-                                text = (primaryEntity as AppEntity.ModuleEntity).description,
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(12.dp)
-                            )
-                        }
+                        Text(
+                            text = (primaryEntity as AppEntity.ModuleEntity).description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(12.dp)
+                        )
                     }
                 }
-                item {
-                    AnimatedVisibility(
-                        visible = showChips,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+
+                // FlowRow chips part
+                AnimatedVisibility(
+                    visible = showChips,
+                    enter = fadeIn(animationSpec = alphaAnimationSpec) +
+                            expandVertically(animationSpec = sizeAnimationSpec, expandFrom = Alignment.Top),
+                    exit = fadeOut(animationSpec = alphaAnimationSpec) +
+                            shrinkVertically(animationSpec = sizeAnimationSpec, shrinkTowards = Alignment.Top)
+                ) {
+                    FlowRow(
+                        modifier = Modifier
+                            // Isolate graphics layer to prevent layout calculation stutter
+                            .graphicsLayer(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
+                        Chip(
+                            selected = autoDelete,
+                            onClick = {
+                                val newValue = !autoDelete
+                                autoDelete = newValue
+                                installer.config.autoDelete = newValue
+                            },
+                            label = stringResource(id = R.string.config_auto_delete),
+                            icon = AppIcons.Delete
+                        )
+                        Chip(
+                            selected = displaySdk,
+                            onClick = {
+                                val newValue = !displaySdk
+                                displaySdk = newValue
+                                installer.config.displaySdk = newValue
+                            },
+                            label = stringResource(id = R.string.config_display_sdk_version),
+                            icon = AppIcons.Info
+                        )
+                        Chip(
+                            selected = displaySize,
+                            onClick = {
+                                val newValue = !displaySize
+                                displaySize = newValue
+                                installer.config.displaySize = newValue
+                            },
+                            label = stringResource(id = R.string.config_display_size),
+                            icon = AppIcons.ShowSize
+                        )
+                        if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
                             Chip(
-                                selected = autoDelete,
+                                selected = showOPPOSpecial,
                                 onClick = {
-                                    val newValue = !autoDelete
-                                    autoDelete = newValue
-                                    installer.config.autoDelete = newValue
+                                    val newValue = !showOPPOSpecial
+                                    showOPPOSpecial = newValue
+                                    settings.copy(showOPPOSpecial = newValue)
                                 },
-                                label = stringResource(id = R.string.config_auto_delete),
-                                icon = AppIcons.Delete
+                                label = stringResource(id = R.string.installer_show_oem_special),
+                                icon = AppIcons.OEMSpecial
                             )
-                            Chip(
-                                selected = displaySdk,
-                                onClick = {
-                                    val newValue = !displaySdk
-                                    displaySdk = newValue
-                                    installer.config.displaySdk = newValue
-                                },
-                                label = stringResource(id = R.string.config_display_sdk_version),
-                                icon = AppIcons.Info
-                            )
-                            Chip(
-                                selected = displaySize,
-                                onClick = {
-                                    val newValue = !displaySize
-                                    displaySize = newValue
-                                    installer.config.displaySize = newValue
-                                },
-                                label = stringResource(id = R.string.config_display_size),
-                                icon = AppIcons.ShowSize
-                            )
-                            if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
-                                Chip(
-                                    selected = showOPPOSpecial,
-                                    onClick = {
-                                        val newValue = !showOPPOSpecial
-                                        showOPPOSpecial = newValue
-                                        settings.copy(showOPPOSpecial = newValue)
-                                    },
-                                    label = stringResource(id = R.string.installer_show_oem_special),
-                                    icon = AppIcons.OEMSpecial
-                                )
-                        }
                     }
                 }
                 val isInvalidSplitInstall = currentPackage.installedAppInfo == null &&
                         entityToInstall == null &&
                         selectedEntities.any { it is AppEntity.SplitEntity }
-                if (isInvalidSplitInstall)
-                    item {
-                        WarningTextBlock(listOf(Pair(stringResource(R.string.installer_splits_invalid_tip), MaterialTheme.colorScheme.error)))
-                    }
+
+                // 原本的 item { } 替换为直接的 if 语句
+                if (isInvalidSplitInstall) {
+                    WarningTextBlock(listOf(Pair(stringResource(R.string.installer_splits_invalid_tip), MaterialTheme.colorScheme.error)))
+                }
             }
         },
         buttons = dialogButtons(
