@@ -5,17 +5,19 @@ package com.rosan.installer.data.engine.repository
 import com.rosan.installer.data.engine.executor.moduleInstaller.LocalModuleInstallerRepositoryImpl
 import com.rosan.installer.data.engine.executor.moduleInstaller.ShizukuModuleInstallerRepositoryImpl
 import com.rosan.installer.data.privileged.model.exception.ShizukuNotWorkException
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.model.RootImplementation
-import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-object ModuleInstallerRepositoryImpl : ModuleInstallerRepository {
+class ModuleInstallerRepositoryImpl(
+    private val deviceCapabilityProvider: DeviceCapabilityProvider
+) : ModuleInstallerRepository {
     override fun doInstallWork(
         config: ConfigModel,
         module: AppEntity.ModuleEntity,
@@ -25,14 +27,14 @@ object ModuleInstallerRepositoryImpl : ModuleInstallerRepository {
         // 1. Select the appropriate repository implementation
         val repo = when (config.authorizer) {
             Authorizer.Root,
-            Authorizer.Customize -> LocalModuleInstallerRepositoryImpl
+            Authorizer.Customize -> LocalModuleInstallerRepositoryImpl()
 
             // Shizuku MUST use the Remote implementation
-            Authorizer.Shizuku -> ShizukuModuleInstallerRepositoryImpl
+            Authorizer.Shizuku -> ShizukuModuleInstallerRepositoryImpl(deviceCapabilityProvider)
 
             Authorizer.None -> {
-                if (OSUtils.isSystemApp && useRoot)
-                    LocalModuleInstallerRepositoryImpl
+                if (deviceCapabilityProvider.isSystemApp && useRoot)
+                    LocalModuleInstallerRepositoryImpl()
                 else null // Signal that no repo is available
             }
 
@@ -53,9 +55,7 @@ object ModuleInstallerRepositoryImpl : ModuleInstallerRepository {
             repo.doInstallWork(config, module, useRoot, rootImplementation)
         } catch (e: IllegalStateException) {
             // Catch immediate configuration errors
-            if (repo is ShizukuModuleInstallerRepositoryImpl &&
-                config.authorizer == Authorizer.Shizuku &&
-                e.message?.contains("binder") == true
+            if (repo is ShizukuModuleInstallerRepositoryImpl && e.message?.contains("binder") == true
             ) {
                 flow { throw ShizukuNotWorkException("Shizuku service connection lost.", e) }
             } else {

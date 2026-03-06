@@ -1,9 +1,9 @@
 package com.rosan.installer.domain.engine.model
 
 import android.graphics.drawable.Drawable
-import com.rosan.installer.build.model.entity.Architecture
 import com.rosan.installer.data.engine.parser.FilterType
 import com.rosan.installer.data.engine.parser.SplitType
+import com.rosan.installer.domain.device.model.Architecture
 
 sealed class AppEntity {
     abstract val packageName: String

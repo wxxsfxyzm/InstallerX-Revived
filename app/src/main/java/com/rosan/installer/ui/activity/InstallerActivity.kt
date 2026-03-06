@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.ui.activity
 
 import android.content.Intent
@@ -18,10 +20,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Level
-import com.rosan.installer.build.model.impl.DeviceCapabilityChecker
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.session.manager.InstallerSessionManager
+import com.rosan.installer.domain.device.model.Level
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.ThemeState
@@ -68,7 +70,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     private var isRequestingPermission = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (RsConfig.isDebug && RsConfig.LEVEL == Level.UNSTABLE)
+        if (AppConfig.isDebug && AppConfig.LEVEL == Level.UNSTABLE)
             logIntentDetails("onNewIntent", intent)
         enableEdgeToEdge()
         // Compat Navigation Bar color for Xiaomi Devices
@@ -158,7 +160,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     override fun onNewIntent(intent: Intent) {
         Timber.d("onNewIntent: Received new intent.")
-        if (RsConfig.isDebug && RsConfig.LEVEL == Level.UNSTABLE)
+        if (AppConfig.isDebug && AppConfig.LEVEL == Level.UNSTABLE)
             logIntentDetails("onNewIntent", intent)
         // Fix for Microsoft Edge
         if (this.installer != null && intent.flags.hasFlag(Intent.FLAG_ACTIVITY_NEW_TASK)) {
@@ -312,7 +314,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             val installer = installer ?: return@setContent
             val background by installer.background.collectAsState(false)
             val progress by installer.progress.collectAsState(ProgressEntity.Ready)
-            val capabilityChecker = koinInject<DeviceCapabilityChecker>()
+            val capabilityChecker = koinInject<DeviceCapabilityProvider>()
 
             if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.Finish)
                 return@setContent

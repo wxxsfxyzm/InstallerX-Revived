@@ -11,6 +11,7 @@ import com.rosan.installer.domain.updater.repository.UpdateRepository
 import com.rosan.installer.domain.updater.usecase.PerformAppUpdateUseCase
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import java.util.concurrent.TimeUnit
 
@@ -33,7 +34,7 @@ val networkModule = module {
 
     single<NetworkResolver> {
         OkHttpNetworkResolver(
-            context = get(),
+            context = androidContext(),
             okHttpClient = get(),
             appSettingsRepo = get()
         )
@@ -41,10 +42,10 @@ val networkModule = module {
 }
 
 val updateModule = module {
-    // 1. Data Layer implementations
+    // Data Layer implementations
     single<UpdateRepository> { OnlineUpdateRepositoryImpl(get(), get(), get()) }
-    single<InAppInstallProvider> { InAppInstallProviderImpl(get()) }
+    single<InAppInstallProvider> { InAppInstallProviderImpl(get(), get()) }
 
-    // 2. Domain Layer UseCases
+    // Domain Layer UseCases
     factory { PerformAppUpdateUseCase(get(), get()) }
 }

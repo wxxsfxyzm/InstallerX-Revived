@@ -3,6 +3,7 @@
 package com.rosan.installer.data.privileged.provider
 
 import com.rosan.installer.data.privileged.util.useUserService
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.model.PostInstallTaskInfo
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.Authorizer
@@ -10,7 +11,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class PostInstallTaskProviderImpl : PostInstallTaskProvider {
+class PostInstallTaskProviderImpl(
+    private val capabilityProvider: DeviceCapabilityProvider
+) : PostInstallTaskProvider {
     override suspend fun executeTasks(authorizer: Authorizer, customizeAuthorizer: String, info: PostInstallTaskInfo) {
         coroutineScope {
             if (!info.hasTasks) return@coroutineScope
@@ -18,7 +21,11 @@ class PostInstallTaskProviderImpl : PostInstallTaskProvider {
             launch {
                 if (info.enableDexopt) {
                     runCatching {
-                        useUserService(authorizer = authorizer, customizeAuthorizer = customizeAuthorizer) {
+                        useUserService(
+                            isSystemApp = capabilityProvider.isSystemApp,
+                            authorizer = authorizer,
+                            customizeAuthorizer = customizeAuthorizer
+                        ) {
                             val result = it.privileged.performDexOpt(info.packageName, info.dexoptMode, info.forceDexopt)
                             Timber.i("Dexopt result: $result")
                         }
@@ -29,7 +36,12 @@ class PostInstallTaskProviderImpl : PostInstallTaskProvider {
             launch {
                 if (info.enableAutoDelete && info.deletePaths.isNotEmpty()) {
                     runCatching {
-                        useUserService(authorizer = authorizer, customizeAuthorizer = customizeAuthorizer, useHookMode = false) {
+                        useUserService(
+                            isSystemApp = capabilityProvider.isSystemApp,
+                            authorizer = authorizer,
+                            customizeAuthorizer = customizeAuthorizer,
+                            useHookMode = false
+                        ) {
                             it.privileged.delete(info.deletePaths.toTypedArray())
                             Timber.i("Delete completed")
                         }

@@ -18,7 +18,7 @@ import timber.log.Timber
 /**
  * A module installer that executes commands DIRECTLY in the local process via `su`.
  */
-object LocalModuleInstallerRepositoryImpl : ModuleInstallerRepository {
+class LocalModuleInstallerRepositoryImpl : ModuleInstallerRepository {
     override fun doInstallWork(
         config: ConfigModel,
         module: AppEntity.ModuleEntity,

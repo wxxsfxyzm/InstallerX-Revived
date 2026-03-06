@@ -53,8 +53,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Manufacturer
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstalledAppInfo
@@ -401,7 +401,7 @@ fun installInfoDialog(
                     }
                 }
                 // --- OPPO Info Display ---
-                if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
+                if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS)
                     AnimatedVisibility(settings.showOPPOSpecial && entityToInstall.sourceType == DataType.APK) {
                         Column {
                             Spacer(modifier = Modifier.height(8.dp))

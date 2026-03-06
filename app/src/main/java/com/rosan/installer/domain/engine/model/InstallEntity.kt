@@ -1,6 +1,6 @@
 package com.rosan.installer.domain.engine.model
 
-import com.rosan.installer.build.model.entity.Architecture
+import com.rosan.installer.domain.device.model.Architecture
 
 data class InstallEntity(
     val name: String,

@@ -8,15 +8,16 @@ import com.rosan.installer.data.engine.executor.appInstaller.ProcessInstallerRep
 import com.rosan.installer.data.engine.executor.appInstaller.ShizukuInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appInstaller.SystemInstallerRepoImpl
 import com.rosan.installer.data.privileged.model.exception.ShizukuNotWorkException
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.InstallEntity
 import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
 import com.rosan.installer.domain.engine.repository.InstallerRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.util.OSUtils
-import org.koin.core.component.KoinComponent
 
-object InstallerRepositoryImpl : InstallerRepository, KoinComponent {
+class InstallerRepositoryImpl(
+    private val deviceCapabilityProvider: DeviceCapabilityProvider
+) : InstallerRepository {
     override suspend fun doInstallWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
@@ -80,7 +81,7 @@ object InstallerRepositoryImpl : InstallerRepository, KoinComponent {
             Authorizer.Shizuku -> ShizukuInstallerRepoImpl
             Authorizer.Dhizuku -> DhizukuInstallerRepoImpl
             Authorizer.None -> {
-                if (OSUtils.isSystemApp) SystemInstallerRepoImpl
+                if (deviceCapabilityProvider.isSystemApp) SystemInstallerRepoImpl
                 else NoneInstallerRepoImpl
             }
 

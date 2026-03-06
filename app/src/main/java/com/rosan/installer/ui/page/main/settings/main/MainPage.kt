@@ -36,7 +36,6 @@ import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -51,7 +50,6 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.all.AllPage
-import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.NewAllPage
 import com.rosan.installer.ui.page.main.settings.preferred.NewPreferredPage
@@ -68,12 +66,8 @@ import org.koin.core.parameter.parametersOf
 @OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MainPage(navController: NavController, preferredViewModel: PreferredViewModel) {
-    val allViewModel: AllViewModel = koinViewModel {
-        parametersOf(navController)
-    }
-    LaunchedEffect(Unit) {
-        allViewModel.dispatch(AllViewAction.Init)
-    }
+    val allViewModel: AllViewModel = koinViewModel { parametersOf(navController) }
+
     val uiState by preferredViewModel.state.collectAsStateWithLifecycle()
     val showExpressiveUI = uiState.showExpressiveUI
     val useBlur = showExpressiveUI && uiState.useBlur

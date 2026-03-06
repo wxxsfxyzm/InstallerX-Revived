@@ -78,10 +78,6 @@ fun MiuixEditPage(
     viewModel: EditViewModel = koinViewModel { parametersOf(id) },
     useBlur: Boolean
 ) {
-    LaunchedEffect(true) {
-        viewModel.dispatch(EditViewAction.Init)
-    }
-
     val snackBarHostState = remember { SnackbarHostState() }
     val scrollBehavior = MiuixScrollBehavior()
     val hazeState = if (useBlur) remember { HazeState() } else null

@@ -1,4 +1,4 @@
-package com.rosan.installer.build.model.entity
+package com.rosan.installer.domain.device.model
 
 import android.content.res.Resources
 import android.util.DisplayMetrics

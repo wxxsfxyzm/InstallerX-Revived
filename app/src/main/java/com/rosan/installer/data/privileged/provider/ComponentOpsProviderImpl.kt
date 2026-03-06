@@ -4,17 +4,25 @@ package com.rosan.installer.data.privileged.provider
 
 import android.content.Intent
 import com.rosan.installer.data.privileged.util.useUserService
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
 import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class ComponentOpsProviderImpl : ComponentOpsProvider {
+class ComponentOpsProviderImpl(
+    private val capabilityProvider: DeviceCapabilityProvider
+) : ComponentOpsProvider {
     override suspend fun startActivityPrivileged(config: ConfigModel, intent: Intent): Boolean {
         return withContext(Dispatchers.IO) {
             var success = false
-            useUserService(authorizer = config.authorizer, customizeAuthorizer = config.customizeAuthorizer, special = null) {
+            useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
+                authorizer = config.authorizer,
+                customizeAuthorizer = config.customizeAuthorizer,
+                special = null
+            ) {
                 try {
                     success = it.privileged.startActivityPrivileged(intent)
                 } catch (e: Exception) {
@@ -28,7 +36,12 @@ class ComponentOpsProviderImpl : ComponentOpsProvider {
     override suspend fun sendBroadcastPrivileged(config: ConfigModel, intent: Intent): Boolean {
         return withContext(Dispatchers.IO) {
             var success = false
-            useUserService(authorizer = config.authorizer, customizeAuthorizer = config.customizeAuthorizer, special = null) {
+            useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
+                authorizer = config.authorizer,
+                customizeAuthorizer = config.customizeAuthorizer,
+                special = null
+            ) {
                 try {
                     success = it.privileged.sendBroadcastPrivileged(intent)
                 } catch (e: Exception) {

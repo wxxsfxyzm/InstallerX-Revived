@@ -22,13 +22,14 @@ import android.os.IInterface
 import android.os.ServiceManager
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.BuildConfig
-import com.rosan.installer.build.model.entity.Architecture
 import com.rosan.installer.data.engine.executor.PackageInstallerUtil.abiOverride
 import com.rosan.installer.data.engine.executor.PackageInstallerUtil.installFlags
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.data.privileged.util.requireDhizukuPermissionGranted
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.getValue
+import com.rosan.installer.domain.device.model.Architecture
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallEntity
@@ -42,7 +43,6 @@ import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.model.PackageSource
-import com.rosan.installer.util.OSUtils
 import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.pm.isFreshInstallCandidate
 import com.rosan.installer.util.pm.isPackageArchivedCompat
@@ -59,6 +59,7 @@ import timber.log.Timber
 abstract class IBinderInstallerRepoImpl : InstallerRepository, KoinComponent {
     private val context by inject<Context>()
     private val reflect by inject<ReflectRepo>()
+    private val capabilityProvider by inject<DeviceCapabilityProvider>()
     private val postInstallTaskProvider by inject<PostInstallTaskProvider>()
     private val taskScope = CoroutineScope(Dispatchers.IO)
 
@@ -74,7 +75,7 @@ abstract class IBinderInstallerRepoImpl : InstallerRepository, KoinComponent {
 
         val installerPackageName = when (config.authorizer) {
             Authorizer.Dhizuku -> getDhizukuComponentName()
-            Authorizer.None -> if (OSUtils.isSystemApp) context.packageName else BuildConfig.APPLICATION_ID
+            Authorizer.None -> if (capabilityProvider.isSystemApp) context.packageName else BuildConfig.APPLICATION_ID
             else -> config.installer ?: BuildConfig.APPLICATION_ID
         }
 

@@ -7,7 +7,6 @@ import com.rosan.installer.domain.settings.model.InstallReason
 import com.rosan.installer.domain.settings.model.PackageSource
 
 sealed class EditViewAction {
-    object Init : EditViewAction()
     data class ChangeDataName(val name: String) : EditViewAction()
     data class ChangeDataDescription(val description: String) : EditViewAction()
     data class ChangeDataAuthorizer(val authorizer: Authorizer) : EditViewAction()

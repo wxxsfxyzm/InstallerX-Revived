@@ -30,7 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -45,9 +46,9 @@ import com.rosan.installer.ui.theme.getM3TopBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
-import com.rosan.installer.util.OSUtils
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -56,12 +57,13 @@ fun NewLabPage(
     viewModel: PreferredViewModel
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val topAppBarState = rememberTopAppBarState()
     val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMaterial3HazeStyle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val showRootImplementationDialog = remember { mutableStateOf(false) }
-    val isMiIslandSupported = remember { OSUtils.isSupportMiIsland() }
+    val isMiIslandSupported = remember { capabilityProvider.isSupportMiIsland }
 
     if (showRootImplementationDialog.value) {
         RootImplementationSelectionDialog(
@@ -152,7 +154,7 @@ fun NewLabPage(
                             }
                         )
                     }
-                    item(visible = uiState.labRootEnableModuleFlash && OSUtils.isSystemApp) {
+                    item(visible = uiState.labRootEnableModuleFlash && capabilityProvider.isSystemApp) {
                         SwitchWidget(
                             icon = AppIcons.FlashPreferRoot,
                             title = stringResource(R.string.lab_module_always_use_root),
@@ -189,7 +191,7 @@ fun NewLabPage(
                 }
             }
 
-            if (RsConfig.isInternetAccessEnabled)
+            if (AppConfig.isInternetAccessEnabled)
                 item {
                     SplicedColumnGroup(
                         title = stringResource(R.string.internet_access_enabled)

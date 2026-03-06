@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.activity
 
 import android.os.Build
@@ -12,7 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rosan.installer.build.model.impl.DeviceCapabilityChecker
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.page.main.settings.SettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -39,9 +41,9 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
 
         super.onCreate(savedInstanceState)
         setContent {
-            val capabilityChecker = koinInject<DeviceCapabilityChecker>()
+            val capabilityProvider = koinInject<DeviceCapabilityProvider>()
             CompositionLocalProvider(
-                LocalSessionInstallSupported provides capabilityChecker.isSessionInstallSupported
+                LocalSessionInstallSupported provides capabilityProvider.isSessionInstallSupported
             ) {
                 val state by preferredViewModel.state.collectAsStateWithLifecycle()
                 InstallerTheme(

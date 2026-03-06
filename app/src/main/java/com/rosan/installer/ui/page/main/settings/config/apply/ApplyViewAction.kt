@@ -1,7 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.config.apply
 
 sealed class ApplyViewAction {
-    data object Init : ApplyViewAction()
     data object LoadApps : ApplyViewAction()
     data object LoadAppEntities : ApplyViewAction()
     data class ApplyPackageName(val packageName: String?, val applied: Boolean) : ApplyViewAction()

@@ -141,9 +141,6 @@ fun MiuixSettingsPage(preferredViewModel: PreferredViewModel) {
     ) {
         composable(route = MiuixSettingsScreen.MiuixMain.route) {
             val allViewModel: AllViewModel = koinViewModel { parametersOf(navController) }
-            LaunchedEffect(Unit) {
-                allViewModel.dispatch(AllViewAction.Init)
-            }
 
             val navigationItems = listOf(
                 NavigationItem(

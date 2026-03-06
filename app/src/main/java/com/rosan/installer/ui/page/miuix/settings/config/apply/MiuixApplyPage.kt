@@ -93,8 +93,6 @@ fun MiuixApplyPage(
         parametersOf(id)
     }
 ) {
-    LaunchedEffect(Unit) { viewModel.dispatch(ApplyViewAction.Init) }
-
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val scrollBehavior = MiuixScrollBehavior()

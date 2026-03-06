@@ -99,10 +99,6 @@ fun NewEditPage(
     viewModel: EditViewModel = koinViewModel { parametersOf(id) },
     useBlur: Boolean
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.dispatch(EditViewAction.Init)
-    }
-
     val showFloatingState = remember { mutableStateOf(true) }
     val showFloating by showFloatingState
     val listState = rememberLazyListState()

@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Manufacturer
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -103,7 +103,7 @@ fun PrepareSettingsContent(
                     installer.config = installer.config.copy(autoDelete = newValue)
                 }
             )
-            if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
+            if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS)
                 MiuixSwitchWidget(
                     title = stringResource(R.string.installer_show_oem_special),
                     description = stringResource(R.string.installer_show_oem_special_desc),

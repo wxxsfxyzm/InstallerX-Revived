@@ -4,16 +4,23 @@ package com.rosan.installer.data.privileged.provider
 
 import com.rosan.installer.data.privileged.util.getSpecialAuth
 import com.rosan.installer.data.privileged.util.useUserService
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.PermissionProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class PermissionProviderImpl : PermissionProvider {
+class PermissionProviderImpl(
+    private val capabilityProvider: DeviceCapabilityProvider
+) : PermissionProvider {
     override suspend fun grantRuntimePermission(authorizer: Authorizer, packageName: String, permission: String) {
         withContext(Dispatchers.IO) {
-            useUserService(authorizer = authorizer, special = getSpecialAuth(authorizer)) {
+            useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
+                authorizer = authorizer,
+                special = getSpecialAuth(authorizer)
+            ) {
                 try {
                     it.privileged.grantRuntimePermission(packageName, permission)
                 } catch (e: Exception) {
@@ -27,7 +34,11 @@ class PermissionProviderImpl : PermissionProvider {
     override suspend fun isPermissionGranted(authorizer: Authorizer, packageName: String, permission: String): Boolean {
         return withContext(Dispatchers.IO) {
             var isGranted = false
-            useUserService(authorizer = authorizer, special = getSpecialAuth(authorizer)) {
+            useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
+                authorizer = authorizer,
+                special = getSpecialAuth(authorizer)
+            ) {
                 try {
                     isGranted = it.privileged.isPermissionGranted(packageName, permission)
                 } catch (e: Exception) {

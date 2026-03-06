@@ -5,16 +5,23 @@ package com.rosan.installer.data.privileged.provider
 import android.content.ComponentName
 import com.rosan.installer.data.privileged.util.getSpecialAuth
 import com.rosan.installer.data.privileged.util.useUserService
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class AppOpsProviderImpl : AppOpsProvider {
+class AppOpsProviderImpl(
+    private val capabilityProvider: DeviceCapabilityProvider
+) : AppOpsProvider {
     override suspend fun setDefaultInstaller(authorizer: Authorizer, component: ComponentName, lock: Boolean) {
         withContext(Dispatchers.IO) {
-            useUserService(authorizer = authorizer, special = getSpecialAuth(authorizer)) { userService ->
+            useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
+                authorizer = authorizer,
+                special = getSpecialAuth(authorizer)
+            ) { userService ->
                 userService.privileged.setDefaultInstaller(component, lock)
             }
         }
@@ -23,6 +30,7 @@ class AppOpsProviderImpl : AppOpsProvider {
     override suspend fun setAdbVerifyEnabled(authorizer: Authorizer, customizeAuthorizer: String, enabled: Boolean) {
         withContext(Dispatchers.IO) {
             useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
                 authorizer = authorizer,
                 customizeAuthorizer = customizeAuthorizer,
                 special = getSpecialAuth(authorizer)
@@ -41,6 +49,7 @@ class AppOpsProviderImpl : AppOpsProvider {
     override suspend fun setPackageNetworkingEnabled(authorizer: Authorizer, uid: Int, enabled: Boolean) {
         withContext(Dispatchers.IO) {
             useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
                 authorizer = authorizer,
                 useHookMode = true,
                 special = getSpecialAuth(authorizer)

@@ -31,8 +31,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Manufacturer
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.sortedBest
@@ -217,7 +217,7 @@ fun installPrepareDialog(
             primaryEntity = primaryEntity,
             isSplitUpdateMode = isSplitUpdateMode,
             containerType = containerType,
-            systemArch = RsConfig.currentArchitecture,
+            systemArch = DeviceConfig.currentArchitecture,
             systemSdkInt = Build.VERSION.SDK_INT,
             resources = installResources
         )
@@ -299,7 +299,7 @@ fun installPrepareDialog(
                                 label = stringResource(id = R.string.config_display_size),
                                 icon = AppIcons.ShowSize
                             )
-                            if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
+                            if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS)
                                 Chip(
                                     selected = showOPPOSpecial,
                                     onClick = {

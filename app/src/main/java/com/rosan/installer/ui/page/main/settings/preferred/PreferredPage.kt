@@ -38,8 +38,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Level
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.domain.device.model.Level
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
@@ -56,8 +57,8 @@ import com.rosan.installer.ui.page.main.widget.setting.OnLifecycleEvent
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.theme.none
-import com.rosan.installer.util.OSUtils
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -67,13 +68,14 @@ fun PreferredPage(
     outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     OnLifecycleEvent(Lifecycle.Event.ON_RESUME) {
         viewModel.dispatch(PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus)
     }
 
-    val revLevel = when (RsConfig.LEVEL) {
+    val revLevel = when (AppConfig.LEVEL) {
         Level.STABLE -> stringResource(id = R.string.stable)
         Level.PREVIEW -> stringResource(id = R.string.preview)
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
@@ -205,7 +207,7 @@ fun PreferredPage(
                     }
                     if (uiState.authorizer == Authorizer.None)
                         item {
-                            val tip = if (OSUtils.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
+                            val tip = if (capabilityProvider.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
                             else stringResource(R.string.config_authorizer_none_tips)
                             InfoTipCard(text = tip)
                         }
@@ -267,7 +269,7 @@ fun PreferredPage(
                             supportingContentText = if (uiState.hasUpdate) stringResource(
                                 R.string.update_available,
                                 uiState.remoteVersion
-                            ) else "$revLevel ${RsConfig.VERSION_NAME}",
+                            ) else "$revLevel ${AppConfig.VERSION_NAME}",
                             supportingContentColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             onClick = { navController.navigate(SettingsScreen.About.route) }
                         )

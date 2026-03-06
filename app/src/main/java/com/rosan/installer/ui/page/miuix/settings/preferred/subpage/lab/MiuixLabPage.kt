@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.HttpProfile
 import com.rosan.installer.domain.settings.model.RootImplementation
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -36,9 +37,9 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
-import com.rosan.installer.util.OSUtils
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -55,11 +56,12 @@ fun MiuixLabPage(
     viewModel: PreferredViewModel
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scrollBehavior = MiuixScrollBehavior()
     val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMiuixHazeStyle()
     val showRootImplementationDialog = remember { mutableStateOf(false) }
-    val isMiIslandSupported = remember { OSUtils.isSupportMiIsland() }
+    val isMiIslandSupported = remember { capabilityProvider.isSupportMiIsland }
 
     MiuixRootImplementationDialog(
         showState = showRootImplementationDialog,
@@ -158,7 +160,7 @@ fun MiuixLabPage(
                                 checked = uiState.labRootShowModuleArt,
                                 onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
                             )
-                            if (OSUtils.isSystemApp)
+                            if (capabilityProvider.isSystemApp)
                                 MiuixSwitchWidget(
                                     title = stringResource(R.string.lab_module_always_use_root),
                                     description = stringResource(R.string.lab_module_always_use_root_desc),
@@ -191,7 +193,7 @@ fun MiuixLabPage(
                     )
                 }
             }
-            if (RsConfig.isInternetAccessEnabled) {
+            if (AppConfig.isInternetAccessEnabled) {
                 item { SmallTitle(stringResource(R.string.internet_access_enabled)) }
                 item {
                     Card(

@@ -26,8 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Manufacturer
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.engine.model.InstallErrorType
 import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
@@ -131,7 +131,7 @@ private fun MiuixErrorSuggestions(
 
             if (installer.config.authorizer != Authorizer.None ||
                 (installer.config.authorizer == Authorizer.None &&
-                        !(RsConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
+                        !(DeviceConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
             ) {
                 add(
                     SuggestionItem(
@@ -184,7 +184,7 @@ private fun MiuixErrorSuggestions(
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA &&
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
                 !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM &&
-                        (RsConfig.currentManufacturer == Manufacturer.SAMSUNG || RsConfig.currentManufacturer == Manufacturer.REALME)) &&
+                        (DeviceConfig.currentManufacturer == Manufacturer.SAMSUNG || DeviceConfig.currentManufacturer == Manufacturer.REALME)) &&
                 (installer.config.authorizer == Authorizer.Root || installer.config.authorizer == Authorizer.Shizuku)
             ) {
                 add(

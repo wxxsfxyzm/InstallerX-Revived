@@ -5,6 +5,7 @@ package com.rosan.installer.data.privileged.provider
 import com.rosan.installer.data.privileged.util.SHELL_ROOT
 import com.rosan.installer.data.privileged.util.SU_ARGS
 import com.rosan.installer.data.privileged.util.useUserService
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
@@ -12,7 +13,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class ShellExecutionProviderImpl : ShellExecutionProvider {
+class ShellExecutionProviderImpl(
+    private val capabilityProvider: DeviceCapabilityProvider
+) : ShellExecutionProvider {
     override suspend fun executeCommandArray(config: ConfigModel, command: Array<String>): String {
         return withContext(Dispatchers.IO) {
             if (config.authorizer == Authorizer.Root || config.authorizer == Authorizer.Customize) {
@@ -39,6 +42,7 @@ class ShellExecutionProviderImpl : ShellExecutionProvider {
 
             var result = ""
             useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
                 authorizer = config.authorizer,
                 customizeAuthorizer = config.customizeAuthorizer,
                 useHookMode = false

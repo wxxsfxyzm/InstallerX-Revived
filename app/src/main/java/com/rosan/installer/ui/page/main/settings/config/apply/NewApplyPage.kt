@@ -59,7 +59,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -106,8 +105,6 @@ fun NewApplyPage(
         parametersOf(id)
     }
 ) {
-    LaunchedEffect(Unit) { viewModel.dispatch(ApplyViewAction.Init) }
-
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()

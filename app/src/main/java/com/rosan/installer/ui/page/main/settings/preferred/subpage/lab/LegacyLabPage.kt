@@ -26,7 +26,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -37,7 +38,7 @@ import com.rosan.installer.ui.page.main.widget.setting.LabHttpProfileWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabRootImplementationWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
-import com.rosan.installer.util.OSUtils
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,9 +47,10 @@ fun LegacyLabPage(
     viewModel: PreferredViewModel
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val showRootImplementationDialog = remember { mutableStateOf(false) }
-    val isMiIslandSupported = remember { OSUtils.isSupportMiIsland() }
+    val isMiIslandSupported = remember { capabilityProvider.isSupportMiIsland }
 
     if (showRootImplementationDialog.value) {
         RootImplementationSelectionDialog(
@@ -119,7 +121,7 @@ fun LegacyLabPage(
                             checked = uiState.labRootShowModuleArt,
                             onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
                         )
-                        if (OSUtils.isSystemApp)
+                        if (capabilityProvider.isSystemApp)
                             SwitchWidget(
                                 icon = AppIcons.FlashPreferRoot,
                                 title = stringResource(R.string.lab_module_always_use_root),
@@ -153,7 +155,7 @@ fun LegacyLabPage(
                 )
             }
             // --- Internet Access Section ---
-            if (RsConfig.isInternetAccessEnabled) {
+            if (AppConfig.isInternetAccessEnabled) {
                 item { LabelWidget(stringResource(R.string.internet_access_enabled)) }
                 // TODO
                 /*item {

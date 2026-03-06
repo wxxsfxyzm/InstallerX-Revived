@@ -2,6 +2,10 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.model
 
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Manufacturer
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+
 // Represents the complete business object for a configuration
 data class ConfigModel(
     val id: Long = 0L,
@@ -98,5 +102,20 @@ data class ConfigModel(
             splitChooseAll = false,
             apkChooseAll = false
         )
+
+        fun generateOptimalDefault(deviceCapabilityProvider: DeviceCapabilityProvider): ConfigModel {
+            val baseConfig = when (DeviceConfig.currentManufacturer) {
+                Manufacturer.XIAOMI -> XiaomiDefault
+                else -> default
+            }
+
+            val optimalAuthorizer = if (deviceCapabilityProvider.isSystemApp) {
+                Authorizer.None
+            } else {
+                Authorizer.Shizuku
+            }
+
+            return baseConfig.copy(authorizer = optimalAuthorizer)
+        }
     }
 }

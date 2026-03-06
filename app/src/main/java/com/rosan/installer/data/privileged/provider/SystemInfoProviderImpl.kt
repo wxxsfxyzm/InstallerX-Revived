@@ -4,17 +4,23 @@ package com.rosan.installer.data.privileged.provider
 
 import android.os.Bundle
 import com.rosan.installer.data.privileged.util.useUserService
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class SystemInfoProviderImpl : SystemInfoProvider {
+class SystemInfoProviderImpl(
+    private val capabilityProvider: DeviceCapabilityProvider
+) : SystemInfoProvider {
     override suspend fun getUsers(authorizer: Authorizer): Map<Int, String> {
         return withContext(Dispatchers.IO) {
             var users: Map<Int, String> = emptyMap()
-            useUserService(authorizer) {
+            useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
+                authorizer = authorizer
+            ) {
                 try {
                     @Suppress("UNCHECKED_CAST")
                     users = it.privileged.users as? Map<Int, String> ?: emptyMap()
@@ -29,7 +35,10 @@ class SystemInfoProviderImpl : SystemInfoProvider {
     override suspend fun getSessionDetails(authorizer: Authorizer, sessionId: Int): Bundle? {
         return withContext(Dispatchers.IO) {
             var details: Bundle? = null
-            useUserService(authorizer) {
+            useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
+                authorizer = authorizer
+            ) {
                 try {
                     details = it.privileged.getSessionDetails(sessionId)
                 } catch (e: Exception) {

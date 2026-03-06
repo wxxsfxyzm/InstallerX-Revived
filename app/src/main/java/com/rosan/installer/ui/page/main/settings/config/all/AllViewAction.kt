@@ -4,7 +4,6 @@ import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.util.ConfigOrder
 
 sealed class AllViewAction {
-    data object Init : AllViewAction()
     data object LoadData : AllViewAction()
     data object UserReadScopeTips : AllViewAction()
     data class ChangeDataConfigOrder(val configOrder: ConfigOrder) : AllViewAction()

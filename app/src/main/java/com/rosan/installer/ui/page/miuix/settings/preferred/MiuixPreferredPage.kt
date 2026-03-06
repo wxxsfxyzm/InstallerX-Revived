@@ -16,8 +16,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Level
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.domain.device.model.Level
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
@@ -36,11 +37,11 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
-import com.rosan.installer.util.OSUtils
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -61,12 +62,13 @@ fun MiuixPreferredPage(
     outerPadding: PaddingValues
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
 
     OnLifecycleEvent(Lifecycle.Event.ON_RESUME) {
         viewModel.dispatch(PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus)
     }
 
-    val revLevel = when (RsConfig.LEVEL) {
+    val revLevel = when (AppConfig.LEVEL) {
         Level.STABLE -> stringResource(id = R.string.stable)
         Level.PREVIEW -> stringResource(id = R.string.preview)
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
@@ -134,7 +136,7 @@ fun MiuixPreferredPage(
             }
             if (uiState.authorizer == Authorizer.None)
                 item {
-                    val tip = if (OSUtils.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
+                    val tip = if (capabilityProvider.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
                     else stringResource(R.string.config_authorizer_none_tips)
                     MiuixSettingsTipCard(text = tip)
                 }
@@ -191,7 +193,7 @@ fun MiuixPreferredPage(
                         summary = if (uiState.hasUpdate) stringResource(
                             R.string.update_available,
                             uiState.remoteVersion
-                        ) else "$revLevel ${RsConfig.VERSION_NAME}",
+                        ) else "$revLevel ${AppConfig.VERSION_NAME}",
                         summaryColor = BasicComponentColors(
                             color = if (uiState.hasUpdate) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant

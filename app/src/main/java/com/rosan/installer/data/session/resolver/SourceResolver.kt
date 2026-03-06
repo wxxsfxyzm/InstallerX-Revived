@@ -12,7 +12,7 @@ import android.provider.OpenableColumns
 import android.system.Os
 import android.system.OsConstants
 import androidx.core.net.toUri
-import com.rosan.installer.build.RsConfig
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.session.util.copyToWithProgress
 import com.rosan.installer.data.session.util.getRealPathFromUri
 import com.rosan.installer.data.session.util.pathUnify
@@ -167,7 +167,7 @@ class SourceResolver(
             "content" -> resolveContentUri(uri)
 
             "http", "https" -> {
-                if (!RsConfig.isInternetAccessEnabled) {
+                if (!AppConfig.isInternetAccessEnabled) {
                     Timber.d("Internet access is disabled in app settings. Aborting network request.")
                     throw ResolvedFailedNoInternetAccessException("No internet access to download files.")
                 }

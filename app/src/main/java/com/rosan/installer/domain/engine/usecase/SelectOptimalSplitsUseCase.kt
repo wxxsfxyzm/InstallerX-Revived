@@ -2,7 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.engine.usecase
 
-import com.rosan.installer.build.RsConfig
+import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.data.engine.parser.FilterType
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.DataType
@@ -79,11 +79,11 @@ class SelectOptimalSplitsUseCase {
         if (splits.isEmpty()) return emptySet()
 
         val availableAbis = splits.filter { it.filterType == FilterType.ABI }.mapNotNull { it.configValue }.toSet()
-        val deviceAbis = RsConfig.supportedArchitectures.map { it.arch }
+        val deviceAbis = DeviceConfig.supportedArchitectures.map { it.arch }
         val targetAbi = findBestDeviceMatch(availableAbis, deviceAbis)
 
         val availableDensities = splits.filter { it.filterType == FilterType.DENSITY }.mapNotNull { it.configValue }.toSet()
-        val deviceDensities = RsConfig.supportedDensities.map { it.key }
+        val deviceDensities = DeviceConfig.supportedDensities.map { it.key }
         val targetDensity = findBestDeviceMatch(availableDensities, deviceDensities)
 
         val availableLangs = splits.filter { it.filterType == FilterType.LANGUAGE }.mapNotNull { it.configValue }.toSet()
@@ -105,7 +105,7 @@ class SelectOptimalSplitsUseCase {
 
     private fun findBestLanguageMatches(candidates: Set<String>): Set<String> {
         if (candidates.isEmpty()) return emptySet()
-        val deviceLangs = RsConfig.supportedLocales.map { it.convertLegacyLanguageCode() }
+        val deviceLangs = DeviceConfig.supportedLocales.map { it.convertLegacyLanguageCode() }
         val selected = mutableSetOf<String>()
 
         val exactMatches = candidates.filter { lang -> deviceLangs.contains(lang) }
@@ -124,7 +124,7 @@ class SelectOptimalSplitsUseCase {
         if (bases.isEmpty()) return null
         if (bases.size == 1) return bases.first()
 
-        val deviceAbis = RsConfig.supportedArchitectures.map { it.arch }
+        val deviceAbis = DeviceConfig.supportedArchitectures.map { it.arch }
         val sorted = bases.sortedWith(
             compareBy<AppEntity.BaseEntity> { base ->
                 val abiIndex = base.arch?.let { deviceAbis.indexOf(it.arch) } ?: -1

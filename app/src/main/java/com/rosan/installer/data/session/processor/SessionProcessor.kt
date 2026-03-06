@@ -5,14 +5,18 @@ package com.rosan.installer.data.session.processor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import com.rosan.installer.data.engine.repository.InstallerRepositoryImpl
 import com.rosan.installer.data.privileged.util.useUserService
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.engine.repository.InstallerRepository
 import com.rosan.installer.domain.session.model.ConfirmationDetails
 import com.rosan.installer.domain.settings.model.ConfigModel
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 
 class SessionProcessor : KoinComponent {
+    private val capabilityProvider by inject<DeviceCapabilityProvider>()
+    private val installerRepository by inject<InstallerRepository>()
 
     fun getSessionDetails(sessionId: Int, config: ConfigModel): ConfirmationDetails {
         var label: CharSequence? = "N/A"
@@ -26,6 +30,7 @@ class SessionProcessor : KoinComponent {
         var bundle: Bundle? = null
         try {
             useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
                 authorizer = config.authorizer,
                 customizeAuthorizer = config.customizeAuthorizer,
                 useHookMode = false
@@ -55,7 +60,7 @@ class SessionProcessor : KoinComponent {
         Timber.d("Approving session $sessionId (granted: $granted) via ${config.authorizer}")
 
         try {
-            InstallerRepositoryImpl.approveSession(config, sessionId, granted)
+            installerRepository.approveSession(config, sessionId, granted)
             Timber.d("Session $sessionId approval processed successfully.")
         } catch (e: Exception) {
             Timber.e(e, "Failed to approve/reject session via ${config.authorizer}")

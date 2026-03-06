@@ -11,7 +11,6 @@ import com.rosan.installer.data.privileged.repository.recycler.ProcessUserServic
 import com.rosan.installer.data.privileged.repository.recycler.ShizukuHookRecycler
 import com.rosan.installer.data.privileged.repository.recycler.ShizukuUserServiceRecycler
 import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.util.OSUtils
 import timber.log.Timber
 import java.lang.reflect.InvocationTargetException
 
@@ -23,6 +22,7 @@ private object DefaultUserService : UserService {
 }
 
 fun useUserService(
+    isSystemApp: Boolean,
     authorizer: Authorizer,
     customizeAuthorizer: String = "",
     useHookMode: Boolean = true,
@@ -30,7 +30,7 @@ fun useUserService(
     action: (UserService) -> Unit
 ) {
     if (authorizer == Authorizer.None) {
-        if (OSUtils.isSystemApp) {
+        if (isSystemApp) {
             Timber.tag(TAG).d("Running as System App with None Authorizer. Executing direct calls.")
             action.invoke(DefaultUserService)
         } else {

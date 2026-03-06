@@ -10,13 +10,13 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.core.content.res.ResourcesCompat
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Architecture
-import com.rosan.installer.build.model.entity.Manufacturer
+import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.invoke
 import com.rosan.installer.data.res.model.impl.AxmlTreeRepoImpl
 import com.rosan.installer.data.res.repo.AxmlTreeRepo
+import com.rosan.installer.domain.device.model.Architecture
+import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.engine.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.AppEntity
@@ -46,7 +46,7 @@ object ApkParser : KoinComponent {
         val path = fileEntity.path
         Timber.d("ApkParser: Processing file path: $path")
 
-        val bestArch = analyseAndSelectBestArchitecture(path, RsConfig.supportedArchitectures)
+        val bestArch = analyseAndSelectBestArchitecture(path, DeviceConfig.supportedArchitectures)
         Timber.d("ApkParser: Selected Arch for $path is $bestArch")
 
         return useResources { resources ->
@@ -216,7 +216,7 @@ object ApkParser : KoinComponent {
                     resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeRepo.ANDROID_NAMESPACE, "roundIcon", -1))
             }
             .register("/manifest/application/meta-data") {
-                if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS) {
+                if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
                     if ("minOsdkVersion" == getAttributeValue(AxmlTreeRepo.ANDROID_NAMESPACE, "name")) {
                         minOsdkVersion = resolveString(
                             resources,
@@ -327,7 +327,7 @@ object ApkParser : KoinComponent {
         }
 
         // Force selection for binary translation scenarios (e.g., running 32-bit libs on arm64-only devices).
-        if (RsConfig.isArm) {
+        if (DeviceConfig.isArm) {
             // Prefer ARMv7a (Architecture.ARM) if available.
             if (apkArchs.contains(Architecture.ARM)) return Architecture.ARM
 
@@ -335,7 +335,7 @@ object ApkParser : KoinComponent {
             if (apkArchs.contains(Architecture.ARMEABI)) return Architecture.ARMEABI
         }
 
-        if (RsConfig.isX86 && apkArchs.contains(Architecture.X86)) return Architecture.X86
+        if (DeviceConfig.isX86 && apkArchs.contains(Architecture.X86)) return Architecture.X86
 
         return apkArchs.firstOrNull { it == Architecture.ARM64 }
             ?: apkArchs.firstOrNull { it == Architecture.ARM }

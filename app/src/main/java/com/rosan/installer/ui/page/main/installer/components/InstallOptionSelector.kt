@@ -7,23 +7,26 @@ import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.util.OSUtils
+import org.koin.compose.koinInject
 
 @SuppressLint("LocalContextResourcesRead")
 @Composable
 fun rememberInstallOptions(authorizer: Authorizer): List<InstallOption> {
     val context = LocalContext.current
+    val capabilityProvider: DeviceCapabilityProvider = koinInject()
+    val isSystemApp = capabilityProvider.isSystemApp
 
     return remember(authorizer) {
-        getInstallOptions(authorizer).sortedBy { opt ->
+        getInstallOptions(authorizer, isSystemApp).sortedBy { opt ->
             context.resources.getString(opt.labelResource)
         }
     }
 }
 
-private fun getInstallOptions(authorizer: Authorizer) = InstallOption.entries
+private fun getInstallOptions(authorizer: Authorizer, isSystemApp: Boolean) = InstallOption.entries
     .filter {
         // First, check if the option is compatible with the current SDK version.
         val sdkVersionMatch = Build.VERSION.SDK_INT >= it.minSdk && Build.VERSION.SDK_INT <= it.maxSdk
@@ -35,7 +38,7 @@ private fun getInstallOptions(authorizer: Authorizer) = InstallOption.entries
         when (it) {
             // The AllowDowngrade option should only be available when the authorizer is Root, Shizuku(running as root).
             // Or running as SystemApp.
-            InstallOption.AllowDowngrade -> authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku || (authorizer == Authorizer.None && OSUtils.isSystemApp)
+            InstallOption.AllowDowngrade -> authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku || (authorizer == Authorizer.None && isSystemApp)
             // All other options are available by default.
             else -> true
         }

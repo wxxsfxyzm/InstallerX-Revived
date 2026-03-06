@@ -13,6 +13,7 @@ import com.rosan.installer.data.session.processor.SessionProcessor
 import com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl
 import com.rosan.installer.data.session.resolver.ConfigResolver
 import com.rosan.installer.data.session.resolver.SourceResolver
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.AuthenticationFailedException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.AppEntity
@@ -23,7 +24,6 @@ import com.rosan.installer.domain.engine.model.sourcePath
 import com.rosan.installer.domain.engine.repository.AppIconRepository
 import com.rosan.installer.domain.engine.usecase.AnalyzePackageUseCase
 import com.rosan.installer.domain.engine.usecase.ExecuteInstallUseCase
-import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.session.model.InstallResult
 import com.rosan.installer.domain.session.model.ProgressEntity
@@ -36,7 +36,6 @@ import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.ui.util.doBiometricAuthOrThrow
-import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -72,7 +71,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
     private val analyzePackageUseCase by inject<AnalyzePackageUseCase>()
     private val executeInstallUseCase by inject<ExecuteInstallUseCase>()
     private val shellExecutionProvider by inject<ShellExecutionProvider>()
-    private val appOpsProvider by inject<AppOpsProvider>()
+    private val deviceCapabilityProvider by inject<DeviceCapabilityProvider>()
     private val autoLockService by inject<AutoLockService>()
     private val appIconRepository by inject<AppIconRepository>()
 
@@ -469,7 +468,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
 
     private suspend fun handleReboot(reason: String) {
         Timber.d("[id=$installerId] handleReboot: Starting cleanup before reboot.")
-        val systemUseRoot = OSUtils.isSystemApp && appSettingsRepo.getBoolean(BooleanSetting.LabModuleAlwaysRoot, false).first()
+        val systemUseRoot = deviceCapabilityProvider.isSystemApp && appSettingsRepo.getBoolean(BooleanSetting.LabModuleAlwaysRoot, false).first()
         if (systemUseRoot) installer.config = installer.config.copy(authorizer = Authorizer.Root)
         // Execute cleanup immediately
         // Call clearCache() explicitly to ensure temporary files are removed

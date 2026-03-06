@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.theme.InstallerTheme
@@ -212,7 +212,7 @@ fun MiuixErrorTextBlock(
                 color = MaterialTheme.colorScheme.outline
             )
 
-            val textToShow = if (RsConfig.isDebug) {
+            val textToShow = if (AppConfig.isDebug) {
                 error.stackTraceToString()
             } else {
                 error.message ?: "An unknown error occurred."

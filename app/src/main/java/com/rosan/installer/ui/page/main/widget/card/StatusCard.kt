@@ -28,8 +28,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Level
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 
 /**
@@ -39,22 +39,23 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 @Composable
 fun StatusWidget(viewModel: PreferredViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val containerColor = when (RsConfig.LEVEL) {
+
+    val containerColor = when (AppConfig.LEVEL) {
         Level.STABLE -> MaterialTheme.colorScheme.primaryContainer
         Level.PREVIEW -> MaterialTheme.colorScheme.secondaryContainer
         Level.UNSTABLE -> MaterialTheme.colorScheme.tertiaryContainer
     }
 
-    val onContainerColor = when (RsConfig.LEVEL) {
+    val onContainerColor = when (AppConfig.LEVEL) {
         Level.STABLE -> MaterialTheme.colorScheme.onPrimaryContainer
         Level.PREVIEW -> MaterialTheme.colorScheme.onSecondaryContainer
         Level.UNSTABLE -> MaterialTheme.colorScheme.onTertiaryContainer
     }
 
-    val internetAccessHint = if (RsConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
+    val internetAccessHint = if (AppConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
     else stringResource(R.string.internet_access_disabled)
 
-    val level = when (RsConfig.LEVEL) {
+    val level = when (AppConfig.LEVEL) {
         Level.STABLE -> stringResource(id = R.string.stable)
         Level.PREVIEW -> stringResource(id = R.string.preview)
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
@@ -64,8 +65,8 @@ fun StatusWidget(viewModel: PreferredViewModel) {
         id = R.string.app_version_info_format,
         internetAccessHint,
         level,
-        RsConfig.VERSION_NAME,
-        RsConfig.VERSION_CODE
+        AppConfig.VERSION_NAME,
+        AppConfig.VERSION_CODE
     )
 
     CardWidget(

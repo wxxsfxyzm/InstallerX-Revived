@@ -7,7 +7,7 @@ import com.rosan.installer.domain.settings.util.AppOrder
 import com.rosan.installer.domain.settings.util.OrderType
 import kotlinx.coroutines.flow.Flow
 
-interface AppRepo {
+interface AppRepository {
     // Added suspend keyword and changed return type to AppModel
     suspend fun all(order: AppOrder = AppOrder.Id(OrderType.Ascending)): List<AppModel>
 

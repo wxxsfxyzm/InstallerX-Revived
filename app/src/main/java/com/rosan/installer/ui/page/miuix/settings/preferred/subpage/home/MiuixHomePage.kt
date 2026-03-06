@@ -36,8 +36,8 @@ import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Level
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
@@ -79,10 +79,10 @@ fun MiuixHomePage(
     val hazeStyle = rememberMiuixHazeStyle()
     val showUpdateDialog = remember { mutableStateOf(false) }
 
-    val internetAccessHint = if (RsConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
+    val internetAccessHint = if (AppConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
     else stringResource(R.string.internet_access_disabled)
 
-    val level = when (RsConfig.LEVEL) {
+    val level = when (AppConfig.LEVEL) {
         Level.STABLE -> stringResource(id = R.string.stable)
         Level.PREVIEW -> stringResource(id = R.string.preview)
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
@@ -92,8 +92,8 @@ fun MiuixHomePage(
         id = R.string.app_version_info_format,
         internetAccessHint,
         level,
-        RsConfig.VERSION_NAME,
-        RsConfig.VERSION_CODE
+        AppConfig.VERSION_NAME,
+        AppConfig.VERSION_CODE
     )
 
     MiuixUpdateDialog(
@@ -216,7 +216,7 @@ fun MiuixHomePage(
                         )
                 }
             }
-            if (RsConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID) {
+            if (AppConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID) {
                 item { SmallTitle(stringResource(R.string.debug)) }
                 item {
                     Card(

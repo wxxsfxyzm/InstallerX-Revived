@@ -36,9 +36,12 @@ class AllViewModel(
     private val _eventFlow = MutableSharedFlow<AllViewEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    init {
+        loadData()
+    }
+
     fun dispatch(action: AllViewAction) {
         when (action) {
-            is AllViewAction.Init -> init()
             is AllViewAction.LoadData -> loadData()
             is AllViewAction.UserReadScopeTips -> userReadTips()
             is AllViewAction.ChangeDataConfigOrder -> changeDataConfigOrder(action.configOrder)
@@ -47,16 +50,6 @@ class AllViewModel(
             is AllViewAction.EditDataConfig -> editDataConfig(action.configModel)
             is AllViewAction.MiuixEditDataConfig -> editMiuixDataConfig(action.configModel)
             is AllViewAction.ApplyConfig -> applyConfig(action.configModel)
-        }
-    }
-
-    private var isInit = false
-
-    private fun init() {
-        synchronized(this) {
-            if (isInit) return
-            isInit = true
-            loadData()
         }
     }
 

@@ -1,13 +1,14 @@
 package com.rosan.installer.domain.settings.model
 
-import com.rosan.installer.util.OSUtils
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 
-val ConfigModel.isPrivileged: Boolean
-    get() = when (authorizer) {
+fun ConfigModel.isPrivileged(deviceCapabilityProvider: DeviceCapabilityProvider): Boolean {
+    return when (authorizer) {
         Authorizer.Root, Authorizer.Shizuku -> true
-        Authorizer.None -> OSUtils.isSystemApp
+        Authorizer.None -> deviceCapabilityProvider.isSystemApp
         else -> false
     }
+}
 
 val ConfigModel.isCustomizeAuthorizer: Boolean
     get() = authorizer == Authorizer.Customize

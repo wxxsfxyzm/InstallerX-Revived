@@ -3,11 +3,13 @@
 package com.rosan.installer.data.session.processor
 
 import android.system.Os
-import com.rosan.installer.data.engine.repository.ModuleInstallerRepositoryImpl
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.InstallEntity
 import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
 import com.rosan.installer.domain.engine.model.PackageAnalysisResult
+import com.rosan.installer.domain.engine.repository.InstallerRepository
+import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
@@ -18,13 +20,11 @@ import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
-import com.rosan.installer.data.engine.repository.InstallerRepositoryImpl as CoreInstaller
 
 class InstallationProcessor(
     private val repo: InstallerSessionRepository,
@@ -47,6 +47,10 @@ class InstallationProcessor(
     }
 
     private val appSettingsRepo by inject<AppSettingsRepo>()
+    private val capabilityProvider by inject<DeviceCapabilityProvider>()
+
+    private val installerRepository by inject<InstallerRepository>()
+    private val moduleInstallerRepository by inject<ModuleInstallerRepository>()
 
     /**
      * Performs the installation.
@@ -101,10 +105,10 @@ class InstallationProcessor(
         progressFlow.emit(ProgressEntity.InstallingModule(output.toList()))
 
         val rootImpl = RootImplementation.fromString(appSettingsRepo.getString(StringSetting.LabRootImplementation).first())
-        val systemUseRoot = OSUtils.isSystemApp && appSettingsRepo.getBoolean(BooleanSetting.LabModuleAlwaysRoot, false).first()
+        val systemUseRoot = capabilityProvider.isSystemApp && appSettingsRepo.getBoolean(BooleanSetting.LabModuleAlwaysRoot, false).first()
 
         // Collect logs from the underlying implementation and emit full updates.
-        ModuleInstallerRepositoryImpl.doInstallWork(
+        moduleInstallerRepository.doInstallWork(
             config = config,
             module = module,
             useRoot = systemUseRoot,
@@ -177,7 +181,7 @@ class InstallationProcessor(
         }
 
         // Perform the blocking install work.
-        CoreInstaller.doInstallWork(
+        installerRepository.doInstallWork(
             config,
             installEntities,
             InstallExtraInfoEntity(targetUserId, cacheDirectory),

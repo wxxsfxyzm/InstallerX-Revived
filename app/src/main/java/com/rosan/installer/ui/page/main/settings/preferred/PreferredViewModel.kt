@@ -12,8 +12,6 @@ import com.rosan.installer.R
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.domain.settings.model.NamedPackage
-import com.rosan.installer.domain.settings.model.SharedUid
 import com.rosan.installer.domain.settings.provider.PrivilegedProvider
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
@@ -22,6 +20,8 @@ import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
+import com.rosan.installer.domain.settings.usecase.settings.ManagePackageListUseCase
+import com.rosan.installer.domain.settings.usecase.settings.ManageSharedUidListUseCase
 import com.rosan.installer.domain.settings.usecase.settings.SetLauncherIconUseCase
 import com.rosan.installer.domain.settings.usecase.settings.ToggleUninstallFlagUseCase
 import com.rosan.installer.domain.updater.model.UpdateInfo
@@ -48,7 +48,9 @@ class PreferredViewModel(
     private val privilegedProvider: PrivilegedProvider,
     private val toggleUninstallFlagUseCase: ToggleUninstallFlagUseCase,
     private val performAppUpdateUseCase: PerformAppUpdateUseCase,
-    private val setLauncherIconUseCase: SetLauncherIconUseCase
+    private val setLauncherIconUseCase: SetLauncherIconUseCase,
+    private val managePackageListUseCase: ManagePackageListUseCase,
+    private val manageSharedUidListUseCase: ManageSharedUidListUseCase
 ) : ViewModel() {
 
     private val _uiEvents = MutableSharedFlow<PreferredViewEvent>(
@@ -246,43 +248,37 @@ class PreferredViewModel(
             is PreferredViewAction.ChangeAutoSilentInstall -> updateSetting(BooleanSetting.DialogAutoSilentInstall, action.autoSilentInstall)
 
             // --- Collection Management ---
-            is PreferredViewAction.AddManagedInstallerPackage -> addManagedPackage(
-                state.value.managedInstallerPackages,
-                NamedPackageListSetting.ManagedInstallerPackages,
-                action.pkg
-            )
+            is PreferredViewAction.AddManagedInstallerPackage -> viewModelScope.launch {
+                managePackageListUseCase.addPackage(NamedPackageListSetting.ManagedInstallerPackages, action.pkg)
+            }
 
-            is PreferredViewAction.RemoveManagedInstallerPackage -> removeManagedPackage(
-                state.value.managedInstallerPackages,
-                NamedPackageListSetting.ManagedInstallerPackages,
-                action.pkg
-            )
+            is PreferredViewAction.RemoveManagedInstallerPackage -> viewModelScope.launch {
+                managePackageListUseCase.removePackage(NamedPackageListSetting.ManagedInstallerPackages, action.pkg)
+            }
 
-            is PreferredViewAction.AddManagedBlacklistPackage -> addManagedPackage(
-                state.value.managedBlacklistPackages,
-                NamedPackageListSetting.ManagedBlacklistPackages,
-                action.pkg
-            )
+            is PreferredViewAction.AddManagedBlacklistPackage -> viewModelScope.launch {
+                managePackageListUseCase.addPackage(NamedPackageListSetting.ManagedBlacklistPackages, action.pkg)
+            }
 
-            is PreferredViewAction.RemoveManagedBlacklistPackage -> removeManagedPackage(
-                state.value.managedBlacklistPackages,
-                NamedPackageListSetting.ManagedBlacklistPackages,
-                action.pkg
-            )
+            is PreferredViewAction.RemoveManagedBlacklistPackage -> viewModelScope.launch {
+                managePackageListUseCase.removePackage(NamedPackageListSetting.ManagedBlacklistPackages, action.pkg)
+            }
 
-            is PreferredViewAction.AddManagedSharedUserIdBlacklist -> addSharedUserIdToBlacklist(action.uid)
-            is PreferredViewAction.RemoveManagedSharedUserIdBlacklist -> removeSharedUserIdFromBlacklist(action.uid)
-            is PreferredViewAction.AddManagedSharedUserIdExemptedPackages -> addManagedPackage(
-                state.value.managedSharedUserIdExemptedPackages,
-                NamedPackageListSetting.ManagedSharedUserIdExemptedPackages,
-                action.pkg
-            )
+            is PreferredViewAction.AddManagedSharedUserIdExemptedPackages -> viewModelScope.launch {
+                managePackageListUseCase.addPackage(NamedPackageListSetting.ManagedSharedUserIdExemptedPackages, action.pkg)
+            }
 
-            is PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages -> removeManagedPackage(
-                state.value.managedSharedUserIdExemptedPackages,
-                NamedPackageListSetting.ManagedSharedUserIdExemptedPackages,
-                action.pkg
-            )
+            is PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages -> viewModelScope.launch {
+                managePackageListUseCase.removePackage(NamedPackageListSetting.ManagedSharedUserIdExemptedPackages, action.pkg)
+            }
+
+            is PreferredViewAction.AddManagedSharedUserIdBlacklist -> viewModelScope.launch {
+                manageSharedUidListUseCase.addUid(SharedUidListSetting.ManagedSharedUserIdBlacklist, action.uid)
+            }
+
+            is PreferredViewAction.RemoveManagedSharedUserIdBlacklist -> viewModelScope.launch {
+                manageSharedUidListUseCase.removeUid(SharedUidListSetting.ManagedSharedUserIdBlacklist, action.uid)
+            }
 
             is PreferredViewAction.ToggleGlobalUninstallFlag -> toggleGlobalUninstallFlag(action.flag, action.enable)
             is PreferredViewAction.SetAdbVerifyEnabledState -> setAdbVerifyEnabled(action.enabled, action)
@@ -348,7 +344,7 @@ class PreferredViewModel(
     private fun requestIgnoreBatteryOptimization() {
         try {
             systemEnvProvider.requestIgnoreBatteryOptimization()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             viewModelScope.launch { _uiEvents.emit(PreferredViewEvent.ShowDefaultInstallerResult("Could not start activity")) }
         }
     }
@@ -416,31 +412,5 @@ class PreferredViewModel(
                 R.string.uninstall_all_users_disabled
             _uiEvents.tryEmit(PreferredViewEvent.ShowMessage(resId))
         }
-    }
-
-    private fun addManagedPackage(list: List<NamedPackage>, key: NamedPackageListSetting, pkg: NamedPackage) = viewModelScope.launch {
-        val currentList = list.toMutableList()
-        if (!currentList.contains(pkg)) {
-            currentList.add(pkg)
-            appSettingsRepo.putNamedPackageList(key, currentList)
-        }
-    }
-
-    private fun removeManagedPackage(list: List<NamedPackage>, key: NamedPackageListSetting, pkg: NamedPackage) = viewModelScope.launch {
-        val currentList = list.toMutableList()
-        currentList.remove(pkg)
-        appSettingsRepo.putNamedPackageList(key, currentList)
-    }
-
-    private fun addSharedUserIdToBlacklist(uid: SharedUid) = viewModelScope.launch {
-        val currentList = state.value.managedSharedUserIdBlacklist
-        if (uid !in currentList) appSettingsRepo.putSharedUidList(SharedUidListSetting.ManagedSharedUserIdBlacklist, currentList + uid)
-    }
-
-    private fun removeSharedUserIdFromBlacklist(uid: SharedUid) = viewModelScope.launch {
-        val currentList = state.value.managedSharedUserIdBlacklist
-        if (uid in currentList) appSettingsRepo.putSharedUidList(
-            SharedUidListSetting.ManagedSharedUserIdBlacklist,
-            currentList.filter { it != uid })
     }
 }

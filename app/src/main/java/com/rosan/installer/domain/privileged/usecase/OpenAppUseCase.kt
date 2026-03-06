@@ -3,15 +3,16 @@
 package com.rosan.installer.domain.privileged.usecase
 
 import android.content.Intent
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 
 class OpenAppUseCase(
-    private val componentOpsProvider: ComponentOpsProvider
+    private val componentOpsProvider: ComponentOpsProvider,
+    private val capabilityProvider: DeviceCapabilityProvider
 ) {
     companion object {
         const val PRIVILEGED_START_TIMEOUT_MS = 2500L
@@ -34,7 +35,7 @@ class OpenAppUseCase(
     suspend operator fun invoke(config: ConfigModel, launchIntent: Intent): Result {
         val shouldAttemptPrivileged = config.authorizer == Authorizer.Root ||
                 config.authorizer == Authorizer.Shizuku ||
-                (config.authorizer == Authorizer.None && OSUtils.isSystemApp)
+                (config.authorizer == Authorizer.None && capabilityProvider.isSystemApp)
 
         if (!shouldAttemptPrivileged) {
             Timber.tag(TAG).i("Privileged start skipped based on authorizer rules.")

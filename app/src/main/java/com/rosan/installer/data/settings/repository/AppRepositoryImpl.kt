@@ -7,15 +7,15 @@ import com.rosan.installer.data.settings.local.room.dao.AppDao
 import com.rosan.installer.data.settings.mapper.toDomainModel
 import com.rosan.installer.data.settings.mapper.toEntity
 import com.rosan.installer.domain.settings.model.AppModel
-import com.rosan.installer.domain.settings.repository.AppRepo
+import com.rosan.installer.domain.settings.repository.AppRepository
 import com.rosan.installer.domain.settings.util.AppOrder
 import com.rosan.installer.domain.settings.util.OrderType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class AppRepoImpl(
+class AppRepositoryImpl(
     private val dao: AppDao
-) : AppRepo {
+) : AppRepository {
 
     // Helper method to build dynamic SQL queries for sorting
     private fun buildOrderQuery(order: AppOrder): SimpleSQLiteQuery {

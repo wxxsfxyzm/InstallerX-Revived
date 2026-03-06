@@ -38,7 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
@@ -165,7 +165,7 @@ fun NewHomePage(
                             }
                     }
                 }
-                if (RsConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID)
+                if (AppConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID)
                     item {
                         SplicedColumnGroup(
                             title = stringResource(R.string.debug)

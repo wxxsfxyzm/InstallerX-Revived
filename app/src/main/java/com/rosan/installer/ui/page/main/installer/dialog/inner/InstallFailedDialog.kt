@@ -25,8 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Manufacturer
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.engine.model.InstallErrorType
 import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
@@ -128,7 +128,7 @@ private fun ErrorSuggestions(
 
             if (installer.config.authorizer != Authorizer.None ||
                 (installer.config.authorizer == Authorizer.None &&
-                        !(RsConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
+                        !(DeviceConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
             ) {
                 add(
                     SuggestionChipInfo(
@@ -184,8 +184,8 @@ private fun ErrorSuggestions(
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA && // Must be lower than Android 16
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && // Must be Android 14 or higher
                 !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && // And is Android 15 or higher
-                        (RsConfig.currentManufacturer == Manufacturer.SAMSUNG ||         // and the manufacturer is Samsung
-                                RsConfig.currentManufacturer == Manufacturer.REALME)) &&        // or the manufacturer is realme -> This combination is excluded
+                        (DeviceConfig.currentManufacturer == Manufacturer.SAMSUNG ||         // and the manufacturer is Samsung
+                                DeviceConfig.currentManufacturer == Manufacturer.REALME)) &&        // or the manufacturer is realme -> This combination is excluded
                 (installer.config.authorizer == Authorizer.Root ||    // Authorization must be
                         installer.config.authorizer == Authorizer.Shizuku)   // Root or Shizuku
             ) {

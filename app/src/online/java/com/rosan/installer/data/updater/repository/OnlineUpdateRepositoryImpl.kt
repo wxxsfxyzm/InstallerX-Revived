@@ -3,9 +3,9 @@
 package com.rosan.installer.data.updater.repository
 
 import android.content.Context
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Level
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.updater.model.GithubRelease
+import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.domain.updater.model.UpdateInfo
 import com.rosan.installer.domain.updater.repository.UpdateRepository
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +28,7 @@ class OnlineUpdateRepositoryImpl(
     }
 
     override suspend fun checkUpdate(): UpdateInfo? = withContext(Dispatchers.IO) {
-        if (RsConfig.isDebug || RsConfig.LEVEL == Level.UNSTABLE || context.packageName != OFFICIAL_PACKAGE_NAME) {
+        if (AppConfig.isDebug || AppConfig.LEVEL == Level.UNSTABLE || context.packageName != OFFICIAL_PACKAGE_NAME) {
             Timber.d("Update check skipped based on environment rules.")
             return@withContext null
         }
@@ -50,7 +50,7 @@ class OnlineUpdateRepositoryImpl(
             val remoteVersion = matchResult?.groupValues?.get(1)
                 ?: remoteRelease.tagName.removePrefix("v")
 
-            val currentVersion = RsConfig.VERSION_NAME
+            val currentVersion = AppConfig.VERSION_NAME
             val hasUpdate = compareVersions(remoteVersion, currentVersion) > 0
 
             Timber.i("Update check: Local=$currentVersion, Remote=$remoteVersion, HasUpdate=$hasUpdate")
@@ -68,7 +68,7 @@ class OnlineUpdateRepositoryImpl(
     }
 
     private fun fetchRemoteRelease(): GithubRelease? {
-        val url = if (RsConfig.LEVEL == Level.STABLE) {
+        val url = if (AppConfig.LEVEL == Level.STABLE) {
             "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest"
         } else {
             "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases"
@@ -83,7 +83,7 @@ class OnlineUpdateRepositoryImpl(
             if (!response.isSuccessful) return null
             val bodyString = response.body.string()
 
-            return if (RsConfig.LEVEL == Level.STABLE) {
+            return if (AppConfig.LEVEL == Level.STABLE) {
                 json.decodeFromString<GithubRelease>(bodyString)
             } else {
                 val releases = json.decodeFromString<List<GithubRelease>>(bodyString)

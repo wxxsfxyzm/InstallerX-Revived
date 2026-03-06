@@ -5,11 +5,12 @@ package com.rosan.installer.data.settings.util
 import android.content.Context
 import com.rosan.installer.data.settings.local.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallModeConverter
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.AppModel
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.model.InstallMode
-import com.rosan.installer.domain.settings.repository.AppRepo
+import com.rosan.installer.domain.settings.repository.AppRepository
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.ConfigRepo
@@ -22,31 +23,10 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
 
-/**
- * Utility class for managing configuration settings.
- *
- * DataStore Migration Notes
- * Since DataStore read/write operations are asynchronous, configuration items that were previously
- * accessed synchronously via `val` properties must be migrated to `suspend fun` (suspending functions).
- * Such functions must be called from within a coroutine or a suspending context; otherwise,
- * a compilation error will occur.
- *
- * Before migration (synchronous)
- * ```
- * val authorizer = ConfigUtil.globalAuthorizer
- *```
- * After migration (asynchronous)
- * ```
- * val authorizer = withContext(Dispatchers.IO) {
- *     ConfigUtil.getGlobalAuthorizer()
- * }
- * ```
- **/
-
 object ConfigUtil : KoinComponent {
     private val context by inject<Context>()
-
     private val appSettingsRepo by inject<AppSettingsRepo>()
+    private val deviceCapabilityProvider by inject<DeviceCapabilityProvider>()
 
     suspend fun getGlobalAuthorizer(): Authorizer {
         val str = appSettingsRepo.getString(StringSetting.Authorizer, "").first()
@@ -114,17 +94,16 @@ object ConfigUtil : KoinComponent {
         withContext(Dispatchers.IO) {
             val repo = get<ConfigRepo>()
             val app = getAppByPackageName(packageName)
-            var config: ConfigModel? = null // 改为 ConfigModel
+            var config: ConfigModel? = null
             if (app != null) config = repo.find(app.configId)
             if (config != null) return@withContext config
             config = repo.all().firstOrNull()
             if (config != null) return@withContext config
-            return@withContext ConfigModel.default // 使用 Model 的 default
+            return@withContext ConfigModel.generateOptimalDefault(deviceCapabilityProvider)
         }
 
-    // 加上 suspend，返回 AppModel
     private suspend fun getAppByPackageName(packageName: String? = null): AppModel? {
-        val repo = get<AppRepo>()
+        val repo = get<AppRepository>()
         var app: AppModel? = repo.findByPackageName(packageName)
         if (app != null) return app
         if (packageName != null) app = repo.findByPackageName(null)

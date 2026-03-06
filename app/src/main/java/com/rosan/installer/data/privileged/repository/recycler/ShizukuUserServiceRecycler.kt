@@ -9,7 +9,7 @@ import android.os.UserHandle
 import androidx.annotation.Keep
 import com.rosan.installer.IPrivilegedService
 import com.rosan.installer.IShizukuUserService
-import com.rosan.installer.build.RsConfig
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.privileged.model.entity.DefaultPrivilegedService
 import com.rosan.installer.data.privileged.repository.recyclable.Recycler
 import com.rosan.installer.data.privileged.repository.recyclable.UserService
@@ -37,7 +37,7 @@ object ShizukuUserServiceRecycler : Recycler<ShizukuUserServiceRecycler.UserServ
 
     class ShizukuUserService @Keep constructor(context: Context) : IShizukuUserService.Stub() {
         init {
-            if (RsConfig.isDebug && Timber.treeCount == 0) Timber.plant(Timber.DebugTree())
+            if (AppConfig.isDebug && Timber.treeCount == 0) Timber.plant(Timber.DebugTree())
             startKoin {
                 modules(processModules)
                 androidContext(createSystemContext(context))

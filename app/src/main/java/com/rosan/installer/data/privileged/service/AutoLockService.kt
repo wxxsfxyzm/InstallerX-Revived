@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2025-2026 InstallerX Revived contributors
-// File: data/privileged/service/AutoLockService.kt
 package com.rosan.installer.data.privileged.service
 
 import android.content.ComponentName

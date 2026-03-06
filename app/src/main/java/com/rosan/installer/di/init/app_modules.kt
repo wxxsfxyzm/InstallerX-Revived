@@ -2,7 +2,7 @@
 // Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.di.init
 
-import com.rosan.installer.di.deviceCapabilityCheckerModule
+import com.rosan.installer.di.deviceModule
 import com.rosan.installer.di.engineModule
 import com.rosan.installer.di.installerModule
 import com.rosan.installer.di.logModule
@@ -23,7 +23,7 @@ val appModules = listOf(
     engineModule,
     networkModule,
     updateModule,
-    deviceCapabilityCheckerModule,
+    deviceModule,
     logModule,
     privilegedModule
 )

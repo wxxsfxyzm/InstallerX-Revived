@@ -37,7 +37,7 @@ import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.getValue
 import com.rosan.installer.data.reflect.repo.invoke
 import com.rosan.installer.data.reflect.repo.invokeStatic
-import com.rosan.installer.util.OSUtils
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
@@ -55,6 +55,7 @@ class DefaultPrivilegedService(
     }
 
     private val reflect by inject<ReflectRepo>()
+    private val capabilityProvider by inject<DeviceCapabilityProvider>()
 
     private val iPackageManager: IPackageManager by lazy {
         if (binderWrapper != null) {
@@ -65,7 +66,7 @@ class DefaultPrivilegedService(
             Timber.tag(TAG).d("Getting IPackageManager in Hook Mode (Directly).")
             ShizukuHook.hookedPackageManager
         } else {
-            if (OSUtils.isSystemApp) Timber.tag(TAG).d("Getting IPackageManager in System Mode.")
+            if (capabilityProvider.isSystemApp) Timber.tag(TAG).d("Getting IPackageManager in System Mode.")
             else Timber.tag(TAG).d("Getting IPackageManager in UserService Mode.")
             IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
         }
@@ -79,7 +80,7 @@ class DefaultPrivilegedService(
         } else if (isHookMode) {
             ShizukuHook.hookedActivityManager
         } else {
-            if (OSUtils.isSystemApp) Timber.tag(TAG).d("Getting IActivityManager in System Mode.")
+            if (capabilityProvider.isSystemApp) Timber.tag(TAG).d("Getting IActivityManager in System Mode.")
             else Timber.tag(TAG).d("Getting IActivityManager in UserService Mode.")
             IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
         }
@@ -94,7 +95,7 @@ class DefaultPrivilegedService(
             Timber.tag(TAG).d("Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
             ShizukuHook.hookedUserManager
         } else {
-            if (OSUtils.isSystemApp) Timber.tag(TAG).d("Getting IUserManager in System Mode.")
+            if (capabilityProvider.isSystemApp) Timber.tag(TAG).d("Getting IUserManager in System Mode.")
             else Timber.tag(TAG).d("Getting IUserManager in UserService Mode.")
             IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
         }
@@ -110,7 +111,7 @@ class DefaultPrivilegedService(
             Timber.tag(TAG).d("Getting Settings Binder in Hook Mode (via ShizukuHook).")
             ShizukuHook.hookedSettingsBinder
         } else {
-            if (OSUtils.isSystemApp) Timber.tag(TAG).d("Getting Settings Binder in System Mode.")
+            if (capabilityProvider.isSystemApp) Timber.tag(TAG).d("Getting Settings Binder in System Mode.")
             else Timber.tag(TAG).d("Getting Settings Binder in UserService Mode.")
             original
         }
@@ -125,7 +126,7 @@ class DefaultPrivilegedService(
             Timber.tag(TAG).d("Getting IConnectivityManager in Hook Mode (via ShizukuHook).")
             ShizukuHook.hookedConnectivityManager
         } else {
-            if (OSUtils.isSystemApp) Timber.tag(TAG).d("Getting IConnectivityManager in System Mode.")
+            if (capabilityProvider.isSystemApp) Timber.tag(TAG).d("Getting IConnectivityManager in System Mode.")
             else Timber.tag(TAG).d("Getting IConnectivityManager in UserService Mode.")
             IConnectivityManager.Stub.asInterface(ServiceManager.getService(Context.CONNECTIVITY_SERVICE))
         }
@@ -433,7 +434,7 @@ class DefaultPrivilegedService(
             val am = iActivityManager
 
             val userId = AndroidProcess.myUid() / 100000
-            val callerPackage = if (OSUtils.isSystemApp) {
+            val callerPackage = if (capabilityProvider.isSystemApp) {
                 context.packageName
             } else "com.android.shell"
             val resolvedType = intent.resolveType(context.contentResolver)

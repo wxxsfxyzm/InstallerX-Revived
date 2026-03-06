@@ -15,22 +15,24 @@ import com.rosan.installer.domain.privileged.provider.PermissionProvider
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
+import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
+import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val privilegedModule = module {
     // Providers
-    single<AppOpsProvider> { AppOpsProviderImpl() }
-    single<ComponentOpsProvider> { ComponentOpsProviderImpl() }
-    single<PermissionProvider> { PermissionProviderImpl() }
-    single<ShellExecutionProvider> { ShellExecutionProviderImpl() }
-    single<PostInstallTaskProvider> { PostInstallTaskProviderImpl() }
-    single<SystemInfoProvider> { SystemInfoProviderImpl() }
+    single<AppOpsProvider> { AppOpsProviderImpl(get()) }
+    single<ComponentOpsProvider> { ComponentOpsProviderImpl(get()) }
+    single<PermissionProvider> { PermissionProviderImpl(get()) }
+    single<ShellExecutionProvider> { ShellExecutionProviderImpl(get()) }
+    single<PostInstallTaskProvider> { PostInstallTaskProviderImpl(get()) }
+    single<SystemInfoProvider> { SystemInfoProviderImpl(get()) }
 
     // Services
     single { AutoLockService(androidContext(), get(), get()) }
 
     // UseCases
-    factory { com.rosan.installer.domain.privileged.usecase.OpenAppUseCase(get()) }
-    factory { com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase(get()) }
+    factory { OpenAppUseCase(get(), get()) }
+    factory { OpenLSPosedUseCase(get(), get()) }
 }

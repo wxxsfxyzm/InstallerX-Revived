@@ -88,12 +88,15 @@ class EditViewModel(
     private val _eventFlow = MutableSharedFlow<EditViewEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    init {
+        loadData()
+    }
+
     fun dispatch(action: EditViewAction) {
         Timber.i("[DISPATCH] Action received: ${action::class.simpleName}")
         viewModelScope.launch {
             val errorMessage = runCatching {
                 when (action) {
-                    is EditViewAction.Init -> init()
                     is EditViewAction.ChangeDataName -> changeDataName(action.name)
                     is EditViewAction.ChangeDataDescription -> changeDataDescription(action.description)
                     is EditViewAction.ChangeDataAuthorizer -> changeDataAuthorizer(action.authorizer)
@@ -135,16 +138,6 @@ class EditViewModel(
             if (errorMessage != null) {
                 _eventFlow.emit(EditViewEvent.SnackBar(message = errorMessage))
             }
-        }
-    }
-
-    private var isInited: Boolean = false
-
-    private fun init() {
-        synchronized(this) {
-            if (isInited) return
-            isInited = true
-            loadData()
         }
     }
 

@@ -3,6 +3,7 @@ package com.rosan.installer.data.engine.executor.moduleInstaller
 import com.rosan.installer.ICommandOutputListener
 import com.rosan.installer.data.engine.executor.ModuleInstallerUtils
 import com.rosan.installer.data.privileged.util.useUserService
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.ModuleInstallCmdInitException
 import com.rosan.installer.domain.engine.exception.ModuleInstallExitCodeNonZeroException
 import com.rosan.installer.domain.engine.model.AppEntity
@@ -17,7 +18,10 @@ import timber.log.Timber
 /**
  * A module installer that works by executing shell commands via a REMOTE privileged process (Binder).
  */
-object ShizukuModuleInstallerRepositoryImpl : ModuleInstallerRepository {
+class ShizukuModuleInstallerRepositoryImpl(
+    private val capabilityProvider: DeviceCapabilityProvider
+) : ModuleInstallerRepository {
+
     override fun doInstallWork(
         config: ConfigModel,
         module: AppEntity.ModuleEntity,
@@ -52,6 +56,7 @@ object ShizukuModuleInstallerRepositoryImpl : ModuleInstallerRepository {
 
         try {
             useUserService(
+                isSystemApp = capabilityProvider.isSystemApp,
                 authorizer = config.authorizer,
                 useHookMode = false
             ) { userService ->

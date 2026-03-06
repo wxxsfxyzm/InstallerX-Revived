@@ -5,14 +5,15 @@ package com.rosan.installer.domain.privileged.usecase
 import android.content.Intent
 import android.os.Build
 import androidx.core.net.toUri
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.util.OSUtils
 import kotlinx.coroutines.withTimeoutOrNull
 
 class OpenLSPosedUseCase(
-    private val componentOpsProvider: ComponentOpsProvider
+    private val componentOpsProvider: ComponentOpsProvider,
+    private val capabilityProvider: DeviceCapabilityProvider
 ) {
     companion object {
         private const val PRIVILEGED_START_TIMEOUT_MS = 2500L
@@ -27,7 +28,7 @@ class OpenLSPosedUseCase(
     suspend operator fun invoke(config: ConfigModel): Boolean {
         val shouldAttemptPrivileged = config.authorizer == Authorizer.Root ||
                 config.authorizer == Authorizer.Shizuku ||
-                (config.authorizer == Authorizer.None && OSUtils.isSystemApp)
+                (config.authorizer == Authorizer.None && capabilityProvider.isSystemApp)
 
         if (!shouldAttemptPrivileged) return false
 

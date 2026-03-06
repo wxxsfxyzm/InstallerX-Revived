@@ -10,8 +10,6 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Manufacturer
 import com.rosan.installer.data.settings.local.room.dao.AppDao
 import com.rosan.installer.data.settings.local.room.dao.ConfigDao
 import com.rosan.installer.data.settings.local.room.entity.AppEntity
@@ -22,6 +20,7 @@ import com.rosan.installer.data.settings.local.room.entity.converter.InstallMode
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallReasonConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.PackageSourceConverter
 import com.rosan.installer.data.settings.mapper.toEntity
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,10 +60,8 @@ abstract class InstallerRoom : RoomDatabase() {
             ).addCallback(object : Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     val database = get<InstallerRoom>()
-                    val defaultConfig = when (RsConfig.currentManufacturer) {
-                        Manufacturer.XIAOMI -> ConfigModel.XiaomiDefault.toEntity()
-                        else -> ConfigModel.default.toEntity()
-                    }
+                    val capabilityProvider = get<DeviceCapabilityProvider>()
+                    val defaultConfig = ConfigModel.generateOptimalDefault(capabilityProvider).toEntity()
                     CoroutineScope(Dispatchers.IO).launch {
                         database.configDao.insert(defaultConfig)
                     }

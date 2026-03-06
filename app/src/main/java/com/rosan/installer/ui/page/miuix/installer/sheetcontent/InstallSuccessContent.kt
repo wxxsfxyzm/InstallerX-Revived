@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase.Companion.PRIVILEGED_START_TIMEOUT_MS
@@ -44,7 +45,7 @@ fun InstallSuccessContent(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-
+    val capabilityProvider: DeviceCapabilityProvider = koinInject()
     val openAppUseCase: OpenAppUseCase = koinInject()
     val openLSPosedUseCase: OpenLSPosedUseCase = koinInject()
 
@@ -68,7 +69,7 @@ fun InstallSuccessContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        if (isXposedModule && installer.config.isPrivileged) {
+        if (isXposedModule && installer.config.isPrivileged(capabilityProvider)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
