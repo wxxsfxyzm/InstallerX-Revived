@@ -140,7 +140,7 @@
     <string name="sort_by_show_system_app">Mostrar aplicaciones del sistema</string>
     <string name="sort_by_show_package_name">Mostrar nombre del paquete</string>
     <string name="installer_ready">Listo</string>
-    <string name="installer_resolving">Verificando…</string>
+    <string name="installer_resolving">Resolviendo…</string>
     <string name="installer_resolve_failed">Error al verificar</string>
     <string name="installer_resolve_success">Verificación exitosa</string>
     <string name="installer_preparing">Preparando</string>
@@ -229,7 +229,7 @@
     <string name="exception_analyse_failed_all_files_unsupported">Archivo no compatible</string>
     <string name="exception_install_failed_already_exists">Esta versión de la aplicación ya está instalada, desinstálala e intenta nuevamente</string>
     <string name="exception_install_failed_blacklisted_package">¡No permites la instalación de esta aplicación!</string>
-    <string name="exception_install_failed_invalid_apk">Esta versión de la aplicación ya está instalada, por favor desinstálala e intenta de nuevo</string>
+    <string name="exception_install_failed_invalid_apk">APK inválido (paquete corrupto). Por favor, vuelve a descargarlo e inténtalo de nuevo</string>
     <string name="exception_install_failed_invalid_uri">URI inválido</string>
     <string name="exception_install_failed_insufficient_storage">Almacenamiento lleno, libera espacio</string>
     <string name="exception_install_failed_duplicate_package">Firma del paquete cambiada, asegúrate de que el paquete sea seguro y desinstala la aplicación, luego vuelve a intentarlo</string>
@@ -696,4 +696,13 @@
     <string name="installer_live_channel_short_text_analyse_failed">Fallado</string>
     <string name="version_with_prefix_format">%1$s %2$s</string>
     <string name="exception_resolve_failed_link_not_valid">Este enlace no contiene un archivo válido</string>
+    <string name="theme_settings_color_spec">Especificaciones de color</string>
+    <string name="theme_settings_color_spec_only_2021">El estilo actual de la paleta solo soporta Spec 2021</string>
+    <string name="installer_analyse_failed_corrupted_archive">Archivo corrupto</string>
+    <string name="tag_identical">Idéntico</string>
+    <string name="installer_prepare_identical_notice">Este paquete es idéntico al de la app instalada. Puedes saltarte esta instalación con seguridad.</string>
+    <string name="config_apk_choose_all">Selecciona todos los APKs por defecto durante la instalación por lotes</string>
+    <string name="config_apk_choose_all_desc">Selecciona todos los APK por defecto para sesiones de varios archivos.</string>
+    <string name="lab_mi_island">Mi Súper Isla</string>
+    <string name="lab_mi_island_desc">Estilo de notificación global. La verificación de firma del sistema solo puede ser evitada cuando el autenticador de aplicación personalizado está configurado en Shizuku. Los usuarios de root pueden habilitar esto directamente tras desactivar manualmente las restricciones de firma</string>
 </resources>

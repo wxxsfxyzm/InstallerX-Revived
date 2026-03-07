@@ -269,7 +269,7 @@
     <string name="exception_analyse_failed_all_files_unsupported">Arquivo não suportado</string>
     <string name="exception_install_failed_already_exists">Esta versão do app já está instalada, por gentileza desinstale e tente novamente</string>
     <string name="exception_install_failed_blacklisted_package">Você não permitiu a instalação do app!</string>
-    <string name="exception_install_failed_invalid_apk">Esta versão do app já está instalada, por gentileza desinstale e tente novamente</string>
+    <string name="exception_install_failed_invalid_apk">APK inválido (pacote corrompido). Baixe-o novamente e repita a operação</string>
     <string name="exception_install_failed_invalid_uri">URI inválida</string>
     <string name="exception_install_failed_insufficient_storage">Armazenamento cheio, tente liberar espaço</string>
     <string name="exception_install_failed_duplicate_package">Assinatura do pacote alterada, certifique-se de que seu pacote é seguro e desinstale o app, depois tente novamente</string>
@@ -685,4 +685,15 @@
     <string name="installer_live_channel_short_text_analyse_failed">Falha</string>
     <string name="exception_resolve_failed_link_not_valid">Este link não contém um arquivo válido</string>
     <string name="version_with_prefix_format">%1$s %2$s</string>
+    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="theme_settings_color_spec">Especificações de Cor</string>
+    <string name="theme_settings_color_spec_only_2021">O estilo atual da paleta suporta apenas a Especificação 2021</string>
+    <string name="config_label_preferences">Preferências</string>
+    <string name="installer_analyse_failed_corrupted_archive">Arquivo corrompido</string>
+    <string name="tag_identical">Idêntico</string>
+    <string name="installer_prepare_identical_notice">Este pacote é idêntico ao aplicativo instalado. Você pode ignorar esta instalação com segurança.</string>
+    <string name="config_apk_choose_all">Selecionar todos os APKs por padrão durante uma instalação em lote</string>
+    <string name="config_apk_choose_all_desc">Selecionar todos os APKs por padrão para sessões com vários arquivos.</string>
+    <string name="lab_mi_island">Mi Super Island</string>
+    <string name="lab_mi_island_desc">Estilo de notificação global. A verificação da assinatura do sistema só pode ser ignorada quando o autenticador de aplicativos personalizado estiver definido como Shizuku. Os usuários root podem ativar isso diretamente após desativar manualmente as restrições de assinatura</string>
 </resources>

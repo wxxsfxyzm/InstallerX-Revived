@@ -388,7 +388,7 @@
     <string name="exception_analyse_failed_all_files_unsupported">Bestand niet ondersteund</string>
     <string name="exception_install_failed_already_exists">Deze app versie is al geïnstalleerd, verwijder alsjeblieft de app en probeer het opnieuw</string>
     <string name="exception_install_failed_blacklisted_package">Je staat het installeren van deze app niet toe!</string>
-    <string name="exception_install_failed_invalid_apk">Deze app versie is al geïnstalleerd, verwijder alsjeblieft de app en probeer het opnieuw</string>
+    <string name="exception_install_failed_invalid_apk">Ongeldige APK (beschadigd pakket). Herinstalleer alsjeblieft de app en probeer het opnieuw</string>
     <string name="exception_install_failed_invalid_uri">Ongeldige URI</string>
     <string name="exception_install_failed_insufficient_storage">Opslag vol, probeer wat ruimte vrij te maken</string>
     <string name="exception_install_failed_duplicate_package">De pakketondertekening is veranderd, zorg ervoor dat het pakket veilig is en verwijder de app, probeer het daarna opnieuw</string>
@@ -688,4 +688,12 @@
     <string name="app_version_info_format">%1$s%2$s %3$s (%4$s)</string>
     <string name="lab_mi_island">Xiaomi Super Island</string>
     <string name="lab_mi_island_desc">Globale meldingsstijl. Verificatie van systeemondertekening kan alleen omzeilt worden wanneer de autorisatiegever is ingesteld op Shizuku. Root-gebruikers kunnen dit meteen inschakelen nadat ze manueel de ondertekeningsrestricties hebben uitgeschakeld</string>
+    <string name="theme_settings_color_spec">Kleurspecificatie</string>
+    <string name="theme_settings_color_spec_only_2021">De huidige palletstijl ondersteund alleen de 2021 specificatie</string>
+    <string name="config_label_preferences">Voorkeuren</string>
+    <string name="installer_analyse_failed_corrupted_archive">Beschadigd archief</string>
+    <string name="tag_identical">Identiek</string>
+    <string name="installer_prepare_identical_notice">Dit pakket is identiek met de geïnstalleerde app. Je kan veilig de installatie overslaan.</string>
+    <string name="config_apk_choose_all">Selecteer standaard alle APK\'s tijdens het meerdere installeren</string>
+    <string name="config_apk_choose_all_desc">Selecteer standaard alle APK\'s voor meerdere bestandssessies.</string>
 </resources>
