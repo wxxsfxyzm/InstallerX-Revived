@@ -17,7 +17,8 @@ import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
-import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val privilegedModule = module {
@@ -30,9 +31,9 @@ val privilegedModule = module {
     single<SystemInfoProvider> { SystemInfoProviderImpl(get()) }
 
     // Services
-    single { AutoLockService(androidContext(), get(), get()) }
+    singleOf(::AutoLockService)
 
     // UseCases
-    factory { OpenAppUseCase(get(), get()) }
-    factory { OpenLSPosedUseCase(get(), get()) }
+    factoryOf(::OpenAppUseCase)
+    factoryOf(::OpenLSPosedUseCase)
 }

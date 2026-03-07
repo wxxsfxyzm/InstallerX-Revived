@@ -30,6 +30,7 @@ class InstallerSettingsViewModel(
 
     val state: StateFlow<InstallerSettingsState> = appSettingsRepo.preferencesFlow.map { prefs ->
         InstallerSettingsState(
+            isLoading = false,
             useBlur = prefs.useBlur,
             authorizer = prefs.authorizer,
             dhizukuAutoCloseCountDown = prefs.dhizukuAutoCloseCountDown,
@@ -52,8 +53,8 @@ class InstallerSettingsViewModel(
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = InstallerSettingsState()
+        started = SharingStarted.Eagerly,
+        initialValue = InstallerSettingsState(isLoading = true)
     )
 
     fun dispatch(action: InstallerSettingsAction) {

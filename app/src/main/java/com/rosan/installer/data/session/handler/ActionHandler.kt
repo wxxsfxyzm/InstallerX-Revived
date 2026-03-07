@@ -68,12 +68,13 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
     private val installerId get() = installer.id
     private val context by inject<Context>()
     private val appSettingsRepo by inject<AppSettingsRepo>()
-    private val analyzePackageUseCase by inject<AnalyzePackageUseCase>()
-    private val executeInstallUseCase by inject<ExecuteInstallUseCase>()
+    private val appIconRepository by inject<AppIconRepository>()
     private val shellExecutionProvider by inject<ShellExecutionProvider>()
     private val deviceCapabilityProvider by inject<DeviceCapabilityProvider>()
     private val autoLockService by inject<AutoLockService>()
-    private val appIconRepository by inject<AppIconRepository>()
+    val configResolver by inject<ConfigResolver>()
+    private val analyzePackageUseCase by inject<AnalyzePackageUseCase>()
+    private val executeInstallUseCase by inject<ExecuteInstallUseCase>()
 
     // Cache directory
     private val cacheDirectory = File(context.cacheDir, "installer_sessions/$installerId")
@@ -205,7 +206,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
         installer.progress.emit(ProgressEntity.InstallResolving)
 
         // Resolve Config
-        installer.config = ConfigResolver.resolve(activity)
+        installer.config = configResolver.resolve(activity)
 
         if (installer.config.installMode.isNotification) {
             Timber.d("[id=$installerId] Notification mode detected. Switching to background.")
@@ -415,7 +416,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
 
     private suspend fun resolveConfirm(activity: Activity, sessionId: Int) {
         Timber.d("[id=$installerId] resolveConfirmInstall: Starting for session $sessionId.")
-        installer.config = ConfigResolver.resolve(activity)
+        installer.config = configResolver.resolve(activity)
 
         val details = sessionProcessor.getSessionDetails(sessionId, installer.config)
         installer.confirmationDetails.value = details
@@ -426,7 +427,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
 
     private suspend fun resolveUninstall(activity: Activity, packageName: String) {
         Timber.d("[id=$installerId] resolveUninstall: Starting for $packageName.")
-        installer.config = ConfigResolver.resolve(activity)
+        installer.config = configResolver.resolve(activity)
         installer.progress.emit(ProgressEntity.UninstallResolving)
 
         val pm = context.packageManager

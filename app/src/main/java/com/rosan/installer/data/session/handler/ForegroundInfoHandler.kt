@@ -17,7 +17,6 @@ import com.rosan.installer.data.session.notification.LegacyNotificationBuilder
 import com.rosan.installer.data.session.notification.MiIslandNotificationBuilder
 import com.rosan.installer.data.session.notification.ModernNotificationBuilder
 import com.rosan.installer.data.session.notification.NotificationHelper
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.domain.engine.repository.AppIconRepository
 import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.session.model.ProgressEntity
@@ -27,6 +26,7 @@ import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
+import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -75,6 +75,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerSessionRe
     private val appSettingsRepo by inject<AppSettingsRepo>()
     private val appIconRepo by inject<AppIconRepository>()
     private val appOpsProvider by inject<AppOpsProvider>()
+    private val configUseCase by inject<GetResolvedConfigUseCase>()
 
     private val notificationManager = NotificationManagerCompat.from(context)
     private val notificationId = installer.id.hashCode() and Int.MAX_VALUE
@@ -117,7 +118,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerSessionRe
         isXiaomiNetworkBlocked = false
 
         // Initialize synchronously in the suspend function to avoid race conditions with onFinish
-        globalAuthorizer = ConfigUtil.getGlobalAuthorizer()
+        globalAuthorizer = configUseCase(null).authorizer
 
         val settings = NotificationSettings(
             showDialog = appSettingsRepo.getBoolean(BooleanSetting.ShowDialogWhenPressingNotification, true).first(),

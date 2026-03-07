@@ -8,6 +8,7 @@ import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.SharedUid
 
 data class InstallerSettingsState(
+    val isLoading: Boolean = true,
     val useBlur: Boolean = true,
     val authorizer: Authorizer = Authorizer.Shizuku,
     val dhizukuAutoCloseCountDown: Int = 5,

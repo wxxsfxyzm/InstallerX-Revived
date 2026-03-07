@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.config.edit
 
 import android.content.Context
@@ -7,9 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
-import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalAuthorizer
-import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalInstallMode
-import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.DexoptMode
@@ -464,7 +463,7 @@ class EditViewModel(
         viewModelScope.launch {
             Timber.i("[LOAD_USERS] Starting to load available users.")
             val newAvailableUsers = runCatching {
-                val authorizer = state.data.authorizer.readGlobal()
+                val authorizer = if (state.data.authorizer == Authorizer.Global) globalAuthorizer else state.data.authorizer
                 withContext(Dispatchers.IO) { systemInfoProvider.getUsers(authorizer) }
             }.getOrElse {
                 Timber.e(it, "Failed to load available users.")
@@ -495,8 +494,9 @@ class EditViewModel(
         loadDataJob?.cancel()
         loadDataJob = viewModelScope.launch(Dispatchers.IO) {
 
-            globalAuthorizer = getGlobalAuthorizer()
-            globalInstallMode = getGlobalInstallMode()
+            val prefs = appSettingsRepo.preferencesFlow.first()
+            globalAuthorizer = prefs.authorizer
+            globalInstallMode = prefs.installMode
 
             val managedPackages =
                 appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedInstallerPackages).firstOrNull() ?: emptyList()
@@ -530,8 +530,8 @@ class EditViewModel(
     private fun saveData() {
         saveDataJob?.cancel()
         saveDataJob = viewModelScope.launch(Dispatchers.IO) {
-            val model = state.data.toConfigModel()
-            // Assume you have checked if UID exists in state.data.installRequesterUid != null
+            var model = state.data.toConfigModel()
+            if (id != null) model = model.copy(id = id)
             val hasRequesterUid = state.data.installRequesterUid != null
 
             // Delegate all logic to UseCase

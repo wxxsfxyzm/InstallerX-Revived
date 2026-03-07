@@ -5,11 +5,11 @@ package com.rosan.installer.data.privileged.service
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,7 +21,8 @@ import timber.log.Timber
 class AutoLockService(
     private val context: Context,
     private val appSettingsRepo: AppSettingsRepo,
-    private val appOpsProvider: AppOpsProvider
+    private val appOpsProvider: AppOpsProvider,
+    private val configUseCase: GetResolvedConfigUseCase
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var isInitialized = false
@@ -40,7 +41,9 @@ class AutoLockService(
                 if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) return@launch
                 if (!appSettingsRepo.getBoolean(BooleanSetting.AutoLockInstaller, false).first()) return@launch
 
-                if (ConfigUtil.getGlobalAuthorizer() == Authorizer.Shizuku) {
+                val globalConfig = configUseCase(null)
+
+                if (globalConfig.authorizer == Authorizer.Shizuku) {
                     executeLock(Authorizer.Shizuku, "ShizukuStartup")
                 }
             } catch (e: Exception) {

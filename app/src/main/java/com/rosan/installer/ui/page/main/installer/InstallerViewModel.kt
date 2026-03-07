@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
-import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallOption
@@ -599,7 +598,7 @@ class InstallerViewModel(
     private fun loadAvailableUsers(authorizer: Authorizer) {
         viewModelScope.launch {
             // getAuthorizer() is a suspend function that correctly resolves 'Global' to the actual authorizer.
-            val effectiveAuthorizer = authorizer.readGlobal()
+            val effectiveAuthorizer = authorizer
 
             // If the effective authorizer is Dhizuku, disable the feature and do not proceed.
             if (effectiveAuthorizer == Authorizer.Dhizuku) {

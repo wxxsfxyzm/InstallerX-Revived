@@ -4,13 +4,17 @@ package com.rosan.installer.data.session.resolver
 
 import android.app.Activity
 import android.content.Intent
-import com.rosan.installer.data.settings.util.ConfigUtil
 import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
 import com.rosan.installer.ui.activity.UninstallerActivity
 import timber.log.Timber
 
-object ConfigResolver {
-    private const val TAG = "InstallSource"
+class ConfigResolver(
+    private val getResolvedConfigUseCase: GetResolvedConfigUseCase
+) {
+    companion object {
+        private const val TAG = "InstallSource"
+    }
 
     // Authorities that definitely belong to the system but don't follow the "com.android.providers" naming convention.
     private val EXPLICIT_SYSTEM_AUTHORITIES = setOf(
@@ -79,7 +83,7 @@ object ConfigResolver {
     }
 
     private suspend fun getConfigForPackage(packageName: String?): ConfigModel {
-        val config = ConfigUtil.getByPackageName(packageName)
+        val config = getResolvedConfigUseCase(packageName)
         Timber.tag(TAG).d("Resolved config for '${packageName ?: "default"}': $config")
         return config
     }

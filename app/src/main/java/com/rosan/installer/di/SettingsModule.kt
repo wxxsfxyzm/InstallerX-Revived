@@ -21,6 +21,7 @@ import com.rosan.installer.domain.settings.repository.AppRepository
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.ConfigRepo
 import com.rosan.installer.domain.settings.usecase.config.GetConfigDraftUseCase
+import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
 import com.rosan.installer.domain.settings.usecase.config.SaveConfigUseCase
 import com.rosan.installer.domain.settings.usecase.config.ToggleAppTargetConfigUseCase
 import com.rosan.installer.domain.settings.usecase.settings.ManagePackageListUseCase
@@ -68,6 +69,7 @@ val settingsModule = module {
     single { ThemeStateProvider(get()) }
 
     // UseCases
+    factory { GetResolvedConfigUseCase(androidContext(), get(), get(), get(), get()) }
     factory { GetConfigDraftUseCase(get(), get()) }
     factory { SaveConfigUseCase(get()) }
     factory { UpdateSettingUseCase(get()) }
