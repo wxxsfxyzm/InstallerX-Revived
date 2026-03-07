@@ -1,6 +1,5 @@
 package com.rosan.installer.ui.page.main.settings.config.all
 
-import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,15 +20,12 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 class AllViewModel(
     var navController: NavController,
     private val repo: ConfigRepo,
     private val appSettingsRepo: AppSettingsRepo
 ) : ViewModel(), KoinComponent {
-    val context by inject<Context>()
-
     var state by mutableStateOf(AllViewState())
         private set
 

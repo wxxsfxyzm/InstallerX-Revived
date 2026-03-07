@@ -46,8 +46,6 @@ import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.AutoClearNotificationTimeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAuthorizerWidget
@@ -63,12 +61,13 @@ import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewInstallerGlobalSettingsPage(
     navController: NavController,
-    viewModel: PreferredViewModel
+    viewModel: InstallerSettingsViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -141,7 +140,7 @@ fun NewInstallerGlobalSettingsPage(
                         DataAuthorizerWidget(
                             currentAuthorizer = uiState.authorizer,
                             changeAuthorizer = {
-                                viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(it))
+                                viewModel.dispatch(InstallerSettingsAction.ChangeGlobalAuthorizer(it))
                             }
                         ) {
                             // Nesting specific animations inside a widget is fine if the widget supports it
@@ -158,7 +157,7 @@ fun NewInstallerGlobalSettingsPage(
                                     startInt = 1,
                                     endInt = 10,
                                     onValueChange = {
-                                        viewModel.dispatch(PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it))
+                                        viewModel.dispatch(InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown(it))
                                     }
                                 )
                             }
@@ -168,7 +167,7 @@ fun NewInstallerGlobalSettingsPage(
                     item {
                         DataInstallModeWidget(
                             currentInstallMode = uiState.installMode,
-                            changeInstallMode = { viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(it)) }
+                            changeInstallMode = { viewModel.dispatch(InstallerSettingsAction.ChangeGlobalInstallMode(it)) }
                         )
                     }
 
@@ -179,7 +178,7 @@ fun NewInstallerGlobalSettingsPage(
                             title = stringResource(R.string.theme_settings_use_live_activity),
                             description = stringResource(R.string.theme_settings_use_live_activity_desc),
                             checked = uiState.showLiveActivity,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowLiveActivity(it)) }
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowLiveActivity(it)) }
                         )
                     }
 
@@ -191,7 +190,7 @@ fun NewInstallerGlobalSettingsPage(
                             description = stringResource(R.string.installer_settings_require_biometric_auth_desc),
                             checked = uiState.installerRequireBiometricAuth,
                             isM3E = true,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, true)) }
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeBiometricAuth(it)) }
                         )
                     }
 
@@ -199,7 +198,7 @@ fun NewInstallerGlobalSettingsPage(
                         AutoClearNotificationTimeWidget(
                             currentValue = uiState.notificationSuccessAutoClearSeconds,
                             onValueChange = { seconds ->
-                                viewModel.dispatch(PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(seconds))
+                                viewModel.dispatch(InstallerSettingsAction.ChangeNotificationSuccessAutoClearSeconds(seconds))
                             }
                         )
                     }
@@ -230,7 +229,7 @@ fun NewInstallerGlobalSettingsPage(
                                 title = stringResource(id = R.string.version_compare_in_single_line),
                                 description = stringResource(id = R.string.version_compare_in_single_line_desc),
                                 checked = uiState.versionCompareInSingleLine,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeVersionCompareInSingleLine(it)) }
+                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeVersionCompareInSingleLine(it)) }
                             )
                         }
 
@@ -241,7 +240,7 @@ fun NewInstallerGlobalSettingsPage(
                                 title = stringResource(id = R.string.sdk_compare_in_multi_line),
                                 description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
                                 checked = uiState.sdkCompareInMultiLine,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeSdkCompareInMultiLine(it)) }
+                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeSdkCompareInMultiLine(it)) }
                             )
                         }
 
@@ -252,7 +251,7 @@ fun NewInstallerGlobalSettingsPage(
                                 title = stringResource(id = R.string.show_dialog_install_extended_menu),
                                 description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
                                 checked = uiState.showDialogInstallExtendedMenu,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)) }
+                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowDialogInstallExtendedMenu(it)) }
                             )
                         }
 
@@ -263,7 +262,7 @@ fun NewInstallerGlobalSettingsPage(
                                 title = stringResource(id = R.string.show_intelligent_suggestion),
                                 description = stringResource(id = R.string.show_intelligent_suggestion_desc),
                                 checked = uiState.showSmartSuggestion,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowSuggestion(it)) }
+                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowSuggestion(it)) }
                             )
                         }
 
@@ -276,7 +275,7 @@ fun NewInstallerGlobalSettingsPage(
                                 checked = uiState.showDialogWhenPressingNotification,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowDialogWhenPressingNotification(
+                                        InstallerSettingsAction.ChangeShowDialogWhenPressingNotification(
                                             it
                                         )
                                     )
@@ -291,7 +290,7 @@ fun NewInstallerGlobalSettingsPage(
                                 title = stringResource(id = R.string.auto_silent_install),
                                 description = stringResource(id = R.string.auto_silent_install_desc),
                                 checked = uiState.autoSilentInstall,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it)) }
+                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeAutoSilentInstall(it)) }
                             )
                         }
 
@@ -302,7 +301,7 @@ fun NewInstallerGlobalSettingsPage(
                                 title = stringResource(id = R.string.disable_notification_on_dismiss),
                                 description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
                                 checked = uiState.disableNotificationForDialogInstall,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowDisableNotification(it)) }
+                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowDisableNotification(it)) }
                             )
                         }
                     }
@@ -321,7 +320,7 @@ fun NewInstallerGlobalSettingsPage(
                                 title = stringResource(id = R.string.installer_show_oem_special),
                                 description = stringResource(id = R.string.installer_show_oem_special_desc),
                                 checked = uiState.showOPPOSpecial,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowOPPOSpecial(it)) }
+                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowOPPOSpecial(it)) }
                             )
                         }
                     }
@@ -337,8 +336,8 @@ fun NewInstallerGlobalSettingsPage(
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_preset_install_sources),
                             packages = uiState.managedInstallerPackages,
-                            onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
-                            onRemovePackage = { viewModel.dispatch(PreferredViewAction.RemoveManagedInstallerPackage(it)) }
+                            onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedInstallerPackage(it)) },
+                            onRemovePackage = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedInstallerPackage(it)) }
                         )
                     }
                 }
@@ -353,8 +352,8 @@ fun NewInstallerGlobalSettingsPage(
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_blacklist),
                             packages = uiState.managedBlacklistPackages,
-                            onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it)) },
-                            onRemovePackage = { viewModel.dispatch(PreferredViewAction.RemoveManagedBlacklistPackage(it)) }
+                            onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedBlacklistPackage(it)) },
+                            onRemovePackage = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedBlacklistPackage(it)) }
                         )
                     }
                 }
@@ -369,8 +368,8 @@ fun NewInstallerGlobalSettingsPage(
                         ManagedUidsWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
                             uids = uiState.managedSharedUserIdBlacklist,
-                            onAddUid = { viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it)) },
-                            onRemoveUid = { viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it)) }
+                            onAddUid = { viewModel.dispatch(InstallerSettingsAction.AddManagedSharedUserIdBlacklist(it)) },
+                            onRemoveUid = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist(it)) }
                         )
                     }
 
@@ -382,10 +381,10 @@ fun NewInstallerGlobalSettingsPage(
                             packages = uiState.managedSharedUserIdExemptedPackages,
                             infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
                             isInfoVisible = uiState.managedSharedUserIdExemptedPackages.isNotEmpty(),
-                            onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdExemptedPackages(it)) },
+                            onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedSharedUserIdExemptedPackages(it)) },
                             onRemovePackage = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
+                                    InstallerSettingsAction.RemoveManagedSharedUserIdExemptedPackages(
                                         it
                                     )
                                 )

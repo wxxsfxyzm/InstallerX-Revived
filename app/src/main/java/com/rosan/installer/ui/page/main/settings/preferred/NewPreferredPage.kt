@@ -1,8 +1,10 @@
+// File: com/rosan/installer/ui/page/main/settings/preferred/NewPreferredPage.kt
 package com.rosan.installer.ui.page.main.settings.preferred
 
-import androidx.compose.foundation.layout.Arrangement
+import android.annotation.SuppressLint
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -11,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
@@ -30,9 +31,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -65,6 +66,7 @@ import dev.chrisbanes.haze.hazeSource
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewPreferredPage(
@@ -73,6 +75,7 @@ fun NewPreferredPage(
     outerPadding: PaddingValues = PaddingValues(0.dp),
     hazeState: HazeState? = null
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val topAppBarState = rememberTopAppBarState()
@@ -90,16 +93,9 @@ fun NewPreferredPage(
 
     val hazeStyle = rememberMaterial3HazeStyle()
 
-    var updateErrorInfo by remember {
-        mutableStateOf<PreferredViewEvent.ShowInAppUpdateErrorDetail?>(
-            null
-        )
-    }
     val snackBarHostState = remember { SnackbarHostState() }
     var errorDialogInfo by remember {
-        mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(
-            null
-        )
+        mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(null)
     }
 
     val detailLabel = stringResource(id = R.string.details)
@@ -109,12 +105,12 @@ fun NewPreferredPage(
             snackBarHostState.currentSnackbarData?.dismiss()
             when (event) {
                 is PreferredViewEvent.ShowDefaultInstallerResult -> {
-                    snackBarHostState.showSnackbar(event.message)
+                    snackBarHostState.showSnackbar(context.getString(event.messageResId))
                 }
 
                 is PreferredViewEvent.ShowDefaultInstallerErrorDetail -> {
                     val snackbarResult = snackBarHostState.showSnackbar(
-                        message = event.title,
+                        message = context.getString(event.titleResId),
                         actionLabel = detailLabel,
                         duration = SnackbarDuration.Short
                     )
@@ -122,12 +118,6 @@ fun NewPreferredPage(
                         errorDialogInfo = event
                     }
                 }
-
-                is PreferredViewEvent.ShowInAppUpdateErrorDetail -> {
-                    updateErrorInfo = event
-                }
-
-                else -> null
             }
         }
     }
@@ -158,31 +148,18 @@ fun NewPreferredPage(
             )
         },
     ) { paddingValues ->
-        when (uiState.progress) {
-            is PreferredViewState.Progress.Loading -> {
+        Crossfade(
+            targetState = uiState.isLoading,
+            label = "PreferredPageContent",
+            animationSpec = tween(durationMillis = 150)
+        ) { isLoading ->
+            if (isLoading) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        ContainedLoadingIndicator(
-                            indicatorColor = MaterialTheme.colorScheme.primary,
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
-                        )
-                        Text(
-                            text = stringResource(id = R.string.loading),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
-                }
-            }
-
-            is PreferredViewState.Progress.Loaded -> {
+                        .padding(paddingValues)
+                )
+            } else {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -307,7 +284,6 @@ fun NewPreferredPage(
         }
     }
 
-    // Dialogs and bottom sheets stay outside the main Box
     errorDialogInfo?.let { dialogInfo ->
         ErrorDisplayDialog(
             exception = dialogInfo.exception,
@@ -316,15 +292,7 @@ fun NewPreferredPage(
                 errorDialogInfo = null
                 viewModel.dispatch(dialogInfo.retryAction)
             },
-            title = dialogInfo.title
-        )
-    }
-
-    updateErrorInfo?.let { info ->
-        ErrorDisplayDialog(
-            title = info.title,
-            exception = info.exception,
-            onDismissRequest = { updateErrorInfo = null }
+            title = stringResource(dialogInfo.titleResId)
         )
     }
 }

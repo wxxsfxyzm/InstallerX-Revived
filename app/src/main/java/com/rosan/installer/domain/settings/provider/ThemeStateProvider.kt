@@ -38,6 +38,7 @@ class ThemeStateProvider(private val appSettingsRepo: AppSettingsRepo) {
         appSettingsRepo.getBoolean(BooleanSetting.UiUseMiuixMonet, false),
         appSettingsRepo.getInt(IntSetting.ThemeSeedColor, PresetColors.first().color.toArgb())
             .map { Color(it) },
+        appSettingsRepo.getBoolean(BooleanSetting.UiUseBlur, true),
         getWallpaperColorsFlow()
     ) { values: Array<Any?> ->
         var idx = 0
@@ -49,6 +50,7 @@ class ThemeStateProvider(private val appSettingsRepo: AppSettingsRepo) {
         val useDynamic = values[idx++] as Boolean
         val useMonet = values[idx++] as Boolean
         val manualSeedColor = values[idx++] as Color
+        val useBlur = values[idx++] as Boolean
         @Suppress("UNCHECKED_CAST") val wallpaperColors = values[idx] as? List<Int>
 
         val effectiveSeedColor =
@@ -65,7 +67,8 @@ class ThemeStateProvider(private val appSettingsRepo: AppSettingsRepo) {
             colorSpec = colorSpec,
             useDynamicColor = useDynamic,
             useMiuixMonet = useMonet,
-            seedColor = effectiveSeedColor
+            seedColor = effectiveSeedColor,
+            useBlur = useBlur
         )
     }
 

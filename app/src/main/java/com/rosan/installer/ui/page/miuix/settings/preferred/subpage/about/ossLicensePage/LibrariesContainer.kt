@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home.ossLicensePage
+package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.about.ossLicensePage
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

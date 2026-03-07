@@ -48,50 +48,51 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.domain.settings.model.ThemeState
+import com.rosan.installer.domain.settings.provider.ThemeStateProvider
+import com.rosan.installer.domain.settings.repository.ConfigRepo
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.all.AllPage
-import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.NewAllPage
 import com.rosan.installer.ui.page.main.settings.preferred.NewPreferredPage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredPage
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
+import org.koin.compose.koinInject
 
-@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun MainPage(navController: NavController, preferredViewModel: PreferredViewModel) {
-    val allViewModel: AllViewModel = koinViewModel { parametersOf(navController) }
-
-    val uiState by preferredViewModel.state.collectAsStateWithLifecycle()
-    val showExpressiveUI = uiState.showExpressiveUI
+fun MainPage(navController: NavController) {
+    val themeStateProvider = koinInject<ThemeStateProvider>()
+    val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
+    val showExpressiveUI = uiState.isExpressive
     val useBlur = showExpressiveUI && uiState.useBlur
     val hazeState = if (useBlur) remember { HazeState() } else null
 
-    val configCount = allViewModel.state.data.configs.size
+    val configRepo = koinInject<ConfigRepo>()
+    val configCountFlow = remember { configRepo.flowAll().map { it.size } }
+    val configCount by configCountFlow.collectAsStateWithLifecycle(initialValue = 0)
     val configLabel = stringResource(R.string.config)
     val preferredLabel = stringResource(R.string.preferred)
 
-    val data = remember(showExpressiveUI, configLabel, preferredLabel, navController, allViewModel, preferredViewModel) {
+    val data = remember(showExpressiveUI, configLabel, preferredLabel, navController) {
         arrayOf(
             NavigationData(
                 icon = AppIcons.RoomPreferences,
                 label = configLabel
             ) { outerPadding, hazeState ->
-                if (showExpressiveUI) NewAllPage(navController, allViewModel, outerPadding = outerPadding, hazeState = hazeState)
-                else AllPage(navController, allViewModel, outerPadding)
+                if (showExpressiveUI) NewAllPage(navController, outerPadding = outerPadding, hazeState = hazeState)
+                else AllPage(navController, outerPadding = outerPadding)
             },
             NavigationData(
                 icon = AppIcons.SettingsSuggest,
                 label = preferredLabel
             ) { outerPadding, hazeState ->
-                if (showExpressiveUI) NewPreferredPage(navController, preferredViewModel, outerPadding = outerPadding, hazeState = hazeState)
-                else PreferredPage(navController, preferredViewModel, outerPadding)
+                if (showExpressiveUI) NewPreferredPage(navController, outerPadding = outerPadding, hazeState = hazeState)
+                else PreferredPage(navController, outerPadding = outerPadding)
             }
         )
     }

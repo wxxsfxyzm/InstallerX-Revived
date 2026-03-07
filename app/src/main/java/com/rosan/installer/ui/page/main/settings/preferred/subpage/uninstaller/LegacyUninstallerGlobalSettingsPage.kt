@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.main.settings.preferred.subpage.installer
+package com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Spacer
@@ -26,8 +26,6 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.activity.UninstallerActivity
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UninstallPackageDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
@@ -39,12 +37,13 @@ import com.rosan.installer.ui.page.main.widget.setting.UninstallRequireBiometric
 import com.rosan.installer.ui.page.main.widget.setting.UninstallSystemAppWidget
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.util.toast
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LegacyUninstallerGlobalSettingsPage(
     navController: NavController,
-    viewModel: PreferredViewModel,
+    viewModel: UninstallerSettingsViewModel = koinViewModel(),
 ) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -53,8 +52,7 @@ fun LegacyUninstallerGlobalSettingsPage(
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             when (event) {
-                is PreferredViewEvent.ShowMessage -> context.toast(event.resId)
-                else -> Unit
+                is UninstallerSettingsEvent.ShowMessage -> context.toast(event.resId)
             }
         }
     }

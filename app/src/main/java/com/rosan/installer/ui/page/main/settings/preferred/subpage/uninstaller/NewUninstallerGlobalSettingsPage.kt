@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.main.settings.preferred.subpage.installer
+package com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller
 
 import android.content.Intent
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,8 +36,6 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.activity.UninstallerActivity
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UninstallPackageDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
@@ -54,12 +52,13 @@ import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import com.rosan.installer.util.toast
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewUninstallerGlobalSettingsPage(
     navController: NavController,
-    viewModel: PreferredViewModel
+    viewModel: UninstallerSettingsViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -77,8 +76,7 @@ fun NewUninstallerGlobalSettingsPage(
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             when (event) {
-                is PreferredViewEvent.ShowMessage -> context.toast(event.resId)
-                else -> Unit
+                is UninstallerSettingsEvent.ShowMessage -> context.toast(event.resId)
             }
         }
     }

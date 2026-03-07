@@ -30,14 +30,14 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.Level
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 
 /**
  * @author iamr0s
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun StatusWidget(viewModel: PreferredViewModel) {
+fun StatusWidget(viewModel: AboutViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
     val containerColor = when (AppConfig.LEVEL) {

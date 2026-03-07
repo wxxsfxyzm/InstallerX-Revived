@@ -46,8 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
@@ -58,12 +57,14 @@ import com.rosan.installer.ui.page.main.widget.setting.SelectableSettingItem
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.material.ThemeMode
 import com.rosan.installer.ui.theme.none
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LegacyThemeSettingsPage(
     navController: NavController,
-    viewModel: PreferredViewModel,
+    viewModel: ThemeSettingsViewModel = koinViewModel(),
+    sharedViewModel: SettingsSharedViewModel = koinViewModel()
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -77,7 +78,7 @@ fun LegacyThemeSettingsPage(
             currentStyle = uiState.paletteStyle,
             onDismiss = { showPaletteDialog = false },
             onSelect = { style ->
-                viewModel.dispatch(PreferredViewAction.SetPaletteStyle(style))
+                viewModel.dispatch(ThemeSettingsAction.SetPaletteStyle(style))
                 showPaletteDialog = false
             }
         )
@@ -88,7 +89,7 @@ fun LegacyThemeSettingsPage(
             currentMode = uiState.themeMode,
             onDismiss = { showThemeModeDialog = false },
             onSelect = { mode ->
-                viewModel.dispatch(PreferredViewAction.SetThemeMode(mode))
+                viewModel.dispatch(ThemeSettingsAction.SetThemeMode(mode))
                 showThemeModeDialog = false
             }
         )
@@ -99,7 +100,7 @@ fun LegacyThemeSettingsPage(
         onDismiss = { showHideLauncherIconDialog = false },
         onConfirm = {
             showHideLauncherIconDialog = false
-            viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(false))
+            viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(false))
         }
     )
 
@@ -130,7 +131,7 @@ fun LegacyThemeSettingsPage(
                         selected = !uiState.showMiuixUI,
                         onClick = {
                             if (uiState.showMiuixUI) { // Only dispatch if changing state
-                                viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(false))
+                                viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(false))
                             }
                         }
                     )
@@ -141,8 +142,8 @@ fun LegacyThemeSettingsPage(
                         selected = uiState.showMiuixUI,
                         onClick = {
                             if (!uiState.showMiuixUI) { // Only dispatch if changing state
-                                viewModel.markPendingNavigateToTheme(true)
-                                viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(true))
+                                sharedViewModel.markPendingNavigateToTheme(true)
+                                viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(true))
                             }
                         }
                     )
@@ -157,7 +158,7 @@ fun LegacyThemeSettingsPage(
                     checked = uiState.showExpressiveUI,
                     isM3E = false,
                     onCheckedChange = {
-                        viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it))
+                        viewModel.dispatch(ThemeSettingsAction.ChangeShowExpressiveUI(it))
                     }
                 )
             }
@@ -190,7 +191,7 @@ fun LegacyThemeSettingsPage(
                     isM3E = false,
                     checked = uiState.useDynamicColor,
                     onCheckedChange = {
-                        viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it))
+                        viewModel.dispatch(ThemeSettingsAction.SetUseDynamicColor(it))
                     }
                 )
             }
@@ -202,7 +203,7 @@ fun LegacyThemeSettingsPage(
                     isM3E = false,
                     checked = uiState.useDynColorFollowPkgIcon,
                     onCheckedChange = {
-                        viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIcon(it))
+                        viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIcon(it))
                     }
                 )
             }
@@ -215,7 +216,7 @@ fun LegacyThemeSettingsPage(
                         isM3E = false,
                         checked = uiState.useDynColorFollowPkgIconForLiveActivity,
                         onCheckedChange = {
-                            viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity(it))
+                            viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIconForLiveActivity(it))
                         }
                     )
                 }
@@ -261,7 +262,7 @@ fun LegacyThemeSettingsPage(
                                                     isSelected = uiState.seedColor == rawColor.color &&
                                                             !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
                                                 ) {
-                                                    viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
+                                                    viewModel.dispatch(ThemeSettingsAction.SetSeedColor(rawColor.color))
                                                 }
                                             }
                                         }
@@ -289,7 +290,7 @@ fun LegacyThemeSettingsPage(
                     isM3E = false,
                     onCheckedChange = {
                         viewModel.dispatch(
-                            PreferredViewAction.ChangePreferSystemIcon(it)
+                            ThemeSettingsAction.ChangePreferSystemIcon(it)
                         )
                     }
                 )
@@ -306,7 +307,7 @@ fun LegacyThemeSettingsPage(
                         if (newCheckedState) {
                             showHideLauncherIconDialog = true
                         } else {
-                            viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
+                            viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(true))
                         }
                     }
                 )

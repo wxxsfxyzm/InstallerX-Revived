@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home
+package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.about
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -38,9 +38,9 @@ import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.Level
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutAction
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 import com.rosan.installer.ui.page.main.widget.setting.LogEventCollector
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
@@ -53,6 +53,7 @@ import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
@@ -67,9 +68,9 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
-fun MiuixHomePage(
+fun MiuixAboutPage(
     navController: NavController,
-    viewModel: PreferredViewModel
+    viewModel: AboutViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -103,22 +104,22 @@ fun MiuixHomePage(
 
     val showLoadingDialog = remember { mutableStateOf(false) }
     val showUpdateErrorDialog = remember { mutableStateOf(false) }
-    var updateErrorInfo by remember { mutableStateOf<PreferredViewEvent.ShowInAppUpdateErrorDetail?>(null) }
+    var updateErrorInfo by remember { mutableStateOf<AboutEvent.ShowInAppUpdateErrorDetail?>(null) }
 
     LogEventCollector(viewModel)
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             when (event) {
-                is PreferredViewEvent.ShowUpdateLoading -> {
+                is AboutEvent.ShowUpdateLoading -> {
                     showLoadingDialog.value = true
                 }
 
-                is PreferredViewEvent.HideUpdateLoading -> {
+                is AboutEvent.HideUpdateLoading -> {
                     showLoadingDialog.value = false
                 }
 
-                is PreferredViewEvent.ShowInAppUpdateErrorDetail -> {
+                is AboutEvent.ShowInAppUpdateErrorDetail -> {
                     showLoadingDialog.value = false
                     updateErrorInfo = event
                     showUpdateErrorDialog.value = true
@@ -212,7 +213,7 @@ fun MiuixHomePage(
                         MiuixNavigationItemWidget(
                             title = stringResource(R.string.get_update_directly),
                             description = stringResource(R.string.get_update_directly_desc),
-                            onClick = { viewModel.dispatch(PreferredViewAction.Update) }
+                            onClick = { viewModel.dispatch(AboutAction.PerformUpdate) }
                         )
                 }
             }
@@ -228,7 +229,7 @@ fun MiuixHomePage(
                             title = stringResource(R.string.save_logs),
                             description = stringResource(R.string.save_logs_desc),
                             checked = uiState.enableFileLogging,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetEnableFileLogging(it)) }
+                            onCheckedChange = { viewModel.dispatch(AboutAction.SetEnableFileLogging(it)) }
                         )
                         AnimatedVisibility(
                             visible = uiState.enableFileLogging,
@@ -238,7 +239,7 @@ fun MiuixHomePage(
                             BasicComponent(
                                 title = stringResource(R.string.export_logs),
                                 summary = stringResource(R.string.export_logs_desc),
-                                onClick = { viewModel.dispatch(PreferredViewAction.ShareLog) }
+                                onClick = { viewModel.dispatch(AboutAction.ShareLog) }
                             )
                         }
                     }

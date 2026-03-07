@@ -51,12 +51,14 @@ import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewAllPage(
     navController: NavController,
-    viewModel: AllViewModel,
+    viewModel: AllViewModel = koinViewModel { parametersOf(navController) },
     outerPadding: PaddingValues = PaddingValues(0.dp),
     hazeState: HazeState? = null
 ) {

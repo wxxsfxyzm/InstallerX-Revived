@@ -1,6 +1,8 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
 import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -60,8 +62,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.main.widget.dialog.BlurWarningDialog
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
@@ -79,14 +80,14 @@ import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.koin.androidx.compose.koinViewModel
 
-// This is now a top-level composable, likely in its own file.
-// It takes NavController instead of an onBack lambda.
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewThemeSettingsPage(
     navController: NavController,
-    viewModel: PreferredViewModel,
+    viewModel: ThemeSettingsViewModel = koinViewModel(),
+    sharedViewModel: SettingsSharedViewModel = koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
@@ -104,7 +105,7 @@ fun NewThemeSettingsPage(
             currentStyle = uiState.paletteStyle,
             onDismiss = { showPaletteDialog = false },
             onSelect = { style ->
-                viewModel.dispatch(PreferredViewAction.SetPaletteStyle(style))
+                viewModel.dispatch(ThemeSettingsAction.SetPaletteStyle(style))
                 showPaletteDialog = false
             }
         )
@@ -115,7 +116,7 @@ fun NewThemeSettingsPage(
             currentMode = uiState.themeMode,
             onDismiss = { showThemeModeDialog = false },
             onSelect = { mode ->
-                viewModel.dispatch(PreferredViewAction.SetThemeMode(mode))
+                viewModel.dispatch(ThemeSettingsAction.SetThemeMode(mode))
                 showThemeModeDialog = false
             }
         )
@@ -130,7 +131,7 @@ fun NewThemeSettingsPage(
         onDismiss = { showHideLauncherIconDialog = false },
         onConfirm = {
             showHideLauncherIconDialog = false
-            viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(false))
+            viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(false))
         }
     )
 
@@ -139,7 +140,7 @@ fun NewThemeSettingsPage(
         onDismiss = { showBlurWarningDialog = false },
         onConfirm = {
             showBlurWarningDialog = false
-            viewModel.dispatch(PreferredViewAction.SetUseBlur(true))
+            viewModel.dispatch(ThemeSettingsAction.SetUseBlur(true))
         }
     )
 
@@ -197,7 +198,7 @@ fun NewThemeSettingsPage(
                             selected = !uiState.showMiuixUI,
                             onClick = {
                                 if (uiState.showMiuixUI) {
-                                    viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(false))
+                                    viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(false))
                                 }
                             }
                         )
@@ -210,8 +211,8 @@ fun NewThemeSettingsPage(
                             selected = uiState.showMiuixUI,
                             onClick = {
                                 if (!uiState.showMiuixUI) {
-                                    viewModel.markPendingNavigateToTheme(true)
-                                    viewModel.dispatch(PreferredViewAction.ChangeUseMiuix(true))
+                                    sharedViewModel.markPendingNavigateToTheme(true)
+                                    viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(true))
                                 }
                             }
                         )
@@ -230,7 +231,7 @@ fun NewThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_use_expressive_ui),
                             description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
                             checked = uiState.showExpressiveUI,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowExpressiveUI(it)) }
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.ChangeShowExpressiveUI(it)) }
                         )
                     }
                     item {
@@ -243,7 +244,7 @@ fun NewThemeSettingsPage(
                                 if (isChecked && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
                                     showBlurWarningDialog = true
                                 } else {
-                                    viewModel.dispatch(PreferredViewAction.SetUseBlur(isChecked))
+                                    viewModel.dispatch(ThemeSettingsAction.SetUseBlur(isChecked))
                                 }
                             }
                         )
@@ -275,7 +276,7 @@ fun NewThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_dynamic_color),
                             description = stringResource(R.string.theme_settings_dynamic_color_desc),
                             checked = uiState.useDynamicColor,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetUseDynamicColor(it)) }
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseDynamicColor(it)) }
                         )
                     }
                     item {
@@ -284,7 +285,7 @@ fun NewThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
                             description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
                             checked = uiState.useDynColorFollowPkgIcon,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetDynColorFollowPkgIcon(it)) }
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIcon(it)) }
                         )
                     }
                     // Conditional item for Live Activity
@@ -296,7 +297,7 @@ fun NewThemeSettingsPage(
                             checked = uiState.useDynColorFollowPkgIconForLiveActivity,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.SetDynColorFollowPkgIconForLiveActivity(
+                                    ThemeSettingsAction.SetDynColorFollowPkgIconForLiveActivity(
                                         it
                                     )
                                 )
@@ -350,7 +351,7 @@ fun NewThemeSettingsPage(
                                                         isSelected = uiState.seedColor == rawColor.color &&
                                                                 !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
                                                     ) {
-                                                        viewModel.dispatch(PreferredViewAction.SetSeedColor(rawColor.color))
+                                                        viewModel.dispatch(ThemeSettingsAction.SetSeedColor(rawColor.color))
                                                     }
                                                 }
                                             }
@@ -381,7 +382,7 @@ fun NewThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_prefer_system_icon),
                             description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
                             checked = uiState.preferSystemIcon,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangePreferSystemIcon(it)) }
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.ChangePreferSystemIcon(it)) }
                         )
                     }
                 }
@@ -402,7 +403,7 @@ fun NewThemeSettingsPage(
                                 if (newCheckedState) {
                                     showHideLauncherIconDialog = true
                                 } else {
-                                    viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
+                                    viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(true))
                                 }
                             }
                         )

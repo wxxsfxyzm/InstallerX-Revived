@@ -29,8 +29,6 @@ import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.RootImplementationSelectionDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
@@ -38,13 +36,14 @@ import com.rosan.installer.ui.page.main.widget.setting.LabHttpProfileWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabRootImplementationWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LegacyLabPage(
     navController: NavHostController,
-    viewModel: PreferredViewModel
+    viewModel: LabSettingsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
@@ -59,9 +58,9 @@ fun LegacyLabPage(
             onConfirm = { selectedImplementation ->
                 showRootImplementationDialog.value = false
                 // 1. Save the selected implementation
-                viewModel.dispatch(PreferredViewAction.LabChangeRootImplementation(selectedImplementation))
+                viewModel.dispatch(LabSettingsAction.LabChangeRootImplementation(selectedImplementation))
                 // 2. Enable the flash module feature
-                viewModel.dispatch(PreferredViewAction.LabChangeRootModuleFlash(true))
+                viewModel.dispatch(LabSettingsAction.LabChangeRootModuleFlash(true))
             }
         )
     }
@@ -99,7 +98,7 @@ fun LegacyLabPage(
                             showRootImplementationDialog.value = true
                         } else {
                             // If turning OFF, disable immediately
-                            viewModel.dispatch(PreferredViewAction.LabChangeRootModuleFlash(false))
+                            viewModel.dispatch(LabSettingsAction.LabChangeRootModuleFlash(false))
                         }
                     }
                 )
@@ -119,7 +118,7 @@ fun LegacyLabPage(
                             description = stringResource(R.string.lab_module_flashing_show_art_desc),
                             isM3E = false,
                             checked = uiState.labRootShowModuleArt,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
+                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeRootShowModuleArt(it)) }
                         )
                         if (capabilityProvider.isSystemApp)
                             SwitchWidget(
@@ -128,7 +127,7 @@ fun LegacyLabPage(
                                 description = stringResource(R.string.lab_module_always_use_root_desc),
                                 isM3E = false,
                                 checked = uiState.labRootModuleAlwaysUseRoot,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(it)) }
+                                onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeRootModuleAlwaysUseRoot(it)) }
                             )
                     }
                 }
@@ -141,7 +140,7 @@ fun LegacyLabPage(
                     description = stringResource(R.string.lab_mi_island_desc),
                     isM3E = false,
                     checked = uiState.labUseMiIsland,
-                    onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeUseMiIsland(it)) }
+                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeUseMiIsland(it)) }
                 )
             }
             item {
@@ -151,7 +150,7 @@ fun LegacyLabPage(
                     description = stringResource(R.string.lab_set_install_requester_desc),
                     checked = uiState.labSetInstallRequester,
                     isM3E = false,
-                    onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
+                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeSetInstallRequester(it)) }
                 )
             }
             // --- Internet Access Section ---
@@ -165,7 +164,7 @@ fun LegacyLabPage(
                         description = stringResource(R.string.lab_http_save_file_desc),
                         checked = uiState.labHttpSaveFile,
                         isM3E = false,
-                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeHttpSaveFile(it)) }
+                        onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeHttpSaveFile(it)) }
                     )
                 }*/
 

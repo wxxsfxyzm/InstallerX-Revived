@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer
+package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.uninstaller
 
 import android.content.Intent
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,8 +22,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.activity.UninstallerActivity
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsEvent
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
@@ -38,6 +38,7 @@ import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import com.rosan.installer.util.toast
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -49,7 +50,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun MiuixUninstallerGlobalSettingsPage(
     navController: NavController,
-    viewModel: PreferredViewModel
+    viewModel: UninstallerSettingsViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -61,8 +62,7 @@ fun MiuixUninstallerGlobalSettingsPage(
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             when (event) {
-                is PreferredViewEvent.ShowMessage -> context.toast(event.resId)
-                else -> Unit
+                is UninstallerSettingsEvent.ShowMessage -> context.toast(event.resId)
             }
         }
     }

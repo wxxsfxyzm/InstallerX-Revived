@@ -38,8 +38,6 @@ import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.AutoClearNotificationTimeWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataAuthorizerWidget
@@ -50,12 +48,13 @@ import com.rosan.installer.ui.page.main.widget.setting.ManagedPackagesWidget
 import com.rosan.installer.ui.page.main.widget.setting.ManagedUidsWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.none
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LegacyInstallerGlobalSettingsPage(
     navController: NavController,
-    viewModel: PreferredViewModel,
+    viewModel: InstallerSettingsViewModel = koinViewModel(),
 ) {
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -84,7 +83,7 @@ fun LegacyInstallerGlobalSettingsPage(
                 DataAuthorizerWidget(
                     currentAuthorizer = uiState.authorizer,
                     changeAuthorizer = { newAuthorizer ->
-                        viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(newAuthorizer))
+                        viewModel.dispatch(InstallerSettingsAction.ChangeGlobalAuthorizer(newAuthorizer))
                     },
                     trailingContent = {
                         AnimatedVisibility(
@@ -101,7 +100,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 endInt = 10
                             ) {
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
+                                    InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown(it)
                                 )
                             }
                         }
@@ -112,7 +111,7 @@ fun LegacyInstallerGlobalSettingsPage(
                 DataInstallModeWidget(
                     currentInstallMode = uiState.installMode,
                     changeInstallMode = {
-                        viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(it))
+                        viewModel.dispatch(InstallerSettingsAction.ChangeGlobalInstallMode(it))
                     }
                 )
             }
@@ -125,7 +124,7 @@ fun LegacyInstallerGlobalSettingsPage(
                         checked = uiState.showLiveActivity,
                         isM3E = false,
                         onCheckedChange = {
-                            viewModel.dispatch(PreferredViewAction.ChangeShowLiveActivity(it))
+                            viewModel.dispatch(InstallerSettingsAction.ChangeShowLiveActivity(it))
                         }
                     )
                 }
@@ -134,7 +133,7 @@ fun LegacyInstallerGlobalSettingsPage(
                     currentValue = uiState.notificationSuccessAutoClearSeconds,
                     onValueChange = { seconds ->
                         viewModel.dispatch(
-                            PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(
+                            InstallerSettingsAction.ChangeNotificationSuccessAutoClearSeconds(
                                 seconds
                             )
                         )
@@ -153,7 +152,7 @@ fun LegacyInstallerGlobalSettingsPage(
                         checked = uiState.installerRequireBiometricAuth,
                         isM3E = false,
                         onCheckedChange = {
-                            viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, true))
+                            viewModel.dispatch(InstallerSettingsAction.ChangeBiometricAuth(it))
                         }
                     )
                 }
@@ -189,7 +188,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 isM3E = false,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeVersionCompareInSingleLine(
+                                        InstallerSettingsAction.ChangeVersionCompareInSingleLine(
                                             it
                                         )
                                     )
@@ -205,7 +204,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 isM3E = false,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeSdkCompareInMultiLine(
+                                        InstallerSettingsAction.ChangeSdkCompareInMultiLine(
                                             it
                                         )
                                     )
@@ -225,7 +224,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 isM3E = false,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
+                                        InstallerSettingsAction.ChangeShowDialogInstallExtendedMenu(it)
                                     )
                                 }
                             )
@@ -239,7 +238,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 isM3E = false,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowSuggestion(it)
+                                        InstallerSettingsAction.ChangeShowSuggestion(it)
                                     )
                                 }
                             )
@@ -253,7 +252,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 isM3E = false,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
+                                        InstallerSettingsAction.ChangeShowDialogWhenPressingNotification(it)
                                     )
                                 }
                             )
@@ -265,7 +264,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 description = stringResource(id = R.string.auto_silent_install_desc),
                                 checked = uiState.autoSilentInstall,
                                 onCheckedChange = {
-                                    viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it))
+                                    viewModel.dispatch(InstallerSettingsAction.ChangeAutoSilentInstall(it))
                                 }
                             )
                         }
@@ -282,7 +281,7 @@ fun LegacyInstallerGlobalSettingsPage(
                                 isM3E = false,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowDisableNotification(it)
+                                        InstallerSettingsAction.ChangeShowDisableNotification(it)
                                     )
                                 }
                             )
@@ -298,7 +297,7 @@ fun LegacyInstallerGlobalSettingsPage(
                         title = stringResource(id = R.string.installer_show_oem_special),
                         description = stringResource(id = R.string.installer_show_oem_special_desc),
                         checked = uiState.showOPPOSpecial,
-                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowOPPOSpecial(it)) }
+                        onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowOPPOSpecial(it)) }
                     )
                 }
             }
@@ -307,10 +306,10 @@ fun LegacyInstallerGlobalSettingsPage(
                 ManagedPackagesWidget(
                     noContentTitle = stringResource(R.string.config_no_preset_install_sources),
                     packages = uiState.managedInstallerPackages,
-                    onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
+                    onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedInstallerPackage(it)) },
                     onRemovePackage = {
                         viewModel.dispatch(
-                            PreferredViewAction.RemoveManagedInstallerPackage(it)
+                            InstallerSettingsAction.RemoveManagedInstallerPackage(it)
                         )
                     })
             }
@@ -319,10 +318,10 @@ fun LegacyInstallerGlobalSettingsPage(
                 ManagedPackagesWidget(
                     noContentTitle = stringResource(R.string.config_no_managed_blacklist),
                     packages = uiState.managedBlacklistPackages,
-                    onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it)) },
+                    onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedBlacklistPackage(it)) },
                     onRemovePackage = {
                         viewModel.dispatch(
-                            PreferredViewAction.RemoveManagedBlacklistPackage(it)
+                            InstallerSettingsAction.RemoveManagedBlacklistPackage(it)
                         )
                     })
             }
@@ -332,10 +331,10 @@ fun LegacyInstallerGlobalSettingsPage(
                     noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
                     uids = uiState.managedSharedUserIdBlacklist,
                     onAddUid = {
-                        viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
+                        viewModel.dispatch(InstallerSettingsAction.AddManagedSharedUserIdBlacklist(it))
                     },
                     onRemoveUid = {
-                        viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it))
+                        viewModel.dispatch(InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist(it))
                     }
                 )
                 AnimatedVisibility(
@@ -351,14 +350,14 @@ fun LegacyInstallerGlobalSettingsPage(
                         isInfoVisible = uiState.managedSharedUserIdExemptedPackages.isNotEmpty(),
                         onAddPackage = {
                             viewModel.dispatch(
-                                PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
+                                InstallerSettingsAction.AddManagedSharedUserIdExemptedPackages(
                                     it
                                 )
                             )
                         },
                         onRemovePackage = {
                             viewModel.dispatch(
-                                PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
+                                InstallerSettingsAction.RemoveManagedSharedUserIdExemptedPackages(
                                     it
                                 )
                             )

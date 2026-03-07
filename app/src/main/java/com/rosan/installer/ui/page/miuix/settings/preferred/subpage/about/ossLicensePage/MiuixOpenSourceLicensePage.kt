@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home.ossLicensePage
+package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.about.ossLicensePage
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,13 +13,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TopAppBar
@@ -29,7 +30,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun MiuixOpenSourceLicensePage(
     navController: NavController,
-    viewModel: PreferredViewModel
+    viewModel: AboutViewModel = koinViewModel()
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val libraries by produceLibraries(R.raw.aboutlibraries)

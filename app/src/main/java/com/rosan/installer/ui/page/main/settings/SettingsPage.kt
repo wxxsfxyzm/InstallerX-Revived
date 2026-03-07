@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings
 
 import androidx.compose.animation.fadeIn
@@ -14,37 +16,43 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.rosan.installer.domain.settings.model.ThemeState
+import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyPage
 import com.rosan.installer.ui.page.main.settings.config.apply.NewApplyPage
 import com.rosan.installer.ui.page.main.settings.config.edit.EditPage
 import com.rosan.installer.ui.page.main.settings.config.edit.NewEditPage
 import com.rosan.installer.ui.page.main.settings.main.MainPage
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.HomePage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.NewHomePage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.home.OpenSourceLicensePage
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutPage
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.NewAboutPage
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.OpenSourceLicensePage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.LegacyInstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.LegacyUninstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.NewInstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.NewUninstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.LegacyLabPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.NewLabPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.LegacyThemeSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.NewThemeSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.LegacyUninstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.NewUninstallerGlobalSettingsPage
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
-fun SettingsPage(preferredViewModel: PreferredViewModel) {
+fun SettingsPage(
+    sharedViewModel: SettingsSharedViewModel = koinViewModel()
+) {
     val navController = rememberNavController()
-    val uiState by preferredViewModel.state.collectAsStateWithLifecycle()
+    val themeStateProvider = koinInject<ThemeStateProvider>()
+    val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
     val useBlur = uiState.useBlur
-    val isExpressive = uiState.showExpressiveUI
+    val isExpressive = uiState.isExpressive
 
     LaunchedEffect(navController) {
-        if (preferredViewModel.pendingNavigateToTheme) {
+        if (sharedViewModel.pendingNavigateToTheme) {
             navController.navigate(SettingsScreen.Theme.route) {
                 popUpTo(SettingsScreen.Main.route)
             }
-            preferredViewModel.markPendingNavigateToTheme(false)
+            sharedViewModel.markPendingNavigateToTheme(false)
         }
     }
 
@@ -69,7 +77,7 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             popExitTransition = { null },
             enterTransition = { null }
         ) {
-            MainPage(navController = navController, preferredViewModel)
+            MainPage(navController = navController)
         }
         composable(
             route = SettingsScreen.EditConfig.route,
@@ -148,9 +156,9 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             }
         ) {
             if (isExpressive)
-                NewHomePage(navController = navController, viewModel = preferredViewModel)
+                NewAboutPage(navController = navController)
             else
-                HomePage(navController = navController, viewModel = preferredViewModel)
+                AboutPage(navController = navController)
         }
         composable(
             route = SettingsScreen.OpenSourceLicense.route,
@@ -175,9 +183,9 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
         ) {
             if (isExpressive) {
-                NewThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
+                NewThemeSettingsPage(navController = navController)
             } else {
-                LegacyThemeSettingsPage(navController = navController, viewModel = preferredViewModel)
+                LegacyThemeSettingsPage(navController = navController)
             }
         }
         composable(
@@ -186,9 +194,9 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
         ) {
             if (isExpressive) {
-                NewInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
+                NewInstallerGlobalSettingsPage(navController = navController)
             } else {
-                LegacyInstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
+                LegacyInstallerGlobalSettingsPage(navController = navController)
             }
         }
         composable(
@@ -197,9 +205,9 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
         ) {
             if (isExpressive) {
-                NewUninstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
+                NewUninstallerGlobalSettingsPage(navController = navController)
             } else {
-                LegacyUninstallerGlobalSettingsPage(navController = navController, viewModel = preferredViewModel)
+                LegacyUninstallerGlobalSettingsPage(navController = navController)
             }
         }
         composable(
@@ -208,9 +216,9 @@ fun SettingsPage(preferredViewModel: PreferredViewModel) {
             popExitTransition = { scaleOut(targetScale = 0.9f) + fadeOut() }
         ) {
             if (isExpressive) {
-                NewLabPage(navController = navController, viewModel = preferredViewModel)
+                NewLabPage(navController = navController)
             } else {
-                LegacyLabPage(navController = navController, viewModel = preferredViewModel)
+                LegacyLabPage(navController = navController)
             }
         }
     }

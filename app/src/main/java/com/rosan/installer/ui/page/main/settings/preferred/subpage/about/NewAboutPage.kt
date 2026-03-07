@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.main.settings.preferred.subpage.home
+package com.rosan.installer.ui.page.main.settings.preferred.subpage.about
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,8 +41,6 @@ import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.card.StatusWidget
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
@@ -57,12 +55,13 @@ import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun NewHomePage(
+fun NewAboutPage(
     navController: NavController,
-    viewModel: PreferredViewModel
+    viewModel: AboutViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -160,7 +159,7 @@ fun NewHomePage(
                                     icon = AppIcons.Download,
                                     title = stringResource(R.string.get_update_directly),
                                     description = stringResource(R.string.get_update_directly_desc),
-                                    onClick = { viewModel.dispatch(PreferredViewAction.Update) }
+                                    onClick = { viewModel.dispatch(AboutAction.PerformUpdate) }
                                 )
                             }
                     }
@@ -176,7 +175,7 @@ fun NewHomePage(
                                     title = stringResource(R.string.save_logs),
                                     description = stringResource(R.string.save_logs_desc),
                                     checked = uiState.enableFileLogging,
-                                    onCheckedChange = { viewModel.dispatch(PreferredViewAction.SetEnableFileLogging(it)) }
+                                    onCheckedChange = { viewModel.dispatch(AboutAction.SetEnableFileLogging(it)) }
                                 )
                             }
                             item(visible = uiState.enableFileLogging) {
@@ -194,7 +193,7 @@ fun NewHomePage(
                     hasUpdate = uiState.hasUpdate,
                     onDirectUpdateClick = {
                         showBottomSheet = false
-                        viewModel.dispatch(PreferredViewAction.Update)
+                        viewModel.dispatch(AboutAction.PerformUpdate)
                     }
                 )
             }

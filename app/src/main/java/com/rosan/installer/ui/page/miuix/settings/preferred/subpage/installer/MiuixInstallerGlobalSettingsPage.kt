@@ -36,8 +36,8 @@ import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.InstallerSettingsAction
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.InstallerSettingsViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixAutoClearNotificationTimeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAuthorizerWidget
@@ -51,6 +51,7 @@ import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -63,7 +64,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun MiuixInstallerGlobalSettingsPage(
     navController: NavController,
-    viewModel: PreferredViewModel,
+    viewModel: InstallerSettingsViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
@@ -109,7 +110,7 @@ fun MiuixInstallerGlobalSettingsPage(
                     MiuixDataAuthorizerWidget(
                         currentAuthorizer = uiState.authorizer,
                         changeAuthorizer = { newAuthorizer ->
-                            viewModel.dispatch(PreferredViewAction.ChangeGlobalAuthorizer(newAuthorizer))
+                            viewModel.dispatch(InstallerSettingsAction.ChangeGlobalAuthorizer(newAuthorizer))
                         }
                     ) {
                         AnimatedVisibility(
@@ -125,7 +126,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                 endInt = 10
                             ) {
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeDhizukuAutoCloseCountDown(it)
+                                    InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown(it)
                                 )
                             }
                         }
@@ -133,7 +134,7 @@ fun MiuixInstallerGlobalSettingsPage(
                     MiuixDataInstallModeWidget(
                         currentInstallMode = uiState.installMode,
                         changeInstallMode = { newMode ->
-                            viewModel.dispatch(PreferredViewAction.ChangeGlobalInstallMode(newMode))
+                            viewModel.dispatch(InstallerSettingsAction.ChangeGlobalInstallMode(newMode))
                         }
                     ) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
@@ -143,7 +144,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                 checked = uiState.showLiveActivity,
                                 onCheckedChange = {
                                     viewModel.dispatch(
-                                        PreferredViewAction.ChangeShowLiveActivity(it)
+                                        InstallerSettingsAction.ChangeShowLiveActivity(it)
                                     )
                                 }
                             )
@@ -157,7 +158,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                 description = stringResource(R.string.installer_settings_require_biometric_auth_desc),
                                 checked = uiState.installerRequireBiometricAuth,
                                 onCheckedChange = {
-                                    viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, true))
+                                    viewModel.dispatch(InstallerSettingsAction.ChangeBiometricAuth(it))
                                 }
                             )
                         }
@@ -165,7 +166,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             currentValue = uiState.notificationSuccessAutoClearSeconds,
                             onValueChange = { seconds ->
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeNotificationSuccessAutoClearSeconds(
+                                    InstallerSettingsAction.ChangeNotificationSuccessAutoClearSeconds(
                                         seconds
                                     )
                                 )
@@ -204,7 +205,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             checked = uiState.showDialogInstallExtendedMenu,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowDialogInstallExtendedMenu(it)
+                                    InstallerSettingsAction.ChangeShowDialogInstallExtendedMenu(it)
                                 )
                             }
                         )
@@ -218,7 +219,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             checked = uiState.showSmartSuggestion,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowSuggestion(it)
+                                    InstallerSettingsAction.ChangeShowSuggestion(it)
                                 )
                             }
                         )
@@ -235,7 +236,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             checked = uiState.showDialogWhenPressingNotification,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowDialogWhenPressingNotification(it)
+                                    InstallerSettingsAction.ChangeShowDialogWhenPressingNotification(it)
                                 )
                             }
                         )
@@ -251,7 +252,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             description = stringResource(id = R.string.auto_silent_install_desc),
                             checked = uiState.autoSilentInstall,
                             onCheckedChange = {
-                                viewModel.dispatch(PreferredViewAction.ChangeAutoSilentInstall(it))
+                                viewModel.dispatch(InstallerSettingsAction.ChangeAutoSilentInstall(it))
                             }
                         )
                     }
@@ -268,7 +269,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             checked = uiState.disableNotificationForDialogInstall,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.ChangeShowDisableNotification(it)
+                                    InstallerSettingsAction.ChangeShowDisableNotification(it)
                                 )
                             }
                         )
@@ -288,7 +289,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             title = stringResource(id = R.string.installer_show_oem_special),
                             description = stringResource(id = R.string.installer_show_oem_special_desc),
                             checked = uiState.showOPPOSpecial,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.ChangeShowOPPOSpecial(it)) }
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowOPPOSpecial(it)) }
                         )
                     }
                 }
@@ -304,10 +305,10 @@ fun MiuixInstallerGlobalSettingsPage(
                     MiuixManagedPackagesWidget(
                         noContentTitle = stringResource(R.string.config_no_preset_install_sources),
                         packages = uiState.managedInstallerPackages,
-                        onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedInstallerPackage(it)) },
+                        onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedInstallerPackage(it)) },
                         onRemovePackage = {
                             viewModel.dispatch(
-                                PreferredViewAction.RemoveManagedInstallerPackage(it)
+                                InstallerSettingsAction.RemoveManagedInstallerPackage(it)
                             )
                         }
                     )
@@ -324,10 +325,10 @@ fun MiuixInstallerGlobalSettingsPage(
                     MiuixManagedPackagesWidget(
                         noContentTitle = stringResource(R.string.config_no_managed_blacklist),
                         packages = uiState.managedBlacklistPackages,
-                        onAddPackage = { viewModel.dispatch(PreferredViewAction.AddManagedBlacklistPackage(it)) },
+                        onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedBlacklistPackage(it)) },
                         onRemovePackage = {
                             viewModel.dispatch(
-                                PreferredViewAction.RemoveManagedBlacklistPackage(it)
+                                InstallerSettingsAction.RemoveManagedBlacklistPackage(it)
                             )
                         }
                     )
@@ -345,10 +346,10 @@ fun MiuixInstallerGlobalSettingsPage(
                         noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
                         uids = uiState.managedSharedUserIdBlacklist,
                         onAddUid = {
-                            viewModel.dispatch(PreferredViewAction.AddManagedSharedUserIdBlacklist(it))
+                            viewModel.dispatch(InstallerSettingsAction.AddManagedSharedUserIdBlacklist(it))
                         },
                         onRemoveUid = {
-                            viewModel.dispatch(PreferredViewAction.RemoveManagedSharedUserIdBlacklist(it))
+                            viewModel.dispatch(InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist(it))
                         }
                     )
                     AnimatedVisibility(
@@ -370,14 +371,14 @@ fun MiuixInstallerGlobalSettingsPage(
                             isInfoVisible = uiState.managedSharedUserIdExemptedPackages.isNotEmpty(),
                             onAddPackage = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.AddManagedSharedUserIdExemptedPackages(
+                                    InstallerSettingsAction.AddManagedSharedUserIdExemptedPackages(
                                         it
                                     )
                                 )
                             },
                             onRemovePackage = {
                                 viewModel.dispatch(
-                                    PreferredViewAction.RemoveManagedSharedUserIdExemptedPackages(
+                                    InstallerSettingsAction.RemoveManagedSharedUserIdExemptedPackages(
                                         it
                                     )
                                 )

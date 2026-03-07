@@ -50,8 +50,8 @@ import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.SharedUid
 import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsAction
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsViewModel
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
 import com.rosan.installer.ui.theme.material.ThemeMode
@@ -1034,20 +1034,20 @@ private fun MiuixDeleteSharedUidConfirmationDialog(
 }
 
 @Composable
-fun MiuixUninstallKeepDataWidget(viewModel: PreferredViewModel) {
+fun MiuixUninstallKeepDataWidget(viewModel: UninstallerSettingsViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     MiuixSwitchWidget(
         title = stringResource(id = R.string.uninstall_keep_data),
         description = stringResource(id = R.string.uninstall_keep_data_desc),
         checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA),
         onCheckedChange = {
-            viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_KEEP_DATA, it))
+            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_KEEP_DATA, it))
         }
     )
 }
 
 @Composable
-fun MiuixUninstallForAllUsersWidget(viewModel: PreferredViewModel) {
+fun MiuixUninstallForAllUsersWidget(viewModel: UninstallerSettingsViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     MiuixSwitchWidget(
         icon = AppIcons.InstallForAllUsers,
@@ -1055,31 +1055,26 @@ fun MiuixUninstallForAllUsersWidget(viewModel: PreferredViewModel) {
         description = stringResource(id = R.string.uninstall_all_users_desc),
         checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS),
         onCheckedChange = {
-            viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_ALL_USERS, it))
+            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_ALL_USERS, it))
         }
     )
 }
 
 @Composable
-fun MiuixUninstallSystemAppWidget(viewModel: PreferredViewModel) {
+fun MiuixUninstallSystemAppWidget(viewModel: UninstallerSettingsViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     MiuixSwitchWidget(
         title = stringResource(id = R.string.uninstall_delete_system_app),
         description = stringResource(id = R.string.uninstall_delete_system_app_desc),
         checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP),
         onCheckedChange = {
-            viewModel.dispatch(
-                PreferredViewAction.ToggleGlobalUninstallFlag(
-                    PackageManagerUtil.DELETE_SYSTEM_APP,
-                    it
-                )
-            )
+            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_SYSTEM_APP, it))
         }
     )
 }
 
 @Composable
-fun MiuixUninstallRequireBiometricAuthWidget(viewModel: PreferredViewModel) {
+fun MiuixUninstallRequireBiometricAuthWidget(viewModel: UninstallerSettingsViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     if (BiometricManager
             .from(LocalContext.current)
@@ -1091,7 +1086,7 @@ fun MiuixUninstallRequireBiometricAuthWidget(viewModel: PreferredViewModel) {
             description = stringResource(R.string.uninstaller_settings_require_biometric_auth_desc),
             checked = uiState.uninstallerRequireBiometricAuth,
             onCheckedChange = {
-                viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, false))
+                viewModel.dispatch(UninstallerSettingsAction.ChangeBiometricAuth(false))
             }
         )
     }

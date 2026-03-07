@@ -27,6 +27,7 @@ import com.rosan.installer.domain.settings.usecase.settings.ManagePackageListUse
 import com.rosan.installer.domain.settings.usecase.settings.ManageSharedUidListUseCase
 import com.rosan.installer.domain.settings.usecase.settings.SetLauncherIconUseCase
 import com.rosan.installer.domain.settings.usecase.settings.ToggleUninstallFlagUseCase
+import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -69,6 +70,7 @@ val settingsModule = module {
     // UseCases
     factory { GetConfigDraftUseCase(get(), get()) }
     factory { SaveConfigUseCase(get()) }
+    factory { UpdateSettingUseCase(get()) }
     factory { ToggleUninstallFlagUseCase(get()) }
     factory { SetLauncherIconUseCase(get(), get()) }
     factory { ToggleAppTargetConfigUseCase(get()) }

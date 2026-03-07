@@ -1,8 +1,9 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
-import androidx.compose.foundation.layout.Arrangement
+import android.annotation.SuppressLint
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -10,11 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -29,9 +28,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -47,7 +46,6 @@ import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.main.widget.setting.AutoLockInstaller
-import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.page.main.widget.setting.ClearCache
 import com.rosan.installer.ui.page.main.widget.setting.DefaultInstaller
 import com.rosan.installer.ui.page.main.widget.setting.DisableAdbVerify
@@ -60,6 +58,7 @@ import com.rosan.installer.ui.theme.none
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PreferredPage(
@@ -67,6 +66,7 @@ fun PreferredPage(
     viewModel: PreferredViewModel = koinViewModel(),
     outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -87,21 +87,20 @@ fun PreferredPage(
             null
         )
     }
-    var showBottomSheet by remember { mutableStateOf(false) }
 
     val detailLabel = stringResource(id = R.string.details)
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
-            snackBarHostState.currentSnackbarData?.dismiss() // Dismiss any existing snackbar
+            snackBarHostState.currentSnackbarData?.dismiss()
             when (event) {
                 is PreferredViewEvent.ShowDefaultInstallerResult -> {
-                    snackBarHostState.showSnackbar(event.message)
+                    snackBarHostState.showSnackbar(context.getString(event.messageResId))
                 }
 
                 is PreferredViewEvent.ShowDefaultInstallerErrorDetail -> {
                     val snackbarResult = snackBarHostState.showSnackbar(
-                        message = event.title,
+                        message = context.getString(event.titleResId),
                         actionLabel = detailLabel,
                         duration = SnackbarDuration.Short
                     )
@@ -109,8 +108,6 @@ fun PreferredPage(
                         errorDialogInfo = event
                     }
                 }
-
-                else -> Unit
             }
         }
     }
@@ -140,31 +137,18 @@ fun PreferredPage(
             )
         },
     ) { paddingValues ->
-        when (uiState.progress) {
-            is PreferredViewState.Progress.Loading -> {
+        Crossfade(
+            targetState = uiState.isLoading,
+            label = "PreferredPageContent",
+            animationSpec = tween(durationMillis = 150)
+        ) { isLoading ->
+            if (isLoading) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        ContainedLoadingIndicator(
-                            indicatorColor = MaterialTheme.colorScheme.primary,
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
-                        )
-                        Text(
-                            text = stringResource(id = R.string.loading),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
-                }
-            }
-
-            is PreferredViewState.Progress.Loaded -> {
+                        .padding(paddingValues)
+                )
+            } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
@@ -279,6 +263,7 @@ fun PreferredPage(
             }
         }
     }
+
     errorDialogInfo?.let { dialogInfo ->
         ErrorDisplayDialog(
             exception = dialogInfo.exception,
@@ -287,18 +272,7 @@ fun PreferredPage(
                 errorDialogInfo = null // Dismiss dialog
                 viewModel.dispatch(dialogInfo.retryAction) // Dispatch the retry action
             },
-            title = dialogInfo.title
+            title = stringResource(dialogInfo.titleResId)
         )
     }
-    if (showBottomSheet)
-        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-            BottomSheetContent(
-                title = stringResource(R.string.get_update),
-                hasUpdate = uiState.hasUpdate,
-                onDirectUpdateClick = {
-                    showBottomSheet = false
-                    viewModel.dispatch(PreferredViewAction.Update)
-                }
-            )
-        }
 }
