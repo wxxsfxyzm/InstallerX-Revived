@@ -16,7 +16,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.DexoptMode
+import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.InstallReason
+import com.rosan.installer.domain.settings.model.PackageSource
 import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
@@ -72,24 +76,24 @@ fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
     val isSessionInstallSupported = LocalSessionInstallSupported.current
     val data = buildMap {
         put(
-            ConfigEntity.Authorizer.Global, stringResource(
+            Authorizer.Global, stringResource(
                 R.string.config_authorizer_global_desc,
                 when (globalAuthorizer) {
-                    ConfigEntity.Authorizer.None -> stringResource(R.string.config_authorizer_none)
-                    ConfigEntity.Authorizer.Root -> stringResource(R.string.config_authorizer_root)
-                    ConfigEntity.Authorizer.Shizuku -> stringResource(R.string.config_authorizer_shizuku)
-                    ConfigEntity.Authorizer.Dhizuku -> stringResource(R.string.config_authorizer_dhizuku)
-                    ConfigEntity.Authorizer.Customize -> stringResource(R.string.config_authorizer_customize)
+                    Authorizer.None -> stringResource(R.string.config_authorizer_none)
+                    Authorizer.Root -> stringResource(R.string.config_authorizer_root)
+                    Authorizer.Shizuku -> stringResource(R.string.config_authorizer_shizuku)
+                    Authorizer.Dhizuku -> stringResource(R.string.config_authorizer_dhizuku)
+                    Authorizer.Customize -> stringResource(R.string.config_authorizer_customize)
                     else -> stringResource(R.string.config_authorizer_global)
                 }
             )
         )
         if (isSessionInstallSupported)
-            put(ConfigEntity.Authorizer.None, stringResource(R.string.config_authorizer_none))
-        put(ConfigEntity.Authorizer.Root, stringResource(R.string.config_authorizer_root))
-        put(ConfigEntity.Authorizer.Shizuku, stringResource(R.string.config_authorizer_shizuku))
-        put(ConfigEntity.Authorizer.Dhizuku, stringResource(R.string.config_authorizer_dhizuku))
-        put(ConfigEntity.Authorizer.Customize, stringResource(R.string.config_authorizer_customize))
+            put(Authorizer.None, stringResource(R.string.config_authorizer_none))
+        put(Authorizer.Root, stringResource(R.string.config_authorizer_root))
+        put(Authorizer.Shizuku, stringResource(R.string.config_authorizer_shizuku))
+        put(Authorizer.Dhizuku, stringResource(R.string.config_authorizer_dhizuku))
+        put(Authorizer.Customize, stringResource(R.string.config_authorizer_customize))
     }
     // Convert data Map to List<SpinnerEntry> required by SuperSpinner.
     val spinnerEntries = remember(data) {
@@ -141,22 +145,22 @@ fun MiuixDataInstallModeWidget(viewModel: EditViewModel) {
     val stateInstallMode = viewModel.state.data.installMode
     val globalInstallMode = viewModel.globalInstallMode
     val data = mapOf(
-        ConfigEntity.InstallMode.Global to stringResource(
+        InstallMode.Global to stringResource(
             R.string.config_install_mode_global_desc,
             when (globalInstallMode) {
-                ConfigEntity.InstallMode.Dialog -> stringResource(R.string.config_install_mode_dialog)
-                ConfigEntity.InstallMode.AutoDialog -> stringResource(R.string.config_install_mode_auto_dialog)
-                ConfigEntity.InstallMode.Notification -> stringResource(R.string.config_install_mode_notification)
-                ConfigEntity.InstallMode.AutoNotification -> stringResource(R.string.config_install_mode_auto_notification)
-                ConfigEntity.InstallMode.Ignore -> stringResource(R.string.config_install_mode_ignore)
+                InstallMode.Dialog -> stringResource(R.string.config_install_mode_dialog)
+                InstallMode.AutoDialog -> stringResource(R.string.config_install_mode_auto_dialog)
+                InstallMode.Notification -> stringResource(R.string.config_install_mode_notification)
+                InstallMode.AutoNotification -> stringResource(R.string.config_install_mode_auto_notification)
+                InstallMode.Ignore -> stringResource(R.string.config_install_mode_ignore)
                 else -> stringResource(R.string.config_install_mode_global)
             }
         ),
-        ConfigEntity.InstallMode.Dialog to stringResource(R.string.config_install_mode_dialog),
-        ConfigEntity.InstallMode.AutoDialog to stringResource(R.string.config_install_mode_auto_dialog),
-        ConfigEntity.InstallMode.Notification to stringResource(R.string.config_install_mode_notification),
-        ConfigEntity.InstallMode.AutoNotification to stringResource(R.string.config_install_mode_auto_notification),
-        ConfigEntity.InstallMode.Ignore to stringResource(R.string.config_install_mode_ignore),
+        InstallMode.Dialog to stringResource(R.string.config_install_mode_dialog),
+        InstallMode.AutoDialog to stringResource(R.string.config_install_mode_auto_dialog),
+        InstallMode.Notification to stringResource(R.string.config_install_mode_notification),
+        InstallMode.AutoNotification to stringResource(R.string.config_install_mode_auto_notification),
+        InstallMode.Ignore to stringResource(R.string.config_install_mode_ignore),
     )
 
     // Convert data Map to List<SpinnerEntry> required by SuperSpinner.
@@ -212,11 +216,11 @@ fun MiuixInstallReasonWidget(viewModel: EditViewModel) {
         ) {
             // A map to associate the enum values with their human-readable string resources.
             val data = mapOf(
-                ConfigEntity.InstallReason.UNKNOWN to stringResource(R.string.config_install_reason_unknown),
-                ConfigEntity.InstallReason.POLICY to stringResource(R.string.config_install_reason_policy),
-                ConfigEntity.InstallReason.DEVICE_RESTORE to stringResource(R.string.config_install_reason_device_restore),
-                ConfigEntity.InstallReason.DEVICE_SETUP to stringResource(R.string.config_install_reason_device_setup),
-                ConfigEntity.InstallReason.USER to stringResource(R.string.config_install_reason_user)
+                InstallReason.UNKNOWN to stringResource(R.string.config_install_reason_unknown),
+                InstallReason.POLICY to stringResource(R.string.config_install_reason_policy),
+                InstallReason.DEVICE_RESTORE to stringResource(R.string.config_install_reason_device_restore),
+                InstallReason.DEVICE_SETUP to stringResource(R.string.config_install_reason_device_setup),
+                InstallReason.USER to stringResource(R.string.config_install_reason_user)
             )
 
             // Convert the data Map to the List<SpinnerEntry> required by SuperSpinner.
@@ -279,11 +283,11 @@ fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
         ) {
             // A map to associate the enum values with their human-readable string resources.
             val data = mapOf(
-                ConfigEntity.PackageSource.UNSPECIFIED to stringResource(R.string.config_package_source_unspecified),
-                ConfigEntity.PackageSource.OTHER to stringResource(R.string.config_package_source_other),
-                ConfigEntity.PackageSource.STORE to stringResource(R.string.config_package_source_store),
-                ConfigEntity.PackageSource.LOCAL_FILE to stringResource(R.string.config_package_source_local_file),
-                ConfigEntity.PackageSource.DOWNLOADED_FILE to stringResource(R.string.config_package_source_downloaded_file),
+                PackageSource.UNSPECIFIED to stringResource(R.string.config_package_source_unspecified),
+                PackageSource.OTHER to stringResource(R.string.config_package_source_other),
+                PackageSource.STORE to stringResource(R.string.config_package_source_store),
+                PackageSource.LOCAL_FILE to stringResource(R.string.config_package_source_local_file),
+                PackageSource.DOWNLOADED_FILE to stringResource(R.string.config_package_source_downloaded_file),
             )
 
             // Convert the data Map to the List<SpinnerEntry> required by SuperSpinner.
@@ -533,10 +537,10 @@ fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
     ) {
         val currentMode = viewModel.state.data.dexoptMode
         val data = mapOf(
-            ConfigEntity.DexoptMode.Verify to stringResource(R.string.config_dexopt_mode_verify),
-            ConfigEntity.DexoptMode.SpeedProfile to stringResource(R.string.config_dexopt_mode_speed_profile),
-            ConfigEntity.DexoptMode.Speed to stringResource(R.string.config_dexopt_mode_speed),
-            ConfigEntity.DexoptMode.Everything to stringResource(R.string.config_dexopt_mode_everything),
+            DexoptMode.Verify to stringResource(R.string.config_dexopt_mode_verify),
+            DexoptMode.SpeedProfile to stringResource(R.string.config_dexopt_mode_speed_profile),
+            DexoptMode.Speed to stringResource(R.string.config_dexopt_mode_speed),
+            DexoptMode.Everything to stringResource(R.string.config_dexopt_mode_everything),
         )
         Column {
             MiuixSwitchWidget(

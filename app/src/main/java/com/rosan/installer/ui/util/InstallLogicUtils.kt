@@ -4,13 +4,13 @@
 package com.rosan.installer.ui.util
 
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Architecture
-import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.model.enums.PackageIdentityStatus
-import com.rosan.installer.data.app.model.enums.SignatureMatchStatus
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Architecture
+import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.DataType
+import com.rosan.installer.domain.engine.model.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.PackageIdentityStatus
+import com.rosan.installer.domain.engine.model.SignatureMatchStatus
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallStateResult
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallWarningResources
 import com.rosan.installer.ui.page.main.widget.chip.WarningModel
@@ -141,9 +141,9 @@ object InstallLogicUtils {
             }
 
             // Warning: Emulation mismatch (ARM on x86 or vice versa)
-            val sysIsArm = RsConfig.isArm
+            val sysIsArm = DeviceConfig.isArm
             val appIsX86 = appArch == Architecture.X86 || appArch == Architecture.X86_64
-            val sysIsX86 = RsConfig.isX86
+            val sysIsX86 = DeviceConfig.isX86
             val appIsArm = appArch == Architecture.ARM || appArch == Architecture.ARM64 || appArch == Architecture.ARMEABI
 
             if ((sysIsArm && appIsX86) || (sysIsX86 && appIsArm)) {

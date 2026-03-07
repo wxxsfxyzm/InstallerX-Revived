@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
 import com.rosan.installer.ui.util.isGestureNavigation
@@ -24,7 +24,7 @@ import top.yukonga.miuix.kmp.basic.TextButton
 
 @Composable
 fun UninstallFailedContent(
-    installer: InstallerRepo,
+    installer: InstallerSessionRepository,
     viewModel: InstallerViewModel,
     onClose: () -> Unit
 ) {

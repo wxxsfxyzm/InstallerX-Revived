@@ -7,12 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,7 +40,6 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
-import com.rosan.installer.ui.page.main.widget.card.ScopeTipCard
 import com.rosan.installer.ui.page.main.widget.card.ShowDataWidget
 import com.rosan.installer.ui.page.main.widget.setting.DeleteEventCollector
 import com.rosan.installer.ui.theme.getM3TopBarColor
@@ -51,12 +48,14 @@ import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewAllPage(
     navController: NavController,
-    viewModel: AllViewModel,
+    viewModel: AllViewModel = koinViewModel { parametersOf(navController) },
     outerPadding: PaddingValues = PaddingValues(0.dp),
     hazeState: HazeState? = null
 ) {
@@ -169,27 +168,17 @@ fun NewAllPage(
                 }
 
                 else -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(top = innerPadding.calculateTopPadding())
-                    ) {
-                        if (!viewModel.state.userReadScopeTips) {
-                            ScopeTipCard(viewModel = viewModel)
-                            Spacer(modifier = Modifier.size(8.dp))
-                        }
-                        ShowDataWidget(
-                            viewModel = viewModel,
-                            listState = listState,
-                            hazeState = hazeState,
-                            contentPadding = PaddingValues(
-                                top = 16.dp,
-                                bottom = outerPadding.calculateBottomPadding() + 16.dp,
-                                start = 16.dp,
-                                end = 16.dp
-                            )
+                    ShowDataWidget(
+                        viewModel = viewModel,
+                        listState = listState,
+                        hazeState = hazeState,
+                        contentPadding = PaddingValues(
+                            top = innerPadding.calculateTopPadding() + 16.dp,
+                            bottom = outerPadding.calculateBottomPadding() + 16.dp,
+                            start = 16.dp,
+                            end = 16.dp
                         )
-                    }
+                    )
                 }
             }
         }

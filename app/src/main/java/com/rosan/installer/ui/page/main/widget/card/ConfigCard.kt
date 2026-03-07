@@ -27,9 +27,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
@@ -43,7 +44,8 @@ fun ShowDataWidget(
     viewModel: AllViewModel,
     listState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     contentPadding: PaddingValues = PaddingValues(16.dp),
-    hazeState: HazeState? = null
+    hazeState: HazeState? = null,
+    adaptiveMinSize: Dp = 320.dp
 ) {
     val configs = viewModel.state.data.configs
     val minId = configs.minByOrNull { it.id }?.id
@@ -52,12 +54,22 @@ fun ShowDataWidget(
         modifier = Modifier
             .fillMaxSize()
             .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
-        columns = StaggeredGridCells.Adaptive(350.dp),
+        columns = StaggeredGridCells.Adaptive(adaptiveMinSize),
         contentPadding = contentPadding,
         verticalItemSpacing = 16.dp,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         state = listState,
     ) {
+        // Insert the tip card as a list item to match MIUIX behavior
+        if (!viewModel.state.userReadScopeTips) {
+            item {
+                ScopeTipCard(viewModel = viewModel)
+            }
+        } else {
+            // Keep the spacing consistent with MIUIX implementation
+            item { Spacer(modifier = Modifier.size(6.dp)) }
+        }
+
         items(configs) { entity ->
             DataItemWidget(
                 viewModel = viewModel,
@@ -72,7 +84,7 @@ fun ShowDataWidget(
 @Composable
 private fun DataItemWidget(
     viewModel: AllViewModel,
-    entity: ConfigEntity,
+    entity: ConfigModel,
     isDefault: Boolean
 ) {
     ElevatedCard(

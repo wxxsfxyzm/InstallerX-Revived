@@ -12,21 +12,25 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.entity.PackageAnalysisResult
-import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.repo.AppIconRepo
-import com.rosan.installer.data.app.util.InstallOption
-import com.rosan.installer.data.app.util.PackageManagerUtil
-import com.rosan.installer.data.installer.model.entity.ProgressEntity
-import com.rosan.installer.data.installer.model.entity.SelectInstallEntity
-import com.rosan.installer.data.installer.model.entity.UninstallInfo
-import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
-import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
+import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.DataType
+import com.rosan.installer.domain.engine.model.InstallOption
+import com.rosan.installer.domain.engine.model.PackageAnalysisResult
+import com.rosan.installer.domain.engine.repository.AppIconRepository
+import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
+import com.rosan.installer.domain.session.model.ProgressEntity
+import com.rosan.installer.domain.session.model.SelectInstallEntity
+import com.rosan.installer.domain.session.model.UninstallInfo
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.settings.repository.IntSetting
+import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.getErrorMessage
 import com.rosan.installer.util.hasFlag
@@ -47,9 +51,10 @@ import org.koin.core.component.inject
 import timber.log.Timber
 
 class InstallerViewModel(
-    private var repo: InstallerRepo,
-    private val appDataStore: AppDataStore,
-    private val appIconRepo: AppIconRepo
+    private var repo: InstallerSessionRepository,
+    private val appSettingsRepo: AppSettingsRepo,
+    private val appIconRepo: AppIconRepository,
+    private val systemInfoProvider: SystemInfoProvider
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
@@ -167,7 +172,7 @@ class InstallerViewModel(
         settingsLoadingJob = loadInitialSettings()
         viewModelScope.launch {
             // Load managed packages for installer selection.
-            appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).collect { packages ->
+            appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedInstallerPackages).collect { packages ->
                 _managedInstallerPackages.value = packages
             }
         }
@@ -219,26 +224,26 @@ class InstallerViewModel(
         viewModelScope.launch {
             viewSettings = viewSettings.copy(
                 uiExpressive =
-                    appDataStore.getBoolean(AppDataStore.UI_EXPRESSIVE_SWITCH, true).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.UiExpressiveSwitch, true).first(),
                 useBlur =
-                    appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, true).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.UiUseBlur, true).first(),
                 preferSystemIconForUpdates =
-                    appDataStore.getBoolean(AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL, false).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first(),
                 autoCloseCountDown =
-                    appDataStore.getInt(AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN, 3).first(),
+                    appSettingsRepo.getInt(IntSetting.DialogAutoCloseCountdown, 3).first(),
                 showExtendedMenu =
-                    appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.DialogShowExtendedMenu, false).first(),
                 showSmartSuggestion =
-                    appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.DialogShowIntelligentSuggestion, true).first(),
                 disableNotificationOnDismiss =
-                    appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false).first(),
+                    appSettingsRepo.getBoolean(BooleanSetting.DialogDisableNotificationOnDismiss, false).first(),
                 versionCompareInSingleLine =
-                    appDataStore.getBoolean(AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE, false).first(),
-                sdkCompareInMultiLine = appDataStore.getBoolean(AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE, false).first(),
-                showOPPOSpecial = appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_OPPO_SPECIAL, false).first(),
-                autoSilentInstall = appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false).first(),
-                enableModuleInstall = appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false).first(),
-                useDynColorFollowPkgIcon = appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false).first()
+                    appSettingsRepo.getBoolean(BooleanSetting.DialogVersionCompareSingleLine, false).first(),
+                sdkCompareInMultiLine = appSettingsRepo.getBoolean(BooleanSetting.DialogSdkCompareMultiLine, false).first(),
+                showOPPOSpecial = appSettingsRepo.getBoolean(BooleanSetting.DialogShowOppoSpecial, false).first(),
+                autoSilentInstall = appSettingsRepo.getBoolean(BooleanSetting.DialogAutoSilentInstall, false).first(),
+                enableModuleInstall = appSettingsRepo.getBoolean(BooleanSetting.LabEnableModuleFlash, false).first(),
+                useDynColorFollowPkgIcon = appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first()
             )
         }
 
@@ -438,7 +443,7 @@ class InstallerViewModel(
 
         // --- Manage auto-install job ---
         autoInstallJob?.cancel() // Cancel any previous auto-install job by default.
-        if (newState is InstallerViewState.InstallPrepare && repo.config.installMode == ConfigEntity.InstallMode.AutoDialog) {
+        if (newState is InstallerViewState.InstallPrepare && repo.config.installMode == InstallMode.AutoDialog) {
             autoInstallJob = viewModelScope.launch {
                 delay(500)
                 if (state is InstallerViewState.InstallPrepare) {
@@ -448,7 +453,7 @@ class InstallerViewModel(
         }
     }
 
-    private fun collectRepo(repo: InstallerRepo) {
+    private fun collectRepo(repo: InstallerSessionRepository) {
         this.repo = repo
         if (repo.config.enableCustomizeUser) {
             loadAvailableUsers(repo.config.authorizer)
@@ -578,12 +583,12 @@ class InstallerViewModel(
     }
 
     private fun selectInstaller(packageName: String?) {
-        repo.config.installer = packageName // Update the repository
+        repo.config = repo.config.copy(installer = packageName) // Update the repository
         _selectedInstaller.value = packageName // Update the StateFlow
     }
 
     private fun selectTargetUser(userId: Int) {
-        repo.config.targetUserId = userId
+        repo.config = repo.config.copy(targetUserId = userId)
         _selectedUserId.value = userId
     }
 
@@ -591,13 +596,13 @@ class InstallerViewModel(
      * Loads available users for the selected authorizer.
      * @param authorizer The authorizer to use for the check.
      */
-    private fun loadAvailableUsers(authorizer: ConfigEntity.Authorizer) {
+    private fun loadAvailableUsers(authorizer: Authorizer) {
         viewModelScope.launch {
             // getAuthorizer() is a suspend function that correctly resolves 'Global' to the actual authorizer.
             val effectiveAuthorizer = authorizer.readGlobal()
 
             // If the effective authorizer is Dhizuku, disable the feature and do not proceed.
-            if (effectiveAuthorizer == ConfigEntity.Authorizer.Dhizuku) {
+            if (effectiveAuthorizer == Authorizer.Dhizuku) {
                 _availableUsers.value = emptyMap()
                 if (_selectedUserId.value != 0) {
                     selectTargetUser(0)
@@ -608,7 +613,7 @@ class InstallerViewModel(
             // Proceed with fetching users for other authorizers.
             runCatching {
                 withContext(Dispatchers.IO) {
-                    PrivilegedManager.getUsers(effectiveAuthorizer)
+                    systemInfoProvider.getUsers(effectiveAuthorizer)
                 }
             }.onSuccess { users ->
                 _availableUsers.value = users

@@ -1,10 +1,15 @@
 package com.rosan.installer.ui.page.main.settings.config.edit
 
-import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.DexoptMode
+import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.InstallReason
+import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.model.PackageSource
 
 data class EditViewState(
-    val data: Data = Data.build(ConfigEntity.default),
+    val data: Data = Data.build(ConfigModel.default),
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
     val availableUsers: Map<Int, String> = emptyMap(),
     val isCustomInstallRequesterEnabled: Boolean = false
@@ -12,13 +17,13 @@ data class EditViewState(
     data class Data(
         val name: String,
         val description: String,
-        val authorizer: ConfigEntity.Authorizer,
+        val authorizer: Authorizer,
         val customizeAuthorizer: String,
-        val installMode: ConfigEntity.InstallMode,
+        val installMode: InstallMode,
         val enableCustomizePackageSource: Boolean,
-        val packageSource: ConfigEntity.PackageSource,
+        val packageSource: PackageSource,
         val enableCustomizeInstallReason: Boolean,
-        val installReason: ConfigEntity.InstallReason,
+        val installReason: InstallReason,
         val enableCustomizeInstallRequester: Boolean,
         val installRequester: String,
         val installRequesterUid: Int? = null,
@@ -28,7 +33,7 @@ data class EditViewState(
         val targetUserId: Int,
         val enableManualDexopt: Boolean,
         val forceDexopt: Boolean,
-        val dexoptMode: ConfigEntity.DexoptMode,
+        val dexoptMode: DexoptMode,
         val autoDelete: Boolean,
         val autoDeleteZip: Boolean,
         val displaySdk: Boolean,
@@ -43,7 +48,7 @@ data class EditViewState(
     ) {
         val errorName = name.isEmpty()// || name == "Default"
 
-        val authorizerCustomize = authorizer == ConfigEntity.Authorizer.Customize
+        val authorizerCustomize = authorizer == Authorizer.Customize
 
         val errorCustomizeAuthorizer = authorizerCustomize && customizeAuthorizer.isEmpty()
 
@@ -52,7 +57,7 @@ data class EditViewState(
         // Validation: Error if enabled but package name is empty OR (package name is not empty but UID not found)
         val errorInstallRequester = enableCustomizeInstallRequester && (installRequester.isEmpty() || installRequesterUid == null)
 
-        fun toConfigEntity(): ConfigEntity = ConfigEntity(
+        fun toConfigModel(): ConfigModel = ConfigModel(
             name = this.name,
             description = this.description,
             authorizer = this.authorizer,
@@ -83,7 +88,7 @@ data class EditViewState(
         )
 
         companion object {
-            fun build(config: ConfigEntity): Data = Data(
+            fun build(config: ConfigModel): Data = Data(
                 name = config.name,
                 description = config.description,
                 authorizer = config.authorizer,

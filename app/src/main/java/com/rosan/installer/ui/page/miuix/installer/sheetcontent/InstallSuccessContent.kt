@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,14 +18,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.recycle.util.openAppPrivileged
-import com.rosan.installer.data.recycle.util.openLSPosedPrivileged
-import com.rosan.installer.data.settings.model.room.entity.ext.isPrivileged
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
+import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase.Companion.PRIVILEGED_START_TIMEOUT_MS
+import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.isPrivileged
 import com.rosan.installer.ui.util.isGestureNavigation
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
@@ -32,13 +38,17 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun InstallSuccessContent(
-    installer: InstallerRepo,
+    installer: InstallerSessionRepository,
     appInfo: AppInfoState,
     dhizukuAutoClose: Int,
     onClose: () -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val capabilityProvider: DeviceCapabilityProvider = koinInject()
+    val openAppUseCase: OpenAppUseCase = koinInject()
+    val openLSPosedUseCase: OpenLSPosedUseCase = koinInject()
+
     val isXposedModule = if (appInfo.primaryEntity is AppEntity.BaseEntity) appInfo.primaryEntity.isXposedModule else false
 
     Column(
@@ -59,7 +69,7 @@ fun InstallSuccessContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        if (isXposedModule && installer.config.isPrivileged) {
+        if (isXposedModule && installer.config.isPrivileged(capabilityProvider)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -69,10 +79,10 @@ fun InstallSuccessContent(
                     modifier = Modifier.weight(1f),
                     onClick = {
                         coroutineScope.launch(Dispatchers.IO) {
-                            openLSPosedPrivileged(
-                                config = installer.config,
-                                onSuccess = onClose
-                            )
+                            val success = openLSPosedUseCase(installer.config)
+                            if (success) {
+                                launch(Dispatchers.Main) { onClose() }
+                            }
                         }
                     }
                 )
@@ -103,13 +113,29 @@ fun InstallSuccessContent(
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                     onClick = {
                         coroutineScope.launch(Dispatchers.IO) {
-                            openAppPrivileged(
-                                context = context,
+                            val result = openAppUseCase(
                                 config = installer.config,
-                                packageName = appInfo.packageName,
-                                dhizukuAutoCloseSeconds = dhizukuAutoClose,
-                                onSuccess = onClose
+                                launchIntent = intent
                             )
+
+                            when (result) {
+                                is OpenAppUseCase.Result.SuccessPrivileged -> {
+                                    launch(Dispatchers.Main) { onClose() }
+                                }
+
+                                is OpenAppUseCase.Result.FallbackRequired -> {
+                                    launch(Dispatchers.Main) {
+                                        context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+
+                                        if (installer.config.authorizer == Authorizer.Dhizuku) {
+                                            delay(dhizukuAutoClose * 1000L)
+                                        } else {
+                                            delay(PRIVILEGED_START_TIMEOUT_MS)
+                                        }
+                                        onClose()
+                                    }
+                                }
+                            }
                         }
                     }
                 )

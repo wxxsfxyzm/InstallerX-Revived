@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.activity
 
 import android.content.Intent
@@ -10,18 +12,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
-import com.rosan.installer.data.installer.model.entity.ProgressEntity
-import com.rosan.installer.data.installer.model.impl.InstallerSessionManager
-import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
-import com.rosan.installer.ui.activity.themestate.ThemeUiState
-import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
+import com.rosan.installer.data.session.manager.InstallerSessionManager
+import com.rosan.installer.domain.session.model.ProgressEntity
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.domain.settings.model.ThemeState
+import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerTheme
@@ -42,10 +41,9 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         private const val EXTRA_PACKAGE_NAME = "package_name"
     }
 
-    private val appDataStore: AppDataStore by inject()
-    private var uiState by mutableStateOf(ThemeUiState())
-    private val sessionManager: InstallerSessionManager by inject()
-    private var installer: InstallerRepo? = null
+    private val themeStateProvider by inject<ThemeStateProvider>()
+    private val sessionManager by inject<InstallerSessionManager>()
+    private var installer: InstallerSessionRepository? = null
     private var job: Job? = null
 
     private lateinit var permissionManager: PermissionManager
@@ -61,14 +59,8 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         super.onCreate(savedInstanceState)
         Timber.d("UninstallerActivity onCreate.")
 
-        lifecycleScope.launch {
-            createThemeUiStateFlow(appDataStore).collect { newState ->
-                uiState = newState
-            }
-        }
-
         permissionManager = PermissionManager(this)
-        // Setup the callback to intercept the settings launch event
+        // Set up the callback to intercept the settings launch event
         permissionManager.onBeforeLaunchSettings = {
             Timber.d("Launching settings for permission, preventing repo closure in onStop.")
             isRequestingPermission = true
@@ -188,6 +180,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
     private fun showContent() {
         setContent {
+            val uiState by themeStateProvider.themeStateFlow.collectAsState(initial = ThemeState())
             if (!uiState.isLoaded) return@setContent
 
             val currentInstaller = installer

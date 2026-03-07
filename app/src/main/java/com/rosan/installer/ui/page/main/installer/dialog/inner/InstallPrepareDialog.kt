@@ -31,12 +31,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.util.sortedBest
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Manufacturer
+import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.DataType
+import com.rosan.installer.domain.engine.model.sortedBest
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -77,7 +77,7 @@ private fun installPrepareEmptyDialog(
 
 @Composable
 private fun installPrepareTooManyDialog(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(
@@ -106,7 +106,7 @@ private fun installPrepareTooManyDialog(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun installPrepareDialog(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     LocalContext.current
     val currentPackageName by viewModel.currentPackageName.collectAsState()
@@ -153,9 +153,9 @@ fun installPrepareDialog(
 
     LaunchedEffect(autoDelete, displaySdk, displaySize) {
         val currentConfig = installer.config
-        if (currentConfig.autoDelete != autoDelete) installer.config.autoDelete = autoDelete
-        if (currentConfig.displaySdk != displaySdk) installer.config.displaySdk = displaySdk
-        if (currentConfig.displaySize != displaySize) installer.config.displaySize = displaySize
+        if (currentConfig.autoDelete != autoDelete) installer.config = installer.config.copy(autoDelete = autoDelete)
+        if (currentConfig.displaySdk != displaySdk) installer.config = installer.config.copy(displaySdk = displaySdk)
+        if (currentConfig.displaySize != displaySize) installer.config = installer.config.copy(displaySize = displaySize)
     }
 
     // Call InstallInfoDialog for base structure
@@ -217,7 +217,7 @@ fun installPrepareDialog(
             primaryEntity = primaryEntity,
             isSplitUpdateMode = isSplitUpdateMode,
             containerType = containerType,
-            systemArch = RsConfig.currentArchitecture,
+            systemArch = DeviceConfig.currentArchitecture,
             systemSdkInt = Build.VERSION.SDK_INT,
             resources = installResources
         )
@@ -274,7 +274,7 @@ fun installPrepareDialog(
                                 onClick = {
                                     val newValue = !autoDelete
                                     autoDelete = newValue
-                                    installer.config.autoDelete = newValue
+                                    installer.config = installer.config.copy(autoDelete = newValue)
                                 },
                                 label = stringResource(id = R.string.config_auto_delete),
                                 icon = AppIcons.Delete
@@ -284,7 +284,7 @@ fun installPrepareDialog(
                                 onClick = {
                                     val newValue = !displaySdk
                                     displaySdk = newValue
-                                    installer.config.displaySdk = newValue
+                                    installer.config = installer.config.copy(displaySdk = newValue)
                                 },
                                 label = stringResource(id = R.string.config_display_sdk_version),
                                 icon = AppIcons.Info
@@ -294,12 +294,12 @@ fun installPrepareDialog(
                                 onClick = {
                                     val newValue = !displaySize
                                     displaySize = newValue
-                                    installer.config.displaySize = newValue
+                                    installer.config = installer.config.copy(displaySize = newValue)
                                 },
                                 label = stringResource(id = R.string.config_display_size),
                                 icon = AppIcons.ShowSize
                             )
-                            if (RsConfig.currentManufacturer == Manufacturer.OPPO || RsConfig.currentManufacturer == Manufacturer.ONEPLUS)
+                            if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS)
                                 Chip(
                                     selected = showOPPOSpecial,
                                     onClick = {

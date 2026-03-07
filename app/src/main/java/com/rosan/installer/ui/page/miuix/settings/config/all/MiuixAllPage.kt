@@ -22,14 +22,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rosan.installer.R
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
+import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBadge
@@ -40,6 +42,9 @@ import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import kotlinx.coroutines.flow.collectLatest
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
@@ -47,6 +52,8 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.SnackbarResult
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -60,11 +67,13 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 @Composable
 fun MiuixAllPage(
     navController: NavController,
-    viewModel: AllViewModel,
+    viewModel: AllViewModel = koinViewModel { parametersOf(navController) },
     hazeState: HazeState?,
     title: String,
-    outerPadding: PaddingValues
+    outerPadding: PaddingValues,
+    snackbarHostState: SnackbarHostState
 ) {
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.navController = navController
     }
@@ -73,6 +82,25 @@ fun MiuixAllPage(
 
     val scrollBehavior = MiuixScrollBehavior()
     val hazeStyle = rememberMiuixHazeStyle()
+
+    LaunchedEffect(Unit) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is AllViewEvent.DeletedConfig -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.delete_success),
+                        actionLabel = context.getString(R.string.restore),
+                        withDismissAction = true
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.dispatch(
+                            AllViewAction.RestoreDataConfig(configModel = event.configModel)
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -153,7 +181,7 @@ fun MiuixAllPage(
 @Composable
 private fun DataItemWidget(
     viewModel: AllViewModel,
-    entity: ConfigEntity,
+    entity: ConfigModel,
     isDefault: Boolean
 ) {
     Card(

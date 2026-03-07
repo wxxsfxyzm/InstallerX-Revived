@@ -7,13 +7,20 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
-import com.rosan.installer.data.recycle.model.impl.PrivilegedManager
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.repo.ConfigRepo
 import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalAuthorizer
 import com.rosan.installer.data.settings.util.ConfigUtil.getGlobalInstallMode
 import com.rosan.installer.data.settings.util.ConfigUtil.readGlobal
+import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.DexoptMode
+import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.InstallReason
+import com.rosan.installer.domain.settings.model.PackageSource
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
+import com.rosan.installer.domain.settings.usecase.config.GetConfigDraftUseCase
+import com.rosan.installer.domain.settings.usecase.config.SaveConfigUseCase
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,8 +36,10 @@ import org.koin.core.component.inject
 import timber.log.Timber
 
 class EditViewModel(
-    private val repo: ConfigRepo,
-    private val appDataStore: AppDataStore,
+    private val appSettingsRepo: AppSettingsRepo,
+    private val getConfigDraftUseCase: GetConfigDraftUseCase,
+    private val saveConfigUseCase: SaveConfigUseCase,
+    private val systemInfoProvider: SystemInfoProvider,
     private val id: Long? = null
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
@@ -70,21 +79,24 @@ class EditViewModel(
     val hasErrors: Boolean
         get() = activeErrorMessages.isNotEmpty()
 
-    var globalAuthorizer by mutableStateOf(ConfigEntity.Authorizer.Global)
+    var globalAuthorizer by mutableStateOf(Authorizer.Global)
         private set
 
-    var globalInstallMode by mutableStateOf(ConfigEntity.InstallMode.Global)
+    var globalInstallMode by mutableStateOf(InstallMode.Global)
         private set
 
     private val _eventFlow = MutableSharedFlow<EditViewEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
+
+    init {
+        loadData()
+    }
 
     fun dispatch(action: EditViewAction) {
         Timber.i("[DISPATCH] Action received: ${action::class.simpleName}")
         viewModelScope.launch {
             val errorMessage = runCatching {
                 when (action) {
-                    is EditViewAction.Init -> init()
                     is EditViewAction.ChangeDataName -> changeDataName(action.name)
                     is EditViewAction.ChangeDataDescription -> changeDataDescription(action.description)
                     is EditViewAction.ChangeDataAuthorizer -> changeDataAuthorizer(action.authorizer)
@@ -129,16 +141,6 @@ class EditViewModel(
         }
     }
 
-    private var isInited: Boolean = false
-
-    private fun init() {
-        synchronized(this) {
-            if (isInited) return
-            isInited = true
-            loadData()
-        }
-    }
-
     private fun changeDataName(name: String) {
         if (name.length > 20) return
         if (name.lines().size > 1) return
@@ -160,23 +162,23 @@ class EditViewModel(
         )
     }
 
-    private fun changeDataAuthorizer(authorizer: ConfigEntity.Authorizer) {
+    private fun changeDataAuthorizer(authorizer: Authorizer) {
         var updatedData = state.data.copy(
             authorizer = authorizer
         )
 
         // Dependency logic for Dhizuku: also disable declareInstaller
-        if (authorizer == ConfigEntity.Authorizer.Dhizuku) {
+        if (authorizer == Authorizer.Dhizuku) {
             updatedData = updatedData.copy()
         }
 
         // Determine the effective authorizer after this change.
-        val effectiveAuthorizer = if (authorizer == ConfigEntity.Authorizer.Global)
+        val effectiveAuthorizer = if (authorizer == Authorizer.Global)
             globalAuthorizer
         else authorizer
 
         // If the effective authorizer is Dhizuku, force disable the customize user feature.
-        if (effectiveAuthorizer == ConfigEntity.Authorizer.Dhizuku) {
+        if (effectiveAuthorizer == Authorizer.Dhizuku) {
             updatedData = updatedData.copy(
                 enableCustomizePackageSource = false,
                 declareInstaller = false,
@@ -211,7 +213,7 @@ class EditViewModel(
         )
     }
 
-    private fun changeDataInstallMode(installMode: ConfigEntity.InstallMode) {
+    private fun changeDataInstallMode(installMode: InstallMode) {
         state = state.copy(
             data = state.data.copy(
                 installMode = installMode
@@ -227,7 +229,7 @@ class EditViewModel(
         )
     }
 
-    private fun changeDataInstallReason(installReason: ConfigEntity.InstallReason) {
+    private fun changeDataInstallReason(installReason: InstallReason) {
         state = state.copy(
             data = state.data.copy(
                 installReason = installReason
@@ -243,7 +245,7 @@ class EditViewModel(
         )
     }
 
-    private fun changeDataPackageSource(packageSource: ConfigEntity.PackageSource) {
+    private fun changeDataPackageSource(packageSource: PackageSource) {
         state = state.copy(
             data = state.data.copy(
                 packageSource = packageSource
@@ -359,7 +361,7 @@ class EditViewModel(
         )
     }
 
-    private fun changeDataDexoptMode(mode: ConfigEntity.DexoptMode) {
+    private fun changeDataDexoptMode(mode: DexoptMode) {
         state = state.copy(
             data = state.data.copy(
                 dexoptMode = mode
@@ -463,7 +465,7 @@ class EditViewModel(
             Timber.i("[LOAD_USERS] Starting to load available users.")
             val newAvailableUsers = runCatching {
                 val authorizer = state.data.authorizer.readGlobal()
-                withContext(Dispatchers.IO) { PrivilegedManager.getUsers(authorizer) }
+                withContext(Dispatchers.IO) { systemInfoProvider.getUsers(authorizer) }
             }.getOrElse {
                 Timber.e(it, "Failed to load available users.")
                 _eventFlow.emit(EditViewEvent.SnackBar(message = it.getErrorMessage(context)))
@@ -492,83 +494,34 @@ class EditViewModel(
     private fun loadData() {
         loadDataJob?.cancel()
         loadDataJob = viewModelScope.launch(Dispatchers.IO) {
-            // Fetch all necessary data in parallel/sequence
-            val configEntity = fetchConfigEntity(id)
-            val managedPackages =
-                appDataStore.getNamedPackageList(AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST).firstOrNull() ?: emptyList()
-            val isCustomInstallRequesterEnabled = appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER).first()
 
-            // Update global state side-effects
             globalAuthorizer = getGlobalAuthorizer()
             globalInstallMode = getGlobalInstallMode()
 
-            // Build and process the initial data (Chain of responsibility pattern)
-            val initialData = EditViewState.Data.build(configEntity)
-                .enrichWithUid() // Attempt to fetch UID if requester is set
-                .applyAuthorizerRestrictions(configEntity.authorizer) // Apply logic for Dhizuku/Global
+            val managedPackages =
+                appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedInstallerPackages).firstOrNull() ?: emptyList()
+            val isCustomInstallRequesterEnabled = appSettingsRepo.getBoolean(BooleanSetting.LabSetInstallRequester).first()
 
-            // Set baseline for unsaved changes detection
+            val configModel = getConfigDraftUseCase(id, globalAuthorizer)
+
+            val initialData = EditViewState.Data.build(configModel).copy(
+                installRequesterUid = configModel.callingFromUid
+            )
+
             originalData = initialData
 
-            // Update UI State
             state = state.copy(
                 data = initialData,
                 managedInstallerPackages = managedPackages,
-                availableUsers = emptyMap(), // Reset users, will load async below
+                availableUsers = emptyMap(),
                 isCustomInstallRequesterEnabled = isCustomInstallRequesterEnabled
             )
 
-            Timber.i("[LOAD_DATA] Original data initialized: $initialData")
+            Timber.i("[LOAD_DATA] Data loaded via UseCase: $initialData")
 
-            // Trigger async user loading if necessary
             if (initialData.enableCustomizeUser) {
                 loadAvailableUsers()
             }
-        }
-    }
-
-    /**
-     * Fetches the config from the repo by ID, or returns a default instance for new creations.
-     */
-    private suspend fun fetchConfigEntity(id: Long?): ConfigEntity {
-        return id?.let { repo.find(it) } ?: ConfigEntity.default.copy(name = "")
-    }
-
-    /**
-     * Extension: Checks if the install requester is enabled and tries to fetch its UID.
-     * Returns a copy of Data with the UID set (or null if not found).
-     */
-    private fun EditViewState.Data.enrichWithUid(): EditViewState.Data {
-        if (!enableCustomizeInstallRequester || installRequester.isEmpty()) {
-            return this
-        }
-
-        val uid = runCatching {
-            context.packageManager.getApplicationInfo(installRequester, 0).uid
-        }.getOrNull()
-
-        return copy(installRequesterUid = uid)
-    }
-
-    /**
-     * Extension: Applies restrictions based on the Authorizer (e.g., Dhizuku limitations).
-     */
-    private fun EditViewState.Data.applyAuthorizerRestrictions(entityAuthorizer: ConfigEntity.Authorizer): EditViewState.Data {
-        val effectiveAuthorizer = if (entityAuthorizer == ConfigEntity.Authorizer.Global) {
-            globalAuthorizer
-        } else {
-            entityAuthorizer
-        }
-
-        // If Dhizuku is active, force disable specific features
-        return if (effectiveAuthorizer == ConfigEntity.Authorizer.Dhizuku) {
-            copy(
-                declareInstaller = false,
-                enableCustomizeUser = false,
-                enableManualDexopt = false
-            )
-        } else {
-            this
         }
     }
 
@@ -577,26 +530,27 @@ class EditViewModel(
     private fun saveData() {
         saveDataJob?.cancel()
         saveDataJob = viewModelScope.launch(Dispatchers.IO) {
-            val message = when {
-                state.data.errorName -> context.getString(R.string.config_error_name)
-                state.data.errorCustomizeAuthorizer -> context.getString(R.string.config_error_customize_authorizer)
-                state.data.errorInstaller -> context.getString(R.string.config_error_installer)
-                state.data.errorInstallRequester -> context.getString(R.string.config_error_package_not_found)
-                else -> null
-            }
-            if (message != null) {
-                _eventFlow.emit(EditViewEvent.SnackBar(message = message))
-            } else {
-                val entity = state.data.toConfigEntity()
-                if (id == null) repo.insert(entity)
-                else repo.update(entity.also {
-                    it.id = id
-                })
-                // After a successful save, update the "original" data
-                // to match the current state. This resets the hasUnsavedChanges flag.
+            val model = state.data.toConfigModel()
+            // Assume you have checked if UID exists in state.data.installRequesterUid != null
+            val hasRequesterUid = state.data.installRequesterUid != null
+
+            // Delegate all logic to UseCase
+            val result = saveConfigUseCase(model, hasRequesterUid)
+
+            result.onSuccess {
                 originalData = state.data
-                Timber.i("[SAVE_DATA] Data saved. Original data updated to: $originalData")
+                Timber.i("[SAVE_DATA] Data saved successfully.")
                 _eventFlow.emit(EditViewEvent.Saved)
+            }.onFailure { error ->
+                // Map Domain error to UI String
+                val message = when (error.message) {
+                    SaveConfigUseCase.Error.NAME_EMPTY.name -> context.getString(R.string.config_error_name)
+                    SaveConfigUseCase.Error.CUSTOM_AUTHORIZER_EMPTY.name -> context.getString(R.string.config_error_customize_authorizer)
+                    SaveConfigUseCase.Error.INSTALLER_EMPTY.name -> context.getString(R.string.config_error_installer)
+                    SaveConfigUseCase.Error.REQUESTER_NOT_FOUND.name -> context.getString(R.string.config_error_package_not_found)
+                    else -> "Unknown error"
+                }
+                _eventFlow.emit(EditViewEvent.SnackBar(message = message))
             }
         }
     }

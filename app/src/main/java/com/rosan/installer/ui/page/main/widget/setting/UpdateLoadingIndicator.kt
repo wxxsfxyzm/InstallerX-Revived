@@ -29,8 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -40,16 +40,16 @@ import dev.chrisbanes.haze.hazeEffect
 @Composable
 fun UpdateLoadingIndicator(
     hazeState: HazeState?,
-    viewModel: PreferredViewModel
+    viewModel: AboutViewModel
 ) {
     var showUpdateLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             when (event) {
-                is PreferredViewEvent.ShowUpdateLoading -> showUpdateLoading = true
-                is PreferredViewEvent.HideUpdateLoading -> showUpdateLoading = false
-                is PreferredViewEvent.ShowInAppUpdateErrorDetail -> showUpdateLoading = false
+                is AboutEvent.ShowUpdateLoading -> showUpdateLoading = true
+                is AboutEvent.HideUpdateLoading -> showUpdateLoading = false
+                is AboutEvent.ShowInAppUpdateErrorDetail -> showUpdateLoading = false
                 else -> null
             }
         }

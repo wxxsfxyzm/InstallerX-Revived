@@ -1,7 +1,7 @@
 package com.rosan.installer.ui.page.main.installer
 
 import android.graphics.Bitmap
-import com.rosan.installer.data.installer.model.entity.InstallResult
+import com.rosan.installer.domain.session.model.InstallResult
 
 sealed class InstallerViewState {
     data object Ready : InstallerViewState()

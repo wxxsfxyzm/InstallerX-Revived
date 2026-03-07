@@ -3,9 +3,10 @@ package com.rosan.installer
 import android.app.Application
 import android.os.Build
 import com.kieronquinn.monetcompat.core.MonetCompat
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.data.recycle.model.impl.AutoLockManager
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.data.privileged.service.AutoLockService
 import com.rosan.installer.di.init.appModules
+import com.rosan.installer.domain.engine.model.InstalledAppInfo.Companion.getKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -26,7 +27,7 @@ class App : Application() {
             MonetCompat.getInstance().updateMonetColors()
         }
 
-        if (RsConfig.isLogEnabled) Timber.plant(Timber.DebugTree())
+        if (AppConfig.isLogEnabled) Timber.plant(Timber.DebugTree())
 
         startKoin {
             // Koin Android Logger
@@ -38,6 +39,7 @@ class App : Application() {
         }
 
         // Initialize Shizuku module
-        AutoLockManager.init()
+        val autoLockService: AutoLockService = getKoin().get()
+        autoLockService.init()
     }
 }

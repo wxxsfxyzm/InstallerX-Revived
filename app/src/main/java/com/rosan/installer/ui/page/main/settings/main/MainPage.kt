@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.main
 
 import androidx.compose.animation.fadeIn
@@ -27,7 +29,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationItemIconPosition
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarArrangement
+import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.WideNavigationRail
 import androidx.compose.material3.WideNavigationRailColors
@@ -36,7 +42,7 @@ import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -45,56 +51,54 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.domain.settings.model.ThemeState
+import com.rosan.installer.domain.settings.provider.ThemeStateProvider
+import com.rosan.installer.domain.settings.repository.ConfigRepo
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.all.AllPage
-import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
-import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.NewAllPage
 import com.rosan.installer.ui.page.main.settings.preferred.NewPreferredPage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredPage
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
+import org.koin.compose.koinInject
 
-@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun MainPage(navController: NavController, preferredViewModel: PreferredViewModel) {
-    val allViewModel: AllViewModel = koinViewModel {
-        parametersOf(navController)
-    }
-    LaunchedEffect(Unit) {
-        allViewModel.dispatch(AllViewAction.Init)
-    }
-    val showExpressiveUI = preferredViewModel.state.showExpressiveUI
-    val useBlur = showExpressiveUI && preferredViewModel.state.useBlur
+fun MainPage(navController: NavController) {
+    val themeStateProvider = koinInject<ThemeStateProvider>()
+    val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
+    val showExpressiveUI = uiState.isExpressive
+    val useBlur = showExpressiveUI && uiState.useBlur
     val hazeState = if (useBlur) remember { HazeState() } else null
 
-    val configCount = allViewModel.state.data.configs.size
+    val configRepo = koinInject<ConfigRepo>()
+    val configCountFlow = remember { configRepo.flowAll().map { it.size } }
+    val configCount by configCountFlow.collectAsStateWithLifecycle(initialValue = 0)
     val configLabel = stringResource(R.string.config)
     val preferredLabel = stringResource(R.string.preferred)
 
-    val data = remember(showExpressiveUI, configLabel, preferredLabel, navController, allViewModel, preferredViewModel) {
+    val data = remember(showExpressiveUI, configLabel, preferredLabel, navController) {
         arrayOf(
             NavigationData(
                 icon = AppIcons.RoomPreferences,
                 label = configLabel
             ) { outerPadding, hazeState ->
-                if (showExpressiveUI) NewAllPage(navController, allViewModel, outerPadding = outerPadding, hazeState = hazeState)
-                else AllPage(navController, allViewModel, outerPadding)
+                if (showExpressiveUI) NewAllPage(navController, outerPadding = outerPadding, hazeState = hazeState)
+                else AllPage(navController, outerPadding = outerPadding)
             },
             NavigationData(
                 icon = AppIcons.SettingsSuggest,
                 label = preferredLabel
             ) { outerPadding, hazeState ->
-                if (showExpressiveUI) NewPreferredPage(navController, preferredViewModel, outerPadding = outerPadding, hazeState = hazeState)
-                else PreferredPage(navController, preferredViewModel, outerPadding)
+                if (showExpressiveUI) NewPreferredPage(navController, outerPadding = outerPadding, hazeState = hazeState)
+                else PreferredPage(navController, outerPadding = outerPadding)
             }
         )
     }
@@ -111,20 +115,24 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
     ) {
-        val isPortrait = maxWidth < maxHeight || (maxHeight / maxWidth > 1.4f)
+        // Expanded layout: >= 840dp OR medium devices in landscape (like foldables)
+        val showRail = maxWidth >= 840.dp || (maxWidth >= 600.dp && maxWidth > maxHeight)
+
+        // Medium layout: >= 600dp but in portrait mode (like foldables in portrait or small tablets)
+        val isMedium = maxWidth >= 600.dp && !showRail
 
         val navigationSide =
-            if (isPortrait) WindowInsetsSides.Bottom
-            else WindowInsetsSides.Start
+            if (showRail) WindowInsetsSides.Start
+            else WindowInsetsSides.Bottom
 
         val navigationWindowInsets = WindowInsets.safeDrawing.only(
-            (if (isPortrait) WindowInsetsSides.Horizontal
-            else WindowInsetsSides.Vertical) + navigationSide
+            (if (showRail) WindowInsetsSides.Vertical
+            else WindowInsetsSides.Horizontal) + navigationSide
         )
 
         val hazeStyle = rememberMaterial3HazeStyle()
 
-        if (isPortrait) {
+        if (!showRail) {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 bottomBar = {
@@ -136,7 +144,8 @@ fun MainPage(navController: NavController, preferredViewModel: PreferredViewMode
                         currentPage = currentPage,
                         onPageChanged = { onPageChanged(it) },
                         configCount = configCount,
-                        containerColor = if (useBlur) Color.Transparent else BottomAppBarDefaults.containerColor
+                        containerColor = if (useBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
+                        isMedium = isMedium // Pass layout state
                     )
                 }
             ) { paddingValues ->
@@ -182,21 +191,23 @@ fun RowNavigation(
     currentPage: Int,
     onPageChanged: (Int) -> Unit,
     configCount: Int,
-    containerColor: Color = if (isM3e) MaterialTheme.colorScheme.surfaceContainer else BottomAppBarDefaults.containerColor
+    containerColor: Color = if (isM3e) MaterialTheme.colorScheme.surfaceContainer else BottomAppBarDefaults.containerColor,
+    isMedium: Boolean = false
 ) {
-    FlexibleBottomAppBar(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentSize(),
-        windowInsets = windowInsets,
-        expandedHeight = if (isM3e) BottomAppBarDefaults.FlexibleBottomAppBarHeight else 72.dp,
-        containerColor = containerColor,
-        horizontalArrangement = BottomAppBarDefaults.FlexibleHorizontalArrangement,
-        content = {
+    if (isM3e) {
+        ShortNavigationBar(
+            modifier = modifier
+                .fillMaxWidth()
+                .wrapContentSize(),
+            windowInsets = windowInsets,
+            containerColor = containerColor,
+            arrangement = if (isMedium) ShortNavigationBarArrangement.Centered else ShortNavigationBarArrangement.EqualWeight
+        ) {
             data.forEachIndexed { index, navigationData ->
-                NavigationBarItem(
+                ShortNavigationBarItem(
                     selected = currentPage == index,
                     onClick = { onPageChanged(index) },
+                    iconPosition = if (isMedium) NavigationItemIconPosition.Start else NavigationItemIconPosition.Top,
                     icon = {
                         val showBadge = index == 0 && configCount > 1
 
@@ -223,12 +234,58 @@ fun RowNavigation(
                     },
                     label = {
                         Text(text = navigationData.label)
-                    },
-                    alwaysShowLabel = isM3e
+                    }
                 )
             }
         }
-    )
+    } else {
+        // Fallback for non-expressive UI
+        FlexibleBottomAppBar(
+            modifier = modifier
+                .fillMaxWidth()
+                .wrapContentSize(),
+            windowInsets = windowInsets,
+            expandedHeight = 72.dp,
+            containerColor = containerColor,
+            horizontalArrangement = BottomAppBarDefaults.FlexibleHorizontalArrangement,
+            content = {
+                data.forEachIndexed { index, navigationData ->
+                    NavigationBarItem(
+                        selected = currentPage == index,
+                        onClick = { onPageChanged(index) },
+                        icon = {
+                            val showBadge = index == 0 && configCount > 1
+
+                            BadgedBox(
+                                badge = {
+                                    androidx.compose.animation.AnimatedVisibility(
+                                        visible = showBadge,
+                                        enter = scaleIn() + fadeIn(),
+                                        exit = scaleOut() + fadeOut(),
+                                        label = "badge"
+                                    ) {
+                                        Badge(
+                                            containerColor = MaterialTheme.colorScheme.secondary,
+                                            contentColor = MaterialTheme.colorScheme.onSecondary
+                                        ) { Text(configCount.toString()) }
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = navigationData.icon,
+                                    contentDescription = navigationData.label
+                                )
+                            }
+                        },
+                        label = {
+                            Text(text = navigationData.label)
+                        },
+                        alwaysShowLabel = false
+                    )
+                }
+            }
+        )
+    }
 }
 
 @Composable

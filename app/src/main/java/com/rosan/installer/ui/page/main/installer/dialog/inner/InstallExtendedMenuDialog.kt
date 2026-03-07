@@ -45,18 +45,18 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.entity.AppEntity
-import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.util.rememberInstallOptions
-import com.rosan.installer.data.app.util.sortedBest
-import com.rosan.installer.data.installer.model.entity.ExtendedMenuEntity
-import com.rosan.installer.data.installer.model.entity.ExtendedMenuItemEntity
-import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.DataType
+import com.rosan.installer.domain.engine.model.sortedBest
+import com.rosan.installer.domain.session.model.ExtendedMenuEntity
+import com.rosan.installer.domain.session.model.ExtendedMenuItemEntity
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.components.rememberInstallOptions
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
@@ -65,7 +65,7 @@ import com.rosan.installer.util.pm.getBestPermissionLabel
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun installExtendedMenuDialog(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val containerType =
@@ -99,8 +99,8 @@ fun installExtendedMenuDialog(
                 )
 
             // Installer selection
-            if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+            if (installer.config.authorizer == Authorizer.Root ||
+                installer.config.authorizer == Authorizer.Shizuku
             ) {
                 add(
                     ExtendedMenuEntity(
@@ -116,8 +116,8 @@ fun installExtendedMenuDialog(
             }
 
             // User selection
-            if ((installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                        installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+            if ((installer.config.authorizer == Authorizer.Root ||
+                        installer.config.authorizer == Authorizer.Shizuku
                         ) && customizeUserEnabled
             ) {
                 add(
@@ -134,8 +134,8 @@ fun installExtendedMenuDialog(
             }
 
             // 动态安装选项
-            if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+            if (installer.config.authorizer == Authorizer.Root ||
+                installer.config.authorizer == Authorizer.Shizuku
             ) {
                 installOptions.forEach { option ->
                     add(
@@ -487,7 +487,7 @@ fun MenuItemWidget(
 
 @Composable
 fun installExtendedMenuSubMenuDialog(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     val currentPackageName by viewModel.currentPackageName.collectAsState()
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }

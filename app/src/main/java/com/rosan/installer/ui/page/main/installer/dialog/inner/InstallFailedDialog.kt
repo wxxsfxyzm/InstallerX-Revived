@@ -25,12 +25,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.app.model.enums.InstallErrorType
-import com.rosan.installer.data.app.util.InstallOption
-import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Manufacturer
+import com.rosan.installer.domain.engine.model.InstallErrorType
+import com.rosan.installer.domain.engine.model.InstallOption
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
@@ -46,7 +46,7 @@ import timber.log.Timber
 
 @Composable
 fun installFailedDialog(
-    installer: InstallerRepo, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     installer.analysisResults.firstOrNull()?.packageName ?: ""
 
@@ -92,7 +92,7 @@ fun installFailedDialog(
 private fun ErrorSuggestions(
     error: Throwable,
     viewModel: InstallerViewModel,
-    installer: InstallerRepo
+    installer: InstallerSessionRepository
 ) {
     val context = LocalContext.current
     var showUninstallConfirmDialog by remember { mutableStateOf(false) }
@@ -126,9 +126,9 @@ private fun ErrorSuggestions(
                 )
             )
 
-            if (installer.config.authorizer != ConfigEntity.Authorizer.None ||
-                (installer.config.authorizer == ConfigEntity.Authorizer.None &&
-                        !(RsConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
+            if (installer.config.authorizer != Authorizer.None ||
+                (installer.config.authorizer == Authorizer.None &&
+                        !(DeviceConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
             ) {
                 add(
                     SuggestionChipInfo(
@@ -184,10 +184,10 @@ private fun ErrorSuggestions(
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA && // Must be lower than Android 16
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && // Must be Android 14 or higher
                 !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && // And is Android 15 or higher
-                        (RsConfig.currentManufacturer == Manufacturer.SAMSUNG ||         // and the manufacturer is Samsung
-                                RsConfig.currentManufacturer == Manufacturer.REALME)) &&        // or the manufacturer is realme -> This combination is excluded
-                (installer.config.authorizer == ConfigEntity.Authorizer.Root ||    // Authorization must be
-                        installer.config.authorizer == ConfigEntity.Authorizer.Shizuku)   // Root or Shizuku
+                        (DeviceConfig.currentManufacturer == Manufacturer.SAMSUNG ||         // and the manufacturer is Samsung
+                                DeviceConfig.currentManufacturer == Manufacturer.REALME)) &&        // or the manufacturer is realme -> This combination is excluded
+                (installer.config.authorizer == Authorizer.Root ||    // Authorization must be
+                        installer.config.authorizer == Authorizer.Shizuku)   // Root or Shizuku
             ) {
                 add(
                     SuggestionChipInfo(
@@ -204,7 +204,7 @@ private fun ErrorSuggestions(
             }
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
-                (installer.config.authorizer == ConfigEntity.Authorizer.Root || installer.config.authorizer == ConfigEntity.Authorizer.Shizuku)
+                (installer.config.authorizer == Authorizer.Root || installer.config.authorizer == Authorizer.Shizuku)
             ) {
                 add(
                     SuggestionChipInfo(
@@ -220,14 +220,14 @@ private fun ErrorSuggestions(
                 )
             }
 
-            if (installer.config.authorizer != ConfigEntity.Authorizer.Dhizuku) {
+            if (installer.config.authorizer != Authorizer.Dhizuku) {
                 add(
                     SuggestionChipInfo(
                         isMatch = { it.hasErrorType(InstallErrorType.HYPEROS_ISOLATION_VIOLATION) },
                         selected = { true },
                         onClick = {
                             // Set available installer
-                            installer.config.installer = "com.miui.packageinstaller"
+                            installer.config = installer.config.copy(installer = "com.miui.packageinstaller")
                             // Wipe originatingUid
                             installer.config.callingFromUid = null
                             viewModel.dispatch(InstallerViewAction.Install(false))
@@ -242,8 +242,8 @@ private fun ErrorSuggestions(
                         isMatch = { it.hasErrorType(InstallErrorType.HYPEROS_ISOLATION_VIOLATION) },
                         selected = { true },
                         onClick = {
-                            installer.config.installer = "com.miui.packageinstaller"
-                            installer.config.authorizer = ConfigEntity.Authorizer.Shizuku
+                            installer.config = installer.config.copy(installer = "com.miui.packageinstaller")
+                            installer.config = installer.config.copy(authorizer = Authorizer.Shizuku)
                             viewModel.dispatch(InstallerViewAction.Install(false))
                         },
                         labelRes = R.string.suggestion_shizuku_isolation,

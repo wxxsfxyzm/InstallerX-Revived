@@ -17,17 +17,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.RootImplementationSelectionDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
@@ -35,29 +36,31 @@ import com.rosan.installer.ui.page.main.widget.setting.LabHttpProfileWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabRootImplementationWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
-import com.rosan.installer.util.OSUtils
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LegacyLabPage(
     navController: NavHostController,
-    viewModel: PreferredViewModel
+    viewModel: LabSettingsViewModel = koinViewModel()
 ) {
-    val state = viewModel.state
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val showRootImplementationDialog = remember { mutableStateOf(false) }
-    val isMiIslandSupported = remember { OSUtils.isSupportMiIsland() }
+    val isMiIslandSupported = remember { capabilityProvider.isSupportMiIsland }
 
     if (showRootImplementationDialog.value) {
         RootImplementationSelectionDialog(
-            currentSelection = state.labRootImplementation,
+            currentSelection = uiState.labRootImplementation,
             onDismiss = { showRootImplementationDialog.value = false },
             onConfirm = { selectedImplementation ->
                 showRootImplementationDialog.value = false
                 // 1. Save the selected implementation
-                viewModel.dispatch(PreferredViewAction.LabChangeRootImplementation(selectedImplementation))
+                viewModel.dispatch(LabSettingsAction.LabChangeRootImplementation(selectedImplementation))
                 // 2. Enable the flash module feature
-                viewModel.dispatch(PreferredViewAction.LabChangeRootModuleFlash(true))
+                viewModel.dispatch(LabSettingsAction.LabChangeRootModuleFlash(true))
             }
         )
     }
@@ -87,7 +90,7 @@ fun LegacyLabPage(
                     icon = AppIcons.Root,
                     title = stringResource(R.string.lab_module_flashing),
                     description = stringResource(R.string.lab_module_flashing_desc),
-                    checked = state.labRootEnableModuleFlash,
+                    checked = uiState.labRootEnableModuleFlash,
                     isM3E = false,
                     onCheckedChange = { isChecking ->
                         if (isChecking) {
@@ -95,7 +98,7 @@ fun LegacyLabPage(
                             showRootImplementationDialog.value = true
                         } else {
                             // If turning OFF, disable immediately
-                            viewModel.dispatch(PreferredViewAction.LabChangeRootModuleFlash(false))
+                            viewModel.dispatch(LabSettingsAction.LabChangeRootModuleFlash(false))
                         }
                     }
                 )
@@ -103,7 +106,7 @@ fun LegacyLabPage(
             // DropDownMenuWidget appears when enabled to allow changing the setting later
             item {
                 AnimatedVisibility(
-                    visible = state.labRootEnableModuleFlash,
+                    visible = uiState.labRootEnableModuleFlash,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
@@ -114,17 +117,17 @@ fun LegacyLabPage(
                             title = stringResource(R.string.lab_module_flashing_show_art),
                             description = stringResource(R.string.lab_module_flashing_show_art_desc),
                             isM3E = false,
-                            checked = state.labRootShowModuleArt,
-                            onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootShowModuleArt(it)) }
+                            checked = uiState.labRootShowModuleArt,
+                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeRootShowModuleArt(it)) }
                         )
-                        if (OSUtils.isSystemApp)
+                        if (capabilityProvider.isSystemApp)
                             SwitchWidget(
                                 icon = AppIcons.FlashPreferRoot,
                                 title = stringResource(R.string.lab_module_always_use_root),
                                 description = stringResource(R.string.lab_module_always_use_root_desc),
                                 isM3E = false,
-                                checked = state.labRootModuleAlwaysUseRoot,
-                                onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeRootModuleAlwaysUseRoot(it)) }
+                                checked = uiState.labRootModuleAlwaysUseRoot,
+                                onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeRootModuleAlwaysUseRoot(it)) }
                             )
                     }
                 }
@@ -136,8 +139,8 @@ fun LegacyLabPage(
                     title = stringResource(R.string.lab_mi_island),
                     description = stringResource(R.string.lab_mi_island_desc),
                     isM3E = false,
-                    checked = state.labUseMiIsland,
-                    onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeUseMiIsland(it)) }
+                    checked = uiState.labUseMiIsland,
+                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeUseMiIsland(it)) }
                 )
             }
             item {
@@ -145,13 +148,13 @@ fun LegacyLabPage(
                     icon = AppIcons.InstallRequester,
                     title = stringResource(R.string.lab_set_install_requester),
                     description = stringResource(R.string.lab_set_install_requester_desc),
-                    checked = state.labSetInstallRequester,
+                    checked = uiState.labSetInstallRequester,
                     isM3E = false,
-                    onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeSetInstallRequester(it)) }
+                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeSetInstallRequester(it)) }
                 )
             }
             // --- Internet Access Section ---
-            if (RsConfig.isInternetAccessEnabled) {
+            if (AppConfig.isInternetAccessEnabled) {
                 item { LabelWidget(stringResource(R.string.internet_access_enabled)) }
                 // TODO
                 /*item {
@@ -159,9 +162,9 @@ fun LegacyLabPage(
                         icon = Icons.Default.Download,
                         title = stringResource(R.string.lab_http_save_file),
                         description = stringResource(R.string.lab_http_save_file_desc),
-                        checked = state.labHttpSaveFile,
+                        checked = uiState.labHttpSaveFile,
                         isM3E = false,
-                        onCheckedChange = { viewModel.dispatch(PreferredViewAction.LabChangeHttpSaveFile(it)) }
+                        onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeHttpSaveFile(it)) }
                     )
                 }*/
 

@@ -79,10 +79,13 @@ private fun TipCard(
 @Composable
 fun ScopeTipCard(
     viewModel: AllViewModel,
+    modifier: Modifier = Modifier,
     cardShape: RoundedCornerShape = RoundedCornerShape(12.dp),
 ) {
     TipCard(
+        modifier = modifier.fillMaxWidth(),
         cardShape = cardShape,
+        noPadding = true,
         tipContent = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

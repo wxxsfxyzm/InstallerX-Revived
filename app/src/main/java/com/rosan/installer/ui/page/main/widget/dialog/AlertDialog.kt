@@ -34,9 +34,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Manufacturer
-import com.rosan.installer.data.app.model.enums.RootImplementation
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Manufacturer
+import com.rosan.installer.domain.settings.model.RootImplementation
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.util.help
 
@@ -174,7 +175,7 @@ fun ErrorDisplayDialog(
                     item {
                         SelectionContainer {
                             Text(
-                                if (RsConfig.isDebug) {
+                                if (AppConfig.isDebug) {
                                     exception.stackTraceToString()
                                 } else {
                                     exception.message ?: "An unknown error occurred."
@@ -215,7 +216,7 @@ fun HideLauncherIconWarningDialog(
             text = {
                 Column {
                     Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
-                    if (RsConfig.currentManufacturer == Manufacturer.XIAOMI)
+                    if (DeviceConfig.currentManufacturer == Manufacturer.XIAOMI)
                         Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi))
                 }
             },

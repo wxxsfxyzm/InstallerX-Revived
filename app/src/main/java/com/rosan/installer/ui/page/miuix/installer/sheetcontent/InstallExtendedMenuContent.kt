@@ -23,17 +23,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.util.rememberInstallOptions
-import com.rosan.installer.data.installer.model.entity.ExtendedMenuEntity
-import com.rosan.installer.data.installer.model.entity.ExtendedMenuItemEntity
-import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.domain.session.model.ExtendedMenuEntity
+import com.rosan.installer.domain.session.model.ExtendedMenuItemEntity
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction.SetInstaller
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction.SetTargetUser
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.components.rememberInstallOptions
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallExtendedMenuAction
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.InstallerTheme
@@ -52,7 +52,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun InstallExtendedMenuContent(
-    installer: InstallerRepo,
+    installer: InstallerSessionRepository,
     viewModel: InstallerViewModel
 ) {
     val isDarkMode = InstallerTheme.isDark
@@ -70,8 +70,8 @@ fun InstallExtendedMenuContent(
     val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, availableUsers) {
         buildList {
             // Installer selection
-            if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+            if (installer.config.authorizer == Authorizer.Root ||
+                installer.config.authorizer == Authorizer.Shizuku
             ) {
                 add(
                     ExtendedMenuEntity(
@@ -86,8 +86,8 @@ fun InstallExtendedMenuContent(
             }
 
             // User selection
-            if ((installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                        installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+            if ((installer.config.authorizer == Authorizer.Root ||
+                        installer.config.authorizer == Authorizer.Shizuku
                         ) && customizeUserEnabled
             ) {
                 add(
@@ -103,8 +103,8 @@ fun InstallExtendedMenuContent(
             }
 
             // Dynamic install options
-            if (installer.config.authorizer == ConfigEntity.Authorizer.Root ||
-                installer.config.authorizer == ConfigEntity.Authorizer.Shizuku
+            if (installer.config.authorizer == Authorizer.Root ||
+                installer.config.authorizer == Authorizer.Shizuku
             ) {
                 installOptions.forEach { option ->
                     add(

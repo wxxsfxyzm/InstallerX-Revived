@@ -30,11 +30,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.enums.DataType
-import com.rosan.installer.data.app.model.exception.ModuleInstallCmdInitException
-import com.rosan.installer.data.app.model.exception.ModuleInstallException
-import com.rosan.installer.data.app.model.exception.ModuleInstallFailedIncompatibleAuthorizerException
-import com.rosan.installer.data.installer.repo.InstallerRepo
+import com.rosan.installer.domain.engine.exception.ModuleInstallCmdInitException
+import com.rosan.installer.domain.engine.exception.ModuleInstallException
+import com.rosan.installer.domain.engine.exception.ModuleInstallFailedIncompatibleAuthorizerException
+import com.rosan.installer.domain.engine.model.DataType
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
@@ -87,7 +87,7 @@ private const val SHEET_ANIMATION_DURATION = 450L
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
-fun MiuixInstallerPage(installer: InstallerRepo) {
+fun MiuixInstallerPage(installer: InstallerSessionRepository) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val showBottomSheet = remember { mutableStateOf(true) }

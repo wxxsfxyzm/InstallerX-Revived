@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -17,18 +18,18 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun LogEventCollector(viewModel: PreferredViewModel) {
+fun LogEventCollector(viewModel: AboutViewModel) {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             when (event) {
-                is PreferredViewEvent.OpenLogShare -> {
+                is AboutEvent.OpenLogShare -> {
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_STREAM, event.uri)
@@ -38,8 +39,8 @@ fun LogEventCollector(viewModel: PreferredViewModel) {
                     context.startActivity(chooser)
                 }
 
-                is PreferredViewEvent.ShareLogFailed -> context.toast(event.error)
-                else -> null
+                is AboutEvent.ShareLogFailed -> context.toast(event.error)
+                else -> Unit
             }
         }
     }
@@ -47,19 +48,21 @@ fun LogEventCollector(viewModel: PreferredViewModel) {
 
 @Composable
 fun DeleteEventCollector(viewModel: AllViewModel, snackBarHostState: SnackbarHostState) {
+    val snackbarString = stringResource(R.string.delete_success)
+    val actionLabel = stringResource(R.string.restore)
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is AllViewEvent.DeletedConfig -> {
                     val result = snackBarHostState.showSnackbar(
-                        message = viewModel.context.getString(R.string.delete_success),
-                        actionLabel = viewModel.context.getString(R.string.restore),
+                        message = snackbarString,
+                        actionLabel = actionLabel,
                         withDismissAction = true
                     )
                     if (result == SnackbarResult.ActionPerformed) {
                         viewModel.dispatch(
                             AllViewAction.RestoreDataConfig(
-                                configEntity = event.configEntity
+                                configModel = event.configModel
                             )
                         )
                     }

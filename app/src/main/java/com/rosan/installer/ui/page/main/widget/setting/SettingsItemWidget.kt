@@ -10,7 +10,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,7 +43,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,17 +61,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.data.app.model.enums.HttpProfile
-import com.rosan.installer.data.app.model.enums.RootImplementation
-import com.rosan.installer.data.app.util.PackageManagerUtil
-import com.rosan.installer.data.settings.model.datastore.entity.NamedPackage
-import com.rosan.installer.data.settings.model.datastore.entity.SharedUid
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.data.engine.executor.PackageManagerUtil
+import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.HttpProfile
+import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.model.RootImplementation
+import com.rosan.installer.domain.settings.model.SharedUid
 import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutAction
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.LabSettingsAction
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.LabSettingsViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.ThemeSettingsAction
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.ThemeSettingsViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsAction
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsViewModel
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
 import com.rosan.installer.ui.util.rememberCacheInfo
@@ -90,8 +96,8 @@ data class AuthorizerInfo(
 @Composable
 fun DataAuthorizerWidget(
     modifier: Modifier = Modifier, // modifier to be applied to FlowRow
-    currentAuthorizer: ConfigEntity.Authorizer,
-    changeAuthorizer: (ConfigEntity.Authorizer) -> Unit,
+    currentAuthorizer: Authorizer,
+    changeAuthorizer: (Authorizer) -> Unit,
     enabled: Boolean = true,
     onClick: () -> Unit = {},
     trailingContent: @Composable () -> Unit = {},
@@ -101,23 +107,23 @@ fun DataAuthorizerWidget(
 
     val isSessionInstallSupported = LocalSessionInstallSupported.current
     val authorizerOptions = mapOf(
-        ConfigEntity.Authorizer.None to AuthorizerInfo(
+        Authorizer.None to AuthorizerInfo(
             R.string.config_authorizer_none,
             AppIcons.None
         ),
-        ConfigEntity.Authorizer.Root to AuthorizerInfo(
+        Authorizer.Root to AuthorizerInfo(
             R.string.config_authorizer_root,
             AppIcons.Root
         ),
-        ConfigEntity.Authorizer.Shizuku to AuthorizerInfo(
+        Authorizer.Shizuku to AuthorizerInfo(
             R.string.config_authorizer_shizuku,
             shizukuIcon
         ),
-        ConfigEntity.Authorizer.Dhizuku to AuthorizerInfo(
+        Authorizer.Dhizuku to AuthorizerInfo(
             R.string.config_authorizer_dhizuku,
             AppIcons.InstallAllowRestrictedPermissions
         ),
-        /* ConfigEntity.Authorizer.Customize to AuthorizerInfo(
+        /* Authorizer.Customize to AuthorizerInfo(
                     R.string.config_authorizer_customize,
                     AppIcons.Customize
                 ),*/
@@ -141,7 +147,7 @@ fun DataAuthorizerWidget(
             authorizerOptions.forEach { (authorizerType, authorizerInfo) ->
                 InputChip(
                     enabled = when (authorizerType) {
-                        ConfigEntity.Authorizer.None -> isSessionInstallSupported
+                        Authorizer.None -> isSessionInstallSupported
                         else -> true
                     } && enabled,
                     selected = currentAuthorizer == authorizerType,
@@ -167,10 +173,11 @@ fun DataAuthorizerWidget(
     }
 }
 
-@Composable
-fun DataCustomizeAuthorizerWidget(viewModel: PreferredViewModel) {
-    if (!viewModel.state.authorizerCustomize) return
-    val customizeAuthorizer = viewModel.state.customizeAuthorizer
+/*@Composable
+fun DataCustomizeAuthorizerWidget(viewModel: InstallerSettingsViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+    if (!uiState.authorizerCustomize) return
+    val customizeAuthorizer = uiState.customizeAuthorizer
     TextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -186,7 +193,7 @@ fun DataCustomizeAuthorizerWidget(viewModel: PreferredViewModel) {
         onValueChange = { viewModel.dispatch(PreferredViewAction.ChangeGlobalCustomizeAuthorizer(it)) },
         maxLines = 8,
     )
-}
+}*/
 
 /**
  * @author iamr0s
@@ -195,11 +202,11 @@ fun DataCustomizeAuthorizerWidget(viewModel: PreferredViewModel) {
 fun DataInstallModeWidget(viewModel: PreferredViewModel) {
     val installMode = viewModel.state.installMode
     val data = mapOf(
-        ConfigEntity.InstallMode.Dialog to stringResource(R.string.config_install_mode_dialog),
-        ConfigEntity.InstallMode.AutoDialog to stringResource(R.string.config_install_mode_auto_dialog),
-        ConfigEntity.InstallMode.Notification to stringResource(R.string.config_install_mode_notification),
-        ConfigEntity.InstallMode.AutoNotification to stringResource(R.string.config_install_mode_auto_notification),
-        ConfigEntity.InstallMode.Ignore to stringResource(R.string.config_install_mode_ignore),
+        InstallMode.Dialog to stringResource(R.string.config_install_mode_dialog),
+        InstallMode.AutoDialog to stringResource(R.string.config_install_mode_auto_dialog),
+        InstallMode.Notification to stringResource(R.string.config_install_mode_notification),
+        InstallMode.AutoNotification to stringResource(R.string.config_install_mode_auto_notification),
+        InstallMode.Ignore to stringResource(R.string.config_install_mode_ignore),
     )
     DropDownMenuWidget(
         icon = Icons.TwoTone.Downloading,
@@ -225,26 +232,26 @@ data class InstallModeInfo(
 @Composable
 fun DataInstallModeWidget(
     modifier: Modifier = Modifier,
-    currentInstallMode: ConfigEntity.InstallMode,
-    changeInstallMode: (ConfigEntity.InstallMode) -> Unit,
+    currentInstallMode: InstallMode,
+    changeInstallMode: (InstallMode) -> Unit,
     trailingContent: @Composable () -> Unit = {}
 ) {
     val haptic = LocalHapticFeedback.current
 
     val installModeOptions = mapOf(
-        ConfigEntity.InstallMode.Dialog to InstallModeInfo(
+        InstallMode.Dialog to InstallModeInfo(
             R.string.config_install_mode_dialog,
             AppIcons.Dialog
         ),
-        ConfigEntity.InstallMode.AutoDialog to InstallModeInfo(
+        InstallMode.AutoDialog to InstallModeInfo(
             R.string.config_install_mode_auto_dialog,
             AppIcons.AutoDialog
         ),
-        ConfigEntity.InstallMode.Notification to InstallModeInfo(
+        InstallMode.Notification to InstallModeInfo(
             R.string.config_install_mode_notification,
             AppIcons.Notification
         ),
-        ConfigEntity.InstallMode.AutoNotification to InstallModeInfo(
+        InstallMode.AutoNotification to InstallModeInfo(
             R.string.config_install_mode_auto_notification,
             AppIcons.AutoNotification
         )
@@ -521,11 +528,11 @@ fun SelectableSettingItem(
 }
 
 @Composable
-fun ColorSpecSelector(viewModel: PreferredViewModel) {
-    val state = viewModel.state
+fun ColorSpecSelector(viewModel: ThemeSettingsViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
 
     // Check if the current PaletteStyle supports SPEC_2025
-    val isSpec2025Supported = state.paletteStyle in listOf(
+    val isSpec2025Supported = uiState.paletteStyle in listOf(
         PaletteStyle.TonalSpot,
         PaletteStyle.Neutral,
         PaletteStyle.Vibrant,
@@ -540,7 +547,7 @@ fun ColorSpecSelector(viewModel: PreferredViewModel) {
     }
 
     // Determine the actual spec being applied to match the fallback logic
-    val activeSpec = if (!isSpec2025Supported) ThemeColorSpec.SPEC_2021 else state.colorSpec
+    val activeSpec = if (!isSpec2025Supported) ThemeColorSpec.SPEC_2021 else uiState.colorSpec
 
     // Use a static localized string for the unsupported state
     val descriptionText = if (!isSpec2025Supported) {
@@ -558,7 +565,7 @@ fun ColorSpecSelector(viewModel: PreferredViewModel) {
         data = availableSpecs.map { it.displayName },
         onChoiceChange = { index ->
             val selectedSpec = availableSpecs[index]
-            viewModel.dispatch(PreferredViewAction.SetColorSpec(selectedSpec))
+            viewModel.dispatch(ThemeSettingsAction.SetColorSpec(selectedSpec))
         }
     )
 }
@@ -891,8 +898,9 @@ fun ManagedUidsWidget(
  * Mimics the logic from MiuixRootImplementationDialog but uses DropDownMenuWidget.
  */
 @Composable
-fun LabRootImplementationWidget(viewModel: PreferredViewModel) {
-    val currentRootImpl = viewModel.state.labRootImplementation
+fun LabRootImplementationWidget(viewModel: LabSettingsViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val currentRootImpl = uiState.labRootImplementation
 
     val data = remember {
         mapOf(
@@ -915,14 +923,15 @@ fun LabRootImplementationWidget(viewModel: PreferredViewModel) {
         data = options,
         onChoiceChange = { newIndex ->
             keys.getOrNull(newIndex)?.let { impl ->
-                viewModel.dispatch(PreferredViewAction.LabChangeRootImplementation(impl))
+                viewModel.dispatch(LabSettingsAction.LabChangeRootImplementation(impl))
             }
         }
     )
 }
 
 @Composable
-fun LabHttpProfileWidget(viewModel: PreferredViewModel) {
+fun LabHttpProfileWidget(viewModel: LabSettingsViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val profiles = remember {
         listOf(
             HttpProfile.ALLOW_SECURE,
@@ -938,7 +947,7 @@ fun LabHttpProfileWidget(viewModel: PreferredViewModel) {
         }
     }
 
-    val currentIndex = profiles.indexOf(viewModel.state.labHttpProfile).coerceAtLeast(0)
+    val currentIndex = profiles.indexOf(uiState.labHttpProfile).coerceAtLeast(0)
 
     DropDownMenuWidget(
         icon = Icons.Default.Security,
@@ -948,7 +957,7 @@ fun LabHttpProfileWidget(viewModel: PreferredViewModel) {
         data = options,
         onChoiceChange = { index ->
             val selectedProfile = profiles.getOrElse(index) { HttpProfile.ALLOW_SECURE }
-            viewModel.dispatch(PreferredViewAction.LabChangeHttpProfile(selectedProfile))
+            viewModel.dispatch(LabSettingsAction.LabChangeHttpProfile(selectedProfile))
         }
     )
 }
@@ -1108,43 +1117,46 @@ private fun DeleteSharedUidConfirmationDialog(
 }
 
 @Composable
-fun UninstallKeepDataWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+fun UninstallKeepDataWidget(viewModel: UninstallerSettingsViewModel, isM3E: Boolean = true) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     SwitchWidget(
         icon = AppIcons.Save,
         title = stringResource(id = R.string.uninstall_keep_data),
         description = stringResource(id = R.string.uninstall_keep_data_desc),
-        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA),
+        checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA),
         onCheckedChange = {
-            viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_KEEP_DATA, it))
+            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_KEEP_DATA, it))
         },
         isM3E = isM3E
     )
 }
 
 @Composable
-fun UninstallForAllUsersWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+fun UninstallForAllUsersWidget(viewModel: UninstallerSettingsViewModel, isM3E: Boolean = true) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     SwitchWidget(
         icon = AppIcons.InstallForAllUsers,
         title = stringResource(id = R.string.uninstall_all_users),
         description = stringResource(id = R.string.uninstall_all_users_desc),
-        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS),
+        checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS),
         onCheckedChange = {
-            viewModel.dispatch(PreferredViewAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_ALL_USERS, it))
+            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_ALL_USERS, it))
         },
         isM3E = isM3E
     )
 }
 
 @Composable
-fun UninstallSystemAppWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+fun UninstallSystemAppWidget(viewModel: UninstallerSettingsViewModel, isM3E: Boolean = true) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     SwitchWidget(
         icon = AppIcons.BugReport,
         title = stringResource(id = R.string.uninstall_delete_system_app),
         description = stringResource(id = R.string.uninstall_delete_system_app_desc),
-        checked = viewModel.state.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP),
+        checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP),
         onCheckedChange = {
             viewModel.dispatch(
-                PreferredViewAction.ToggleGlobalUninstallFlag(
+                UninstallerSettingsAction.ToggleGlobalUninstallFlag(
                     PackageManagerUtil.DELETE_SYSTEM_APP,
                     it
                 )
@@ -1155,7 +1167,8 @@ fun UninstallSystemAppWidget(viewModel: PreferredViewModel, isM3E: Boolean = tru
 }
 
 @Composable
-fun UninstallRequireBiometricAuthWidget(viewModel: PreferredViewModel, isM3E: Boolean = true) {
+fun UninstallRequireBiometricAuthWidget(viewModel: UninstallerSettingsViewModel, isM3E: Boolean = true) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     if (BiometricManager
             .from(LocalContext.current)
             .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
@@ -1164,21 +1177,21 @@ fun UninstallRequireBiometricAuthWidget(viewModel: PreferredViewModel, isM3E: Bo
             icon = AppIcons.BiometricAuth,
             title = stringResource(R.string.uninstaller_settings_require_biometric_auth),
             description = stringResource(R.string.uninstaller_settings_require_biometric_auth_desc),
-            checked = viewModel.state.uninstallerRequireBiometricAuth,
+            checked = uiState.uninstallerRequireBiometricAuth,
             isM3E = isM3E,
             onCheckedChange = {
-                viewModel.dispatch(PreferredViewAction.ChangeBiometricAuth(it, false))
+                viewModel.dispatch(UninstallerSettingsAction.ChangeBiometricAuth(it))
             }
         )
     }
 }
 
 @Composable
-fun ExportLogsWidget(viewModel: PreferredViewModel) {
+fun ExportLogsWidget(viewModel: AboutViewModel) {
     BaseWidget(
         icon = AppIcons.BugReport,
         title = stringResource(R.string.export_logs),
         description = stringResource(R.string.export_logs_desc),
-        onClick = { viewModel.dispatch(PreferredViewAction.ShareLog) }
+        onClick = { viewModel.dispatch(AboutAction.ShareLog) }
     ) {}
 }

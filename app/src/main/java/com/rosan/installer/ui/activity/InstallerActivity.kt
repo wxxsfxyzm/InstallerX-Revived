@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.ui.activity
 
 import android.content.Intent
@@ -18,15 +20,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Level
-import com.rosan.installer.build.model.impl.DeviceCapabilityChecker
-import com.rosan.installer.data.installer.model.entity.ProgressEntity
-import com.rosan.installer.data.installer.model.impl.InstallerSessionManager
-import com.rosan.installer.data.installer.repo.InstallerRepo
-import com.rosan.installer.data.settings.model.datastore.AppDataStore
-import com.rosan.installer.ui.activity.themestate.ThemeUiState
-import com.rosan.installer.ui.activity.themestate.createThemeUiStateFlow
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.data.session.manager.InstallerSessionManager
+import com.rosan.installer.domain.device.model.Level
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.session.model.ProgressEntity
+import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.domain.settings.model.ThemeState
+import com.rosan.installer.domain.settings.provider.ThemeStateProvider
+import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
@@ -38,7 +41,6 @@ import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.core.component.KoinComponent
@@ -52,13 +54,15 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         private const val ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS"
     }
 
-    private val appDataStore: AppDataStore by inject()
-    private var uiState by mutableStateOf(ThemeUiState())
+    private val appSettingsRepo by inject<AppSettingsRepo>()
+    private val themeStateProvider: ThemeStateProvider by inject()
     private var disableNotificationOnDismiss = false
 
     private val sessionManager: InstallerSessionManager by inject()
-    private var installer by mutableStateOf<InstallerRepo?>(null)
+    private var installer by mutableStateOf<InstallerSessionRepository?>(null)
     private var job: Job? = null
+
+    private var latestProgress: ProgressEntity = ProgressEntity.Ready
 
     private lateinit var permissionManager: PermissionManager
 
@@ -66,7 +70,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     private var isRequestingPermission = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (RsConfig.isDebug && RsConfig.LEVEL == Level.UNSTABLE)
+        if (AppConfig.isDebug && AppConfig.LEVEL == Level.UNSTABLE)
             logIntentDetails("onNewIntent", intent)
         enableEdgeToEdge()
         // Compat Navigation Bar color for Xiaomi Devices
@@ -76,16 +80,9 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         Timber.d("onCreate. SavedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}")
 
         lifecycleScope.launch {
-            launch { // Collect theme state
-                createThemeUiStateFlow(appDataStore).collect { newState ->
-                    uiState = newState
-                }
-            }
-
-            launch { // Collect disable notification on dismiss state
-                appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS).collect {
-                    disableNotificationOnDismiss = it
-                }
+            // Collect disable notification on dismiss state
+            appSettingsRepo.getBoolean(BooleanSetting.DialogDisableNotificationOnDismiss).collect {
+                disableNotificationOnDismiss = it
             }
         }
 
@@ -163,7 +160,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     override fun onNewIntent(intent: Intent) {
         Timber.d("onNewIntent: Received new intent.")
-        if (RsConfig.isDebug && RsConfig.LEVEL == Level.UNSTABLE)
+        if (AppConfig.isDebug && AppConfig.LEVEL == Level.UNSTABLE)
             logIntentDetails("onNewIntent", intent)
         // Fix for Microsoft Edge
         if (this.installer != null && intent.flags.hasFlag(Intent.FLAG_ACTIVITY_NEW_TASK)) {
@@ -211,10 +208,8 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             installer?.let { repo ->
                 // If using session install, we don't hide UI since oems have different package installer impls
                 // if (repo.config.authorizer == ConfigEntity.Authorizer.None) return
-                // Since the interface defines 'progress' as Flow, we need to cast it to SharedFlow
-                // to access the replayCache. We know InstallerRepoImpl uses MutableStateFlow.
-                val sharedFlow = repo.progress as? SharedFlow<*>
-                val currentProgress = sharedFlow?.replayCache?.lastOrNull()
+
+                val currentProgress = latestProgress
 
                 val isRunning = currentProgress is ProgressEntity.InstallResolving ||
                         currentProgress is ProgressEntity.InstallAnalysing ||
@@ -275,6 +270,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             launch {
                 installer.progress.collect { progress ->
                     Timber.d("[id=${installer.id}] Activity collected progress: ${progress::class.simpleName}")
+                    latestProgress = progress
                     if (progress is ProgressEntity.Finish) {
                         Timber.d("[id=${installer.id}] Finish progress detected, finishing activity.")
                         if (!this@InstallerActivity.isFinishing) this@InstallerActivity.finish()
@@ -312,12 +308,13 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     private fun showContent() {
         setContent {
+            val uiState by themeStateProvider.themeStateFlow.collectAsState(initial = ThemeState())
             if (!uiState.isLoaded) return@setContent
 
             val installer = installer ?: return@setContent
             val background by installer.background.collectAsState(false)
             val progress by installer.progress.collectAsState(ProgressEntity.Ready)
-            val capabilityChecker = koinInject<DeviceCapabilityChecker>()
+            val capabilityChecker = koinInject<DeviceCapabilityProvider>()
 
             if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.Finish)
                 return@setContent

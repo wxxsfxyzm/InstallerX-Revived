@@ -1,15 +1,15 @@
 package com.rosan.installer.ui.page.main.settings.config.all
 
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
-import com.rosan.installer.data.settings.util.ConfigOrder
-import com.rosan.installer.data.settings.util.OrderType
+import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.util.ConfigOrder
+import com.rosan.installer.domain.settings.util.OrderType
 
 data class AllViewState(
     val data: Data = Data(),
     val userReadScopeTips: Boolean = false,
 ) {
     data class Data(
-        val configs: List<ConfigEntity> = emptyList(),
+        val configs: List<ConfigModel> = emptyList(),
         val configOrder: ConfigOrder = ConfigOrder.Id(OrderType.Ascending),
         val progress: Progress = Progress.Loading
     ) {

@@ -146,7 +146,7 @@
             android:finishOnTaskLaunch="true" />
 
         <service
-            android:name="com.rosan.installer.data.installer.model.impl.InstallerService"
+            android:name="com.rosan.installer.data.session.service.InstallerService"
             android:foregroundServiceType="specialUse">
 
             <property

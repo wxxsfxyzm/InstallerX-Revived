@@ -1,16 +1,16 @@
 package com.rosan.installer.ui.util
 
-import com.rosan.installer.data.settings.model.room.entity.ConfigEntity
+import com.rosan.installer.domain.settings.model.Authorizer
 
 /**
  * Returns true if the Dhizuku authorizer is active, which disables certain features.
  */
 fun isDhizukuActive(
-    stateAuthorizer: ConfigEntity.Authorizer,
-    globalAuthorizer: ConfigEntity.Authorizer
+    stateAuthorizer: Authorizer,
+    globalAuthorizer: Authorizer
 ) = when (stateAuthorizer) {
-    ConfigEntity.Authorizer.Dhizuku -> true
-    ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.Dhizuku
+    Authorizer.Dhizuku -> true
+    Authorizer.Global -> globalAuthorizer == Authorizer.Dhizuku
     else -> false
 }
 
@@ -18,10 +18,10 @@ fun isDhizukuActive(
  * Returns true if the None authorizer is active.
  */
 fun isNoneActive(
-    stateAuthorizer: ConfigEntity.Authorizer,
-    globalAuthorizer: ConfigEntity.Authorizer
+    stateAuthorizer: Authorizer,
+    globalAuthorizer: Authorizer
 ) = when (stateAuthorizer) {
-    ConfigEntity.Authorizer.None -> true
-    ConfigEntity.Authorizer.Global -> globalAuthorizer == ConfigEntity.Authorizer.None
+    Authorizer.None -> true
+    Authorizer.Global -> globalAuthorizer == Authorizer.None
     else -> false
 }

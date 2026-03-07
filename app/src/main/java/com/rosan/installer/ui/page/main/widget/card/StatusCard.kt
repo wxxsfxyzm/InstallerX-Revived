@@ -18,41 +18,44 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
-import com.rosan.installer.build.RsConfig
-import com.rosan.installer.build.model.entity.Level
-import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
+import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.domain.device.model.Level
+import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 
 /**
  * @author iamr0s
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun StatusWidget(viewModel: PreferredViewModel) {
-    val state = viewModel.state
-    val containerColor = when (RsConfig.LEVEL) {
+fun StatusWidget(viewModel: AboutViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+
+    val containerColor = when (AppConfig.LEVEL) {
         Level.STABLE -> MaterialTheme.colorScheme.primaryContainer
         Level.PREVIEW -> MaterialTheme.colorScheme.secondaryContainer
         Level.UNSTABLE -> MaterialTheme.colorScheme.tertiaryContainer
     }
 
-    val onContainerColor = when (RsConfig.LEVEL) {
+    val onContainerColor = when (AppConfig.LEVEL) {
         Level.STABLE -> MaterialTheme.colorScheme.onPrimaryContainer
         Level.PREVIEW -> MaterialTheme.colorScheme.onSecondaryContainer
         Level.UNSTABLE -> MaterialTheme.colorScheme.onTertiaryContainer
     }
 
-    val internetAccessHint = if (RsConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
+    val internetAccessHint = if (AppConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
     else stringResource(R.string.internet_access_disabled)
 
-    val level = when (RsConfig.LEVEL) {
+    val level = when (AppConfig.LEVEL) {
         Level.STABLE -> stringResource(id = R.string.stable)
         Level.PREVIEW -> stringResource(id = R.string.preview)
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
@@ -62,8 +65,8 @@ fun StatusWidget(viewModel: PreferredViewModel) {
         id = R.string.app_version_info_format,
         internetAccessHint,
         level,
-        RsConfig.VERSION_NAME,
-        RsConfig.VERSION_CODE
+        AppConfig.VERSION_NAME,
+        AppConfig.VERSION_CODE
     )
 
     CardWidget(
@@ -100,9 +103,9 @@ fun StatusWidget(viewModel: PreferredViewModel) {
                     text = versionInfoText,
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                if (state.hasUpdate)
+                if (uiState.hasUpdate)
                     Text(
-                        text = stringResource(R.string.update_available, state.remoteVersion),
+                        text = stringResource(R.string.update_available, uiState.remoteVersion),
                         style = MaterialTheme.typography.bodyMediumEmphasized,
                         color = MaterialTheme.colorScheme.primary
                     )
