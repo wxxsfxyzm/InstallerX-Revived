@@ -2,8 +2,10 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.di
 
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.rosan.installer.data.settings.local.datastore.AppDataStore
 import com.rosan.installer.data.settings.local.room.InstallerRoom
@@ -30,27 +32,25 @@ import com.rosan.installer.domain.settings.usecase.settings.SetLauncherIconUseCa
 import com.rosan.installer.domain.settings.usecase.settings.ToggleUninstallFlagUseCase
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val settingsModule = module {
-    // Room Database Injection
+    // Room
     single { InstallerRoom.createInstance() }
 
-    single<AppRepository> {
-        val roomDatabase: InstallerRoom = get()
-        AppRepositoryImpl(roomDatabase.appDao)
-    }
+    single { get<InstallerRoom>().appDao }
+    single { get<InstallerRoom>().configDao }
 
-    single<ConfigRepo> {
-        val roomDatabase: InstallerRoom = get()
-        ConfigRepoImpl(roomDatabase.configDao)
-    }
+    singleOf(::AppRepositoryImpl) { bind<AppRepository>() }
+    singleOf(::ConfigRepoImpl) { bind<ConfigRepo>() }
 
-    // DataStore Injection
-    single {
+    // DataStore
+    single<DataStore<Preferences>> {
         PreferenceDataStoreFactory.create(
             migrations = listOf(
-                // Migration from SharedPreferences to DataStore
                 SharedPreferencesMigration(androidContext(), "app")
             )
         ) {
@@ -58,24 +58,25 @@ val settingsModule = module {
         }
     }
 
-    single { AppDataStore(get(), get()) }
+    singleOf(::AppDataStore)
 
-    single<AppSettingsRepo> { AppSettingsRepoImpl(get()) }
+    singleOf(::AppSettingsRepoImpl) { bind<AppSettingsRepo>() }
 
     // Providers
-    single<SystemEnvProvider> { SystemEnvProviderImpl(androidContext()) }
-    single<SystemAppProvider> { SystemAppProviderImpl(androidContext()) }
-    single<PrivilegedProvider> { PrivilegedProviderImpl(androidContext(), get()) }
-    single { ThemeStateProvider(get()) }
+    singleOf(::SystemEnvProviderImpl) { bind<SystemEnvProvider>() }
+    singleOf(::SystemAppProviderImpl) { bind<SystemAppProvider>() }
+    singleOf(::PrivilegedProviderImpl) { bind<PrivilegedProvider>() }
+
+    singleOf(::ThemeStateProvider)
 
     // UseCases
     factory { GetResolvedConfigUseCase(androidContext(), get(), get(), get(), get()) }
-    factory { GetConfigDraftUseCase(get(), get()) }
-    factory { SaveConfigUseCase(get()) }
-    factory { UpdateSettingUseCase(get()) }
-    factory { ToggleUninstallFlagUseCase(get()) }
-    factory { SetLauncherIconUseCase(get(), get()) }
-    factory { ToggleAppTargetConfigUseCase(get()) }
-    factory { ManagePackageListUseCase(get()) }
-    factory { ManageSharedUidListUseCase(get()) }
+    factoryOf(::GetConfigDraftUseCase)
+    factoryOf(::SaveConfigUseCase)
+    factoryOf(::UpdateSettingUseCase)
+    factoryOf(::ToggleUninstallFlagUseCase)
+    factoryOf(::SetLauncherIconUseCase)
+    factoryOf(::ToggleAppTargetConfigUseCase)
+    factoryOf(::ManagePackageListUseCase)
+    factoryOf(::ManageSharedUidListUseCase)
 }

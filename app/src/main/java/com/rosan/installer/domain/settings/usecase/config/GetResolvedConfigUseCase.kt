@@ -69,7 +69,7 @@ class GetResolvedConfigUseCase(
         config = configRepo.all().firstOrNull()
         if (config != null) return config
 
-        return ConfigModel.generateOptimalDefault(deviceCapabilityProvider)
+        return ConfigModel.generateOptimalDefault()
     }
 
     private suspend fun getAppByPackageName(packageName: String?): AppModel? {

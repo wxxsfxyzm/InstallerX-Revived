@@ -10,6 +10,7 @@ import com.rosan.installer.domain.settings.provider.PrivilegedProvider
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import com.rosan.installer.domain.updater.model.UpdateInfo
 import com.rosan.installer.domain.updater.repository.UpdateRepository
 import kotlinx.coroutines.Dispatchers
@@ -24,10 +25,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class PreferredViewModel(
-    private val appSettingsRepo: AppSettingsRepo,
+    appSettingsRepo: AppSettingsRepo,
     private val updateRepo: UpdateRepository,
     private val systemEnvProvider: SystemEnvProvider,
-    private val privilegedProvider: PrivilegedProvider
+    private val privilegedProvider: PrivilegedProvider,
+    private val updateSetting: UpdateSettingUseCase
 ) : ViewModel() {
 
     private val _uiEvents = MutableSharedFlow<PreferredViewEvent>(
@@ -76,15 +78,19 @@ class PreferredViewModel(
 
     fun dispatch(action: PreferredViewAction) {
         when (action) {
-            is PreferredViewAction.ChangeAutoLockInstaller -> updateSetting(BooleanSetting.AutoLockInstaller, action.autoLockInstaller)
+            is PreferredViewAction.ChangeAutoLockInstaller -> viewModelScope.launch {
+                updateSetting(
+                    BooleanSetting.AutoLockInstaller,
+                    action.autoLockInstaller
+                )
+            }
+
             is PreferredViewAction.SetAdbVerifyEnabledState -> setAdbVerifyEnabled(action.enabled, action)
             is PreferredViewAction.RequestIgnoreBatteryOptimization -> requestIgnoreBatteryOptimization()
             is PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus -> refreshIgnoreBatteryOptStatus()
             is PreferredViewAction.SetDefaultInstaller -> setDefaultInstaller(action.lock, action)
         }
     }
-
-    private fun updateSetting(setting: BooleanSetting, value: Boolean) = viewModelScope.launch { appSettingsRepo.putBoolean(setting, value) }
 
     private fun requestIgnoreBatteryOptimization() {
         try {

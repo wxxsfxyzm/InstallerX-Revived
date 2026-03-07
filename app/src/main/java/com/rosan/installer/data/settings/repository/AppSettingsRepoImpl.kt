@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.preferences.core.Preferences
 import com.rosan.installer.data.settings.local.datastore.AppDataStore
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.AppPreferences
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.HttpProfile
@@ -27,13 +28,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 class AppSettingsRepoImpl(
-    private val appDataStore: AppDataStore
+    private val appDataStore: AppDataStore,
+    private val capabilityProvider: DeviceCapabilityProvider
 ) : AppSettingsRepo {
     override val preferencesFlow: Flow<AppPreferences> = combine(
         listOf(
-            appDataStore.getString(AppDataStore.AUTHORIZER, Authorizer.Global.value),
+            appDataStore.getString(
+                AppDataStore.AUTHORIZER,
+                if (capabilityProvider.isSystemApp) Authorizer.None.value else Authorizer.Shizuku.value
+            ),
             appDataStore.getString(AppDataStore.CUSTOMIZE_AUTHORIZER, ""),
-            appDataStore.getString(AppDataStore.INSTALL_MODE, InstallMode.Global.value),
+            appDataStore.getString(AppDataStore.INSTALL_MODE, InstallMode.Dialog.value),
             appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_EXTENDED_MENU, false),
             appDataStore.getBoolean(AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION, true),
             appDataStore.getBoolean(AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS, false),

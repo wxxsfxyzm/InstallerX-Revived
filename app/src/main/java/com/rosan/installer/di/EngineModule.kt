@@ -13,18 +13,20 @@ import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.engine.usecase.AnalyzePackageUseCase
 import com.rosan.installer.domain.engine.usecase.ExecuteInstallUseCase
 import com.rosan.installer.domain.engine.usecase.SelectOptimalSplitsUseCase
-import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val engineModule = module {
     // Repositories
-    single<AppIconRepository> { AppIconRepositoryImpl(androidContext()) }
-    single<AnalyserRepository> { AnalyserRepositoryImpl(get()) }
-    single<InstallerRepository> { InstallerRepositoryImpl(get(), get(), get(), get()) }
-    single<ModuleInstallerRepository> { ModuleInstallerRepositoryImpl(get()) }
+    singleOf(::AppIconRepositoryImpl) { bind<AppIconRepository>() }
+    singleOf(::AnalyserRepositoryImpl) { bind<AnalyserRepository>() }
+    singleOf(::InstallerRepositoryImpl) { bind<InstallerRepository>() }
+    singleOf(::ModuleInstallerRepositoryImpl) { bind<ModuleInstallerRepository>() }
 
     // UseCases
-    factory { SelectOptimalSplitsUseCase() }
-    factory { AnalyzePackageUseCase(get(), get(), get()) }
-    factory { ExecuteInstallUseCase(get()) }
+    factoryOf(::SelectOptimalSplitsUseCase)
+    factoryOf(::AnalyzePackageUseCase)
+    factoryOf(::ExecuteInstallUseCase)
 }

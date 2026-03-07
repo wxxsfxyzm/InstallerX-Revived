@@ -20,7 +20,6 @@ import com.rosan.installer.data.settings.local.room.entity.converter.InstallMode
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallReasonConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.PackageSourceConverter
 import com.rosan.installer.data.settings.mapper.toEntity
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,8 +59,7 @@ abstract class InstallerRoom : RoomDatabase() {
             ).addCallback(object : Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     val database = get<InstallerRoom>()
-                    val capabilityProvider = get<DeviceCapabilityProvider>()
-                    val defaultConfig = ConfigModel.generateOptimalDefault(capabilityProvider).toEntity()
+                    val defaultConfig = ConfigModel.generateOptimalDefault().toEntity()
                     CoroutineScope(Dispatchers.IO).launch {
                         database.configDao.insert(defaultConfig)
                     }
