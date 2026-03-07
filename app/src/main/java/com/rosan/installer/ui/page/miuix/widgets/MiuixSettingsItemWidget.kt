@@ -1086,7 +1086,7 @@ fun MiuixUninstallRequireBiometricAuthWidget(viewModel: UninstallerSettingsViewM
             description = stringResource(R.string.uninstaller_settings_require_biometric_auth_desc),
             checked = uiState.uninstallerRequireBiometricAuth,
             onCheckedChange = {
-                viewModel.dispatch(UninstallerSettingsAction.ChangeBiometricAuth(false))
+                viewModel.dispatch(UninstallerSettingsAction.ChangeBiometricAuth(it))
             }
         )
     }
