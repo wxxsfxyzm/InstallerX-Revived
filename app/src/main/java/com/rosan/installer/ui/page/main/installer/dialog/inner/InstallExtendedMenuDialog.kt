@@ -27,6 +27,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -210,7 +211,8 @@ fun MenuItemWidget(
     val singleShape = RoundedCornerShape(cornerRadius)
 
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(4.dp), // 卡片之间的间距
+        // Spacing between cards
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .heightIn(max = 325.dp)
@@ -285,7 +287,6 @@ fun MenuItemWidget(
                             onDismissRequest = { expanded = false }
                         ) {
                             // "System Default" option
-                            // Not needed for the moment
                             DropdownMenuItem(
                                 text = { Text(text = stringResource(id = R.string.config_follow_settings)) },
                                 onClick = {
@@ -379,8 +380,20 @@ fun MenuItemWidget(
                         else -> null
                     }
 
-                    // 判断是否选中，仅对安装选项有效
+                    // Check if selected, valid only for install options
                     val isSelected = option?.let { (installFlags and it.value) != 0 } ?: false
+
+                    // Determine background container color
+                    val containerColor = if (option != null && isSelected)
+                        MaterialTheme.colorScheme.primaryContainer
+                    else
+                        MaterialTheme.colorScheme.surfaceContainer
+
+                    // Automatically derive optimal content color based on container color
+                    val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
+
+                    // Derive a variant color for secondary text with alpha modification
+                    val variantContentColor = contentColor.copy(alpha = 0.7f)
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -406,14 +419,10 @@ fun MenuItemWidget(
                                 else -> {}
                             }
                         },
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = 0.dp, // if (option != null && isSelected) 1.dp else 2.dp
-                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (option != null && isSelected)
-                                MaterialTheme.colorScheme.primaryContainer
-                            else
-                                MaterialTheme.colorScheme.surfaceContainer
+                            containerColor = containerColor,
+                            contentColor = contentColor
                         )
                     ) {
                         Row(
@@ -428,22 +437,8 @@ fun MenuItemWidget(
                                 contentAlignment = Alignment.Center
                             ) {
                                 when (item.action) {
-                                    is InstallExtendedMenuAction.PermissionList ->
-                                        Icon(
-                                            modifier = Modifier.size(24.dp),
-                                            imageVector = item.menuItem.icon
-                                                ?: Icons.TwoTone.PermDeviceInformation,
-                                            contentDescription = stringResource(item.menuItem.nameResourceId),
-                                        )
-
-                                    is InstallExtendedMenuAction.CustomizeInstaller ->
-                                        Icon(
-                                            modifier = Modifier.size(24.dp),
-                                            imageVector = item.menuItem.icon
-                                                ?: Icons.TwoTone.PermDeviceInformation,
-                                            contentDescription = stringResource(item.menuItem.nameResourceId),
-                                        )
-
+                                    is InstallExtendedMenuAction.PermissionList,
+                                    is InstallExtendedMenuAction.CustomizeInstaller,
                                     is InstallExtendedMenuAction.CustomizeUser ->
                                         Icon(
                                             modifier = Modifier.size(24.dp),
@@ -455,7 +450,7 @@ fun MenuItemWidget(
                                     is InstallExtendedMenuAction.InstallOption ->
                                         Checkbox(
                                             checked = isSelected,
-                                            onCheckedChange = null, // 交互处理在 Card 的 onClick 中
+                                            onCheckedChange = null, // Interaction is handled in the Card's onClick
                                         )
 
                                     is InstallExtendedMenuAction.TextField -> {}
@@ -466,13 +461,15 @@ fun MenuItemWidget(
                                 Text(
                                     text = stringResource(item.menuItem.nameResourceId),
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    // Title inherits the default contentColor perfectly
+                                    color = contentColor
                                 )
                                 item.menuItem.descriptionResourceId?.let { descriptionId ->
                                     Text(
                                         text = stringResource(descriptionId),
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        // Apply the derived variant color for the description
+                                        color = variantContentColor
                                     )
                                 }
                             }
@@ -547,16 +544,24 @@ fun PermissionCard(
         context.getBestPermissionLabel(permission)
     }
 
+    // Determine the background color
+    val containerColor = if (isHighlight)
+        MaterialTheme.colorScheme.primaryContainer
+    else
+        MaterialTheme.colorScheme.surfaceContainer
+
+    // Automatically get the matching content color
+    val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
+
+    // Create a variant color based on the content color for secondary text
+    val variantContentColor = contentColor.copy(alpha = 0.7f)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(
-            0.dp, // if (isHighlight) 1.dp else 4.dp
-        ),
+        elevation = CardDefaults.cardElevation(0.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isHighlight)
-                MaterialTheme.colorScheme.primaryContainer
-            else
-                MaterialTheme.colorScheme.surfaceContainer
+            containerColor = containerColor,
+            contentColor = contentColor
         )
     ) {
         Column(
@@ -566,16 +571,18 @@ fun PermissionCard(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                // 直接使用我们计算好的标签
+                // Use the calculated label
                 text = permissionLabel,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                // Inherits contentColor from Card by default, but you can explicitly set it
+                color = contentColor,
             )
             Text(
-                // 副标题仍然显示原始权限字符串
+                // Subtitle shows the original permission string
                 text = permission,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                // Use the variant color
+                color = variantContentColor,
             )
         }
     }
