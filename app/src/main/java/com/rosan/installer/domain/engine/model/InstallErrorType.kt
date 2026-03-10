@@ -35,6 +35,7 @@ enum class InstallErrorType(val legacyCode: Int, val stringResId: Int) {
     DEPRECATED_SDK_VERSION(-29, R.string.exception_install_failed_deprecated_sdk_version),
     PARSE_FAILED_UNEXPECTED_EXCEPTION(-102, R.string.exception_install_parse_failed_unexpected_exception),
     PARSE_FAILED_NO_CERTIFICATES(-103, R.string.exception_install_parse_failed_no_certificates),
+    PARSE_FAILED_BAD_SHARED_USER_ID(-107, R.string.exception_install_parse_failed_bad_shared_user_id),
     INTERNAL_ERROR(-110, R.string.exception_install_failed_unknown),
     USER_RESTRICTED(-111, R.string.exception_install_failed_user_restricted),
     DUPLICATE_PERMISSION(-112, R.string.exception_install_failed_duplicate_permission),

@@ -523,6 +523,7 @@
     <string name="exception_install_failed_duplicate_permission">The package is trying to redeclare permission already declared by another app!</string>
     <string name="exception_install_parse_failed_unexpected_exception">Parse Failed</string>
     <string name="exception_install_parse_failed_no_certificates">Missing certificates</string>
+    <string name="exception_install_parse_failed_bad_shared_user_id">Non-preloaded apps are forbidden from using the system shared UID</string>
     <string name="exception_install_parse_failed_skipped">The package was skipped and should be ignored</string>
     <string name="exception_install_failed_user_restricted">System restricted install through USB, please enable it</string>
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS does not allow uninstalling this app!</string>
