@@ -14,6 +14,7 @@ import com.rosan.installer.data.session.repository.InstallerSessionRepositoryImp
 import com.rosan.installer.data.session.resolver.ConfigResolver
 import com.rosan.installer.data.session.resolver.SourceResolver
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.engine.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.domain.engine.exception.AuthenticationFailedException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.AppEntity
@@ -66,13 +67,14 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
 
     // Helper property to get ID for logging
     private val installerId get() = installer.id
+
     private val context by inject<Context>()
     private val appSettingsRepo by inject<AppSettingsRepo>()
     private val appIconRepository by inject<AppIconRepository>()
     private val shellExecutionProvider by inject<ShellExecutionProvider>()
     private val deviceCapabilityProvider by inject<DeviceCapabilityProvider>()
     private val autoLockService by inject<AutoLockService>()
-    val configResolver by inject<ConfigResolver>()
+    private val configResolver by inject<ConfigResolver>()
     private val analyzePackageUseCase by inject<AnalyzePackageUseCase>()
     private val executeInstallUseCase by inject<ExecuteInstallUseCase>()
 
@@ -258,12 +260,18 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
 
         val extra = AnalyseExtraEntity(cacheDirectory, isModuleFlashEnabled = isModuleEnabled)
 
-        installer.analysisResults = analyzePackageUseCase(
+        val results = analyzePackageUseCase(
             sessionId = installer.id,
             config = installer.config,
             data = installer.data,
             extra = extra
         )
+
+        if (results.isEmpty()) {
+            throw AnalyseFailedAllFilesUnsupportedException("No valid installation entities found in the provided sources.")
+        }
+
+        installer.analysisResults = results
 
         Timber.d("[id=$installerId] analyse: Emitting ProgressEntity.InstallAnalysedSuccess.")
         installer.progress.emit(ProgressEntity.InstallAnalysedSuccess)
