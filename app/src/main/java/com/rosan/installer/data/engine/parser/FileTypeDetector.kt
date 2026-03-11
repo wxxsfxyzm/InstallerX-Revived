@@ -2,11 +2,13 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
+import android.os.Build
 import com.rosan.installer.domain.engine.exception.AnalyseFailedCorruptedArchiveException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.DataEntity
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.util.ArchiveUtils
+import dalvik.system.ZipPathValidator
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import org.koin.core.component.KoinComponent
@@ -20,6 +22,22 @@ import java.util.zip.ZipFile
 object FileTypeDetector : KoinComponent {
 
     private val json: Json by inject()
+
+    init {
+        disableZipPathValidation()
+    }
+
+    private fun disableZipPathValidation() {
+        // ZipPathValidator was introduced in Android 14 (API 34)
+        if (Build.VERSION.SDK_INT >= 34) {
+            try {
+                ZipPathValidator.clearCallback()
+                Timber.d("ZipPathValidator callback cleared for safe in-memory analysis.")
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to clear ZipPathValidator callback.")
+            }
+        }
+    }
 
     fun detect(data: DataEntity, extra: AnalyseExtraEntity): DataType {
         val fileEntity = data as? DataEntity.FileEntity ?: return DataType.NONE
