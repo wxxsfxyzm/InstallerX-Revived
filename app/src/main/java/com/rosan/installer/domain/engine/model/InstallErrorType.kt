@@ -36,7 +36,7 @@ enum class InstallErrorType(val legacyCode: Int, val stringResId: Int) {
     PARSE_FAILED_UNEXPECTED_EXCEPTION(-102, R.string.exception_install_parse_failed_unexpected_exception),
     PARSE_FAILED_NO_CERTIFICATES(-103, R.string.exception_install_parse_failed_no_certificates),
     PARSE_FAILED_BAD_SHARED_USER_ID(-107, R.string.exception_install_parse_failed_bad_shared_user_id),
-    INTERNAL_ERROR(-110, R.string.exception_install_failed_unknown),
+    INTERNAL_ERROR(-110, R.string.exception_uninstall_failed_internal_error),
     USER_RESTRICTED(-111, R.string.exception_install_failed_user_restricted),
     DUPLICATE_PERMISSION(-112, R.string.exception_install_failed_duplicate_permission),
     NO_MATCHING_ABIS(-113, R.string.exception_install_failed_cpu_abi_incompatible),
@@ -54,8 +54,6 @@ enum class InstallErrorType(val legacyCode: Int, val stringResId: Int) {
     UNKNOWN(Int.MAX_VALUE, R.string.exception_install_failed_unknown);
 
     companion object {
-        fun fromLegacyCode(code: Int): InstallErrorType {
-            return entries.find { it.legacyCode == code } ?: UNKNOWN
-        }
+        fun fromLegacyCode(code: Int) = entries.find { it.legacyCode == code } ?: UNKNOWN
     }
 }

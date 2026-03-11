@@ -250,7 +250,7 @@ fun MiuixAboutPage(
     }
 
     WindowDialog(
-        show = showLoadingDialog
+        show = showLoadingDialog.value
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

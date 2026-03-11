@@ -75,7 +75,7 @@ fun LibrariesContainer(
 
     selectedLibrary?.let { library ->
         WindowDialog(
-            show = showState,
+            show = showState.value,
             onDismissRequest = onDismiss,
             title = library.name,
             content = {

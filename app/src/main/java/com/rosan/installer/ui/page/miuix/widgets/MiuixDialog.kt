@@ -71,7 +71,7 @@ fun MiuixUnsavedChangesDialog(
     }
 
     WindowDialog(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismiss,
         title = dialogTitle,
         content = {
@@ -125,7 +125,7 @@ fun MiuixHideLauncherIconWarningDialog(
     onConfirm: () -> Unit,
 ) {
     WindowDialog(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismiss,
         title = stringResource(R.string.warning),
         content = {
@@ -172,7 +172,7 @@ fun MiuixUpdateDialog(
     val uriHandler = LocalUriHandler.current
 
     WindowDialog(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismiss,
         title = stringResource(R.string.get_update),
         content = {
@@ -237,7 +237,7 @@ fun MiuixUninstallConfirmationDialog(
     keepData: Boolean
 ) {
     WindowDialog(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismiss,
         title = stringResource(R.string.suggestion_uninstall_alert_dialog_confirm_action),
         content = {
@@ -299,7 +299,7 @@ fun ErrorDisplaySheet(
     title: String
 ) {
     SuperBottomSheet(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismissRequest,
         title = title,
         startAction = {
@@ -382,7 +382,7 @@ fun MiuixRootImplementationDialog(
     var selectedImpl by remember { mutableStateOf(rootImplementations.first()) }
 
     WindowDialog(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismiss,
         title = stringResource(R.string.lab_module_select_root_impl),
         insideMargin = DpSize(0.dp, 24.dp),
@@ -471,7 +471,7 @@ fun MiuixUninstallPackageDialog(
     val isConfirmEnabled = packageName.isNotBlank()
 
     WindowDialog(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismiss,
         title = stringResource(R.string.uninstall_enter_package_name),
         content = {
@@ -521,7 +521,7 @@ fun MiuixBlurWarningDialog(
     onConfirm: () -> Unit,
 ) {
     WindowDialog(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismiss,
         title = stringResource(R.string.warning),
         content = {

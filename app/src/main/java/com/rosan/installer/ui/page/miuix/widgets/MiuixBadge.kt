@@ -98,7 +98,7 @@ fun MiuixWarningChipGroup(
 
     if (selectedWarning != null) {
         WindowDialog(
-            show = showDialog,
+            show = showDialog.value,
             title = selectedWarning!!.shortLabel,
             titleColor = selectedWarning!!.color,
             summary = selectedWarning!!.fullDescription,

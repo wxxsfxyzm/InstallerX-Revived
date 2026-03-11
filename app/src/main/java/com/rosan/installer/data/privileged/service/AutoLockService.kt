@@ -10,6 +10,7 @@ import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
+import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -69,7 +70,7 @@ class AutoLockService(
     private suspend fun executeLock(authorizer: Authorizer, source: String) {
         try {
             Timber.d("Locking via $authorizer (Source: $source)")
-            val component = ComponentName(context, "com.rosan.installer.ui.activity.InstallerActivity")
+            val component = ComponentName(context, InstallerActivity::class.java)
             appOpsProvider.setDefaultInstaller(authorizer = authorizer, component = component, lock = true)
         } catch (e: Exception) {
             Timber.e(e, "AutoLock execution failed")

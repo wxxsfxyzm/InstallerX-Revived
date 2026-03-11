@@ -718,7 +718,7 @@ private fun MiuixAddPackageDialog(
     val showState = remember { mutableStateOf(true) }
 
     WindowDialog(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismiss,
         title = stringResource(R.string.config_add_new_package),
         content = {
@@ -779,7 +779,7 @@ private fun MiuixDeleteNamedPackageConfirmationDialog(
     val showState = remember { mutableStateOf(true) }
 
     WindowDialog(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismiss,
         title = stringResource(R.string.config_confirm_deletion),
         content = {
@@ -937,7 +937,7 @@ private fun MiuixAddUidDialog(
     val isConfirmEnabled = uidName.isNotBlank() && uidValueString.toIntOrNull() != null
 
     WindowDialog(
-        show = showState,
+        show = showState.value,
         onDismissRequest = onDismiss,
         title = stringResource(R.string.config_add_new_shared_uid),
         content = {
@@ -1002,35 +1002,33 @@ private fun MiuixDeleteSharedUidConfirmationDialog(
     val showState = remember { mutableStateOf(true) }
 
     WindowDialog(
-        show = showState,
-        onDismissRequest = onDismiss,
+        show = showState.value,
         title = stringResource(R.string.config_confirm_deletion),
-        content = {
-            Column {
-                Text(stringResource(R.string.config_confirm_deletion_desc, item.uidName))
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
-                ) {
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(R.string.cancel),
-                        onClick = onDismiss
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(R.string.delete),
-                        colors = ButtonDefaults.textButtonColors(
-                            textColor = MaterialTheme.colorScheme.error
-                        ),
-                        onClick = onConfirm
-                    )
-                }
+    ) {
+        Column {
+            Text(stringResource(R.string.config_confirm_deletion_desc, item.uidName))
+            Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+            ) {
+                TextButton(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(R.string.cancel),
+                    onClick = onDismiss
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                TextButton(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(R.string.delete),
+                    colors = ButtonDefaults.textButtonColors(
+                        textColor = MaterialTheme.colorScheme.error
+                    ),
+                    onClick = onConfirm
+                )
             }
         }
-    )
+    }
 }
 
 @Composable

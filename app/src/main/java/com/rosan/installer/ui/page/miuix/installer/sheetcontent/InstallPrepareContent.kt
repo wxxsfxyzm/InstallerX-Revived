@@ -431,13 +431,21 @@ fun InstallPrepareContent(
                 if (showExpandButton)
                     TextButton(
                         onClick = { isExpanded = !isExpanded },
+                        text = if (isExpanded) stringResource(R.string.collapse) else stringResource(R.string.expand),
+                        colors = ButtonDefaults.textButtonColors(
+                            color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
+                            textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                        ),
                         modifier = Modifier.weight(1f),
-                        text = if (isExpanded) stringResource(R.string.collapse) else stringResource(R.string.expand)
                     )
                 else
                     TextButton(
                         onClick = onCancel,
                         text = stringResource(R.string.cancel),
+                        colors = ButtonDefaults.textButtonColors(
+                            color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
+                            textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                        ),
                         modifier = Modifier.weight(1f),
                     )
                 TextButton(
