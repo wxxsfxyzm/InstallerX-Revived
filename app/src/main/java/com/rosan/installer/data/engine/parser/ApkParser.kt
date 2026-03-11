@@ -191,15 +191,11 @@ object ApkParser : KoinComponent {
                 val versionCodeMinor = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCode", 0).toLong()
                 versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
 
-                versionName = when (val resId = getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName", -1)) {
-                    -1 -> getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName") ?: versionName
-                    0 -> versionName
-                    else -> try {
-                        resources.getString(resId)
-                    } catch (_: Exception) {
-                        getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName") ?: versionName
-                    }
-                }
+                versionName = resolveString(
+                    resources,
+                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName", ResourcesCompat.ID_NULL),
+                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName")
+                ) ?: versionName
             }
             .register("/manifest/uses-sdk") {
                 minSdk = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "minSdkVersion")
@@ -208,19 +204,19 @@ object ApkParser : KoinComponent {
             .register("/manifest/application") {
                 label = resolveString(
                     resources,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "label", -1),
+                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "label", ResourcesCompat.ID_NULL),
                     getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "label")
                 )
-                icon = resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "icon", -1))
+                icon = resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "icon", ResourcesCompat.ID_NULL))
                 roundIcon =
-                    resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "roundIcon", -1))
+                    resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "roundIcon", ResourcesCompat.ID_NULL))
             }
             .register("/manifest/application/meta-data") {
                 if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
                     if ("minOsdkVersion" == getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")) {
                         minOsdkVersion = resolveString(
                             resources,
-                            getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "value", -1),
+                            getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "value", ResourcesCompat.ID_NULL),
                             getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
                         )
                     }
@@ -284,23 +280,21 @@ object ApkParser : KoinComponent {
     }
 
     private fun resolveString(res: Resources, resId: Int, rawValue: String?): String? {
-        if (resId > 0) {
-            try {
-                return res.getString(resId)
-            } catch (_: Exception) {
-            }
+        if (resId == ResourcesCompat.ID_NULL) return rawValue
+        return try {
+            res.getString(resId)
+        } catch (_: Exception) {
+            rawValue
         }
-        return rawValue
     }
 
     private fun resolveDrawable(res: Resources, theme: Resources.Theme?, resId: Int): Drawable? {
-        if (resId > 0) {
-            try {
-                return ResourcesCompat.getDrawable(res, resId, theme)
-            } catch (_: Exception) {
-            }
+        if (resId == ResourcesCompat.ID_NULL) return null
+        return try {
+            ResourcesCompat.getDrawable(res, resId, theme)
+        } catch (_: Exception) {
+            null
         }
-        return null
     }
 
     private fun analyseAndSelectBestArchitecture(path: String, deviceSupportedArchs: List<Architecture>): Architecture? {
