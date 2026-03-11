@@ -14,8 +14,8 @@ capsule = "2.1.3"
 focusApi = "1.4"
 kotlin = "2.3.10"
 ksp = "2.3.6"
-composeBom = "2026.02.01"
-compose = "1.10.4"
+composeBom = "2026.03.00"
+compose = "1.10.5"
 haze = "1.7.2"
 splashScreen = "1.2.0"
 material3 = "1.5.0-alpha15"
@@ -44,9 +44,9 @@ aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "abo
 
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
-androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.17.0" }
+androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.18.0" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.12.4" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.13.0" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.10.0" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androix-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
