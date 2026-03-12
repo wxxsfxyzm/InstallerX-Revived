@@ -14,8 +14,8 @@ import timber.log.Timber
 class ComponentOpsProviderImpl(
     private val capabilityProvider: DeviceCapabilityProvider
 ) : ComponentOpsProvider {
-    override suspend fun startActivityPrivileged(config: ConfigModel, intent: Intent): Boolean {
-        return withContext(Dispatchers.IO) {
+    override suspend fun startActivityPrivileged(config: ConfigModel, intent: Intent): Boolean =
+        withContext(Dispatchers.IO) {
             var success = false
             useUserService(
                 isSystemApp = capabilityProvider.isSystemApp,
@@ -31,10 +31,9 @@ class ComponentOpsProviderImpl(
             }
             success
         }
-    }
 
-    override suspend fun sendBroadcastPrivileged(config: ConfigModel, intent: Intent): Boolean {
-        return withContext(Dispatchers.IO) {
+    override suspend fun sendBroadcastPrivileged(config: ConfigModel, intent: Intent): Boolean =
+        withContext(Dispatchers.IO) {
             var success = false
             useUserService(
                 isSystemApp = capabilityProvider.isSystemApp,
@@ -50,5 +49,4 @@ class ComponentOpsProviderImpl(
             }
             success
         }
-    }
 }

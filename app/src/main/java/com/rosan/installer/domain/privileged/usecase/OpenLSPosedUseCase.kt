@@ -5,6 +5,8 @@ package com.rosan.installer.domain.privileged.usecase
 import android.content.Intent
 import android.os.Build
 import androidx.core.net.toUri
+import com.rosan.installer.SecretCodeReceiver.Companion.SECRET_CODE_ACTION
+import com.rosan.installer.SecretCodeReceiver.Companion.SECRET_CODE_ACTION_OLD
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
 import com.rosan.installer.domain.settings.model.Authorizer
@@ -17,8 +19,7 @@ class OpenLSPosedUseCase(
 ) {
     companion object {
         private const val PRIVILEGED_START_TIMEOUT_MS = 2500L
-        private const val SECRET_CODE_ACTION = "android.provider.Telephony.SECRET_CODE"
-        private const val SECRET_CODE_ACTION_OLD = "android.telephony.action.SECRET_CODE"
+        private const val LSPOSED_SECRET_CODE = "android_secret_code://5776733"
     }
 
     /**
@@ -38,7 +39,7 @@ class OpenLSPosedUseCase(
             } else {
                 SECRET_CODE_ACTION_OLD
             }
-            data = "android_secret_code://5776733".toUri()
+            data = LSPOSED_SECRET_CODE.toUri()
         }
 
         withTimeoutOrNull(PRIVILEGED_START_TIMEOUT_MS) {
