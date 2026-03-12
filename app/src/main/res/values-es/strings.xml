@@ -705,4 +705,5 @@
     <string name="config_apk_choose_all_desc">Selecciona todos los APK por defecto para sesiones de varios archivos.</string>
     <string name="lab_mi_island">Mi Súper Isla</string>
     <string name="lab_mi_island_desc">Estilo de notificación global. La verificación de firma del sistema solo puede ser evitada cuando el autenticador de aplicación personalizado está configurado en Shizuku. Los usuarios de root pueden habilitar esto directamente tras desactivar manualmente las restricciones de firma</string>
+    <string name="config_label_preferences">Preferencias</string>
 </resources>

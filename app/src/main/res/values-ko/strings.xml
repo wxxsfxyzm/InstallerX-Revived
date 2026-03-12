@@ -145,4 +145,10 @@
     <string name="restore">취소</string>
     <string name="delete_success">삭제되었습니다</string>
     <string name="loading">로드중…</string>
+    <string name="open_source_license_settings_description">타사 오픈 소스 라이브러리와 해당 라이선스를 확인하세요</string>
+    <string name="debug">디버그</string>
+    <string name="save_logs">로그 저장</string>
+    <string name="save_logs_desc">디버깅을 위해 로그를 로컬 파일에 저장합니다</string>
+    <string name="export_logs">수출 로그</string>
+    <string name="export_logs_desc">앱의 로그 내보내기</string>
 </resources>

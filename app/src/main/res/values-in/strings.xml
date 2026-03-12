@@ -22,7 +22,7 @@
     <string name="updating">Memperbarui…</string>
     <string name="get_update">Dapatkan pembaruan</string>
     <string name="get_update_detail">Periksa pembaruan perangkat lunak dan fitur baru</string>
-    <string name="update_available">Pembaharuan Tersedia: %1$s</string>
+    <string name="update_available">Pembaruan Tersedia: %1$s</string>
     <string name="get_update_directly">Dapatkan pembaruan secara langsung</string>
     <string name="get_update_directly_desc">Dapatkan pembaruan langsung dari GitHub dan instal, tidak akan ada cache yang tertinggal</string>
     <string name="get_source_code">Periksa kode sumber</string>
@@ -681,4 +681,16 @@
     <string name="lab_unstable_features">Fitur tidak stabil</string>
     <string name="lab_set_install_requester">Atur Peminta Instalasi</string>
     <string name="lab_set_install_requester_desc">Isi bidang OriginatingUid dengan paket pemanggil agar sesuai dengan perilaku sistem</string>
+    <string name="exception_resolve_failed_link_not_valid">Tautan ini tidak mempunyai berkas valid</string>
+    <string name="installer_live_channel_short_text_analyse_failed">Gagal</string>
+    <string name="installer_analyse_success">Analisa berhasil</string>
+    <string name="theme_settings_color_spec">Spek Warna</string>
+    <string name="theme_settings_color_spec_only_2021">Gaya palet saat ini hanya mendukung Spek 2021</string>
+    <string name="config_label_preferences">Preferensi</string>
+    <string name="installer_analyse_failed_corrupted_archive">Arsip rusak</string>
+    <string name="tag_identical">Identikal</string>
+    <string name="installer_prepare_identical_notice">Paket ini identik dengan aplikasi yang sudah terpasang. Anda dapat aman melewati dengan instalasi ini.</string>
+    <string name="config_apk_choose_all">Secara bawaan, semua APK akan dipilih selama instalasi massal</string>
+    <string name="config_apk_choose_all_desc">Secara bawaan, semua berkas APK akan dipilih untuk sesi dengan banyak file.</string>
+    <string name="lab_mi_island_desc">Gaya notifikasi global. Verifikasi tanda tangan sistem hanya dapat dilewati jika app-authenticator kustom diatur ke Shizuku. Pengguna root dapat mengaktifkannya langsung setelah menonaktifkan pembatasan tanda tangan secara manual</string>
 </resources>

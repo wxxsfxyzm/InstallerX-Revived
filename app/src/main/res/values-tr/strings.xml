@@ -132,11 +132,11 @@
     <string name="config_dialog_message_unsaved_changes">Kaydetmeden çıkmak istediğinize emin misiniz?</string>
     <string name="config_follow_settings">Profili Takip Et</string>
     <string name="config_managed_installer_packages_title">Kaynak Ön Ayarlarını Yükle</string>
-    <string name="config_managed_blacklist_by_package_name_title">Paket adına göre kurulumu yasaklanan uygulamalar</string>
-    <string name="config_managed_blacklist_by_shared_user_id_title">SharedUID tarafından kurulumu yasaklanan uygulamalar</string>
-    <string name="config_no_preset_install_sources">Önceden ayarlanmış kurulum kaynağı yok</string>
-    <string name="config_no_managed_blacklist">Paket adına göre kurulumu yasaklanan uygulama yok</string>
-    <string name="config_no_managed_shared_user_id_blacklist">SharedUID tarafından kurulumu yasaklanan uygulama yok</string>
+    <string name="config_managed_blacklist_by_package_name_title">Paket adına göre yüklenmesi yasaklanan uygulamalar</string>
+    <string name="config_managed_blacklist_by_shared_user_id_title">SharedUID tarafından yüklenmesi yasaklanan uygulamalar</string>
+    <string name="config_no_preset_install_sources">Önceden ayarlanmış yükleme kaynağı yok</string>
+    <string name="config_no_managed_blacklist">Paket adına göre yüklenmesi yasaklanan uygulama yok</string>
+    <string name="config_no_managed_shared_user_id_blacklist">SharedUID tarafından yüklenmesi yasaklanan uygulama yok</string>
     <string name="config_shared_uid_prior_to_pkgname_desc">Yalnızca SharedUID\'yi hedefleyen muafiyetler; paket adı tarafından yasaklanmışsa, yine de yüklenemez.</string>
     <string name="config_add_new_shared_uid">Yeni Paylaşılan Kullanıcı Kimliği ekle</string>
     <string name="config_shared_uid_name">Paylaşılan Kullanıcı Kimliği adı</string>
@@ -280,8 +280,8 @@
     <string name="permission_dhizuku">Dhizu\'yu kullan</string>
     <string name="permission_unknown">Bilinmeyen izin</string>
     <string name="installer_running">InstallerX çalışıyor</string>
-    <string name="installer_version_short">Ver. %1$s (%2$s)</string>
-    <string name="installer_version">Versiyon: %1$s (%2$s)</string>
+    <string name="installer_version_short">Sür. %1$s (%2$s)</string>
+    <string name="installer_version">Sürüm: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">Paket: %1$s</string>
     <string name="installer_file_path">Yol: %1$s</string>
@@ -303,7 +303,7 @@
     <string name="exception_install_failed_dexopt">DEX optimize edilemedi</string>
     <string name="exception_install_failed_older_sdk">Sistem sürümü çok eski, lütfen sistemi yükseltin</string>
     <string name="exception_install_failed_conflicting_provider">Aynı ada sahip bir ContentProvider mevcut</string>
-    <string name="exception_install_failed_newer_sdk">Paket sistem sürümü için çok eski</string>
+    <string name="exception_install_failed_newer_sdk">Paket, sistem sürümü için çok eski</string>
     <string name="exception_install_failed_test_only">Hata ayıklama uygulamalarının yüklenmesi devre dışı bırakıldı, etkinleştirin ve tekrar deneyin</string>
     <string name="exception_install_failed_cpu_abi_incompatible">CPU ABI uyumsuz, lütfen mevcut CPU\'yu destekleyen paketi indirin</string>
     <string name="exception_install_failed_aborted">Kurulum iptal edildi</string>
@@ -353,7 +353,7 @@
     <string name="permission_list">İzin Listesi</string>
     <string name="permission_list_desc">Yüklenen paketin talep ettiği izinlerin listesi</string>
     <string name="theme_settings_package_icons">Paket simgesi kaynağı</string>
-    <string name="theme_settings_prefer_system_icon">Kurulacak uygulama için sistem simgesini tercih et</string>
+    <string name="theme_settings_prefer_system_icon">Yüklenecek uygulama için sistem simgesini tercih et</string>
     <string name="theme_settings_prefer_system_icon_desc">Sistemden uygulama simgesini almaya çalış. Simge paketleri için kullanışlıdır. Kurulum paketindeki simgeler için bunu kapatın</string>
     <string name="no_cache">Önbellek yok</string>
     <string name="clearing_cache">Önbellek temizleniyor…</string>
@@ -457,8 +457,8 @@
     <string name="suggestion_bypass_low_target_sdk">Kısıtlamaları atlatmaya izin ver</string>
     <string name="suggestion_bypass_blacklist_set_by_user">Yüklemeye bir kez izin ver</string>
     <string name="config_global_default">Global Varsayılan</string>
-    <string name="installer_version_name_label">Versiyon Adı:</string>
-    <string name="installer_version_code_label">Versiyon Kodu:</string>
+    <string name="installer_version_name_label">Sürüm Adı:</string>
+    <string name="installer_version_code_label">Sürüm Kodu:</string>
     <string name="installer_package_min_sdk_label">Min SDK:</string>
     <string name="installer_package_target_sdk_label">Hedef SDK:</string>
     <string name="exception_uninstall_failed_internal_error">Paket Yöneticisi iç hatası</string>
@@ -508,7 +508,7 @@
     <string name="suggestion_mi_isolation_desc">Geçici olarak geçerli yükleyiciyi ekleyin ve yeniden deneyin</string>
     <string name="suggestion_user_restricted_desc">USB kurulumunu etkinleştirmek için Geliştirici seçeneklerine gidin</string>
     <string name="suggestion_bypass_low_target_sdk_desc">Geçici olarak kısıtlamaları atlatmaya izin ver ve yeniden dene</string>
-    <string name="suggestion_bypass_blacklist_set_by_user_desc">Geçici olarak bir kez kuruluma izin ver</string>
+    <string name="suggestion_bypass_blacklist_set_by_user_desc">Geçici olarak bir kez yüklemeye izin ver</string>
     <string name="suggestion_retry_install_desc">Tekrar yüklemeyi deneyin</string>
     <string name="lab">Laboratuvar</string>
     <string name="lab_desc">Deneysel ve geliştirici özelliklerine erişin</string>
@@ -696,4 +696,5 @@
     <string name="installer_prepare_identical_notice">Bu paket, yüklü olan uygulamayla tamamen aynıdır. Bu yüklemeyi güvenle atlayabilirsiniz.</string>
     <string name="config_apk_choose_all">Toplu yükleme sırasında varsayılan olarak tüm APK\'ları seçin</string>
     <string name="config_apk_choose_all_desc">Çoklu dosya oturumlarında varsayılan olarak tüm APK\'lar seçilir.</string>
+    <string name="exception_install_parse_failed_bad_shared_user_id">Sistem tarafından önceden yüklenmiş olmayan uygulamaların shared UID\'yi kullanımı yasaktır</string>
 </resources>

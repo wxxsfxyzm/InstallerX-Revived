@@ -694,4 +694,5 @@
     <string name="installer_live_channel_short_text_analyse_failed">Ошибка</string>
     <string name="exception_resolve_failed_link_not_valid">Эта ссылка не содержит действительный файл</string>
     <string name="tag_arch_emulated">Разрядность</string>
+    <string name="exception_install_parse_failed_bad_shared_user_id">Сторонним приложениям запрещено использовать системный ID</string>
 </resources>
