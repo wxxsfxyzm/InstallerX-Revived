@@ -56,7 +56,7 @@ fun UninstallingContent(
                 InfiniteProgressIndicator()
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = stringResource(R.string.installer_uninstalling)
+                    text = stringResource(R.string.installer_uninstalling),
                 )
             }
         }

@@ -25,6 +25,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.patched.ProgressButton
 import top.yukonga.miuix.kmp.basic.patched.ProgressButtonDefaults
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun InstallPreparingContent(
@@ -67,7 +68,7 @@ fun InstallPreparingContent(
         }
 
         val contentColor = if (animatedProgress < 0.45f)
-            MiuixTheme.colorScheme.onSecondaryVariant
+            if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
         else
             MiuixTheme.colorScheme.onPrimary
 
@@ -80,7 +81,7 @@ fun InstallPreparingContent(
                 .navigationBarsPadding()
                 .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             colors = ProgressButtonDefaults.progressButtonColors(
-                trackColor = MiuixTheme.colorScheme.secondaryVariant,
+                trackColor = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
                 progressColor = MiuixTheme.colorScheme.primary,
                 contentColor = contentColor
             )

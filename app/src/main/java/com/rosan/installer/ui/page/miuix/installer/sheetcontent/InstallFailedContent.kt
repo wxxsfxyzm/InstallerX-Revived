@@ -42,6 +42,7 @@ import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.hasErrorType
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.SmallTitle
@@ -87,6 +88,10 @@ fun InstallFailedContent(
             TextButton(
                 onClick = onClose,
                 text = stringResource(R.string.close),
+                colors = ButtonDefaults.textButtonColors(
+                    color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
+                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                ),
                 modifier = Modifier.fillMaxWidth(),
             )
         }

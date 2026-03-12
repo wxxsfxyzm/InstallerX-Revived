@@ -35,6 +35,7 @@ import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun InstallSuccessContent(
@@ -77,6 +78,10 @@ fun InstallSuccessContent(
                 TextButton(
                     text = stringResource(R.string.open_lsposed),
                     modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.textButtonColors(
+                        color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
+                        textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                    ),
                     onClick = {
                         coroutineScope.launch(Dispatchers.IO) {
                             val success = openLSPosedUseCase(installer.config)
@@ -104,6 +109,10 @@ fun InstallSuccessContent(
             TextButton(
                 text = stringResource(R.string.finish),
                 modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColors(
+                    color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
+                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                ),
                 onClick = onClose,
             )
             if (intent != null)

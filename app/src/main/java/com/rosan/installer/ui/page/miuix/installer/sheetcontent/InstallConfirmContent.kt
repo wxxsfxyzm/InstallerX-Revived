@@ -30,6 +30,7 @@ import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun InstallConfirmContent(
@@ -87,6 +88,10 @@ fun InstallConfirmContent(
                 TextButton(
                     onClick = onCancel,
                     text = stringResource(R.string.cancel),
+                    colors = ButtonDefaults.textButtonColors(
+                        color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
+                        textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                    ),
                     modifier = Modifier.weight(1f),
                 )
 

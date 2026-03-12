@@ -188,6 +188,10 @@ fun InstallChoiceContent(
                         }
                     },
                     text = stringResource(if (isBack) R.string.back else R.string.cancel),
+                    colors = ButtonDefaults.textButtonColors(
+                        color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
+                        textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                    ),
                     modifier = Modifier.weight(1f),
                 )
             }

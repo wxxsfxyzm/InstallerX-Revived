@@ -16,8 +16,10 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
 import com.rosan.installer.ui.util.isGestureNavigation
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun NonInstallFailedContent(
@@ -43,12 +45,15 @@ fun NonInstallFailedContent(
                 .navigationBarsPadding()
                 .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
         ) {
-            Button(
+            TextButton(
+                text = stringResource(R.string.close),
                 onClick = onClose,
                 modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(R.string.close))
-            }
+                colors = ButtonDefaults.textButtonColors(
+                    color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
+                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                )
+            )
         }
     }
 }
