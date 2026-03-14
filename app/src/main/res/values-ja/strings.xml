@@ -304,7 +304,7 @@
     <string name="config_add_new_package">新しいパッケージを追加</string>
     <string name="config_package_name">パッケージ名</string>
     <string name="config_confirm_deletion">削除を確認</string>
-    <string name="config_confirm_deletion_desc">%1$s を削除したいですか? これは元に戻せません。</string>
+    <string name="config_confirm_deletion_desc">%1$s を削除しますか？この操作は元に戻せません。</string>
     <string name="config_installer_matches">マッチ: %1$s</string>
     <string name="config_no_managed_packages_to_suggest">提案なし</string>
     <string name="config_error_name">名前を空欄にすることはできません</string>
@@ -371,7 +371,7 @@
     <string name="installer_prepare_install_too_many">base.apk を1つだけ選択してください</string>
     <string name="installer_prepare_sdk_incompatible">システム SDK がアプリの要求よりも低い</string>
     <string name="installer_prepare_type_new_install">新しいアプリをインストールする準備中</string>
-    <string name="installer_prepare_type_upgrade">アプリをアップグレードする準備中</string>
+    <string name="installer_prepare_type_upgrade">アプリのアップグレード準備中</string>
     <string name="installer_prepare_type_downgrade">これはダウングレードであり、データの損失やアプリの不安定化を引き起こす可能性があります</string>
     <string name="installer_prepare_type_reinstall">アプリの現在のバージョンを再インストールします</string>
     <string name="installer_prepare_type_sidegrade">アプリの現在のバージョンを変更します</string>
@@ -483,7 +483,7 @@
     <string name="exception_authentication_failed">ユーザー認証に失敗しました</string>
     <string name="exception_install_failed_already_exists">このアプリのバージョンは既にインストールされています。アンインストールしてもう一度お試しください</string>
     <string name="exception_install_failed_blacklisted_package">アプリのインストールを許可していません!</string>
-    <string name="exception_install_failed_invalid_apk">無効なAPKです（パッケージが破損しています）。再度ダウンロードしてみてください</string>
+    <string name="exception_install_failed_invalid_apk">APK が無効です（パッケージが破損しています）。再ダウンロードしてもう一度お試しください</string>
     <string name="exception_install_failed_invalid_uri">無効なURI</string>
     <string name="exception_install_failed_insufficient_storage">ストレージがいっぱいです。空き容量を増やしてください</string>
     <string name="exception_install_failed_duplicate_package">パッケージの署名が変更されました。パッケージが安全であることを確認してアプリケーションをアンインストールしてから、もう一度お試しください</string>
@@ -680,4 +680,14 @@
     <string name="theme_settings_color_spec">カラー仕様</string>
     <string name="config_label_preferences">詳細設定</string>
     <string name="config_apk_choose_all_desc">複数ファイルのセッションで、デフォルトですべての APK を選択します。</string>
+    <string name="theme_settings_color_spec_only_2021">現在のパレットスタイルは Spec 2021 のみをサポートしています</string>
+    <string name="installer_analyse_failed_corrupted_archive">破損したアーカイブ</string>
+    <string name="tag_arch_emulated">Arch エミュレート</string>
+    <string name="tag_identical">同一</string>
+    <string name="installer_prepare_identical_notice">このパッケージはインストール済みのアプリと同一です。このインストールはスキップしても構いません。</string>
+    <string name="exception_install_parse_failed_bad_shared_user_id">プリロードされていないアプリはシステム共有 UID の使用が禁止されています</string>
+    <string name="config_apk_choose_all">バッチインストール中にデフォルトですべての APK を選択する</string>
+    <string name="split_name_language">言語分割: %1$s</string>
+    <string name="split_name_architecture">アーキテクチャー分割: %1$s</string>
+    <string name="split_name_density">ピクセル密度: %1$s</string>
 </resources>
