@@ -44,7 +44,8 @@ class OnlineUpdateRepositoryImpl(
             val downloadUrl = apkAsset?.browserDownloadUrl ?: ""
             val fileName = apkAsset?.name ?: ""
 
-            val versionRegex = Regex("v(\\d.+?)\\.apk", RegexOption.IGNORE_CASE)
+            // Updated regex: APK names no longer have 'v', they look like '...-online-26.03.1a2b3c4.apk'
+            val versionRegex = Regex("-(\\d.+?)\\.apk", RegexOption.IGNORE_CASE)
             val matchResult = versionRegex.find(fileName)
 
             val remoteVersion = matchResult?.groupValues?.get(1)
@@ -94,20 +95,18 @@ class OnlineUpdateRepositoryImpl(
 
     /**
      * Compare two version strings.
-     * Format: major.minor.patch[.hash]
+     * Format: yy.MM[.patch][.hash]
      *
      * Rules:
-     * 1. Compare numeric parts (major.minor.patch) numerically
+     * 1. Compare numeric parts (yy.MM.patch) numerically
      * 2. If numeric parts are equal and both have hash suffixes:
-     *    - Different hashes = treat as update needed (return 1)
-     *    - Same hash = no update (return 0)
+     * - Different hashes = treat as update needed (return 1)
+     * - Same hash = no update (return 0)
      * 3. If numeric parts are equal but only one has hash: prioritize version with hash
      *
      * @return positive if v1 > v2, negative if v1 < v2, 0 if equal
      */
     private fun compareVersions(v1: String, v2: String): Int {
-        // Split version into numeric part and hash part
-        // Example: "2.3.1.87e0cc9" -> ["2.3.1", "87e0cc9"]
         val (numericV1, hashV1) = splitVersion(v1)
         val (numericV2, hashV2) = splitVersion(v2)
 
@@ -119,43 +118,46 @@ class OnlineUpdateRepositoryImpl(
 
         // Numeric parts are equal, compare hash parts
         return when {
-            // Both have hashes
             hashV1 != null && hashV2 != null -> {
-                if (hashV1 == hashV2) 0  // Same hash, no update
-                else 1  // Different hash, treat as update available
+                if (hashV1 == hashV2) 0 else 1
             }
-            // Only v1 has hash (v1 is newer build)
+
             hashV1 != null && hashV2 == null -> 1
-            // Only v2 has hash (v2 is newer build)
             hashV1 == null && hashV2 != null -> -1
-            // Neither has hash
             else -> 0
         }
     }
 
     /**
-     * Split version string into numeric part and optional hash part.
-     * Format strictly guaranteed as: major.minor.patch[.hash]
-     *
-     * Examples:
-     * - "2.3.3" -> Pair("2.3.3", null)
-     * - "2.3.3.d69b04f" -> Pair("2.3.3", "d69b04f")
-     * - "2.3.3.4365770" -> Pair("2.3.3", "4365770")
+     * Dynamically split version string into numeric base and optional Git hash.
+     * Supports formats like:
+     * - "26.03" -> Pair("26.03", null)
+     * - "26.03.01" -> Pair("26.03.01", null)
+     * - "26.03.1a2b3c4" -> Pair("26.03", "1a2b3c4")
+     * - "26.03.01.1a2b3c4" -> Pair("26.03.01", "1a2b3c4")
      */
     private fun splitVersion(version: String): Pair<String, String?> {
         val parts = version.split('.')
+        if (parts.isEmpty()) return Pair(version, null)
 
-        // Extract exactly the first 3 parts for major.minor.patch
-        val numericVersion = parts.take(3).joinToString(".")
+        val lastPart = parts.last()
 
-        // Extract the 4th part as hash if it exists
-        val hashPart = parts.getOrNull(3)
+        // Git short hashes are hex strings of at least 7 characters.
+        // Stable patches (e.g., "01", "2") are much shorter.
+        val isHash = lastPart.length >= 7 && lastPart.matches(Regex("^[a-fA-F0-9]+\$"))
 
-        return Pair(numericVersion, hashPart)
+        return if (isHash) {
+            // Rejoin everything except the last part as the numeric base
+            val numericVersion = parts.dropLast(1).joinToString(".")
+            Pair(numericVersion, lastPart)
+        } else {
+            // It's a pure stable version without a hash
+            Pair(version, null)
+        }
     }
 
     /**
-     * Compare numeric version parts only (e.g., "2.3.1" vs "2.3.2")
+     * Compare numeric version parts only (e.g., "26.03" vs "26.03.01")
      */
     private fun compareNumericVersion(v1: String, v2: String): Int {
         val parts1 = v1.split('.')
@@ -189,7 +191,6 @@ class OnlineUpdateRepositoryImpl(
             val body = response.body
             val contentLength = body.contentLength()
 
-            // Return pure Java InputStream to Domain layer
             Pair(body.byteStream(), contentLength)
         } catch (e: Exception) {
             Timber.e(e, "Exception during download request")
@@ -197,5 +198,3 @@ class OnlineUpdateRepositoryImpl(
         }
     }
 }
-
-
