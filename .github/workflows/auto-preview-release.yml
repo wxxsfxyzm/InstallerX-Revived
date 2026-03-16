@@ -29,9 +29,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get commit short SHA
-        id: commit_sha
-        run: echo "SHORT_SHA=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
+      - name: Get commit short SHA & Date
+        id: vars
+        run: |
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "YY_MM=$(date +'%y.%m')" >> $GITHUB_OUTPUT
 
       - name: Set up JDK 25
         uses: actions/setup-java@v5
@@ -48,21 +50,6 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
-
-      - name: Update versionName format
-        id: version
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION=$(./gradlew -q properties | grep '^BASE_VERSION:' | awk '{print $2}')
-          A=$(echo $VERSION | cut -d. -f1)
-          B=$(echo $VERSION | cut -d. -f2)
-          C=$(echo $VERSION | cut -d. -f3)
-          C_NEW=$((C + 1))
-          NEW_VERSION="${A}.${B}.${C_NEW}.${{ steps.commit_sha.outputs.SHORT_SHA }}"
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-          echo "Generated Version: $NEW_VERSION"
 
       - name: Decode and set up signing key
         env:
@@ -85,13 +72,13 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease -PVERSION_NAME="${{ env.NEW_VERSION }}"
+        run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease
 
       - name: Find and Rename Preview APKs
         id: rename_apks
         run: |
           PROJECT_NAME="InstallerX-Revived"
-          VERSION_TAG="v${{ env.NEW_VERSION }}"
+          VERSION_TAG="v${{ steps.vars.outputs.YY_MM }}.${{ steps.vars.outputs.SHORT_SHA }}"
 
           ONLINE_APK_DIR="app/build/outputs/apk/onlinePreview/release/"
           OFFLINE_APK_DIR="app/build/outputs/apk/offlinePreview/release/"

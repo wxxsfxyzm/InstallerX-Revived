@@ -4,12 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: '输入版本标签 (例如 v2.2.3)'
+        description: 'Input version tag exactly (e.g. 26.03 or 26.03.01)'
         required: true
-      changelog:
-        description: '填写更新日志 (支持 Markdown)'
-        required: true
-        type: string
 
 jobs:
   build_and_release:
@@ -33,7 +29,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          # 手动发布版本无需写入构建缓存
+          # Cache is read-only for manual stable releases
           cache-read-only: true
 
       - name: Verify Keystore
@@ -67,13 +63,15 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease
+        # Explicitly pass the user input to override the dynamic date version in Gradle
+        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease -PVERSION_NAME="${{ inputs.version_tag }}"
 
       - name: Find and Rename Universal APKs
         id: rename_apk
         run: |
           PROJECT_NAME="InstallerX-Revived"
           VERSION_TAG="${{ inputs.version_tag }}"
+          
           for FLAVOR in online offline; do
             APK_DIR="app/build/outputs/apk/${FLAVOR}Stable/release/"
             ORIGINAL_APK=$(find "$APK_DIR" -maxdepth 1 -type f -name "*.apk" | head -n 1)
@@ -95,9 +93,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: "InstallerX Revived stable ${{ inputs.version_tag }}"
+          # Use the exact input as the tag name
           tag_name: ${{ inputs.version_tag }}
-          body: ${{ inputs.changelog }}
+          # Publish as draft so you can manually write the changelog and publish it later
+          draft: true
           prerelease: false
+          # Explicitly prevent GitHub from auto-generating release notes in the body
+          generate_release_notes: false
           files: |
             app/build/outputs/apk/onlineStable/release/InstallerX-Revived-online-${{ inputs.version_tag }}.apk
             app/build/outputs/apk/offlineStable/release/InstallerX-Revived-offline-${{ inputs.version_tag }}.apk

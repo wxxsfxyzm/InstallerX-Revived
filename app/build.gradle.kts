@@ -1,4 +1,17 @@
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Properties
+
+// Get git commit hash safely, compatible with configuration cache
+fun getGitCommitHash(): String {
+    return try {
+        providers.exec {
+            commandLine("git", "rev-parse", "--short", "HEAD")
+        }.standardOutput.asText.get().trim()
+    } catch (e: Exception) {
+        "unknown"
+    }
+}
 
 plugins {
     alias(libs.plugins.agp.app)
@@ -43,8 +56,9 @@ android {
         // GitHub Actions will automatically use versionName A.B.C+1 when building preview releases
         // update versionCode and versionName before manually trigger a stable release
         versionCode = 46
-        versionName = project.findProperty("VERSION_NAME") as String?
-            ?: project.findProperty("BASE_VERSION") as String
+        val manualVersionName = project.findProperty("VERSION_NAME") as String?
+        val dynamicVersionName = LocalDate.now().format(DateTimeFormatter.ofPattern("yy.MM"))
+        versionName = manualVersionName ?: dynamicVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -119,10 +133,12 @@ android {
         create("Unstable") {
             dimension = "level"
             isDefault = true
+            versionNameSuffix = ".${getGitCommitHash()}"
         }
 
         create("Preview") {
             dimension = "level"
+            versionNameSuffix = ".${getGitCommitHash()}"
         }
 
         create("Stable") {
