@@ -4,6 +4,7 @@ package com.rosan.installer.data.updater.repository
 
 import android.content.Context
 import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.core.env.AppConfig.OFFICIAL_PACKAGE_NAME
 import com.rosan.installer.data.updater.model.GithubRelease
 import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.domain.updater.model.UpdateInfo
@@ -24,7 +25,6 @@ class OnlineUpdateRepositoryImpl(
     companion object {
         private const val REPO_OWNER = "wxxsfxyzm"
         private const val REPO_NAME = "InstallerX-Revived"
-        private const val OFFICIAL_PACKAGE_NAME = "com.rosan.installer.x.revived"
     }
 
     override suspend fun checkUpdate(): UpdateInfo? = withContext(Dispatchers.IO) {
