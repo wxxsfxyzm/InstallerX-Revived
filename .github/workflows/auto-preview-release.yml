@@ -3,22 +3,22 @@ name: Automatic Alpha Pre-Release (Latest Only)
 on:
   push:
     branches: [ "main" ]
-    # 仅在以下路径发生变更时触发发布，忽略文档修改
+    # Only trigger on specific path changes
     paths:
-      - 'app/**'                # 监听 app 模块源码
-      - 'build.gradle.kts'      # 监听根目录构建脚本
-      - 'settings.gradle.kts'   # 监听项目设置
-      - 'gradle.properties'     # 监听 Gradle 属性
-      - 'gradle/**'             # 监听 Gradle Wrapper 和依赖定义
-      - '.github/workflows/auto-preview-release.yml' # 监听工作流文件的修改
+      - 'app/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - '.github/workflows/auto-preview-release.yml'
 
 jobs:
   build_and_prerelease:
-    # Skip alpha release for version bumps or explicitly skipped commits
+    # Skip preview release for version bumps or explicitly skipped commits
     if: |
       !contains(github.event.head_commit.message, 'chore: bump version') &&
       !contains(github.event.head_commit.message, 'chore(release)') &&
-      !contains(github.event.head_commit.message, '[skip alpha]')
+      !contains(github.event.head_commit.message, '[skip preview]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -44,7 +44,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          # 主分支构建允许更新缓存
+          # Main branch builds are allowed to update the cache
           cache-read-only: false
           cache-encryption-key: ${{ secrets.GRADLE_CACHE_ENCRYPTION_KEY }}
 
@@ -78,7 +78,8 @@ jobs:
         id: rename_apks
         run: |
           PROJECT_NAME="InstallerX-Revived"
-          VERSION_TAG="v${{ steps.vars.outputs.YY_MM }}.${{ steps.vars.outputs.SHORT_SHA }}"
+          # Pure version tag e.g., 26.03.1a2b3c4
+          VERSION_TAG="${{ steps.vars.outputs.YY_MM }}.${{ steps.vars.outputs.SHORT_SHA }}"
 
           ONLINE_APK_DIR="app/build/outputs/apk/onlinePreview/release/"
           OFFLINE_APK_DIR="app/build/outputs/apk/offlinePreview/release/"
@@ -103,24 +104,28 @@ jobs:
 
           echo "online_apk=${NEW_ONLINE_APK_PATH}" >> $GITHUB_OUTPUT
           echo "offline_apk=${NEW_OFFLINE_APK_PATH}" >> $GITHUB_OUTPUT
+          echo "version_tag=${VERSION_TAG}" >> $GITHUB_OUTPUT
 
-      - name: Delete old alpha release and tag
+      - name: Delete old preview release and tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          LATEST_TAG=$(git tag --list "*-alpha" | sort -Vr | head -n 1)
+          # Use regex to find tags ending with a hex hash of 7 or more characters
+          # Stable tags like 26.03 or 26.03.01 will not match this regex
+          LATEST_TAG=$(git tag --list --sort=-creatordate | grep -E '^[0-9]+\.[0-9]+\.[a-f0-9]{7,}$' | head -n 1)
           if [[ -n "$LATEST_TAG" ]]; then
-            gh release delete "$LATEST_TAG" --yes || echo "No previous alpha release found to delete."
-            git push origin --delete "$LATEST_TAG" || echo "No previous alpha tag found to delete."
+            gh release delete "$LATEST_TAG" --yes || echo "No previous preview release found to delete."
+            git push origin --delete "$LATEST_TAG" || echo "No previous preview tag found to delete."
           else
-            echo "No alpha tag to delete."
+            echo "No preview tag to delete."
           fi
 
       - name: Generate changelog
         id: changelog
         run: |
-          PREV_TAG=$(git tag --list | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -Vr | head -n 1)
-          CURR_TAG="v${{ env.NEW_VERSION }}-alpha"
+          # Match pure number stable tags, ignoring those with hex hashes
+          PREV_TAG=$(git tag --list | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' | sort -Vr | head -n 1)
+          CURR_TAG="${{ steps.rename_apks.outputs.version_tag }}"
 
           if [ -z "$PREV_TAG" ]; then
             LOG_RANGE=""
@@ -163,18 +168,18 @@ jobs:
           echo "--- Generated Changelog for Release Body ---"
           echo -e "${CHANGELOG_BODY_OUTPUT}${CHANGELOG_LINK_OUTPUT}"
 
-      - name: Create Latest Alpha Pre-Release
+      - name: Create Latest Preview Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "InstallerX Revived Alpha (${{ steps.commit_sha.outputs.SHORT_SHA }})"
-          tag_name: "v${{ env.NEW_VERSION }}-alpha"
+          name: "InstallerX Revived Preview (${{ steps.vars.outputs.SHORT_SHA }})"
+          tag_name: "${{ steps.rename_apks.outputs.version_tag }}"
           target_commitish: ${{ github.sha }}
           body: |
-            ## 这是自动构建的最新 Alpha 测试版。
+            ## 这是自动构建的最新测试版。
             - **这是一个预发布版本，并非为生产环境准备就绪。**
             - 我们非常鼓励您分享您的看法！
             
-            ## This is an automatically built latest Alpha pre-release.
+            ## This is an automatically built latest Preview release.
             - **This is a pre-release version and is not intended for production use.**
             - We appreciate any feedback!
             
