@@ -247,8 +247,6 @@ dependencies {
     implementation(libs.haze)
     implementation(libs.haze.materials)
 
-    // m3color
-    // implementation(libs.m3color)
     // okhttp
     implementation(libs.okhttp)
 
