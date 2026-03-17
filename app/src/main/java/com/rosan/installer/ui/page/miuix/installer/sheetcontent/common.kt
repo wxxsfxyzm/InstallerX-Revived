@@ -3,8 +3,11 @@ package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -92,6 +95,8 @@ fun rememberAppInfoState(
 @Composable
 fun AppInfoSlot(
     appInfo: AppInfoState,
+    // Callback for icon click events. Null means not clickable.
+    onIconClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -99,11 +104,21 @@ fun AppInfoSlot(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Image(
-            painter = rememberDrawablePainter(drawable = appInfo.icon),
-            contentDescription = "App Icon",
-            modifier = Modifier.size(72.dp)
-        )
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                // .clip(RoundedCornerShape(16.dp))
+                .then(
+                    if (onIconClick != null) Modifier.clickable { onIconClick() } else Modifier
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = rememberDrawablePainter(drawable = appInfo.icon),
+                contentDescription = "App Icon",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
         Text(
             modifier = Modifier.basicMarquee(),
             text = appInfo.label,

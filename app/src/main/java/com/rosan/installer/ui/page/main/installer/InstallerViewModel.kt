@@ -1,6 +1,7 @@
 package com.rosan.installer.ui.page.main.installer
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -9,11 +10,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.DataEntity
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.engine.model.PackageAnalysisResult
@@ -48,6 +51,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
+import java.io.File
 
 class InstallerViewModel(
     private var repo: InstallerSessionRepository,
@@ -216,6 +220,8 @@ class InstallerViewModel(
             is InstallerViewAction.SetInstaller -> selectInstaller(action.installer)
             is InstallerViewAction.SetTargetUser -> selectTargetUser(action.userId)
             is InstallerViewAction.ApproveSession -> repo.approveConfirmation(action.sessionId, action.granted)
+
+            is InstallerViewAction.ShareApp -> shareApp(action.appEntity)
         }
     }
 
@@ -881,5 +887,48 @@ class InstallerViewModel(
     private fun installMultiple() {
         val selectedEntities = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
         repo.installMultiple(selectedEntities)
+    }
+
+    /**
+     * Triggers the Android share sheet for the specified app entity.
+     */
+    private fun shareApp(entity: AppEntity) {
+        Timber.d("Sharing app: $entity")
+        try {
+            // The input data is guaranteed to be a standalone file 
+            // (either a full .apks or an extracted .apk split).
+            val data = entity.data as? DataEntity.FileEntity
+            if (data == null) {
+                toast("Invalid file entity for sharing")
+                return
+            }
+
+            val fileToShare = File(data.path)
+
+            if (!fileToShare.exists()) {
+                toast("File does not exist")
+                return
+            }
+
+            // Retrieve authority matching AndroidManifest.xml
+            val authority = "${context.packageName}.fileprovider"
+            val uri = FileProvider.getUriForFile(context, authority, fileToShare)
+
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                // Determine MIME type based on entity type
+                type = if (entity is AppEntity.ModuleEntity) "application/zip" else "application/vnd.android.package-archive"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            val chooser = Intent.createChooser(shareIntent, null)
+            // Context might be application context from Koin, so NEW_TASK flag is required
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            context.startActivity(chooser)
+        } catch (e: Exception) {
+            Timber.tag("ShareAppError").e(e, "Failed to share file")
+            toast("Failed to share file")
+        }
     }
 }

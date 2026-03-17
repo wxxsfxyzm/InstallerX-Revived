@@ -61,6 +61,7 @@ import com.rosan.installer.domain.engine.model.InstalledAppInfo
 import com.rosan.installer.domain.engine.model.sortedBest
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
@@ -124,13 +125,22 @@ fun installInfoDialog(
                 label = "IconLoadAnimation"
             ) { icon ->
                 Box(
-                    modifier = Modifier.size(64.dp),
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .then(
+                            if (viewModel.state == InstallerViewState.InstallPrepare) {
+                                Modifier.clickable {
+                                    viewModel.dispatch(InstallerViewAction.ShareApp(entityToInstall))
+                                }
+                            } else {
+                                Modifier
+                            }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(12.dp)),
+                        modifier = Modifier.fillMaxSize(),
                         painter = rememberDrawablePainter(icon),
                         contentDescription = null
                     )

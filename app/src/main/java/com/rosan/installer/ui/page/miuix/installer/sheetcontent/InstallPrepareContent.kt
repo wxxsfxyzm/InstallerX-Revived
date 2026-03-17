@@ -179,7 +179,15 @@ fun InstallPrepareContent(
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item { AppInfoSlot(appInfo = appInfo) }
+        item {
+            AppInfoSlot(
+                appInfo = appInfo,
+                onIconClick = {
+                    // Trigger the share action using the already resolved primaryEntity
+                    viewModel.dispatch(InstallerViewAction.ShareApp(primaryEntity))
+                }
+            )
+        }
         item { Spacer(modifier = Modifier.height(4.dp)) }
         item {
             MiuixWarningChipGroup(
