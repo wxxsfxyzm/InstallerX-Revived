@@ -451,4 +451,13 @@
     <string name="installer_install_confirm">Підтвердження встановлення</string>
     <string name="uninstall_keep_data_desc">Дані застосунку та кеш будуть збережені</string>
     <string name="uninstall_all_users_desc">Виберіть правило для виявлення серійної зйомки. Жорсткі критерії надійніші, але можуть пропускати деякі серії. М\'які критерії дозволяють виявити більше серій, проте можуть групувати непов\'язані фотографії.</string>
+    <string name="uninstall_all_users_disabled">Видалення для всіх користувачів вимкнено</string>
+    <string name="uninstall_delete_system_app_desc">Дозволити видалення системних програм для поточного користувача</string>
+    <string name="uninstall_system_app_disabled">Видалення системної програми вимкнено</string>
+    <string name="uninstall_failed_message">Не вдалося видалити</string>
+    <string name="uninstall_call_uninstaller">Виклик деінсталятора</string>
+    <string name="uninstall_call_uninstaller_manually">Викликати деінсталятор вручну</string>
+    <string name="uninstall_call_uninstaller_manually_desc">Видалити програму за вказаною назвою пакета</string>
+    <string name="uninstall_progress_text">Видалення...</string>
+    <string name="uninstall_enter_package_name">Введіть назву пакета, щоб видалити</string>
 </resources>

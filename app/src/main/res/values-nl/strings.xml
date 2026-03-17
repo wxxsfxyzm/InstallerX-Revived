@@ -696,4 +696,5 @@
     <string name="installer_prepare_identical_notice">Dit pakket is identiek met de geïnstalleerde app. Je kan veilig de installatie overslaan.</string>
     <string name="config_apk_choose_all">Selecteer standaard alle APK\'s tijdens het meerdere installeren</string>
     <string name="config_apk_choose_all_desc">Selecteer standaard alle APK\'s voor meerdere bestandssessies.</string>
+    <string name="exception_install_parse_failed_bad_shared_user_id">Niet vooraf geïnstalleerde apps kunnen niet de gedeelde UID van het systeem gebruiken</string>
 </resources>

@@ -56,7 +56,7 @@
     <string name="theme_settings_ui_style">UI Style</string>
     <string name="theme_settings_desc">Change the theme of the app</string>
     <string name="theme_settings_miuix_ui">Miuix</string>
-    <string name="theme_settings_miuix_ui_desc">Similar to Hyperos</string>
+    <string name="theme_settings_miuix_ui_desc">Similar to HyperOS</string>
     <string name="theme_settings_miuix_custom_colors">Custom Colors</string>
     <string name="theme_settings_miuix_custom_colors_desc">Customize theme colors in Miuix theme style</string>
     <string name="theme_settings_google_ui">Google Material 3</string>

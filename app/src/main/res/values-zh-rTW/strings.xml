@@ -239,7 +239,7 @@
     <string name="sort_by_show_system_app">顯示系統應用程式</string>
     <string name="sort_by_show_package_name">顯示套件名稱</string>
     <string name="installer_ready">準備就緒</string>
-    <string name="installer_resolving">分析中…</string>
+    <string name="installer_resolving">解析中…</string>
     <string name="installer_resolve_failed">分析失敗</string>
     <string name="installer_resolve_success">分析成功</string>
     <string name="installer_preparing">正在讀取檔案</string>
@@ -391,8 +391,8 @@
     <string name="downgrade_version_prefix">降級</string>
     <string name="install_choice">安裝包選擇</string>
     <string name="installer_error_reason">錯誤原因</string>
-    <string name="exception_install_failed_origin_os_blacklist">Vivo 安裝系統 app 需要宣告有效安裝者！</string>
-    <string name="exception_install_failed_hyperos_isolation_violation">HyperOS 安裝系統 app 需要宣告有效安裝者！</string>
+    <string name="exception_install_failed_origin_os_blacklist">安裝 Vivo 系統應用程式需要宣告有效安裝來源！</string>
+    <string name="exception_install_failed_hyperos_isolation_violation">安裝小米系統應用程式需要宣告有效安裝來源！</string>
     <string name="get_update">取得更新</string>
     <string name="show_dialog_when_pressing_notification">點擊通知時顯示對話框</string>
     <string name="change_notification_touch_behavior">變更通知觸碰行為</string>
@@ -403,8 +403,8 @@
     <string name="show_dialog_install_extended_menu">顯示擴展選單</string>
     <string name="show_dialog_install_extended_menu_desc">在安裝對話框中顯示更多操作選項</string>
     <string name="extended_menu">擴展選單</string>
-    <string name="disable_notification_on_dismiss">對話框關閉時退出</string>
-    <string name="close_notification_immediately_on_dialog_dismiss">關閉對話框將靜默退出</string>
+    <string name="disable_notification_on_dismiss">對話框隱藏時退出安裝</string>
+    <string name="close_notification_immediately_on_dialog_dismiss">主動隱藏對話框將取消本次安裝，而非掛起到通知欄</string>
     <string name="set_countdown">設定倒數計時</string>
     <string name="dhizuku_auto_close_countdown_desc">Dhizuku 安裝成功後自動關閉的倒數計時</string>
     <string name="dhizuku_cannot_set_package_source_desc">Dhizuku 模式不支援自訂套件來源！</string>
@@ -692,4 +692,19 @@
     <string name="old_version_uninstalled">解除安裝</string>
     <string name="lab_module_always_use_root">始終以 root 權限刷入模組</string>
     <string name="lab_module_always_use_root_desc">作為系統安裝程式執行時，為了獲得最佳效能，刷入模組時一律使用 root 權限</string>
+    <string name="theme_settings_color_spec">顏色規格</string>
+    <string name="theme_settings_color_spec_only_2021">當前調色板樣式僅支持 Spec 2021</string>
+    <string name="config_label_preferences">偏好設定</string>
+    <string name="installer_analyse_failed_corrupted_archive">損壞的壓縮包</string>
+    <string name="installer_analyse_success">分析成功</string>
+    <string name="tag_identical">相同</string>
+    <string name="installer_prepare_identical_notice">當前安裝包與已安裝的應用文件一致，可考慮跳過本次安裝</string>
+    <string name="installer_live_channel_short_text_analyse_failed">失敗</string>
+    <string name="exception_resolve_failed_link_not_valid">此連結不包含有效文件</string>
+    <string name="exception_install_parse_failed_bad_shared_user_id">非預先安裝應用程式禁止使用系統級 UID</string>
+    <string name="config_apk_choose_all">默認選擇所有 APK</string>
+    <string name="config_apk_choose_all_desc">單次安裝會話含有多個 APK 檔案時預設勾選所有 APK 文件</string>
+    <string name="lab_mi_island">小米超級島</string>
+    <string name="lab_mi_island_desc">覆蓋全域通知樣式。 僅當應用授權器設定為 Shizuku 時可繞過系統簽名限制；Root 使用者在手動關閉系統簽名驗證後可直接開啟</string>
+    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
 </resources>
