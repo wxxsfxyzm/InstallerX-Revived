@@ -46,7 +46,7 @@ import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutAction
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
-import com.rosan.installer.ui.page.main.widget.setting.LogEventCollector
+import com.rosan.installer.ui.page.main.widget.util.LogEventCollector
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton

@@ -1,4 +1,4 @@
-package com.rosan.installer.ui.page.main.widget.setting
+package com.rosan.installer.ui.page.main.widget.util
 
 import android.content.Intent
 import androidx.compose.material3.SnackbarHostState
@@ -15,6 +15,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rosan.installer.R
+import com.rosan.installer.ui.page.main.installer.InstallerViewEvent
+import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
@@ -100,6 +102,19 @@ fun OnLifecycleEvent(
 
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+}
+
+@Composable
+fun ToastEventCollector(viewModel: InstallerViewModel) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        viewModel.uiEvents.collect { event ->
+            when (event) {
+                is InstallerViewEvent.ShowToast -> context.toast(event.message)
+                is InstallerViewEvent.ShowToastRes -> context.toast(event.messageResId)
+            }
         }
     }
 }

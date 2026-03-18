@@ -40,7 +40,7 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.ShowDataWidget
-import com.rosan.installer.ui.page.main.widget.setting.DeleteEventCollector
+import com.rosan.installer.ui.page.main.widget.util.DeleteEventCollector
 import com.rosan.installer.ui.theme.none
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel

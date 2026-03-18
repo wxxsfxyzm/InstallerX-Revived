@@ -542,6 +542,8 @@
     <string name="exception_http_not_allowed">Cleartext HTTP not allowed</string>
     <string name="exception_http_restricted_for_localhost">Cleartext HTTP restricted to localhost</string>
     <string name="exception_zip_exception">Failed to open zip as file</string>
+    <string name="error_dialog_install_menu_not_available">Extended menu is not available</string>
+    <string name="error_no_package_to_uninstall">No package available to uninstall</string>
     <string name="old_version_prefix">Current</string>
     <string name="old_version_archived">Archived</string>
     <string name="old_version_uninstalled">Uninstalled</string>

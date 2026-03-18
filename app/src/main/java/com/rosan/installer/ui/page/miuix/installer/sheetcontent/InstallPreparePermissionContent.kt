@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
 import androidx.activity.compose.BackHandler
@@ -10,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.sortedBest
@@ -45,7 +47,8 @@ fun InstallPreparePermissionContent(
     onBack: () -> Unit
 ) {
     val isDarkMode = InstallerTheme.isDark
-    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val currentPackageName = uiState.currentPackageName
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
 
     val entity = currentPackage?.appEntities

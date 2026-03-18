@@ -1,13 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
-import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -16,23 +13,19 @@ import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.DataEntity
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.engine.model.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.sourcePath
 import com.rosan.installer.domain.engine.repository.AppIconRepository
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
-import com.rosan.installer.domain.session.model.UninstallInfo
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.InstallMode
-import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.domain.settings.repository.IntSetting
-import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.getErrorMessage
 import com.rosan.installer.util.hasFlag
@@ -40,18 +33,23 @@ import com.rosan.installer.util.removeFlag
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
-import java.io.File
 
 class InstallerViewModel(
     private var repo: InstallerSessionRepository,
@@ -61,107 +59,54 @@ class InstallerViewModel(
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
-    var state by mutableStateOf<InstallerViewState>(InstallerViewState.Ready)
-        private set
+    // Event channel for one-off side effects (e.g. Toasts)
+    private val _uiEvents = MutableSharedFlow<InstallerViewEvent>(
+        replay = 0,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val uiEvents: SharedFlow<InstallerViewEvent> = _uiEvents.asSharedFlow()
 
-    /**
-     * Checks if the current selection for installation contains at least one module.
-     * This is determined by checking if any selected entity is of type ModuleEntity.
-     */
+    // Internal mutable state for high-frequency UI changes and progress
+    private val _localState = MutableStateFlow(
+        InstallerState(
+            defaultInstallerFromSettings = repo.config.installer,
+            selectedInstaller = repo.config.installer
+        )
+    )
+
+    // The single source of truth for the UI.
+    // Combines dynamic local state with reactive global app settings.
+    val uiState: StateFlow<InstallerState> = combine(
+        _localState,
+        appSettingsRepo.preferencesFlow
+    ) { local, prefs ->
+        local.copy(
+            viewSettings = local.viewSettings.copy(
+                useBlur = prefs.useBlur,
+                autoCloseCountDown = prefs.dhizukuAutoCloseCountDown,
+                showExtendedMenu = prefs.showDialogInstallExtendedMenu,
+                showSmartSuggestion = prefs.showSmartSuggestion,
+                disableNotificationOnDismiss = prefs.disableNotificationForDialogInstall,
+                versionCompareInSingleLine = prefs.versionCompareInSingleLine,
+                sdkCompareInMultiLine = prefs.sdkCompareInMultiLine,
+                showOPPOSpecial = prefs.showOPPOSpecial,
+                autoSilentInstall = prefs.autoSilentInstall
+            ),
+            managedInstallerPackages = prefs.managedInstallerPackages,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = _localState.value
+    )
+
     val isInstallingModule: Boolean
         get() = repo.analysisResults.any { result ->
             result.appEntities.any { entity -> entity.selected && entity.app is AppEntity.ModuleEntity }
         }
 
-    // Hold the original, complete analysis results for multi-install scenarios.
     private var originalAnalysisResults: List<PackageAnalysisResult> = emptyList()
-
-    var viewSettings by mutableStateOf(InstallerViewSettings())
-        private set
-
-    var showMiuixSheetRightActionSettings by mutableStateOf(false)
-        private set
-    var showMiuixPermissionList by mutableStateOf(false)
-        private set
-    var navigatedFromPrepareToChoice by mutableStateOf(false)
-        private set
-
-    // Progress to drive the progress bar
-    private val _installProgress = MutableStateFlow<Float?>(null)
-    val installProgress: StateFlow<Float?> = _installProgress.asStateFlow()
-
-    /**
-     * Determines if the dialog can be dismissed by tapping the scrim.
-     * Dismissal is disallowed during ongoing operations like installing.
-     */
-    val isDismissible
-        get() = when (state) {
-            is InstallerViewState.Analysing,
-            is InstallerViewState.Resolving,
-            is InstallerViewState.InstallExtendedMenu,
-            is InstallerViewState.InstallChoice,
-            is InstallerViewState.Uninstalling -> false
-
-            is InstallerViewState.InstallingModule -> (state as InstallerViewState.InstallingModule).isFinished
-            is InstallerViewState.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
-            is InstallerViewState.Preparing,
-            is InstallerViewState.Installing -> !viewSettings.disableNotificationOnDismiss
-
-            else -> true
-        }
-
-    private val _currentPackageName = MutableStateFlow<String?>(null)
-    val currentPackageName: StateFlow<String?> = _currentPackageName.asStateFlow()
-
-    private val _displayIcons = MutableStateFlow<Map<String, Drawable?>>(emptyMap())
-    val displayIcons: StateFlow<Map<String, Drawable?>> = _displayIcons.asStateFlow()
-
-    // --- StateFlow to hold the seed color extracted from the icon ---
-    private val _seedColor = MutableStateFlow<Color?>(null)
-    val seedColor: StateFlow<Color?> = _seedColor.asStateFlow()
-
-    // StateFlow to manage `install flags`
-    // An Int value formed by combining all options using bitwise operations.
-    private val _installFlags = MutableStateFlow(0) // 默认值为0，表示没有开启任何选项
-    val installFlags: StateFlow<Int> = _installFlags.asStateFlow()
-
-    // StateFlow to hold the default installer package name from global settings.
-    private val _defaultInstallerFromSettings = MutableStateFlow(repo.config.installer)
-    val defaultInstallerFromSettings: StateFlow<String?> = _defaultInstallerFromSettings.asStateFlow()
-
-    // StateFlow to hold the list of managed installer packages.
-    private val _managedInstallerPackages = MutableStateFlow<List<NamedPackage>>(emptyList())
-    val managedInstallerPackages: StateFlow<List<NamedPackage>> = _managedInstallerPackages.asStateFlow()
-
-    // StateFlow to hold the currently selected installer package name.
-    private val _selectedInstaller = MutableStateFlow(repo.config.installer)
-    val selectedInstaller: StateFlow<String?> = _selectedInstaller.asStateFlow()
-
-    // StateFlow to hold the list of available users.
-    private val _availableUsers = MutableStateFlow<Map<Int, String>>(emptyMap())
-    val availableUsers: StateFlow<Map<Int, String>> = _availableUsers.asStateFlow()
-
-    // StateFlow to hold the currently selected user ID.
-    private val _selectedUserId = MutableStateFlow(0)
-    val selectedUserId: StateFlow<Int> = _selectedUserId.asStateFlow()
-
-    /**
-     * Holds information about the app being uninstalled for UI display.
-     * This is separate from repo.uninstallInfo to prevent info from being cleared.
-     */
-    private val _uiUninstallInfo = MutableStateFlow<UninstallInfo?>(null)
-    val uiUninstallInfo: StateFlow<UninstallInfo?> = _uiUninstallInfo.asStateFlow()
-
-    /**
-     * Holds the bitmask for uninstall flags (e.g., KEEP_DATA).
-     */
-    private val _uninstallFlags = MutableStateFlow(0)
-    val uninstallFlags: StateFlow<Int> = _uninstallFlags.asStateFlow()
-
-    /**
-     * Flag to track if the current operation is an uninstall-and-retry flow.
-     * This helps the progress collector know when to trigger a reinstall.
-     */
     private var isRetryingInstall = false
 
     private var loadingStateJob: Job? = null
@@ -171,13 +116,23 @@ class InstallerViewModel(
     private var collectRepoJob: Job? = null
 
     init {
-        Timber.d("InstallerViewModel init")
         settingsLoadingJob = loadInitialSettings()
-        viewModelScope.launch {
-            // Load managed packages for installer selection.
-            appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedInstallerPackages).collect { packages ->
-                _managedInstallerPackages.value = packages
-            }
+    }
+
+    /**
+     * Loads specific settings that might not be exposed directly in preferencesFlow,
+     * but are needed locally by the installer.
+     */
+    private fun loadInitialSettings() = viewModelScope.launch {
+        _localState.update { state ->
+            state.copy(
+                viewSettings = state.viewSettings.copy(
+                    uiExpressive = appSettingsRepo.getBoolean(BooleanSetting.UiExpressiveSwitch, true).first(),
+                    preferSystemIconForUpdates = appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first(),
+                    enableModuleInstall = appSettingsRepo.getBoolean(BooleanSetting.LabEnableModuleFlash, false).first(),
+                    useDynColorFollowPkgIcon = appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first()
+                )
+            )
         }
     }
 
@@ -188,8 +143,7 @@ class InstallerViewModel(
             is InstallerViewAction.Cancel -> cancel()
             is InstallerViewAction.Analyse -> analyse()
             is InstallerViewAction.InstallChoice -> {
-                // Check if navigating from*InstallPrepare
-                navigatedFromPrepareToChoice = state is InstallerViewState.InstallPrepare
+                _localState.update { it.copy(navigatedFromPrepareToChoice = uiState.value.stage is InstallerStage.InstallPrepare) }
                 installChoice()
             }
 
@@ -200,82 +154,38 @@ class InstallerViewModel(
             is InstallerViewAction.Install -> install()
             is InstallerViewAction.Background -> background()
             is InstallerViewAction.Reboot -> repo.reboot(action.reason)
-            is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(
-                action.keepData,
-                action.conflictingPackage
-            )
+            is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData, action.conflictingPackage)
+            is InstallerViewAction.Uninstall -> repo.uninstallInfo.value?.packageName?.let { repo.uninstall(it) }
 
-            is InstallerViewAction.Uninstall -> {
-                // Trigger uninstall using the package name from the collected info
-                repo.uninstallInfo.value?.packageName?.let { repo.uninstall(it) }
-            }
-
-            is InstallerViewAction.ShowMiuixSheetRightActionSettings -> showMiuixSheetRightActionSettings = true
-            is InstallerViewAction.HideMiuixSheetRightActionSettings -> showMiuixSheetRightActionSettings = false
-            is InstallerViewAction.ShowMiuixPermissionList -> showMiuixPermissionList = true
-            is InstallerViewAction.HideMiuixPermissionList -> showMiuixPermissionList = false
+            is InstallerViewAction.ShowMiuixSheetRightActionSettings -> _localState.update { it.copy(showMiuixSheetRightActionSettings = true) }
+            is InstallerViewAction.HideMiuixSheetRightActionSettings -> _localState.update { it.copy(showMiuixSheetRightActionSettings = false) }
+            is InstallerViewAction.ShowMiuixPermissionList -> _localState.update { it.copy(showMiuixPermissionList = true) }
+            is InstallerViewAction.HideMiuixPermissionList -> _localState.update { it.copy(showMiuixPermissionList = false) }
 
             is InstallerViewAction.ToggleSelection -> toggleSelection(action.packageName, action.entity, action.isMultiSelect)
             is InstallerViewAction.ToggleUninstallFlag -> toggleUninstallFlag(action.flag, action.enable)
             is InstallerViewAction.SetInstaller -> selectInstaller(action.installer)
             is InstallerViewAction.SetTargetUser -> selectTargetUser(action.userId)
             is InstallerViewAction.ApproveSession -> repo.approveConfirmation(action.sessionId, action.granted)
-
             is InstallerViewAction.ShareApp -> shareApp(action.appEntity)
+            is InstallerViewAction.ShowToast -> toast(action.message)
+            is InstallerViewAction.ShowToastRes -> toast(action.messageResId)
         }
     }
 
-    private fun loadInitialSettings() =
-        viewModelScope.launch {
-            viewSettings = viewSettings.copy(
-                uiExpressive =
-                    appSettingsRepo.getBoolean(BooleanSetting.UiExpressiveSwitch, true).first(),
-                useBlur =
-                    appSettingsRepo.getBoolean(BooleanSetting.UiUseBlur, true).first(),
-                preferSystemIconForUpdates =
-                    appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first(),
-                autoCloseCountDown =
-                    appSettingsRepo.getInt(IntSetting.DialogAutoCloseCountdown, 3).first(),
-                showExtendedMenu =
-                    appSettingsRepo.getBoolean(BooleanSetting.DialogShowExtendedMenu, false).first(),
-                showSmartSuggestion =
-                    appSettingsRepo.getBoolean(BooleanSetting.DialogShowIntelligentSuggestion, true).first(),
-                disableNotificationOnDismiss =
-                    appSettingsRepo.getBoolean(BooleanSetting.DialogDisableNotificationOnDismiss, false).first(),
-                versionCompareInSingleLine =
-                    appSettingsRepo.getBoolean(BooleanSetting.DialogVersionCompareSingleLine, false).first(),
-                sdkCompareInMultiLine = appSettingsRepo.getBoolean(BooleanSetting.DialogSdkCompareMultiLine, false).first(),
-                showOPPOSpecial = appSettingsRepo.getBoolean(BooleanSetting.DialogShowOppoSpecial, false).first(),
-                autoSilentInstall = appSettingsRepo.getBoolean(BooleanSetting.DialogAutoSilentInstall, false).first(),
-                enableModuleInstall = appSettingsRepo.getBoolean(BooleanSetting.LabEnableModuleFlash, false).first(),
-                useDynColorFollowPkgIcon = appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first()
-            )
-        }
-
-    /**
-     * Maps a ProgressEntity from the repository to the corresponding InstallerViewState.
-     * This function centralizes the logic for state transitions based on progress updates.
-     *
-     * @param progress The latest ProgressEntity from the repository.
-     * @return The calculated InstallerViewState.
-     */
-    private fun mapProgressToViewState(progress: ProgressEntity): InstallerViewState {
+    private fun mapProgressToStage(progress: ProgressEntity): InstallerStage {
         return when (progress) {
-            is ProgressEntity.Ready -> InstallerViewState.Ready
-
+            is ProgressEntity.Ready -> InstallerStage.Ready
             is ProgressEntity.UninstallResolveFailed,
-            is ProgressEntity.InstallResolvedFailed -> InstallerViewState.ResolveFailed
+            is ProgressEntity.InstallResolvedFailed -> InstallerStage.ResolveFailed
 
-            is ProgressEntity.InstallAnalysedFailed -> InstallerViewState.AnalyseFailed
+            is ProgressEntity.InstallAnalysedFailed -> InstallerStage.AnalyseFailed
 
             is ProgressEntity.InstallAnalysedSuccess -> {
-                // Backup original results on first successful analysis.
-                if (originalAnalysisResults.isEmpty()) {
-                    originalAnalysisResults = repo.analysisResults
-                }
-                repo.analysisResults.forEach { result ->
-                    loadDisplayIcon(result.packageName)
-                }
+                if (originalAnalysisResults.isEmpty()) originalAnalysisResults = repo.analysisResults
+
+                repo.analysisResults.forEach { result -> loadDisplayIcon(result.packageName) }
+
                 val analysisResults = repo.analysisResults
                 val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType
 
@@ -285,198 +195,83 @@ class InstallerViewModel(
                         containerType == DataType.MIXED_MODULE_APK ||
                         containerType == DataType.MIXED_MODULE_ZIP
 
-                if (isMultiAppMode) InstallerViewState.InstallChoice else InstallerViewState.InstallPrepare
+                if (isMultiAppMode) InstallerStage.InstallChoice else InstallerStage.InstallPrepare
             }
 
             is ProgressEntity.Installing -> {
-                // Calculate float progress for ProgressBar
-                val floatProgress = if (progress.total > 1) {
-                    progress.current.toFloat() / progress.total.toFloat()
-                } else 0f
-
-                InstallerViewState.Installing(
-                    progress = floatProgress,
-                    current = progress.current,
-                    total = progress.total,
-                    appLabel = progress.appLabel
-                )
+                val floatProgress = if (progress.total > 1) progress.current.toFloat() / progress.total.toFloat() else 0f
+                InstallerStage.Installing(floatProgress, progress.current, progress.total, progress.appLabel)
             }
 
-            // Explicit mapping for batch completion
-            is ProgressEntity.InstallCompleted -> {
-                InstallerViewState.InstallCompleted(progress.results)
-            }
+            is ProgressEntity.InstallCompleted -> InstallerStage.InstallCompleted(progress.results)
 
             is ProgressEntity.InstallFailed -> {
-                //  Check if it's a module install using the persistent Repo data
                 if (isInstallingModule) {
-                    // Load the full log history from the Repo, ensuring data persists across ViewModel recreations
                     val currentOutput = repo.moduleLog.toMutableList()
-
-                    // Append the error message to the terminal output for visibility
                     repo.error.message?.let { msg ->
                         val errorLine = "ERROR: $msg"
-                        // Prevent duplicate error lines
-                        if (currentOutput.lastOrNull() != errorLine) {
-                            currentOutput.add(errorLine)
-                        }
+                        if (currentOutput.lastOrNull() != errorLine) currentOutput.add(errorLine)
                     }
-
-                    // Return the terminal view state with isFinished = true
-                    InstallerViewState.InstallingModule(
-                        output = currentOutput,
-                        isFinished = true
-                    )
-                } else {
-                    InstallerViewState.InstallFailed
-                }
+                    InstallerStage.InstallingModule(output = currentOutput, isFinished = true)
+                } else InstallerStage.InstallFailed
             }
 
             is ProgressEntity.InstallSuccess -> {
-                // Check if it's a module install
-                if (isInstallingModule) {
-                    // Load the full log history from the Repo and keep the terminal view open
-                    InstallerViewState.InstallingModule(
-                        output = repo.moduleLog,
-                        isFinished = true
-                    )
-                } else {
-                    InstallerViewState.InstallSuccess
-                }
+                if (isInstallingModule) InstallerStage.InstallingModule(output = repo.moduleLog, isFinished = true)
+                else InstallerStage.InstallSuccess
             }
 
-            is ProgressEntity.InstallingModule -> InstallerViewState.InstallingModule(progress.output)
+            is ProgressEntity.InstallingModule -> InstallerStage.InstallingModule(progress.output)
 
             is ProgressEntity.InstallConfirming -> {
                 val details = repo.confirmationDetails.value
-                if (details != null) {
-                    InstallerViewState.InstallConfirm(
-                        appLabel = details.appLabel,
-                        appIcon = details.appIcon,
-                        sessionId = details.sessionId
-                    )
-                } else {
-                    InstallerViewState.ResolveFailed // Fallback if details are missing
-                }
+                if (details != null) InstallerStage.InstallConfirm(details.appLabel, details.appIcon, details.sessionId)
+                else InstallerStage.ResolveFailed
             }
 
-            is ProgressEntity.Uninstalling -> {
-                if (isRetryingInstall) InstallerViewState.InstallRetryDowngradeUsingUninstall else InstallerViewState.Uninstalling
-            }
-
+            is ProgressEntity.Uninstalling -> if (isRetryingInstall) InstallerStage.InstallRetryDowngradeUsingUninstall else InstallerStage.Uninstalling
             is ProgressEntity.UninstallFailed -> {
                 if (isRetryingInstall) {
                     isRetryingInstall = false
-                    InstallerViewState.InstallFailed
-                } else {
-                    InstallerViewState.UninstallFailed
-                }
+                    InstallerStage.InstallFailed
+                } else InstallerStage.UninstallFailed
             }
 
             is ProgressEntity.UninstallSuccess -> {
                 if (isRetryingInstall) {
                     isRetryingInstall = false
-                    repo.install(false) // Trigger reinstall
-                    InstallerViewState.InstallRetryDowngradeUsingUninstall
-                } else {
-                    InstallerViewState.UninstallSuccess
-                }
+                    repo.install(false)
+                    InstallerStage.InstallRetryDowngradeUsingUninstall
+                } else InstallerStage.UninstallSuccess
             }
 
-            is ProgressEntity.UninstallReady -> {
-                // This state has side effects (updating UI-specific state), so they are handled here.
-                _uiUninstallInfo.value = repo.uninstallInfo.value
-                _uninstallFlags.value = repo.config.uninstallFlags
-                InstallerViewState.UninstallReady
-            }
-
-            // For states that are handled specially (like loading), or have no UI change, return the current state.
-            is ProgressEntity.InstallResolving, is ProgressEntity.InstallAnalysing, is ProgressEntity.InstallPreparing -> state
-
-            // Fallback for any other unhandled progress types.
-            else -> InstallerViewState.Ready
-        }
-    }
-
-    /**
-     * Handles all side effects related to a progress update, such as managing jobs,
-     * updating focused package name, and handling dynamic colors.
-     *
-     * @param newPackageName The package name derived from the new state, if any.
-     * @param newState The newly calculated InstallerViewState.
-     */
-    private fun handleStateSideEffects(newPackageName: String?, newState: InstallerViewState) {
-        // --- Update current package name ---
-        if (newPackageName != _currentPackageName.value) {
-            _currentPackageName.value = newPackageName
-            if (newPackageName != null) {
-                loadDisplayIcon(newPackageName)
-            }
-        }
-
-        // --- UNIFIED DYNAMIC COLOR LOGIC ---
-        if (viewSettings.useDynColorFollowPkgIcon) {
-            val colorInt: Int? = when (newState) {
-                // For install states, get color from analysis results
-                is InstallerViewState.InstallPrepare,
-                is InstallerViewState.Installing,
-                is InstallerViewState.InstallFailed,
-                is InstallerViewState.InstallSuccess -> repo.analysisResults.find { it.packageName == newPackageName }?.seedColor
-
-                // For choice screen, get the first available color
-                is InstallerViewState.InstallChoice -> repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
-
-                // For uninstall state, get pre-calculated color from uninstall info
-                is InstallerViewState.UninstallReady,
-                is InstallerViewState.Uninstalling,
-                is InstallerViewState.UninstallSuccess,
-                is InstallerViewState.UninstallFailed -> repo.uninstallInfo.value?.seedColor
-
-                // For all other states, we can clear the color
-                else -> null
-            }
-            if (colorInt != null) {
-                _seedColor.value = Color(colorInt)
-            } else if (newState is InstallerViewState.Ready) {
-                _seedColor.value = null
-            }
-
-        } else if (_seedColor.value != null) {
-            // If the feature is disabled, ensure the color is cleared.
-            _seedColor.value = null
-        }
-
-        // --- Manage auto-install job ---
-        autoInstallJob?.cancel() // Cancel any previous auto-install job by default.
-        if (newState is InstallerViewState.InstallPrepare && repo.config.installMode == InstallMode.AutoDialog) {
-            autoInstallJob = viewModelScope.launch {
-                delay(500)
-                if (state is InstallerViewState.InstallPrepare) {
-                    install()
-                }
-            }
+            is ProgressEntity.UninstallReady -> InstallerStage.UninstallReady
+            is ProgressEntity.InstallResolving, is ProgressEntity.InstallAnalysing, is ProgressEntity.InstallPreparing -> _localState.value.stage
+            else -> InstallerStage.Ready
         }
     }
 
     private fun collectRepo(repo: InstallerSessionRepository) {
         this.repo = repo
-        if (repo.config.enableCustomizeUser) {
-            loadAvailableUsers(repo.config.authorizer)
-        }
+        if (repo.config.enableCustomizeUser) loadAvailableUsers(repo.config.authorizer)
 
-        // Initialize install flags from repo config
-        _installFlags.value = listOfNotNull(
+        val initialInstallFlags = listOfNotNull(
             repo.config.allowTestOnly.takeIf { it }?.let { InstallOption.AllowTest.value },
             repo.config.allowDowngrade.takeIf { it }?.let { InstallOption.AllowDowngrade.value },
             repo.config.forAllUser.takeIf { it }?.let { InstallOption.AllUsers.value },
             repo.config.bypassLowTargetSdk.takeIf { it }?.let { InstallOption.BypassLowTargetSdkBlock.value },
             repo.config.allowAllRequestedPermissions.takeIf { it }?.let { InstallOption.GrantAllRequestedPermissions.value }
         ).fold(0) { acc, flag -> acc or flag }
-        repo.config.installFlags = _installFlags.value
 
-        _currentPackageName.value = null
-        val newPackageNames = repo.analysisResults.map { it.packageName }.toSet()
-        _displayIcons.update { old -> old.filterKeys { it in newPackageNames } }
+        repo.config.installFlags = initialInstallFlags
+
+        _localState.update {
+            it.copy(
+                installFlags = initialInstallFlags,
+                currentPackageName = null,
+                displayIcons = it.displayIcons.filterKeys { key -> key in repo.analysisResults.map { res -> res.packageName } }
+            )
+        }
 
         collectRepoJob?.cancel()
         autoInstallJob?.cancel()
@@ -484,103 +279,101 @@ class InstallerViewModel(
         collectRepoJob = viewModelScope.launch {
             settingsLoadingJob.join()
             repo.progress.collect { progress ->
-                // Handle transient "loading" states separately, as they don't always cause a full state change.
                 if (progress is ProgressEntity.InstallResolving || progress is ProgressEntity.InstallPreparing || progress is ProgressEntity.InstallAnalysing) {
-                    // If installing a module, skip the anti-flicker delay to show the sheet immediately.
                     if (isInstallingModule) {
                         loadingStateJob?.cancel()
-                        state = if (progress is ProgressEntity.InstallPreparing) {
-                            InstallerViewState.Preparing(progress.progress)
-                        } else {
-                            InstallerViewState.Analysing
+                        _localState.update {
+                            it.copy(stage = if (progress is ProgressEntity.InstallPreparing) InstallerStage.Preparing(progress.progress) else InstallerStage.Analysing)
                         }
-                    }
-                    // For regular app installs, keep the 200ms delay to prevent UI flickering.
-                    else if (loadingStateJob == null || !loadingStateJob!!.isActive) {
+                    } else if (loadingStateJob == null || !loadingStateJob!!.isActive) {
                         loadingStateJob = viewModelScope.launch {
                             delay(200L)
-                            state = if (progress is ProgressEntity.InstallPreparing) {
-                                InstallerViewState.Preparing(progress.progress)
-                            } else {
-                                InstallerViewState.Analysing
+                            _localState.update {
+                                it.copy(stage = if (progress is ProgressEntity.InstallPreparing) InstallerStage.Preparing(progress.progress) else InstallerStage.Analysing)
                             }
                         }
                     }
-                    return@collect // Don't proceed to full state-machine for these transient states.
+                    return@collect
                 }
 
                 loadingStateJob?.cancel()
                 loadingStateJob = null
 
-                // --- Stage 2: Map the progress to a new view state ---
-                val newState = mapProgressToViewState(progress)
+                val newStage = mapProgressToStage(progress)
 
-                // --- Stage 3: Determine context (like the current package name) from the new state ---
-                val newPackageName = when (newState) {
-                    // For the Installing state, we need to differentiate between single and batch install
-                    is InstallerViewState.Installing -> {
-                        if (newState.total > 1) {
+                val newPackageName = when (newStage) {
+                    is InstallerStage.Installing -> {
+                        if (newStage.total > 1) {
                             val selectedEntities = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
                             val groupedApps = selectedEntities.groupBy { it.app.packageName }.values.toList()
-
-                            val index = newState.current - 1
-                            val currentAppGroup = groupedApps.getOrNull(index)
-
-                            currentAppGroup?.firstOrNull()?.app?.packageName
-                                ?: _currentPackageName.value // Fallback
+                            groupedApps.getOrNull(newStage.current - 1)?.firstOrNull()?.app?.packageName ?: _localState.value.currentPackageName
                         } else {
-                            // For single install, use the selected entity.
-                            _currentPackageName.value
-                                ?: repo.analysisResults.firstNotNullOfOrNull { result ->
-                                    if (result.appEntities.any { it.selected }) result.packageName else null
-                                }
+                            _localState.value.currentPackageName
+                                ?: repo.analysisResults.firstNotNullOfOrNull { r -> if (r.appEntities.any { it.selected }) r.packageName else null }
                                 ?: repo.analysisResults.firstOrNull()?.packageName
                         }
                     }
 
-                    // For these states, we need to ensure a specific package name is focused.
-                    is InstallerViewState.InstallPrepare,
-                    is InstallerViewState.InstallFailed,
-                    is InstallerViewState.InstallSuccess -> {
-                        // Prioritize the existing currentPackageName (correctly set by installPrepare).
-                        // This ensures that in Mixed Module/APK scenarios, the entity selected by the user
-                        // (e.g., the APK) remains focused instead of reverting to the first item (e.g., the Module).
-                        // Fallback to the first result only if currentPackageName is null.
-                        _currentPackageName.value ?: repo.analysisResults.firstOrNull()?.packageName
+                    is InstallerStage.InstallPrepare, is InstallerStage.InstallFailed, is InstallerStage.InstallSuccess -> {
+                        _localState.value.currentPackageName ?: repo.analysisResults.firstOrNull()?.packageName
                     }
-                    // For choice/multi-app states, there is no single focused package.
-                    is InstallerViewState.InstallChoice, is InstallerViewState.Ready -> null
-                    // For other states, keep the current package name unless explicitly cleared.
-                    else -> _currentPackageName.value
+
+                    is InstallerStage.InstallChoice, is InstallerStage.Ready -> null
+                    else -> _localState.value.currentPackageName
                 }
 
-                // --- Stage 4: Handle all side effects based on the new state and progress ---
-                handleStateSideEffects(newPackageName, newState)
+                if (newPackageName != null && newPackageName != _localState.value.currentPackageName) {
+                    loadDisplayIcon(newPackageName)
+                }
 
-                // --- Stage 5: Apply the final state change if necessary ---
-                if (newState != state) {
-                    Timber.d("State transition: ${state::class.simpleName} -> ${newState::class.simpleName}")
-                    state = newState
+                _localState.update { currentState ->
+                    var updatedState = currentState.copy(
+                        stage = newStage,
+                        currentPackageName = newPackageName ?: currentState.currentPackageName
+                    )
+
+                    if (updatedState.viewSettings.useDynColorFollowPkgIcon) {
+                        val colorInt: Int? = when (newStage) {
+                            is InstallerStage.InstallPrepare, is InstallerStage.Installing, is InstallerStage.InstallFailed, is InstallerStage.InstallSuccess ->
+                                repo.analysisResults.find { it.packageName == newPackageName }?.seedColor
+
+                            is InstallerStage.InstallChoice -> repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
+                            is InstallerStage.UninstallReady, is InstallerStage.Uninstalling, is InstallerStage.UninstallSuccess, is InstallerStage.UninstallFailed ->
+                                repo.uninstallInfo.value?.seedColor
+
+                            else -> null
+                        }
+                        updatedState = updatedState.copy(seedColor = colorInt?.let { Color(it) })
+                    } else {
+                        updatedState = updatedState.copy(seedColor = null)
+                    }
+
+                    if (newStage is InstallerStage.UninstallReady) {
+                        updatedState = updatedState.copy(
+                            uiUninstallInfo = repo.uninstallInfo.value,
+                            uninstallFlags = repo.config.uninstallFlags
+                        )
+                    }
+
+                    updatedState
+                }
+
+                autoInstallJob?.cancel()
+                if (newStage is InstallerStage.InstallPrepare && repo.config.installMode == InstallMode.AutoDialog) {
+                    autoInstallJob = viewModelScope.launch {
+                        delay(500)
+                        if (_localState.value.stage is InstallerStage.InstallPrepare) install()
+                    }
                 }
             }
         }
     }
 
-    /**
-     * Toggle (enable/disable) an installation flag
-     * @param flag The flag to operate on (from InstallOption.value)
-     * @param enable true to add the flag, false to remove the flag
-     */
     fun toggleInstallFlag(flag: Int, enable: Boolean) {
-        val currentFlags = _installFlags.value
-        if (enable) {
-            // Add flag using bitwise OR
-            _installFlags.value = currentFlags.addFlag(flag)
-        } else {
-            // Remove flag using bitwise AND and bitwise NOT (inv)
-            _installFlags.value = currentFlags.removeFlag(flag)
-        }
-        repo.config.installFlags = _installFlags.value // 同步到 repo.config
+        val currentFlags = _localState.value.installFlags
+        val newFlags = if (enable) currentFlags.addFlag(flag) else currentFlags.removeFlag(flag)
+        _localState.update { it.copy(installFlags = newFlags) }
+        repo.config.installFlags = newFlags
     }
 
     fun toggleBypassBlacklist(enable: Boolean) {
@@ -588,95 +381,49 @@ class InstallerViewModel(
     }
 
     private fun selectInstaller(packageName: String?) {
-        repo.config = repo.config.copy(installer = packageName) // Update the repository
-        _selectedInstaller.value = packageName // Update the StateFlow
+        repo.config = repo.config.copy(installer = packageName)
+        _localState.update { it.copy(selectedInstaller = packageName) }
     }
 
     private fun selectTargetUser(userId: Int) {
         repo.config = repo.config.copy(targetUserId = userId)
-        _selectedUserId.value = userId
+        _localState.update { it.copy(selectedUserId = userId) }
     }
 
-    /**
-     * Loads available users for the selected authorizer.
-     * @param authorizer The authorizer to use for the check.
-     */
     private fun loadAvailableUsers(authorizer: Authorizer) {
         viewModelScope.launch {
-            // getAuthorizer() is a suspend function that correctly resolves 'Global' to the actual authorizer.
-            val effectiveAuthorizer = authorizer
-
-            // If the effective authorizer is Dhizuku, disable the feature and do not proceed.
-            if (effectiveAuthorizer == Authorizer.Dhizuku) {
-                _availableUsers.value = emptyMap()
-                if (_selectedUserId.value != 0) {
-                    selectTargetUser(0)
-                }
+            if (authorizer == Authorizer.Dhizuku) {
+                _localState.update { it.copy(availableUsers = emptyMap()) }
+                if (_localState.value.selectedUserId != 0) selectTargetUser(0)
                 return@launch
             }
 
-            // Proceed with fetching users for other authorizers.
             runCatching {
-                withContext(Dispatchers.IO) {
-                    systemInfoProvider.getUsers(effectiveAuthorizer)
-                }
+                withContext(Dispatchers.IO) { systemInfoProvider.getUsers(authorizer) }
             }.onSuccess { users ->
-                _availableUsers.value = users
-                // Validate if the currently selected user still exists.
-                if (!users.containsKey(_selectedUserId.value)) {
-                    selectTargetUser(0)
-                }
+                _localState.update { it.copy(availableUsers = users) }
+                if (!users.containsKey(_localState.value.selectedUserId)) selectTargetUser(0)
             }.onFailure { error ->
-                // Check if the error is caused by coroutine cancellation.
-                if (error is CancellationException) {
-                    Timber.d("User loading job was cancelled as expected.")
-                    throw error
-                }
+                if (error is CancellationException) throw error
                 Timber.e(error, "Failed to load available users.")
                 toast(error.getErrorMessage(context))
-                _availableUsers.value = emptyMap()
-                // Also reset selected user on failure.
-                if (_selectedUserId.value != 0) {
-                    selectTargetUser(0)
-                }
+                _localState.update { it.copy(availableUsers = emptyMap()) }
+                if (_localState.value.selectedUserId != 0) selectTargetUser(0)
             }
         }
     }
 
-    /**
-     * Loads the display icon for the given package name and updates the StateFlow.
-     * @param packageName The package name of the app to load the icon for.
-     */
     private fun loadDisplayIcon(packageName: String) {
         if (packageName.isBlank()) return
+        if (_localState.value.displayIcons[packageName] != null || iconJobs[packageName]?.isActive == true) return
 
-        val mapSnapshot = _displayIcons.value
-        val currentValue = mapSnapshot[packageName]
-        val existingJob = iconJobs[packageName]
-        val isJobActive = existingJob?.isActive == true
+        _localState.update { it.copy(displayIcons = it.displayIcons + (packageName to null)) }
 
-        if (currentValue != null || isJobActive) {
-            return
-        }
-
-        _displayIcons.update { currentMap ->
-            if (currentMap.containsKey(packageName)) {
-                currentMap
-            } else {
-                currentMap + (packageName to null)
-            }
-        }
-
-        existingJob?.cancel()
+        iconJobs[packageName]?.cancel()
         iconJobs[packageName] = viewModelScope.launch {
-            val rawEntities = repo.analysisResults
-                .find { it.packageName == packageName }
-                ?.appEntities
-                ?.map { it.app }
-
-            val entityToInstall =
-                rawEntities?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
-                    ?: rawEntities?.filterIsInstance<AppEntity.ModuleEntity>()?.firstOrNull()
+            val rawEntities = repo.analysisResults.find { it.packageName == packageName }?.appEntities?.map { it.app }
+            val entityToInstall = rawEntities?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
+                ?: rawEntities?.filterIsInstance<AppEntity.ModuleEntity>()?.firstOrNull()
 
             val loadedIcon = try {
                 appIconRepo.getIcon(
@@ -684,76 +431,52 @@ class InstallerViewModel(
                     packageName = packageName,
                     entityToInstall = entityToInstall,
                     iconSizePx = 256,
-                    preferSystemIcon = viewSettings.preferSystemIconForUpdates
+                    preferSystemIcon = uiState.value.viewSettings.preferSystemIconForUpdates
                 )
             } catch (_: Exception) {
                 null
             }
 
-            val finalIcon =
-                loadedIcon ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+            val finalIcon = loadedIcon ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
 
-            _displayIcons.update { currentMap ->
-                if (currentMap[packageName] == null) {
-                    currentMap + (packageName to finalIcon)
-                } else {
-                    currentMap
-                }
+            _localState.update {
+                if (it.displayIcons[packageName] == null) it.copy(displayIcons = it.displayIcons + (packageName to finalIcon))
+                else it
             }
         }
     }
 
-    fun toast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun toast(@StringRes resId: Int) {
-        Toast.makeText(context, resId, Toast.LENGTH_SHORT).show()
-    }
+    private fun toast(message: String) = _uiEvents.tryEmit(InstallerViewEvent.ShowToast(message))
+    private fun toast(@StringRes resId: Int) = _uiEvents.tryEmit(InstallerViewEvent.ShowToastRes(resId))
 
     private fun close() {
         autoInstallJob?.cancel()
         collectRepoJob?.cancel()
-        _currentPackageName.value = null
         iconJobs.values.forEach { it.cancel() }
         iconJobs.clear()
         repo.close()
-        state = InstallerViewState.Ready
+        _localState.update { it.copy(currentPackageName = null, stage = InstallerStage.Ready) }
     }
 
     private fun cancel() {
-        // 2. 取消自动安装任务（如果存在）
         autoInstallJob?.cancel()
-
-        // 3. 取消图标加载任务（可选，优化性能）
         iconJobs.values.forEach { it.cancel() }
-
-        // 4. 调用 Repo 的取消。
-        // 根据之前的后端修改，ActionHandler 会捕获 Cancel 动作，取消协程，并发送 ProgressEntity.Ready。
-        // ViewModel 监听到 Ready 后，会自动将 state 切换回 InstallerViewState.Ready。
         repo.cancel()
     }
 
-    private fun analyse() {
-        repo.analyse()
-    }
+    private fun analyse() = repo.analyse()
 
     private fun installChoice() {
         autoInstallJob?.cancel()
-        if (_currentPackageName.value != null) _currentPackageName.value = null
-        val containerType = repo.analysisResults.firstOrNull()
-            ?.appEntities?.firstOrNull()
-            ?.app?.sourceType
+        _localState.update { it.copy(currentPackageName = null) }
 
+        val containerType = repo.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType
         if (containerType == DataType.MIXED_MODULE_APK) {
-            val currentResults = repo.analysisResults.toMutableList()
-            val updatedResults = currentResults.map { packageResult ->
-                val deselectedEntities = packageResult.appEntities.map { it.copy(selected = false) }
-                packageResult.copy(appEntities = deselectedEntities)
-            }
-            repo.analysisResults = updatedResults
+            repo.analysisResults = repo.analysisResults.map { result ->
+                result.copy(appEntities = result.appEntities.map { it.copy(selected = false) })
+            }.toMutableList()
         }
-        state = InstallerViewState.InstallChoice
+        _localState.update { it.copy(stage = InstallerStage.InstallChoice) }
     }
 
     private fun installPrepare() {
@@ -762,38 +485,35 @@ class InstallerViewModel(
 
         if (uniquePackages.size == 1) {
             val targetPackageName = selectedEntities.first().app.packageName
-            _currentPackageName.value = targetPackageName
-            if (viewSettings.useDynColorFollowPkgIcon) {
-                val colorInt = repo.analysisResults.find { it.packageName == targetPackageName }?.seedColor
-                _seedColor.value = colorInt?.let { Color(it) }
+            _localState.update {
+                it.copy(
+                    currentPackageName = targetPackageName,
+                    stage = InstallerStage.InstallPrepare,
+                    seedColor = if (it.viewSettings.useDynColorFollowPkgIcon)
+                        repo.analysisResults.find { res -> res.packageName == targetPackageName }?.seedColor?.let { c -> Color(c) }
+                    else null
+                )
             }
-            state = InstallerViewState.InstallPrepare
         } else {
-            // Handle case where multiple packages are selected, maybe go back to choice.
-            state = InstallerViewState.InstallChoice
+            _localState.update { it.copy(stage = InstallerStage.InstallChoice) }
         }
     }
 
     private fun installExtendedMenu() {
-        when (state) {
-            is InstallerViewState.InstallPrepare,
-            InstallerViewState.InstallExtendedSubMenu,
-            InstallerViewState.InstallFailed -> {
-                state = InstallerViewState.InstallExtendedMenu
-            }
-
-            else -> {
-                toast("dialog_install_extended_menu_not_available"/*R.string.dialog_install_extended_menu_not_available*/)
-            }
-        }
+        if (_localState.value.stage in listOf(
+                InstallerStage.InstallPrepare,
+                InstallerStage.InstallExtendedSubMenu,
+                InstallerStage.InstallFailed
+            )
+        ) {
+            _localState.update { it.copy(stage = InstallerStage.InstallExtendedMenu) }
+        } else toast(R.string.error_dialog_install_menu_not_available)
     }
 
     private fun installExtendedSubMenu() {
-        if (state is InstallerViewState.InstallExtendedMenu) {
-            state = InstallerViewState.InstallExtendedSubMenu
-        } else {
-            toast("dialog_install_extended_sub_menu_not_available"/*R.string.dialog_install_extended_sub_menu_not_available*/)
-        }
+        if (_localState.value.stage is InstallerStage.InstallExtendedMenu) {
+            _localState.update { it.copy(stage = InstallerStage.InstallExtendedSubMenu) }
+        } else toast(R.string.error_dialog_install_menu_not_available)
     }
 
     private fun install() {
@@ -802,14 +522,8 @@ class InstallerViewModel(
         repo.install(true)
     }
 
-    private fun background() {
-        repo.background(true)
-    }
+    private fun background() = repo.background(true)
 
-    /**
-     * Toggles the selection state of a specific entity within a package.
-     * This method handles the complexity of updating the immutable state.
-     */
     fun toggleSelection(packageName: String, entityToToggle: SelectInstallEntity, isMultiSelect: Boolean) {
         val currentResults = repo.analysisResults.toMutableList()
         val packageIndex = currentResults.indexOfFirst { it.packageName == packageName }
@@ -817,117 +531,89 @@ class InstallerViewModel(
         if (packageIndex != -1) {
             val packageToUpdate = currentResults[packageIndex]
             val updatedEntities = packageToUpdate.appEntities.map { currentEntity ->
-                // Use object reference for precise matching
-                if (currentEntity === entityToToggle) {
-                    currentEntity.copy(selected = !currentEntity.selected)
-                } else if (!isMultiSelect) {
-                    // For single-select (radio button) behavior, deselect others
-                    currentEntity.copy(selected = false)
-                } else {
-                    currentEntity
-                }
+                if (currentEntity === entityToToggle) currentEntity.copy(selected = !currentEntity.selected)
+                else if (!isMultiSelect) currentEntity.copy(selected = false)
+                else currentEntity
             }.toMutableList()
 
-            // In multi-select mode (radio buttons), if the user clicks an already selected pkg,
-            // we should deselect everything in that group.
-            if (!isMultiSelect && entityToToggle.selected) {
-                updatedEntities.replaceAll { it.copy(selected = false) }
-            }
+            if (!isMultiSelect && entityToToggle.selected) updatedEntities.replaceAll { it.copy(selected = false) }
 
             currentResults[packageIndex] = packageToUpdate.copy(appEntities = updatedEntities)
             repo.analysisResults = currentResults
+
+            // Trigger recomposition explicitly since repo isn't a state flow
+            _localState.update { it.copy() }
         }
     }
 
     private fun toggleUninstallFlag(flag: Int, enable: Boolean) {
-        val currentFlags = _uninstallFlags.value
-        var newFlags = currentFlags
+        val currentFlags = _localState.value.uninstallFlags
+        var newFlags = if (enable) currentFlags.addFlag(flag) else currentFlags.removeFlag(flag)
 
-        if (enable) {
-            newFlags = newFlags.addFlag(flag)
-
-            if (flag == PackageManagerUtil.DELETE_ALL_USERS) {
-                if (currentFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP)) {
-                    newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_SYSTEM_APP)
-                    toast(R.string.uninstall_system_app_disabled)
-                }
-            } else if (flag == PackageManagerUtil.DELETE_SYSTEM_APP) {
-                if (currentFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS)) {
-                    newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_ALL_USERS)
-                    toast(R.string.uninstall_all_users_disabled)
-                }
-            }
-        } else newFlags = newFlags.removeFlag(flag)
+        if (enable && flag == PackageManagerUtil.DELETE_ALL_USERS && currentFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP)) {
+            newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_SYSTEM_APP)
+            toast(R.string.uninstall_system_app_disabled)
+        } else if (enable && flag == PackageManagerUtil.DELETE_SYSTEM_APP && currentFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS)) {
+            newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_ALL_USERS)
+            toast(R.string.uninstall_all_users_disabled)
+        }
 
         if (newFlags != currentFlags) {
-            _uninstallFlags.value = newFlags
+            _localState.update { it.copy(uninstallFlags = newFlags) }
             repo.config.uninstallFlags = newFlags
         }
     }
 
     private fun uninstallAndRetryInstall(keepData: Boolean, conflictingPackage: String?) {
-        val targetPackageName = conflictingPackage ?: _currentPackageName.value
+        val targetPackageName = conflictingPackage ?: _localState.value.currentPackageName
         if (targetPackageName == null) {
-            toast("R.string.error_no_package_to_uninstall")
+            toast(R.string.error_no_package_to_uninstall)
             return
         }
-        repo.config.uninstallFlags = if (keepData)
-            PackageManagerUtil.DELETE_KEEP_DATA
-        else 0 // Default flags (complete removal)
-
-        // Set the flag before starting the operation
+        repo.config.uninstallFlags = if (keepData) PackageManagerUtil.DELETE_KEEP_DATA else 0
         isRetryingInstall = true
         Timber.d("Uninstalling conflicting/old package: $targetPackageName for retry")
         repo.uninstall(targetPackageName)
     }
 
-    /**
-     * Starts the multi-package installation process.
-     */
     private fun installMultiple() {
         val selectedEntities = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
         repo.installMultiple(selectedEntities)
     }
 
-    /**
-     * Triggers the Android share sheet for the specified app entity.
-     */
     private fun shareApp(entity: AppEntity) {
         Timber.d("Sharing app: $entity")
         try {
-            // The input data is guaranteed to be a standalone file 
-            // (either a full .apks or an extracted .apk split).
-            val data = entity.data as? DataEntity.FileEntity
-            if (data == null) {
+            val filePath = entity.data.sourcePath()
+            if (filePath == null) {
                 toast("Invalid file entity for sharing")
                 return
             }
 
-            val fileToShare = File(data.path)
-
+            val fileToShare = java.io.File(filePath)
             if (!fileToShare.exists()) {
                 toast("File does not exist")
                 return
             }
 
-            // Retrieve authority matching AndroidManifest.xml
             val authority = "${context.packageName}.fileprovider"
             val uri = FileProvider.getUriForFile(context, authority, fileToShare)
 
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                // Determine MIME type based on entity type
-                type = if (entity is AppEntity.ModuleEntity) "application/zip" else "application/vnd.android.package-archive"
+                type = when {
+                    entity is AppEntity.ModuleEntity -> "application/zip"
+                    filePath.endsWith(".apkm", true) || filePath.endsWith(".apks", true) || filePath.endsWith(".xapk", true) -> "application/zip"
+                    else -> "application/vnd.android.package-archive"
+                }
                 putExtra(Intent.EXTRA_STREAM, uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
 
             val chooser = Intent.createChooser(shareIntent, null)
-            // Context might be application context from Koin, so NEW_TASK flag is required
             chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
             context.startActivity(chooser)
         } catch (e: Exception) {
-            Timber.tag("ShareAppError").e(e, "Failed to share file")
+            Timber.e(e, "Failed to share file")
             toast("Failed to share file")
         }
     }

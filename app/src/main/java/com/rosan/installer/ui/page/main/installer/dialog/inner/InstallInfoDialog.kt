@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import android.os.Build
@@ -39,7 +41,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
@@ -61,16 +63,15 @@ import com.rosan.installer.domain.engine.model.InstalledAppInfo
 import com.rosan.installer.domain.engine.model.sortedBest
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.toAndroidVersionName
 import kotlin.math.abs
-
 
 /**
  * Provides info display: Icon, Title, Subtitle (with version logic).
@@ -82,12 +83,16 @@ fun installInfoDialog(
     viewModel: InstallerViewModel,
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
-    val settings = viewModel.viewSettings
-    val iconMap by viewModel.displayIcons.collectAsState()
-    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val settings = uiState.viewSettings
+    val iconMap = uiState.displayIcons
+    val currentPackageName = uiState.currentPackageName
+    val stage = uiState.stage
+
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
     // If there's no current package to display, return empty params.
     if (currentPackage == null) return DialogParams()
+
     // The pre-install info is now directly available within main data model.
     val preInstallAppInfo = currentPackage.installedAppInfo
     val selectableEntities = currentPackage.appEntities
@@ -112,7 +117,7 @@ fun installInfoDialog(
                 else -> entityToInstall.packageName
             }
 
-    // Collect the icon state directly from the ViewModel.
+    // Get the icon from our map
     val displayIcon = iconMap[entityToInstall.packageName]
 
     return DialogParams(
@@ -129,7 +134,7 @@ fun installInfoDialog(
                         .size(64.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .then(
-                            if (viewModel.state == InstallerViewState.InstallPrepare) {
+                            if (stage == InstallerStage.InstallPrepare) {
                                 Modifier.clickable {
                                     viewModel.dispatch(InstallerViewAction.ShareApp(entityToInstall))
                                 }
@@ -164,7 +169,7 @@ fun installInfoDialog(
                 // When it becomes invisible, it will not take up any space,
                 // and the Row will re-center the Text automatically.
                 AnimatedVisibility(
-                    visible = viewModel.state == InstallerViewState.InstallPrepare || viewModel.state == InstallerViewState.InstallSuccess,
+                    visible = stage == InstallerStage.InstallPrepare || stage == InstallerStage.InstallSuccess,
                     enter = fadeIn() + slideInHorizontally { it }, // Slide in from the right
                     exit = fadeOut() + slideOutHorizontally { it }  // Slide out to the right
                 ) {

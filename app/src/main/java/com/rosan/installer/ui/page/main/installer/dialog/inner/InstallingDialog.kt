@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -16,11 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
@@ -30,9 +33,11 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 fun installingDialog(
     installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
-    val state = viewModel.state
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val stage = uiState.stage
+    val viewSettings = uiState.viewSettings
 
-    val installingState = state as? InstallerViewState.Installing
+    val installingStage = stage as? InstallerStage.Installing
 
     // Call InstallInfoDialog for base structure (icon, title, subtitle with new version)
     val baseParams = installInfoDialog(
@@ -47,15 +52,15 @@ fun installingDialog(
             DialogParamsType.InstallerInstalling.id
         ) {
             Column {
-                if (installingState != null) {
-                    val displayLabel = installingState.appLabel ?: "Unknown"
+                if (installingStage != null) {
+                    val displayLabel = installingStage.appLabel ?: "Unknown"
 
-                    val formattedText = if (installingState.total > 1) {
+                    val formattedText = if (installingStage.total > 1) {
                         stringResource(
                             R.string.installing_progress_text,
                             displayLabel,
-                            installingState.current,
-                            installingState.total
+                            installingStage.current,
+                            installingStage.total
                         )
                     } else null
 
@@ -71,14 +76,14 @@ fun installingDialog(
                     }
                 }
                 // --- M3E ---
-                val currentProgress = installingState?.progress
+                val currentProgress = installingStage?.progress
                 if (currentProgress != null && currentProgress > 0f) {
                     val animatedProgress by animateFloatAsState(
                         targetValue = currentProgress,
                         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
                         label = "ProgressBarAnimation"
                     )
-                    if (viewModel.viewSettings.uiExpressive)
+                    if (viewSettings.uiExpressive)
                         LinearWavyProgressIndicator(
                             progress = { animatedProgress },
                             modifier = Modifier

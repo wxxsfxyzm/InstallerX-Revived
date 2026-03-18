@@ -16,9 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
@@ -32,11 +33,13 @@ fun InstallPreparingContent(
     viewModel: InstallerViewModel,
     onCancel: () -> Unit
 ) {
-    val currentState = viewModel.state
-    val progress = if (currentState is InstallerViewState.Preparing) {
-        currentState.progress
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val stage = uiState.stage
+    // Extract progress via Smart Cast from the stage
+    val progress = if (stage is InstallerStage.Preparing) {
+        stage.progress
     } else {
-        0f
+        -1f // Default to indeterminate if state is wrong
     }
 
     val animatedProgress by animateFloatAsState(

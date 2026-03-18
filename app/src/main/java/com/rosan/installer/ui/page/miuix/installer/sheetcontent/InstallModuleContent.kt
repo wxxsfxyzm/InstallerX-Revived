@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
 import androidx.compose.foundation.layout.Arrangement
@@ -43,8 +45,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
  * It features a scrollable log area that automatically follows new output,
  * and a close button.
  *
- * @param colorScheme The color scheme for the UI.
- * @param isDarkMode Whether the UI is in dark mode.
  * @param outputLines The list of log lines to display.
  * @param isFinished Whether the installation process has completed.
  * @param onClose Lambda to be invoked when the close button is clicked.

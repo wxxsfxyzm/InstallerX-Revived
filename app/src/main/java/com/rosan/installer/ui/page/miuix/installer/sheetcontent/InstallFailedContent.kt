@@ -261,7 +261,7 @@ private fun MiuixErrorSuggestions(
                             context.startActivity(intent)
                             viewModel.dispatch(InstallerViewAction.Close)
                         } catch (_: ActivityNotFoundException) {
-                            viewModel.toast("Developer options screen not found.")
+                            viewModel.dispatch(InstallerViewAction.ShowToast("Developer options screen not found."))
                         }
                     },
                     labelRes = R.string.suggestion_user_restricted,

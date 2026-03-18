@@ -53,10 +53,10 @@ import com.rosan.installer.ui.page.main.widget.setting.ClearCache
 import com.rosan.installer.ui.page.main.widget.setting.DefaultInstaller
 import com.rosan.installer.ui.page.main.widget.setting.DisableAdbVerify
 import com.rosan.installer.ui.page.main.widget.setting.IgnoreBatteryOptimizationSetting
-import com.rosan.installer.ui.page.main.widget.setting.OnLifecycleEvent
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.theme.getM3TopBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.none

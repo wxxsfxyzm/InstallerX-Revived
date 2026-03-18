@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import android.content.ActivityNotFoundException
@@ -24,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
@@ -48,7 +51,8 @@ import timber.log.Timber
 fun installFailedDialog(
     installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
-    installer.analysisResults.firstOrNull()?.packageName ?: ""
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val viewSettings = uiState.viewSettings
 
     // Call InstallInfoDialog for base structure
     val baseParams = installInfoDialog(
@@ -65,7 +69,7 @@ fun installFailedDialog(
                 ErrorTextBlock(
                     installer.error,
                     suggestions = {
-                        if (viewModel.viewSettings.showSmartSuggestion)
+                        if (viewSettings.showSmartSuggestion)
                             ErrorSuggestions(
                                 error = installer.error,
                                 viewModel = viewModel,
@@ -266,7 +270,7 @@ private fun ErrorSuggestions(
                         } catch (_: ActivityNotFoundException) {
                             // In case the activity is not found on some strange devices,
                             // show a toast to the user.
-                            viewModel.toast("Developer options screen not found.")
+                            viewModel.dispatch(InstallerViewAction.ShowToast("Developer options screen not found."))
                         }
                     },
                     labelRes = R.string.suggestion_user_restricted,

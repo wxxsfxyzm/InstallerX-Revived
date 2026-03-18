@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import androidx.compose.animation.AnimatedVisibility
@@ -24,7 +26,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,11 +33,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
@@ -52,16 +54,10 @@ fun uninstallInfoDialog(
     viewModel: InstallerViewModel,
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
-    // Collect the UninstallInfo state from the ViewModel.
-    val uninstallInfo by viewModel.uiUninstallInfo.collectAsState()
-    val appInfo = uninstallInfo ?: return DialogParams() // Return empty if no info is available.
-
-    // Collect the icon map and get the specific icon for the current package.
-    //val iconMap by viewModel.displayIcons.collectAsState()
-    //val displayIcon = iconMap[appInfo.packageName]
-
-    // A unique key to ensure AnimatedContent updates correctly when the target app changes.
-    //val uniqueContentKey = "${DialogParamsType.UninstallerInfo.id}_${appInfo.packageName}"
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    // Collect the UninstallInfo state from uiState.
+    val appInfo = uiState.uiUninstallInfo ?: return DialogParams() // Return empty if no info is available.
+    val stage = uiState.stage
 
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.InstallerUninstallInfo.id) {
@@ -89,7 +85,7 @@ fun uninstallInfoDialog(
                 // When it becomes invisible, it will not take up any space,
                 // and the Row will re-center the Text automatically.
                 AnimatedVisibility(
-                    visible = viewModel.state == InstallerViewState.UninstallReady,
+                    visible = stage == InstallerStage.UninstallReady,
                     enter = fadeIn() + slideInHorizontally { it }, // Slide in from the right
                     exit = fadeOut() + slideOutHorizontally { it }  // Slide out to the right
                 ) {

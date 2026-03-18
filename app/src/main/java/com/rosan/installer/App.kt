@@ -27,7 +27,13 @@ class App : Application() {
             MonetCompat.getInstance().updateMonetColors()
         }
 
-        if (AppConfig.isLogEnabled) Timber.plant(Timber.DebugTree())
+        if (AppConfig.isLogEnabled) Timber.plant(object : Timber.DebugTree() {
+            override fun createStackElementTag(element: StackTraceElement): String? {
+                return super.createStackElementTag(element)
+                    ?.substringBefore('$')
+                    ?.take(23)
+            }
+        })
 
         startKoin {
             // Koin Android Logger

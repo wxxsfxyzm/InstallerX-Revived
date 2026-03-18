@@ -47,11 +47,11 @@ import com.rosan.installer.ui.page.main.widget.card.StatusWidget
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.page.main.widget.setting.ExportLogsWidget
-import com.rosan.installer.ui.page.main.widget.setting.LogEventCollector
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
+import com.rosan.installer.ui.page.main.widget.util.LogEventCollector
 import com.rosan.installer.ui.theme.getM3TopBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle

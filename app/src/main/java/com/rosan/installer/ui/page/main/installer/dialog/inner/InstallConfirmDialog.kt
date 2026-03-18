@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import androidx.compose.foundation.Image
@@ -16,9 +18,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
@@ -27,7 +29,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 fun installConfirmDialog(
     viewModel: InstallerViewModel
 ): DialogParams {
-    val state = viewModel.state as? InstallerViewState.InstallConfirm ?: return DialogParams()
+    val sessionInfo = viewModel.uiState.value.stage as? InstallerStage.InstallConfirm ?: return DialogParams()
 
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.InstallerConfirm.id) {
@@ -35,9 +37,9 @@ fun installConfirmDialog(
                 modifier = Modifier.size(64.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (state.appIcon != null) {
+                if (sessionInfo.appIcon != null) {
                     Image(
-                        bitmap = state.appIcon.asImageBitmap(),
+                        bitmap = sessionInfo.appIcon.asImageBitmap(),
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxSize()
@@ -48,7 +50,7 @@ fun installConfirmDialog(
         },
         title = DialogInnerParams(DialogParamsType.InstallerConfirm.id) {
             Text(
-                text = state.appLabel.toString(),
+                text = sessionInfo.appLabel.toString(),
                 textAlign = TextAlign.Center
             )
         },
@@ -62,10 +64,10 @@ fun installConfirmDialog(
         buttons = dialogButtons(DialogParamsType.InstallerConfirm.id) {
             listOf(
                 DialogButton(stringResource(R.string.confirm)) {
-                    viewModel.dispatch(InstallerViewAction.ApproveSession(state.sessionId, true))
+                    viewModel.dispatch(InstallerViewAction.ApproveSession(sessionInfo.sessionId, true))
                 },
                 DialogButton(stringResource(R.string.cancel)) {
-                    viewModel.dispatch(InstallerViewAction.ApproveSession(state.sessionId, false))
+                    viewModel.dispatch(InstallerViewAction.ApproveSession(sessionInfo.sessionId, false))
                 }
             )
         }

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import android.annotation.SuppressLint
@@ -19,17 +21,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
@@ -108,10 +109,10 @@ private fun installPrepareTooManyDialog(
 fun installPrepareDialog(
     installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
-    LocalContext.current
-    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val currentPackageName = uiState.currentPackageName
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
-    val settings = viewModel.viewSettings
+    val settings = uiState.viewSettings
 
     // If there is no specific package to prepare, show an empty/error dialog.
     if (currentPackage == null) {

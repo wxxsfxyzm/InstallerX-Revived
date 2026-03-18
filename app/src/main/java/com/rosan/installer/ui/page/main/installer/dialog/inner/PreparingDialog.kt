@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -17,10 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
@@ -30,9 +33,13 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 fun preparingDialog(
     viewModel: InstallerViewModel
 ): DialogParams {
-    val currentState = viewModel.state
-    val progress = if (currentState is InstallerViewState.Preparing) {
-        currentState.progress
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val stage = uiState.stage
+    val viewSettings = uiState.viewSettings
+
+    // Extract progress via Smart Cast from the stage
+    val progress = if (stage is InstallerStage.Preparing) {
+        stage.progress
     } else {
         -1f // Default to indeterminate if state is wrong
     }
@@ -74,7 +81,9 @@ fun preparingDialog(
                         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
                         label = "PreparingProgressAnimation"
                     )
-                    if (viewModel.viewSettings.uiExpressive)
+
+                    // Use viewSettings from uiState
+                    if (viewSettings.uiExpressive)
                         LinearWavyProgressIndicator(
                             progress = { animatedProgress },
                             modifier = Modifier

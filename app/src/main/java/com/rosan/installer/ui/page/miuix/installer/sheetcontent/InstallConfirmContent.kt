@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
 import androidx.compose.foundation.Image
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,9 +24,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.InstallerViewState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -38,7 +42,9 @@ fun InstallConfirmContent(
     onCancel: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    val state = viewModel.state as InstallerViewState.InstallConfirm
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val stage = uiState.stage as? InstallerStage.InstallConfirm ?: return
+
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
@@ -49,9 +55,9 @@ fun InstallConfirmContent(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(top = 16.dp, bottom = 24.dp)
             ) {
-                if (state.appIcon != null) {
+                if (stage.appIcon != null) {
                     Image(
-                        bitmap = state.appIcon.asImageBitmap(),
+                        bitmap = stage.appIcon.asImageBitmap(),
                         contentDescription = null,
                         modifier = Modifier
                             .size(86.dp)
@@ -65,7 +71,7 @@ fun InstallConfirmContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = state.appLabel.toString(),
+                    text = stage.appLabel.toString(),
                     style = MiuixTheme.textStyles.title3,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -19,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.installer.InstallerViewState
+import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
@@ -30,7 +32,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun InstallingContent(
-    state: InstallerViewState.Installing,
+    state: InstallerStage.Installing,
     appInfo: AppInfoState,
     onButtonClick: () -> Unit
 ) {

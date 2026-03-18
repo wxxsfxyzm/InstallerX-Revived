@@ -6,12 +6,12 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.AppEntity
@@ -37,10 +37,11 @@ fun installSuccessDialog(
     viewModel: InstallerViewModel
 ): DialogParams {
     val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val deviceCapabilityProvider: DeviceCapabilityProvider = koinInject()
-    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val currentPackageName = uiState.currentPackageName
     val coroutineScope = rememberCoroutineScope()
-    val settings = viewModel.viewSettings
+    val settings = uiState.viewSettings
 
     val openAppUseCase: OpenAppUseCase = koinInject()
     val openLSPosedUseCase: OpenLSPosedUseCase = koinInject()

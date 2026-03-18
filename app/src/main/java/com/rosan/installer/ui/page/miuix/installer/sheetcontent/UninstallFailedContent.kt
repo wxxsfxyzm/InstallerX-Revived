@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
 import androidx.compose.foundation.layout.Arrangement
@@ -9,12 +11,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -31,8 +33,8 @@ fun UninstallFailedContent(
     viewModel: InstallerViewModel,
     onClose: () -> Unit
 ) {
-    val uninstallInfo by viewModel.uiUninstallInfo.collectAsState()
-    val info = uninstallInfo ?: return
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val info = uiState.uiUninstallInfo ?: return
 
     Column(
         modifier = Modifier.fillMaxWidth(),

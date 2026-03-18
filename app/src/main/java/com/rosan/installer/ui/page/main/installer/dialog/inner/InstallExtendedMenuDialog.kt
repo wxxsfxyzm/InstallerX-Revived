@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.DataType
@@ -66,22 +68,28 @@ import com.rosan.installer.util.pm.getBestPermissionLabel
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun installExtendedMenuDialog(
-    installer: InstallerSessionRepository, viewModel: InstallerViewModel
+    installer: InstallerSessionRepository,
+    viewModel: InstallerViewModel
 ): DialogParams {
-    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val currentPackageName = uiState.currentPackageName
+    val installFlags = uiState.installFlags
+    val managedPackages = uiState.managedInstallerPackages
+    val selectedInstallerPackageName = uiState.selectedInstaller
+    val availableUsers = uiState.availableUsers
+    val selectedUserId = uiState.selectedUserId
+
     val containerType =
         installer.analysisResults.find { it.packageName == currentPackageName }?.appEntities?.first()?.app?.sourceType
     val installOptions = rememberInstallOptions(installer.config.authorizer)
-    val installFlags by viewModel.installFlags.collectAsState()
-    val managedPackages by viewModel.managedInstallerPackages.collectAsState()
-    val selectedInstallerPackageName by viewModel.selectedInstaller.collectAsState()
+
     val selectedInstaller = remember(selectedInstallerPackageName, managedPackages) {
         managedPackages.find { it.packageName == selectedInstallerPackageName }
     }
-    val availableUsers by viewModel.availableUsers.collectAsState()
-    val selectedUserId by viewModel.selectedUserId.collectAsState()
     val customizeUserEnabled = installer.config.enableCustomizeUser
     val defaultInstallerHintText = stringResource(id = R.string.config_follow_settings)
+
     val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, availableUsers) {
         buildList {
             // Permission List
@@ -134,7 +142,7 @@ fun installExtendedMenuDialog(
                 )
             }
 
-            // 动态安装选项
+            // Dynamic installation options
             if (installer.config.authorizer == Authorizer.Root ||
                 installer.config.authorizer == Authorizer.Shizuku
             ) {
@@ -167,7 +175,14 @@ fun installExtendedMenuDialog(
             )
         },
         content = DialogInnerParams(DialogParamsType.InstallExtendedMenu.id) {
-            MenuItemWidget(menuEntities, viewModel, installFlags, managedPackages, availableUsers)
+            MenuItemWidget(
+                menuEntities,
+                viewModel,
+                installFlags,
+                managedPackages,
+                availableUsers,
+                uiState.defaultInstallerFromSettings // Passed directly from state
+            )
         },
         buttons = dialogButtons(
             DialogParamsType.InstallExtendedMenu.id
@@ -185,12 +200,12 @@ fun installExtendedMenuDialog(
 fun MenuItemWidget(
     entities: SnapshotStateList<ExtendedMenuEntity>,
     viewmodel: InstallerViewModel,
-    installFlags: Int, // flags from viewmodel
+    installFlags: Int,
     managedPackages: List<NamedPackage>,
-    availableUsers: Map<Int, String>
+    availableUsers: Map<Int, String>,
+    defaultInstallerFromSettings: String? // Added parameter to receive value
 ) {
     val haptic = LocalHapticFeedback.current
-    val defaultInstallerFromSettings by viewmodel.defaultInstallerFromSettings.collectAsState()
 
     // Define shapes for different positions
     val cornerRadius = 16.dp
@@ -486,7 +501,10 @@ fun MenuItemWidget(
 fun installExtendedMenuSubMenuDialog(
     installer: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
-    val currentPackageName by viewModel.currentPackageName.collectAsState()
+    // Observe the single source of truth
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val currentPackageName = uiState.currentPackageName
+
     val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
 
     val entity = currentPackage?.appEntities
@@ -514,10 +532,10 @@ fun installExtendedMenuSubMenuDialog(
                     .padding(horizontal = 16.dp, vertical = 0.dp)
                     .heightIn(max = 400.dp),
             ) {
-                itemsIndexed(permissionList) { index, permission ->
+                itemsIndexed(permissionList) { _, permission ->
                     PermissionCard(
                         permission = permission,
-                        // 从 ViewModel 的 state 中读取是否选中
+                        // Note: If you need to read selection state from viewmodel later, use uiState here
                         isHighlight = false
                     )
                 }

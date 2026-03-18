@@ -44,10 +44,10 @@ import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
 import com.rosan.installer.ui.page.main.widget.setting.ExportLogsWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
-import com.rosan.installer.ui.page.main.widget.setting.LogEventCollector
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
+import com.rosan.installer.ui.page.main.widget.util.LogEventCollector
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.koin.androidx.compose.koinViewModel

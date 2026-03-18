@@ -51,9 +51,9 @@ import com.rosan.installer.ui.page.main.widget.setting.DefaultInstaller
 import com.rosan.installer.ui.page.main.widget.setting.DisableAdbVerify
 import com.rosan.installer.ui.page.main.widget.setting.IgnoreBatteryOptimizationSetting
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
-import com.rosan.installer.ui.page.main.widget.setting.OnLifecycleEvent
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
+import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.theme.none
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject

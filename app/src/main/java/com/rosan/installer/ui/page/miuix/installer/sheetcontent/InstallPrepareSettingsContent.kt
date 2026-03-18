@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
 import androidx.activity.compose.BackHandler
@@ -18,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
@@ -39,7 +42,8 @@ fun PrepareSettingsContent(
     viewModel: InstallerViewModel
 ) {
     val isDarkMode = InstallerTheme.isDark
-    val settings = viewModel.viewSettings
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val settings = uiState.viewSettings
     var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
     var displaySize by remember { mutableStateOf(installer.config.displaySize) }

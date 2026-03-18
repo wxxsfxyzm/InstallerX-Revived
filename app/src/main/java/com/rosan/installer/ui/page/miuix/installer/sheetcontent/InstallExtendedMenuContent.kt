@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
 import androidx.activity.compose.BackHandler
@@ -12,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.session.model.ExtendedMenuEntity
 import com.rosan.installer.domain.session.model.ExtendedMenuItemEntity
@@ -57,15 +59,19 @@ fun InstallExtendedMenuContent(
 ) {
     val isDarkMode = InstallerTheme.isDark
     val installOptions = rememberInstallOptions(installer.config.authorizer)
-    val installFlags by viewModel.installFlags.collectAsState()
-    val managedPackages by viewModel.managedInstallerPackages.collectAsState()
-    val selectedInstallerPackageName by viewModel.selectedInstaller.collectAsState()
-    val defaultInstallerFromSettings by viewModel.defaultInstallerFromSettings.collectAsState()
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val installFlags = uiState.installFlags
+    val managedPackages = uiState.managedInstallerPackages
+    val selectedInstallerPackageName = uiState.selectedInstaller
+    val defaultInstallerFromSettings = uiState.defaultInstallerFromSettings
+    val availableUsers = uiState.availableUsers
+    val selectedUserId = uiState.selectedUserId
+
     val selectedInstaller = remember(selectedInstallerPackageName, managedPackages) {
         managedPackages.find { it.packageName == selectedInstallerPackageName }
     }
-    val availableUsers by viewModel.availableUsers.collectAsState()
-    val selectedUserId by viewModel.selectedUserId.collectAsState()
+
     val customizeUserEnabled = installer.config.enableCustomizeUser
     val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, availableUsers) {
         buildList {
@@ -153,11 +159,6 @@ fun InstallExtendedMenuContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            /*TextButton(
-                onClick = { viewModel.dispatch(InstallerViewAction.Close) },
-                text = stringResource(R.string.cancel),
-                modifier = Modifier.weight(1f),
-            )*/
             TextButton(
                 onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) },
                 text = stringResource(R.string.back),

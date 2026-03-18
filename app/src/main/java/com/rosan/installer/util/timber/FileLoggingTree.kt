@@ -22,7 +22,7 @@ import java.util.Locale
  */
 class FileLoggingTree(
     private val context: Context
-) : Timber.DebugTree() {
+) : Timber.Tree() {
 
     companion object {
         private const val TAG = "FileLoggingTree"
