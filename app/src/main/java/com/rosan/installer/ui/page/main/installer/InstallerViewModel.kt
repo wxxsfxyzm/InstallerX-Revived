@@ -50,6 +50,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
+import java.io.File
 
 class InstallerViewModel(
     private var repo: InstallerSessionRepository,
@@ -590,7 +591,7 @@ class InstallerViewModel(
                 return
             }
 
-            val fileToShare = java.io.File(filePath)
+            val fileToShare = File(filePath)
             if (!fileToShare.exists()) {
                 toast("File does not exist")
                 return

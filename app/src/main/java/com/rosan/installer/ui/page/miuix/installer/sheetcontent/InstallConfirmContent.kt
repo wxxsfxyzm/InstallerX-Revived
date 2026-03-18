@@ -73,6 +73,7 @@ fun InstallConfirmContent(
                 Text(
                     text = stage.appLabel.toString(),
                     style = MiuixTheme.textStyles.title3,
+                    color = MiuixTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 24.dp)
