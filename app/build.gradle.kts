@@ -7,13 +7,13 @@ val gitHash: String = try {
     providers.exec {
         commandLine("git", "rev-parse", "--short", "HEAD")
     }.standardOutput.asText.get().trim()
-} catch (e: Exception) {
+} catch (_: Exception) {
     "unknown"
 }
 
 val manualVersionName = project.findProperty("VERSION_NAME") as String?
-val dynamicVersionName = LocalDate.now().format(DateTimeFormatter.ofPattern("yy.MM"))
-val baseVersionName = manualVersionName ?: dynamicVersionName
+val dynamicVersionName: String = LocalDate.now().format(DateTimeFormatter.ofPattern("yy.MM"))
+val baseVersionName: String = manualVersionName ?: dynamicVersionName
 
 plugins {
     alias(libs.plugins.agp.app)
@@ -65,7 +65,6 @@ android {
         versionName = baseVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
     signingConfigs {
@@ -106,7 +105,7 @@ android {
                     println("Applying custom signing to release build.")
                     signingConfigs.getByName("releaseCustom")
                 } else {
-                    println("No custom signing info. Debug build will use the default debug keystore.")
+                    println("No custom signing info. Release build will use the default debug keystore.")
                     signingConfigs.getByName("debug")
                 }
             isShrinkResources = true
