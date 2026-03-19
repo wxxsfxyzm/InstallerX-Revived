@@ -19,6 +19,7 @@ import com.rosan.installer.domain.engine.repository.AnalyserRepository
 import com.rosan.installer.domain.engine.repository.AppIconRepository
 import com.rosan.installer.domain.engine.repository.InstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
+import com.rosan.installer.domain.engine.usecase.AnalyzeInstallStateUseCase
 import com.rosan.installer.domain.engine.usecase.AnalyzePackageUseCase
 import com.rosan.installer.domain.engine.usecase.ExecuteInstallUseCase
 import com.rosan.installer.domain.engine.usecase.SelectOptimalSplitsUseCase
@@ -49,7 +50,8 @@ val engineModule = module {
     singleOf(::ModuleInstallerRepositoryImpl) { bind<ModuleInstallerRepository>() }
 
     // UseCases
-    factoryOf(::SelectOptimalSplitsUseCase)
+    factoryOf(::AnalyzeInstallStateUseCase)
     factoryOf(::AnalyzePackageUseCase)
     factoryOf(::ExecuteInstallUseCase)
+    factoryOf(::SelectOptimalSplitsUseCase)
 }

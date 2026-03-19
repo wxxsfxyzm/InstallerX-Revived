@@ -3,10 +3,10 @@
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import androidx.compose.ui.graphics.Color
-import com.rosan.installer.ui.page.main.widget.chip.WarningModel
+import com.rosan.installer.ui.page.main.widget.chip.NoticeModel
 
 // Encapsulate UI resources to keep the function signature clean
-data class InstallWarningResources(
+data class InstallNoticeResources(
     // String
     val tagDowngrade: String,
     val textDowngrade: String,
@@ -34,6 +34,6 @@ data class InstallWarningResources(
 
 // Return type containing the list and the button ID
 data class InstallStateResult(
-    val warnings: List<WarningModel>,
+    val notices: List<NoticeModel>,
     val buttonTextId: Int
 )

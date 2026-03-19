@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.widget.chip.WarningModel
+import com.rosan.installer.ui.page.main.widget.chip.NoticeModel
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
@@ -72,12 +72,12 @@ fun MiuixBadge(
 @Composable
 fun MiuixInfoChipGroup(
     modifier: Modifier = Modifier,
-    warnings: List<WarningModel>
+    notices: List<NoticeModel>
 ) {
-    var selectedWarning by remember { mutableStateOf<WarningModel?>(null) }
+    var selectedNotice by remember { mutableStateOf<NoticeModel?>(null) }
     val showDialog = remember { mutableStateOf(false) }
 
-    if (warnings.isEmpty()) {
+    if (notices.isEmpty()) {
         Spacer(modifier = Modifier.height(12.dp))
         return
     }
@@ -87,7 +87,7 @@ fun MiuixInfoChipGroup(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
     ) {
-        warnings.forEach { item ->
+        notices.forEach { item ->
             MiuixBadge(
                 text = item.shortLabel,
                 textColor = item.color,
@@ -95,24 +95,24 @@ fun MiuixInfoChipGroup(
                 modifier = Modifier
                     .clip(CircleShape)
                     .clickable {
-                        selectedWarning = item
+                        selectedNotice = item
                         showDialog.value = true
                     }
             )
         }
     }
 
-    if (selectedWarning != null) {
+    if (selectedNotice != null) {
         WindowDialog(
             show = showDialog.value,
-            title = selectedWarning!!.shortLabel,
-            titleColor = selectedWarning!!.color,
-            summary = selectedWarning!!.fullDescription,
+            title = selectedNotice!!.shortLabel,
+            titleColor = selectedNotice!!.color,
+            summary = selectedNotice!!.fullDescription,
             onDismissRequest = {
                 showDialog.value = false
             },
             onDismissFinished = {
-                selectedWarning = null
+                selectedNotice = null
             },
             content = {
                 Row(

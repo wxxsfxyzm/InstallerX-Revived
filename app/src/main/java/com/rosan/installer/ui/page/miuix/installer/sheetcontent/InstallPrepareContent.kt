@@ -43,20 +43,22 @@ import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstalledAppInfo
 import com.rosan.installer.domain.engine.model.sortedBest
+import com.rosan.installer.domain.engine.usecase.AnalyzeInstallStateUseCase
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallWarningResources
+import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallNoticeResources
+import com.rosan.installer.ui.page.main.installer.mapper.InstallStateUiMapper
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInfoChipGroup
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
-import com.rosan.installer.ui.util.InstallLogicUtils
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.isGestureNavigation
+import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
@@ -143,7 +145,7 @@ fun InstallPrepareContent(
     val labelXposedTargetApi = stringResource(R.string.installer_xposed_target_api)
 
     val installResources = remember(errorColor, primaryColor) {
-        InstallWarningResources(
+        InstallNoticeResources(
             tagDowngrade = tagDowngrade,
             textDowngrade = downgradeWarning,
             tagSignature = tagSignature,
@@ -166,23 +168,38 @@ fun InstallPrepareContent(
         )
     }
 
-    val (warningModels, buttonTextId) = remember(
+    // Inject the pure domain use case
+    val analyzeInstallStateUseCase = koinInject<AnalyzeInstallStateUseCase>()
+
+    // Instantiate the UI mapper with the required Compose resources
+    val installStateUiMapper = remember(installResources) {
+        InstallStateUiMapper(installResources)
+    }
+
+    // Execute domain logic and map to UI state within the remember block
+    val (notices, buttonTextId) = remember(
         currentPackage,
         entityToInstall,
         isSplitUpdateMode,
         containerType,
-        installResources
+        installStateUiMapper
     ) {
-        InstallLogicUtils.analyzeInstallState(
+        // 1. Get pure domain state
+        val domainState = analyzeInstallStateUseCase(
             currentPackage = currentPackage,
             entityToInstall = entityToInstall,
             primaryEntity = primaryEntity,
             isSplitUpdateMode = isSplitUpdateMode,
             containerType = containerType,
             systemArch = DeviceConfig.currentArchitecture,
-            systemSdkInt = Build.VERSION.SDK_INT,
-            resources = installResources
+            systemSdkInt = Build.VERSION.SDK_INT
         )
+
+        // 2. Map to UI state
+        val uiState = installStateUiMapper.mapToUiState(domainState)
+
+        // 3. Destructure the data class components
+        Pair(uiState.notices, uiState.buttonTextId)
     }
 
     LazyColumn(
@@ -201,7 +218,7 @@ fun InstallPrepareContent(
         item {
             MiuixInfoChipGroup(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
-                warnings = warningModels
+                notices = notices
             )
         }
         item {

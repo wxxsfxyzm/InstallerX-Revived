@@ -23,7 +23,9 @@ import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.session.manager.InstallerSessionManager
 import com.rosan.installer.domain.device.model.Level
+import com.rosan.installer.domain.device.model.PermissionType
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.device.provider.PermissionChecker
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.ThemeState
@@ -31,11 +33,10 @@ import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
+import com.rosan.installer.ui.common.permission.PermissionRequester
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.util.PermissionDenialReason
-import com.rosan.installer.ui.util.PermissionManager
 import com.rosan.installer.util.hasFlag
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
@@ -64,14 +65,14 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     private var latestProgress: ProgressEntity = ProgressEntity.Ready
 
-    private lateinit var permissionManager: PermissionManager
+    private val permissionChecker: PermissionChecker by inject()
+    private lateinit var permissionRequester: PermissionRequester
 
     // Flag to track if the activity is stopped due to a permission request
     private var isRequestingPermission = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (AppConfig.isDebug && AppConfig.LEVEL == Level.UNSTABLE)
-            logIntentDetails("onNewIntent", intent)
+        if (AppConfig.isDebug && AppConfig.LEVEL == Level.UNSTABLE) logIntentDetails("onNewIntent", intent)
         enableEdgeToEdge()
         // Compat Navigation Bar color for Xiaomi Devices
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
@@ -86,9 +87,9 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             }
         }
 
-        permissionManager = PermissionManager(this)
-        // Setup the callback to intercept the settings launch event
-        permissionManager.onBeforeLaunchSettings = {
+        permissionRequester = PermissionRequester(this, permissionChecker)
+        // Set up the callback to intercept the settings launch event
+        permissionRequester.onBeforeLaunchSettings = {
             Timber.d("Launching settings for permission, preventing repo closure in onStop.")
             isRequestingPermission = true
         }
@@ -118,7 +119,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         Timber.d("checkPermissionsAndStartProcess: Starting permission check flow.")
 
         // Call the manager to request permissions and handle the results in the callbacks.
-        permissionManager.requestEssentialPermissions(
+        permissionRequester.requestEssentialPermissions(
             onGranted = {
                 Timber.d("All essential permissions are granted.")
                 when (intent.action) {
@@ -135,12 +136,12 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 // This is called if any permission is denied.
                 // The 'reason' enum tells you which one failed.
                 when (reason) {
-                    PermissionDenialReason.NOTIFICATION -> {
+                    PermissionType.NOTIFICATION -> {
                         Timber.w("Notification permission was denied.")
                         this.toast(R.string.enable_notification_hint)
                     }
 
-                    PermissionDenialReason.STORAGE -> {
+                    PermissionType.STORAGE -> {
                         Timber.w("Storage permission was denied.")
                         this.toast(R.string.enable_storage_permission_hint)
                     }

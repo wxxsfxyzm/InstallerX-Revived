@@ -3,7 +3,6 @@
 package com.rosan.installer.ui.page.main.settings.config.apply
 
 import com.rosan.installer.domain.settings.model.AppModel
-import com.rosan.installer.ui.common.ViewContent
 
 data class ApplyViewState(
     // App data state

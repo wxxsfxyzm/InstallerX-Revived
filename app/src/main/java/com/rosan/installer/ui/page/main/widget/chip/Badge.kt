@@ -61,28 +61,28 @@ fun CapsuleTag(
 }
 
 // Data model to hold both short tag and full description
-data class WarningModel(
-    val shortLabel: String,   // Displayed on the chip
+data class NoticeModel(
+    val shortLabel: String,      // Displayed on the chip
     val fullDescription: String, // Displayed in the dialog
-    val color: Color
+    val color: Color             // Color of the chip
 )
 
 @Composable
 fun InstallInfoChipGroup(
     modifier: Modifier = Modifier,
-    warnings: List<WarningModel>
+    notices: List<NoticeModel>
 ) {
-    // State to track which warning is currently being viewed
-    var selectedWarning by remember { mutableStateOf<WarningModel?>(null) }
+    // State to track which notice is currently being viewed
+    var selectedNotice by remember { mutableStateOf<NoticeModel?>(null) }
 
-    if (warnings.isEmpty()) return
+    if (notices.isEmpty()) return
 
     FlowRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
     ) {
-        warnings.forEach { item ->
+        notices.forEach { item ->
             CapsuleTag(
                 text = item.shortLabel,
                 textColor = item.color,
@@ -90,30 +90,30 @@ fun InstallInfoChipGroup(
                 backgroundColor = item.color.copy(alpha = 0.2f),
                 modifier = Modifier
                     .clip(CircleShape) // Ensure ripple is circular
-                    .clickable { selectedWarning = item }
+                    .clickable { selectedNotice = item }
             )
         }
     }
 
     // Dialog handling
-    selectedWarning?.let { warning ->
+    selectedNotice?.let { notice ->
         AlertDialog(
-            onDismissRequest = { selectedWarning = null },
+            onDismissRequest = { selectedNotice = null },
             confirmButton = {
-                TextButton(onClick = { selectedWarning = null }) {
+                TextButton(onClick = { selectedNotice = null }) {
                     Text(stringResource(R.string.confirm)) // Or use a common "OK" string
                 }
             },
             title = {
                 Text(
-                    text = warning.shortLabel,
-                    color = warning.color,
+                    text = notice.shortLabel,
+                    color = notice.color,
                     style = MaterialTheme.typography.titleMedium
                 )
             },
             text = {
                 Text(
-                    text = warning.fullDescription,
+                    text = notice.fullDescription,
                     style = MaterialTheme.typography.bodyMedium
                 )
             },

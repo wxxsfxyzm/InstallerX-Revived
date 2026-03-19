@@ -11,8 +11,7 @@ import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.domain.settings.usecase.config.ToggleAppTargetConfigUseCase
-import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase // 新增导入
-import com.rosan.installer.ui.common.ViewContent
+import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
