@@ -6,10 +6,10 @@ import android.content.pm.PackageInstaller
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.core.reflection.getValue
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
+import org.koin.core.component.inject
 
 object PackageInstallerUtil : KoinComponent {
-    private val reflect = get<ReflectionProvider>()
+    private val reflect by inject<ReflectionProvider>()
 
     var PackageInstaller.SessionParams.installFlags: Int
         get() = reflect.getValue(this, "installFlags") ?: 0

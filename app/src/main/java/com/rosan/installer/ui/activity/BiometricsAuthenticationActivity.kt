@@ -3,6 +3,7 @@
 package com.rosan.installer.ui.activity
 
 import android.os.Bundle
+import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -23,9 +24,9 @@ class BiometricsAuthenticationActivity : FragmentActivity() {
             .setTitle(title)
             .setSubtitle(subTitle)
             .setAllowedAuthenticators(
-                androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                        androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                        androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                        BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
             )
             .build()
 
