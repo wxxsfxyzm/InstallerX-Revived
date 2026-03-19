@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2025-2026 InstallerX Revived contributors
-
 package com.rosan.installer.ui.page.main.widget.chip
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
@@ -27,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
@@ -42,15 +42,20 @@ fun CapsuleTag(
 ) {
     Box(
         modifier = modifier
+            .defaultMinSize(minHeight = 24.dp)
             .clip(CircleShape)
             .background(backgroundColor)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
+            .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             color = textColor,
-            style = style
+            style = style.copy(
+                platformStyle = PlatformTextStyle(
+                    includeFontPadding = false
+                )
+            )
         )
     }
 }
@@ -62,9 +67,8 @@ data class WarningModel(
     val color: Color
 )
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WarningChipGroup(
+fun InstallInfoChipGroup(
     modifier: Modifier = Modifier,
     warnings: List<WarningModel>
 ) {
@@ -83,7 +87,7 @@ fun WarningChipGroup(
                 text = item.shortLabel,
                 textColor = item.color,
                 // Make background lighter for better contrast
-                backgroundColor = item.color.copy(alpha = 0.12f),
+                backgroundColor = item.color.copy(alpha = 0.2f),
                 modifier = Modifier
                     .clip(CircleShape) // Ensure ripple is circular
                     .clickable { selectedWarning = item }

@@ -45,7 +45,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.widget.chip.Chip
-import com.rosan.installer.ui.page.main.widget.chip.WarningChipGroup
+import com.rosan.installer.ui.page.main.widget.chip.InstallInfoChipGroup
 import com.rosan.installer.ui.util.InstallLogicUtils
 
 // Assume pausingIcon is accessible
@@ -237,7 +237,7 @@ fun installPrepareDialog(
         ) {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
                 item {
-                    WarningChipGroup(
+                    InstallInfoChipGroup(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         warnings = warningModels
                     )
