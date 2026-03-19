@@ -33,6 +33,7 @@ import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
+import com.rosan.installer.ui.common.auth.BiometricAuthBridge
 import com.rosan.installer.ui.common.permission.PermissionRequester
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
@@ -192,7 +193,10 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     override fun onStop() {
         super.onStop()
 
-        if (BiometricsAuthenticationActivity.onActivityReady != null) return
+        if (BiometricAuthBridge.isAuthenticating) {
+            Timber.d("onStop: Ignored background trigger due to active biometric authentication.")
+            return
+        }
         // Check if the screen is currently on.
         // If the screen is off, onStop is triggered by locking the device.
         // We explicitly want to ignore this case.

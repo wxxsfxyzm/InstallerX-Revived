@@ -16,7 +16,7 @@ import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
-import com.rosan.installer.ui.util.doBiometricAuth
+import com.rosan.installer.ui.common.auth.safeBiometricAuth
 import com.rosan.installer.util.timber.FileLoggingTree
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -61,7 +61,7 @@ class SystemEnvProviderImpl(private val context: Context) : SystemEnvProvider {
     }
 
     override suspend fun authenticateBiometric(isInstaller: Boolean): Boolean {
-        return context.doBiometricAuth(
+        return context.safeBiometricAuth(
             title = context.getString(R.string.use_biometric_confirm_change_auth_settings),
             subTitle = context.getString(R.string.use_biometric_confirm_change_auth_settings_desc)
         )

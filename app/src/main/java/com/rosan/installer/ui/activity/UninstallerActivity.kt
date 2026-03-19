@@ -23,6 +23,7 @@ import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
+import com.rosan.installer.ui.common.auth.BiometricAuthBridge
 import com.rosan.installer.ui.common.permission.PermissionRequester
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
@@ -112,6 +113,11 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
     override fun onStop() {
         super.onStop()
+
+        if (BiometricAuthBridge.isAuthenticating) {
+            Timber.d("onStop: Ignored repo closure due to active biometric authentication.")
+            return
+        }
         // Check if the screen is currently on.
         // If the screen is off, onStop is triggered by locking the device.
         // We explicitly want to ignore this case.

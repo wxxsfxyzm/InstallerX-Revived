@@ -36,7 +36,7 @@ import com.rosan.installer.domain.settings.model.ConfigModel.Companion.default
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.ui.util.doBiometricAuthOrThrow
+import com.rosan.installer.ui.common.auth.safeBiometricAuthOrThrow
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -297,7 +297,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
 
         if (!requireBiometricAuth) return
 
-        return context.doBiometricAuthOrThrow(
+        return context.safeBiometricAuthOrThrow(
             title = context.getString(R.string.auth_to_continue_work),
             subTitle = context.getString(
                 if (isInstall)
