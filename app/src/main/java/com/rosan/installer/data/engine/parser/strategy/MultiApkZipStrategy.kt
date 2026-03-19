@@ -14,7 +14,9 @@ import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
 import java.util.zip.ZipFile
 
-object MultiApkZipStrategy : AnalysisStrategy {
+class MultiApkZipStrategy(
+    private val apkParser: ApkParser
+) : AnalysisStrategy {
 
     override suspend fun analyze(
         config: ConfigModel,
@@ -36,7 +38,7 @@ object MultiApkZipStrategy : AnalysisStrategy {
         apkEntries.map { entry ->
             async(Dispatchers.IO) {
                 // Use ApkParser to handle extraction and deep analysis
-                ApkParser.parseZipEntryFull(
+                apkParser.parseZipEntryFull(
                     config,
                     zipFile,
                     entry,

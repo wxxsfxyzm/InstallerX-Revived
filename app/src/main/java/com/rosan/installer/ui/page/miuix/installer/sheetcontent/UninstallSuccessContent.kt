@@ -39,7 +39,7 @@ fun UninstallSuccessContent(
         verticalArrangement = Arrangement.Center
     ) {
         AppInfoSlot(
-            AppInfoState(
+            appInfo = AppInfoState(
                 icon = info.appIcon,
                 label = info.appLabel ?: "Unknown App",
                 packageName = info.packageName

@@ -11,17 +11,15 @@ import com.rosan.installer.util.ArchiveUtils
 import dalvik.system.ZipPathValidator
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
 
-object FileTypeDetector : KoinComponent {
-
-    private val json: Json by inject()
+class FileTypeDetector(
+    private val json: Json
+) {
 
     init {
         disableZipPathValidation()
@@ -29,7 +27,7 @@ object FileTypeDetector : KoinComponent {
 
     private fun disableZipPathValidation() {
         // ZipPathValidator was introduced in Android 14 (API 34)
-        if (Build.VERSION.SDK_INT >= 34) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             try {
                 ZipPathValidator.clearCallback()
                 Timber.d("ZipPathValidator callback cleared for safe in-memory analysis.")

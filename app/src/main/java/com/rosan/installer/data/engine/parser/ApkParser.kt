@@ -21,9 +21,8 @@ import com.rosan.installer.domain.engine.exception.AnalyseFailedAllFilesUnsuppor
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.DataEntity
+import com.rosan.installer.domain.engine.model.XposedModuleInfo
 import com.rosan.installer.domain.settings.model.ConfigModel
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -31,10 +30,10 @@ import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
-object ApkParser : KoinComponent {
-    private val reflect by inject<ReflectionProvider>()
-    private val context by inject<Context>()
-
+class ApkParser(
+    private val context: Context,
+    private val reflect: ReflectionProvider
+) {
     @SuppressLint("DiscouragedPrivateApi")
     fun parseFull(
         data: DataEntity,
@@ -171,7 +170,6 @@ object ApkParser : KoinComponent {
         var versionCode: Long = -1
         var versionName = ""
         var minOsdkVersion: String? = null
-        var isXposedModule = false
         var label: String? = null
         var icon: Drawable? = null
         var roundIcon: Drawable? = null
@@ -181,6 +179,11 @@ object ApkParser : KoinComponent {
         val signatureHash = (data as? DataEntity.FileEntity)?.path?.let {
             SignatureUtils.getApkSignatureHash(context, it)
         }
+
+        // Variables for Xposed extraction
+        val metaDataMap = mutableMapOf<String, String>()
+        var appDescription: String? = null
+        var isPotentialXposed = false
 
         AxmlTreeParserImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml"))
             .register("/manifest") {
@@ -207,9 +210,23 @@ object ApkParser : KoinComponent {
                     getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "label", ResourcesCompat.ID_NULL),
                     getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "label")
                 )
-                icon = resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "icon", ResourcesCompat.ID_NULL))
-                roundIcon =
-                    resolveDrawable(resources, theme, getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "roundIcon", ResourcesCompat.ID_NULL))
+                icon = resolveDrawable(
+                    resources,
+                    theme,
+                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "icon", ResourcesCompat.ID_NULL)
+                )
+                roundIcon = resolveDrawable(
+                    resources,
+                    theme,
+                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "roundIcon", ResourcesCompat.ID_NULL)
+                )
+
+                // Extract description for Xposed fallback
+                appDescription = resolveString(
+                    resources,
+                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "description", ResourcesCompat.ID_NULL),
+                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "description")
+                )
             }
             .register("/manifest/application/meta-data") {
                 if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
@@ -223,12 +240,22 @@ object ApkParser : KoinComponent {
                 }
 
                 val metaDataName = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")
+                val metaDataValue = resolveString(
+                    resources,
+                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "value", ResourcesCompat.ID_NULL),
+                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
+                )
 
+                if (metaDataName != null && metaDataValue != null) {
+                    metaDataMap[metaDataName] = metaDataValue
+                }
+
+                // Check legacy xposed indicators
                 if ("xposedmodule" == metaDataName ||
                     "xposedminversion" == metaDataName ||
                     "xposeddescription" == metaDataName
                 ) {
-                    isXposedModule = true
+                    isPotentialXposed = true
                 }
             }
             .register("/manifest/uses-permission") {
@@ -236,14 +263,20 @@ object ApkParser : KoinComponent {
             }
             .map { }
 
+        // Final Xposed verification and data extraction
+        var xposedInfo: XposedModuleInfo? = null
         ZipFile(path).use { zip ->
-            val propEntry = zip.getEntry("META-INF/xposed/module.prop");
-            if (propEntry != null) {
-                isXposedModule = true
+            // Check modern Xposed indicators if legacy ones were not found
+            if (!isPotentialXposed && (zip.getEntry("META-INF/xposed/module.prop") != null || zip.getEntry("assets/xposed_init") != null)) {
+                isPotentialXposed = true
+            }
+
+            if (isPotentialXposed) {
+                xposedInfo = XposedUtils.extract(zip, metaDataMap, appDescription)
             }
         }
 
-        Timber.d("ApkParser: Manifest parsed. Package: $packageName, Split: $splitName")
+        Timber.d("ApkParser: Manifest parsed. Package: $packageName, Split: $splitName, IsXposed: ${xposedInfo != null}")
         if (packageName.isNullOrEmpty()) throw Exception("Invalid APK: missing package name")
 
         return if (splitName.isNullOrEmpty()) AppEntity.BaseEntity(
@@ -257,7 +290,7 @@ object ApkParser : KoinComponent {
             targetSdk = targetSdk,
             minSdk = minSdk,
             minOsdkVersion = minOsdkVersion,
-            isXposedModule = isXposedModule,
+            xposedInfo = xposedInfo, // Using the extracted info object
             arch = arch,
             permissions = permissions,
             sourceType = extra.dataType,

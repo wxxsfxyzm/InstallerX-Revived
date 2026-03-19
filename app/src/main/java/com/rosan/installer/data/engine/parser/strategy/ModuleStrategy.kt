@@ -13,7 +13,10 @@ import timber.log.Timber
 import java.util.Properties
 import java.util.zip.ZipFile
 
-object ModuleStrategy : AnalysisStrategy {
+class ModuleStrategy(
+    private val singleApkStrategy: SingleApkStrategy,
+    private val multiApkZipStrategy: MultiApkZipStrategy
+) : AnalysisStrategy {
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
@@ -37,12 +40,12 @@ object ModuleStrategy : AnalysisStrategy {
                     DataType.MIXED_MODULE_APK -> {
                         // It's an APK that is also a Module.
                         // We use SingleApkStrategy logic (via ApkParser)
-                        SingleApkStrategy.analyze(config, data, ensureZip, extra)
+                        singleApkStrategy.analyze(config, data, ensureZip, extra)
                     }
 
                     DataType.MIXED_MODULE_ZIP -> {
                         // It's a Zip containing APKs + Module prop
-                        MultiApkZipStrategy.analyze(config, data, ensureZip, extra)
+                        multiApkZipStrategy.analyze(config, data, ensureZip, extra)
                     }
 
                     else -> emptyList() // Pure MODULE_ZIP

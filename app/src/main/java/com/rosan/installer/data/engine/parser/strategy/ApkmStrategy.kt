@@ -15,13 +15,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.io.File
 import java.util.zip.ZipFile
 
-object ApkmStrategy : AnalysisStrategy, KoinComponent {
-    private val json by inject<Json>()
+class ApkmStrategy(
+    private val json: Json
+) : AnalysisStrategy {
 
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun analyze(

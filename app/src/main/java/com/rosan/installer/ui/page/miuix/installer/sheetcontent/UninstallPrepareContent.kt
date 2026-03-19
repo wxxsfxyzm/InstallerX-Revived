@@ -55,7 +55,7 @@ fun UninstallPrepareContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppInfoSlot(
-            AppInfoState(
+            appInfo = AppInfoState(
                 icon = info.appIcon,
                 label = info.appLabel ?: "Unknown App",
                 packageName = info.packageName

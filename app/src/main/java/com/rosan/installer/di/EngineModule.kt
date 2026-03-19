@@ -2,6 +2,15 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.di
 
+import com.rosan.installer.data.engine.parser.ApkParser
+import com.rosan.installer.data.engine.parser.FileTypeDetector
+import com.rosan.installer.data.engine.parser.UnifiedContainerAnalyser
+import com.rosan.installer.data.engine.parser.strategy.ApkmStrategy
+import com.rosan.installer.data.engine.parser.strategy.ApksStrategy
+import com.rosan.installer.data.engine.parser.strategy.ModuleStrategy
+import com.rosan.installer.data.engine.parser.strategy.MultiApkZipStrategy
+import com.rosan.installer.data.engine.parser.strategy.SingleApkStrategy
+import com.rosan.installer.data.engine.parser.strategy.XApkStrategy
 import com.rosan.installer.data.engine.repository.AnalyserRepositoryImpl
 import com.rosan.installer.data.engine.repository.AppIconRepositoryImpl
 import com.rosan.installer.data.engine.repository.InstallerRepositoryImpl
@@ -19,6 +28,20 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val engineModule = module {
+    // Parser
+    singleOf(::ApkParser)
+    // Parser Tools
+    singleOf(::FileTypeDetector)
+    // Strategies
+    singleOf(::SingleApkStrategy)
+    singleOf(::MultiApkZipStrategy)
+    singleOf(::ApksStrategy)
+    singleOf(::XApkStrategy)
+    singleOf(::ApkmStrategy)
+    singleOf(::ModuleStrategy)
+    // Unified Analyzer
+    singleOf(::UnifiedContainerAnalyser)
+
     // Repositories
     singleOf(::AppIconRepositoryImpl) { bind<AppIconRepository>() }
     singleOf(::AnalyserRepositoryImpl) { bind<AnalyserRepository>() }

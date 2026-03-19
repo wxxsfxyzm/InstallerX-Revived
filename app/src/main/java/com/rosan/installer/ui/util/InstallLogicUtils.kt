@@ -170,6 +170,29 @@ object InstallLogicUtils {
             )
         }
 
+        // 6. Check Xposed Module Info
+        val xposedInfo = (primaryEntity as? AppEntity.BaseEntity)?.xposedInfo
+        if (xposedInfo != null) {
+            // Build the multiline description dynamically
+            val details = buildString {
+                xposedInfo.minApi?.let { append("${resources.labelXposedMinApi}$it\n") }
+                xposedInfo.targetApi?.let { append("${resources.labelXposedTargetApi}$it\n") }
+                if (xposedInfo.description?.isNotBlank() == true) {
+                    if (isNotEmpty()) append("\n")
+                    append(xposedInfo.description)
+                }
+            }.trim()
+
+            warnings.add(
+                WarningModel(
+                    shortLabel = resources.tagXposed,
+                    // If no extra details exist, just show the tag itself
+                    fullDescription = details.ifEmpty { resources.tagXposed },
+                    color = resources.primaryColor // Informational
+                )
+            )
+        }
+
         return InstallStateResult(warnings, finalButtonTextId)
     }
 }

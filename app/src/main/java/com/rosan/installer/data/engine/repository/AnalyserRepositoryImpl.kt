@@ -22,6 +22,8 @@ import timber.log.Timber
 import java.util.zip.ZipException
 
 class AnalyserRepositoryImpl(
+    private val fileTypeDetector: FileTypeDetector,
+    private val unifiedContainerAnalyser: UnifiedContainerAnalyser,
     private val selectOptimalSplitsUseCase: SelectOptimalSplitsUseCase
 ) : AnalyserRepository {
     override suspend fun doWork(
@@ -124,11 +126,11 @@ class AnalyserRepositoryImpl(
     ): List<AppEntity> =
         try {
             // Detect type efficiently
-            val fileType = FileTypeDetector.detect(data, extra)
+            val fileType = fileTypeDetector.detect(data, extra)
             Timber.d("AnalyserRepo: FileType -> $fileType")
             if (fileType == DataType.NONE) return emptyList()
             // Delegate to the Unified Analyzer
-            UnifiedContainerAnalyser.analyze(config, data, fileType, extra.copy(dataType = fileType))
+            unifiedContainerAnalyser.analyze(config, data, fileType, extra.copy(dataType = fileType))
         } catch (e: Exception) {
             Timber.e(e, "Fatal error analyzing source: ${data.source}")
             if (e is ZipException) throw e

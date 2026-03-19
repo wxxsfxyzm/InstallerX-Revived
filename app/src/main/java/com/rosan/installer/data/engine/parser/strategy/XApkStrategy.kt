@@ -9,18 +9,19 @@ import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.DataEntity
 import com.rosan.installer.domain.settings.model.ConfigModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.io.File
 import java.util.zip.ZipFile
 
-object XApkStrategy : AnalysisStrategy, KoinComponent {
-    private val json by inject<Json>()
+class XApkStrategy(
+    private val json: Json
+) : AnalysisStrategy {
 
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun analyze(
@@ -34,7 +35,9 @@ object XApkStrategy : AnalysisStrategy, KoinComponent {
 
         // 1. Parse Manifest
         val manifestEntry = zipFile.getEntry("manifest.json") ?: return emptyList()
-        val manifest = zipFile.getInputStream(manifestEntry).use {
+        val manifest = withContext(Dispatchers.IO) {
+            zipFile.getInputStream(manifestEntry)
+        }.use {
             json.decodeFromStream<Manifest>(it)
         }
 

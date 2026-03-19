@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.domain.engine.model
 
 import android.graphics.drawable.Drawable
@@ -28,7 +30,7 @@ sealed class AppEntity {
         override val minSdk: String?,
         // Only available for oppo apk
         val minOsdkVersion: String? = null,
-        val isXposedModule: Boolean = false,
+        val xposedInfo: XposedModuleInfo? = null,
         override val arch: Architecture? = null,
         override val size: Long = data.getSize(),
         override val sourceType: DataType? = null,
@@ -36,7 +38,10 @@ sealed class AppEntity {
         val permissions: List<String>? = null,
         val signatureHash: String? = null,
         val fileHash: String? = null
-    ) : AppEntity()
+    ) : AppEntity() {
+        val isXposedModule: Boolean
+            get() = xposedInfo != null
+    }
 
     data class SplitEntity(
         override val packageName: String,

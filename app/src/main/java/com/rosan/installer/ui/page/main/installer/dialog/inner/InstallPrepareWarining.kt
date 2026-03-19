@@ -21,6 +21,10 @@ data class InstallWarningResources(
     val textArchMismatchFormat: String, // Expecting a string with 2 placeholders
     val tagIdentical: String,
     val textIdentical: String,
+    // Xposed specific strings
+    val tagXposed: String,
+    val labelXposedMinApi: String,
+    val labelXposedTargetApi: String,
 
     // Color
     val errorColor: Color,

@@ -14,7 +14,9 @@ import timber.log.Timber
 import java.io.File
 import java.util.zip.ZipFile
 
-object ApksStrategy : AnalysisStrategy {
+class ApksStrategy(
+    private val apkParser: ApkParser
+) : AnalysisStrategy {
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
@@ -47,7 +49,7 @@ object ApksStrategy : AnalysisStrategy {
         // 2. Parse Base APK (Heavy operation - needs Icon/Label)
         val baseDeferred = async {
             Timber.d("ApksStrategy: Parsing base entry full details...")
-            ApkParser.parseZipEntryFull(config, zipFile, baseEntry, data, extra)
+            apkParser.parseZipEntryFull(config, zipFile, baseEntry, data, extra)
         }
 
         // 3. Process Splits (Lightweight operation)

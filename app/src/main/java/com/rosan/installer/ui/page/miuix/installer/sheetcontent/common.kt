@@ -16,7 +16,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.sortedBest
@@ -96,11 +98,13 @@ fun rememberAppInfoState(
 
 @Composable
 fun AppInfoSlot(
+    modifier: Modifier = Modifier,
     appInfo: AppInfoState,
     // Callback for icon click events. Null means not clickable.
-    onIconClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    onIconClick: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -116,7 +120,12 @@ fun AppInfoSlot(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = rememberDrawablePainter(drawable = appInfo.icon),
+                painter = rememberDrawablePainter(
+                    drawable = appInfo.icon ?: ContextCompat.getDrawable(
+                        context,
+                        android.R.drawable.sym_def_app_icon
+                    )
+                ),
                 contentDescription = "App Icon",
                 modifier = Modifier.fillMaxSize()
             )

@@ -21,17 +21,24 @@ import java.util.zip.ZipFile
  * A unified entry point for analyzing any package format.
  * It manages the lifecycle of the ZipFile (if applicable) to ensure it's opened only once.
  */
-object UnifiedContainerAnalyser {
+class UnifiedContainerAnalyser(
+    singleApkStrategy: SingleApkStrategy,
+    apksStrategy: ApksStrategy,
+    apkmStrategy: ApkmStrategy,
+    xapkStrategy: XApkStrategy,
+    multiApkZipStrategy: MultiApkZipStrategy,
+    moduleStrategy: ModuleStrategy
+) {
 
     private val strategies = mapOf(
-        DataType.APK to SingleApkStrategy,
-        DataType.APKS to ApksStrategy,
-        DataType.APKM to ApkmStrategy,
-        DataType.XAPK to XApkStrategy,
-        DataType.MULTI_APK_ZIP to MultiApkZipStrategy,
-        DataType.MODULE_ZIP to ModuleStrategy,
-        DataType.MIXED_MODULE_ZIP to ModuleStrategy,
-        DataType.MIXED_MODULE_APK to ModuleStrategy
+        DataType.APK to singleApkStrategy,
+        DataType.APKS to apksStrategy,
+        DataType.APKM to apkmStrategy,
+        DataType.XAPK to xapkStrategy,
+        DataType.MULTI_APK_ZIP to multiApkZipStrategy,
+        DataType.MODULE_ZIP to moduleStrategy,
+        DataType.MIXED_MODULE_ZIP to moduleStrategy,
+        DataType.MIXED_MODULE_APK to moduleStrategy
     )
 
     suspend fun analyze(

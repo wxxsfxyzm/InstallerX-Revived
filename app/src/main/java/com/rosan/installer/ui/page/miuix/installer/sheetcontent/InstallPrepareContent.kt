@@ -138,6 +138,9 @@ fun InstallPrepareContent(
     val textArchMismatch = stringResource(R.string.installer_prepare_arch_mismatch_notice)
     val tagIdentical = stringResource(R.string.tag_identical)
     val textIdentical = stringResource(R.string.installer_prepare_identical_notice)
+    val tagXposed = stringResource(R.string.tag_xposed)
+    val labelXposedMinApi = stringResource(R.string.installer_xposed_min_api)
+    val labelXposedTargetApi = stringResource(R.string.installer_xposed_target_api)
 
     val installResources = remember(errorColor, primaryColor) {
         InstallWarningResources(
@@ -154,6 +157,9 @@ fun InstallPrepareContent(
             textArchMismatchFormat = textArchMismatch,
             tagIdentical = tagIdentical,
             textIdentical = textIdentical,
+            tagXposed = tagXposed,
+            labelXposedMinApi = labelXposedMinApi,
+            labelXposedTargetApi = labelXposedTargetApi,
             errorColor = errorColor,
             tertiaryColor = primaryColor,
             primaryColor = primaryColor
