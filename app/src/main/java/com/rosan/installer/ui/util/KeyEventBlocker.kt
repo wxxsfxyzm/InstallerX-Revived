@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+
+// Portions of this file are derived from weishu/KernelSU
+// (https://github.com/tiann/KernelSU)
+// Copyright (C) KernelSU contributors
+// Licensed under GPL-3.0
 package com.rosan.installer.ui.util
 
 import androidx.compose.foundation.focusable

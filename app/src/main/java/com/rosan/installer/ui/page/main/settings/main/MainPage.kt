@@ -2,6 +2,8 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.main
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -42,6 +44,7 @@ import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,6 +61,7 @@ import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.ConfigRepo
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllPage
 import com.rosan.installer.ui.page.main.settings.config.all.NewAllPage
 import com.rosan.installer.ui.page.main.settings.preferred.NewPreferredPage
@@ -67,13 +71,19 @@ import com.rosan.installer.ui.theme.rememberMaterial3HazeStyle
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun MainPage(navController: NavController) {
+fun MainPage(
+    navController: NavController,
+    sharedViewModel: SettingsSharedViewModel = koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
+) {
+    val scope = rememberCoroutineScope()
     val themeStateProvider = koinInject<ThemeStateProvider>()
     val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
+    val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val showExpressiveUI = uiState.isExpressive
     val useBlur = showExpressiveUI && uiState.useBlur
     val hazeState = if (useBlur) remember { HazeState() } else null
@@ -103,9 +113,16 @@ fun MainPage(navController: NavController) {
         )
     }
 
-    val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(pageCount = { data.size })
+    val pagerState = rememberPagerState(
+        initialPage = sharedState.lastMainPageIndex,
+        pageCount = { data.size }
+    )
     val currentPage = pagerState.currentPage
+    LaunchedEffect(currentPage) {
+        if (sharedState.lastMainPageIndex != currentPage) {
+            sharedViewModel.updateLastMainPageIndex(currentPage)
+        }
+    }
     fun onPageChanged(page: Int) {
         scope.launch {
             pagerState.animateScrollToPage(page = page)

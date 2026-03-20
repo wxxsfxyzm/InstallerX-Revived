@@ -2,16 +2,26 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class SettingsSharedViewModel : ViewModel() {
-    var pendingNavigateToTheme by mutableStateOf(false)
-        private set
+
+    private val _state = MutableStateFlow(SettingsSharedState())
+    val state: StateFlow<SettingsSharedState> = _state.asStateFlow()
 
     fun markPendingNavigateToTheme(pending: Boolean) {
-        pendingNavigateToTheme = pending
+        _state.update { currentState ->
+            currentState.copy(pendingNavigateToTheme = pending)
+        }
+    }
+
+    fun updateLastMainPageIndex(index: Int) {
+        _state.update { currentState ->
+            currentState.copy(lastMainPageIndex = index)
+        }
     }
 }

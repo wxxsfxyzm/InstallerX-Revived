@@ -1,6 +1,8 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
 import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -65,7 +67,7 @@ import org.koin.androidx.compose.koinViewModel
 fun LegacyThemeSettingsPage(
     navController: NavController,
     viewModel: ThemeSettingsViewModel = koinViewModel(),
-    sharedViewModel: SettingsSharedViewModel = koinViewModel()
+    sharedViewModel: SettingsSharedViewModel = koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()

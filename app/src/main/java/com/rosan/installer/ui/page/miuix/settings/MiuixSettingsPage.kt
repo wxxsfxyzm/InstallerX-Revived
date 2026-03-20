@@ -2,6 +2,8 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.settings
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.RoomPreferences
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,12 +46,14 @@ import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.miuix.settings.config.all.MiuixAllPage
 import com.rosan.installer.ui.page.miuix.settings.config.apply.MiuixApplyPage
 import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
@@ -67,6 +72,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
@@ -82,11 +88,23 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
-fun MiuixSettingsPage() {
+fun MiuixSettingsPage(
+    sharedViewModel: SettingsSharedViewModel = koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
+) {
     val navController = rememberNavController()
     val themeStateProvider = koinInject<ThemeStateProvider>()
     val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
+    val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val useBlur = uiState.useBlur
+
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+
+    LaunchedEffect(currentBackStackEntry, sharedState.pendingNavigateToTheme) {
+        if (sharedState.pendingNavigateToTheme && currentBackStackEntry?.destination?.route == MiuixSettingsScreen.MiuixMain.route) {
+            navController.navigate(MiuixSettingsScreen.MiuixTheme.route)
+            sharedViewModel.markPendingNavigateToTheme(false)
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -129,7 +147,17 @@ fun MiuixSettingsPage() {
                 )
             )
 
-            val pagerState = rememberPagerState(pageCount = { navigationItems.size })
+            val pagerState = rememberPagerState(
+                initialPage = sharedState.lastMainPageIndex,
+                pageCount = { navigationItems.size }
+            )
+
+            LaunchedEffect(pagerState.currentPage) {
+                if (sharedState.lastMainPageIndex != pagerState.currentPage) {
+                    sharedViewModel.updateLastMainPageIndex(pagerState.currentPage)
+                }
+            }
+
             val snackbarHostState = remember { SnackbarHostState() }
             val hazeState = if (useBlur) remember { HazeState() } else null
             val hazeStyle = rememberMiuixHazeStyle()

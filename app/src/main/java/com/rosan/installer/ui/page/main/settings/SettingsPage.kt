@@ -2,6 +2,8 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
@@ -14,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rosan.installer.domain.settings.model.ThemeState
@@ -39,19 +42,20 @@ import org.koin.compose.koinInject
 
 @Composable
 fun SettingsPage(
-    sharedViewModel: SettingsSharedViewModel = koinViewModel()
+    sharedViewModel: SettingsSharedViewModel = koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
 ) {
     val navController = rememberNavController()
     val themeStateProvider = koinInject<ThemeStateProvider>()
     val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
+    val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val useBlur = uiState.useBlur
     val isExpressive = uiState.isExpressive
 
-    LaunchedEffect(navController) {
-        if (sharedViewModel.pendingNavigateToTheme) {
-            navController.navigate(SettingsScreen.Theme.route) {
-                popUpTo(SettingsScreen.Main.route)
-            }
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+
+    LaunchedEffect(currentBackStackEntry, sharedState.pendingNavigateToTheme) {
+        if (sharedState.pendingNavigateToTheme && currentBackStackEntry?.destination?.route == SettingsScreen.Main.route) {
+            navController.navigate(SettingsScreen.Theme.route)
             sharedViewModel.markPendingNavigateToTheme(false)
         }
     }
