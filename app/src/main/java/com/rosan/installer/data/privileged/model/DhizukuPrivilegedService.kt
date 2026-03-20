@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.data.privileged.model
 
 import android.app.admin.DevicePolicyManager
@@ -15,7 +17,7 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
     private val devicePolicyManager: DevicePolicyManager =
         context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
 
-    override fun delete(paths: Array<out String>) = deletePaths(paths)
+    override fun delete(paths: Array<out String>) = deletePaths(paths.toList())
 
     override fun performDexOpt(
         packageName: String,
@@ -40,11 +42,10 @@ class DhizukuPrivilegedService : BasePrivilegedService() {
                 ownerComponent,
                 InstallIntentFilter, component
             )
-        } catch (t: Throwable) { // <--- 使用 Throwable 来捕获包括 Error 在内的所有问题
-            // 捕获所有异常，防止进程崩溃
+        } catch (t: Throwable) {
             Timber.tag("DhizukuPrivilegedService")
                 .e(t, "Failed to set default installer due to a throwable")
-            // 重新抛出，让客户端知道操作失败了
+            // Re-throw to inform client that op is failed
             throw t
         }
     }

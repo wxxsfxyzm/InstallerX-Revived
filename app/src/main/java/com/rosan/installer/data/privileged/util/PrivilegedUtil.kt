@@ -17,34 +17,25 @@ const val SU_ARGS = "-M"
 
 private const val DELETE_TAG = "DELETE_PATH"
 
-
-fun deletePaths(paths: Array<out String>) {
+fun deletePaths(paths: List<String>) {
     for (path in paths) {
         val file = File(path)
 
         Timber.tag(DELETE_TAG).d("Processing path for deletion: $path")
 
         try {
-            // Check if the file exists before attempting to delete.
             if (file.exists()) {
-                // Call delete() and check its boolean return value.
-                if (file.delete()) {
-                    // This is the true success case.
-                    Timber.tag(DELETE_TAG).d("Successfully deleted file: $path")
+                if (file.deleteRecursively()) {
+                    Timber.tag(DELETE_TAG).d("Successfully deleted: $path")
                 } else {
-                    // The file existed, but deletion failed.
-                    // This is a critical case to log as a warning.
-                    Timber.tag(DELETE_TAG).w("Failed to delete file: $path. Check for permissions or if it is a non-empty directory.")
+                    Timber.tag(DELETE_TAG).w("Failed to delete: $path. Check for permissions or lock issues.")
                 }
             } else {
-                // If the file doesn't exist, it's already in the desired state. No error needed.
-                Timber.tag(DELETE_TAG).d("File does not exist, no action needed: $path")
+                Timber.tag(DELETE_TAG).d("File/Directory does not exist, no action needed: $path")
             }
         } catch (e: SecurityException) {
-            // Specifically catch permission errors. This is crucial for debugging.
             Timber.tag(DELETE_TAG).e(e, "SecurityException on deleting $path. Permission denied.")
         } catch (e: Exception) {
-            // Catch any other unexpected errors during the process.
             Timber.tag(DELETE_TAG).e(e, "An unexpected error occurred while processing $path")
         }
     }

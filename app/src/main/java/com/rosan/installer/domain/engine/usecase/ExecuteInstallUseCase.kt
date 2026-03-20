@@ -3,7 +3,6 @@
 package com.rosan.installer.domain.engine.usecase
 
 import com.rosan.installer.domain.engine.model.InstallEntity
-import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
 import com.rosan.installer.domain.engine.repository.InstallerRepository
 import com.rosan.installer.domain.settings.model.ConfigModel
 
@@ -18,7 +17,6 @@ class ExecuteInstallUseCase(
      * Executes the installation of the provided entities.
      * * @param config The configuration containing authorizer and install flags.
      * @param entities The list of APK/Module entities to be installed.
-     * @param extra Metadata including userId and cache directory paths.
      * @param blacklist List of package names that are restricted.
      * @param sharedUserIdBlacklist List of SharedUserIDs that are restricted.
      * @param sharedUserIdExemption List of packages exempt from UID restrictions.
@@ -26,7 +24,6 @@ class ExecuteInstallUseCase(
     suspend fun install(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity,
         blacklist: List<String> = emptyList(),
         sharedUserIdBlacklist: List<String> = emptyList(),
         sharedUserIdExemption: List<String> = emptyList()
@@ -34,7 +31,6 @@ class ExecuteInstallUseCase(
         installerRepository.doInstallWork(
             config = config,
             entities = entities,
-            extra = extra,
             blacklist = blacklist,
             sharedUserIdBlacklist = sharedUserIdBlacklist,
             sharedUserIdExemption = sharedUserIdExemption
@@ -46,10 +42,9 @@ class ExecuteInstallUseCase(
      */
     suspend fun uninstall(
         config: ConfigModel,
-        packageName: String,
-        extra: InstallExtraInfoEntity
+        packageName: String
     ) {
-        installerRepository.doUninstallWork(config, packageName, extra)
+        installerRepository.doUninstallWork(config, packageName)
     }
 
     /**

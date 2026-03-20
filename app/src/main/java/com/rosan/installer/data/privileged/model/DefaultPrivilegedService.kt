@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.data.privileged.model
 
 import android.annotation.SuppressLint
@@ -132,7 +134,7 @@ class DefaultPrivilegedService(
         }
     }
 
-    override fun delete(paths: Array<out String>) = deletePaths(paths)
+    override fun delete(paths: Array<out String>) = deletePaths(paths.toList())
 
     override fun performDexOpt(
         packageName: String,
@@ -310,7 +312,7 @@ class DefaultPrivilegedService(
             try {
                 listener.onError(errorMessage)
                 listener.onComplete(-1) // Send a failure exit code
-            } catch (re: RemoteException) {
+            } catch (_: RemoteException) {
                 // The client might be dead, just log it.
                 Timber.tag(TAG).e(e, "Failed to send execution error to client.")
             }
@@ -663,7 +665,7 @@ class DefaultPrivilegedService(
                             Timber.tag(TAG).d("Fallback: Loaded icon from installed app")
                         }
                     }
-                } catch (e: PackageManager.NameNotFoundException) {
+                } catch (_: PackageManager.NameNotFoundException) {
                     Timber.tag(TAG).d("App not installed, cannot use fallback info.")
                 } catch (e: Exception) {
                     Timber.tag(TAG).e(e, "Failed to load info from installed app fallback")

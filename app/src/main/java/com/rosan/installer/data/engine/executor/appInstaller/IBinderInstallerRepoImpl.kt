@@ -23,14 +23,12 @@ import com.rosan.installer.data.engine.executor.PackageInstallerUtil.abiOverride
 import com.rosan.installer.data.engine.executor.PackageInstallerUtil.installFlags
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.data.privileged.util.requireDhizukuPermissionGranted
-
 import com.rosan.installer.domain.device.model.Architecture
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallEntity
 import com.rosan.installer.domain.engine.model.InstallErrorType
-import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
 import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.engine.model.sourcePath
 import com.rosan.installer.domain.engine.repository.InstallerRepository
@@ -47,6 +45,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import android.os.Process as AndroidProcess
 
 abstract class IBinderInstallerRepoImpl(
     protected val context: Context,
@@ -58,13 +57,14 @@ abstract class IBinderInstallerRepoImpl(
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
 
-    private suspend fun getPackageInstaller(
-        config: ConfigModel, entities: List<InstallEntity>, extra: InstallExtraInfoEntity
-    ): PackageInstaller {
+    private suspend fun getPackageInstaller(config: ConfigModel): PackageInstaller {
         val iPackageManager =
             IPackageManager.Stub.asInterface(iBinderWrapper(ServiceManager.getService("package")))
         val iPackageInstaller =
             IPackageInstaller.Stub.asInterface(iBinderWrapper(iPackageManager.packageInstaller.asBinder()))
+
+        // Resolve the target user ID based on config
+        val finalUserId = if (config.enableCustomizeUser) config.targetUserId else AndroidProcess.myUid() / 100000
 
         val installerPackageName = when (config.authorizer) {
             Authorizer.Dhizuku -> getDhizukuComponentName()
@@ -79,7 +79,7 @@ abstract class IBinderInstallerRepoImpl(
                 String::class.java,
                 String::class.java,
                 Int::class.java,
-            )!!.newInstance(iPackageInstaller, installerPackageName, null, extra.userId)
+            )!!.newInstance(iPackageInstaller, installerPackageName, null, finalUserId)
         else reflect.getDeclaredConstructor(
             PackageInstaller::class.java,
             IPackageInstaller::class.java,
@@ -88,7 +88,7 @@ abstract class IBinderInstallerRepoImpl(
         )!!.newInstance(
             iPackageInstaller,
             installerPackageName,
-            extra.userId
+            finalUserId
         )) as PackageInstaller
     }
 
@@ -147,17 +147,16 @@ abstract class IBinderInstallerRepoImpl(
     override suspend fun doInstallWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity,
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
     ) {
         val result = runCatching {
             entities.groupBy { it.packageName }.forEach { (packageName, entities) ->
-                doInnerWork(config, entities, extra, packageName, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
+                doInnerWork(config, entities, packageName, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
             }
         }
-        doFinishWork(config, entities, extra, result)
+        doFinishWork(config, entities, result)
         result.onFailure {
             throw it
         }
@@ -166,8 +165,7 @@ abstract class IBinderInstallerRepoImpl(
     @SuppressLint("MissingPermission")
     override suspend fun doUninstallWork(
         config: ConfigModel,
-        packageName: String,
-        extra: InstallExtraInfoEntity,
+        packageName: String
     ) {
         // Get the underlying IPackageManager and IPackageInstaller interfaces.
         val iPackageManager =
@@ -184,6 +182,10 @@ abstract class IBinderInstallerRepoImpl(
             else -> context.packageName
         }
 
+        // Always use the current user for uninstallation, ignoring config.enableCustomizeUser
+        // This prevents accidental uninstallation from other profiles if the config was reused from an install session.
+        val currentUserId = AndroidProcess.myUid() / 100000
+
         Timber.d("Directly calling IPackageInstaller.uninstall with flags: $flags")
 
         // Directly call the method from the stub interface.
@@ -192,7 +194,7 @@ abstract class IBinderInstallerRepoImpl(
             callerPackageName,
             flags,
             receiver.getIntentSender(),
-            extra.userId
+            currentUserId
         )
 
         // The result verification logic remains the same.
@@ -202,7 +204,6 @@ abstract class IBinderInstallerRepoImpl(
     private suspend fun doInnerWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity,
         packageName: String,
         managedBlacklistPackages: List<String>,
         sharedUserIdBlacklist: List<String>,
@@ -234,12 +235,12 @@ abstract class IBinderInstallerRepoImpl(
         }
 
         if (entities.isEmpty()) return
-        val packageInstaller = getPackageInstaller(config, entities, extra)
+        val packageInstaller = getPackageInstaller(config)
         var session: Session? = null
         try {
-            session = createSession(config, entities, extra, packageInstaller, packageName)
-            installIts(config, entities, extra, session)
-            commit(config, entities, extra, session)
+            session = createSession(config, entities, packageInstaller, packageName)
+            installIts(entities, session)
+            commit(session)
         } catch (e: Exception) {
             session?.abandon()
             throw e
@@ -251,7 +252,6 @@ abstract class IBinderInstallerRepoImpl(
     private suspend fun createSession(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity,
         packageInstaller: PackageInstaller,
         packageName: String
     ): Session {
@@ -355,18 +355,11 @@ abstract class IBinderInstallerRepoImpl(
         return session
     }
 
-    private fun installIts(
-        config: ConfigModel,
-        entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity,
-        session: Session
-    ) {
-        for (entity in entities) installIt(config, entity, extra, session)
+    private fun installIts(entities: List<InstallEntity>, session: Session) {
+        for (entity in entities) installIt(entity, session)
     }
 
-    private fun installIt(
-        config: ConfigModel, entity: InstallEntity, extra: InstallExtraInfoEntity, session: Session
-    ) {
+    private fun installIt(entity: InstallEntity, session: Session) {
         Timber.d("Installing entity: ${entity.name}, data path: ${entity.data}, top source: ${entity.data.getSourceTop()}")
         val inputStream = entity.data.getInputStreamWhileNotEmpty()
             ?: throw Exception("can't open input stream for this data: '${entity.data}'")
@@ -387,12 +380,7 @@ abstract class IBinderInstallerRepoImpl(
     }
 
     @SuppressLint("RequestInstallPackagesPolicy")
-    private suspend fun commit(
-        config: ConfigModel,
-        entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity,
-        session: Session
-    ) {
+    private suspend fun commit(session: Session) {
         val receiver = LocalIntentReceiver(reflect)
         session.commit(receiver.getIntentSender())
         PackageManagerUtil.installResultVerify(context, receiver)
@@ -401,7 +389,6 @@ abstract class IBinderInstallerRepoImpl(
     open suspend fun doFinishWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        extraInfo: InstallExtraInfoEntity,
         result: Result<Unit>
     ) {
         Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
@@ -437,24 +424,5 @@ abstract class IBinderInstallerRepoImpl(
                 }
             }
         }
-    }
-
-    protected open suspend fun onDeleteWork(
-        config: ConfigModel,
-        entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity
-    ) {
-        val pathsToDelete = entities.sourcePath().toList()
-        if (pathsToDelete.isEmpty()) return
-
-        postInstallTaskProvider.executeTasks(
-            authorizer = config.authorizer,
-            customizeAuthorizer = config.customizeAuthorizer,
-            info = PostInstallTaskInfo(
-                packageName = entities.firstOrNull()?.packageName ?: "",
-                enableAutoDelete = true,
-                deletePaths = pathsToDelete
-            )
-        )
     }
 }

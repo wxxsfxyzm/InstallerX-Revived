@@ -10,10 +10,8 @@ import com.rosan.installer.data.engine.executor.appInstaller.ProcessInstallerRep
 import com.rosan.installer.data.engine.executor.appInstaller.ShizukuInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appInstaller.SystemInstallerRepoImpl
 import com.rosan.installer.data.privileged.exception.ShizukuNotWorkException
-
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.InstallEntity
-import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
 import com.rosan.installer.domain.engine.repository.InstallerRepository
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.Authorizer
@@ -28,7 +26,6 @@ class InstallerRepositoryImpl(
     override suspend fun doInstallWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity,
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
@@ -36,7 +33,6 @@ class InstallerRepositoryImpl(
         repo.doInstallWork(
             config,
             entities,
-            extra,
             blacklist,
             sharedUserIdBlacklist,
             sharedUserIdExemption
@@ -45,10 +41,9 @@ class InstallerRepositoryImpl(
 
     override suspend fun doUninstallWork(
         config: ConfigModel,
-        packageName: String,
-        extra: InstallExtraInfoEntity,
+        packageName: String
     ) = executeWithRepo(config) { repo ->
-        repo.doUninstallWork(config, packageName, extra)
+        repo.doUninstallWork(config, packageName)
     }
 
     override suspend fun approveSession(
@@ -91,7 +86,7 @@ class InstallerRepositoryImpl(
                 if (deviceCapabilityProvider.isSystemApp) {
                     SystemInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
                 } else {
-                    NoneInstallerRepoImpl(context, reflect)
+                    NoneInstallerRepoImpl(context, reflect, postInstallTaskProvider)
                 }
             }
 

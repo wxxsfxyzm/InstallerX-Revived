@@ -2,11 +2,9 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.session.processor
 
-import android.system.Os
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.InstallEntity
-import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
 import com.rosan.installer.domain.engine.model.PackageAnalysisResult
 import com.rosan.installer.domain.engine.repository.InstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
@@ -62,7 +60,6 @@ class InstallationProcessor(
     suspend fun install(
         config: ConfigModel,
         analysisResults: List<PackageAnalysisResult>,
-        cacheDirectory: String,
         current: Int = 1,
         total: Int = 1
     ) {
@@ -79,7 +76,7 @@ class InstallationProcessor(
         if (firstApp is AppEntity.ModuleEntity) {
             installModule(config, firstApp)
         } else {
-            installApp(config, selected, cacheDirectory, current, total)
+            installApp(config, selected, current, total)
         }
     }
 
@@ -128,7 +125,6 @@ class InstallationProcessor(
     private suspend fun installApp(
         config: ConfigModel,
         selectedEntities: List<SelectInstallEntity>,
-        cacheDirectory: String,
         current: Int,
         total: Int
     ) {
@@ -171,20 +167,10 @@ class InstallationProcessor(
             )
         }
 
-        val targetUserId = if (config.enableCustomizeUser) {
-            Timber.d("Custom user is enabled. Installing for user: ${config.targetUserId}")
-            config.targetUserId
-        } else {
-            val uid = Os.getuid() / 100000
-            Timber.d("Custom user is disabled. Installing for current user: $uid")
-            uid
-        }
-
         // Perform the blocking install work.
         installerRepository.doInstallWork(
             config,
             installEntities,
-            InstallExtraInfoEntity(targetUserId, cacheDirectory),
             blacklist,
             sharedUidBlacklist,
             sharedUidWhitelist

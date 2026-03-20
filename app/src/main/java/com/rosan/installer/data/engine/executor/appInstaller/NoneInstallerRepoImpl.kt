@@ -10,15 +10,15 @@ import android.provider.Settings
 import androidx.core.net.toUri
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
-import com.rosan.installer.data.privileged.util.deletePaths
-
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallEntity
 import com.rosan.installer.domain.engine.model.InstallErrorType
-import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
 import com.rosan.installer.domain.engine.model.sourcePath
 import com.rosan.installer.domain.engine.repository.InstallerRepository
+import com.rosan.installer.domain.privileged.model.PostInstallTaskInfo
+import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
+import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +28,8 @@ import java.io.IOException
 
 class NoneInstallerRepoImpl(
     private val context: Context,
-    private val reflect: ReflectionProvider
+    private val reflect: ReflectionProvider,
+    private val postInstallTaskProvider: PostInstallTaskProvider
 ) : InstallerRepository {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -36,7 +37,6 @@ class NoneInstallerRepoImpl(
     override suspend fun doInstallWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity,
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
@@ -86,7 +86,7 @@ class NoneInstallerRepoImpl(
             }
         }
 
-        doFinishWork(config, entities, extra, result)
+        doFinishWork(config, entities, result)
         // If the installation failed, re-throw the exception to notify the caller.
         result.onFailure {
             throw it
@@ -96,49 +96,47 @@ class NoneInstallerRepoImpl(
     private fun doFinishWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        extraInfo: InstallExtraInfoEntity,
         result: Result<Unit>
     ) {
         Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
         if (result.isSuccess) {
-            // Process autoDelete
-            if (config.autoDelete && (entities.first().sourceType != DataType.MULTI_APK_ZIP || config.autoDeleteZip)) {
-                Timber.tag("doFinishWork").d("autoDelete is enabled, starting delete work.")
-                // Launch a background coroutine to handle file deletion.
-                coroutineScope.launch {
-                    // Use runCatching to prevent deletion errors from crashing the app.
-                    runCatching {
-                        onDeleteWork(entities)
-                    }.onFailure {
-                        Timber.e(it, "An error occurred during the onDeleteWork execution.")
-                    }
+            val packageName = entities.firstOrNull()?.packageName ?: return
+
+            // Determine if the source type is capable of being deleted
+            val isDeleteCapable = entities.firstOrNull()?.sourceType !in listOf(
+                DataType.MULTI_APK_ZIP,
+                DataType.MIXED_MODULE_APK,
+                DataType.MIXED_MODULE_ZIP
+            )
+
+            val shouldDelete = config.autoDelete && (isDeleteCapable || config.autoDeleteZip)
+            val pathsToDelete = if (shouldDelete) entities.sourcePath().toList() else emptyList()
+
+            // Launch a background coroutine to handle post-install tasks (like deletion).
+            coroutineScope.launch {
+                runCatching {
+                    postInstallTaskProvider.executeTasks(
+                        authorizer = Authorizer.None,
+                        customizeAuthorizer = config.customizeAuthorizer,
+                        info = PostInstallTaskInfo(
+                            packageName = packageName,
+                            enableDexopt = config.enableManualDexopt,
+                            dexoptMode = config.dexoptMode.value,
+                            forceDexopt = config.forceDexopt,
+                            enableAutoDelete = shouldDelete,
+                            deletePaths = pathsToDelete
+                        )
+                    )
+                }.onFailure { e ->
+                    Timber.e(e, "Async post-install tasks failed")
                 }
             }
         }
     }
 
-    /**
-     * Handles the actual file deletion using standard, non-privileged APIs.
-     */
-    private fun onDeleteWork(
-        entities: List<InstallEntity>,
-    ) {
-        // Extract the source file paths from the install entities.
-        val pathsToDelete = entities.sourcePath()
-        if (pathsToDelete.isEmpty()) {
-            Timber.tag("onDeleteWork").w("No source paths found to delete.")
-            return
-        }
-
-        Timber.tag("onDeleteWork").d("Attempting to delete paths: ${pathsToDelete.joinToString()}")
-        // Use the robust deletePaths utility function which handles errors gracefully.
-        deletePaths(pathsToDelete)
-    }
-
     override suspend fun doUninstallWork(
         config: ConfigModel,
-        packageName: String,
-        extra: InstallExtraInfoEntity
+        packageName: String
     ) {
         val result = runCatching {
             // Get the standard PackageInstaller

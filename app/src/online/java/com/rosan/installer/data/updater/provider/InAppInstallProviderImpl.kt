@@ -3,11 +3,9 @@
 package com.rosan.installer.data.updater.provider
 
 import android.content.Context
-import android.os.Process
 import com.rosan.installer.domain.engine.model.DataEntity
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallEntity
-import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
 import com.rosan.installer.domain.engine.repository.InstallerRepository
 import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.updater.provider.InAppInstallProvider
@@ -40,7 +38,6 @@ class InAppInstallProviderImpl(
         installerRepository.doInstallWork(
             config = config,
             entities = listOf(installEntity),
-            extra = InstallExtraInfoEntity(userId = Process.myUid() / 100000, ""),
             blacklist = emptyList(),
             sharedUserIdBlacklist = emptyList(),
             sharedUserIdExemption = emptyList()

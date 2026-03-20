@@ -8,10 +8,8 @@ import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.data.privileged.repository.recycler.ProcessHookRecycler
 import com.rosan.installer.data.privileged.util.SHELL_ROOT
 import com.rosan.installer.data.privileged.util.SHELL_SH
-
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.InstallEntity
-import com.rosan.installer.domain.engine.model.InstallExtraInfoEntity
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
@@ -27,20 +25,18 @@ class ProcessInstallerRepoImpl(
     override suspend fun doInstallWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        extra: InstallExtraInfoEntity,
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
     ) = runWithProcess(config) {
-        super.doInstallWork(config, entities, extra, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
+        super.doInstallWork(config, entities, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
     }
 
     override suspend fun doUninstallWork(
         config: ConfigModel,
-        packageName: String,
-        extra: InstallExtraInfoEntity
+        packageName: String
     ) = runWithProcess(config) {
-        super.doUninstallWork(config, packageName, extra)
+        super.doUninstallWork(config, packageName)
     }
 
     override suspend fun approveSession(
@@ -64,10 +60,9 @@ class ProcessInstallerRepoImpl(
     override suspend fun doFinishWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        extraInfo: InstallExtraInfoEntity,
         result: Result<Unit>
     ) {
-        super.doFinishWork(config, entities, extraInfo, result)
+        super.doFinishWork(config, entities, result)
     }
 
     private suspend fun <T> runWithProcess(
