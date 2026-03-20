@@ -17,18 +17,19 @@ import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
+import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val privilegedModule = module {
     // Providers
-    single<AppOpsProvider> { AppOpsProviderImpl(get()) }
-    single<ComponentOpsProvider> { ComponentOpsProviderImpl(get()) }
-    single<PermissionProvider> { PermissionProviderImpl(get()) }
-    single<ShellExecutionProvider> { ShellExecutionProviderImpl(get()) }
-    single<PostInstallTaskProvider> { PostInstallTaskProviderImpl(get()) }
-    single<SystemInfoProvider> { SystemInfoProviderImpl(get()) }
+    singleOf(::AppOpsProviderImpl) { bind<AppOpsProvider>() }
+    singleOf(::ComponentOpsProviderImpl) { bind<ComponentOpsProvider>() }
+    singleOf(::PermissionProviderImpl) { bind<PermissionProvider>() }
+    singleOf(::ShellExecutionProviderImpl) { bind<ShellExecutionProvider>() }
+    singleOf(::PostInstallTaskProviderImpl) { bind<PostInstallTaskProvider>() }
+    singleOf(::SystemInfoProviderImpl) { bind<SystemInfoProvider>() }
 
     // Services
     singleOf(::AutoLockService)

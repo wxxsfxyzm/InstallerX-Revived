@@ -70,7 +70,7 @@ val settingsModule = module {
     singleOf(::ThemeStateProvider)
 
     // UseCases
-    factory { GetResolvedConfigUseCase(androidContext(), get(), get(), get(), get()) }
+    factoryOf(::GetResolvedConfigUseCase)
     factoryOf(::GetConfigDraftUseCase)
     factoryOf(::SaveConfigUseCase)
     factoryOf(::UpdateSettingUseCase)

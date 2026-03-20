@@ -11,18 +11,20 @@ import com.rosan.installer.domain.updater.repository.UpdateRepository
 import com.rosan.installer.domain.updater.usecase.PerformAppUpdateUseCase
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
-import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import java.util.concurrent.TimeUnit
 
 val networkModule = module {
     single {
         OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS) // Connection Timeout
-            .readTimeout(15, TimeUnit.SECONDS)    // Read Timeout
-            .writeTimeout(15, TimeUnit.SECONDS)   // Write Timeout
-            .followRedirects(true)                 // Allow Redirect
-            .followSslRedirects(true)       // Allow SSL Redirect
+            .connectTimeout(15, TimeUnit.SECONDS)       // Connection Timeout
+            .readTimeout(15, TimeUnit.SECONDS)          // Read Timeout
+            .writeTimeout(15, TimeUnit.SECONDS)         // Write Timeout
+            .followRedirects(true)                             // Allow Redirect
+            .followSslRedirects(true)  // Allow SSL Redirect
             .connectionSpecs(
                 listOf(
                     ConnectionSpec.MODERN_TLS,
@@ -32,20 +34,14 @@ val networkModule = module {
             .build()
     }
 
-    single<NetworkResolver> {
-        OkHttpNetworkResolver(
-            context = androidContext(),
-            okHttpClient = get(),
-            appSettingsRepo = get()
-        )
-    }
+    singleOf(::OkHttpNetworkResolver) { bind<NetworkResolver>() }
 }
 
 val updateModule = module {
     // Data Layer implementations
-    single<UpdateRepository> { OnlineUpdateRepositoryImpl(get(), get(), get()) }
-    single<InAppInstallProvider> { InAppInstallProviderImpl(get(), get()) }
+    singleOf(::OnlineUpdateRepositoryImpl) { bind<UpdateRepository>() }
+    singleOf(::InAppInstallProviderImpl) { bind<InAppInstallProvider>() }
 
     // Domain Layer UseCases
-    factory { PerformAppUpdateUseCase(get(), get()) }
+    factoryOf(::PerformAppUpdateUseCase)
 }

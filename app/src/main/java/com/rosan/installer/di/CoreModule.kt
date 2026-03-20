@@ -4,8 +4,10 @@ package com.rosan.installer.di
 
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.core.reflection.ReflectionProviderImpl
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val coreModule = module {
-    single<ReflectionProvider> { ReflectionProviderImpl() }
+    singleOf(::ReflectionProviderImpl) { bind<ReflectionProvider>() }
 }

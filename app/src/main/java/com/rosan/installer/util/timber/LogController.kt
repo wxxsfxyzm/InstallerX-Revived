@@ -19,7 +19,7 @@ class LogController(
     // Use Main scope for collecting flow, file IO is handled internally by the Tree on IO dispatcher
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    fun init() {
+    init {
         scope.launch {
             appSettingsRepo.getBoolean(BooleanSetting.EnableFileLogging, true)
                 .collectLatest { enabled ->
