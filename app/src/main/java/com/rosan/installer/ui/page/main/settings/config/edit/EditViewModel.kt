@@ -35,11 +35,11 @@ import org.koin.core.component.inject
 import timber.log.Timber
 
 class EditViewModel(
+    private val id: Long? = null,
     private val appSettingsRepo: AppSettingsRepo,
     private val getConfigDraftUseCase: GetConfigDraftUseCase,
     private val saveConfigUseCase: SaveConfigUseCase,
-    private val systemInfoProvider: SystemInfoProvider,
-    private val id: Long? = null
+    private val systemInfoProvider: SystemInfoProvider
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 

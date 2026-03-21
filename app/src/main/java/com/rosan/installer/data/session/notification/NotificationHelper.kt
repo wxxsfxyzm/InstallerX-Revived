@@ -6,19 +6,18 @@ import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
-import androidx.core.graphics.drawable.toBitmapOrNull
 import com.rosan.installer.R
 import com.rosan.installer.data.session.handler.BroadcastHandler
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.sortedBest
-import com.rosan.installer.domain.engine.repository.AppIconRepository
+import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 
 class NotificationHelper(
     private val context: Context,
     private val installer: InstallerSessionRepository,
-    private val appIconRepo: AppIconRepository
+    private val getAppIcon: GetAppIconUseCase
 ) {
     enum class Channel(val value: String) {
         InstallerChannel("installer_channel"),
@@ -57,33 +56,39 @@ class NotificationHelper(
         }
     }
 
-    // Retrieve specific icon from multi-install queue or analysis results
+    /**
+     * Retrieves the large icon for notifications.
+     * Supports both installation and uninstallation tasks.
+     */
     suspend fun getLargeIconBitmap(preferSystemIcon: Boolean, currentBatchIndex: Int? = null): Bitmap? {
+        // Priority 1: Check if this is an uninstallation task
+        val uninstallPkg = installer.uninstallInfo.value?.packageName
+
+        // Priority 2: Check if this is a multi-install batch
         val entityFromQueue = if (currentBatchIndex != null && installer.multiInstallQueue.isNotEmpty()) {
             installer.multiInstallQueue.getOrNull(currentBatchIndex)?.app
         } else null
 
-        val entityToInstall = if (entityFromQueue != null) {
-            entityFromQueue
-        } else {
-            val entities = installer.analysisResults
-                .flatMap { it.appEntities }
-                .filter { it.selected }
-                .map { it.app }
-            entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
-                ?: entities.sortedBest().firstOrNull()
-        } ?: return null
+        // Priority 3: Resolve current selected entity for single install
+        val entityToInstall = entityFromQueue
+            ?: if (uninstallPkg == null) {
+                val entities = installer.analysisResults
+                    .flatMap { it.appEntities }
+                    .filter { it.selected }
+                    .map { it.app }
+                entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+                    ?: entities.sortedBest().firstOrNull()
+            } else null
 
         val iconSizePx = context.resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_width)
 
-        val drawable = appIconRepo.getIcon(
+        // Delegate to UseCase using the resolved package name
+        return getAppIcon(
             sessionId = installer.id,
-            packageName = entityToInstall.packageName,
+            packageName = uninstallPkg ?: entityToInstall?.packageName ?: return null,
             entityToInstall = entityToInstall,
             iconSizePx = iconSizePx,
             preferSystemIcon = preferSystemIcon
         )
-
-        return drawable?.toBitmapOrNull(width = iconSizePx, height = iconSizePx)
     }
 }

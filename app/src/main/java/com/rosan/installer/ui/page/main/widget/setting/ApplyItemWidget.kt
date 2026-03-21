@@ -1,6 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.widget.setting
 
-import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -28,34 +29,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import com.rosan.installer.data.engine.repository.AppIconCache
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewApp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 /**
  * A reusable item widget for displaying app information with a toggle switch.
- * It handles performance-critical tasks like asynchronous icon loading and entry animations internally.
+ * It handles entry animations internally. Icon loading has been hoisted.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ApplyItemWidget(
     modifier: Modifier = Modifier,
     app: ApplyViewApp,
+    icon: ImageBitmap?, // Passed from the parent caller
     isApplied: Boolean,
     // Visual customization parameters
     shape: Shape = RoundedCornerShape(8.dp),
@@ -98,38 +92,15 @@ fun ApplyItemWidget(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // --- Icon Loading Logic ---
-        val context = LocalContext.current
-        val density = LocalDensity.current
-        val iconSizePx = remember(density) { with(density) { 40.dp.roundToPx() } }
 
-        var icon by remember(app.packageName) { mutableStateOf<Drawable?>(null) }
-
-        // Load icon asynchronously to prevent UI stuttering
-        LaunchedEffect(app.packageName) {
-            launch(Dispatchers.IO) {
-                val pm = context.packageManager
-                val info = runCatching {
-                    pm.getApplicationInfo(app.packageName, 0)
-                }.getOrNull()
-
-                if (info != null) {
-                    val loadedIcon = AppIconCache.loadIconDrawable(context, info, iconSizePx)
-                    if (loadedIcon != null) {
-                        icon = loadedIcon
-                    }
-                }
-            }
-        }
-
+        // Render the icon if available, otherwise use a placeholder to avoid layout shifts.
         if (icon != null) {
             Image(
-                painter = rememberDrawablePainter(icon),
+                bitmap = icon,
                 modifier = Modifier.size(40.dp),
                 contentDescription = null
             )
         } else {
-            // Placeholder to avoid layout shifts.
             Box(modifier = Modifier.size(40.dp))
         }
 

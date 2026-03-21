@@ -2,7 +2,6 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -18,10 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.sortedBest
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
@@ -34,7 +32,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  */
 @Immutable
 data class AppInfoState(
-    val icon: Drawable?,
+    val icon: ImageBitmap?,
     val label: String,
     val packageName: String,
     // Helper to access the underlying entity if specific logic needs it (e.g. version comparison)
@@ -49,7 +47,7 @@ data class AppInfoState(
 fun rememberAppInfoState(
     installer: InstallerSessionRepository,
     currentPackageName: String?,
-    displayIcons: Map<String, Drawable?>
+    displayIcons: Map<String, ImageBitmap?>
 ): AppInfoState {
     return remember(installer, currentPackageName, displayIcons) {
         val currentPackage = if (currentPackageName != null) {
@@ -61,7 +59,7 @@ fun rememberAppInfoState(
         // Default fallback values
         var label = "Unknown App"
         var packageName = "unknown.package"
-        var icon: Drawable? = null
+        var icon: ImageBitmap? = null
         var primaryEntity: AppEntity? = null
 
         if (currentPackage != null) {
@@ -121,16 +119,13 @@ fun AppInfoSlot(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = rememberDrawablePainter(
-                    drawable = appInfo.icon ?: ContextCompat.getDrawable(
-                        context,
-                        android.R.drawable.sym_def_app_icon
-                    )
-                ),
-                contentDescription = "App Icon",
-                modifier = Modifier.fillMaxSize()
-            )
+            if (appInfo.icon != null) {
+                Image(
+                    bitmap = appInfo.icon,
+                    contentDescription = "App Icon",
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
         Text(
             modifier = Modifier.basicMarquee(),

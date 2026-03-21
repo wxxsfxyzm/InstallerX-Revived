@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
-import androidx.core.content.ContextCompat
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,7 +17,8 @@ import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.engine.model.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.sourcePath
-import com.rosan.installer.domain.engine.repository.AppIconRepository
+import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
+import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
@@ -55,8 +56,9 @@ import java.io.File
 class InstallerViewModel(
     private var repo: InstallerSessionRepository,
     private val appSettingsRepo: AppSettingsRepo,
-    private val appIconRepo: AppIconRepository,
-    private val systemInfoProvider: SystemInfoProvider
+    private val systemInfoProvider: SystemInfoProvider,
+    private val getAppIcon: GetAppIconUseCase,
+    private val getAppIconColor: GetAppIconColorUseCase,
 ) : ViewModel(), KoinComponent {
     private val context by inject<Context>()
 
@@ -321,6 +323,7 @@ class InstallerViewModel(
                     }
 
                     is InstallerStage.InstallChoice, is InstallerStage.Ready -> null
+                    is InstallerStage.UninstallReady -> repo.uninstallInfo.value?.packageName
                     else -> _localState.value.currentPackageName
                 }
 
@@ -328,33 +331,29 @@ class InstallerViewModel(
                     loadDisplayIcon(newPackageName)
                 }
 
+                if (newPackageName != null && newPackageName != _localState.value.currentPackageName) {
+                    loadDisplayIcon(newPackageName)
+                }
+
                 _localState.update { currentState ->
-                    var updatedState = currentState.copy(
+                    val updatedState = currentState.copy(
                         stage = newStage,
-                        currentPackageName = newPackageName ?: currentState.currentPackageName
+                        currentPackageName = newPackageName ?: currentState.currentPackageName,
+                        uiUninstallInfo = repo.uninstallInfo.value // Update metadata
                     )
 
+                    // Re-calculate seed color from the icon if dynamic color is enabled
                     if (updatedState.viewSettings.useDynColorFollowPkgIcon) {
-                        val colorInt: Int? = when (newStage) {
-                            is InstallerStage.InstallPrepare, is InstallerStage.Installing, is InstallerStage.InstallFailed, is InstallerStage.InstallSuccess ->
-                                repo.analysisResults.find { it.packageName == newPackageName }?.seedColor
-
-                            is InstallerStage.InstallChoice -> repo.analysisResults.firstNotNullOfOrNull { it.seedColor }
-                            is InstallerStage.UninstallReady, is InstallerStage.Uninstalling, is InstallerStage.UninstallSuccess, is InstallerStage.UninstallFailed ->
-                                repo.uninstallInfo.value?.seedColor
-
-                            else -> null
+                        // For uninstallation, we can now use the repo's central logic to get the color
+                        // from the already loaded/cached icon bitmap
+                        viewModelScope.launch {
+                            val colorInt = getAppIconColor(
+                                sessionId = repo.id,
+                                packageName = newPackageName ?: "",
+                                preferSystemIcon = updatedState.viewSettings.preferSystemIconForUpdates
+                            )
+                            _localState.update { it.copy(seedColor = colorInt?.let { c -> Color(c) }) }
                         }
-                        updatedState = updatedState.copy(seedColor = colorInt?.let { Color(it) })
-                    } else {
-                        updatedState = updatedState.copy(seedColor = null)
-                    }
-
-                    if (newStage is InstallerStage.UninstallReady) {
-                        updatedState = updatedState.copy(
-                            uiUninstallInfo = repo.uninstallInfo.value,
-                            uninstallFlags = repo.config.uninstallFlags
-                        )
                     }
 
                     updatedState
@@ -427,22 +426,19 @@ class InstallerViewModel(
             val entityToInstall = rawEntities?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
                 ?: rawEntities?.filterIsInstance<AppEntity.ModuleEntity>()?.firstOrNull()
 
-            val loadedIcon = try {
-                appIconRepo.getIcon(
-                    sessionId = repo.id,
-                    packageName = packageName,
-                    entityToInstall = entityToInstall,
-                    iconSizePx = 256,
-                    preferSystemIcon = uiState.value.viewSettings.preferSystemIconForUpdates
-                )
-            } catch (_: Exception) {
-                null
-            }
+            // 【重构后】直接调用 UseCase，不需要 try-catch，不需要传一堆默认参数
+            val loadedIconBitmap = getAppIcon(
+                sessionId = repo.id,
+                packageName = packageName,
+                entityToInstall = entityToInstall,
+                preferSystemIcon = uiState.value.viewSettings.preferSystemIconForUpdates
+            )
 
-            val finalIcon = loadedIcon ?: ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+            // ViewModel 仅负责把 Domain 层的 Bitmap 转为 UI 层的 ImageBitmap
+            val finalImageBitmap = loadedIconBitmap?.asImageBitmap()
 
             _localState.update {
-                if (it.displayIcons[packageName] == null) it.copy(displayIcons = it.displayIcons + (packageName to finalIcon))
+                if (it.displayIcons[packageName] == null) it.copy(displayIcons = it.displayIcons + (packageName to finalImageBitmap))
                 else it
             }
         }

@@ -31,17 +31,33 @@ val viewModelModule = module {
     viewModel { (installer: InstallerSessionRepository) ->
         InstallerViewModel(
             repo = installer,
-            appSettingsRepo = get(),
-            appIconRepo = get(),
-            systemInfoProvider = get()
+            get(),
+            get(),
+            get(),
+            get()
         )
     }
 
     viewModel { (id: Long) ->
-        ApplyViewModel(get(), get(), get(), get(), get(), id)
+        ApplyViewModel(
+            id = id,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
     }
 
     viewModel { (id: Long?) ->
-        EditViewModel(get(), get(), get(), get(), id)
+        EditViewModel(
+            id = id,
+            get(),
+            get(),
+            get(),
+            get()
+        )
     }
 }

@@ -43,7 +43,7 @@ fun UninstallFailedContent(
     ) {
         AppInfoSlot(
             appInfo = AppInfoState(
-                icon = info.appIcon,
+                icon = uiState.displayIcons[info.packageName],
                 label = info.appLabel ?: "Unknown App",
                 packageName = info.packageName
             )

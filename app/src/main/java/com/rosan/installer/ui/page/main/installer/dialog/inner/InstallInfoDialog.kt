@@ -53,7 +53,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
@@ -128,7 +127,7 @@ fun installInfoDialog(
                     fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(150))
                 },
                 label = "IconLoadAnimation"
-            ) { icon ->
+            ) { iconBitmap ->
                 Box(
                     modifier = Modifier
                         .size(64.dp)
@@ -144,11 +143,13 @@ fun installInfoDialog(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        modifier = Modifier.fillMaxSize(),
-                        painter = rememberDrawablePainter(icon),
-                        contentDescription = null
-                    )
+                    if (iconBitmap != null)
+                        Image(
+                            bitmap = iconBitmap,
+                            modifier = Modifier.fillMaxSize(),
+                            contentDescription = null
+                        )
+
                 }
             }
         },

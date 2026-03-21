@@ -21,7 +21,10 @@ import com.rosan.installer.domain.engine.repository.InstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.engine.usecase.AnalyzeInstallStateUseCase
 import com.rosan.installer.domain.engine.usecase.AnalyzePackageUseCase
+import com.rosan.installer.domain.engine.usecase.ClearAppIconCacheUseCase
 import com.rosan.installer.domain.engine.usecase.ExecuteInstallUseCase
+import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
+import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.engine.usecase.SelectOptimalSplitsUseCase
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
@@ -54,4 +57,7 @@ val engineModule = module {
     factoryOf(::AnalyzePackageUseCase)
     factoryOf(::ExecuteInstallUseCase)
     factoryOf(::SelectOptimalSplitsUseCase)
+    factoryOf(::GetAppIconUseCase)
+    factoryOf(::GetAppIconColorUseCase)
+    factoryOf(::ClearAppIconCacheUseCase)
 }

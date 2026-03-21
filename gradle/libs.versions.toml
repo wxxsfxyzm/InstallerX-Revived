@@ -21,7 +21,6 @@ splashScreen = "1.2.0"
 material3 = "1.5.0-alpha15"
 room = "2.8.4"
 ktx-serialization = "1.10.0"
-accompanist = "0.37.3"
 rikka-shizuku = "13.1.5"
 koin-bom = "4.2.0"
 datastore = "1.2.1"
@@ -83,8 +82,6 @@ koin-core = { module = "io.insert-koin:koin-core" }
 koin-android = { group = "io.insert-koin", name = "koin-android" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
 koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel" }
-
-accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 
 # Rikka Shizuku
 # https://github.com/RikkaApps/Shizuku-API

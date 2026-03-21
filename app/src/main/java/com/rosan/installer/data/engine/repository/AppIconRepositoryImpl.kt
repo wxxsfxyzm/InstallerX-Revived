@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import com.materialkolor.quantize.QuantizerCelebi
 import com.materialkolor.score.Score
@@ -22,9 +23,10 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
+import android.os.Process as AndroidProcess
 
 /**
- * The default implementation of [com.rosan.installer.domain.engine.repository.AppIconRepository].
+ * The default implementation of [AppIconRepository].
  * It handles the logic for loading icons from the installed package (for upgrades)
  * or from the APK entity (for new installs) and caches the results.
  */
@@ -33,26 +35,33 @@ class AppIconRepositoryImpl(
 ) : AppIconRepository, KoinComponent {
     private val pm: PackageManager by lazy { context.packageManager }
 
-    // Cache to store loading operations (Deferred) to handle concurrent requests.
-    private val iconCache = ConcurrentHashMap<String, Deferred<Drawable?>>()
+    /**
+     * Efficiently identifies the User ID of the current process using the standard UID range formula.
+     */
+    private val currentUserId: Int by lazy {
+        AndroidProcess.myUid() / 100000
+    }
+
+    // Cache to store loading operations returning Bitmap
+    private val iconCache = ConcurrentHashMap<String, Deferred<Bitmap?>>()
 
     override suspend fun getIcon(
         sessionId: String,
         packageName: String,
         entityToInstall: AppEntity?,
+        userId: Int, // Explicitly passed (e.g., from Installer session)
         iconSizePx: Int,
         preferSystemIcon: Boolean
-    ): Drawable? = coroutineScope {
-        val cacheKey = "$sessionId-$packageName"
+    ): Bitmap? = coroutineScope {
+        // Cache key now includes userId to prevent cross-user leakage
+        val cacheKey = "$sessionId-$packageName-$userId"
 
         val deferred = iconCache.getOrPut(cacheKey) {
             async(Dispatchers.IO) {
                 val baseEntity = entityToInstall as? AppEntity.BaseEntity
-                val rawApkIcon = baseEntity?.icon
-                // val apkPath = baseEntity?.data?.sourcePath()
+                val rawApkIconDrawable = baseEntity?.icon
                 val apkPath = (baseEntity?.data as? DataEntity.FileEntity)?.path
 
-                // Try to get ApplicationInfo from an already installed package.
                 val installedAppInfo = try {
                     context.packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
                 } catch (_: PackageManager.NameNotFoundException) {
@@ -60,35 +69,22 @@ class AppIconRepositoryImpl(
                 }
 
                 if (preferSystemIcon) {
-                    // --- User prefers system/themed icon ---
-                    // Priority 1: If the app is installed (upgrade), load its icon directly.
-                    // This correctly applies system theming and icon packs.
                     if (installedAppInfo != null) {
-                        Timber.d("preferSystemIcon is true, upgrade, load from installedAppInfo")
-                        return@async AppIconCache.loadIconDrawable(context, installedAppInfo, iconSizePx)
+                        return@async AppIconCache.loadIconBitmap(context, installedAppInfo, userId, iconSizePx)
                     }
 
-                    // Priority 2: If it's a new install, try to load the themed icon
-                    // from the APK file using the system's loader.
                     if (apkPath != null) {
-                        Timber.d("preferSystemIcon is true, new install, load from APK")
-                        val themedIconFromApk = loadIconFromApkWithSystemLoader(apkPath, iconSizePx)
+                        // Pass userId to the system loader helper
+                        val themedIconFromApk = loadIconFromApkWithSystemLoader(apkPath, userId, iconSizePx)
                         if (themedIconFromApk != null) {
-                            Timber.d("preferSystemIcon is true, new install, load from APK with system loader")
                             return@async themedIconFromApk
                         }
                     }
 
-                    // Priority 3 (Fallback): If all else fails, use the pre-parsed raw icon.
-                    Timber.d("preferSystemIcon is true, falling back to load from rawApkIcon")
-                    rawApkIcon
+                    rawApkIconDrawable?.toBitmap()
                 } else {
-                    // --- Default behavior, prefer new APK's icon ---
-                    Timber.d("preferSystemIcon is false")
-                    Timber.d("rawApkIcon is $rawApkIcon")
-                    rawApkIcon ?: if (installedAppInfo != null) {
-                        Timber.d("installedAppInfo is not null, load from installedAppInfo")
-                        AppIconCache.loadIconDrawable(context, installedAppInfo, iconSizePx)
+                    rawApkIconDrawable?.toBitmap() ?: if (installedAppInfo != null) {
+                        AppIconCache.loadIconBitmap(context, installedAppInfo, userId, iconSizePx)
                     } else {
                         null
                     }
@@ -96,10 +92,10 @@ class AppIconRepositoryImpl(
             }
         }
         try {
-            deferred.await()
+            deferred.await() ?: getFallbackSystemIcon(context)
         } catch (_: Exception) {
             iconCache.remove(cacheKey, deferred)
-            null
+            getFallbackSystemIcon(context)
         }
     }
 
@@ -109,8 +105,9 @@ class AppIconRepositoryImpl(
         entityToInstall: AppEntity.BaseEntity?,
         preferSystemIcon: Boolean
     ): Int? {
-        val icon = getIcon(sessionId, packageName, entityToInstall, 256, preferSystemIcon)
-        return extractColorFromDrawable(icon)
+        // Uses the current process userId for color extraction as it's typically for the local UI context
+        val iconBitmap = getIcon(sessionId, packageName, entityToInstall, currentUserId, 256, preferSystemIcon)
+        return iconBitmap?.extractSeedColor()
     }
 
     override suspend fun extractColorFromDrawable(drawable: Drawable?): Int? {
@@ -124,8 +121,19 @@ class AppIconRepositoryImpl(
         }
     }
 
+    override fun clearCacheForSession(sessionId: String) {
+        val keysToRemove = iconCache.keys.filter { it.startsWith("$sessionId-") }
+        keysToRemove.forEach { key ->
+            iconCache.remove(key)?.cancel()
+        }
+    }
+
     override fun clearCacheForPackage(packageName: String) {
-        iconCache.remove(packageName)
+        // Filters across all sessions and users for this specific package
+        val keysToRemove = iconCache.keys.filter { it.contains("-$packageName-") || it.endsWith("-$packageName") }
+        keysToRemove.forEach { key ->
+            iconCache.remove(key)?.cancel()
+        }
     }
 
     private fun Drawable.toBitmap(): Bitmap {
@@ -153,24 +161,16 @@ class AppIconRepositoryImpl(
     }
 
     /**
-     * Loads an icon from an uninstalled APK file using the system's resource loader.
-     * This allows icon packs and theming to be applied.
-     *
-     * @param apkPath The absolute path to the APK file.
-     * @param iconSizePx The desired icon size in pixels.
-     * @return A themed [Drawable] if successful, or null otherwise.
+     * Loads an icon from an APK file using the system's resource loader to apply themes.
      */
-    private suspend fun loadIconFromApkWithSystemLoader(apkPath: String, iconSizePx: Int): Drawable? {
+    private suspend fun loadIconFromApkWithSystemLoader(apkPath: String, userId: Int, iconSizePx: Int): Bitmap? {
         return try {
             val packageInfo = pm.getPackageArchiveInfo(apkPath, 0)
             packageInfo?.applicationInfo?.let { appInfo ->
-                // The ApplicationInfo from getPackageArchiveInfo lacks the source path.
-                // We must manually set it so the system knows where to load resources from.
                 appInfo.sourceDir = apkPath
                 appInfo.publicSourceDir = apkPath
-
-                // Now, use the same high-quality loader as for installed apps.
-                AppIconCache.loadIconDrawable(context, appInfo, iconSizePx)
+                // Delegate to AppIconCache with the specified userId
+                AppIconCache.loadIconBitmap(context, appInfo, userId, iconSizePx)
             }
         } catch (e: Exception) {
             Timber.w(e, "Could not load themed icon from APK at path: $apkPath")
@@ -178,4 +178,8 @@ class AppIconRepositoryImpl(
         }
     }
 
+    private fun getFallbackSystemIcon(context: Context): Bitmap? {
+        return ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+            ?.toBitmap()
+    }
 }

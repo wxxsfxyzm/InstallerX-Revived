@@ -1,45 +1,45 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+
+// Portions of this file are derived from RikkaApps/Shizuku
+// (https://github.com/RikkaApps/Shizuku)
+// Copyright (C) RikkaApps contributors
+// Licensed under Apache-2.0
 package com.rosan.installer.data.engine.repository
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.AdaptiveIconDrawable
-import android.graphics.drawable.Drawable
 import androidx.collection.LruCache
-import androidx.core.graphics.drawable.toDrawable
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
 import me.zhanghai.android.appiconloader.AppIconLoader
-import java.util.concurrent.Executors
-import kotlin.coroutines.CoroutineContext
 
 /**
- * 提供应用图标异步加载和缓存功能。
+ * Provides asynchronous application icon loading and memory caching.
  *
- * 该工具类包含一个内存 LRU 缓存，以避免重复的磁盘读取，并使用一个专用的后台线程池进行图标加载，以保持主线程的流畅。
- *
- * 核心的缓存与加载逻辑改编自 RikkaApps 的 Shizuku 项目中的 `AppIconCache.kt` 文件。
- *
- * 代码受 Apache License 2.0 许可协议保护。
- * @see <a href="https://github.com/RikkaApps/Shizuku/blob/master/LICENSE">Apache License 2.0</a>
- * @see <a href="https://github.com/RikkaApps/Shizuku/blob/master/manager/src/main/java/moe/shizuku/manager/utils/AppIconCache.kt">RikkaApps/Shizuku - AppIconCache.kt</a>
+ * This utility employs an LRU cache to prevent redundant disk I/O and utilizes a
+ * dedicated background dispatcher to ensure the main thread remains responsive during icon decoding.
  */
-object AppIconCache : CoroutineScope {
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main
-
+object AppIconCache {
     private class AppIconLruCache(maxSize: Int) :
         LruCache<Triple<String, Int, Int>, Bitmap>(maxSize) {
         override fun sizeOf(key: Triple<String, Int, Int>, value: Bitmap): Int {
+            // Memory size in KB
             return value.byteCount / 1024
         }
     }
 
     private val lruCache: LruCache<Triple<String, Int, Int>, Bitmap>
+
+    /**
+     * Dedicated dispatcher with limited parallelism to handle heavy icon loading tasks
+     * without overwhelming the system resources.
+     */
     private val dispatcher: CoroutineDispatcher
+
     private var appIconLoaders = mutableMapOf<Int, AppIconLoader>()
 
     init {
@@ -47,9 +47,9 @@ object AppIconCache : CoroutineScope {
         val availableCacheSize = (maxMemory / 4).toInt()
         lruCache = AppIconLruCache(availableCacheSize)
 
+        // Dynamically calculate thread count based on available processors
         val threadCount = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
-        val loadIconExecutor = Executors.newFixedThreadPool(threadCount)
-        dispatcher = loadIconExecutor.asCoroutineDispatcher()
+        dispatcher = Dispatchers.IO.limitedParallelism(threadCount)
     }
 
     private fun get(packageName: String, userId: Int, size: Int): Bitmap? =
@@ -70,8 +70,8 @@ object AppIconCache : CoroutineScope {
         get(info.packageName, userId, size)?.let { return it }
 
         val loader = appIconLoaders.getOrPut(size) {
-            val shrink =
-                context.applicationInfo.loadIcon(context.packageManager) is AdaptiveIconDrawable
+            // Determine if the icon should be shrunk based on AdaptiveIcon compatibility
+            val shrink = context.applicationInfo.loadIcon(context.packageManager) is AdaptiveIconDrawable
             AppIconLoader(size, shrink, context)
         }
 
@@ -81,20 +81,23 @@ object AppIconCache : CoroutineScope {
     }
 
     /**
-     * Loads the application icon as a Drawable using a background thread and caching.
+     * Loads the application icon as a [Bitmap] on a background thread.
      *
-     * @param context The context.
-     * @param info The ApplicationInfo for the target app.
-     * @param size The desired icon size in pixels.
-     * @return A Drawable of the app icon, or null if loading fails.
+     * @param context The application context.
+     * @param info The [ApplicationInfo] of the target application.
+     * @param userId The ID of the user the application belongs to.
+     * @param size The target icon size in pixels.
      */
-    suspend fun loadIconDrawable(context: Context, info: ApplicationInfo, size: Int): Drawable? {
+    suspend fun loadIconBitmap(
+        context: Context,
+        info: ApplicationInfo,
+        userId: Int,
+        size: Int
+    ): Bitmap? {
         return try {
-            val bitmap = withContext(dispatcher) {
-                // Assuming primary user (ID 0)
-                getOrLoadBitmap(context, info, 0, size)
+            withContext(dispatcher) {
+                getOrLoadBitmap(context, info, userId, size)
             }
-            bitmap.toDrawable(context.resources)
         } catch (e: Exception) {
             e.printStackTrace()
             null

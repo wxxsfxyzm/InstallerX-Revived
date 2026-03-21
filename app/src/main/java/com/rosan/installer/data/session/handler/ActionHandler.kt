@@ -20,9 +20,10 @@ import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.SessionMode
 import com.rosan.installer.domain.engine.model.sourcePath
-import com.rosan.installer.domain.engine.repository.AppIconRepository
 import com.rosan.installer.domain.engine.usecase.AnalyzePackageUseCase
+import com.rosan.installer.domain.engine.usecase.ClearAppIconCacheUseCase
 import com.rosan.installer.domain.engine.usecase.ExecuteInstallUseCase
+import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.session.model.InstallResult
 import com.rosan.installer.domain.session.model.ProgressEntity
@@ -68,13 +69,14 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
 
     private val context by inject<Context>()
     private val appSettingsRepo by inject<AppSettingsRepo>()
-    private val appIconRepository by inject<AppIconRepository>()
     private val shellExecutionProvider by inject<ShellExecutionProvider>()
     private val deviceCapabilityProvider by inject<DeviceCapabilityProvider>()
     private val autoLockService by inject<AutoLockService>()
     private val configResolver by inject<ConfigResolver>()
-    private val analyzePackageUseCase by inject<AnalyzePackageUseCase>()
-    private val executeInstallUseCase by inject<ExecuteInstallUseCase>()
+    private val analyzePackage by inject<AnalyzePackageUseCase>()
+    private val executeInstall by inject<ExecuteInstallUseCase>()
+    private val getAppColor by inject<GetAppIconColorUseCase>()
+    private val clearAppIconCache by inject<ClearAppIconCacheUseCase>()
 
     // Cache directory
     private val cacheDirectory = File(context.cacheDir, "installer_sessions/$installerId")
@@ -258,7 +260,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
 
         val extra = AnalyseExtraEntity(cacheDirectory, isModuleFlashEnabled = isModuleEnabled)
 
-        val results = analyzePackageUseCase(
+        val results = analyzePackage(
             sessionId = installer.id,
             config = installer.config,
             data = installer.data,
@@ -438,22 +440,26 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
         val pm = context.packageManager
         val appInfo = pm.getApplicationInfo(packageName, 0)
         val pInfo = pm.getPackageInfo(packageName, 0)
-        val icon = pm.getApplicationIcon(appInfo)
 
         val color = if (appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first()) {
-            appIconRepository.extractColorFromDrawable(icon)
+            getAppColor(
+                sessionId = installerId,
+                packageName = packageName,
+                preferSystemIcon = true
+            )
         } else null
 
         installer.uninstallInfo.update {
             UninstallInfo(
-                packageName,
-                pm.getApplicationLabel(appInfo).toString(),
-                pInfo.versionName,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pInfo.longVersionCode else @Suppress("DEPRECATION") pInfo.versionCode.toLong(),
-                icon,
-                color
+                packageName = packageName,
+                appLabel = pm.getApplicationLabel(appInfo).toString(),
+                versionName = pInfo.versionName,
+                versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pInfo.longVersionCode
+                else @Suppress("DEPRECATION") pInfo.versionCode.toLong(),
+                seedColor = color
             )
         }
+
         Timber.d("[id=$installerId] resolveUninstall: Success. Emitting UninstallReady.")
         installer.progress.emit(ProgressEntity.UninstallReady)
     }
@@ -463,7 +469,7 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
         Timber.d("[id=$installerId] uninstall: Starting for $packageName. Emitting ProgressEntity.Uninstalling.")
         installer.progress.emit(ProgressEntity.Uninstalling)
 
-        executeInstallUseCase.uninstall(
+        executeInstall.uninstall(
             config = installer.config,
             packageName = packageName
         )
@@ -510,13 +516,23 @@ class ActionHandler(scope: CoroutineScope, installer: InstallerSessionRepository
 
     private fun clearCache() {
         Timber.d("[id=$installerId] clearCacheDirectory: Clearing cache...")
+
+        // 1. Clear file system trackers
         sourceResolver.getTrackedCloseables().forEach { runCatching { it.close() } }
+
+        // 2. Clear physical cache files
         File(cacheDirectory).runCatching {
-            if (exists()) {
-                val deleted = deleteRecursively()
-                Timber.d("[id=$installerId] Cache directory deleted ($cacheDirectory): $deleted")
-            } else {
-                Timber.d("[id=$installerId] Cache directory not found, already cleared.")
+            if (exists()) deleteRecursively()
+        }
+
+        // 3. Use UseCase to clear memory icon cache for this specific session
+        clearAppIconCache(sessionId = installerId)
+
+        // 4. If the operation was a success, ensure the global system cache is also refreshed
+        val lastProgress = installer.progress.replayCache.firstOrNull()
+        if (lastProgress is ProgressEntity.InstallSuccess || lastProgress is ProgressEntity.UninstallSuccess) {
+            installer.analysisResults.firstOrNull()?.packageName?.let {
+                clearAppIconCache(packageName = it)
             }
         }
     }

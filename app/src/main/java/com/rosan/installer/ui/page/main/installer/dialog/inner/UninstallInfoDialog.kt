@@ -12,9 +12,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,7 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerStage
@@ -47,6 +48,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
  * Provides a base dialog structure for the uninstall process.
  * It displays the app's icon, label, package name, and version based on UninstallInfo.
  * @param viewModel The ViewModel holding the state and data for the dialog.
+ * @param onTitleExtraClick Callback to be invoked when the extra button in the title is clicked.
  * @return A DialogParams object populated with the app's basic information.
  */
 @Composable
@@ -55,23 +57,36 @@ fun uninstallInfoDialog(
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    // Collect the UninstallInfo state from uiState.
-    val appInfo = uiState.uiUninstallInfo ?: return DialogParams() // Return empty if no info is available.
+    val appInfo = uiState.uiUninstallInfo ?: return DialogParams()
     val stage = uiState.stage
+
+    // Get the managed ImageBitmap from the centralized map
+    val displayIcon = uiState.displayIcons[appInfo.packageName]
 
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.InstallerUninstallInfo.id) {
-            Image(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                painter = rememberDrawablePainter(appInfo.appIcon),
-                contentDescription = null
-            )
+            // Using AnimatedContent to handle transition from loading (null) to loaded
+            androidx.compose.animation.AnimatedContent(targetState = displayIcon) { iconBitmap ->
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (iconBitmap != null) {
+                        Image(
+                            bitmap = iconBitmap,
+                            modifier = Modifier.fillMaxSize(),
+                            contentDescription = null
+                        )
+                    } else {
+                        // Fixed size placeholder while loading
+                        Spacer(modifier = Modifier.fillMaxSize())
+                    }
+                }
+            }
         },
         title = DialogInnerParams(DialogParamsType.InstallerUninstallInfo.id) {
-            // Use a Row with centered arrangement.
-            // This will automatically center its visible children as a group.
             Row(
                 modifier = Modifier.animateContentSize(),
                 horizontalArrangement = Arrangement.Center,
@@ -81,19 +96,13 @@ fun uninstallInfoDialog(
                     text = appInfo.appLabel ?: "Unknown Package",
                     modifier = Modifier.basicMarquee()
                 )
-                // Use AnimatedVisibility to show the button with an animation.
-                // When it becomes invisible, it will not take up any space,
-                // and the Row will re-center the Text automatically.
                 AnimatedVisibility(
                     visible = stage == InstallerStage.UninstallReady,
-                    enter = fadeIn() + slideInHorizontally { it }, // Slide in from the right
-                    exit = fadeOut() + slideOutHorizontally { it }  // Slide out to the right
+                    enter = fadeIn() + slideInHorizontally { it },
+                    exit = fadeOut() + slideOutHorizontally { it }
                 ) {
-                    // This inner Row groups the spacer and button so they animate as one unit.
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Add a small spacer between the text and the button.
                         Spacer(modifier = Modifier.width(8.dp))
-
                         IconButton(
                             modifier = Modifier
                                 .clip(CircleShape)
@@ -115,24 +124,18 @@ fun uninstallInfoDialog(
             }
         },
         subtitle = DialogInnerParams(DialogParamsType.InstallerUninstallInfo.id) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Display the package name.
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     stringResource(R.string.installer_package_name, appInfo.packageName),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.basicMarquee()
                 )
-
                 Spacer(modifier = Modifier.size(8.dp))
-
-                // Display the version information.
                 Text(
                     text = stringResource(
                         R.string.installer_version,
                         appInfo.versionName ?: "N/A",
-                        appInfo.versionCode ?: "N/A"
+                        appInfo.versionCode?.toString() ?: "N/A"
                     ),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.basicMarquee()

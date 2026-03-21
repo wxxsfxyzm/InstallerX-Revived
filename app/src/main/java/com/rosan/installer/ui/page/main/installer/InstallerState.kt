@@ -2,8 +2,8 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer
 
-import android.graphics.drawable.Drawable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import com.rosan.installer.domain.session.model.UninstallInfo
 import com.rosan.installer.domain.settings.model.NamedPackage
 
@@ -23,7 +23,7 @@ data class InstallerState(
 
     // Visual data
     val currentPackageName: String? = null,
-    val displayIcons: Map<String, Drawable?> = emptyMap(),
+    val displayIcons: Map<String, ImageBitmap?> = emptyMap(),
     val seedColor: Color? = null,
 
     // Configuration data
