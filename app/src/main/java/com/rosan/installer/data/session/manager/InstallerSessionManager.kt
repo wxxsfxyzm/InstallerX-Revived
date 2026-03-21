@@ -39,7 +39,7 @@ class InstallerSessionManager(
         val newId = id ?: UUID.randomUUID().toString()
         Timber.Forest.d("InstallerSessionManager: Creating new session with id: $newId")
 
-        // Define cleanup action: remove from map when repo closes
+        // Define cleanup action: remove from map when session closes
         val onCloseAction: () -> Unit = {
             remove(newId)
         }
@@ -62,7 +62,7 @@ class InstallerSessionManager(
 
     /**
      * Removes a session from the manager.
-     * This should usually be called by the repo's onClose callback.
+     * This should usually be called by the session's onClose callback.
      */
     private fun remove(id: String) {
         if (sessions.remove(id) != null) {

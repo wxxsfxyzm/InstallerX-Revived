@@ -91,7 +91,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         permissionRequester = PermissionRequester(this, permissionChecker)
         // Set up the callback to intercept the settings launch event
         permissionRequester.onBeforeLaunchSettings = {
-            Timber.d("Launching settings for permission, preventing repo closure in onStop.")
+            Timber.d("Launching settings for permission, preventing session closure in onStop.")
             isRequestingPermission = true
         }
 
@@ -212,7 +212,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         if (!isFinishing && !isChangingConfigurations && !isRequestingPermission) {
             installer?.let { repo ->
                 // If using session install, we don't hide UI since oems have different package installer impls
-                // if (repo.config.authorizer == ConfigEntity.Authorizer.None) return
+                // if (session.config.authorizer == ConfigEntity.Authorizer.None) return
 
                 val currentProgress = latestProgress
 

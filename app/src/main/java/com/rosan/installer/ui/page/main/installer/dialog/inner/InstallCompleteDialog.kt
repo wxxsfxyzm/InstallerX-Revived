@@ -113,7 +113,7 @@ private fun ResultItemCard(
             if (result.success) {
                 SuccessCard()
             } else if (result.error != null) {
-                // 为了复用 errorTextBlock，我们需要在安装失败时将错误信息临时存到 repo 中
+                // 为了复用 errorTextBlock，我们需要在安装失败时将错误信息临时存到 session 中
                 // ViewModel 的 handleMultiInstallProgress 已经这样做了
                 FailureCard(result.error)
             }

@@ -65,7 +65,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         permissionRequester = PermissionRequester(this, permissionChecker)
         // Set up the callback to intercept the settings launch event
         permissionRequester.onBeforeLaunchSettings = {
-            Timber.d("Launching settings for permission, preventing repo closure in onStop.")
+            Timber.d("Launching settings for permission, preventing session closure in onStop.")
             isRequestingPermission = true
         }
 
@@ -115,7 +115,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         super.onStop()
 
         if (BiometricAuthBridge.isAuthenticating) {
-            Timber.d("onStop: Ignored repo closure due to active biometric authentication.")
+            Timber.d("onStop: Ignored session closure due to active biometric authentication.")
             return
         }
         // Check if the screen is currently on.
@@ -136,7 +136,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                 repo.close()
             }
         } else if (isRequestingPermission) {
-            Timber.d("onStop: Ignored repo closure due to active permission request.")
+            Timber.d("onStop: Ignored session closure due to active permission request.")
             isRequestingPermission = false
         }
     }
@@ -193,7 +193,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
             val currentInstaller = installer
             if (currentInstaller == null) {
-                // If repo is null, we can't proceed.
+                // If session is null, we can't proceed.
                 LaunchedEffect(Unit) {
                     finish()
                 }

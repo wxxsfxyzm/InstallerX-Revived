@@ -54,7 +54,7 @@ import timber.log.Timber
 import java.io.File
 
 class InstallerViewModel(
-    private var repo: InstallerSessionRepository,
+    private var session: InstallerSessionRepository,
     private val appSettingsRepo: AppSettingsRepo,
     private val systemInfoProvider: SystemInfoProvider,
     private val getAppIcon: GetAppIconUseCase,
@@ -73,8 +73,8 @@ class InstallerViewModel(
     // Internal mutable state for high-frequency UI changes and progress
     private val _localState = MutableStateFlow(
         InstallerState(
-            defaultInstallerFromSettings = repo.config.installer,
-            selectedInstaller = repo.config.installer
+            defaultInstallerFromSettings = session.config.installer,
+            selectedInstaller = session.config.installer
         )
     )
 
@@ -106,7 +106,7 @@ class InstallerViewModel(
     )
 
     val isInstallingModule: Boolean
-        get() = repo.analysisResults.any { result ->
+        get() = session.analysisResults.any { result ->
             result.appEntities.any { entity -> entity.selected && entity.app is AppEntity.ModuleEntity }
         }
 
@@ -142,7 +142,7 @@ class InstallerViewModel(
 
     fun dispatch(action: InstallerViewAction) {
         when (action) {
-            is InstallerViewAction.CollectRepo -> collectRepo(action.repo)
+            is InstallerViewAction.CollectRepo -> collectRepo(action.session)
             is InstallerViewAction.Close -> close()
             is InstallerViewAction.Cancel -> cancel()
             is InstallerViewAction.Analyse -> analyse()
@@ -157,9 +157,9 @@ class InstallerViewModel(
             is InstallerViewAction.InstallMultiple -> installMultiple()
             is InstallerViewAction.Install -> install()
             is InstallerViewAction.Background -> background()
-            is InstallerViewAction.Reboot -> repo.reboot(action.reason)
+            is InstallerViewAction.Reboot -> session.reboot(action.reason)
             is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData, action.conflictingPackage)
-            is InstallerViewAction.Uninstall -> repo.uninstallInfo.value?.packageName?.let { repo.uninstall(it) }
+            is InstallerViewAction.Uninstall -> session.uninstallInfo.value?.packageName?.let { session.uninstall(it) }
 
             is InstallerViewAction.ShowMiuixSheetRightActionSettings -> _localState.update { it.copy(showMiuixSheetRightActionSettings = true) }
             is InstallerViewAction.HideMiuixSheetRightActionSettings -> _localState.update { it.copy(showMiuixSheetRightActionSettings = false) }
@@ -170,7 +170,7 @@ class InstallerViewModel(
             is InstallerViewAction.ToggleUninstallFlag -> toggleUninstallFlag(action.flag, action.enable)
             is InstallerViewAction.SetInstaller -> selectInstaller(action.installer)
             is InstallerViewAction.SetTargetUser -> selectTargetUser(action.userId)
-            is InstallerViewAction.ApproveSession -> repo.approveConfirmation(action.sessionId, action.granted)
+            is InstallerViewAction.ApproveSession -> session.approveConfirmation(action.sessionId, action.granted)
             is InstallerViewAction.ShareApp -> shareApp(action.appEntity)
             is InstallerViewAction.ShowToast -> toast(action.message)
             is InstallerViewAction.ShowToastRes -> toast(action.messageResId)
@@ -186,11 +186,11 @@ class InstallerViewModel(
             is ProgressEntity.InstallAnalysedFailed -> InstallerStage.AnalyseFailed
 
             is ProgressEntity.InstallAnalysedSuccess -> {
-                if (originalAnalysisResults.isEmpty()) originalAnalysisResults = repo.analysisResults
+                if (originalAnalysisResults.isEmpty()) originalAnalysisResults = session.analysisResults
 
-                repo.analysisResults.forEach { result -> loadDisplayIcon(result.packageName) }
+                session.analysisResults.forEach { result -> loadDisplayIcon(result.packageName) }
 
-                val analysisResults = repo.analysisResults
+                val analysisResults = session.analysisResults
                 val containerType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType
 
                 val isMultiAppMode = analysisResults.size > 1 ||
@@ -211,8 +211,8 @@ class InstallerViewModel(
 
             is ProgressEntity.InstallFailed -> {
                 if (isInstallingModule) {
-                    val currentOutput = repo.moduleLog.toMutableList()
-                    repo.error.message?.let { msg ->
+                    val currentOutput = session.moduleLog.toMutableList()
+                    session.error.message?.let { msg ->
                         val errorLine = "ERROR: $msg"
                         if (currentOutput.lastOrNull() != errorLine) currentOutput.add(errorLine)
                     }
@@ -221,14 +221,14 @@ class InstallerViewModel(
             }
 
             is ProgressEntity.InstallSuccess -> {
-                if (isInstallingModule) InstallerStage.InstallingModule(output = repo.moduleLog, isFinished = true)
+                if (isInstallingModule) InstallerStage.InstallingModule(output = session.moduleLog, isFinished = true)
                 else InstallerStage.InstallSuccess
             }
 
             is ProgressEntity.InstallingModule -> InstallerStage.InstallingModule(progress.output)
 
             is ProgressEntity.InstallConfirming -> {
-                val details = repo.confirmationDetails.value
+                val details = session.confirmationDetails.value
                 if (details != null) InstallerStage.InstallConfirm(details.appLabel, details.appIcon, details.sessionId)
                 else InstallerStage.ResolveFailed
             }
@@ -244,7 +244,7 @@ class InstallerViewModel(
             is ProgressEntity.UninstallSuccess -> {
                 if (isRetryingInstall) {
                     isRetryingInstall = false
-                    repo.install(false)
+                    session.install(false)
                     InstallerStage.InstallRetryDowngradeUsingUninstall
                 } else InstallerStage.UninstallSuccess
             }
@@ -255,25 +255,25 @@ class InstallerViewModel(
         }
     }
 
-    private fun collectRepo(repo: InstallerSessionRepository) {
-        this.repo = repo
-        if (repo.config.enableCustomizeUser) loadAvailableUsers(repo.config.authorizer)
+    private fun collectRepo(session: InstallerSessionRepository) {
+        this.session = session
+        if (session.config.enableCustomizeUser) loadAvailableUsers(session.config.authorizer)
 
         val initialInstallFlags = listOfNotNull(
-            repo.config.allowTestOnly.takeIf { it }?.let { InstallOption.AllowTest.value },
-            repo.config.allowDowngrade.takeIf { it }?.let { InstallOption.AllowDowngrade.value },
-            repo.config.forAllUser.takeIf { it }?.let { InstallOption.AllUsers.value },
-            repo.config.bypassLowTargetSdk.takeIf { it }?.let { InstallOption.BypassLowTargetSdkBlock.value },
-            repo.config.allowAllRequestedPermissions.takeIf { it }?.let { InstallOption.GrantAllRequestedPermissions.value }
+            session.config.allowTestOnly.takeIf { it }?.let { InstallOption.AllowTest.value },
+            session.config.allowDowngrade.takeIf { it }?.let { InstallOption.AllowDowngrade.value },
+            session.config.forAllUser.takeIf { it }?.let { InstallOption.AllUsers.value },
+            session.config.bypassLowTargetSdk.takeIf { it }?.let { InstallOption.BypassLowTargetSdkBlock.value },
+            session.config.allowAllRequestedPermissions.takeIf { it }?.let { InstallOption.GrantAllRequestedPermissions.value }
         ).fold(0) { acc, flag -> acc or flag }
 
-        repo.config.installFlags = initialInstallFlags
+        session.config.installFlags = initialInstallFlags
 
         _localState.update {
             it.copy(
                 installFlags = initialInstallFlags,
                 currentPackageName = null,
-                displayIcons = it.displayIcons.filterKeys { key -> key in repo.analysisResults.map { res -> res.packageName } }
+                displayIcons = it.displayIcons.filterKeys { key -> key in session.analysisResults.map { res -> res.packageName } }
             )
         }
 
@@ -282,7 +282,7 @@ class InstallerViewModel(
 
         collectRepoJob = viewModelScope.launch {
             settingsLoadingJob.join()
-            repo.progress.collect { progress ->
+            session.progress.collect { progress ->
                 if (progress is ProgressEntity.InstallResolving || progress is ProgressEntity.InstallPreparing || progress is ProgressEntity.InstallAnalysing) {
                     if (isInstallingModule) {
                         loadingStateJob?.cancel()
@@ -308,22 +308,22 @@ class InstallerViewModel(
                 val newPackageName = when (newStage) {
                     is InstallerStage.Installing -> {
                         if (newStage.total > 1) {
-                            val selectedEntities = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
+                            val selectedEntities = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }
                             val groupedApps = selectedEntities.groupBy { it.app.packageName }.values.toList()
                             groupedApps.getOrNull(newStage.current - 1)?.firstOrNull()?.app?.packageName ?: _localState.value.currentPackageName
                         } else {
                             _localState.value.currentPackageName
-                                ?: repo.analysisResults.firstNotNullOfOrNull { r -> if (r.appEntities.any { it.selected }) r.packageName else null }
-                                ?: repo.analysisResults.firstOrNull()?.packageName
+                                ?: session.analysisResults.firstNotNullOfOrNull { r -> if (r.appEntities.any { it.selected }) r.packageName else null }
+                                ?: session.analysisResults.firstOrNull()?.packageName
                         }
                     }
 
                     is InstallerStage.InstallPrepare, is InstallerStage.InstallFailed, is InstallerStage.InstallSuccess -> {
-                        _localState.value.currentPackageName ?: repo.analysisResults.firstOrNull()?.packageName
+                        _localState.value.currentPackageName ?: session.analysisResults.firstOrNull()?.packageName
                     }
 
                     is InstallerStage.InstallChoice, is InstallerStage.Ready -> null
-                    is InstallerStage.UninstallReady -> repo.uninstallInfo.value?.packageName
+                    is InstallerStage.UninstallReady -> session.uninstallInfo.value?.packageName
                     else -> _localState.value.currentPackageName
                 }
 
@@ -331,24 +331,24 @@ class InstallerViewModel(
                     loadDisplayIcon(newPackageName)
                 }
 
-                if (newPackageName != null && newPackageName != _localState.value.currentPackageName) {
-                    loadDisplayIcon(newPackageName)
-                }
-
                 _localState.update { currentState ->
+                    // Latch the uninstall info. 
+                    // Once we get a non-null info, keep it until the session is explicitly closed.
+                    val retainedUninstallInfo = currentState.uiUninstallInfo ?: session.uninstallInfo.value
+
                     val updatedState = currentState.copy(
                         stage = newStage,
                         currentPackageName = newPackageName ?: currentState.currentPackageName,
-                        uiUninstallInfo = repo.uninstallInfo.value // Update metadata
+                        uiUninstallInfo = retainedUninstallInfo
                     )
 
                     // Re-calculate seed color from the icon if dynamic color is enabled
                     if (updatedState.viewSettings.useDynColorFollowPkgIcon) {
-                        // For uninstallation, we can now use the repo's central logic to get the color
+                        // For uninstallation, we can now use the session's central logic to get the color
                         // from the already loaded/cached icon bitmap
                         viewModelScope.launch {
                             val colorInt = getAppIconColor(
-                                sessionId = repo.id,
+                                sessionId = session.id,
                                 packageName = newPackageName ?: "",
                                 preferSystemIcon = updatedState.viewSettings.preferSystemIconForUpdates
                             )
@@ -360,7 +360,7 @@ class InstallerViewModel(
                 }
 
                 autoInstallJob?.cancel()
-                if (newStage is InstallerStage.InstallPrepare && repo.config.installMode == InstallMode.AutoDialog) {
+                if (newStage is InstallerStage.InstallPrepare && session.config.installMode == InstallMode.AutoDialog) {
                     autoInstallJob = viewModelScope.launch {
                         delay(500)
                         if (_localState.value.stage is InstallerStage.InstallPrepare) install()
@@ -374,20 +374,20 @@ class InstallerViewModel(
         val currentFlags = _localState.value.installFlags
         val newFlags = if (enable) currentFlags.addFlag(flag) else currentFlags.removeFlag(flag)
         _localState.update { it.copy(installFlags = newFlags) }
-        repo.config.installFlags = newFlags
+        session.config.installFlags = newFlags
     }
 
     fun toggleBypassBlacklist(enable: Boolean) {
-        repo.config.bypassBlacklistInstallSetByUser = enable
+        session.config.bypassBlacklistInstallSetByUser = enable
     }
 
     private fun selectInstaller(packageName: String?) {
-        repo.config = repo.config.copy(installer = packageName)
+        session.config = session.config.copy(installer = packageName)
         _localState.update { it.copy(selectedInstaller = packageName) }
     }
 
     private fun selectTargetUser(userId: Int) {
-        repo.config = repo.config.copy(targetUserId = userId)
+        session.config = session.config.copy(targetUserId = userId)
         _localState.update { it.copy(selectedUserId = userId) }
     }
 
@@ -422,19 +422,17 @@ class InstallerViewModel(
 
         iconJobs[packageName]?.cancel()
         iconJobs[packageName] = viewModelScope.launch {
-            val rawEntities = repo.analysisResults.find { it.packageName == packageName }?.appEntities?.map { it.app }
+            val rawEntities = session.analysisResults.find { it.packageName == packageName }?.appEntities?.map { it.app }
             val entityToInstall = rawEntities?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
                 ?: rawEntities?.filterIsInstance<AppEntity.ModuleEntity>()?.firstOrNull()
 
-            // 【重构后】直接调用 UseCase，不需要 try-catch，不需要传一堆默认参数
             val loadedIconBitmap = getAppIcon(
-                sessionId = repo.id,
+                sessionId = session.id,
                 packageName = packageName,
                 entityToInstall = entityToInstall,
                 preferSystemIcon = uiState.value.viewSettings.preferSystemIconForUpdates
             )
 
-            // ViewModel 仅负责把 Domain 层的 Bitmap 转为 UI 层的 ImageBitmap
             val finalImageBitmap = loadedIconBitmap?.asImageBitmap()
 
             _localState.update {
@@ -452,25 +450,25 @@ class InstallerViewModel(
         collectRepoJob?.cancel()
         iconJobs.values.forEach { it.cancel() }
         iconJobs.clear()
-        repo.close()
-        _localState.update { it.copy(currentPackageName = null, stage = InstallerStage.Ready) }
+        session.close()
+        _localState.update { it.copy(currentPackageName = null, uiUninstallInfo = null, stage = InstallerStage.Ready) }
     }
 
     private fun cancel() {
         autoInstallJob?.cancel()
         iconJobs.values.forEach { it.cancel() }
-        repo.cancel()
+        session.cancel()
     }
 
-    private fun analyse() = repo.analyse()
+    private fun analyse() = session.analyse()
 
     private fun installChoice() {
         autoInstallJob?.cancel()
         _localState.update { it.copy(currentPackageName = null) }
 
-        val containerType = repo.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType
+        val containerType = session.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType
         if (containerType == DataType.MIXED_MODULE_APK) {
-            repo.analysisResults = repo.analysisResults.map { result ->
+            session.analysisResults = session.analysisResults.map { result ->
                 result.copy(appEntities = result.appEntities.map { it.copy(selected = false) })
             }.toMutableList()
         }
@@ -478,7 +476,7 @@ class InstallerViewModel(
     }
 
     private fun installPrepare() {
-        val selectedEntities = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
+        val selectedEntities = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }
         val uniquePackages = selectedEntities.groupBy { it.app.packageName }
 
         if (uniquePackages.size == 1) {
@@ -488,7 +486,7 @@ class InstallerViewModel(
                     currentPackageName = targetPackageName,
                     stage = InstallerStage.InstallPrepare,
                     seedColor = if (it.viewSettings.useDynColorFollowPkgIcon)
-                        repo.analysisResults.find { res -> res.packageName == targetPackageName }?.seedColor?.let { c -> Color(c) }
+                        session.analysisResults.find { res -> res.packageName == targetPackageName }?.seedColor?.let { c -> Color(c) }
                     else null
                 )
             }
@@ -517,13 +515,13 @@ class InstallerViewModel(
     private fun install() {
         autoInstallJob?.cancel()
         Timber.d("Standard foreground installation triggered. Contains Module: $isInstallingModule")
-        repo.install(true)
+        session.install(true)
     }
 
-    private fun background() = repo.background(true)
+    private fun background() = session.background(true)
 
     fun toggleSelection(packageName: String, entityToToggle: SelectInstallEntity, isMultiSelect: Boolean) {
-        val currentResults = repo.analysisResults.toMutableList()
+        val currentResults = session.analysisResults.toMutableList()
         val packageIndex = currentResults.indexOfFirst { it.packageName == packageName }
 
         if (packageIndex != -1) {
@@ -537,9 +535,9 @@ class InstallerViewModel(
             if (!isMultiSelect && entityToToggle.selected) updatedEntities.replaceAll { it.copy(selected = false) }
 
             currentResults[packageIndex] = packageToUpdate.copy(appEntities = updatedEntities)
-            repo.analysisResults = currentResults
+            session.analysisResults = currentResults
 
-            // Trigger recomposition explicitly since repo isn't a state flow
+            // Trigger recomposition explicitly since session isn't a state flow
             _localState.update { it.copy() }
         }
     }
@@ -558,7 +556,7 @@ class InstallerViewModel(
 
         if (newFlags != currentFlags) {
             _localState.update { it.copy(uninstallFlags = newFlags) }
-            repo.config.uninstallFlags = newFlags
+            session.config.uninstallFlags = newFlags
         }
     }
 
@@ -568,15 +566,15 @@ class InstallerViewModel(
             toast(R.string.error_no_package_to_uninstall)
             return
         }
-        repo.config.uninstallFlags = if (keepData) PackageManagerUtil.DELETE_KEEP_DATA else 0
+        session.config.uninstallFlags = if (keepData) PackageManagerUtil.DELETE_KEEP_DATA else 0
         isRetryingInstall = true
         Timber.d("Uninstalling conflicting/old package: $targetPackageName for retry")
-        repo.uninstall(targetPackageName)
+        session.uninstall(targetPackageName)
     }
 
     private fun installMultiple() {
-        val selectedEntities = repo.analysisResults.flatMap { it.appEntities }.filter { it.selected }
-        repo.installMultiple(selectedEntities)
+        val selectedEntities = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }
+        session.installMultiple(selectedEntities)
     }
 
     private fun shareApp(entity: AppEntity) {

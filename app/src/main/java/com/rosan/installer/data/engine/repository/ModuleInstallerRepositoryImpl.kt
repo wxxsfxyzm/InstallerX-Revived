@@ -35,7 +35,7 @@ class ModuleInstallerRepositoryImpl(
             Authorizer.None -> {
                 if (deviceCapabilityProvider.isSystemApp && useRoot)
                     LocalModuleInstallerRepositoryImpl()
-                else null // Signal that no repo is available
+                else null // Signal that no session is available
             }
 
             else -> null

@@ -8,7 +8,7 @@ import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 
 sealed class InstallerViewAction {
-    data class CollectRepo(val repo: InstallerSessionRepository) : InstallerViewAction()
+    data class CollectRepo(val session: InstallerSessionRepository) : InstallerViewAction()
     data object Close : InstallerViewAction()
     data object Analyse : InstallerViewAction()
     data object InstallChoice : InstallerViewAction()

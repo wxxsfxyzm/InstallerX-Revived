@@ -28,9 +28,9 @@ val viewModelModule = module {
     viewModelOf(::LabSettingsViewModel)
     viewModelOf(::AboutViewModel)
 
-    viewModel { (installer: InstallerSessionRepository) ->
+    viewModel { (session: InstallerSessionRepository) ->
         InstallerViewModel(
-            repo = installer,
+            session = session,
             get(),
             get(),
             get(),
