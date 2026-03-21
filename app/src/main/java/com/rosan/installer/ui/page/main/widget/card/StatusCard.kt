@@ -21,12 +21,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.Level
@@ -75,16 +72,16 @@ fun StatusWidget(viewModel: AboutViewModel) {
             contentColor = onContainerColor
         ),
         icon = {
-            Image(
-                modifier = Modifier.size(56.dp),
-                painter = rememberDrawablePainter(
-                    drawable = ContextCompat.getDrawable(
-                        LocalContext.current,
-                        R.mipmap.ic_launcher
-                    )
-                ),
-                contentDescription = stringResource(id = R.string.app_name)
-            )
+            if (uiState.appIcon != null) {
+                Image(
+                    bitmap = uiState.appIcon!!,
+                    modifier = Modifier.size(56.dp),
+                    contentDescription = stringResource(id = R.string.app_name)
+                )
+            } else {
+                // Placeholder
+                Box(modifier = Modifier.size(56.dp))
+            }
         },
         title = {
             Text(

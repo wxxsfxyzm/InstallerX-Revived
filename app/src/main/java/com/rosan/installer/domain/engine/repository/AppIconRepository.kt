@@ -16,7 +16,7 @@ interface AppIconRepository {
          * Reserved session ID for icons of apps already installed on the system.
          * Used to share cache across different configuration sessions.
          */
-        const val SESSION_APP_LIST = "system_installed_apps"
+        const val SETTINGS_APP_LIST = "system_installed_apps"
     }
 
     /**

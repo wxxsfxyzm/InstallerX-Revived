@@ -27,6 +27,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 class SystemEnvProviderImpl(private val context: Context) : SystemEnvProvider {
+    override val packageName: String = context.packageName
 
     override suspend fun getPackageUid(packageName: String): Int? {
         return runCatching {

@@ -54,7 +54,7 @@ class AppIconRepositoryImpl(
         preferSystemIcon: Boolean
     ): Bitmap? = coroutineScope {
         // Cache key now includes userId to prevent cross-user leakage
-        val cacheKey = "$sessionId-$packageName-$userId"
+        val cacheKey = "$sessionId-$packageName-$userId-$iconSizePx"
 
         val deferred = iconCache.getOrPut(cacheKey) {
             async(Dispatchers.IO) {

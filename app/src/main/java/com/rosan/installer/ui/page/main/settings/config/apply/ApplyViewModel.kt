@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rosan.installer.domain.engine.repository.AppIconRepository.Companion.SESSION_APP_LIST
+import com.rosan.installer.domain.engine.repository.AppIconRepository.Companion.SETTINGS_APP_LIST
 import com.rosan.installer.domain.engine.usecase.ClearAppIconCacheUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.settings.model.AppModel
@@ -201,7 +201,7 @@ class ApplyViewModel(
         loadAppsJob?.cancel()
         loadAppsJob = viewModelScope.launch(Dispatchers.IO) {
             _apps.value = _apps.value.copy(progress = ViewContent.Progress.Loading)
-            clearAppIconCache(sessionId = SESSION_APP_LIST)
+            clearAppIconCache(sessionId = SETTINGS_APP_LIST)
             if (_apps.value.data.isNotEmpty()) delay(1.5.seconds)
             val list = systemAppProvider.getInstalledApps()
             _apps.value = _apps.value.copy(data = list, progress = ViewContent.Progress.Loaded)
@@ -238,7 +238,7 @@ class ApplyViewModel(
 
         iconJobs[packageName] = viewModelScope.launch(Dispatchers.IO) {
             val iconBitmap = getAppIcon(
-                sessionId = SESSION_APP_LIST,
+                sessionId = SETTINGS_APP_LIST,
                 packageName = packageName,
                 iconSizePx = 144,
                 preferSystemIcon = true

@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.about
 
+import androidx.compose.ui.graphics.ImageBitmap
 import com.rosan.installer.domain.settings.model.Authorizer
 
 data class AboutState(
@@ -10,5 +11,6 @@ data class AboutState(
     val authorizer: Authorizer = Authorizer.None,
     val hasUpdate: Boolean = false,
     val remoteVersion: String = "",
-    val enableFileLogging: Boolean = false
+    val enableFileLogging: Boolean = false,
+    val appIcon: ImageBitmap? = null
 )

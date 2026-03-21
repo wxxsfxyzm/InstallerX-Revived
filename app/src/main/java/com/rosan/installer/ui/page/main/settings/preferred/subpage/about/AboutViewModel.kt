@@ -2,9 +2,13 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.about
 
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rosan.installer.domain.engine.repository.AppIconRepository.Companion.SETTINGS_APP_LIST
+import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
@@ -31,6 +35,7 @@ class AboutViewModel(
     private val systemEnvProvider: SystemEnvProvider,
     private val updateSetting: UpdateSettingUseCase,
     private val performAppUpdateUseCase: PerformAppUpdateUseCase,
+    private val getAppIcon: GetAppIconUseCase
 ) : ViewModel() {
 
     private val _uiEvents = MutableSharedFlow<AboutEvent>(
@@ -42,17 +47,21 @@ class AboutViewModel(
 
     private val updateInfoFlow = MutableStateFlow<UpdateInfo?>(null)
 
+    private val _appIcon = MutableStateFlow<ImageBitmap?>(null)
+
     val state: StateFlow<AboutState> = combine(
         appSettingsRepo.preferencesFlow,
-        updateInfoFlow
-    ) { prefs, updateInfo ->
+        updateInfoFlow,
+        _appIcon
+    ) { prefs, updateInfo, appIcon ->
         AboutState(
             isLoading = false,
             useBlur = prefs.useBlur,
             authorizer = prefs.authorizer,
             hasUpdate = updateInfo?.hasUpdate ?: false,
             remoteVersion = updateInfo?.remoteVersion ?: "",
-            enableFileLogging = prefs.enableFileLogging
+            enableFileLogging = prefs.enableFileLogging,
+            appIcon = appIcon
         )
     }.stateIn(
         scope = viewModelScope,
@@ -62,6 +71,7 @@ class AboutViewModel(
 
     init {
         checkUpdate()
+        loadAppIcon()
     }
 
     fun dispatch(action: AboutAction) {
@@ -75,6 +85,16 @@ class AboutViewModel(
     private fun checkUpdate() = viewModelScope.launch(Dispatchers.IO) {
         val result = updateRepo.checkUpdate()
         if (result != null) updateInfoFlow.value = result
+    }
+
+    private fun loadAppIcon() = viewModelScope.launch {
+        val bitmap = getAppIcon(
+            sessionId = SETTINGS_APP_LIST,
+            packageName = systemEnvProvider.packageName,
+            iconSizePx = 256,
+            preferSystemIcon = true
+        )
+        _appIcon.value = bitmap?.asImageBitmap()
     }
 
     private fun performInAppUpdate() = viewModelScope.launch {

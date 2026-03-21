@@ -35,10 +35,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
@@ -175,16 +173,15 @@ fun MiuixAboutPage(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Image(
-                                modifier = Modifier.size(80.dp),
-                                painter = rememberDrawablePainter(
-                                    drawable = ContextCompat.getDrawable(
-                                        LocalContext.current,
-                                        R.mipmap.ic_launcher
-                                    )
-                                ),
-                                contentDescription = stringResource(id = R.string.app_name)
-                            )
+                            if (uiState.appIcon != null) {
+                                Image(
+                                    bitmap = uiState.appIcon!!,
+                                    modifier = Modifier.size(80.dp),
+                                    contentDescription = stringResource(id = R.string.app_name)
+                                )
+                            } else {
+                                Box(modifier = Modifier.size(80.dp))
+                            }
                             Text(
                                 text = stringResource(id = R.string.app_name),
                                 style = MiuixTheme.textStyles.title2,

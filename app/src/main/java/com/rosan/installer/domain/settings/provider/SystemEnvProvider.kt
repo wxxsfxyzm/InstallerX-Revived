@@ -5,6 +5,8 @@ package com.rosan.installer.domain.settings.provider
 import kotlinx.coroutines.flow.Flow
 
 interface SystemEnvProvider {
+    val packageName: String
+
     suspend fun getPackageUid(packageName: String): Int?
     fun isIgnoringBatteryOptimizationsFlow(): Flow<Boolean>
     fun isAdbVerifyEnabledFlow(): Flow<Boolean>

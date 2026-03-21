@@ -17,7 +17,7 @@ import com.rosan.installer.data.session.notification.LegacyNotificationBuilder
 import com.rosan.installer.data.session.notification.MiIslandNotificationBuilder
 import com.rosan.installer.data.session.notification.ModernNotificationBuilder
 import com.rosan.installer.data.session.notification.NotificationHelper
-import com.rosan.installer.domain.engine.repository.AppIconRepository
+import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
@@ -73,9 +73,9 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerSessionRe
     private var sessionStartTime: Long = 0L
     private val context by inject<Context>()
     private val appSettingsRepo by inject<AppSettingsRepo>()
-    private val appIconRepo by inject<AppIconRepository>()
     private val appOpsProvider by inject<AppOpsProvider>()
-    private val configUseCase by inject<GetResolvedConfigUseCase>()
+    private val getResolvedConfig by inject<GetResolvedConfigUseCase>()
+    private val getAppIcon by inject<GetAppIconUseCase>()
 
     private val notificationManager = NotificationManagerCompat.from(context)
     private val notificationId = installer.id.hashCode() and Int.MAX_VALUE
@@ -103,7 +103,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerSessionRe
     }
 
     // Initialize Delegated Builders
-    private val helper by lazy { NotificationHelper(context, installer, appIconRepo) }
+    private val helper by lazy { NotificationHelper(context, installer, getAppIcon) }
     private val miIslandBuilder by lazy { MiIslandNotificationBuilder(context, installer, helper) }
     private val legacyBuilder by lazy { LegacyNotificationBuilder(context, installer, helper) }
     private val modernBuilder by lazy {
@@ -118,7 +118,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerSessionRe
         isXiaomiNetworkBlocked = false
 
         // Initialize synchronously in the suspend function to avoid race conditions with onFinish
-        globalAuthorizer = configUseCase(null).authorizer
+        globalAuthorizer = getResolvedConfig(null).authorizer
 
         val settings = NotificationSettings(
             showDialog = appSettingsRepo.getBoolean(BooleanSetting.ShowDialogWhenPressingNotification, true).first(),
@@ -371,9 +371,6 @@ class ForegroundInfoHandler(scope: CoroutineScope, installer: InstallerSessionRe
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override suspend fun onFinish() {
-        installer.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app.packageName }.distinct()
-            .forEach { appIconRepo.clearCacheForPackage(it) }
-
         setNotificationImmediate(null)
         job?.cancel()
 
