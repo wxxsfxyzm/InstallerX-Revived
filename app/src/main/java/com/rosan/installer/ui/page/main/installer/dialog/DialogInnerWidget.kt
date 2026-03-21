@@ -34,48 +34,43 @@ import com.rosan.installer.ui.page.main.installer.dialog.inner.uninstallingDialo
 // change the content when the id been changed
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 fun dialogInnerWidget(
-    installer: InstallerSessionRepository,
     params: DialogInnerParams
 ): @Composable (() -> Unit)? =
     if (params.content == null) null
     else {
         {
-            /*AnimatedContent(
-                targetState = "${installer.id}_${params.id}"
-            ) {
-                params.content.invoke()
-            }*/params.content.invoke()
+            params.content.invoke()
         }
     }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun dialogGenerateParams(
-    installer: InstallerSessionRepository, viewModel: InstallerViewModel
+    session: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     return when (val stage = uiState.stage) {
         is InstallerStage.Ready -> readyDialog(viewModel)
-        is InstallerStage.Resolving -> resolvingDialog(installer, viewModel)
-        is InstallerStage.ResolveFailed -> resolveFailedDialog(installer, viewModel)
+        is InstallerStage.Resolving -> resolvingDialog(viewModel)
+        is InstallerStage.ResolveFailed -> resolveFailedDialog(session, viewModel)
         is InstallerStage.Preparing -> preparingDialog(viewModel)
-        is InstallerStage.Analysing -> analysingDialog(installer, viewModel)
-        is InstallerStage.AnalyseFailed -> analyseFailedDialog(installer, viewModel)
-        is InstallerStage.InstallChoice -> installChoiceDialog(installer, viewModel)
-        is InstallerStage.InstallPrepare -> installPrepareDialog(installer, viewModel)
-        is InstallerStage.InstallExtendedMenu -> installExtendedMenuDialog(installer, viewModel)
-        is InstallerStage.InstallExtendedSubMenu -> installExtendedMenuSubMenuDialog(installer, viewModel)
-        is InstallerStage.Installing -> installingDialog(installer, viewModel)
-        is InstallerStage.InstallSuccess -> installSuccessDialog(installer, viewModel)
-        is InstallerStage.InstallFailed -> installFailedDialog(installer, viewModel)
-        is InstallerStage.InstallCompleted -> installCompletedDialog(installer, viewModel, stage.results)
+        is InstallerStage.Analysing -> analysingDialog(viewModel)
+        is InstallerStage.AnalyseFailed -> analyseFailedDialog(session, viewModel)
+        is InstallerStage.InstallChoice -> installChoiceDialog(session, viewModel)
+        is InstallerStage.InstallPrepare -> installPrepareDialog(session, viewModel)
+        is InstallerStage.InstallExtendedMenu -> installExtendedMenuDialog(session, viewModel)
+        is InstallerStage.InstallExtendedSubMenu -> installExtendedMenuSubMenuDialog(session, viewModel)
+        is InstallerStage.Installing -> installingDialog(session, viewModel)
+        is InstallerStage.InstallSuccess -> installSuccessDialog(session, viewModel)
+        is InstallerStage.InstallFailed -> installFailedDialog(session, viewModel)
+        is InstallerStage.InstallCompleted -> installCompletedDialog(viewModel, stage.results)
         is InstallerStage.InstallConfirm -> installConfirmDialog(viewModel)
-        is InstallerStage.InstallRetryDowngradeUsingUninstall -> installingDialog(installer, viewModel)
+        is InstallerStage.InstallRetryDowngradeUsingUninstall -> installingDialog(session, viewModel)
         is InstallerStage.UninstallReady -> uninstallReadyDialog(viewModel)
         is InstallerStage.UninstallSuccess -> uninstallSuccessDialog(viewModel)
-        is InstallerStage.UninstallFailed -> uninstallFailedDialog(installer, viewModel)
-        is InstallerStage.Uninstalling -> uninstallingDialog(installer, viewModel)
-        is InstallerStage.UninstallResolveFailed -> uninstallFailedDialog(installer, viewModel)
+        is InstallerStage.UninstallFailed -> uninstallFailedDialog(session, viewModel)
+        is InstallerStage.Uninstalling -> uninstallingDialog(viewModel)
+        is InstallerStage.UninstallResolveFailed -> uninstallFailedDialog(session, viewModel)
         // when is exhaustive, so no need to handle the else case
         else -> readyDialog(viewModel)
     }

@@ -31,7 +31,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun installingDialog(
-    installer: InstallerSessionRepository, viewModel: InstallerViewModel
+    session: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stage = uiState.stage
@@ -41,7 +41,7 @@ fun installingDialog(
 
     // Call InstallInfoDialog for base structure (icon, title, subtitle with new version)
     val baseParams = installInfoDialog(
-        installer = installer,
+        session = session,
         viewModel = viewModel,
         onTitleExtraClick = {}
     )

@@ -20,8 +20,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 
-class BroadcastHandler(scope: CoroutineScope, installer: InstallerSessionRepository) :
-    Handler(scope, installer), KoinComponent {
+class BroadcastHandler(scope: CoroutineScope, session: InstallerSessionRepository) :
+    Handler(scope, session), KoinComponent {
     companion object {
         private const val ACTION = "installer.broadcast.action"
         const val KEY_ID = "installer_id"
@@ -59,7 +59,7 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerSessionReposit
     private val receiver = Receiver()
 
     override suspend fun onStart() {
-        Timber.d("[id=${installer.id}] onStart: Registering receiver.")
+        Timber.d("[id=${session.id}] onStart: Registering receiver.")
         registerReceiver(receiver)
     }
 
@@ -73,7 +73,7 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerSessionReposit
     }
 
     override suspend fun onFinish() {
-        Timber.d("[id=${installer.id}] onFinish: Unregistering receiver.")
+        Timber.d("[id=${session.id}] onFinish: Unregistering receiver.")
         context.unregisterReceiver(receiver)
     }
 
@@ -86,16 +86,16 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerSessionReposit
 
             val receivedId = intent.getStringExtra(KEY_ID)
             Timber
-                .d("Receiver onReceive: Expected ID=${installer.id}, Received ID=$receivedId, Action=${intent.action}")
+                .d("Receiver onReceive: Expected ID=${session.id}, Received ID=$receivedId, Action=${intent.action}")
 
-            if (receivedId != installer.id) {
+            if (receivedId != session.id) {
                 Timber.w("Receiver ID mismatch. Discarding broadcast.")
                 return
             }
 
             val keyName = intent.getStringExtra(KEY_NAME) ?: return
             val name = Name.revert(keyName)
-            Timber.d("[id=${installer.id}] Receiver: Received broadcast for name: $name. Dispatching action.")
+            Timber.d("[id=${session.id}] Receiver: Received broadcast for name: $name. Dispatching action.")
             val pendingResult = goAsync()
             receiverScope.launch {
                 try {
@@ -108,25 +108,25 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerSessionReposit
 
         private suspend fun doWork(context: Context, name: Name) {
             when (name) {
-                Name.Analyse -> installer.analyse()
-                Name.Install -> installer.install(true)
-                Name.Finish -> installer.close()
-                Name.Cancel -> installer.cancel()
+                Name.Analyse -> session.analyse()
+                Name.Install -> session.install(true)
+                Name.Finish -> session.close()
+                Name.Cancel -> session.cancel()
                 Name.PrivilegedLaunchAndFinish -> handlePrivilegedLaunchAndFinish(context)
                 else -> {
-                    Timber.d("[id=${installer.id}] Receiver: No action for broadcast name: $name")
+                    Timber.d("[id=${session.id}] Receiver: No action for broadcast name: $name")
                 }
             }
         }
 
         private suspend fun handlePrivilegedLaunchAndFinish(context: Context) {
-            val packageName = installer.analysisResults
+            val packageName = session.analysisResults
                 .flatMap { it.appEntities }
                 .firstOrNull { it.selected }?.app?.packageName ?: return
 
             val launchIntent = context.packageManager.getLaunchIntentForPackage(packageName) ?: return
 
-            val result = openAppUseCase(installer.config, launchIntent)
+            val result = openAppUseCase(session.config, launchIntent)
 
             if (result is OpenAppUseCase.Result.FallbackRequired) {
                 Timber.d("Privileged launch fallback: starting activity normally.")
@@ -134,7 +134,7 @@ class BroadcastHandler(scope: CoroutineScope, installer: InstallerSessionReposit
             }
 
             Timber.d("Privileged launch result processed, closing session.")
-            installer.close()
+            session.close()
         }
     }
 

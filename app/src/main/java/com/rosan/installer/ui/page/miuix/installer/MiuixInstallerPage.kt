@@ -91,8 +91,8 @@ private const val SHEET_ANIMATION_DURATION = 450L
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
 fun MiuixInstallerPage(
-    installer: InstallerSessionRepository,
-    viewModel: InstallerViewModel = koinViewModel { parametersOf(installer) }
+    session: InstallerSessionRepository,
+    viewModel: InstallerViewModel = koinViewModel { parametersOf(session) }
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -123,16 +123,16 @@ fun MiuixInstallerPage(
         } ?: globalColorScheme
     }
 
-    val sourceType = installer.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
-    val packageName = currentPackageName ?: installer.analysisResults.firstOrNull()?.packageName ?: ""
+    val sourceType = session.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
+    val packageName = currentPackageName ?: session.analysisResults.firstOrNull()?.packageName ?: ""
     val appInfoState = rememberAppInfoState(
-        installer = installer,
+        session = session,
         currentPackageName = currentPackageName,
         displayIcons = displayIcons
     )
 
-    LaunchedEffect(installer.id) {
-        viewModel.dispatch(InstallerViewAction.CollectRepo(installer))
+    LaunchedEffect(session.id) {
+        viewModel.dispatch(InstallerViewAction.CollectRepo(session))
     }
 
     ToastEventCollector(viewModel)
@@ -410,7 +410,7 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.InstallChoice -> {
                             InstallChoiceContent(
-                                installer = installer,
+                                session = session,
                                 viewModel = viewModel,
                                 onCancel = closeSheet
                             )
@@ -418,7 +418,7 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.InstallExtendedMenu -> {
                             InstallExtendedMenuContent(
-                                installer = installer,
+                                session = session,
                                 viewModel = viewModel
                             )
                         }
@@ -454,14 +454,14 @@ fun MiuixInstallerPage(
                                 when (subState) {
                                     "settings" -> {
                                         PrepareSettingsContent(
-                                            installer = installer,
+                                            session = session,
                                             viewModel = viewModel
                                         )
                                     }
 
                                     "permissions" -> {
                                         InstallPreparePermissionContent(
-                                            installer = installer,
+                                            session = session,
                                             viewModel = viewModel,
                                             onBack = { viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList) }
                                         )
@@ -469,7 +469,7 @@ fun MiuixInstallerPage(
 
                                     else -> { // "prepare"
                                         InstallPrepareContent(
-                                            installer = installer,
+                                            session = session,
                                             viewModel = viewModel,
                                             appInfo = appInfoState,
                                             onCancel = closeSheet,
@@ -505,7 +505,7 @@ fun MiuixInstallerPage(
                         is InstallerStage.InstallSuccess -> {
                             InstallSuccessContent(
                                 appInfo = appInfoState,
-                                installer = installer,
+                                session = session,
                                 dhizukuAutoClose = settings.autoCloseCountDown,
                                 onClose = closeSheet
                             )
@@ -519,12 +519,12 @@ fun MiuixInstallerPage(
                         }
 
                         is InstallerStage.InstallFailed -> {
-                            if (installer.error is ModuleInstallFailedIncompatibleAuthorizerException ||
-                                installer.error is ModuleInstallCmdInitException ||
-                                installer.error is ModuleInstallException
+                            if (session.error is ModuleInstallFailedIncompatibleAuthorizerException ||
+                                session.error is ModuleInstallCmdInitException ||
+                                session.error is ModuleInstallException
                             )
                                 NonInstallFailedContent(
-                                    error = installer.error,
+                                    error = session.error,
                                     onClose = closeSheet
                                 )
                             else
@@ -533,7 +533,7 @@ fun MiuixInstallerPage(
                                 ) {
                                     InstallFailedContent(
                                         appInfo = appInfoState,
-                                        installer = installer,
+                                        session = session,
                                         viewModel = viewModel,
                                         onClose = closeSheet
                                     )
@@ -566,7 +566,7 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.UninstallFailed -> {
                             UninstallFailedContent(
-                                installer = installer,
+                                session = session,
                                 viewModel = viewModel,
                                 onClose = closeSheet
                             )
@@ -574,7 +574,7 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.AnalyseFailed, is InstallerStage.ResolveFailed -> {
                             NonInstallFailedContent(
-                                error = installer.error,
+                                error = session.error,
                                 onClose = closeSheet
                             )
                         }

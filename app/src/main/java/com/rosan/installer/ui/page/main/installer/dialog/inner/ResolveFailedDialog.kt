@@ -15,7 +15,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 
 @Composable
 fun resolveFailedDialog(
-    installer: InstallerSessionRepository, viewModel: InstallerViewModel
+    session: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(
@@ -25,7 +25,7 @@ fun resolveFailedDialog(
         ) {
             Text(stringResource(R.string.installer_resolve_failed))
         }, text = DialogInnerParams(
-            DialogParamsType.InstallerResolveFailed.id, { ErrorTextBlock(installer.error) }
+            DialogParamsType.InstallerResolveFailed.id, { ErrorTextBlock(session.error) }
         ), buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {

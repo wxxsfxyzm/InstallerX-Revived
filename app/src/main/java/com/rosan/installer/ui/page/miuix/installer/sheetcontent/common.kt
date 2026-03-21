@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.sortedBest
@@ -45,15 +44,15 @@ data class AppInfoState(
  */
 @Composable
 fun rememberAppInfoState(
-    installer: InstallerSessionRepository,
+    session: InstallerSessionRepository,
     currentPackageName: String?,
     displayIcons: Map<String, ImageBitmap?>
 ): AppInfoState {
-    return remember(installer, currentPackageName, displayIcons) {
+    return remember(session, currentPackageName, displayIcons) {
         val currentPackage = if (currentPackageName != null) {
-            installer.analysisResults.find { it.packageName == currentPackageName }
+            session.analysisResults.find { it.packageName == currentPackageName }
         } else {
-            installer.analysisResults.firstOrNull()
+            session.analysisResults.firstOrNull()
         }
 
         // Default fallback values
@@ -103,8 +102,6 @@ fun AppInfoSlot(
     // Callback for icon click events. Null means not clickable.
     onIconClick: (() -> Unit)? = null
 ) {
-    val context = LocalContext.current
-
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,

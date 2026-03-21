@@ -41,7 +41,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun InstallSuccessContent(
-    installer: InstallerSessionRepository,
+    session: InstallerSessionRepository,
     appInfo: AppInfoState,
     dhizukuAutoClose: Int,
     onClose: () -> Unit
@@ -72,7 +72,7 @@ fun InstallSuccessContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        if (isXposedModule && installer.config.isPrivileged(capabilityProvider)) {
+        if (isXposedModule && session.config.isPrivileged(capabilityProvider)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -86,7 +86,7 @@ fun InstallSuccessContent(
                     ),
                     onClick = {
                         coroutineScope.launch(Dispatchers.IO) {
-                            val success = openLSPosedUseCase(installer.config)
+                            val success = openLSPosedUseCase(session.config)
                             if (success) {
                                 launch(Dispatchers.Main) { onClose() }
                             }
@@ -125,7 +125,7 @@ fun InstallSuccessContent(
                     onClick = {
                         coroutineScope.launch(Dispatchers.IO) {
                             val result = openAppUseCase(
-                                config = installer.config,
+                                config = session.config,
                                 launchIntent = intent
                             )
 
@@ -138,7 +138,7 @@ fun InstallSuccessContent(
                                     launch(Dispatchers.Main) {
                                         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
-                                        if (installer.config.authorizer == Authorizer.Dhizuku) {
+                                        if (session.config.authorizer == Authorizer.Dhizuku) {
                                             delay(dhizukuAutoClose * 1000L)
                                         } else {
                                             delay(PRIVILEGED_START_TIMEOUT_MS)

@@ -109,17 +109,17 @@ private fun installPrepareTooManyDialog(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun installPrepareDialog(
-    installer: InstallerSessionRepository, viewModel: InstallerViewModel
+    session: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentPackageName = uiState.currentPackageName
-    val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
+    val currentPackage = session.analysisResults.find { it.packageName == currentPackageName }
     val settings = uiState.viewSettings
 
     // If there is no specific package to prepare, show an empty/error dialog.
     if (currentPackage == null) {
-        return if (installer.analysisResults.size > 1) {
-            installPrepareTooManyDialog(installer, viewModel)
+        return if (session.analysisResults.size > 1) {
+            installPrepareTooManyDialog(session, viewModel)
         } else {
             installPrepareEmptyDialog(viewModel)
         }
@@ -149,21 +149,21 @@ fun installPrepareDialog(
     val isSplitUpdateMode = (isBundleSplitUpdate || isPureSplit) && preInstallAppInfo != null
 
     var showChips by remember { mutableStateOf(false) }
-    var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
-    var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
-    var displaySize by remember { mutableStateOf(installer.config.displaySize) }
+    var autoDelete by remember { mutableStateOf(session.config.autoDelete) }
+    var displaySdk by remember { mutableStateOf(session.config.displaySdk) }
+    var displaySize by remember { mutableStateOf(session.config.displaySize) }
     var showOPPOSpecial by remember { mutableStateOf(settings.showOPPOSpecial) }
 
     LaunchedEffect(autoDelete, displaySdk, displaySize) {
-        val currentConfig = installer.config
-        if (currentConfig.autoDelete != autoDelete) installer.config = installer.config.copy(autoDelete = autoDelete)
-        if (currentConfig.displaySdk != displaySdk) installer.config = installer.config.copy(displaySdk = displaySdk)
-        if (currentConfig.displaySize != displaySize) installer.config = installer.config.copy(displaySize = displaySize)
+        val currentConfig = session.config
+        if (currentConfig.autoDelete != autoDelete) session.config = session.config.copy(autoDelete = autoDelete)
+        if (currentConfig.displaySdk != displaySdk) session.config = session.config.copy(displaySdk = displaySdk)
+        if (currentConfig.displaySize != displaySize) session.config = session.config.copy(displaySize = displaySize)
     }
 
     // Call InstallInfoDialog for base structure
     val baseParams = installInfoDialog(
-        installer = installer,
+        session = session,
         viewModel = viewModel,
         onTitleExtraClick = { showChips = !showChips }
     )
@@ -298,7 +298,7 @@ fun installPrepareDialog(
                                 onClick = {
                                     val newValue = !autoDelete
                                     autoDelete = newValue
-                                    installer.config = installer.config.copy(autoDelete = newValue)
+                                    session.config = session.config.copy(autoDelete = newValue)
                                 },
                                 label = stringResource(id = R.string.config_auto_delete),
                                 icon = AppIcons.Delete
@@ -308,7 +308,7 @@ fun installPrepareDialog(
                                 onClick = {
                                     val newValue = !displaySdk
                                     displaySdk = newValue
-                                    installer.config = installer.config.copy(displaySdk = newValue)
+                                    session.config = session.config.copy(displaySdk = newValue)
                                 },
                                 label = stringResource(id = R.string.config_display_sdk_version),
                                 icon = AppIcons.Info
@@ -318,7 +318,7 @@ fun installPrepareDialog(
                                 onClick = {
                                     val newValue = !displaySize
                                     displaySize = newValue
-                                    installer.config = installer.config.copy(displaySize = newValue)
+                                    session.config = session.config.copy(displaySize = newValue)
                                 },
                                 label = stringResource(id = R.string.config_display_size),
                                 icon = AppIcons.ShowSize

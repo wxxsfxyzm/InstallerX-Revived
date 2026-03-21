@@ -15,7 +15,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
@@ -24,7 +23,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun uninstallingDialog(
-    installer: InstallerSessionRepository, viewModel: InstallerViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     // Call uninstallInfoDialog for base structure (icon, title, subtitle with new version)
     val baseParams = uninstallInfoDialog(

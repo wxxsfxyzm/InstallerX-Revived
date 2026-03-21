@@ -54,11 +54,11 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun InstallExtendedMenuContent(
-    installer: InstallerSessionRepository,
+    session: InstallerSessionRepository,
     viewModel: InstallerViewModel
 ) {
     val isDarkMode = InstallerTheme.isDark
-    val installOptions = rememberInstallOptions(installer.config.authorizer)
+    val installOptions = rememberInstallOptions(session.config.authorizer)
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val installFlags = uiState.installFlags
@@ -72,12 +72,12 @@ fun InstallExtendedMenuContent(
         managedPackages.find { it.packageName == selectedInstallerPackageName }
     }
 
-    val customizeUserEnabled = installer.config.enableCustomizeUser
+    val customizeUserEnabled = session.config.enableCustomizeUser
     val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, availableUsers) {
         buildList {
             // Installer selection
-            if (installer.config.authorizer == Authorizer.Root ||
-                installer.config.authorizer == Authorizer.Shizuku
+            if (session.config.authorizer == Authorizer.Root ||
+                session.config.authorizer == Authorizer.Shizuku
             ) {
                 add(
                     ExtendedMenuEntity(
@@ -92,8 +92,8 @@ fun InstallExtendedMenuContent(
             }
 
             // User selection
-            if ((installer.config.authorizer == Authorizer.Root ||
-                        installer.config.authorizer == Authorizer.Shizuku
+            if ((session.config.authorizer == Authorizer.Root ||
+                        session.config.authorizer == Authorizer.Shizuku
                         ) && customizeUserEnabled
             ) {
                 add(
@@ -109,8 +109,8 @@ fun InstallExtendedMenuContent(
             }
 
             // Dynamic install options
-            if (installer.config.authorizer == Authorizer.Root ||
-                installer.config.authorizer == Authorizer.Shizuku
+            if (session.config.authorizer == Authorizer.Root ||
+                session.config.authorizer == Authorizer.Shizuku
             ) {
                 installOptions.forEach { option ->
                     add(

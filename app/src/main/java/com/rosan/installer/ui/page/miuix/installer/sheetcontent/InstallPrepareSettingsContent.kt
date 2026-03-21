@@ -38,15 +38,15 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun PrepareSettingsContent(
-    installer: InstallerSessionRepository,
+    session: InstallerSessionRepository,
     viewModel: InstallerViewModel
 ) {
     val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val settings = uiState.viewSettings
-    var autoDelete by remember { mutableStateOf(installer.config.autoDelete) }
-    var displaySdk by remember { mutableStateOf(installer.config.displaySdk) }
-    var displaySize by remember { mutableStateOf(installer.config.displaySize) }
+    var autoDelete by remember { mutableStateOf(session.config.autoDelete) }
+    var displaySdk by remember { mutableStateOf(session.config.displaySdk) }
+    var displaySize by remember { mutableStateOf(session.config.displaySize) }
     var showOPPOSpecial by remember { mutableStateOf(settings.showOPPOSpecial) }
 
     BackHandler {
@@ -54,9 +54,9 @@ fun PrepareSettingsContent(
     }
 
     LaunchedEffect(autoDelete, displaySdk) {
-        val currentConfig = installer.config
-        if (currentConfig.autoDelete != autoDelete) installer.config = installer.config.copy(autoDelete = autoDelete)
-        if (currentConfig.displaySdk != displaySdk) installer.config = installer.config.copy(displaySdk = displaySdk)
+        val currentConfig = session.config
+        if (currentConfig.autoDelete != autoDelete) session.config = session.config.copy(autoDelete = autoDelete)
+        if (currentConfig.displaySdk != displaySdk) session.config = session.config.copy(displaySdk = displaySdk)
     }
 
     Column(
@@ -84,7 +84,7 @@ fun PrepareSettingsContent(
                 onCheckedChange = {
                     val newValue = !displaySdk
                     displaySdk = newValue
-                    installer.config = installer.config.copy(displaySdk = newValue)
+                    session.config = session.config.copy(displaySdk = newValue)
                 }
             )
             MiuixSwitchWidget(
@@ -94,17 +94,17 @@ fun PrepareSettingsContent(
                 onCheckedChange = {
                     val newValue = !displaySize
                     displaySize = newValue
-                    installer.config = installer.config.copy(displaySize = newValue)
+                    session.config = session.config.copy(displaySize = newValue)
                 }
             )
             MiuixSwitchWidget(
                 title = stringResource(R.string.config_auto_delete),
                 description = stringResource(R.string.config_auto_delete_desc),
-                checked = installer.config.autoDelete,
+                checked = session.config.autoDelete,
                 onCheckedChange = {
                     val newValue = !autoDelete
                     autoDelete = newValue
-                    installer.config = installer.config.copy(autoDelete = newValue)
+                    session.config = session.config.copy(autoDelete = newValue)
                 }
             )
             if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS)

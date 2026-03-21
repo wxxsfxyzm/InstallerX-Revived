@@ -29,7 +29,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun UninstallFailedContent(
-    installer: InstallerSessionRepository,
+    session: InstallerSessionRepository,
     viewModel: InstallerViewModel,
     onClose: () -> Unit
 ) {
@@ -50,7 +50,7 @@ fun UninstallFailedContent(
         )
         Spacer(modifier = Modifier.height(32.dp))
         MiuixErrorTextBlock(
-            error = installer.error,
+            error = session.error,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f, fill = false)

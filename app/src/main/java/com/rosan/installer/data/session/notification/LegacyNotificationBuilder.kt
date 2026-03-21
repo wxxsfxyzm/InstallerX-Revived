@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Copyright (C) 2025-2026 InstallerX Revived contributors
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.data.session.notification
 
 import android.app.Notification
@@ -15,7 +15,7 @@ import com.rosan.installer.util.getErrorMessage
 
 class LegacyNotificationBuilder(
     private val context: Context,
-    private val installer: InstallerSessionRepository,
+    private val session: InstallerSessionRepository,
     private val helper: NotificationHelper
 ) {
 
@@ -55,7 +55,7 @@ class LegacyNotificationBuilder(
             if (isImportance && background) NotificationHelper.Channel.InstallerChannel else NotificationHelper.Channel.InstallerProgressChannel
         val icon = (if (isWorking) NotificationHelper.Icon.Working else NotificationHelper.Icon.Pausing).resId
         val contentIntent =
-            if (installer.config.installMode == InstallMode.Notification || installer.config.installMode == InstallMode.AutoNotification) {
+            if (session.config.installMode == InstallMode.Notification || session.config.installMode == InstallMode.AutoNotification) {
                 if (showDialog) helper.openIntent else null
             } else helper.openIntent
 
@@ -106,7 +106,7 @@ class LegacyNotificationBuilder(
             .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
 
     private suspend fun onAnalysedSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): Notification {
-        val allEntities = installer.analysisResults.flatMap { it.appEntities }
+        val allEntities = session.analysisResults.flatMap { it.appEntities }
         val selectedApps = allEntities.map { it.app }
         val hasComplexType = allEntities.any { it.app.sourceType == DataType.MIXED_MODULE_APK || it.app.sourceType == DataType.MIXED_MODULE_ZIP }
         val isMultiPackage = selectedApps.groupBy { it.packageName }.size > 1
@@ -146,16 +146,16 @@ class LegacyNotificationBuilder(
         .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon)).build()
 
     private suspend fun onInstallFailed(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): NotificationCompat.Builder {
-        val info = installer.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context)
+        val info = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context)
         val contentText = context.getString(R.string.installer_install_failed)
         return builder.setContentTitle(info.title).setContentText(contentText).setStyle(
-            NotificationCompat.BigTextStyle().setBigContentTitle(info.title).bigText("$contentText\n${installer.error.getErrorMessage(context)}")
+            NotificationCompat.BigTextStyle().setBigContentTitle(info.title).bigText("$contentText\n${session.error.getErrorMessage(context)}")
         ).setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon)).addAction(0, context.getString(R.string.retry), helper.installIntent)
             .addAction(0, context.getString(R.string.cancel), helper.finishIntent)
     }
 
     private suspend fun onInstallSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): NotificationCompat.Builder {
-        val entities = installer.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }
+        val entities = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }
         var newBuilder =
             builder.setContentTitle(entities.getInfo(context).title).setContentText(context.getString(R.string.installer_install_success))
                 .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon))

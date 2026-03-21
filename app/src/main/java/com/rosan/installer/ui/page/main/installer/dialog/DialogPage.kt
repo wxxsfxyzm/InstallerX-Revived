@@ -31,10 +31,8 @@ import org.koin.core.parameter.parametersOf
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DialogPage(
-    installer: InstallerSessionRepository,
-    viewModel: InstallerViewModel = koinViewModel {
-        parametersOf(installer)
-    }
+    session: InstallerSessionRepository,
+    viewModel: InstallerViewModel = koinViewModel { parametersOf(session) }
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stage = uiState.stage
@@ -58,8 +56,8 @@ fun DialogPage(
         } ?: globalColorScheme
     }
 
-    LaunchedEffect(installer.id) {
-        viewModel.dispatch(InstallerViewAction.CollectRepo(installer))
+    LaunchedEffect(session.id) {
+        viewModel.dispatch(InstallerViewAction.CollectRepo(session))
     }
 
     ToastEventCollector(viewModel)
@@ -118,7 +116,7 @@ fun DialogPage(
             }
             // Handle other non-Ready states: Show standard PositionDialog
             else if (stage !is InstallerStage.Ready) {
-                val params = dialogGenerateParams(installer, viewModel)
+                val params = dialogGenerateParams(session, viewModel)
 
                 PositionDialog(
                     useBlur = useBlur,
@@ -131,12 +129,12 @@ fun DialogPage(
                             }
                         }
                     },
-                    centerIcon = dialogInnerWidget(installer, params.icon),
-                    centerTitle = dialogInnerWidget(installer, params.title),
-                    centerSubtitle = dialogInnerWidget(installer, params.subtitle),
-                    centerText = dialogInnerWidget(installer, params.text),
-                    centerContent = dialogInnerWidget(installer, params.content),
-                    centerButton = dialogInnerWidget(installer, params.buttons)
+                    centerIcon = dialogInnerWidget(params.icon),
+                    centerTitle = dialogInnerWidget(params.title),
+                    centerSubtitle = dialogInnerWidget(params.subtitle),
+                    centerText = dialogInnerWidget(params.text),
+                    centerContent = dialogInnerWidget(params.content),
+                    centerButton = dialogInnerWidget(params.buttons)
                 )
             }
         }

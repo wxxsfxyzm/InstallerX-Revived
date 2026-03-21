@@ -61,7 +61,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     private var disableNotificationOnDismiss = false
 
     private val sessionManager: InstallerSessionManager by inject()
-    private var installer by mutableStateOf<InstallerSessionRepository?>(null)
+    private var session by mutableStateOf<InstallerSessionRepository?>(null)
     private var job: Job? = null
 
     private var latestProgress: ProgressEntity = ProgressEntity.Ready
@@ -95,18 +95,18 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             isRequestingPermission = true
         }
 
-        val originalInstallerId = if (savedInstanceState == null) {
+        val originalSessionId = if (savedInstanceState == null) {
             intent?.getStringExtra(KEY_ID)
         } else {
             savedInstanceState.getString(KEY_ID)
         }
 
         restoreInstaller(savedInstanceState)
-        if (originalInstallerId == null) {
+        if (originalSessionId == null) {
             Timber.d("onCreate: This is a fresh launch (originalId is null). Starting permission and resolve process.")
             checkPermissionsAndStartProcess()
         } else {
-            Timber.d("onCreate: Re-attaching to existing installer ($originalInstallerId).")
+            Timber.d("onCreate: Re-attaching to existing installer ($originalSessionId).")
         }
 
         showContent()
@@ -129,7 +129,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
                     else -> {
                         Timber.d("onCreate: Dispatching resolveInstall")
-                        installer?.resolveInstall(this)
+                        session?.resolveInstall(this)
                     }
                 }
             },
@@ -154,7 +154,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        val currentId = installer?.id
+        val currentId = session?.id
         outState.putString(KEY_ID, currentId)
         Timber.d("onSaveInstanceState: Saving id: $currentId")
         super.onSaveInstanceState(outState)
@@ -165,7 +165,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         if (AppConfig.isDebug && AppConfig.LEVEL == Level.UNSTABLE)
             logIntentDetails("onNewIntent", intent)
         // Fix for Microsoft Edge
-        if (this.installer != null && intent.flags.hasFlag(Intent.FLAG_ACTIVITY_NEW_TASK)) {
+        if (this.session != null && intent.flags.hasFlag(Intent.FLAG_ACTIVITY_NEW_TASK)) {
             Timber.w("onNewIntent was called with NEW_TASK, but an installer instance already exists. Ignoring re-initialization.")
             super.onNewIntent(intent)
             return
@@ -179,14 +179,14 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             val sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
             if (sessionId != -1) {
                 Timber.d("onNewIntent: Dispatching resolveConfirmInstall for session $sessionId")
-                installer?.resolveConfirmInstall(this, sessionId)
+                session?.resolveConfirmInstall(this, sessionId)
             } else {
                 Timber.e("onNewIntent: CONFIRM_INSTALL intent missing EXTRA_SESSION_ID")
                 finish()
             }
         } else {
             Timber.d("onNewIntent: Dispatching resolveInstall")
-            installer?.resolveInstall(this)
+            session?.resolveInstall(this)
         }
     }
 
@@ -210,7 +210,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
         // Only strictly interpret as user leaving when not finishing and not changing configurations (e.g., rotation)
         if (!isFinishing && !isChangingConfigurations && !isRequestingPermission) {
-            installer?.let { repo ->
+            session?.let { session ->
                 // If using session install, we don't hide UI since oems have different package installer impls
                 // if (session.config.authorizer == ConfigEntity.Authorizer.None) return
 
@@ -226,14 +226,14 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 // If the task is still running and hasn't finished or errored
                 if (isRunning) {
                     Timber.d("onStop: User left activity while running. Triggering background mode.")
-                    repo.background(true)
+                    session.background(true)
                 } else { // If the task has finished or errored
                     if (disableNotificationOnDismiss) {
                         Timber.d("onStop: Task finished and disableNotificationOnDismiss is true. Closing.")
-                        repo.close()
+                        session.close()
                     } else {
                         Timber.d("onStop: Task finished and disableNotificationOnDismiss is false. Triggering background mode.")
-                        repo.background(true)
+                        session.background(true)
                     }
                 }
             }
@@ -251,42 +251,42 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     private fun restoreInstaller(savedInstanceState: Bundle? = null) {
-        val installerId =
+        val sessionId =
             if (savedInstanceState == null) intent?.getStringExtra(KEY_ID) else savedInstanceState.getString(KEY_ID)
-        Timber.d("restoreInstaller: Attempting to restore with id: $installerId")
+        Timber.d("restoreInstaller: Attempting to restore with id: $sessionId")
 
-        if (this.installer != null && this.installer?.id == installerId) {
-            Timber.d("restoreInstaller: Current installer already matches id $installerId. Skipping.")
+        if (this.session != null && this.session?.id == sessionId) {
+            Timber.d("restoreInstaller: Current installer already matches id $sessionId. Skipping.")
             return
         }
 
         job?.cancel()
         Timber.d("restoreInstaller: Old job cancelled. Getting new installer instance.")
 
-        val installer = sessionManager.getOrCreate(installerId)
-        installer.background(false)
-        this.installer = installer
-        intent?.putExtra(KEY_ID, installer.id)
+        val session = sessionManager.getOrCreate(sessionId)
+        session.background(false)
+        this.session = session
+        intent?.putExtra(KEY_ID, session.id)
 
-        Timber.d("restoreInstaller: New installer instance [id=${installer.id}] set. Starting collectors.")
+        Timber.d("restoreInstaller: New installer instance [id=${session.id}] set. Starting collectors.")
 
         val scope = CoroutineScope(Dispatchers.Main.immediate)
         job = scope.launch {
             launch {
-                installer.progress.collect { progress ->
-                    Timber.d("[id=${installer.id}] Activity collected progress: ${progress::class.simpleName}")
+                session.progress.collect { progress ->
+                    Timber.d("[id=${session.id}] Activity collected progress: ${progress::class.simpleName}")
                     latestProgress = progress
                     if (progress is ProgressEntity.Finish) {
-                        Timber.d("[id=${installer.id}] Finish progress detected, finishing activity.")
+                        Timber.d("[id=${session.id}] Finish progress detected, finishing activity.")
                         if (!this@InstallerActivity.isFinishing) this@InstallerActivity.finish()
                     }
                 }
             }
             launch {
-                installer.background.collect { isBackground ->
-                    Timber.d("[id=${installer.id}] Activity collected background: $isBackground")
+                session.background.collect { isBackground ->
+                    Timber.d("[id=${session.id}] Activity collected background: $isBackground")
                     if (isBackground) {
-                        Timber.d("[id=${installer.id}] Background mode detected, finishing activity.")
+                        Timber.d("[id=${session.id}] Background mode detected, finishing activity.")
                         this@InstallerActivity.finish()
                     }
                 }
@@ -307,7 +307,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
 
         Timber.d("onCreate: Dispatching resolveConfirmInstall for session $sessionId")
-        installer?.resolveConfirmInstall(this, sessionId)
+        session?.resolveConfirmInstall(this, sessionId)
     }
 
 
@@ -316,9 +316,9 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             val uiState by themeStateProvider.themeStateFlow.collectAsState(initial = ThemeState())
             if (!uiState.isLoaded) return@setContent
 
-            val installer = installer ?: return@setContent
-            val background by installer.background.collectAsState(false)
-            val progress by installer.progress.collectAsState(ProgressEntity.Ready)
+            val session = session ?: return@setContent
+            val background by session.background.collectAsState(false)
+            val progress by session.progress.collectAsState(ProgressEntity.Ready)
             val capabilityChecker = koinInject<DeviceCapabilityProvider>()
 
             if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.Finish)
@@ -339,9 +339,9 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         if (uiState.useMiuix) {
-                            MiuixInstallerPage(installer = installer)
+                            MiuixInstallerPage(session)
                         } else {
-                            InstallerPage(installer = installer)
+                            InstallerPage(session)
                         }
                     }
                 }

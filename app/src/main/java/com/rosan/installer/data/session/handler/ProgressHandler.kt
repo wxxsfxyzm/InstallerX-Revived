@@ -10,16 +10,17 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class ProgressHandler(scope: CoroutineScope, installer: InstallerSessionRepository) : Handler(scope, installer) {
+class ProgressHandler(scope: CoroutineScope, session: InstallerSessionRepository) :
+    Handler(scope, session) {
 
     private var job: Job? = null
 
     override suspend fun onStart() {
-        Timber.d("[id=${installer.id}] onStart: Starting to collect progress.")
+        Timber.d("[id=${session.id}] onStart: Starting to collect progress.")
         job = scope.launch {
-            installer.progress.collect {
+            session.progress.collect {
                 // Log all progress changes for debugging
-                Timber.d("[id=${installer.id}] Collected progress: ${it::class.simpleName}")
+                Timber.d("[id=${session.id}] Collected progress: ${it::class.simpleName}")
                 when (it) {
                     is ProgressEntity.InstallResolvedFailed -> onResolved(false)
                     is ProgressEntity.InstallResolveSuccess -> onResolved(true)
@@ -31,40 +32,40 @@ class ProgressHandler(scope: CoroutineScope, installer: InstallerSessionReposito
     }
 
     override suspend fun onFinish() {
-        Timber.d("[id=${installer.id}] onFinish: Cancelling job.")
+        Timber.d("[id=${session.id}] onFinish: Cancelling job.")
         job?.cancel()
     }
 
     private fun onResolved(success: Boolean) {
-        Timber.d("[id=${installer.id}] onResolved called with success: $success")
-        val installMode = installer.config.installMode
+        Timber.d("[id=${session.id}] onResolved called with success: $success")
+        val installMode = session.config.installMode
         if (installMode == InstallMode.Notification || installMode == InstallMode.AutoNotification) {
-            Timber.d("[id=${installer.id}] onResolved: Notification mode detected. Setting background(true).")
-            installer.background(true)
+            Timber.d("[id=${session.id}] onResolved: Notification mode detected. Setting background(true).")
+            session.background(true)
         }
         if (success) {
-            Timber.d("[id=${installer.id}] onResolved: Success. Triggering analyse().")
-            installer.analyse()
+            Timber.d("[id=${session.id}] onResolved: Success. Triggering analyse().")
+            session.analyse()
         }
     }
 
     private fun onAnalysedSuccess() {
-        Timber.d("[id=${installer.id}] onAnalysedSuccess called.")
-        val installMode = installer.config.installMode
+        Timber.d("[id=${session.id}] onAnalysedSuccess called.")
+        val installMode = session.config.installMode
         if (installMode != InstallMode.AutoDialog && installMode != InstallMode.AutoNotification) {
             Timber
-                .d("[id=${installer.id}] onAnalysedSuccess: Not an auto-install mode ($installMode). Doing nothing.")
+                .d("[id=${session.id}] onAnalysedSuccess: Not an auto-install mode ($installMode). Doing nothing.")
             return
         }
 
-        val isSinglePackage = installer.analysisResults.size == 1
+        val isSinglePackage = session.analysisResults.size == 1
 
         if (!isSinglePackage) {
-            Timber.d("[id=${installer.id}] onAnalysedSuccess: Not a single package install. Doing nothing.")
+            Timber.d("[id=${session.id}] onAnalysedSuccess: Not a single package install. Doing nothing.")
             return
         }
 
-        Timber.d("[id=${installer.id}] onAnalysedSuccess: Auto-install conditions met. Triggering install().")
-        installer.install(true)
+        Timber.d("[id=${session.id}] onAnalysedSuccess: Auto-install conditions met. Triggering install().")
+        session.install(true)
     }
 }

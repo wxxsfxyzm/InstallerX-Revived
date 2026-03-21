@@ -49,14 +49,14 @@ import timber.log.Timber
 
 @Composable
 fun installFailedDialog(
-    installer: InstallerSessionRepository, viewModel: InstallerViewModel
+    session: InstallerSessionRepository, viewModel: InstallerViewModel
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val viewSettings = uiState.viewSettings
 
     // Call InstallInfoDialog for base structure
     val baseParams = installInfoDialog(
-        installer = installer,
+        session = session,
         viewModel = viewModel,
         onTitleExtraClick = {}
     )
@@ -67,13 +67,13 @@ fun installFailedDialog(
             DialogParamsType.InstallerInstallFailed.id,
             {
                 ErrorTextBlock(
-                    installer.error,
+                    session.error,
                     suggestions = {
                         if (viewSettings.showSmartSuggestion)
                             ErrorSuggestions(
-                                error = installer.error,
+                                error = session.error,
                                 viewModel = viewModel,
-                                installer = installer
+                                installer = session
                             )
                     }
                 )

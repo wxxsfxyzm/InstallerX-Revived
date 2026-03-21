@@ -71,7 +71,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun InstallPrepareContent(
-    installer: InstallerSessionRepository,
+    session: InstallerSessionRepository,
     viewModel: InstallerViewModel,
     appInfo: AppInfoState,
     onCancel: () -> Unit,
@@ -80,7 +80,7 @@ fun InstallPrepareContent(
     val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentPackageName = uiState.currentPackageName
-    val currentPackage = installer.analysisResults.find { it.packageName == currentPackageName }
+    val currentPackage = session.analysisResults.find { it.packageName == currentPackageName }
     val settings = uiState.viewSettings
 
     var isExpanded by remember { mutableStateOf(false) }
@@ -256,10 +256,10 @@ fun InstallPrepareContent(
                             SDKComparison(
                                 entityToInstall = primaryEntity,
                                 preInstallAppInfo = currentPackage.installedAppInfo,
-                                installer = installer
+                                installer = session
                             )
 
-                            AnimatedVisibility(visible = installer.config.displaySize && primaryEntity.size > 0) {
+                            AnimatedVisibility(visible = session.config.displaySize && primaryEntity.size > 0) {
                                 val oldSize = currentPackage.installedAppInfo?.packageSize ?: 0L
                                 val oldSizeStr = if (oldSize > 0 && !isSplitUpdateMode) oldSize.formatSize() else null
                                 val newSizeStr = totalSelectedSize.formatSize()
@@ -295,14 +295,14 @@ fun InstallPrepareContent(
                                 newValue = primaryEntity.versionCode.toString(),
                                 oldValue = null
                             )
-                            AnimatedVisibility(visible = installer.config.displaySdk) {
+                            AnimatedVisibility(visible = session.config.displaySdk) {
                                 AdaptiveInfoRow(
                                     labelResId = R.string.installer_module_author_label,
                                     newValue = primaryEntity.author,
                                     oldValue = null
                                 )
                             }
-                            AnimatedVisibility(visible = installer.config.displaySize) {
+                            AnimatedVisibility(visible = session.config.displaySize) {
                                 val newSizeStr = totalSelectedSize.formatSize()
                                 AdaptiveInfoRow(
                                     labelResId = R.string.installer_package_size_label,
@@ -324,11 +324,11 @@ fun InstallPrepareContent(
                             SDKComparison(
                                 entityToInstall = primaryEntity,
                                 preInstallAppInfo = currentPackage.installedAppInfo,
-                                installer = installer
+                                installer = session
                             )
 
                             // Size
-                            AnimatedVisibility(visible = installer.config.displaySize) {
+                            AnimatedVisibility(visible = session.config.displaySize) {
                                 val newSizeStr = totalSelectedSize.formatSize()
                                 AdaptiveInfoRow(
                                     labelResId = R.string.installer_package_size_label,
@@ -370,8 +370,8 @@ fun InstallPrepareContent(
                         )
 
                     // Install Options
-                    if (installer.config.authorizer != Authorizer.Dhizuku &&
-                        installer.config.authorizer != Authorizer.None
+                    if (session.config.authorizer != Authorizer.Dhizuku &&
+                        session.config.authorizer != Authorizer.None
                     )
                         MiuixNavigationItemWidget(
                             title = stringResource(R.string.config_label_install_options),
@@ -422,7 +422,7 @@ fun InstallPrepareContent(
             AnimatedVisibility(
                 visible = (primaryEntity is AppEntity.ModuleEntity) &&
                         primaryEntity.description.isNotBlank() &&
-                        installer.config.displaySdk,
+                        session.config.displaySdk,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {

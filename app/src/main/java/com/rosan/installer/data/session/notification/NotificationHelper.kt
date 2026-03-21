@@ -16,7 +16,7 @@ import com.rosan.installer.domain.settings.model.Authorizer
 
 class NotificationHelper(
     private val context: Context,
-    private val installer: InstallerSessionRepository,
+    private val session: InstallerSessionRepository,
     private val getAppIcon: GetAppIconUseCase
 ) {
     enum class Channel(val value: String) {
@@ -31,11 +31,11 @@ class NotificationHelper(
         Pausing(R.drawable.round_hourglass_disabled_24)
     }
 
-    val openIntent: PendingIntent = BroadcastHandler.openIntent(context, installer)
-    val analyseIntent: PendingIntent = BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Analyse)
-    val installIntent: PendingIntent = BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Install)
-    val cancelIntent: PendingIntent = BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Cancel)
-    val finishIntent: PendingIntent = BroadcastHandler.namedIntent(context, installer, BroadcastHandler.Name.Finish)
+    val openIntent: PendingIntent = BroadcastHandler.openIntent(context, session)
+    val analyseIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Analyse)
+    val installIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Install)
+    val cancelIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Cancel)
+    val finishIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Finish)
 
     // Resolve specific launch intent considering privileged access
     fun getLaunchPendingIntent(packageName: String?): PendingIntent? {
@@ -43,16 +43,16 @@ class NotificationHelper(
             context.packageManager.getLaunchIntentForPackage(it)
         } ?: return null
 
-        val supportsPrivileged = installer.config.authorizer in listOf(
+        val supportsPrivileged = session.config.authorizer in listOf(
             Authorizer.Root,
             Authorizer.Shizuku,
             Authorizer.Customize
         )
 
         return if (supportsPrivileged) {
-            BroadcastHandler.privilegedLaunchAndFinishIntent(context, installer)
+            BroadcastHandler.privilegedLaunchAndFinishIntent(context, session)
         } else {
-            BroadcastHandler.launchIntent(context, installer, launchIntent)
+            BroadcastHandler.launchIntent(context, session, launchIntent)
         }
     }
 
@@ -62,17 +62,17 @@ class NotificationHelper(
      */
     suspend fun getLargeIconBitmap(preferSystemIcon: Boolean, currentBatchIndex: Int? = null): Bitmap? {
         // Priority 1: Check if this is an uninstallation task
-        val uninstallPkg = installer.uninstallInfo.value?.packageName
+        val uninstallPkg = session.uninstallInfo.value?.packageName
 
         // Priority 2: Check if this is a multi-install batch
-        val entityFromQueue = if (currentBatchIndex != null && installer.multiInstallQueue.isNotEmpty()) {
-            installer.multiInstallQueue.getOrNull(currentBatchIndex)?.app
+        val entityFromQueue = if (currentBatchIndex != null && session.multiInstallQueue.isNotEmpty()) {
+            session.multiInstallQueue.getOrNull(currentBatchIndex)?.app
         } else null
 
         // Priority 3: Resolve current selected entity for single install
         val entityToInstall = entityFromQueue
             ?: if (uninstallPkg == null) {
-                val entities = installer.analysisResults
+                val entities = session.analysisResults
                     .flatMap { it.appEntities }
                     .filter { it.selected }
                     .map { it.app }
@@ -84,7 +84,7 @@ class NotificationHelper(
 
         // Delegate to UseCase using the resolved package name
         return getAppIcon(
-            sessionId = installer.id,
+            sessionId = session.id,
             packageName = uninstallPkg ?: entityToInstall?.packageName ?: return null,
             entityToInstall = entityToInstall,
             iconSizePx = iconSizePx,

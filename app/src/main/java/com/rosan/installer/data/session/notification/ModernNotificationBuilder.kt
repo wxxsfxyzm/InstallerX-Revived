@@ -28,7 +28,7 @@ import kotlin.reflect.KClass
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 class ModernNotificationBuilder(
     private val context: Context,
-    private val installer: InstallerSessionRepository,
+    private val session: InstallerSessionRepository,
     private val helper: NotificationHelper
 ) {
     companion object {
@@ -101,7 +101,7 @@ class ModernNotificationBuilder(
             .setSilent(true)
             .setOngoing(true)
 
-        val contentIntent = when (installer.config.installMode) {
+        val contentIntent = when (session.config.installMode) {
             InstallMode.Notification,
             InstallMode.AutoNotification -> if (showDialog) helper.openIntent else null
 
@@ -164,8 +164,8 @@ class ModernNotificationBuilder(
             }
 
             is ProgressEntity.InstallAnalysedSuccess -> {
-                val selectedApps = installer.analysisResults.flatMap { it.appEntities }.map { it.app }
-                val hasComplexType = installer.analysisResults.flatMap { it.appEntities }
+                val selectedApps = session.analysisResults.flatMap { it.appEntities }.map { it.app }
+                val hasComplexType = session.analysisResults.flatMap { it.appEntities }
                     .any { it.app.sourceType == DataType.MIXED_MODULE_APK || it.app.sourceType == DataType.MIXED_MODULE_ZIP }
                 val isMultiPackage = selectedApps.groupBy { it.packageName }.size > 1
 
@@ -204,7 +204,7 @@ class ModernNotificationBuilder(
             }
 
             is ProgressEntity.InstallSuccess -> {
-                contentTitle = installer.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context).title
+                contentTitle = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context).title
                 shortText = context.getString(R.string.installer_live_channel_short_text_success)
                 progressStyle.setProgress(totalProgressWeight.toInt())
             }
@@ -222,7 +222,7 @@ class ModernNotificationBuilder(
             }
 
             is ProgressEntity.InstallFailed -> {
-                contentTitle = installer.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context).title
+                contentTitle = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context).title
                 shortText = context.getString(R.string.installer_live_channel_short_text_install_failed)
                 progressStyle.setProgress(totalProgressWeight.toInt())
             }
@@ -240,7 +240,7 @@ class ModernNotificationBuilder(
     }
 
     private fun onResolvedFailed(builder: NotificationCompat.Builder): NotificationCompat.Builder =
-        builder.setContentText(installer.error.getErrorMessage(context)).setOnlyAlertOnce(false).setSilent(false)
+        builder.setContentText(session.error.getErrorMessage(context)).setOnlyAlertOnce(false).setSilent(false)
             .addAction(0, context.getString(R.string.cancel), helper.finishIntent)
 
     private suspend fun onAnalysedSuccess(
@@ -249,7 +249,7 @@ class ModernNotificationBuilder(
         isSameState: Boolean
     ): NotificationCompat.Builder {
         builder.setOnlyAlertOnce(isSameState).setSilent(false)
-        val allEntities = installer.analysisResults.flatMap { it.appEntities }
+        val allEntities = session.analysisResults.flatMap { it.appEntities }
         val hasComplexType = allEntities.any { it.app.sourceType == DataType.MIXED_MODULE_APK || it.app.sourceType == DataType.MIXED_MODULE_ZIP }
         val isMultiPackage = allEntities.map { it.app }.groupBy { it.packageName }.size > 1
 
@@ -269,7 +269,7 @@ class ModernNotificationBuilder(
     }
 
     private fun onAnalysedFailed(builder: NotificationCompat.Builder): NotificationCompat.Builder =
-        builder.setContentText(installer.error.getErrorMessage(context)).setOnlyAlertOnce(false).setSilent(false)
+        builder.setContentText(session.error.getErrorMessage(context)).setOnlyAlertOnce(false).setSilent(false)
             .addAction(0, context.getString(R.string.cancel), helper.finishIntent)
 
     private suspend fun onInstalling(
@@ -293,7 +293,7 @@ class ModernNotificationBuilder(
     private suspend fun onInstallSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): NotificationCompat.Builder {
         builder.setContentText(context.getString(R.string.installer_install_success))
             .setOnlyAlertOnce(false).setSilent(false).setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon))
-        val openIntent = helper.getLaunchPendingIntent(installer.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }
+        val openIntent = helper.getLaunchPendingIntent(session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }
             .firstOrNull()?.packageName)
         if (openIntent != null) builder.addAction(0, context.getString(R.string.open), openIntent)
         return builder.addAction(0, context.getString(R.string.finish), helper.finishIntent)
@@ -304,7 +304,7 @@ class ModernNotificationBuilder(
             .setOnlyAlertOnce(false).setSilent(false).addAction(0, context.getString(R.string.finish), helper.finishIntent)
 
     private suspend fun onInstallFailed(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): NotificationCompat.Builder =
-        builder.setContentText(installer.error.getErrorMessage(context)).setOnlyAlertOnce(false).setSilent(false)
+        builder.setContentText(session.error.getErrorMessage(context)).setOnlyAlertOnce(false).setSilent(false)
             .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon))
             .addAction(0, context.getString(R.string.retry), helper.installIntent)
             .addAction(0, context.getString(R.string.cancel), helper.finishIntent)
@@ -336,11 +336,11 @@ class ModernNotificationBuilder(
 
     private fun getCurrentSeedColor(progress: ProgressEntity): Int? {
         if (progress is ProgressEntity.Installing && progress.total > 1) {
-            val currentEntity = installer.multiInstallQueue.getOrNull(progress.current - 1)
+            val currentEntity = session.multiInstallQueue.getOrNull(progress.current - 1)
             if (currentEntity != null) {
-                return installer.analysisResults.find { it.packageName == currentEntity.app.packageName }?.seedColor
+                return session.analysisResults.find { it.packageName == currentEntity.app.packageName }?.seedColor
             }
         }
-        return installer.analysisResults.firstNotNullOfOrNull { it.seedColor }
+        return session.analysisResults.firstNotNullOfOrNull { it.seedColor }
     }
 }

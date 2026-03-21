@@ -53,7 +53,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 @Composable
 fun InstallFailedContent(
     appInfo: AppInfoState,
-    installer: InstallerSessionRepository,
+    session: InstallerSessionRepository,
     viewModel: InstallerViewModel,
     onClose: () -> Unit
 ) {
@@ -67,7 +67,7 @@ fun InstallFailedContent(
         AppInfoSlot(appInfo = appInfo)
         Spacer(modifier = Modifier.height(32.dp))
         MiuixErrorTextBlock(
-            error = installer.error,
+            error = session.error,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f, fill = false) // Removed to allow suggestions to push content
@@ -75,9 +75,9 @@ fun InstallFailedContent(
         Spacer(modifier = Modifier.height(16.dp))
         MiuixErrorSuggestions(
             isDarkMode = isDarkMode,
-            error = installer.error,
+            error = session.error,
             viewModel = viewModel,
-            installer = installer
+            installer = session
         )
         Row(
             modifier = Modifier

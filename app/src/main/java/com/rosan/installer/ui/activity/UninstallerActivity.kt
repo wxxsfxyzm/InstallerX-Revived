@@ -45,7 +45,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
     private val themeStateProvider by inject<ThemeStateProvider>()
     private val sessionManager by inject<InstallerSessionManager>()
-    private var installer: InstallerSessionRepository? = null
+    private var session: InstallerSessionRepository? = null
     private var job: Job? = null
 
     private val permissionChecker: PermissionChecker by inject()
@@ -69,8 +69,8 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
             isRequestingPermission = true
         }
 
-        val installerId = savedInstanceState?.getString(KEY_ID)
-        installer = sessionManager.getOrCreate(installerId)
+        val sessionId = savedInstanceState?.getString(KEY_ID)
+        session = sessionManager.getOrCreate(sessionId)
 
         // Start the process only if it's a fresh launch, not a configuration change
         if (savedInstanceState == null) {
@@ -90,7 +90,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
             if (packageName.isNullOrBlank()) {
                 Timber.e("UninstallerActivity started without a package name.")
-                installer?.close()
+                session?.close()
                 this.finish()
                 return
             }
@@ -105,7 +105,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        val currentId = installer?.id
+        val currentId = session?.id
         outState.putString(KEY_ID, currentId)
         Timber.d("UninstallerActivity onSaveInstanceState: Saving id: $currentId")
         super.onSaveInstanceState(outState)
@@ -131,9 +131,9 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         }
         // Only strictly interpret as user leaving when not finishing and not changing configurations (e.g., rotation)
         if (!isFinishing && !isChangingConfigurations && !isRequestingPermission) {
-            installer?.let { repo ->
+            session?.let { session ->
                 Timber.d("onStop: User left UninstallerActivity. Closing repository.")
-                repo.close()
+                session.close()
             }
         } else if (isRequestingPermission) {
             Timber.d("onStop: Ignored session closure due to active permission request.")
@@ -153,7 +153,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         permissionRequester.requestEssentialPermissions(
             onGranted = {
                 Timber.d("Permissions granted. Proceeding with uninstall for $packageName")
-                installer?.resolveUninstall(this@UninstallerActivity, packageName)
+                session?.resolveUninstall(this@UninstallerActivity, packageName)
             },
             onDenied = { reason ->
                 when (reason) {
@@ -176,8 +176,8 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         job?.cancel()
         val scope = CoroutineScope(Dispatchers.Main.immediate)
         job = scope.launch {
-            installer?.progress?.collect { progress ->
-                Timber.d("[id=${installer?.id}] Activity collected progress: ${progress::class.simpleName}")
+            session?.progress?.collect { progress ->
+                Timber.d("[id=${session?.id}] Activity collected progress: ${progress::class.simpleName}")
                 // Finish the activity on final states
                 if (progress is ProgressEntity.Finish) {
                     if (!this@UninstallerActivity.isFinishing) this@UninstallerActivity.finish()
@@ -191,8 +191,8 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
             val uiState by themeStateProvider.themeStateFlow.collectAsState(initial = ThemeState())
             if (!uiState.isLoaded) return@setContent
 
-            val currentInstaller = installer
-            if (currentInstaller == null) {
+            val currentSession = session
+            if (currentSession == null) {
                 // If session is null, we can't proceed.
                 LaunchedEffect(Unit) {
                     finish()
@@ -212,9 +212,9 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (uiState.useMiuix) {
-                        MiuixInstallerPage(installer = currentInstaller)
+                        MiuixInstallerPage(currentSession)
                     } else {
-                        InstallerPage(installer = currentInstaller)
+                        InstallerPage(currentSession)
                     }
                 }
             }
