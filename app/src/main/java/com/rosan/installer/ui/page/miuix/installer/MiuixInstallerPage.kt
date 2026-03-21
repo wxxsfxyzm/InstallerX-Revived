@@ -132,7 +132,7 @@ fun MiuixInstallerPage(
     )
 
     LaunchedEffect(session.id) {
-        viewModel.dispatch(InstallerViewAction.CollectRepo(session))
+        viewModel.dispatch(InstallerViewAction.CollectSession(session))
     }
 
     ToastEventCollector(viewModel)

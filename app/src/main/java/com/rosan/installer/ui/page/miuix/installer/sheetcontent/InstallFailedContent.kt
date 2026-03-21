@@ -77,7 +77,7 @@ fun InstallFailedContent(
             isDarkMode = isDarkMode,
             error = session.error,
             viewModel = viewModel,
-            installer = session
+            session = session
         )
         Row(
             modifier = Modifier
@@ -103,7 +103,7 @@ private fun MiuixErrorSuggestions(
     isDarkMode: Boolean,
     error: Throwable,
     viewModel: InstallerViewModel,
-    installer: InstallerSessionRepository
+    session: InstallerSessionRepository
 ) {
     val context = LocalContext.current
 
@@ -120,7 +120,7 @@ private fun MiuixErrorSuggestions(
 
     var pendingConflictingPackage by remember { mutableStateOf<String?>(null) }
 
-    val possibleSuggestions = remember(installer) {
+    val possibleSuggestions = remember(session) {
         buildList {
             add(
                 SuggestionItem(
@@ -134,8 +134,8 @@ private fun MiuixErrorSuggestions(
                 )
             )
 
-            if (installer.config.authorizer != Authorizer.None ||
-                (installer.config.authorizer == Authorizer.None &&
+            if (session.config.authorizer != Authorizer.None ||
+                (session.config.authorizer == Authorizer.None &&
                         !(DeviceConfig.currentManufacturer == Manufacturer.XIAOMI && hasMiPackageInstaller))
             ) {
                 add(
@@ -190,7 +190,7 @@ private fun MiuixErrorSuggestions(
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
                 !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM &&
                         (DeviceConfig.currentManufacturer == Manufacturer.SAMSUNG || DeviceConfig.currentManufacturer == Manufacturer.REALME)) &&
-                (installer.config.authorizer == Authorizer.Root || installer.config.authorizer == Authorizer.Shizuku)
+                (session.config.authorizer == Authorizer.Root || session.config.authorizer == Authorizer.Shizuku)
             ) {
                 add(
                     SuggestionItem(
@@ -206,7 +206,7 @@ private fun MiuixErrorSuggestions(
             }
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
-                (installer.config.authorizer == Authorizer.Root || installer.config.authorizer == Authorizer.Shizuku)
+                (session.config.authorizer == Authorizer.Root || session.config.authorizer == Authorizer.Shizuku)
             ) {
                 add(
                     SuggestionItem(
@@ -221,15 +221,15 @@ private fun MiuixErrorSuggestions(
                 )
             }
 
-            if (installer.config.authorizer != Authorizer.Dhizuku) {
+            if (session.config.authorizer != Authorizer.Dhizuku) {
                 add(
                     SuggestionItem(
                         isMatch = { it.hasErrorType(InstallErrorType.HYPEROS_ISOLATION_VIOLATION) },
                         onClick = {
                             // Set available installer
-                            installer.config = installer.config.copy(installer = "com.android.shell")
+                            session.config = session.config.copy(installer = "com.android.shell")
                             // Wipe originatingUid
-                            installer.config.callingFromUid = null
+                            session.config.callingFromUid = null
                             viewModel.dispatch(InstallerViewAction.Install(false))
                         },
                         labelRes = R.string.suggestion_mi_isolation,
@@ -241,8 +241,8 @@ private fun MiuixErrorSuggestions(
                     SuggestionItem(
                         isMatch = { it.hasErrorType(InstallErrorType.HYPEROS_ISOLATION_VIOLATION) },
                         onClick = {
-                            installer.config = installer.config.copy(installer = "com.android.shell")
-                            installer.config = installer.config.copy(authorizer = Authorizer.Shizuku)
+                            session.config = session.config.copy(installer = "com.android.shell")
+                            session.config = session.config.copy(authorizer = Authorizer.Shizuku)
                             viewModel.dispatch(InstallerViewAction.Install(false))
                         },
                         labelRes = R.string.suggestion_shizuku_isolation,

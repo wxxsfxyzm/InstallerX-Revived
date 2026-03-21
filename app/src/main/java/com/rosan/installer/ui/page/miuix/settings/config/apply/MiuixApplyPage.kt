@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -252,7 +253,7 @@ fun MiuixApplyPage(
                             state = lazyListState,
                             contentPadding = PaddingValues(
                                 top = paddingValues.calculateTopPadding() + 8.dp,
-                                bottom = paddingValues.calculateBottomPadding() + 16.dp
+                                bottom = paddingValues.calculateBottomPadding()
                             ),
                             overscrollEffect = null
                         ) {
@@ -283,7 +284,7 @@ fun MiuixApplyPage(
                                 }
 
                                 val isApplied = appliedPackageSet.contains(app.packageName)
-// Dispatch action to load the icon when the item becomes visible
+                                // Dispatch action to load the icon when the item becomes visible
                                 LaunchedEffect(app.packageName) {
                                     viewModel.dispatch(ApplyViewAction.LoadIcon(app.packageName))
                                 }
@@ -316,6 +317,7 @@ fun MiuixApplyPage(
                                     showPackageName = uiState.showPackageName
                                 )
                             }
+                            item { Spacer(modifier = Modifier.navigationBarsPadding()) }
                         }
                     }
                 }

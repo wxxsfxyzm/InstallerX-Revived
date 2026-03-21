@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.config.edit
 
 import com.rosan.installer.domain.settings.model.Authorizer
@@ -38,6 +40,6 @@ sealed class EditViewAction {
 
     data class ChangeApkChooseAll(val apkChooseAll: Boolean) : EditViewAction()
 
-    object LoadData : EditViewAction()
-    object SaveData : EditViewAction()
+    data object LoadData : EditViewAction()
+    data object SaveData : EditViewAction()
 }
