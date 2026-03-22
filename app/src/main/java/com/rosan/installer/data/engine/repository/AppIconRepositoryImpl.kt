@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
 import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 import android.os.Process as AndroidProcess
@@ -32,7 +31,7 @@ import android.os.Process as AndroidProcess
  */
 class AppIconRepositoryImpl(
     private val context: Context
-) : AppIconRepository, KoinComponent {
+) : AppIconRepository {
     private val pm: PackageManager by lazy { context.packageManager }
 
     /**
