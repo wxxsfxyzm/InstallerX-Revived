@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 import com.materialkolor.quantize.QuantizerCelebi
 import com.materialkolor.score.Score
 import com.rosan.installer.domain.engine.model.AppEntity
@@ -80,9 +81,11 @@ class AppIconRepositoryImpl(
                         }
                     }
 
-                    rawApkIconDrawable?.toBitmap()
+                    // Pass iconSizePx to limit the maximum size of the parsed APK icon
+                    rawApkIconDrawable?.toBitmap(iconSizePx)
                 } else {
-                    rawApkIconDrawable?.toBitmap() ?: if (installedAppInfo != null) {
+                    // Pass iconSizePx here as well
+                    rawApkIconDrawable?.toBitmap(iconSizePx) ?: if (installedAppInfo != null) {
                         AppIconCache.loadIconBitmap(context, installedAppInfo, userId, iconSizePx)
                     } else {
                         null
@@ -112,7 +115,8 @@ class AppIconRepositoryImpl(
     override suspend fun extractColorFromDrawable(drawable: Drawable?): Int? {
         if (drawable == null) return null
         return try {
-            val bitmap = drawable.toBitmap()
+            // Use a sensible default limit (e.g., 256) for color extraction to prevent OOM
+            val bitmap = drawable.toBitmap(256)
             bitmap.extractSeedColor()
         } catch (e: Exception) {
             Timber.e(e, "Failed to extract color from drawable")
@@ -135,9 +139,41 @@ class AppIconRepositoryImpl(
         }
     }
 
-    private fun Drawable.toBitmap(): Bitmap {
-        if (this is BitmapDrawable && this.bitmap != null) return this.bitmap
-        val bitmap = createBitmap(if (intrinsicWidth > 0) intrinsicWidth else 1, if (intrinsicHeight > 0) intrinsicHeight else 1)
+    /**
+     * Converts a Drawable to a Bitmap safely by enforcing a maximum size constraint.
+     * Prevents Canvas "trying to draw too large bitmap" crashes.
+     */
+    private fun Drawable.toBitmap(maxSizePx: Int): Bitmap {
+        if (this is BitmapDrawable && this.bitmap != null) {
+            val originalBitmap = this.bitmap
+            // Return original if it is already within the acceptable bounds
+            if (originalBitmap.width <= maxSizePx && originalBitmap.height <= maxSizePx) {
+                return originalBitmap
+            }
+            // Scale down the overly large bitmap
+            val ratio = originalBitmap.width.toFloat() / originalBitmap.height.toFloat()
+            val finalWidth = if (ratio > 1) maxSizePx else (maxSizePx * ratio).toInt()
+            val finalHeight = if (ratio > 1) (maxSizePx / ratio).toInt() else maxSizePx
+
+            return originalBitmap.scale(finalWidth.coerceAtLeast(1), finalHeight.coerceAtLeast(1))
+        }
+
+        var width = if (intrinsicWidth > 0) intrinsicWidth else maxSizePx
+        var height = if (intrinsicHeight > 0) intrinsicHeight else maxSizePx
+
+        // Calculate the appropriate size while maintaining aspect ratio
+        if (width > maxSizePx || height > maxSizePx) {
+            val ratio = width.toFloat() / height.toFloat()
+            if (ratio > 1) {
+                width = maxSizePx
+                height = (maxSizePx / ratio).toInt()
+            } else {
+                height = maxSizePx
+                width = (maxSizePx * ratio).toInt()
+            }
+        }
+
+        val bitmap = createBitmap(width.coerceAtLeast(1), height.coerceAtLeast(1))
         val canvas = Canvas(bitmap)
         this.setBounds(0, 0, canvas.width, canvas.height)
         this.draw(canvas)
@@ -179,6 +215,6 @@ class AppIconRepositoryImpl(
 
     private fun getFallbackSystemIcon(context: Context): Bitmap? {
         return ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
-            ?.toBitmap()
+            ?.toBitmap(256)
     }
 }
