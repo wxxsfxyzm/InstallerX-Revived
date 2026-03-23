@@ -32,12 +32,12 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.ModuleInstallCmdInitException
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
 import com.rosan.installer.domain.engine.exception.ModuleInstallFailedIncompatibleAuthorizerException
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
@@ -75,6 +75,7 @@ import com.rosan.installer.ui.util.getSupportTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -95,6 +96,7 @@ fun MiuixInstallerPage(
     viewModel: InstallerViewModel = koinViewModel { parametersOf(session) }
 ) {
     val context = LocalContext.current
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scope = rememberCoroutineScope()
     val showBottomSheet = remember { mutableStateOf(true) }
 
@@ -180,7 +182,7 @@ fun MiuixInstallerPage(
         }
     }
 
-    val isMiInstallerSupported = LocalMiPackageInstallerPresent.current
+    val isMiInstallerSupported = capabilityProvider.hasMiPackageInstaller
 
     CompositionLocalProvider(
         LocalInstallerColorScheme provides activeMd3ColorScheme
@@ -528,16 +530,12 @@ fun MiuixInstallerPage(
                                     onClose = closeSheet
                                 )
                             else
-                                CompositionLocalProvider(
-                                    LocalMiPackageInstallerPresent provides isMiInstallerSupported
-                                ) {
-                                    InstallFailedContent(
-                                        appInfo = appInfoState,
-                                        session = session,
-                                        viewModel = viewModel,
-                                        onClose = closeSheet
-                                    )
-                                }
+                                InstallFailedContent(
+                                    appInfo = appInfoState,
+                                    session = session,
+                                    viewModel = viewModel,
+                                    onClose = closeSheet
+                                )
                         }
 
                         is InstallerStage.InstallingModule -> {

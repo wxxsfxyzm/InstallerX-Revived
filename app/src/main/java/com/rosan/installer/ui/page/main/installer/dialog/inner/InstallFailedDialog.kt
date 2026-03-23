@@ -30,11 +30,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.InstallErrorType
 import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -45,6 +45,7 @@ import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.dialog.UninstallConfirmationDialog
 import com.rosan.installer.util.hasErrorType
 import kotlinx.coroutines.delay
+import org.koin.compose.koinInject
 import timber.log.Timber
 
 @Composable
@@ -99,9 +100,10 @@ private fun ErrorSuggestions(
     session: InstallerSessionRepository
 ) {
     val context = LocalContext.current
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     var showUninstallConfirmDialog by remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
-    val hasMiPackageInstaller = LocalMiPackageInstallerPresent.current
+    val hasMiPackageInstaller = capabilityProvider.hasMiPackageInstaller
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
     // Refactored SuggestionChipInfo to use a matching lambda predicate

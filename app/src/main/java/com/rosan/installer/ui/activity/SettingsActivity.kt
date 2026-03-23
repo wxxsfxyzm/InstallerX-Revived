@@ -9,19 +9,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
-import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.page.main.settings.SettingsPage
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsPage
 import com.rosan.installer.ui.theme.InstallerTheme
-import org.koin.compose.koinInject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import androidx.compose.material3.Surface as Material3Surface
@@ -42,31 +38,29 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
 
         super.onCreate(savedInstanceState)
         setContent {
-            val capabilityProvider = koinInject<DeviceCapabilityProvider>()
             val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
             isThemeLoaded = uiState.isLoaded
-            CompositionLocalProvider(
+            /*CompositionLocalProvider(
                 LocalSessionInstallSupported provides capabilityProvider.isSessionInstallSupported
+            ) {*/
+            InstallerTheme(
+                isExpressive = uiState.isExpressive,
+                useMiuix = uiState.useMiuix,
+                themeMode = uiState.themeMode,
+                paletteStyle = uiState.paletteStyle,
+                colorSpec = uiState.colorSpec,
+                useDynamicColor = uiState.useDynamicColor,
+                useMiuixMonet = uiState.useMiuixMonet,
+                seedColor = uiState.seedColor
             ) {
-                InstallerTheme(
-                    isExpressive = uiState.isExpressive,
-                    useMiuix = uiState.useMiuix,
-                    themeMode = uiState.themeMode,
-                    paletteStyle = uiState.paletteStyle,
-                    colorSpec = uiState.colorSpec,
-                    useDynamicColor = uiState.useDynamicColor,
-                    useMiuixMonet = uiState.useMiuixMonet,
-                    seedColor = uiState.seedColor
-                ) {
-                    if (uiState.useMiuix) {
-                        MiuixSurface(modifier = Modifier.fillMaxSize()) { MiuixSettingsPage() }
-                    } else {
-                        Material3Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            color = if (uiState.isExpressive) MaterialTheme.colorScheme.surfaceContainer
-                            else MaterialTheme.colorScheme.surface
-                        ) { SettingsPage() }
-                    }
+                if (uiState.useMiuix) {
+                    MiuixSurface(modifier = Modifier.fillMaxSize()) { MiuixSettingsPage() }
+                } else {
+                    Material3Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = if (uiState.isExpressive) MaterialTheme.colorScheme.surfaceContainer
+                        else MaterialTheme.colorScheme.surface
+                    ) { SettingsPage() }
                 }
             }
         }

@@ -28,11 +28,11 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.InstallErrorType
 import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
@@ -42,6 +42,7 @@ import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.hasErrorType
+import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
@@ -106,10 +107,11 @@ private fun MiuixErrorSuggestions(
     session: InstallerSessionRepository
 ) {
     val context = LocalContext.current
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
 
     val showUninstallConfirmDialogState = remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
-    val hasMiPackageInstaller = LocalMiPackageInstallerPresent.current
+    val hasMiPackageInstaller = capabilityProvider.hasMiPackageInstaller
 
     data class SuggestionItem(
         val isMatch: (Throwable) -> Boolean,

@@ -16,16 +16,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.DexoptMode
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.InstallReason
 import com.rosan.installer.domain.settings.model.PackageSource
-import com.rosan.installer.ui.common.LocalSessionInstallSupported
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
 import com.rosan.installer.ui.util.isDhizukuActive
+import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
@@ -71,9 +72,10 @@ fun MiuixDataDescriptionWidget(viewModel: EditViewModel) {
 
 @Composable
 fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val stateAuthorizer = viewModel.state.data.authorizer
     val globalAuthorizer = viewModel.globalAuthorizer
-    val isSessionInstallSupported = LocalSessionInstallSupported.current
+    val isSessionInstallSupported = capabilityProvider.isSessionInstallSupported
     val data = buildMap {
         put(
             Authorizer.Global, stringResource(

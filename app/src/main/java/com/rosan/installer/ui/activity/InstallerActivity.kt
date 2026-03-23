@@ -12,7 +12,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +23,6 @@ import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.session.manager.InstallerSessionManager
 import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.domain.device.model.PermissionType
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.device.provider.PermissionChecker
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
@@ -32,7 +30,6 @@ import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.ui.common.LocalMiPackageInstallerPresent
 import com.rosan.installer.ui.common.auth.BiometricAuthBridge
 import com.rosan.installer.ui.common.permission.PermissionRequester
 import com.rosan.installer.ui.page.main.installer.InstallerPage
@@ -44,7 +41,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -319,7 +315,6 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             val session = session ?: return@setContent
             val background by session.background.collectAsState(false)
             val progress by session.progress.collectAsState(ProgressEntity.Ready)
-            val capabilityChecker = koinInject<DeviceCapabilityProvider>()
 
             if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.Finish)
                 return@setContent
@@ -334,15 +329,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 useMiuixMonet = uiState.useMiuixMonet,
                 seedColor = uiState.seedColor
             ) {
-                CompositionLocalProvider(
-                    LocalMiPackageInstallerPresent provides capabilityChecker.hasMiPackageInstaller
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        if (uiState.useMiuix) {
-                            MiuixInstallerPage(session)
-                        } else {
-                            InstallerPage(session)
-                        }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (uiState.useMiuix) {
+                        MiuixInstallerPage(session)
+                    } else {
+                        InstallerPage(session)
                     }
                 }
             }
