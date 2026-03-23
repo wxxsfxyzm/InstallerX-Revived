@@ -9,8 +9,8 @@ import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 
-class SystemInstallerRepoImpl(
+class SystemAppInstallerRepoImpl(
     context: Context, reflect: ReflectionProvider, capabilityProvider: DeviceCapabilityProvider, postInstallTaskProvider: PostInstallTaskProvider
-) : IBinderInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider) {
+) : IBinderAppInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider) {
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder = iBinder
 }

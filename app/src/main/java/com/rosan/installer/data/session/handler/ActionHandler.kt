@@ -7,8 +7,6 @@ import android.content.Context
 import android.os.Build
 import com.rosan.installer.R
 import com.rosan.installer.data.privileged.service.AutoLockService
-import com.rosan.installer.data.session.processor.InstallationProcessor
-import com.rosan.installer.data.session.processor.SessionProcessor
 import com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl
 import com.rosan.installer.data.session.resolver.ConfigResolver
 import com.rosan.installer.data.session.resolver.SourceResolver
@@ -21,9 +19,12 @@ import com.rosan.installer.domain.engine.model.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.SessionMode
 import com.rosan.installer.domain.engine.model.sourcePath
 import com.rosan.installer.domain.engine.usecase.AnalyzePackageUseCase
+import com.rosan.installer.domain.engine.usecase.ApproveSessionUseCase
 import com.rosan.installer.domain.engine.usecase.ClearAppIconCacheUseCase
-import com.rosan.installer.domain.engine.usecase.ExecuteInstallUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
+import com.rosan.installer.domain.engine.usecase.GetSessionConfirmationDetailsUseCase
+import com.rosan.installer.domain.engine.usecase.ProcessInstallationUseCase
+import com.rosan.installer.domain.engine.usecase.ProcessUninstallUseCase
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.session.model.InstallResult
 import com.rosan.installer.domain.session.model.ProgressEntity
@@ -74,9 +75,12 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
     private val autoLockService by inject<AutoLockService>()
     private val configResolver by inject<ConfigResolver>()
     private val analyzePackage by inject<AnalyzePackageUseCase>()
-    private val executeInstall by inject<ExecuteInstallUseCase>()
     private val getAppColor by inject<GetAppIconColorUseCase>()
     private val clearAppIconCache by inject<ClearAppIconCacheUseCase>()
+    private val processInstallation by inject<ProcessInstallationUseCase>()
+    private val processUninstall by inject<ProcessUninstallUseCase>()
+    private val getSessionConfirmationDetails by inject<GetSessionConfirmationDetailsUseCase>()
+    private val approveSession by inject<ApproveSessionUseCase>()
 
     // Cache directory
     private val cacheDirectory = File(context.cacheDir, "installer_sessions/$sessionId")
@@ -85,8 +89,6 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
 
     // Initializing helpers without passing ID
     private val sourceResolver = SourceResolver(cacheDirectory, mutableProgressFlow)
-    private val sessionProcessor = SessionProcessor()
-    private val installationProcessor = InstallationProcessor(session, mutableProgressFlow)
 
     override suspend fun onStart() {
         Timber.d("[id=$sessionId] onStart: Starting to collect actions.")
@@ -183,15 +185,8 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
             is InstallerSessionRepositoryImpl.Action.ResolveUninstall -> resolveUninstall(action.activity, action.packageName)
             is InstallerSessionRepositoryImpl.Action.Uninstall -> uninstall(action.packageName)
             is InstallerSessionRepositoryImpl.Action.ResolveConfirmInstall -> resolveConfirm(action.activity, action.sessionId)
-            is InstallerSessionRepositoryImpl.Action.ApproveSession -> {
-                Timber.d("[id=$sessionId] ApproveSession: ${action.granted} for session ${action.sessionId}")
-                sessionProcessor.approveSession(
-                    action.sessionId,
-                    action.granted,
-                    session.config
-                )
-                session.progress.emit(ProgressEntity.Finish)
-            }
+            // Handle Session Confirmation
+            is InstallerSessionRepositoryImpl.Action.ApproveSession -> handleConfirm(action.sessionId, action.granted)
             // Handle Reboot Action
             is InstallerSessionRepositoryImpl.Action.Reboot -> handleReboot(action.reason)
             // Cancel and Finish are handled in the collector directly
@@ -342,15 +337,6 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
             val currentProgressIndex = session.currentMultiInstallIndex + 1
             val totalCount = groupedQueue.size
 
-            // Emit progress to UI
-            session.progress.emit(
-                ProgressEntity.Installing(
-                    current = currentProgressIndex,
-                    total = totalCount,
-                    appLabel = appLabel
-                )
-            )
-
             try {
                 // Construct a temporary result list for the processor
                 val originalResults = session.analysisResults
@@ -358,16 +344,20 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
 
                 if (targetResult != null) {
                     val entitiesToInstall = appEntities.map { it.copy(selected = true) }
-
                     val tempResults = listOf(targetResult.copy(appEntities = entitiesToInstall))
 
-                    // Perform install.
-                    installationProcessor.install(
+                    // Perform install
+                    processInstallation(
                         config = session.config,
                         analysisResults = tempResults,
                         current = currentProgressIndex,
                         total = totalCount
-                    )
+                    ).collect { progress ->
+                        if (progress is ProgressEntity.InstallingModule) {
+                            session.moduleLog = progress.output
+                        }
+                        session.progress.emit(progress)
+                    }
 
                     appEntities.forEach { entity ->
                         session.multiInstallResults.add(InstallResult(entity, true))
@@ -408,8 +398,19 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
      * Performs the installation logic.
      */
     private suspend fun performInstallLogic() {
-        Timber.d("[id=$sessionId] install: Starting installation process via InstallationProcessor.")
-        installationProcessor.install(session.config, session.analysisResults)
+        Timber.d("[id=$sessionId] install: Starting installation process via UseCase.")
+
+        processInstallation(
+            config = session.config,
+            analysisResults = session.analysisResults
+        ).collect { progress ->
+            // Sync module logs back to the session repository if applicable
+            if (progress is ProgressEntity.InstallingModule) {
+                session.moduleLog = progress.output
+            }
+            // Emit progress to the UI layer
+            session.progress.emit(progress)
+        }
 
         // Cache cleanup strategy
         val mode = session.analysisResults.firstOrNull()?.sessionMode ?: SessionMode.Single
@@ -425,7 +426,7 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
         Timber.d("[id=$sessionId] resolveConfirmInstall: Starting for session $sessionId.")
         session.config = configResolver.resolve(activity)
 
-        val details = sessionProcessor.getSessionDetails(sessionId, session.config)
+        val details = getSessionConfirmationDetails(sessionId, session.config)
         session.confirmationDetails.value = details
 
         Timber.d("[id=$sessionId] resolveConfirmInstall: Success. Emitting InstallConfirming.")
@@ -469,12 +470,22 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
         Timber.d("[id=$sessionId] uninstall: Starting for $packageName. Emitting ProgressEntity.Uninstalling.")
         session.progress.emit(ProgressEntity.Uninstalling)
 
-        executeInstall.uninstall(
+        processUninstall(
             config = session.config,
             packageName = packageName
         )
         Timber.d("[id=$sessionId] uninstall: Succeeded for $packageName. Emitting ProgressEntity.UninstallSuccess.")
         session.progress.emit(ProgressEntity.UninstallSuccess)
+    }
+
+    private suspend fun handleConfirm(sessionId: Int, granted: Boolean) {
+        Timber.d("[id=$sessionId] ApproveSession: $granted for session $sessionId")
+        approveSession(
+            sessionId = sessionId,
+            granted = granted,
+            config = session.config
+        )
+        session.progress.emit(ProgressEntity.Finish)
     }
 
     private suspend fun handleReboot(reason: String) {

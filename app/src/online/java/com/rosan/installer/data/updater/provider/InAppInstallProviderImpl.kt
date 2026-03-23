@@ -6,14 +6,14 @@ import android.content.Context
 import com.rosan.installer.domain.engine.model.DataEntity
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallEntity
-import com.rosan.installer.domain.engine.repository.InstallerRepository
+import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.updater.provider.InAppInstallProvider
 import java.io.InputStream
 
 class InAppInstallProviderImpl(
     private val context: Context,
-    private val installerRepository: InstallerRepository
+    private val appInstaller: AppInstallerRepository
 ) : InAppInstallProvider {
 
     override suspend fun executeInstall(
@@ -35,7 +35,7 @@ class InAppInstallProviderImpl(
             sourceType = DataType.APK
         )
 
-        installerRepository.doInstallWork(
+        appInstaller.doInstallWork(
             config = config,
             entities = listOf(installEntity),
             blacklist = emptyList(),

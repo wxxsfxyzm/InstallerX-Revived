@@ -15,7 +15,7 @@ import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallEntity
 import com.rosan.installer.domain.engine.model.InstallErrorType
 import com.rosan.installer.domain.engine.model.sourcePath
-import com.rosan.installer.domain.engine.repository.InstallerRepository
+import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.privileged.model.PostInstallTaskInfo
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.Authorizer
@@ -26,11 +26,11 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.IOException
 
-class NoneInstallerRepoImpl(
+class NoneAppInstallerRepoImpl(
     private val context: Context,
     private val reflect: ReflectionProvider,
     private val postInstallTaskProvider: PostInstallTaskProvider
-) : InstallerRepository {
+) : AppInstallerRepository {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     @SuppressLint("RequestInstallPackagesPolicy")

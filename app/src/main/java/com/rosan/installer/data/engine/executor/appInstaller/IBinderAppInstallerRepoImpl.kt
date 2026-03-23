@@ -31,7 +31,7 @@ import com.rosan.installer.domain.engine.model.InstallEntity
 import com.rosan.installer.domain.engine.model.InstallErrorType
 import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.engine.model.sourcePath
-import com.rosan.installer.domain.engine.repository.InstallerRepository
+import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.privileged.model.PostInstallTaskInfo
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.Authorizer
@@ -47,12 +47,12 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import android.os.Process as AndroidProcess
 
-abstract class IBinderInstallerRepoImpl(
+abstract class IBinderAppInstallerRepoImpl(
     protected val context: Context,
     protected val reflect: ReflectionProvider,
     protected val capabilityProvider: DeviceCapabilityProvider,
     protected val postInstallTaskProvider: PostInstallTaskProvider
-) : InstallerRepository {
+) : AppInstallerRepository {
     private val taskScope = CoroutineScope(Dispatchers.IO)
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder

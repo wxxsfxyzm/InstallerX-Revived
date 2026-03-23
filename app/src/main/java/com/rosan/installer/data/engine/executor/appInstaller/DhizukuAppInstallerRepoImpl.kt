@@ -10,9 +10,9 @@ import com.rosan.installer.data.privileged.util.requireDhizukuPermissionGranted
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 
-class DhizukuInstallerRepoImpl(
+class DhizukuAppInstallerRepoImpl(
     context: Context, reflect: ReflectionProvider, capabilityProvider: DeviceCapabilityProvider, postInstallTaskProvider: PostInstallTaskProvider
-) : IBinderInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider) {
+) : IBinderAppInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider) {
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder =
         requireDhizukuPermissionGranted {
             Dhizuku.binderWrapper(iBinder)

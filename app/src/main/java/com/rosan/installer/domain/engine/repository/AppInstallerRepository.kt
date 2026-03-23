@@ -8,7 +8,7 @@ import com.rosan.installer.domain.settings.model.ConfigModel
 /**
  * Interface for the installer repository.
  */
-interface InstallerRepository {
+interface AppInstallerRepository {
     /**
      * Performs the installation of packages.
      *

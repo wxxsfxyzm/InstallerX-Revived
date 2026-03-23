@@ -4,25 +4,25 @@ package com.rosan.installer.data.engine.repository
 
 import android.content.Context
 import com.rosan.installer.core.reflection.ReflectionProvider
-import com.rosan.installer.data.engine.executor.appInstaller.DhizukuInstallerRepoImpl
-import com.rosan.installer.data.engine.executor.appInstaller.NoneInstallerRepoImpl
-import com.rosan.installer.data.engine.executor.appInstaller.ProcessInstallerRepoImpl
-import com.rosan.installer.data.engine.executor.appInstaller.ShizukuInstallerRepoImpl
-import com.rosan.installer.data.engine.executor.appInstaller.SystemInstallerRepoImpl
+import com.rosan.installer.data.engine.executor.appInstaller.DhizukuAppInstallerRepoImpl
+import com.rosan.installer.data.engine.executor.appInstaller.NoneAppInstallerRepoImpl
+import com.rosan.installer.data.engine.executor.appInstaller.ProcessAppInstallerRepoImpl
+import com.rosan.installer.data.engine.executor.appInstaller.ShizukuAppInstallerRepoImpl
+import com.rosan.installer.data.engine.executor.appInstaller.SystemAppInstallerRepoImpl
 import com.rosan.installer.data.privileged.exception.ShizukuNotWorkException
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.InstallEntity
-import com.rosan.installer.domain.engine.repository.InstallerRepository
+import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel
 
-class InstallerRepositoryImpl(
+class AppInstallerRepositoryImpl(
     private val context: Context,
     private val reflect: ReflectionProvider,
     private val deviceCapabilityProvider: DeviceCapabilityProvider,
     private val postInstallTaskProvider: PostInstallTaskProvider
-) : InstallerRepository {
+) : AppInstallerRepository {
     override suspend fun doInstallWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
@@ -59,7 +59,7 @@ class InstallerRepositoryImpl(
      */
     private suspend fun <T> executeWithRepo(
         config: ConfigModel,
-        action: suspend (InstallerRepository) -> T
+        action: suspend (AppInstallerRepository) -> T
     ): T {
         val repo = resolveRepo(config)
 
@@ -67,7 +67,7 @@ class InstallerRepositoryImpl(
             return action(repo)
         } catch (e: IllegalStateException) {
             // Check if Shizuku service connection is lost
-            if (repo is ShizukuInstallerRepoImpl && e.message?.contains("binder haven't been received") == true) {
+            if (repo is ShizukuAppInstallerRepoImpl && e.message?.contains("binder haven't been received") == true) {
                 throw ShizukuNotWorkException("Shizuku service connection lost during operation.", e)
             }
             // Throw other exceptions as-is
@@ -78,19 +78,19 @@ class InstallerRepositoryImpl(
     /**
      * Resolve the InstallerRepo based on the provided 
      */
-    private fun resolveRepo(config: ConfigModel): InstallerRepository {
+    private fun resolveRepo(config: ConfigModel): AppInstallerRepository {
         return when (config.authorizer) {
-            Authorizer.Shizuku -> ShizukuInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
-            Authorizer.Dhizuku -> DhizukuInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+            Authorizer.Shizuku -> ShizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+            Authorizer.Dhizuku -> DhizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
             Authorizer.None -> {
                 if (deviceCapabilityProvider.isSystemApp) {
-                    SystemInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+                    SystemAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
                 } else {
-                    NoneInstallerRepoImpl(context, reflect, postInstallTaskProvider)
+                    NoneAppInstallerRepoImpl(context, reflect, postInstallTaskProvider)
                 }
             }
 
-            else -> ProcessInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+            else -> ProcessAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
         }
     }
 }
