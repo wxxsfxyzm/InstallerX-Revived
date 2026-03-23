@@ -28,9 +28,6 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
-import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.Closeable
 import java.io.File
@@ -39,10 +36,11 @@ import java.io.RandomAccessFile
 import java.util.UUID
 
 class SourceResolver(
+    private val context: Context,               // 2. 从构造函数传入 Context
+    private val networkResolver: NetworkResolver, // 3. 从构造函数传入 NetworkResolver
     private val cacheDirectory: String,
     private val progressFlow: MutableSharedFlow<ProgressEntity>
-) : KoinComponent {
-    private val context by inject<Context>()
+) {
     private val closeables = mutableListOf<Closeable>()
 
     fun getTrackedCloseables(): List<Closeable> = closeables
@@ -172,7 +170,7 @@ class SourceResolver(
                     throw ResolvedFailedNoInternetAccessException("No internet access to download files.")
                 }
 
-                get<NetworkResolver>().resolve(uri, cacheDirectory, progressFlow)
+                networkResolver.resolve(uri, cacheDirectory, progressFlow)
             }
 
             else -> throw ResolveException("Unsupported scheme: $scheme", listOf(uri))

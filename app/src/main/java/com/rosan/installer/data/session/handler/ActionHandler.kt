@@ -31,6 +31,7 @@ import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.model.UninstallInfo
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.domain.session.repository.NetworkResolver
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel.Companion.default
 import com.rosan.installer.domain.settings.model.InstallMode
@@ -74,6 +75,7 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
     private val deviceCapabilityProvider by inject<DeviceCapabilityProvider>()
     private val autoLockService by inject<AutoLockService>()
     private val configResolver by inject<ConfigResolver>()
+    private val networkResolver by inject<NetworkResolver>()
     private val analyzePackage by inject<AnalyzePackageUseCase>()
     private val getAppColor by inject<GetAppIconColorUseCase>()
     private val clearAppIconCache by inject<ClearAppIconCacheUseCase>()
@@ -88,7 +90,12 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
         .absolutePath
 
     // Initializing helpers without passing ID
-    private val sourceResolver = SourceResolver(cacheDirectory, mutableProgressFlow)
+    private val sourceResolver = SourceResolver(
+        context = context,
+        networkResolver = networkResolver,
+        cacheDirectory = cacheDirectory,
+        progressFlow = mutableProgressFlow
+    )
 
     override suspend fun onStart() {
         Timber.d("[id=$sessionId] onStart: Starting to collect actions.")
