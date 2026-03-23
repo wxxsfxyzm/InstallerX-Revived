@@ -19,7 +19,6 @@ import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.NotificationsOff
-import androidx.compose.material.icons.outlined.PlaylistAddCheck
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.Tag
@@ -74,6 +73,7 @@ import androidx.compose.material.icons.twotone.Search
 import androidx.compose.material.icons.twotone.Security
 import androidx.compose.material.icons.twotone.SecurityUpdateWarning
 import androidx.compose.material.icons.twotone.SettingsSuggest
+import androidx.compose.material.icons.twotone.Share
 import androidx.compose.material.icons.twotone.Source
 import androidx.compose.material.icons.twotone.SystemUpdate
 import androidx.compose.material.icons.twotone.TaskAlt
@@ -95,6 +95,7 @@ object AppIcons {
     val Delete = Icons.TwoTone.Delete
     val Retry = Icons.TwoTone.Refresh
     val Save = Icons.TwoTone.Save
+    val Share = Icons.TwoTone.Share
     val BugReport = Icons.TwoTone.BugReport
     val Terminal = Icons.TwoTone.Terminal
     val Launcher = Icons.TwoTone.RocketLaunch

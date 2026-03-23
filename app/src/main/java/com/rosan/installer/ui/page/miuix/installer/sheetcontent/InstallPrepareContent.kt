@@ -210,7 +210,8 @@ fun InstallPrepareContent(
                 appInfo = appInfo,
                 onIconClick = {
                     // Trigger the share action using the already resolved primaryEntity
-                    viewModel.dispatch(InstallerViewAction.ShareApp(primaryEntity))
+                    if (settings.labTapIconToShare)
+                        viewModel.dispatch(InstallerViewAction.ShareApp(primaryEntity))
                 }
             )
         }

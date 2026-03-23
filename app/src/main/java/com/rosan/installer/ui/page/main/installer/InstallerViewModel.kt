@@ -92,7 +92,8 @@ class InstallerViewModel(
                 versionCompareInSingleLine = prefs.versionCompareInSingleLine,
                 sdkCompareInMultiLine = prefs.sdkCompareInMultiLine,
                 showOPPOSpecial = prefs.showOPPOSpecial,
-                autoSilentInstall = prefs.autoSilentInstall
+                autoSilentInstall = prefs.autoSilentInstall,
+                labTapIconToShare = prefs.labTapIconToShare
             ),
             managedInstallerPackages = prefs.managedInstallerPackages,
         )

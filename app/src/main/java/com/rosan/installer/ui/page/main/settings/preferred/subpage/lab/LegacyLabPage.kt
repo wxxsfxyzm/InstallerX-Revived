@@ -162,6 +162,16 @@ fun LegacyLabPage(
                     }
                     item {
                         SwitchWidget(
+                            icon = AppIcons.Share,
+                            title = stringResource(R.string.lab_tap_icon_to_share),
+                            description = stringResource(R.string.lab_tap_icon_to_share_desc),
+                            checked = uiState.labTapIconToShare,
+                            isM3E = false,
+                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeTapIconToShare(it)) }
+                        )
+                    }
+                    item {
+                        SwitchWidget(
                             icon = AppIcons.InstallRequester,
                             title = stringResource(R.string.lab_set_install_requester),
                             description = stringResource(R.string.lab_set_install_requester_desc),

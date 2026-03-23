@@ -33,6 +33,7 @@ import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.HttpProfile
 import com.rosan.installer.domain.settings.model.RootImplementation
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.LabSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.LabSettingsViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
@@ -203,6 +204,13 @@ fun MiuixLabPage(
                                     checked = uiState.labUseMiIsland,
                                     onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeUseMiIsland(it)) }
                                 )
+                            MiuixSwitchWidget(
+                                icon = AppIcons.Share,
+                                title = stringResource(R.string.lab_tap_icon_to_share),
+                                description = stringResource(R.string.lab_tap_icon_to_share_desc),
+                                checked = uiState.labTapIconToShare,
+                                onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeTapIconToShare(it)) }
+                            )
                             MiuixSwitchWidget(
                                 title = stringResource(R.string.lab_set_install_requester),
                                 description = stringResource(R.string.lab_set_install_requester_desc),

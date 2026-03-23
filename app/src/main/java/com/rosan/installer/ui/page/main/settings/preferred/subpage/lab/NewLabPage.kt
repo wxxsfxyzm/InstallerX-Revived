@@ -188,12 +188,21 @@ fun NewLabPage(
                         SplicedColumnGroup(
                             title = stringResource(R.string.lab_unstable_features)
                         ) {
-                            if (isMiIslandSupported) item {
+                            item(visible = isMiIslandSupported) {
                                 SwitchWidget(
                                     title = stringResource(R.string.lab_mi_island),
                                     description = stringResource(R.string.lab_mi_island_desc),
                                     checked = uiState.labUseMiIsland,
                                     onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeUseMiIsland(it)) }
+                                )
+                            }
+                            item {
+                                SwitchWidget(
+                                    icon = AppIcons.Share,
+                                    title = stringResource(R.string.lab_tap_icon_to_share),
+                                    description = stringResource(R.string.lab_tap_icon_to_share_desc),
+                                    checked = uiState.labTapIconToShare,
+                                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeTapIconToShare(it)) }
                                 )
                             }
                             item {

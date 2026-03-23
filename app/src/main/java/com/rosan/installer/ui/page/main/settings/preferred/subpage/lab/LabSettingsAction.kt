@@ -14,4 +14,5 @@ sealed class LabSettingsAction {
     data class LabChangeSetInstallRequester(val enable: Boolean) : LabSettingsAction()
     data class LabChangeHttpProfile(val profile: HttpProfile) : LabSettingsAction()
     data class LabChangeHttpSaveFile(val enable: Boolean) : LabSettingsAction()
+    data class LabChangeTapIconToShare(val enable: Boolean) : LabSettingsAction()
 }

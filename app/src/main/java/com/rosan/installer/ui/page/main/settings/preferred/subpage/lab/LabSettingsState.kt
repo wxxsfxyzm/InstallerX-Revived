@@ -15,5 +15,6 @@ data class LabSettingsState(
     val labUseMiIsland: Boolean = false,
     val labSetInstallRequester: Boolean = false,
     val labHttpProfile: HttpProfile = HttpProfile.ALLOW_SECURE,
-    val labHttpSaveFile: Boolean = false
+    val labHttpSaveFile: Boolean = false,
+    val labTapIconToShare: Boolean = false
 )

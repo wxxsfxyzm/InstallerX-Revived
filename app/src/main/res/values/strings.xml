@@ -730,4 +730,6 @@
     <string name="lab_set_install_requester_desc">Fill OriginatingUid field with caller package to match system behavior</string>
     <string name="lab_mi_island">Mi Super Island</string>
     <string name="lab_mi_island_desc">Global notification style. System signature verification can only be bypassed when the custom app-authenticator is set to Shizuku. Root users can enable this directly after manually disabling signature restrictions</string>
+    <string name="lab_tap_icon_to_share">Tap icon to share apk</string>
+    <string name="lab_tap_icon_to_share_desc">Tap icon on the prepare page to share apk</string>
 </resources>

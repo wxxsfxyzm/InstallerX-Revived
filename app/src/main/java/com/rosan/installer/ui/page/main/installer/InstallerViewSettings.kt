@@ -15,5 +15,7 @@ data class InstallerViewSettings(
     val showOPPOSpecial: Boolean = false,
     val autoSilentInstall: Boolean = false,
     val enableModuleInstall: Boolean = false,
-    val useDynColorFollowPkgIcon: Boolean = false
+    val useDynColorFollowPkgIcon: Boolean = false,
+    // Lab
+    val labTapIconToShare: Boolean = false
 )

@@ -134,7 +134,7 @@ fun installInfoDialog(
                         .size(64.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .then(
-                            if (stage == InstallerStage.InstallPrepare) {
+                            if (stage == InstallerStage.InstallPrepare && settings.labTapIconToShare) {
                                 Modifier.clickable {
                                     viewModel.dispatch(InstallerViewAction.ShareApp(entityToInstall))
                                 }

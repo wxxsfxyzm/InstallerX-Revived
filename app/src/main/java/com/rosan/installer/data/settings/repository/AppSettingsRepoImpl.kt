@@ -75,6 +75,7 @@ class AppSettingsRepoImpl(
             appDataStore.getString(AppDataStore.LAB_HTTP_PROFILE, "Default"),
             appDataStore.getBoolean(AppDataStore.LAB_HTTP_SAVE_FILE, false),
             appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER, false),
+            appDataStore.getBoolean(AppDataStore.LAB_TAP_ICON_TO_SHARE, false),
             appDataStore.getBoolean(AppDataStore.ENABLE_FILE_LOGGING, true),
 
             // Theme settings
@@ -136,6 +137,7 @@ class AppSettingsRepoImpl(
             labHttpProfile = HttpProfile.fromString(values[idx++] as String),
             labHttpSaveFile = values[idx++] as Boolean,
             labSetInstallRequester = values[idx++] as Boolean,
+            labTapIconToShare = values[idx++] as Boolean,
             enableFileLogging = values[idx++] as Boolean,
 
             themeMode = runCatching { ThemeMode.valueOf(values[idx++] as String) }.getOrDefault(ThemeMode.SYSTEM),
@@ -244,6 +246,7 @@ class AppSettingsRepoImpl(
             BooleanSetting.LabModuleAlwaysRoot -> AppDataStore.LAB_MODULE_ALWAYS_ROOT
             BooleanSetting.LabHttpSaveFile -> AppDataStore.LAB_HTTP_SAVE_FILE
             BooleanSetting.LabSetInstallRequester -> AppDataStore.LAB_SET_INSTALL_REQUESTER
+            BooleanSetting.LabTapIconToShare -> AppDataStore.LAB_TAP_ICON_TO_SHARE
             BooleanSetting.EnableFileLogging -> AppDataStore.ENABLE_FILE_LOGGING
         }
 

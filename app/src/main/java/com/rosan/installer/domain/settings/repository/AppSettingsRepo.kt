@@ -59,6 +59,7 @@ enum class BooleanSetting {
     LabModuleAlwaysRoot,
     LabHttpSaveFile,
     LabSetInstallRequester,
+    LabTapIconToShare,
     EnableFileLogging
 }
 
