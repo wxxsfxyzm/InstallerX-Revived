@@ -346,7 +346,7 @@
     <string name="unlock_default_installer_success">Назначение успешно отменено</string>
     <string name="unstable">Альфа</string>
     <string name="update">Опции профиля</string>
-    <string name="upgrade_version_prefix">Ставимая</string>
+    <string name="upgrade_version_prefix">Будет установлена</string>
     <string name="user_terms">Пользовательское соглашение</string>
     <string name="version_compare_in_single_line">Сравнение версий в одной строке</string>
     <string name="version_compare_in_single_line_desc">Отображать сравнение версий пакетов в одной строке при установке</string>

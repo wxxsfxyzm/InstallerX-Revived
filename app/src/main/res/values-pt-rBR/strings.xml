@@ -35,7 +35,7 @@
     <string name="theme_settings_ui_style">Estilo da Interface</string>
     <string name="theme_settings_desc">Alterar o tema do app</string>
     <string name="theme_settings_miuix_ui">Miuix</string>
-    <string name="theme_settings_miuix_ui_desc">Similar ao Hyperos</string>
+    <string name="theme_settings_miuix_ui_desc">Similar ao HyperOS</string>
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">Interface Padrão Material Design</string>
     <string name="theme_settings_ui_engine">Mecanismo de Interface</string>
@@ -193,7 +193,7 @@
     <string name="installer_prepare_type_unknown_confirm">Você tem certeza que deseja instalar?</string>
     <string name="installer_prepare_signature_mismatch">Incompatibilidade de assinatura! Continuar a instalação pode causar perda de dados ou riscos à segurança.</string>
     <string name="installer_prepare_signature_unknown">Não é possível verificar a assinatura do app, prossiga com cautela.</string>
-    <string name="installer_installing">Instalado…</string>
+    <string name="installer_installing">Instalando…</string>
     <string name="installer_install_failed">Falha na instalação</string>
     <string name="installer_install_success">Instalação bem sucedida</string>
     <string name="installer_silent_install">Instalação silenciosa</string>
