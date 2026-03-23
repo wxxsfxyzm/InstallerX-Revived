@@ -514,7 +514,7 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
         session.progress.tryEmit(ProgressEntity.Ready)
     }
 
-    private fun clearCache() {
+    private suspend fun clearCache() {
         Timber.d("[id=$sessionId] clearCacheDirectory: Clearing cache...")
 
         // 1. Clear file system trackers

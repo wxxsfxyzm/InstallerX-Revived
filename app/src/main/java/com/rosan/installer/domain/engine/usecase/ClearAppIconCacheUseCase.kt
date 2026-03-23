@@ -16,7 +16,7 @@ class ClearAppIconCacheUseCase(
      * @param sessionId If provided, clears all icons associated with this session.
      * @param packageName If provided, clears all icons for this package across all sessions.
      */
-    operator fun invoke(sessionId: String? = null, packageName: String? = null) {
+    suspend operator fun invoke(sessionId: String? = null, packageName: String? = null) {
         sessionId?.let { appIconRepo.clearCacheForSession(it) }
         packageName?.let { appIconRepo.clearCacheForPackage(it) }
     }
