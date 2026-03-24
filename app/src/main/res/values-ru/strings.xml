@@ -695,4 +695,10 @@
     <string name="exception_resolve_failed_link_not_valid">Эта ссылка не содержит действительный файл</string>
     <string name="tag_arch_emulated">Разрядность</string>
     <string name="exception_install_parse_failed_bad_shared_user_id">Сторонним приложениям запрещено использовать системный ID</string>
+    <string name="error_dialog_install_menu_not_available">Расширенное меню недоступно</string>
+    <string name="lab_tap_icon_to_share_desc">Возможность поделиться apk-файлом при нажатии на иконку перед установкой</string>
+    <string name="lab_tap_icon_to_share">Поделится apk-файлом</string>
+    <string name="error_no_package_to_uninstall">Нет доступного пакета для удаления</string>
+    <string name="installer_xposed_target_api">Целевой API:</string>
+    <string name="installer_xposed_min_api">Мин. API:</string>
 </resources>
