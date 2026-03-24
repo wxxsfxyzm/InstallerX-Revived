@@ -10,7 +10,6 @@ import com.rosan.installer.ui.theme.material.ThemeColorSpec
 import com.rosan.installer.ui.theme.material.ThemeMode
 
 data class ThemeSettingsState(
-    val isLoading: Boolean = true,
     val showMiuixUI: Boolean = false,
     val showExpressiveUI: Boolean = true,
     val useBlur: Boolean = true,
@@ -19,12 +18,12 @@ data class ThemeSettingsState(
     val colorSpec: ThemeColorSpec = ThemeColorSpec.SPEC_2025,
     val useDynamicColor: Boolean = true,
     val useMiuixMonet: Boolean = false,
+    val useAppleFloatingBar: Boolean = false,
     val seedColor: Color = PresetColors[0].color,
     val availableColors: List<RawColor> = PresetColors,
     val useDynColorFollowPkgIcon: Boolean = false,
     val useDynColorFollowPkgIconForLiveActivity: Boolean = false,
     val preferSystemIcon: Boolean = false,
     val showLauncherIcon: Boolean = true,
-
     val showLiveActivity: Boolean = false
 )

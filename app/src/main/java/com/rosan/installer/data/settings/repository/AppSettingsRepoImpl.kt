@@ -24,12 +24,16 @@ import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
 import com.rosan.installer.ui.theme.material.ThemeMode
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.shareIn
 
 class AppSettingsRepoImpl(
     private val appDataStore: AppDataStore,
-    private val capabilityProvider: DeviceCapabilityProvider
+    capabilityProvider: DeviceCapabilityProvider,
+    appScope: CoroutineScope
 ) : AppSettingsRepo {
     override val preferencesFlow: Flow<AppPreferences> = combine(
         listOf(
@@ -84,6 +88,7 @@ class AppSettingsRepoImpl(
             appDataStore.getString(AppDataStore.THEME_COLOR_SPEC, ThemeColorSpec.SPEC_2025.name),
             appDataStore.getBoolean(AppDataStore.THEME_USE_DYNAMIC_COLOR, true),
             appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX_MONET, false),
+            appDataStore.getBoolean(AppDataStore.UI_USE_APPLE_FLOATING_BAR, false),
             appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb()),
             appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false),
             appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false),
@@ -145,12 +150,17 @@ class AppSettingsRepoImpl(
             colorSpec = runCatching { ThemeColorSpec.valueOf(values[idx++] as String) }.getOrDefault(ThemeColorSpec.SPEC_2025),
             useDynamicColor = values[idx++] as Boolean,
             useMiuixMonet = values[idx++] as Boolean,
+            useAppleFloatingBar = values[idx++] as Boolean,
             seedColorInt = values[idx++] as Int,
             useDynColorFollowPkgIcon = values[idx++] as Boolean,
             useDynColorFollowPkgIconForLiveActivity = values[idx++] as Boolean,
             useBlur = values[idx++] as Boolean
         )
-    }
+    }.shareIn(
+        scope = appScope,
+        started = SharingStarted.Eagerly,
+        replay = 1
+    )
 
     override suspend fun putString(setting: StringSetting, value: String) =
         appDataStore.putString(stringKey(setting), value)
@@ -219,6 +229,7 @@ class AppSettingsRepoImpl(
             BooleanSetting.ThemeUseDynamicColor -> AppDataStore.THEME_USE_DYNAMIC_COLOR
             BooleanSetting.UiUseMiuix -> AppDataStore.UI_USE_MIUIX
             BooleanSetting.UiUseMiuixMonet -> AppDataStore.UI_USE_MIUIX_MONET
+            BooleanSetting.UiUseAppleFloatingBar -> AppDataStore.UI_USE_APPLE_FLOATING_BAR
             BooleanSetting.UiDynColorFollowPkgIcon -> AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON
             BooleanSetting.LiveActivityDynColorFollowPkgIcon -> AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON
             BooleanSetting.ShowLiveActivity -> AppDataStore.SHOW_LIVE_ACTIVITY

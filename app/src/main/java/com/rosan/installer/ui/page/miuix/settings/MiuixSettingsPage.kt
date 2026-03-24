@@ -59,6 +59,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kyant.backdrop.backdrops.LayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.ThemeState
@@ -110,7 +111,7 @@ fun MiuixSettingsPage(
     val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
     val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val useBlur = uiState.useBlur
-    val useFloatingBottomBar = true
+    val useFloatingBottomBar = uiState.useAppleFloatingBar
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(currentBackStackEntry, sharedState.pendingNavigateToTheme) {
@@ -378,7 +379,7 @@ private fun SettingsCompactLayout(
             }
         }
     ) { paddingValues ->
-        InstallerPagerContent(
+        SettingsPagerContent(
             hazeState = hazeState,
             pagerState = pagerState,
             navController = navController,
@@ -484,7 +485,7 @@ private fun SettingsWideContent(
             }
         }
     ) { paddingValues ->
-        InstallerPagerContent(
+        SettingsPagerContent(
             hazeState = hazeState,
             pagerState = pagerState,
             navController = navController,
@@ -499,7 +500,7 @@ private fun SettingsWideContent(
 }
 
 @Composable
-private fun InstallerPagerContent(
+private fun SettingsPagerContent(
     hazeState: HazeState?,
     pagerState: PagerState,
     navController: NavController,
@@ -514,7 +515,9 @@ private fun InstallerPagerContent(
         state = pagerState,
         userScrollEnabled = true,
         overscrollEffect = null,
+        beyondViewportPageCount = 1,
         modifier = modifier
+            .then(if (backdrop != null && useFloatingBottomBar) Modifier.layerBackdrop(backdrop) else Modifier)
     ) { page ->
         when (page) {
             0 -> MiuixAllPage(
@@ -522,8 +525,7 @@ private fun InstallerPagerContent(
                 hazeState = hazeState,
                 title = navigationItems[page].label,
                 outerPadding = outerPadding,
-                snackbarHostState = snackbarHostState,
-                backdrop = backdrop
+                snackbarHostState = snackbarHostState
             )
 
             1 -> MiuixPreferredPage(
@@ -531,8 +533,7 @@ private fun InstallerPagerContent(
                 hazeState = hazeState,
                 title = navigationItems[page].label,
                 outerPadding = outerPadding,
-                snackbarHostState = snackbarHostState,
-                backdrop = backdrop
+                snackbarHostState = snackbarHostState
             )
         }
     }

@@ -116,7 +116,7 @@ fun FloatingBottomBar(
     isBlurEnabled: Boolean = true,
     content: @Composable RowScope.() -> Unit
 ) {
-    val isInLightTheme = InstallerTheme.isDark
+    val isInLightTheme = !InstallerTheme.isDark
     val accentColor = MiuixTheme.colorScheme.primary
     val containerColor = if (isBlurEnabled) {
         MiuixTheme.colorScheme.surfaceContainer.copy(0.4f)

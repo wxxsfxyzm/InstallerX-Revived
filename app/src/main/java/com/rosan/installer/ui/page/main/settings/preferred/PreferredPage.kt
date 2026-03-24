@@ -1,9 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -137,130 +134,116 @@ fun PreferredPage(
             )
         },
     ) { paddingValues ->
-        Crossfade(
-            targetState = uiState.isLoading,
-            label = "PreferredPageContent",
-            animationSpec = tween(durationMillis = 150)
-        ) { isLoading ->
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding(),
+                bottom = outerPadding.calculateBottomPadding()
+            )
+        ) {
+            item { LabelWidget(stringResource(R.string.global)) }
+            item {
+                SettingsNavigationItemWidget(
+                    icon = AppIcons.Theme,
+                    title = stringResource(R.string.theme_settings),
+                    description = stringResource(R.string.theme_settings_desc),
+                    onClick = {
+                        // Navigate using NavController instead of changing state
+                        navController.navigate(SettingsScreen.Theme.route)
+                    }
                 )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        top = paddingValues.calculateTopPadding(),
-                        bottom = outerPadding.calculateBottomPadding()
-                    )
-                ) {
-                    item { LabelWidget(stringResource(R.string.global)) }
-                    item {
-                        SettingsNavigationItemWidget(
-                            icon = AppIcons.Theme,
-                            title = stringResource(R.string.theme_settings),
-                            description = stringResource(R.string.theme_settings_desc),
-                            onClick = {
-                                // Navigate using NavController instead of changing state
-                                navController.navigate(SettingsScreen.Theme.route)
-                            }
-                        )
-                    }
-                    item {
-                        SettingsNavigationItemWidget(
-                            icon = AppIcons.InstallMode,
-                            title = stringResource(R.string.installer_settings),
-                            description = stringResource(R.string.installer_settings_desc),
-                            onClick = {
-                                // Navigate using NavController
-                                navController.navigate(SettingsScreen.InstallerGlobal.route)
-                            }
-                        )
-                    }
-                    item {
-                        SettingsNavigationItemWidget(
-                            icon = AppIcons.Delete,
-                            title = stringResource(R.string.uninstaller_settings),
-                            description = stringResource(R.string.uninstaller_settings_desc),
-                            onClick = {
-                                navController.navigate(SettingsScreen.UninstallerGlobal.route)
-                            }
-                        )
-                    }
-                    if (uiState.authorizer == Authorizer.None)
-                        item {
-                            val tip = if (capabilityProvider.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
-                            else stringResource(R.string.config_authorizer_none_tips)
-                            InfoTipCard(text = tip)
-                        }
-                    item { LabelWidget(stringResource(R.string.basic)) }
-                    item {
-                        DisableAdbVerify(
-                            checked = !uiState.adbVerifyEnabled,
-                            isError = uiState.authorizer == Authorizer.Dhizuku,
-                            enabled = uiState.authorizer != Authorizer.Dhizuku &&
-                                    uiState.authorizer != Authorizer.None,
-                            isM3E = false,
-                            onCheckedChange = { isDisabled ->
-                                viewModel.dispatch(
-                                    PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
-                                )
-                            }
-                        )
-                    }
-                    item {
-                        IgnoreBatteryOptimizationSetting(
-                            checked = uiState.isIgnoringBatteryOptimizations,
-                            enabled = !uiState.isIgnoringBatteryOptimizations,
-                            isM3E = false,
-                        ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
-                    }
-                    item {
-                        AutoLockInstaller(
-                            checked = uiState.autoLockInstaller,
-                            enabled = uiState.authorizer != Authorizer.None,
-                            isM3E = false
-                        ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!uiState.autoLockInstaller)) }
-                    }
-                    item {
-                        DefaultInstaller(
-                            lock = true,
-                            enabled = uiState.authorizer != Authorizer.None
-                        ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
-                    }
-                    item {
-                        DefaultInstaller(
-                            lock = false,
-                            enabled = uiState.authorizer != Authorizer.None
-                        ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
-                    }
-                    item { ClearCache() }
-                    item { LabelWidget(stringResource(R.string.other)) }
-                    item {
-                        SettingsAboutItemWidget(
-                            imageVector = AppIcons.Lab,
-                            headlineContentText = stringResource(R.string.lab),
-                            supportingContentText = stringResource(R.string.lab_desc),
-                            onClick = { navController.navigate(SettingsScreen.Lab.route) }
-                        )
-                    }
-                    item {
-                        SettingsAboutItemWidget(
-                            imageVector = AppIcons.Info,
-                            headlineContentText = stringResource(R.string.about_detail),
-                            supportingContentText = if (uiState.hasUpdate) stringResource(
-                                R.string.update_available,
-                                uiState.remoteVersion
-                            ) else "$revLevel ${AppConfig.VERSION_NAME}",
-                            supportingContentColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            onClick = { navController.navigate(SettingsScreen.About.route) }
-                        )
-                    }
-                    item { Spacer(Modifier.navigationBarsPadding()) }
-                }
             }
+            item {
+                SettingsNavigationItemWidget(
+                    icon = AppIcons.InstallMode,
+                    title = stringResource(R.string.installer_settings),
+                    description = stringResource(R.string.installer_settings_desc),
+                    onClick = {
+                        // Navigate using NavController
+                        navController.navigate(SettingsScreen.InstallerGlobal.route)
+                    }
+                )
+            }
+            item {
+                SettingsNavigationItemWidget(
+                    icon = AppIcons.Delete,
+                    title = stringResource(R.string.uninstaller_settings),
+                    description = stringResource(R.string.uninstaller_settings_desc),
+                    onClick = {
+                        navController.navigate(SettingsScreen.UninstallerGlobal.route)
+                    }
+                )
+            }
+            if (uiState.authorizer == Authorizer.None)
+                item {
+                    val tip = if (capabilityProvider.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
+                    else stringResource(R.string.config_authorizer_none_tips)
+                    InfoTipCard(text = tip)
+                }
+            item { LabelWidget(stringResource(R.string.basic)) }
+            item {
+                DisableAdbVerify(
+                    checked = !uiState.adbVerifyEnabled,
+                    isError = uiState.authorizer == Authorizer.Dhizuku,
+                    enabled = uiState.authorizer != Authorizer.Dhizuku &&
+                            uiState.authorizer != Authorizer.None,
+                    isM3E = false,
+                    onCheckedChange = { isDisabled ->
+                        viewModel.dispatch(
+                            PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
+                        )
+                    }
+                )
+            }
+            item {
+                IgnoreBatteryOptimizationSetting(
+                    checked = uiState.isIgnoringBatteryOptimizations,
+                    enabled = !uiState.isIgnoringBatteryOptimizations,
+                    isM3E = false,
+                ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
+            }
+            item {
+                AutoLockInstaller(
+                    checked = uiState.autoLockInstaller,
+                    enabled = uiState.authorizer != Authorizer.None,
+                    isM3E = false
+                ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!uiState.autoLockInstaller)) }
+            }
+            item {
+                DefaultInstaller(
+                    lock = true,
+                    enabled = uiState.authorizer != Authorizer.None
+                ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
+            }
+            item {
+                DefaultInstaller(
+                    lock = false,
+                    enabled = uiState.authorizer != Authorizer.None
+                ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
+            }
+            item { ClearCache() }
+            item { LabelWidget(stringResource(R.string.other)) }
+            item {
+                SettingsAboutItemWidget(
+                    imageVector = AppIcons.Lab,
+                    headlineContentText = stringResource(R.string.lab),
+                    supportingContentText = stringResource(R.string.lab_desc),
+                    onClick = { navController.navigate(SettingsScreen.Lab.route) }
+                )
+            }
+            item {
+                SettingsAboutItemWidget(
+                    imageVector = AppIcons.Info,
+                    headlineContentText = stringResource(R.string.about_detail),
+                    supportingContentText = if (uiState.hasUpdate) stringResource(
+                        R.string.update_available,
+                        uiState.remoteVersion
+                    ) else "$revLevel ${AppConfig.VERSION_NAME}",
+                    supportingContentColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    onClick = { navController.navigate(SettingsScreen.About.route) }
+                )
+            }
+            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 

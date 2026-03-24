@@ -19,6 +19,7 @@ import com.rosan.installer.ui.theme.material.RawColor
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -31,7 +32,7 @@ class ThemeSettingsViewModel(
 
     val state: StateFlow<ThemeSettingsState> = combine(
         appSettingsRepo.preferencesFlow,
-        systemEnvProvider.getWallpaperColorsFlow()
+        systemEnvProvider.getWallpaperColorsFlow().onStart { emit(emptyList()) }
     ) { prefs, wallpaperColors ->
         val manualSeedColor = Color(prefs.seedColorInt)
         val effectiveSeedColor: Color = if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
@@ -53,7 +54,6 @@ class ThemeSettingsViewModel(
         } else PresetColors
 
         ThemeSettingsState(
-            isLoading = false,
             showMiuixUI = prefs.showMiuixUI,
             showExpressiveUI = prefs.showExpressiveUI,
             useBlur = prefs.useBlur,
@@ -62,19 +62,19 @@ class ThemeSettingsViewModel(
             colorSpec = prefs.colorSpec,
             useDynamicColor = prefs.useDynamicColor,
             useMiuixMonet = prefs.useMiuixMonet,
+            useAppleFloatingBar = prefs.useAppleFloatingBar,
             seedColor = effectiveSeedColor,
             availableColors = availableColors,
             useDynColorFollowPkgIcon = prefs.useDynColorFollowPkgIcon,
             useDynColorFollowPkgIconForLiveActivity = prefs.useDynColorFollowPkgIconForLiveActivity,
             preferSystemIcon = prefs.preferSystemIcon,
             showLauncherIcon = prefs.showLauncherIcon,
-
             showLiveActivity = prefs.showLiveActivity
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = ThemeSettingsState(isLoading = true)
+        initialValue = ThemeSettingsState()
     )
 
     fun dispatch(action: ThemeSettingsAction) {
@@ -93,6 +93,13 @@ class ThemeSettingsViewModel(
             is ThemeSettingsAction.SetColorSpec -> viewModelScope.launch { updateSetting(StringSetting.ThemeColorSpec, action.spec.name) }
             is ThemeSettingsAction.SetUseDynamicColor -> viewModelScope.launch { updateSetting(BooleanSetting.ThemeUseDynamicColor, action.use) }
             is ThemeSettingsAction.SetUseMiuixMonet -> viewModelScope.launch { updateSetting(BooleanSetting.UiUseMiuixMonet, action.use) }
+            is ThemeSettingsAction.SetUseAppleFloatingBar -> viewModelScope.launch {
+                updateSetting(
+                    BooleanSetting.UiUseAppleFloatingBar,
+                    action.use
+                )
+            }
+
             is ThemeSettingsAction.SetDynColorFollowPkgIcon -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.UiDynColorFollowPkgIcon,

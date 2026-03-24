@@ -2,9 +2,6 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.lab
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +9,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -117,127 +113,113 @@ fun NewLabPage(
             )
         }
     ) { paddingValues ->
-        Crossfade(
-            targetState = uiState.isLoading,
-            label = "LabPageContent",
-            animationSpec = tween(durationMillis = 150)
-        ) { isLoading ->
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
-                    contentPadding = PaddingValues(
-                        top = paddingValues.calculateTopPadding() + 12.dp
-                    )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding() + 12.dp
+            )
+        ) {
+            item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.config_authorizer_root)
                 ) {
-                    item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
                     item {
-                        SplicedColumnGroup(
-                            title = stringResource(R.string.config_authorizer_root)
-                        ) {
-                            item {
-                                SwitchWidget(
-                                    icon = AppIcons.Root,
-                                    title = stringResource(R.string.lab_module_flashing),
-                                    description = stringResource(R.string.lab_module_flashing_desc),
-                                    checked = uiState.labRootEnableModuleFlash,
-                                    onCheckedChange = { isChecking ->
-                                        if (isChecking) {
-                                            showRootImplementationDialog.value = true
-                                        } else {
-                                            viewModel.dispatch(LabSettingsAction.LabChangeRootModuleFlash(false))
-                                        }
-                                    }
-                                )
+                        SwitchWidget(
+                            icon = AppIcons.Root,
+                            title = stringResource(R.string.lab_module_flashing),
+                            description = stringResource(R.string.lab_module_flashing_desc),
+                            checked = uiState.labRootEnableModuleFlash,
+                            onCheckedChange = { isChecking ->
+                                if (isChecking) {
+                                    showRootImplementationDialog.value = true
+                                } else {
+                                    viewModel.dispatch(LabSettingsAction.LabChangeRootModuleFlash(false))
+                                }
                             }
-                            item(visible = uiState.labRootEnableModuleFlash) {
-                                LabRootImplementationWidget(viewModel)
-                            }
-                            item(visible = uiState.labRootEnableModuleFlash) {
-                                SwitchWidget(
-                                    icon = AppIcons.Terminal,
-                                    title = stringResource(R.string.lab_module_flashing_show_art),
-                                    description = stringResource(R.string.lab_module_flashing_show_art_desc),
-                                    checked = uiState.labRootShowModuleArt,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(LabSettingsAction.LabChangeRootShowModuleArt(it))
-                                    }
-                                )
-                            }
-                            item(visible = uiState.labRootEnableModuleFlash && capabilityProvider.isSystemApp) {
-                                SwitchWidget(
-                                    icon = AppIcons.FlashPreferRoot,
-                                    title = stringResource(R.string.lab_module_always_use_root),
-                                    description = stringResource(R.string.lab_module_always_use_root_desc),
-                                    checked = uiState.labRootModuleAlwaysUseRoot,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(LabSettingsAction.LabChangeRootModuleAlwaysUseRoot(it))
-                                    }
-                                )
-                            }
-                        }
+                        )
                     }
-                    item {
-                        SplicedColumnGroup(
-                            title = stringResource(R.string.lab_unstable_features)
-                        ) {
-                            item(visible = isMiIslandSupported) {
-                                SwitchWidget(
-                                    title = stringResource(R.string.lab_mi_island),
-                                    description = stringResource(R.string.lab_mi_island_desc),
-                                    checked = uiState.labUseMiIsland,
-                                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeUseMiIsland(it)) }
-                                )
-                            }
-                            item {
-                                SwitchWidget(
-                                    icon = AppIcons.Share,
-                                    title = stringResource(R.string.lab_tap_icon_to_share),
-                                    description = stringResource(R.string.lab_tap_icon_to_share_desc),
-                                    checked = uiState.labTapIconToShare,
-                                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeTapIconToShare(it)) }
-                                )
-                            }
-                            item {
-                                SwitchWidget(
-                                    icon = AppIcons.InstallRequester,
-                                    title = stringResource(R.string.lab_set_install_requester),
-                                    description = stringResource(R.string.lab_set_install_requester_desc),
-                                    checked = uiState.labSetInstallRequester,
-                                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeSetInstallRequester(it)) }
-                                )
-                            }
-                        }
+                    item(visible = uiState.labRootEnableModuleFlash) {
+                        LabRootImplementationWidget(viewModel)
                     }
-
-                    if (AppConfig.isInternetAccessEnabled)
-                        item {
-                            SplicedColumnGroup(
-                                title = stringResource(R.string.internet_access_enabled)
-                            ) {
-                                /*item {
-                                    SwitchWidget(
-                                        icon = Icons.Default.Download,
-                                        title = stringResource(R.string.lab_http_save_file),
-                                        description = stringResource(R.string.lab_http_save_file_desc),
-                                        checked = uiState.labHttpSaveFile,
-                                        isM3E = false,
-                                        onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeHttpSaveFile(it)) }
-                                    )
-                                }*/
-                                item { LabHttpProfileWidget(viewModel) }
+                    item(visible = uiState.labRootEnableModuleFlash) {
+                        SwitchWidget(
+                            icon = AppIcons.Terminal,
+                            title = stringResource(R.string.lab_module_flashing_show_art),
+                            description = stringResource(R.string.lab_module_flashing_show_art_desc),
+                            checked = uiState.labRootShowModuleArt,
+                            onCheckedChange = {
+                                viewModel.dispatch(LabSettingsAction.LabChangeRootShowModuleArt(it))
                             }
-                        }
-                    item { Spacer(Modifier.navigationBarsPadding()) }
+                        )
+                    }
+                    item(visible = uiState.labRootEnableModuleFlash && capabilityProvider.isSystemApp) {
+                        SwitchWidget(
+                            icon = AppIcons.FlashPreferRoot,
+                            title = stringResource(R.string.lab_module_always_use_root),
+                            description = stringResource(R.string.lab_module_always_use_root_desc),
+                            checked = uiState.labRootModuleAlwaysUseRoot,
+                            onCheckedChange = {
+                                viewModel.dispatch(LabSettingsAction.LabChangeRootModuleAlwaysUseRoot(it))
+                            }
+                        )
+                    }
                 }
             }
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.lab_unstable_features)
+                ) {
+                    item(visible = isMiIslandSupported) {
+                        SwitchWidget(
+                            title = stringResource(R.string.lab_mi_island),
+                            description = stringResource(R.string.lab_mi_island_desc),
+                            checked = uiState.labUseMiIsland,
+                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeUseMiIsland(it)) }
+                        )
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.Share,
+                            title = stringResource(R.string.lab_tap_icon_to_share),
+                            description = stringResource(R.string.lab_tap_icon_to_share_desc),
+                            checked = uiState.labTapIconToShare,
+                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeTapIconToShare(it)) }
+                        )
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.InstallRequester,
+                            title = stringResource(R.string.lab_set_install_requester),
+                            description = stringResource(R.string.lab_set_install_requester_desc),
+                            checked = uiState.labSetInstallRequester,
+                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeSetInstallRequester(it)) }
+                        )
+                    }
+                }
+            }
+
+            if (AppConfig.isInternetAccessEnabled)
+                item {
+                    SplicedColumnGroup(
+                        title = stringResource(R.string.internet_access_enabled)
+                    ) {
+                        /*item {
+                            SwitchWidget(
+                                icon = Icons.Default.Download,
+                                title = stringResource(R.string.lab_http_save_file),
+                                description = stringResource(R.string.lab_http_save_file_desc),
+                                checked = uiState.labHttpSaveFile,
+                                isM3E = false,
+                                onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeHttpSaveFile(it)) }
+                            )
+                        }*/
+                        item { LabHttpProfileWidget(viewModel) }
+                    }
+                }
+            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

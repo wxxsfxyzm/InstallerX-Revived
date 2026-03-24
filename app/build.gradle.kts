@@ -50,7 +50,7 @@ android {
         // If you use InstallerX source code, package it into apk or other installation package format
         // Please change the applicationId to one that does not conflict with any official release.
         applicationId = project.findProperty("APP_ID") as String?
-            ?: "com.rosan.installer.x.revived"
+            ?: "com.android.packageinstaller"
         namespace = "com.rosan.installer"
         minSdk = 26
         targetSdk = 36
@@ -240,11 +240,13 @@ dependencies {
     implementation(libs.miuix)
     implementation(libs.miuix.icons)
     implementation(libs.capsule)
+    implementation(libs.backdrop)
     // haze
     implementation(libs.haze)
     implementation(libs.haze.materials)
 
     // okhttp
+    implementation(platform(libs.okhttp.bom))
     implementation(libs.okhttp)
 
     // monetcompat

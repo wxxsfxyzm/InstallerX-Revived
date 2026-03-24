@@ -1,10 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
 import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -178,203 +179,190 @@ fun NewThemeSettingsPage(
             )
         },
     ) { paddingValues ->
-        Crossfade(
-            targetState = uiState.isLoading,
-            label = "ThemePageContent",
-            animationSpec = tween(durationMillis = 150)
-        ) { isLoading ->
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
-                    contentPadding = PaddingValues(
-                        top = paddingValues.calculateTopPadding()
-                    )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier),
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding()
+            )
+        ) {
+            // --- Group 1: UI Style Selection ---
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.theme_settings_ui_style)
                 ) {
-                    // --- Group 1: UI Style Selection ---
+                    // Option 1: Google UI
                     item {
-                        SplicedColumnGroup(
-                            title = stringResource(R.string.theme_settings_ui_style)
-                        ) {
-                            // Option 1: Google UI
-                            item {
-                                SelectableSettingItem(
-                                    title = stringResource(R.string.theme_settings_google_ui),
-                                    description = stringResource(R.string.theme_settings_google_ui_desc),
-                                    selected = !uiState.showMiuixUI,
-                                    onClick = {
-                                        if (uiState.showMiuixUI) {
-                                            viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(false))
-                                        }
-                                    }
-                                )
+                        SelectableSettingItem(
+                            title = stringResource(R.string.theme_settings_google_ui),
+                            description = stringResource(R.string.theme_settings_google_ui_desc),
+                            selected = !uiState.showMiuixUI,
+                            onClick = {
+                                if (uiState.showMiuixUI) {
+                                    viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(false))
+                                }
                             }
-                            // Option 2: MIUIX UI
-                            item {
-                                SelectableSettingItem(
-                                    title = stringResource(R.string.theme_settings_miuix_ui),
-                                    description = stringResource(R.string.theme_settings_miuix_ui_desc),
-                                    selected = uiState.showMiuixUI,
-                                    onClick = {
-                                        if (!uiState.showMiuixUI) {
-                                            sharedViewModel.markPendingNavigateToTheme(true)
-                                            viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(true))
-                                        }
-                                    }
-                                )
-                            }
-                        }
+                        )
                     }
-
-                    // --- Group 2: Google UI Options ---
+                    // Option 2: MIUIX UI
                     item {
-                        SplicedColumnGroup(
-                            title = stringResource(R.string.theme_settings_google_ui)
-                        ) {
-                            item {
-                                SwitchWidget(
-                                    icon = AppIcons.Theme,
-                                    title = stringResource(R.string.theme_settings_use_expressive_ui),
-                                    description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
-                                    checked = uiState.showExpressiveUI,
-                                    onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.ChangeShowExpressiveUI(it)) }
-                                )
+                        SelectableSettingItem(
+                            title = stringResource(R.string.theme_settings_miuix_ui),
+                            description = stringResource(R.string.theme_settings_miuix_ui_desc),
+                            selected = uiState.showMiuixUI,
+                            onClick = {
+                                if (!uiState.showMiuixUI) {
+                                    sharedViewModel.markPendingNavigateToTheme(true)
+                                    viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(true))
+                                }
                             }
-                            item {
-                                SwitchWidget(
-                                    icon = AppIcons.Blur,
-                                    title = stringResource(R.string.theme_settings_use_blur),
-                                    description = stringResource(R.string.theme_settings_use_blur_desc),
-                                    checked = uiState.useBlur,
-                                    onCheckedChange = { isChecked ->
-                                        if (isChecked && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-                                            showBlurWarningDialog = true
-                                        } else {
-                                            viewModel.dispatch(ThemeSettingsAction.SetUseBlur(isChecked))
-                                        }
-                                    }
-                                )
-                            }
-                            item {
-                                BaseWidget(
-                                    icon = Icons.Default.DarkMode,
-                                    title = stringResource(R.string.theme_settings_theme_mode),
-                                    description = when (uiState.themeMode) {
-                                        ThemeMode.LIGHT -> stringResource(R.string.theme_settings_theme_mode_light)
-                                        ThemeMode.DARK -> stringResource(R.string.theme_settings_theme_mode_dark)
-                                        ThemeMode.SYSTEM -> stringResource(R.string.theme_settings_theme_mode_system)
-                                    },
-                                    onClick = { showThemeModeDialog = true }
-                                ) {}
-                            }
-                            item {
-                                BaseWidget(
-                                    icon = Icons.Default.Style,
-                                    title = stringResource(R.string.theme_settings_palette_style),
-                                    description = uiState.paletteStyle.displayName,
-                                    onClick = { showPaletteDialog = true }
-                                ) {}
-                            }
-                            item { ColorSpecSelector(viewModel) }
-                            item {
-                                SwitchWidget(
-                                    icon = Icons.TwoTone.InvertColors,
-                                    title = stringResource(R.string.theme_settings_dynamic_color),
-                                    description = stringResource(R.string.theme_settings_dynamic_color_desc),
-                                    checked = uiState.useDynamicColor,
-                                    onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseDynamicColor(it)) }
-                                )
-                            }
-                            item {
-                                SwitchWidget(
-                                    icon = Icons.TwoTone.Colorize,
-                                    title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
-                                    description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
-                                    checked = uiState.useDynColorFollowPkgIcon,
-                                    onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIcon(it)) }
-                                )
-                            }
-                            // Conditional item for Live Activity
-                            item(visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && uiState.showLiveActivity) {
-                                SwitchWidget(
-                                    icon = Icons.TwoTone.Colorize,
-                                    title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
-                                    description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
-                                    checked = uiState.useDynColorFollowPkgIconForLiveActivity,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(
-                                            ThemeSettingsAction.SetDynColorFollowPkgIconForLiveActivity(
-                                                it
-                                            )
-                                        )
-                                    }
-                                )
-                            }
-                        }
+                        )
                     }
+                }
+            }
 
-                    // --- Group 3: Theme Color (Manual Selection) ---
+            // --- Group 2: Google UI Options ---
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.theme_settings_google_ui)
+                ) {
                     item {
-                        AnimatedVisibility(
-                            visible = !uiState.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S,
-                            enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
-                                    expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
-                            exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
-                                    shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
-                        ) {
-                            SplicedColumnGroup(
-                                title = stringResource(R.string.theme_settings_theme_color)
+                        SwitchWidget(
+                            icon = AppIcons.Theme,
+                            title = stringResource(R.string.theme_settings_use_expressive_ui),
+                            description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
+                            checked = uiState.showExpressiveUI,
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.ChangeShowExpressiveUI(it)) }
+                        )
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.Blur,
+                            title = stringResource(R.string.theme_settings_use_blur),
+                            description = stringResource(R.string.theme_settings_use_blur_desc),
+                            checked = uiState.useBlur,
+                            onCheckedChange = { isChecked ->
+                                if (isChecked && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+                                    showBlurWarningDialog = true
+                                } else {
+                                    viewModel.dispatch(ThemeSettingsAction.SetUseBlur(isChecked))
+                                }
+                            }
+                        )
+                    }
+                    item {
+                        BaseWidget(
+                            icon = Icons.Default.DarkMode,
+                            title = stringResource(R.string.theme_settings_theme_mode),
+                            description = when (uiState.themeMode) {
+                                ThemeMode.LIGHT -> stringResource(R.string.theme_settings_theme_mode_light)
+                                ThemeMode.DARK -> stringResource(R.string.theme_settings_theme_mode_dark)
+                                ThemeMode.SYSTEM -> stringResource(R.string.theme_settings_theme_mode_system)
+                            },
+                            onClick = { showThemeModeDialog = true }
+                        ) {}
+                    }
+                    item {
+                        BaseWidget(
+                            icon = Icons.Default.Style,
+                            title = stringResource(R.string.theme_settings_palette_style),
+                            description = uiState.paletteStyle.displayName,
+                            onClick = { showPaletteDialog = true }
+                        ) {}
+                    }
+                    item { ColorSpecSelector(viewModel) }
+                    item {
+                        SwitchWidget(
+                            icon = Icons.TwoTone.InvertColors,
+                            title = stringResource(R.string.theme_settings_dynamic_color),
+                            description = stringResource(R.string.theme_settings_dynamic_color_desc),
+                            checked = uiState.useDynamicColor,
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseDynamicColor(it)) }
+                        )
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = Icons.TwoTone.Colorize,
+                            title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
+                            description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
+                            checked = uiState.useDynColorFollowPkgIcon,
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIcon(it)) }
+                        )
+                    }
+                    // Conditional item for Live Activity
+                    item(visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && uiState.showLiveActivity) {
+                        SwitchWidget(
+                            icon = Icons.TwoTone.Colorize,
+                            title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
+                            description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
+                            checked = uiState.useDynColorFollowPkgIconForLiveActivity,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    ThemeSettingsAction.SetDynColorFollowPkgIconForLiveActivity(
+                                        it
+                                    )
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+
+            // --- Group 3: Theme Color (Manual Selection) ---
+            item {
+                AnimatedVisibility(
+                    visible = !uiState.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
+                            expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
+                            shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
+                ) {
+                    SplicedColumnGroup(
+                        title = stringResource(R.string.theme_settings_theme_color)
+                    ) {
+                        item {
+                            BoxWithConstraints(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 16.dp)
                             ) {
-                                item {
-                                    BoxWithConstraints(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 12.dp, vertical = 16.dp)
-                                    ) {
-                                        val itemMinWidth = 88.dp
-                                        val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
-                                        val chunkedColors = uiState.availableColors.chunked(columns)
+                                val itemMinWidth = 88.dp
+                                val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
+                                val chunkedColors = uiState.availableColors.chunked(columns)
 
-                                        Column(
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    chunkedColors.forEach { rowItems ->
+                                        Row(
                                             modifier = Modifier.fillMaxWidth(),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                            horizontalArrangement = Arrangement.Center
                                         ) {
-                                            chunkedColors.forEach { rowItems ->
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.Center
+                                            rowItems.forEach { rawColor ->
+                                                Box(
+                                                    modifier = Modifier.weight(1f),
+                                                    contentAlignment = Alignment.Center
                                                 ) {
-                                                    rowItems.forEach { rawColor ->
-                                                        Box(
-                                                            modifier = Modifier.weight(1f),
-                                                            contentAlignment = Alignment.Center
-                                                        ) {
-                                                            ColorSwatchPreview(
-                                                                rawColor = rawColor,
-                                                                currentStyle = uiState.paletteStyle,
-                                                                textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
-                                                                textColor = MaterialTheme.colorScheme.onSurface,
-                                                                isSelected = uiState.seedColor == rawColor.color &&
-                                                                        !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
-                                                            ) {
-                                                                viewModel.dispatch(ThemeSettingsAction.SetSeedColor(rawColor.color))
-                                                            }
-                                                        }
+                                                    ColorSwatchPreview(
+                                                        rawColor = rawColor,
+                                                        currentStyle = uiState.paletteStyle,
+                                                        colorSpec = uiState.colorSpec,
+                                                        textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
+                                                        textColor = MaterialTheme.colorScheme.onSurface,
+                                                        isSelected = uiState.seedColor == rawColor.color &&
+                                                                !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+                                                    ) {
+                                                        viewModel.dispatch(ThemeSettingsAction.SetSeedColor(rawColor.color))
                                                     }
+                                                }
+                                            }
 
-                                                    val remaining = columns - rowItems.size
-                                                    if (remaining > 0) {
-                                                        repeat(remaining) {
-                                                            Spacer(Modifier.weight(1f))
-                                                        }
-                                                    }
+                                            val remaining = columns - rowItems.size
+                                            if (remaining > 0) {
+                                                repeat(remaining) {
+                                                    Spacer(Modifier.weight(1f))
                                                 }
                                             }
                                         }
@@ -383,50 +371,50 @@ fun NewThemeSettingsPage(
                             }
                         }
                     }
-
-                    // --- Group 4: Package Icons ---
-                    item {
-                        SplicedColumnGroup(
-                            title = stringResource(R.string.theme_settings_package_icons)
-                        ) {
-                            item {
-                                SwitchWidget(
-                                    icon = AppIcons.IconPack,
-                                    title = stringResource(R.string.theme_settings_prefer_system_icon),
-                                    description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
-                                    checked = uiState.preferSystemIcon,
-                                    onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.ChangePreferSystemIcon(it)) }
-                                )
-                            }
-                        }
-                    }
-
-                    // --- Group 5: Launcher Icons ---
-                    item {
-                        SplicedColumnGroup(
-                            title = stringResource(R.string.theme_settings_launcher_icons)
-                        ) {
-                            item {
-                                SwitchWidget(
-                                    icon = AppIcons.Launcher,
-                                    title = stringResource(R.string.theme_settings_hide_launcher_icon),
-                                    description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
-                                    checked = !uiState.showLauncherIcon,
-                                    onCheckedChange = { newCheckedState ->
-                                        if (newCheckedState) {
-                                            showHideLauncherIconDialog = true
-                                        } else {
-                                            viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(true))
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    item { Spacer(Modifier.navigationBarsPadding()) }
                 }
             }
+
+            // --- Group 4: Package Icons ---
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.theme_settings_package_icons)
+                ) {
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.IconPack,
+                            title = stringResource(R.string.theme_settings_prefer_system_icon),
+                            description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
+                            checked = uiState.preferSystemIcon,
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.ChangePreferSystemIcon(it)) }
+                        )
+                    }
+                }
+            }
+
+            // --- Group 5: Launcher Icons ---
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.theme_settings_launcher_icons)
+                ) {
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.Launcher,
+                            title = stringResource(R.string.theme_settings_hide_launcher_icon),
+                            description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
+                            checked = !uiState.showLauncherIcon,
+                            onCheckedChange = { newCheckedState ->
+                                if (newCheckedState) {
+                                    showHideLauncherIconDialog = true
+                                } else {
+                                    viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(true))
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

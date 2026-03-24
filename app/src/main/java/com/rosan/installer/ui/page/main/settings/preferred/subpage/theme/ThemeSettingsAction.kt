@@ -16,6 +16,7 @@ sealed class ThemeSettingsAction {
     data class SetColorSpec(val spec: ThemeColorSpec) : ThemeSettingsAction()
     data class SetUseDynamicColor(val use: Boolean) : ThemeSettingsAction()
     data class SetUseMiuixMonet(val use: Boolean) : ThemeSettingsAction()
+    data class SetUseAppleFloatingBar(val use: Boolean) : ThemeSettingsAction()
     data class SetDynColorFollowPkgIcon(val follow: Boolean) : ThemeSettingsAction()
     data class SetDynColorFollowPkgIconForLiveActivity(val follow: Boolean) : ThemeSettingsAction()
     data class SetSeedColor(val color: Color) : ThemeSettingsAction()

@@ -3,13 +3,10 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.lab
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -82,125 +79,111 @@ fun LegacyLabPage(
             )
         }
     ) { paddingValues ->
-        Crossfade(
-            targetState = uiState.isLoading,
-            label = "LabPageContent",
-            animationSpec = tween(durationMillis = 150)
-        ) { isLoading ->
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
-                    // --- Root Section (Module Flashing) ---
-                    item { LabelWidget(stringResource(R.string.config_authorizer_root)) }
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.Root,
-                            title = stringResource(R.string.lab_module_flashing),
-                            description = stringResource(R.string.lab_module_flashing_desc),
-                            checked = uiState.labRootEnableModuleFlash,
-                            isM3E = false,
-                            onCheckedChange = { isChecking ->
-                                if (isChecking) {
-                                    // If turning ON, show the dialog first (don't enable yet)
-                                    showRootImplementationDialog.value = true
-                                } else {
-                                    // If turning OFF, disable immediately
-                                    viewModel.dispatch(LabSettingsAction.LabChangeRootModuleFlash(false))
-                                }
-                            }
-                        )
-                    }
-                    // DropDownMenuWidget appears when enabled to allow changing the setting later
-                    item {
-                        AnimatedVisibility(
-                            visible = uiState.labRootEnableModuleFlash,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
-                            Column {
-                                LabRootImplementationWidget(viewModel)
-                                SwitchWidget(
-                                    icon = AppIcons.Terminal,
-                                    title = stringResource(R.string.lab_module_flashing_show_art),
-                                    description = stringResource(R.string.lab_module_flashing_show_art_desc),
-                                    isM3E = false,
-                                    checked = uiState.labRootShowModuleArt,
-                                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeRootShowModuleArt(it)) }
-                                )
-                                if (capabilityProvider.isSystemApp)
-                                    SwitchWidget(
-                                        icon = AppIcons.FlashPreferRoot,
-                                        title = stringResource(R.string.lab_module_always_use_root),
-                                        description = stringResource(R.string.lab_module_always_use_root_desc),
-                                        isM3E = false,
-                                        checked = uiState.labRootModuleAlwaysUseRoot,
-                                        onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeRootModuleAlwaysUseRoot(it)) }
-                                    )
-                            }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
+            // --- Root Section (Module Flashing) ---
+            item { LabelWidget(stringResource(R.string.config_authorizer_root)) }
+            item {
+                SwitchWidget(
+                    icon = AppIcons.Root,
+                    title = stringResource(R.string.lab_module_flashing),
+                    description = stringResource(R.string.lab_module_flashing_desc),
+                    checked = uiState.labRootEnableModuleFlash,
+                    isM3E = false,
+                    onCheckedChange = { isChecking ->
+                        if (isChecking) {
+                            // If turning ON, show the dialog first (don't enable yet)
+                            showRootImplementationDialog.value = true
+                        } else {
+                            // If turning OFF, disable immediately
+                            viewModel.dispatch(LabSettingsAction.LabChangeRootModuleFlash(false))
                         }
                     }
-                    // --- Unstable Features Section ---
-                    item { LabelWidget(stringResource(R.string.lab_unstable_features)) }
-                    if (isMiIslandSupported) item {
+                )
+            }
+            // DropDownMenuWidget appears when enabled to allow changing the setting later
+            item {
+                AnimatedVisibility(
+                    visible = uiState.labRootEnableModuleFlash,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Column {
+                        LabRootImplementationWidget(viewModel)
                         SwitchWidget(
-                            title = stringResource(R.string.lab_mi_island),
-                            description = stringResource(R.string.lab_mi_island_desc),
+                            icon = AppIcons.Terminal,
+                            title = stringResource(R.string.lab_module_flashing_show_art),
+                            description = stringResource(R.string.lab_module_flashing_show_art_desc),
                             isM3E = false,
-                            checked = uiState.labUseMiIsland,
-                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeUseMiIsland(it)) }
+                            checked = uiState.labRootShowModuleArt,
+                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeRootShowModuleArt(it)) }
                         )
-                    }
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.Share,
-                            title = stringResource(R.string.lab_tap_icon_to_share),
-                            description = stringResource(R.string.lab_tap_icon_to_share_desc),
-                            checked = uiState.labTapIconToShare,
-                            isM3E = false,
-                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeTapIconToShare(it)) }
-                        )
-                    }
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.InstallRequester,
-                            title = stringResource(R.string.lab_set_install_requester),
-                            description = stringResource(R.string.lab_set_install_requester_desc),
-                            checked = uiState.labSetInstallRequester,
-                            isM3E = false,
-                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeSetInstallRequester(it)) }
-                        )
-                    }
-                    // --- Internet Access Section ---
-                    if (AppConfig.isInternetAccessEnabled) {
-                        item { LabelWidget(stringResource(R.string.internet_access_enabled)) }
-                        // TODO
-                        /*item {
+                        if (capabilityProvider.isSystemApp)
                             SwitchWidget(
-                                icon = Icons.Default.Download,
-                                title = stringResource(R.string.lab_http_save_file),
-                                description = stringResource(R.string.lab_http_save_file_desc),
-                                checked = uiState.labHttpSaveFile,
+                                icon = AppIcons.FlashPreferRoot,
+                                title = stringResource(R.string.lab_module_always_use_root),
+                                description = stringResource(R.string.lab_module_always_use_root_desc),
                                 isM3E = false,
-                                onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeHttpSaveFile(it)) }
+                                checked = uiState.labRootModuleAlwaysUseRoot,
+                                onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeRootModuleAlwaysUseRoot(it)) }
                             )
-                        }*/
-
-                        // HTTP Profile DropDown
-                        item { LabHttpProfileWidget(viewModel) }
                     }
-                    item { Spacer(Modifier.navigationBarsPadding()) }
                 }
             }
+            // --- Unstable Features Section ---
+            item { LabelWidget(stringResource(R.string.lab_unstable_features)) }
+            if (isMiIslandSupported) item {
+                SwitchWidget(
+                    title = stringResource(R.string.lab_mi_island),
+                    description = stringResource(R.string.lab_mi_island_desc),
+                    isM3E = false,
+                    checked = uiState.labUseMiIsland,
+                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeUseMiIsland(it)) }
+                )
+            }
+            item {
+                SwitchWidget(
+                    icon = AppIcons.Share,
+                    title = stringResource(R.string.lab_tap_icon_to_share),
+                    description = stringResource(R.string.lab_tap_icon_to_share_desc),
+                    checked = uiState.labTapIconToShare,
+                    isM3E = false,
+                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeTapIconToShare(it)) }
+                )
+            }
+            item {
+                SwitchWidget(
+                    icon = AppIcons.InstallRequester,
+                    title = stringResource(R.string.lab_set_install_requester),
+                    description = stringResource(R.string.lab_set_install_requester_desc),
+                    checked = uiState.labSetInstallRequester,
+                    isM3E = false,
+                    onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeSetInstallRequester(it)) }
+                )
+            }
+            // --- Internet Access Section ---
+            if (AppConfig.isInternetAccessEnabled) {
+                item { LabelWidget(stringResource(R.string.internet_access_enabled)) }
+                // TODO
+                /*item {
+                    SwitchWidget(
+                        icon = Icons.Default.Download,
+                        title = stringResource(R.string.lab_http_save_file),
+                        description = stringResource(R.string.lab_http_save_file_desc),
+                        checked = uiState.labHttpSaveFile,
+                        isM3E = false,
+                        onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeHttpSaveFile(it)) }
+                    )
+                }*/
+
+                // HTTP Profile DropDown
+                item { LabHttpProfileWidget(viewModel) }
+            }
+            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

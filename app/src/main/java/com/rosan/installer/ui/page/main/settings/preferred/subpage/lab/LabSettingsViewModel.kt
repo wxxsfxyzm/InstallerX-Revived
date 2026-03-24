@@ -21,7 +21,6 @@ class LabSettingsViewModel(
 
     val state: StateFlow<LabSettingsState> = appSettingsRepo.preferencesFlow.map { prefs ->
         LabSettingsState(
-            isLoading = false,
             useBlur = prefs.useBlur,
             labRootEnableModuleFlash = prefs.labRootEnableModuleFlash,
             labRootShowModuleArt = prefs.labRootShowModuleArt,
@@ -36,7 +35,7 @@ class LabSettingsViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = LabSettingsState(isLoading = true)
+        initialValue = LabSettingsState()
     )
 
     fun dispatch(action: LabSettingsAction) {

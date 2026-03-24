@@ -55,7 +55,6 @@ class AboutViewModel(
         _appIcon
     ) { prefs, updateInfo, appIcon ->
         AboutState(
-            isLoading = false,
             useBlur = prefs.useBlur,
             authorizer = prefs.authorizer,
             hasUpdate = updateInfo?.hasUpdate ?: false,
@@ -66,7 +65,7 @@ class AboutViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = AboutState(isLoading = true)
+        initialValue = AboutState()
     )
 
     init {

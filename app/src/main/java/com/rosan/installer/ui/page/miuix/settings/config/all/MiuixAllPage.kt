@@ -29,8 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.kyant.backdrop.backdrops.LayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
@@ -74,8 +72,7 @@ fun MiuixAllPage(
     hazeState: HazeState?,
     title: String,
     outerPadding: PaddingValues,
-    snackbarHostState: SnackbarHostState,
-    backdrop: LayerBackdrop?
+    snackbarHostState: SnackbarHostState
 ) {
     LaunchedEffect(Unit) {
         viewModel.navController = navController
@@ -154,7 +151,6 @@ fun MiuixAllPage(
                     modifier = Modifier
                         .fillMaxSize()
                         .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier)
-                        .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                         .overScrollVertical()
                         .nestedScroll(scrollBehavior.nestedScrollConnection),
                     columns = GridCells.Adaptive(350.dp),

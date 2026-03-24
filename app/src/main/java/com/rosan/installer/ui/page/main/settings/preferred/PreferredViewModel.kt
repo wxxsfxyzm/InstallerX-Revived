@@ -54,7 +54,6 @@ class PreferredViewModel(
         val customizeAuthorizer = if (prefs.authorizer == Authorizer.Customize) prefs.customizeAuthorizer else ""
 
         PreferredViewState(
-            isLoading = false,
             useBlur = prefs.useBlur,
             authorizer = prefs.authorizer,
             customizeAuthorizer = customizeAuthorizer,
@@ -67,7 +66,7 @@ class PreferredViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = PreferredViewState(isLoading = true)
+        initialValue = PreferredViewState()
     )
 
     init {
