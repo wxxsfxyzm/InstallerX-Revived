@@ -76,4 +76,8 @@
     <string name="uninstall_keep_data_desc">Nedzēst, bet paturēt lietotnes datus un kešatmiņu</string>
     <string name="uninstall_all_users">Visiem lietotājiem</string>
     <string name="uninstall_all_users_desc">Noņem šo lietotni visiem šīs ierīces lietotājiem</string>
+    <string name="app_language">Lietotnes valoda</string>
+    <string name="app_language_follow_system">Sekot sistēmas valodai</string>
 </resources>
+
+

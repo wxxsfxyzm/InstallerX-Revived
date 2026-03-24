@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="agreement_title">Chính sách</string>
+    <string name="app_language">Ngôn ngữ ứng dụng</string>
+    <string name="app_language_follow_system">Theo ngôn ngữ hệ thống</string>
 </resources>
+
+

@@ -697,4 +697,8 @@
     <string name="config_apk_choose_all">Selecteer standaard alle APK\'s tijdens het meerdere installeren</string>
     <string name="config_apk_choose_all_desc">Selecteer standaard alle APK\'s voor meerdere bestandssessies.</string>
     <string name="exception_install_parse_failed_bad_shared_user_id">Niet vooraf geïnstalleerde apps kunnen niet de gedeelde UID van het systeem gebruiken</string>
+    <string name="app_language">App-taal</string>
+    <string name="app_language_follow_system">Systeemtaal volgen</string>
 </resources>
+
+

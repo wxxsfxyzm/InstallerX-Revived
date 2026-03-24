@@ -215,6 +215,7 @@ fun HideLauncherIconWarningDialog(
             title = { Text(text = dialogTitle) },
             text = {
                 Column {
+                    Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_recovery))
                     Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
                     if (DeviceConfig.currentManufacturer == Manufacturer.XIAOMI)
                         Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi))

@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.settings.model.AppLanguageOption
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage
@@ -610,6 +611,41 @@ fun MiuixThemeModeWidget(
             // Invoke the callback only if the mode has actually changed.
             if (currentThemeMode != newMode) {
                 onThemeModeChange(newMode)
+            }
+        }
+    )
+}
+
+@Composable
+fun MiuixAppLanguageWidget(
+    modifier: Modifier = Modifier,
+    currentLanguageTag: String?,
+    supportedLanguages: List<AppLanguageOption>,
+    onLanguageChange: (String?) -> Unit
+) {
+    val spinnerEntries = remember(supportedLanguages) {
+        supportedLanguages.map { SpinnerEntry(title = it.displayName) }
+    }
+    val selectedIndex = remember(currentLanguageTag, supportedLanguages) {
+        supportedLanguages.indexOfFirst { it.languageTag == currentLanguageTag }
+            .takeIf { it >= 0 }
+            ?: 0
+    }
+
+    SuperSpinner(
+        modifier = modifier,
+        title = stringResource(id = R.string.app_language),
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            supportedLanguages.getOrNull(newIndex)?.languageTag?.let { selectedTag ->
+                if (currentLanguageTag != selectedTag) {
+                    onLanguageChange(selectedTag)
+                }
+            } ?: run {
+                if (currentLanguageTag != null) {
+                    onLanguageChange(null)
+                }
             }
         }
     )

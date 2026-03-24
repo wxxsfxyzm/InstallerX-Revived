@@ -690,4 +690,8 @@
     <string name="split_name_language">言語分割: %1$s</string>
     <string name="split_name_architecture">アーキテクチャー分割: %1$s</string>
     <string name="split_name_density">ピクセル密度: %1$s</string>
+    <string name="app_language">アプリの言語</string>
+    <string name="app_language_follow_system">システムの言語に従う</string>
 </resources>
+
+

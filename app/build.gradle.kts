@@ -188,6 +188,7 @@ room {
 
 dependencies {
     compileOnly(project(":hidden-api"))
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.lifecycle)

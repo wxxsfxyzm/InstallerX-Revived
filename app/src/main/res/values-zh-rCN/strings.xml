@@ -106,8 +106,12 @@
     <string name="theme_settings_launcher_icons">桌面图标</string>
     <string name="theme_settings_hide_launcher_icon">隐藏桌面图标</string>
     <string name="theme_settings_hide_launcher_icon_desc">通过 *#*#46789#*#* 来访问设置</string>
+    <string name="theme_settings_hide_launcher_icon_desc_recovery">添加快捷设置磁贴，或通过 *#*#46789#*#* 来访问设置</string>
+    <string name="theme_settings_hide_launcher_icon_warning_recovery">如果你希望隐藏桌面图标后还能从状态栏打开，请先把 InstallerX 磁贴加到快捷设置里。</string>
     <string name="theme_settings_hide_launcher_icon_warning">请在隐藏之前确认你能够访问本应用设置界面！</string>
     <string name="theme_settings_hide_launcher_icon_warning_xiaomi">对于 HyperOS，请允许“自启动”和“后台弹出界面”，以接收拨号界面代码！</string>
+    <string name="quick_settings_tile_label">InstallerX</string>
+    <string name="quick_settings_tile_subtitle">打开设置</string>
     <string name="installer_settings">安装器设置</string>
     <string name="installer_settings_desc">更改安装器的全局设置</string>
     <string name="uninstaller_settings">卸载器设置</string>
@@ -715,4 +719,8 @@
     <string name="lab_mi_island_desc">覆盖全局通知样式。仅当应用授权器设置为 Shizuku 时可绕过系统签名限制；Root 用户在手动关闭系统签名验证后可直接开启</string>
     <string name="lab_tap_icon_to_share">点击图标分享安装包</string>
     <string name="lab_tap_icon_to_share_desc">在安装准备界面点击应用图标即可分享安装包</string>
+    <string name="app_language">应用语言</string>
+    <string name="app_language_follow_system">跟随系统语言</string>
 </resources>
+
+

@@ -315,4 +315,8 @@
     <string name="installer_analyse_failed">تحلیل ناموفق بود</string>
     <string name="installer_select_install">انتخاب برنامه‌ها برای نصب</string>
     <string name="installer_select_split">انتخاب بخش‌های APK</string>
+    <string name="app_language">زبان برنامه</string>
+    <string name="app_language_follow_system">پیروی از زبان سیستم</string>
 </resources>
+
+

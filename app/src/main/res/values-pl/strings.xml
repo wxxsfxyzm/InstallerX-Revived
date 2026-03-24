@@ -90,4 +90,8 @@
     <string name="theme_settings_use_live_activity_desc">Użyj Aktywności na żywo zamiast powiadomień. Może nie być obsługiwane na niestandardowych ROM-ach</string>
     <string name="theme_settings_package_icons">Źródło ikony pakietu</string>
     <string name="theme_settings_prefer_system_icon">Użyj ikony systemowej dla instalacji aplikacji</string>
+    <string name="app_language">Język aplikacji</string>
+    <string name="app_language_follow_system">Użyj języka systemowego</string>
 </resources>
+
+

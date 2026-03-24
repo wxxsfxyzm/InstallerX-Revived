@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.rosan.installer.data.settings.local.datastore.AppDataStore
 import com.rosan.installer.data.settings.local.room.InstallerRoom
+import com.rosan.installer.data.settings.provider.AppLanguageProviderImpl
 import com.rosan.installer.data.settings.provider.PrivilegedProviderImpl
 import com.rosan.installer.data.settings.provider.SystemAppProviderImpl
 import com.rosan.installer.data.settings.provider.SystemEnvProviderImpl
@@ -16,6 +17,7 @@ import com.rosan.installer.data.settings.repository.AppRepositoryImpl
 import com.rosan.installer.data.settings.repository.AppSettingsRepoImpl
 import com.rosan.installer.data.settings.repository.ConfigRepoImpl
 import com.rosan.installer.domain.settings.provider.PrivilegedProvider
+import com.rosan.installer.domain.settings.provider.AppLanguageProvider
 import com.rosan.installer.domain.settings.provider.SystemAppProvider
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
@@ -63,6 +65,7 @@ val settingsModule = module {
     singleOf(::AppSettingsRepoImpl) { bind<AppSettingsRepo>() }
 
     // Providers
+    singleOf(::AppLanguageProviderImpl) { bind<AppLanguageProvider>() }
     singleOf(::SystemEnvProviderImpl) { bind<SystemEnvProvider>() }
     singleOf(::SystemAppProviderImpl) { bind<SystemAppProvider>() }
     singleOf(::PrivilegedProviderImpl) { bind<PrivilegedProvider>() }

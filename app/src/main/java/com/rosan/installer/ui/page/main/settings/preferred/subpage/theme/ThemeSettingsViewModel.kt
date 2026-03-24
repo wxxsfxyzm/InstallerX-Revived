@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rosan.installer.domain.settings.provider.AppLanguageProvider
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepo
 import com.rosan.installer.domain.settings.repository.BooleanSetting
@@ -19,20 +20,25 @@ import com.rosan.installer.ui.theme.material.RawColor
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ThemeSettingsViewModel(
     appSettingsRepo: AppSettingsRepo,
+    private val appLanguageProvider: AppLanguageProvider,
     systemEnvProvider: SystemEnvProvider,
     private val updateSetting: UpdateSettingUseCase,
     private val setLauncherIconUseCase: SetLauncherIconUseCase
 ) : ViewModel() {
+    private val appLanguageTag = MutableStateFlow(appLanguageProvider.getCurrentLanguageTag())
+    private val supportedAppLanguages = appLanguageProvider.getSupportedLanguages()
 
     val state: StateFlow<ThemeSettingsState> = combine(
         appSettingsRepo.preferencesFlow,
-        systemEnvProvider.getWallpaperColorsFlow()
-    ) { prefs, wallpaperColors ->
+        systemEnvProvider.getWallpaperColorsFlow(),
+        appLanguageTag
+    ) { prefs, wallpaperColors, currentLanguageTag ->
         val manualSeedColor = Color(prefs.seedColorInt)
         val effectiveSeedColor: Color = if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             if (!wallpaperColors.isNullOrEmpty()) {
@@ -64,6 +70,8 @@ class ThemeSettingsViewModel(
             useMiuixMonet = prefs.useMiuixMonet,
             seedColor = effectiveSeedColor,
             availableColors = availableColors,
+            appLanguageTag = currentLanguageTag,
+            supportedAppLanguages = supportedAppLanguages,
             useDynColorFollowPkgIcon = prefs.useDynColorFollowPkgIcon,
             useDynColorFollowPkgIconForLiveActivity = prefs.useDynColorFollowPkgIconForLiveActivity,
             preferSystemIcon = prefs.preferSystemIcon,
@@ -108,6 +116,10 @@ class ThemeSettingsViewModel(
             }
 
             is ThemeSettingsAction.SetSeedColor -> viewModelScope.launch { updateSetting(IntSetting.ThemeSeedColor, action.color.toArgb()) }
+            is ThemeSettingsAction.SetAppLanguage -> {
+                appLanguageProvider.setCurrentLanguageTag(action.languageTag)
+                appLanguageTag.value = appLanguageProvider.getCurrentLanguageTag()
+            }
             is ThemeSettingsAction.ChangePreferSystemIcon -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.PreferSystemIconForInstall,

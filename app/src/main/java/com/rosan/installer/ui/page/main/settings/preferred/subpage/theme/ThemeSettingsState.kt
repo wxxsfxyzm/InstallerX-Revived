@@ -3,6 +3,7 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
 import androidx.compose.ui.graphics.Color
+import com.rosan.installer.domain.settings.model.AppLanguageOption
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.material.RawColor
@@ -21,6 +22,8 @@ data class ThemeSettingsState(
     val useMiuixMonet: Boolean = false,
     val seedColor: Color = PresetColors[0].color,
     val availableColors: List<RawColor> = PresetColors,
+    val appLanguageTag: String? = null,
+    val supportedAppLanguages: List<AppLanguageOption> = emptyList(),
     val useDynColorFollowPkgIcon: Boolean = false,
     val useDynColorFollowPkgIconForLiveActivity: Boolean = false,
     val preferSystemIcon: Boolean = false,

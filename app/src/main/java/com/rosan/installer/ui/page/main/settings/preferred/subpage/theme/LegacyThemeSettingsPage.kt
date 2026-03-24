@@ -75,6 +75,10 @@ fun LegacyThemeSettingsPage(
 
     var showPaletteDialog by remember { mutableStateOf(false) }
     var showThemeModeDialog by remember { mutableStateOf(false) }
+    var showAppLanguageDialog by remember { mutableStateOf(false) }
+    val currentAppLanguage =
+        uiState.supportedAppLanguages.firstOrNull { it.languageTag == uiState.appLanguageTag }
+            ?: uiState.supportedAppLanguages.firstOrNull()
 
     if (showPaletteDialog) {
         PaletteStyleDialog(
@@ -94,6 +98,18 @@ fun LegacyThemeSettingsPage(
             onSelect = { mode ->
                 viewModel.dispatch(ThemeSettingsAction.SetThemeMode(mode))
                 showThemeModeDialog = false
+            }
+        )
+    }
+
+    if (showAppLanguageDialog) {
+        AppLanguageDialog(
+            currentLanguageTag = uiState.appLanguageTag,
+            supportedLanguages = uiState.supportedAppLanguages,
+            onDismiss = { showAppLanguageDialog = false },
+            onSelect = { languageTag ->
+                viewModel.dispatch(ThemeSettingsAction.SetAppLanguage(languageTag))
+                showAppLanguageDialog = false
             }
         )
     }
@@ -187,6 +203,14 @@ fun LegacyThemeSettingsPage(
                                 ThemeMode.SYSTEM -> stringResource(R.string.theme_settings_theme_mode_system)
                             },
                             onClick = { showThemeModeDialog = true }
+                        ) {}
+                    }
+                    item {
+                        BaseWidget(
+                            icon = AppIcons.Translate,
+                            title = stringResource(R.string.app_language),
+                            description = currentAppLanguage?.displayName,
+                            onClick = { showAppLanguageDialog = true }
                         ) {}
                     }
                     item {
@@ -315,7 +339,7 @@ fun LegacyThemeSettingsPage(
                         SwitchWidget(
                             icon = AppIcons.BugReport,
                             title = stringResource(R.string.theme_settings_hide_launcher_icon),
-                            description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
+                            description = stringResource(R.string.theme_settings_hide_launcher_icon_desc_recovery),
                             checked = !uiState.showLauncherIcon,
                             isM3E = false,
                             onCheckedChange = { newCheckedState ->

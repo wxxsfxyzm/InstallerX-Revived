@@ -79,6 +79,7 @@ import androidx.compose.material.icons.twotone.SystemUpdate
 import androidx.compose.material.icons.twotone.TaskAlt
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material.icons.twotone.Timer
+import androidx.compose.material.icons.twotone.Translate
 import androidx.compose.material.icons.twotone.Widgets
 
 /**
@@ -117,6 +118,7 @@ object AppIcons {
     val ViewSourceCode = Icons.TwoTone.Code
     val OpenSourceLicense = Icons.TwoTone.Copyright
     val Blur = Icons.TwoTone.BlurOn
+    val Translate = Icons.TwoTone.Translate
 
     // --- 导航图标集合 ---
     val RoomPreferences = Icons.TwoTone.RoomPreferences

@@ -2,11 +2,14 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.activity
 
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -23,7 +26,23 @@ import org.koin.core.component.inject
 import androidx.compose.material3.Surface as Material3Surface
 import top.yukonga.miuix.kmp.basic.Surface as MiuixSurface
 
-class SettingsActivity : ComponentActivity(), KoinComponent {
+class SettingsActivity : AppCompatActivity(), KoinComponent {
+    companion object {
+        private const val LAUNCH_REQUEST_CODE = 1001
+
+        fun createLaunchIntent(context: Context): Intent =
+            Intent(context, SettingsActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+
+        fun createLaunchPendingIntent(context: Context): PendingIntent = PendingIntent.getActivity(
+            context,
+            LAUNCH_REQUEST_CODE,
+            createLaunchIntent(context),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
     private val themeStateProvider by inject<ThemeStateProvider>()
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()

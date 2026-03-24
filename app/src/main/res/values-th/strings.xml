@@ -369,4 +369,8 @@
     <string name="virtual_preload_desc">ระบุว่าแพ็คเกจเป็น Virtual Preload</string>
     <string name="install_anyway">ติดตั้งต่อไป</string>
     <string name="reinstall">ติดตั้งใหม่</string>
+    <string name="app_language">ภาษาของแอป</string>
+    <string name="app_language_follow_system">ใช้ภาษาของระบบ</string>
 </resources>
+
+

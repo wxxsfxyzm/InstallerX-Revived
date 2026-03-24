@@ -578,4 +578,6 @@
     <string name="config_install_mode_desc">Mode d\'installation par défaut et paramètres associés</string>
     <string name="config_install_reason">Raison de l\'installation</string>
     <string name="config_install_reason_unknown">Inconnu</string>
+    <string name="app_language">Langue de l\'application</string>
+    <string name="app_language_follow_system">Suivre la langue du système</string>
 </resources>

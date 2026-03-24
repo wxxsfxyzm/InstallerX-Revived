@@ -7,9 +7,9 @@ import android.content.pm.PackageInstaller
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
@@ -45,7 +45,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 
-class InstallerActivity : ComponentActivity(), KoinComponent {
+class InstallerActivity : AppCompatActivity(), KoinComponent {
     companion object {
         const val KEY_ID = "installer_id"
         private const val ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL"

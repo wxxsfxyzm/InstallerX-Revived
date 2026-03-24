@@ -43,4 +43,8 @@
     <string name="theme_settings_google_ui">ગૂગલ મટિરિયલ ૩</string>
     <string name="theme_settings_use_expressive_ui">એક્સ્પ્રેસીવ યુઆઈ વાપરો</string>
     <string name="theme_settings_use_blur">ઝાંખું ચાલુ કરો</string>
+    <string name="app_language">એપ ભાષા</string>
+    <string name="app_language_follow_system">સિસ્ટમ ભાષા અનુસરો</string>
 </resources>
+
+

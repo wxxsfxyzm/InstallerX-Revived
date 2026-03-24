@@ -19,6 +19,7 @@ sealed class ThemeSettingsAction {
     data class SetDynColorFollowPkgIcon(val follow: Boolean) : ThemeSettingsAction()
     data class SetDynColorFollowPkgIconForLiveActivity(val follow: Boolean) : ThemeSettingsAction()
     data class SetSeedColor(val color: Color) : ThemeSettingsAction()
+    data class SetAppLanguage(val languageTag: String?) : ThemeSettingsAction()
     data class ChangePreferSystemIcon(val preferSystemIcon: Boolean) : ThemeSettingsAction()
     data class ChangeShowLauncherIcon(val showLauncherIcon: Boolean) : ThemeSettingsAction()
 }

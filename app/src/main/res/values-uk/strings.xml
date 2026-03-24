@@ -460,4 +460,8 @@
     <string name="uninstall_call_uninstaller_manually_desc">Видалити програму за вказаною назвою пакета</string>
     <string name="uninstall_progress_text">Видалення...</string>
     <string name="uninstall_enter_package_name">Введіть назву пакета, щоб видалити</string>
+    <string name="app_language">Мова застосунку</string>
+    <string name="app_language_follow_system">Використовувати мову системи</string>
 </resources>
+
+

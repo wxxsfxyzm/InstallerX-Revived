@@ -99,7 +99,11 @@ fun NewThemeSettingsPage(
     var showHideLauncherIconDialog by remember { mutableStateOf(false) }
     var showPaletteDialog by remember { mutableStateOf(false) }
     var showThemeModeDialog by remember { mutableStateOf(false) }
+    var showAppLanguageDialog by remember { mutableStateOf(false) }
     var showBlurWarningDialog by remember { mutableStateOf(false) }
+    val currentAppLanguage =
+        uiState.supportedAppLanguages.firstOrNull { it.languageTag == uiState.appLanguageTag }
+            ?: uiState.supportedAppLanguages.firstOrNull()
 
     if (showPaletteDialog) {
         PaletteStyleDialog(
@@ -119,6 +123,18 @@ fun NewThemeSettingsPage(
             onSelect = { mode ->
                 viewModel.dispatch(ThemeSettingsAction.SetThemeMode(mode))
                 showThemeModeDialog = false
+            }
+        )
+    }
+
+    if (showAppLanguageDialog) {
+        AppLanguageDialog(
+            currentLanguageTag = uiState.appLanguageTag,
+            supportedLanguages = uiState.supportedAppLanguages,
+            onDismiss = { showAppLanguageDialog = false },
+            onSelect = { languageTag ->
+                viewModel.dispatch(ThemeSettingsAction.SetAppLanguage(languageTag))
+                showAppLanguageDialog = false
             }
         )
     }
@@ -276,6 +292,14 @@ fun NewThemeSettingsPage(
                             }
                             item {
                                 BaseWidget(
+                                    icon = AppIcons.Translate,
+                                    title = stringResource(R.string.app_language),
+                                    description = currentAppLanguage?.displayName,
+                                    onClick = { showAppLanguageDialog = true }
+                                ) {}
+                            }
+                            item {
+                                BaseWidget(
                                     icon = Icons.Default.Style,
                                     title = stringResource(R.string.theme_settings_palette_style),
                                     description = uiState.paletteStyle.displayName,
@@ -410,7 +434,7 @@ fun NewThemeSettingsPage(
                                 SwitchWidget(
                                     icon = AppIcons.Launcher,
                                     title = stringResource(R.string.theme_settings_hide_launcher_icon),
-                                    description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
+                                    description = stringResource(R.string.theme_settings_hide_launcher_icon_desc_recovery),
                                     checked = !uiState.showLauncherIcon,
                                     onCheckedChange = { newCheckedState ->
                                         if (newCheckedState) {

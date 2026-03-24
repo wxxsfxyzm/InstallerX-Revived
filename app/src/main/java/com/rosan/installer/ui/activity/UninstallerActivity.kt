@@ -6,9 +6,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
@@ -37,7 +37,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 
-class UninstallerActivity : ComponentActivity(), KoinComponent {
+class UninstallerActivity : AppCompatActivity(), KoinComponent {
     companion object {
         private const val KEY_ID = "uninstaller_id"
         private const val EXTRA_PACKAGE_NAME = "package_name"

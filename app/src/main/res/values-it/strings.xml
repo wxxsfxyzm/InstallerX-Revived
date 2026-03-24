@@ -55,4 +55,6 @@
     <string name="theme_settings_miuix_custom_colors">Colori personalizzati</string>
     <string name="theme_settings_miuix_custom_colors_desc">Personalizza i colori del tema in stile Miuix</string>
     <string name="theme_settings_google_ui">Google Material 3</string>
+    <string name="app_language">Lingua dell\'app</string>
+    <string name="app_language_follow_system">Segui la lingua di sistema</string>
 </resources>

@@ -693,4 +693,8 @@
     <string name="config_apk_choose_all">Secara bawaan, semua APK akan dipilih selama instalasi massal</string>
     <string name="config_apk_choose_all_desc">Secara bawaan, semua berkas APK akan dipilih untuk sesi dengan banyak file.</string>
     <string name="lab_mi_island_desc">Gaya notifikasi global. Verifikasi tanda tangan sistem hanya dapat dilewati jika app-authenticator kustom diatur ke Shizuku. Pengguna root dapat mengaktifkannya langsung setelah menonaktifkan pembatasan tanda tangan secara manual</string>
+    <string name="app_language">Bahasa aplikasi</string>
+    <string name="app_language_follow_system">Ikuti bahasa sistem</string>
 </resources>
+
+

@@ -82,8 +82,12 @@
     <string name="theme_settings_launcher_icons">桌面圖示</string>
     <string name="theme_settings_hide_launcher_icon">隱藏桌面圖示</string>
     <string name="theme_settings_hide_launcher_icon_desc">透過 *#*#46789#*#* 來存取設定</string>
+    <string name="theme_settings_hide_launcher_icon_desc_recovery">加入快捷設定磁貼，或透過 *#*#46789#*#* 來存取設定</string>
+    <string name="theme_settings_hide_launcher_icon_warning_recovery">如果您希望隱藏桌面圖示後仍能從狀態列開啟，請先把 InstallerX 磁貼加入快捷設定。</string>
     <string name="theme_settings_hide_launcher_icon_warning">請在隱藏之前確認您能夠存取本應用程式設定介面！</string>
     <string name="theme_settings_hide_launcher_icon_warning_xiaomi">對於 HyperOS，請允許「自啟動」和「背景彈出介面」，以接收撥號介面代碼！</string>
+    <string name="quick_settings_tile_label">InstallerX</string>
+    <string name="quick_settings_tile_subtitle">開啟設定</string>
     <string name="installer_settings">安裝程式設定</string>
     <string name="installer_settings_desc">更改安裝程式的全域設定</string>
     <string name="installer_settings_global_installer">全域</string>
@@ -707,4 +711,8 @@
     <string name="lab_mi_island">小米超級島</string>
     <string name="lab_mi_island_desc">覆蓋全域通知樣式。 僅當應用授權器設定為 Shizuku 時可繞過系統簽名限制；Root 使用者在手動關閉系統簽名驗證後可直接開啟</string>
     <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="app_language">應用程式語言</string>
+    <string name="app_language_follow_system">跟隨系統語言</string>
 </resources>
+
+

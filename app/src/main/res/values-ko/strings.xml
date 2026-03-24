@@ -151,4 +151,8 @@
     <string name="save_logs_desc">디버깅을 위해 로그를 로컬 파일에 저장합니다</string>
     <string name="export_logs">수출 로그</string>
     <string name="export_logs_desc">앱의 로그 내보내기</string>
+    <string name="app_language">앱 언어</string>
+    <string name="app_language_follow_system">시스템 언어 따르기</string>
 </resources>
+
+

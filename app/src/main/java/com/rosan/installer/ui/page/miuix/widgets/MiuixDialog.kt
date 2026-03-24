@@ -132,6 +132,7 @@ fun MiuixHideLauncherIconWarningDialog(
             // Custom content layout with body text and action buttons
             Column {
                 // Warning message
+                Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_recovery))
                 Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
                 if (DeviceConfig.currentManufacturer == Manufacturer.XIAOMI)
                     Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi))

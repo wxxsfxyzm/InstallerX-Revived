@@ -44,6 +44,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.ThemeSe
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBlurWarningDialog
+import com.rosan.installer.ui.page.miuix.widgets.MiuixAppLanguageWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixColorSpecWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixHideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixPaletteStyleWidget
@@ -159,6 +160,17 @@ fun MiuixThemeSettingsPage(
                                 currentThemeMode = uiState.themeMode,
                                 onThemeModeChange = { newMode ->
                                     viewModel.dispatch(ThemeSettingsAction.SetThemeMode(newMode))
+                                }
+                            )
+                            MiuixAppLanguageWidget(
+                                currentLanguageTag = uiState.appLanguageTag,
+                                supportedLanguages = uiState.supportedAppLanguages,
+                                onLanguageChange = { languageTag ->
+                                    viewModel.dispatch(
+                                        ThemeSettingsAction.SetAppLanguage(
+                                            languageTag
+                                        )
+                                    )
                                 }
                             )
                             MiuixSwitchWidget(
@@ -343,7 +355,7 @@ fun MiuixThemeSettingsPage(
                         ) {
                             MiuixSwitchWidget(
                                 title = stringResource(R.string.theme_settings_hide_launcher_icon),
-                                description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
+                                description = stringResource(R.string.theme_settings_hide_launcher_icon_desc_recovery),
                                 checked = !uiState.showLauncherIcon,
                                 onCheckedChange = { newCheckedState ->
                                     if (newCheckedState) {

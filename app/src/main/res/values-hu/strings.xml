@@ -650,4 +650,8 @@
     <string name="lab_unstable_features">Instabil funkciók</string>
     <string name="lab_set_install_requester">Telepítési kérelmező beállítása</string>
     <string name="lab_set_install_requester_desc">Töltsd ki az OriganitingUid mezőt a hívó csomaggal, hogy az illeszkedjen a rendszer viselkedéséhez</string>
+    <string name="app_language">Alkalmazás nyelve</string>
+    <string name="app_language_follow_system">Rendszernyelv követése</string>
 </resources>
+
+

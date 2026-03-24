@@ -4,11 +4,17 @@
     <locale android:name="ar" />
     <locale android:name="de" />
     <locale android:name="es" />
+    <locale android:name="fa" />
     <locale android:name="fr" />
+    <locale android:name="gu" />
     <locale android:name="hu" />
     <locale android:name="id" />
+    <locale android:name="it" />
     <locale android:name="ja" />
+    <locale android:name="ko" />
+    <locale android:name="lv" />
     <locale android:name="nl" />
+    <locale android:name="pl" />
     <locale android:name="pt-BR" />
     <locale android:name="ru" />
     <locale android:name="th" />

@@ -110,8 +110,12 @@
     <string name="theme_settings_launcher_icons">Launcher icon</string>
     <string name="theme_settings_hide_launcher_icon">Hide launcher icon</string>
     <string name="theme_settings_hide_launcher_icon_desc">Dial *#*#46789#*#* to open settings</string>
+    <string name="theme_settings_hide_launcher_icon_desc_recovery">Add the Quick Settings tile, or dial *#*#46789#*#* to open settings</string>
+    <string name="theme_settings_hide_launcher_icon_warning_recovery">Add the InstallerX Quick Settings tile first if you want to reopen it from the status bar after hiding the launcher icon.</string>
     <string name="theme_settings_hide_launcher_icon_warning">Please make sure you can access this page before hiding launcher icon!</string>
     <string name="theme_settings_hide_launcher_icon_warning_xiaomi">For HyperOS, please allow "Autostart" and "Open new windows while running in the background" to receive dialer code!</string>
+    <string name="quick_settings_tile_label">InstallerX</string>
+    <string name="quick_settings_tile_subtitle">Open settings</string>
     <string name="installer_settings">Installer Settings</string>
     <string name="installer_settings_desc">Change the global settings of the installer</string>
     <string name="uninstaller_settings">Uninstaller Settings</string>
@@ -732,4 +736,8 @@
     <string name="lab_mi_island_desc">Global notification style. System signature verification can only be bypassed when the custom app-authenticator is set to Shizuku. Root users can enable this directly after manually disabling signature restrictions</string>
     <string name="lab_tap_icon_to_share">Tap icon to share apk</string>
     <string name="lab_tap_icon_to_share_desc">Tap icon on the prepare page to share apk</string>
+    <string name="app_language">App language</string>
+    <string name="app_language_follow_system">Follow system language</string>
 </resources>
+
+

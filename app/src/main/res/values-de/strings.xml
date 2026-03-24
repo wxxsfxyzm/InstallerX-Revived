@@ -658,4 +658,8 @@
     <string name="installer_author">Autor: %1$s</string>
     <string name="lab_module_always_use_root">Immer root nutzen, um Module zu flashen</string>
     <string name="lab_module_always_use_root_desc">Wenn installerX als System-installer ausgeführt wird, immer root nutzen um Module zu flashen, um beste Performance zu erzielen</string>
+    <string name="app_language">App-Sprache</string>
+    <string name="app_language_follow_system">Systemsprache verwenden</string>
 </resources>
+
+

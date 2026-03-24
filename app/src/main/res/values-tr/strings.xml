@@ -697,4 +697,8 @@
     <string name="config_apk_choose_all">Toplu yükleme sırasında varsayılan olarak tüm APK\'ları seçin</string>
     <string name="config_apk_choose_all_desc">Çoklu dosya oturumlarında varsayılan olarak tüm APK\'lar seçilir.</string>
     <string name="exception_install_parse_failed_bad_shared_user_id">Sistem tarafından önceden yüklenmiş olmayan uygulamaların shared UID\'yi kullanımı yasaktır</string>
+    <string name="app_language">Uygulama dili</string>
+    <string name="app_language_follow_system">Sistem dilini takip et</string>
 </resources>
+
+
