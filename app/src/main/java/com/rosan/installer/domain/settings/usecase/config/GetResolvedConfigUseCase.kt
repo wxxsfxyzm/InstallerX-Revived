@@ -67,7 +67,9 @@ class GetResolvedConfigUseCase(
             if (config != null) return config
         }
 
-        config = configRepo.all().firstOrNull()
+        // Fetch only the default configuration directly from the database
+        // Avoid using all().firstOrNull() to save memory and IO performance
+        config = configRepo.findDefault()
         if (config != null) return config
 
         return ConfigModel.generateOptimalDefault()

@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kyant.backdrop.backdrops.LayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.Level
@@ -77,7 +79,8 @@ fun MiuixPreferredPage(
     hazeState: HazeState?,
     title: String,
     outerPadding: PaddingValues,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    backdrop: LayerBackdrop?
 ) {
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -149,6 +152,7 @@ fun MiuixPreferredPage(
                     modifier = Modifier
                         .fillMaxSize()
                         .then(hazeState?.let { Modifier.hazeSource(it) } ?: Modifier)
+                        .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                         .scrollEndHaptic()
                         .overScrollVertical()
                         .nestedScroll(scrollBehavior.nestedScrollConnection),

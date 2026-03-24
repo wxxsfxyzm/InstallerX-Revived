@@ -46,6 +46,10 @@ class ConfigRepoImpl(
         return dao.flowFind(id).map { it?.toDomainModel() }
     }
 
+    override suspend fun findDefault(): ConfigModel? {
+        return dao.findDefault()?.toDomainModel()
+    }
+
     override suspend fun update(model: ConfigModel) {
         val entity = model.toEntity()
         entity.modifiedAt = System.currentTimeMillis()

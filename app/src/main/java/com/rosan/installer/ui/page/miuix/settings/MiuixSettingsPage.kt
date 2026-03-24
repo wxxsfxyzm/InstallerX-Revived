@@ -12,16 +12,22 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,9 +44,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -49,6 +58,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.kyant.backdrop.backdrops.LayerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
@@ -64,6 +75,8 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.Mi
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.lab.MiuixLabPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.uninstaller.MiuixUninstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.miuix.widgets.FloatingBottomBar
+import com.rosan.installer.ui.page.miuix.widgets.FloatingBottomBarItem
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
@@ -84,6 +97,7 @@ import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @OptIn(ExperimentalHazeMaterialsApi::class)
@@ -96,7 +110,7 @@ fun MiuixSettingsPage(
     val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
     val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val useBlur = uiState.useBlur
-
+    val useFloatingBottomBar = true
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(currentBackStackEntry, sharedState.pendingNavigateToTheme) {
@@ -161,6 +175,11 @@ fun MiuixSettingsPage(
             val snackbarHostState = remember { SnackbarHostState() }
             val hazeState = if (useBlur) remember { HazeState() } else null
             val hazeStyle = rememberMiuixHazeStyle()
+            val surfaceColor = MiuixTheme.colorScheme.surface
+            val backdrop = rememberLayerBackdrop {
+                drawRect(surfaceColor)
+                drawContent()
+            }
 
             // --- Layout Decision Logic ---
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -184,8 +203,11 @@ fun MiuixSettingsPage(
                         pagerState = pagerState,
                         navigationItems = navigationItems,
                         snackbarHostState = snackbarHostState,
+                        useFloatingBottomBar = useFloatingBottomBar,
                         hazeState = hazeState,
-                        hazeStyle = hazeStyle
+                        hazeStyle = hazeStyle,
+                        backdrop = backdrop,
+                        isBlurEnabled = useBlur
                     )
             }
         }
@@ -249,29 +271,86 @@ private fun SettingsCompactLayout(
     pagerState: PagerState,
     navigationItems: List<NavigationItem>,
     snackbarHostState: SnackbarHostState,
+    useFloatingBottomBar: Boolean,
     hazeState: HazeState?,
-    hazeStyle: HazeStyle
+    hazeStyle: HazeStyle,
+    backdrop: LayerBackdrop,
+    isBlurEnabled: Boolean
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            NavigationBar(
-                modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
-                color = hazeState.getMiuixAppBarColor()
-            ) {
-                navigationItems.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        selected = pagerState.currentPage == index,
-                        onClick = {
+            if (useFloatingBottomBar) {
+                // Floating Bottom Bar Layout
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    FloatingBottomBar(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {},
+                            )
+                            .padding(bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+                        selectedIndex = { pagerState.currentPage },
+                        onSelected = { index ->
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(index)
                             }
                         },
-                        icon = item.icon,
-                        label = item.label
-                    )
+                        backdrop = backdrop,
+                        tabsCount = navigationItems.size,
+                        isBlurEnabled = isBlurEnabled
+                    ) {
+                        navigationItems.forEachIndexed { index, item ->
+                            FloatingBottomBarItem(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
+                                modifier = Modifier.defaultMinSize(minWidth = 76.dp)
+                            ) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.label,
+                                    tint = MiuixTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = item.label,
+                                    fontSize = 11.sp,
+                                    lineHeight = 14.sp,
+                                    color = MiuixTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Visible
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Standard Miuix Navigation Bar Layout
+                NavigationBar(
+                    modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
+                    color = hazeState.getMiuixAppBarColor()
+                ) {
+                    navigationItems.forEachIndexed { index, item ->
+                        NavigationBarItem(
+                            selected = pagerState.currentPage == index,
+                            onClick = {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
+                            },
+                            icon = item.icon,
+                            label = item.label
+                        )
+                    }
                 }
             }
         },
@@ -306,7 +385,9 @@ private fun SettingsCompactLayout(
             navigationItems = navigationItems,
             snackbarHostState = snackbarHostState,
             modifier = Modifier.fillMaxSize(),
-            outerPadding = paddingValues
+            outerPadding = paddingValues,
+            useFloatingBottomBar = useFloatingBottomBar,
+            backdrop = backdrop
         )
     }
 }
@@ -410,7 +491,9 @@ private fun SettingsWideContent(
             navigationItems = navigationItems,
             snackbarHostState = snackbarHostState,
             modifier = Modifier.fillMaxSize(),
-            outerPadding = paddingValues
+            outerPadding = paddingValues,
+            useFloatingBottomBar = false,
+            backdrop = null
         )
     }
 }
@@ -423,7 +506,9 @@ private fun InstallerPagerContent(
     navigationItems: List<NavigationItem>,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
-    outerPadding: PaddingValues
+    outerPadding: PaddingValues,
+    useFloatingBottomBar: Boolean,
+    backdrop: LayerBackdrop?
 ) {
     HorizontalPager(
         state = pagerState,
@@ -437,7 +522,8 @@ private fun InstallerPagerContent(
                 hazeState = hazeState,
                 title = navigationItems[page].label,
                 outerPadding = outerPadding,
-                snackbarHostState = snackbarHostState
+                snackbarHostState = snackbarHostState,
+                backdrop = backdrop
             )
 
             1 -> MiuixPreferredPage(
@@ -445,7 +531,8 @@ private fun InstallerPagerContent(
                 hazeState = hazeState,
                 title = navigationItems[page].label,
                 outerPadding = outerPadding,
-                snackbarHostState = snackbarHostState
+                snackbarHostState = snackbarHostState,
+                backdrop = backdrop
             )
         }
     }

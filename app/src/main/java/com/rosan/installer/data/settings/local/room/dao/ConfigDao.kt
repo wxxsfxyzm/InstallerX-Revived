@@ -32,6 +32,9 @@ interface ConfigDao {
     @Query("select * from config where id = :id limit 1")
     fun flowFind(id: Long): Flow<ConfigEntity?>
 
+    @Query("select * from config order by id asc limit 1")
+    suspend fun findDefault(): ConfigEntity?
+
     @Update
     suspend fun update(entity: ConfigEntity)
 

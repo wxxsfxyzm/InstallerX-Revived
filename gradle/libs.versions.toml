@@ -31,6 +31,7 @@ miuix = "0.8.8"
 okhttp = "5.3.2"
 monetcompat = "0.4.1"
 materialKolor = "5.0.0-alpha07"
+backdrop = "1.0.6"
 
 [plugins]
 agp-lib = { id = "com.android.library", version.ref = "agp" }
@@ -51,6 +52,7 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 androix-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
 
 capsule = { module = "io.github.kyant0:capsule", version.ref = "capsule" }
+backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 focus-api = { module = "com.xzakota.hyper.notification:focus-api", version.ref = "focusApi" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
@@ -113,7 +115,8 @@ miuix = { group = "top.yukonga.miuix.kmp", name = "miuix-android", version.ref =
 miuix-icons = { group = "top.yukonga.miuix.kmp", name = "miuix-icons-android", version.ref = "miuix" }
 
 # okhttp
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp" }
+okhttp-bom = { module = "com.squareup.okhttp3:okhttp-bom", version.ref = "okhttp" }
 
 # MonetCompat
 # https://github.com/KieronQuinn/MonetCompat

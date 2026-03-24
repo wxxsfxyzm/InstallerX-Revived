@@ -17,6 +17,8 @@ interface ConfigRepo {
 
     fun flowFind(id: Long): Flow<ConfigModel?>
 
+    suspend fun findDefault(): ConfigModel?
+
     suspend fun update(model: ConfigModel)
 
     suspend fun insert(model: ConfigModel)
