@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.settings
 
+import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -112,6 +113,7 @@ fun MiuixSettingsPage(
     val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val useBlur = uiState.useBlur
     val useFloatingBottomBar = uiState.useAppleFloatingBar
+    val useFloatingBottomBarBlur = useBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(currentBackStackEntry, sharedState.pendingNavigateToTheme) {
@@ -205,10 +207,10 @@ fun MiuixSettingsPage(
                         navigationItems = navigationItems,
                         snackbarHostState = snackbarHostState,
                         useFloatingBottomBar = useFloatingBottomBar,
+                        useFloatingBottomBarBlur = useFloatingBottomBarBlur,
                         hazeState = hazeState,
                         hazeStyle = hazeStyle,
                         backdrop = backdrop,
-                        isBlurEnabled = useBlur
                     )
             }
         }
@@ -273,10 +275,10 @@ private fun SettingsCompactLayout(
     navigationItems: List<NavigationItem>,
     snackbarHostState: SnackbarHostState,
     useFloatingBottomBar: Boolean,
+    useFloatingBottomBarBlur: Boolean,
     hazeState: HazeState?,
     hazeStyle: HazeStyle,
-    backdrop: LayerBackdrop,
-    isBlurEnabled: Boolean
+    backdrop: LayerBackdrop
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -305,7 +307,7 @@ private fun SettingsCompactLayout(
                         },
                         backdrop = backdrop,
                         tabsCount = navigationItems.size,
-                        isBlurEnabled = isBlurEnabled
+                        isBlurEnabled = useFloatingBottomBarBlur
                     ) {
                         navigationItems.forEachIndexed { index, item ->
                             FloatingBottomBarItem(
