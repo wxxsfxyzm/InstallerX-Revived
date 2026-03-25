@@ -697,4 +697,10 @@
     <string name="lab_mi_island">Mi Super Island</string>
     <string name="lab_mi_island_desc">Estilo de notificação global. A verificação da assinatura do sistema só pode ser ignorada quando o autenticador de aplicativos personalizado estiver definido como Shizuku. Os usuários root podem ativar isso diretamente após desativar manualmente as restrições de assinatura</string>
     <string name="exception_install_parse_failed_bad_shared_user_id">Apps não pré-carregados são proibidos de usar o UID compartilhado do sistema</string>
+    <string name="installer_xposed_min_api">API Mín:</string>
+    <string name="installer_xposed_target_api">API Alvo:</string>
+    <string name="error_dialog_install_menu_not_available">O menu avançado não está disponível</string>
+    <string name="error_no_package_to_uninstall">Não há pacotes disponíveis para desinstalação</string>
+    <string name="lab_tap_icon_to_share">Toque no ícone para compartilhar o APK</string>
+    <string name="lab_tap_icon_to_share_desc">Toque no ícone na página de preparação para compartilhar o APK</string>
 </resources>

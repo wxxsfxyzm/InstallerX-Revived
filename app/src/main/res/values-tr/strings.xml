@@ -697,4 +697,12 @@
     <string name="config_apk_choose_all">Toplu yükleme sırasında varsayılan olarak tüm APK\'ları seçin</string>
     <string name="config_apk_choose_all_desc">Çoklu dosya oturumlarında varsayılan olarak tüm APK\'lar seçilir.</string>
     <string name="exception_install_parse_failed_bad_shared_user_id">Sistem tarafından önceden yüklenmiş olmayan uygulamaların shared UID\'yi kullanımı yasaktır</string>
+    <string name="theme_settings_use_apple_floating_bar">Yüzen alt çubuğu etkinleştir</string>
+    <string name="theme_settings_use_apple_floating_bar_desc">Ekranın alt kısmında yüzen bir gezinme çubuğu görüntüler</string>
+    <string name="installer_xposed_min_api">Min API:</string>
+    <string name="installer_xposed_target_api">Hedef API:</string>
+    <string name="error_dialog_install_menu_not_available">Genişletilmiş menü mevcut değil</string>
+    <string name="error_no_package_to_uninstall">Kaldırılacak paket yok</string>
+    <string name="lab_tap_icon_to_share">APK\'yı paylaşmak için simgeye dokunun</string>
+    <string name="lab_tap_icon_to_share_desc">APK\'yı paylaşmak için hazırlık sayfasındaki simgeye dokunun</string>
 </resources>
