@@ -48,7 +48,7 @@
     <string name="theme_settings_hide_launcher_icon">Cacher l\'icône de l\'appli dans le lanceur</string>
     <string name="theme_settings_hide_launcher_icon_desc">Composez *#*#46789#*#* pour ouvrir les paramètres</string>
     <string name="theme_settings_hide_launcher_icon_warning">Assurez-vous de pouvoir accéder à cette page avant de masquer l\'icône du lanceur !</string>
-    <string name="theme_settings_hide_launcher_icon_warning_xiaomi">Sur HyperOS, veuillez autoriser le démarrage automatique et l\'ouverture de nouvelles fenêtres lors de l\'exécution en arrière-plan pour pouvoir recevoir le code correctement !</string>
+    <string name="theme_settings_hide_launcher_icon_warning_xiaomi">Sur HyperOS, veuillez autoriser le démarrage automatique et l\'ouverture de nouvelles fenêtres lors de l\'exécution en arrière-plan pour pouvoir recevoir le code correctement !</string>
     <string name="installer_settings">Paramètres de l\'installateur</string>
     <string name="installer_settings_desc">Modifiez les paramètres globaux du programme d\'installation</string>
     <string name="installer_settings_global_installer">Général</string>
@@ -573,7 +573,7 @@
     <string name="installer_settings_auto_clear_time_never_desc">Ne jamais effacer la notification de réussite de l\'installation</string>
     <string name="installer_settings_auto_clear_time_seconds_format">%d secondes</string>
     <string name="installer_settings_auto_clear_time_seconds_format_desc">Effacer la notification de réussite de l\'installation après %d secondes</string>
-    <string name="theme_settings_use_blur_warning">L\'effet de flou peut être instable et causer des problèmes inattendus sur Android 11 et les versions antérieures. Vous devrez peut-être effacer les données de l\'application si des problèmes surviennent. Voulez-vous continuer ?</string>
+    <string name="theme_settings_use_blur_warning">L\'effet de flou peut être instable et causer des problèmes inattendus sur Android 11 et les versions antérieures. Vous devrez peut-être effacer les données de l\'application si des problèmes surviennent. Voulez-vous continuer ?</string>
     <string name="config_authorizer_none_system_app_tips">En tant qu\'installateur système, la plupart des options ici ne sont pas nécessaires.</string>
     <string name="config_install_mode_desc">Mode d\'installation par défaut et paramètres associés</string>
     <string name="config_install_reason">Raison de l\'installation</string>
