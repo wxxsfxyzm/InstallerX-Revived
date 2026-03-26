@@ -14,7 +14,6 @@ import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.AnalyseFailedAllFilesUnsupportedException
 import com.rosan.installer.domain.engine.exception.AuthenticationFailedException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
-import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.SessionMode
 import com.rosan.installer.domain.engine.model.sourcePath
@@ -338,9 +337,6 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
             val appEntities = groupedQueue[session.currentMultiInstallIndex]
             val firstEntity = appEntities.first()
 
-            val appLabel = (firstEntity.app as? AppEntity.BaseEntity)?.label
-                ?: firstEntity.app.packageName
-
             val currentProgressIndex = session.currentMultiInstallIndex + 1
             val totalCount = groupedQueue.size
 
@@ -546,12 +542,24 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
         // 3. Use UseCase to clear memory icon cache for this specific session
         clearAppIconCache(sessionId = sessionId)
 
-        // 4. If the operation was a success, ensure the global system cache is also refreshed
+        // 4. Ensure the global system cache is also refreshed
         val lastProgress = session.progress.replayCache.firstOrNull()
-        if (lastProgress is ProgressEntity.InstallSuccess || lastProgress is ProgressEntity.UninstallSuccess) {
-            session.analysisResults.firstOrNull()?.packageName?.let {
-                clearAppIconCache(packageName = it)
+        when (lastProgress) {
+            is ProgressEntity.InstallSuccess, is ProgressEntity.UninstallSuccess -> {
+                session.analysisResults.firstOrNull()?.packageName?.let {
+                    clearAppIconCache(packageName = it)
+                }
             }
+
+            is ProgressEntity.InstallCompleted -> {
+                session.multiInstallResults
+                    .filter { it.success }
+                    .forEach { result ->
+                        clearAppIconCache(packageName = result.entity.app.packageName)
+                    }
+            }
+
+            else -> {}
         }
     }
 
