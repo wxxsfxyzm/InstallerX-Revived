@@ -20,6 +20,7 @@ import java.util.Locale
  * A Timber Tree that logs to files asynchronously.
  * Uses a buffered Channel to prevent blocking the UI thread and OOM issues.
  */
+@Suppress("LogNotTimber")
 class FileLoggingTree(
     private val context: Context
 ) : Timber.Tree() {

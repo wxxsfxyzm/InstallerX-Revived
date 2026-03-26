@@ -5,8 +5,8 @@ package com.rosan.installer.di.init
 import com.rosan.installer.di.coreModule
 import com.rosan.installer.di.deviceModule
 import com.rosan.installer.di.engineModule
+import com.rosan.installer.di.initModule
 import com.rosan.installer.di.installerModule
-import com.rosan.installer.di.logModule
 import com.rosan.installer.di.networkModule
 import com.rosan.installer.di.privilegedModule
 import com.rosan.installer.di.serializationModule
@@ -24,6 +24,6 @@ val appModules = listOf(
     networkModule,
     updateModule,
     deviceModule,
-    logModule,
+    initModule,
     privilegedModule
 )

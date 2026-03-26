@@ -82,7 +82,6 @@ import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.U
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsViewModel
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
-import com.rosan.installer.ui.util.rememberCacheInfo
 import com.rosan.installer.util.hasFlag
 import org.koin.compose.koinInject
 
@@ -422,18 +421,6 @@ fun DefaultInstaller(
             stringResource(if (lock) R.string.lock_default_installer_desc else R.string.unlock_default_installer_desc),
         enabled = enabled,
         onClick = onClick
-    ) {}
-}
-
-@Composable
-fun ClearCache() {
-    val cacheState = rememberCacheInfo()
-    BaseWidget(
-        icon = AppIcons.ClearAll,
-        title = stringResource(id = R.string.clear_cache),
-        description = cacheState.description,
-        enabled = !cacheState.inProgress,
-        onClick = { cacheState.onClear() }
     ) {}
 }
 

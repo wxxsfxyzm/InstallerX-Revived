@@ -45,7 +45,6 @@ import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.page.miuix.widgets.MiuixAutoLockInstaller
-import com.rosan.installer.ui.page.miuix.widgets.MiuixClearCache
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDefaultInstaller
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDisableAdbVerify
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationSetting
@@ -232,7 +231,6 @@ fun MiuixPreferredPage(
                         lock = false,
                         enabled = uiState.authorizer != Authorizer.None,
                     ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
-                    MiuixClearCache()
                 }
             }
             item { SmallTitle(stringResource(R.string.other)) }

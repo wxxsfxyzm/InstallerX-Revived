@@ -55,7 +55,6 @@ import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.U
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
 import com.rosan.installer.ui.theme.material.ThemeMode
-import com.rosan.installer.ui.util.rememberCacheInfo
 import com.rosan.installer.util.hasFlag
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -326,17 +325,6 @@ fun MiuixDefaultInstaller(
         ),
         enabled = enabled,
         onClick = onClick
-    )
-}
-
-@Composable
-fun MiuixClearCache() {
-    val cacheState = rememberCacheInfo()
-    BasicComponent(
-        enabled = !cacheState.inProgress,
-        title = stringResource(id = R.string.clear_cache),
-        summary = cacheState.description,
-        onClick = { cacheState.onClear() }
     )
 }
 

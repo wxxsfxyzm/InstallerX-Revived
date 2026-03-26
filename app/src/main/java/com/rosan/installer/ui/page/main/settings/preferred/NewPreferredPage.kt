@@ -54,7 +54,6 @@ import com.rosan.installer.ui.page.main.settings.SettingsScreen
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.main.widget.setting.AutoLockInstaller
-import com.rosan.installer.ui.page.main.widget.setting.ClearCache
 import com.rosan.installer.ui.page.main.widget.setting.DefaultInstaller
 import com.rosan.installer.ui.page.main.widget.setting.DisableAdbVerify
 import com.rosan.installer.ui.page.main.widget.setting.IgnoreBatteryOptimizationSetting
@@ -246,7 +245,6 @@ fun NewPreferredPage(
                             enabled = uiState.authorizer != Authorizer.None
                         ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
                     }
-                    item { ClearCache() }
                 }
             }
             // --- Other Settings Group ---
