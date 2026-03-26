@@ -14,7 +14,6 @@ import com.rosan.installer.R
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.DataType
-import com.rosan.installer.domain.engine.model.InstallOption
 import com.rosan.installer.domain.engine.model.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.sourcePath
 import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
@@ -262,15 +261,7 @@ class InstallerViewModel(
         this.session = session
         if (session.config.enableCustomizeUser) loadAvailableUsers(session.config.authorizer)
 
-        val initialInstallFlags = listOfNotNull(
-            session.config.allowTestOnly.takeIf { it }?.let { InstallOption.AllowTest.value },
-            session.config.allowDowngrade.takeIf { it }?.let { InstallOption.AllowDowngrade.value },
-            session.config.forAllUser.takeIf { it }?.let { InstallOption.AllUsers.value },
-            session.config.bypassLowTargetSdk.takeIf { it }?.let { InstallOption.BypassLowTargetSdkBlock.value },
-            session.config.allowAllRequestedPermissions.takeIf { it }?.let { InstallOption.GrantAllRequestedPermissions.value }
-        ).fold(0) { acc, flag -> acc or flag }
-
-        session.config.installFlags = initialInstallFlags
+        val initialInstallFlags = session.config.installFlags
 
         _localState.update {
             it.copy(
