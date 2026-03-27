@@ -1,4 +1,6 @@
-package com.rosan.installer
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
+package com.rosan.installer.framework.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -15,7 +17,7 @@ class SecretCodeReceiver : BroadcastReceiver() {
 
     // This method is called when the BroadcastReceiver receives an Intent broadcast.
     override fun onReceive(context: Context, intent: Intent) {
-        Timber.d("onReceive: $intent, action: ${intent.action}")
+        Timber.Forest.d("onReceive: $intent, action: ${intent.action}")
 
         // --- Check if the received intent's action is the one we expect. ---
         val isSecretCodeAction =
@@ -33,7 +35,7 @@ class SecretCodeReceiver : BroadcastReceiver() {
             context.startActivity(i)
         } else {
             // Log a warning if the action does not match.
-            Timber.w("Received an intent with unexpected action: ${intent.action}")
+            Timber.Forest.w("Received an intent with unexpected action: ${intent.action}")
         }
     }
 }

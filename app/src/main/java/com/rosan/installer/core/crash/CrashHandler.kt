@@ -1,8 +1,10 @@
-package com.rosan.installer
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+package com.rosan.installer.core.crash
 
+import android.os.Process
 import timber.log.Timber
 import kotlin.system.exitProcess
-import android.os.Process as AndroidProcess
 
 object CrashHandler : Thread.UncaughtExceptionHandler {
     private var defaultHandler: Thread.UncaughtExceptionHandler? = null
@@ -14,7 +16,7 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
 
     override fun uncaughtException(t: Thread, e: Throwable) {
         // Log the crash to Timber (which pipes it to the file)
-        Timber.tag("CRASH").e(e, "Uncaught Exception detected")
+        Timber.Forest.tag("CRASH").e(e, "Uncaught Exception detected")
 
         // Give the file logger a moment to drain the buffer to disk
         // This is crucial for async loggers!
@@ -25,7 +27,7 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
 
         // Delegate to default handler or kill process
         defaultHandler?.uncaughtException(t, e) ?: run {
-            AndroidProcess.killProcess(AndroidProcess.myPid())
+            Process.killProcess(Process.myPid())
             exitProcess(1)
         }
     }

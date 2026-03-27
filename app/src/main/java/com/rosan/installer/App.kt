@@ -3,6 +3,7 @@ package com.rosan.installer
 import android.app.Application
 import android.os.Build
 import com.kieronquinn.monetcompat.core.MonetCompat
+import com.rosan.installer.core.crash.CrashHandler
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.privileged.service.AutoLockService
 import com.rosan.installer.di.init.appModules

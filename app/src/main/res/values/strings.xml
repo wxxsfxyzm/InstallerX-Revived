@@ -371,6 +371,7 @@
     <string name="installer_install_failed">Install failed</string>
     <string name="installer_install_success">Install success</string>
     <string name="installer_install_complete">Install complete</string>
+    <string name="batch_install_result_message">Batch installation: %1$d/%2$d successful</string>
     <string name="installer_silent_install">Silent Install</string>
     <string name="installer_error_reason">Error Reason</string>
     <string name="installer_unknown_error">Unknown Error</string>

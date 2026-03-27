@@ -146,7 +146,7 @@
             android:finishOnTaskLaunch="true" />
 
         <service
-            android:name="com.rosan.installer.data.session.service.InstallerService"
+            android:name="com.rosan.installer.framework.service.InstallerService"
             android:foregroundServiceType="specialUse">
 
             <property
@@ -157,7 +157,7 @@
         <service
             android:label="@string/app_name"
             android:icon="@drawable/ic_tile_icon"
-            android:name="com.rosan.installer.ui.tile.SettingsTileService"
+            android:name="com.rosan.installer.framework.tile.SettingsTileService"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             android:exported="true">
             <intent-filter>
@@ -184,7 +184,7 @@
         </provider>
 
         <receiver
-            android:name=".SecretCodeReceiver"
+            android:name=".framework.receiver.SecretCodeReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SECRET_CODE" />

@@ -32,7 +32,7 @@ jobs:
       - name: Get commit short SHA & Date
         id: vars
         run: |
-          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "SHORT_SHA=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
           echo "YY_MM=$(date +'%y.%m')" >> $GITHUB_OUTPUT
 
       - name: Set up JDK 25

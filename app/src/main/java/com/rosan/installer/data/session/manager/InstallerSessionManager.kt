@@ -5,8 +5,8 @@ package com.rosan.installer.data.session.manager
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
-import com.rosan.installer.data.session.service.InstallerService
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.framework.service.InstallerService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf

@@ -51,7 +51,7 @@ jobs:
 
       - name: Get commit short SHA
         id: commit_sha
-        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: echo "SHORT_SHA=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
 
       - name: Set up JDK 25
         uses: actions/setup-java@v5

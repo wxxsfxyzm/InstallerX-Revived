@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
-package com.rosan.installer.data.session.service
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+package com.rosan.installer.framework.service
 
 import android.app.PendingIntent
 import android.app.Service
@@ -21,6 +21,7 @@ import com.rosan.installer.data.session.handler.ProgressHandler
 import com.rosan.installer.data.session.manager.InstallerSessionManager
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -52,30 +53,12 @@ class InstallerService : Service() {
     // Lifecycle scope for the Service itself (not specific installers)
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())
 
-    // Map storing scopes for each active installer ID
-    private val installerScopes = mutableMapOf<String, CoroutineScope>()
+    // Map storing scopes for each active session ID
+    private val sessionScopes = mutableMapOf<String, CoroutineScope>()
 
     private var idleTimeoutJob: Job? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
-
-    override fun onCreate() {
-        super.onCreate()
-        Timber.d("InstallerService: onCreate. Creating Notification Channel.")
-        createNotificationChannel()
-
-        // Restore state from Manager.
-        // If Service crashed/restarted but App Process (and Manager) is alive, re-attach handlers.
-        restoreSessions()
-    }
-
-    private fun restoreSessions() {
-        val activeSessions = sessionManager.getAllSessions()
-        if (activeSessions.isNotEmpty()) {
-            Timber.i("InstallerService: Restoring ${activeSessions.size} active sessions from Manager.")
-            activeSessions.forEach { setupInstallerScope(it) }
-        }
-    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val actionString = intent?.action
@@ -101,8 +84,8 @@ class InstallerService : Service() {
             Action.Destroy -> stopServiceForcefully()
             Action.Ready -> {
                 if (id != null) {
-                    sessionManager.get(id)?.let { repo ->
-                        setupInstallerScope(repo)
+                    sessionManager.get(id)?.let { session ->
+                        setupSessionScope(session)
                     } ?: run {
                         Timber.w("Received Ready action for ID $id but Repo not found in Manager.")
                     }
@@ -121,11 +104,39 @@ class InstallerService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun setupInstallerScope(installer: InstallerSessionRepository) {
-        val id = installer.id
+    override fun onCreate() {
+        super.onCreate()
+        Timber.d("InstallerService: onCreate. Creating Notification Channel.")
+        createNotificationChannel()
 
-        synchronized(installerScopes) {
-            if (installerScopes.containsKey(id)) {
+        // Restore state from Manager.
+        // If Service crashed/restarted but App Process (and Manager) is alive, re-attach handlers.
+        restoreSessions()
+    }
+
+    override fun onDestroy() {
+        Timber.d("InstallerService: onDestroy")
+        serviceScope.cancel()
+        synchronized(sessionScopes) {
+            sessionScopes.values.forEach { it.cancel() }
+            sessionScopes.clear()
+        }
+        super.onDestroy()
+    }
+
+    private fun restoreSessions() {
+        val activeSessions = sessionManager.getAllSessions()
+        if (activeSessions.isNotEmpty()) {
+            Timber.i("InstallerService: Restoring ${activeSessions.size} active sessions from Manager.")
+            activeSessions.forEach { setupSessionScope(it) }
+        }
+    }
+
+    private fun setupSessionScope(session: InstallerSessionRepository) {
+        val id = session.id
+
+        synchronized(sessionScopes) {
+            if (sessionScopes.containsKey(id)) {
                 Timber.d("[id=$id] Scope already exists. Skipping setup.")
                 return
             }
@@ -134,24 +145,27 @@ class InstallerService : Service() {
             idleTimeoutJob?.cancel()
 
             val scope = CoroutineScope(Dispatchers.IO + Job())
-            installerScopes[id] = scope
+            sessionScopes[id] = scope
 
             val handlers = listOf(
-                ActionHandler(scope, installer),
-                ProgressHandler(scope, installer),
-                ForegroundInfoHandler(scope, installer),
-                BroadcastHandler(scope, installer)
+                ActionHandler(scope, session),
+                ProgressHandler(scope, session),
+                ForegroundInfoHandler(scope, session),
+                BroadcastHandler(scope, session)
             )
+
+            // Start observing UI effects (Toasts) on the main thread
+            observeUiEffectsForSession(session)
 
             scope.launch {
                 Timber.d("[id=$id] Starting handlers.")
                 handlers.forEach { it.onStart() }
 
-                installer.progress.collect { progress ->
+                session.progress.collect { progress ->
                     if (progress is ProgressEntity.Finish) {
                         Timber.d("[id=$id] Finished. Cleaning up handlers.")
                         handlers.forEach { it.onFinish() }
-                        detachInstaller(id)
+                        detachSession(id)
                     }
                 }
             }
@@ -159,11 +173,11 @@ class InstallerService : Service() {
     }
 
     private fun checkIdleState() {
-        synchronized(installerScopes) {
+        synchronized(sessionScopes) {
             // Note: updateForegroundState() is completely removed.
             // We already promoted to foreground at the top of onStartCommand.
 
-            if (installerScopes.isEmpty()) {
+            if (sessionScopes.isEmpty()) {
                 Timber.d("No active scopes. Scheduling shutdown in $IDLE_TIMEOUT_MS ms.")
                 idleTimeoutJob?.cancel()
                 idleTimeoutJob = serviceScope.launch {
@@ -225,9 +239,9 @@ class InstallerService : Service() {
      * Removes the scope for a specific installer but keeps the Service alive momentarily
      * to check if other installers are running.
      */
-    private fun detachInstaller(id: String) {
-        synchronized(installerScopes) {
-            installerScopes.remove(id)?.cancel()
+    private fun detachSession(id: String) {
+        synchronized(sessionScopes) {
+            sessionScopes.remove(id)?.cancel()
             Timber.d("[id=$id] Scope removed and cancelled.")
         }
 
@@ -252,21 +266,51 @@ class InstallerService : Service() {
     private fun stopServiceForcefully() {
         Timber.w("Force destroying service.")
         // Clean up all scopes
-        synchronized(installerScopes) {
-            installerScopes.values.forEach { it.cancel() }
-            installerScopes.clear()
+        synchronized(sessionScopes) {
+            sessionScopes.values.forEach { it.cancel() }
+            sessionScopes.clear()
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
-    override fun onDestroy() {
-        Timber.d("InstallerService: onDestroy")
-        serviceScope.cancel()
-        synchronized(installerScopes) {
-            installerScopes.values.forEach { it.cancel() }
-            installerScopes.clear()
+    /**
+     * Observes session progress to trigger UI effects like Toasts.
+     * Executed within serviceScope which runs on Dispatchers.Main.
+     */
+    private fun observeUiEffectsForSession(session: InstallerSessionRepository) {
+        serviceScope.launch {
+            session.progress.collect { progress ->
+                when (progress) {
+                    is ProgressEntity.InstallSuccess -> {
+                        toast(R.string.installer_install_success)
+                    }
+
+                    is ProgressEntity.InstallCompleted -> {
+                        val successCount = progress.results.count { it.success }
+                        val totalCount = progress.results.size
+                        toast(R.string.batch_install_result_message, successCount, totalCount)
+                    }
+
+                    is ProgressEntity.UninstallSuccess -> {
+                        toast(R.string.uninstall_success_message)
+                    }
+
+                    is ProgressEntity.InstallFailed,
+                    is ProgressEntity.InstallAnalysedFailed,
+                    is ProgressEntity.InstallResolvedFailed -> {
+                        toast(R.string.installer_install_failed)
+                    }
+
+                    is ProgressEntity.UninstallFailed -> {
+                        toast(R.string.uninstall_failed_message)
+                    }
+
+                    else -> {
+                        // Safely ignore transitional states
+                    }
+                }
+            }
         }
-        super.onDestroy()
     }
 }
