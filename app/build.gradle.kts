@@ -26,6 +26,7 @@ plugins {
 
 android {
     compileSdk = 37
+    compileSdkMinor = 0
 
     val properties = Properties()
     val keystorePropertiesFile = rootProject.file("keystore.properties")
