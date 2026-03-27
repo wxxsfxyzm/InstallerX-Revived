@@ -12,7 +12,7 @@ import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.PackageSource
 
 data class EditViewState(
-    val data: Data = Data.build(ConfigModel.generateOptimalDefault()),
+    val data: Data = Data.build(ConfigModel.default),
     val originalData: Data? = null,
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
     val availableUsers: Map<Int, String> = emptyMap(),

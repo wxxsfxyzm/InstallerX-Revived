@@ -12,7 +12,8 @@ class GetConfigDraftUseCase(
     private val systemEnvProvider: SystemEnvProvider
 ) {
     suspend operator fun invoke(id: Long?, globalAuthorizer: Authorizer): ConfigModel {
-        var model = id?.let { configRepo.find(it) } ?: ConfigModel.default.copy(name = "")
+        // Ensure device-specific optimal presets (e.g., Xiaomi) are applied for new configs.
+        var model = id?.let { configRepo.find(it) } ?: ConfigModel.generateOptimalDefault().copy(name = "")
 
         if (!model.installRequester.isNullOrEmpty()) {
             val uid = systemEnvProvider.getPackageUid(model.installRequester)
