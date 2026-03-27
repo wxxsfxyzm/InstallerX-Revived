@@ -4,6 +4,7 @@ package com.rosan.installer.ui.page.main.settings.config.edit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rosan.installer.R
 import com.rosan.installer.domain.privileged.usecase.GetAvailableUsersUseCase
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.DexoptMode
@@ -15,6 +16,7 @@ import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.usecase.config.GetConfigDraftUseCase
 import com.rosan.installer.domain.settings.usecase.config.SaveConfigUseCase
+import com.rosan.installer.domain.settings.usecase.settings.GetPackageUidUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -27,7 +29,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class EditViewModel(
@@ -35,7 +36,8 @@ class EditViewModel(
     private val appSettingsRepo: AppSettingsRepo,
     private val getConfigDraft: GetConfigDraftUseCase,
     private val saveConfig: SaveConfigUseCase,
-    private val getAvailableUsers: GetAvailableUsersUseCase
+    private val getAvailableUsers: GetAvailableUsersUseCase,
+    private val getPackageUid: GetPackageUidUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EditViewState())
@@ -178,27 +180,18 @@ class EditViewModel(
         if (packageName.isBlank()) return
 
         installRequesterJob?.cancel()
-        installRequesterJob = viewModelScope.launch(Dispatchers.IO) {
+        installRequesterJob = viewModelScope.launch {
+            // Debounce for 300ms to avoid frequent queries while typing
             delay(300)
 
-            // To completely remove context from ViewModel, fetching UID should ideally be a UseCase.
-            // Assuming you have a way to fetch UID here, or you might need to temporarily keep context
-            // for this specific PackageManager call if you haven't abstracted it yet.
-            // For now, retaining the logic structure.
-            val uid = try {
-                // Warning: Context removal might break this if you completely un-injected context.
-                // You should move getApplicationInfo to a provider (like SystemInfoProvider).
-                null // Placeholder if context is removed. Replace with actual Provider call.
-            } catch (_: Exception) {
-                null
-            }
+            // The UseCase handles the IO thread switching and exception catching internally
+            val uid = getPackageUid(packageName)
 
-            withContext(Dispatchers.Main.immediate) {
-                _state.update { currentState ->
-                    if (currentState.data.installRequester == packageName) {
-                        currentState.copy(data = currentState.data.copy(installRequesterUid = uid))
-                    } else currentState
-                }
+            _state.update { currentState ->
+                // Double check if the package name has changed during the delay
+                if (currentState.data.installRequester == packageName) {
+                    currentState.copy(data = currentState.data.copy(installRequesterUid = uid))
+                } else currentState
             }
         }
     }
@@ -348,10 +341,25 @@ class EditViewModel(
                 _state.update { it.copy(originalData = it.data) }
                 _eventFlow.emit(EditViewEvent.Saved)
             }.onFailure { error ->
-                // To fully decouple from context, we pass the error string explicitly mapped in Domain,
-                // or emit a sealed class to UI for localized resolution.
-                // Assuming you handle mapping in the UI side now or pass standard Domain strings.
-                _eventFlow.emit(EditViewEvent.SnackBar(message = error.message ?: "Unknown error"))
+                Timber.e(error, "Failed to save config")
+
+                if (error is SaveConfigUseCase.SaveConfigException) {
+                    val errorResId = when (error.error) {
+                        SaveConfigUseCase.Error.NAME_EMPTY -> R.string.config_error_name
+                        SaveConfigUseCase.Error.CUSTOM_AUTHORIZER_EMPTY -> R.string.config_error_customize_authorizer
+                        SaveConfigUseCase.Error.INSTALLER_EMPTY -> R.string.config_error_installer
+                        SaveConfigUseCase.Error.REQUESTER_NOT_FOUND -> R.string.config_error_package_not_found
+                    }
+                    _eventFlow.emit(EditViewEvent.SnackBar(messageResId = errorResId))
+                } else {
+                    // Fallback to error message if present, otherwise use the localized unknown error resource
+                    val errorMsg = error.message
+                    if (!errorMsg.isNullOrBlank()) {
+                        _eventFlow.emit(EditViewEvent.SnackBar(message = errorMsg))
+                    } else {
+                        _eventFlow.emit(EditViewEvent.SnackBar(messageResId = R.string.installer_unknown_error))
+                    }
+                }
             }
         }
     }

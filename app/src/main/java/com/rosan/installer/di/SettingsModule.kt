@@ -26,6 +26,7 @@ import com.rosan.installer.domain.settings.usecase.config.GetConfigDraftUseCase
 import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
 import com.rosan.installer.domain.settings.usecase.config.SaveConfigUseCase
 import com.rosan.installer.domain.settings.usecase.config.ToggleAppTargetConfigUseCase
+import com.rosan.installer.domain.settings.usecase.settings.GetPackageUidUseCase
 import com.rosan.installer.domain.settings.usecase.settings.ManagePackageListUseCase
 import com.rosan.installer.domain.settings.usecase.settings.ManageSharedUidListUseCase
 import com.rosan.installer.domain.settings.usecase.settings.SetLauncherIconUseCase
@@ -85,4 +86,5 @@ val settingsModule = module {
     factoryOf(::ToggleAppTargetConfigUseCase)
     factoryOf(::ManagePackageListUseCase)
     factoryOf(::ManageSharedUidListUseCase)
+    factoryOf(::GetPackageUidUseCase)
 }

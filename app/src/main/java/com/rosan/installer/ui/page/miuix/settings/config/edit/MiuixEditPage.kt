@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.settings.config.edit
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,14 +20,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -34,8 +35,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
+import com.rosan.installer.ui.page.main.settings.config.edit.EditViewEvent
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
-import com.rosan.installer.ui.page.main.widget.util.EditEventCollector
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowAllRequestedPermissionsWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowDowngradeWidget
@@ -68,6 +69,7 @@ import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import com.rosan.installer.ui.util.isNoneActive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.Card
@@ -76,6 +78,8 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Close
@@ -90,6 +94,7 @@ fun MiuixEditPage(
     viewModel: EditViewModel = koinViewModel { parametersOf(id) },
     useBlur: Boolean
 ) {
+    val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dispatch = viewModel::dispatch
 
@@ -120,7 +125,31 @@ fun MiuixEditPage(
     val stateAuthorizer = state.data.authorizer
     val globalAuthorizer = state.globalAuthorizer
 
-    EditEventCollector(viewModel, navController, snackBarHostState)
+    val unknownErrorString = stringResource(R.string.installer_unknown_error)
+    LaunchedEffect(Unit) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is EditViewEvent.SnackBar -> {
+                    // Resolve priority:
+                    // 1. Specific Resource ID
+                    // 2. Explicit String message
+                    // 3. Localized generic fallback
+                    val snackBarText = event.messageResId?.let { @SuppressLint("LocalContextGetResourceValueCall") context.getString(it) }
+                        ?: event.message
+                        ?: unknownErrorString
+
+                    snackBarHostState.showSnackbar(
+                        message = snackBarText,
+                        withDismissAction = true,
+                    )
+                }
+
+                is EditViewEvent.Saved -> {
+                    navController.navigateUp()
+                }
+            }
+        }
+    }
 
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
@@ -153,7 +182,7 @@ fun MiuixEditPage(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        snackbarHost = { SnackbarHost(state = snackBarHostState) },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier

@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.widget.util
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -130,12 +131,22 @@ fun EditEventCollector(
     navController: NavController,
     snackBarHostState: SnackbarHostState
 ) {
+    val context = LocalContext.current
+    val unknownErrorString = stringResource(R.string.installer_unknown_error)
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is EditViewEvent.SnackBar -> {
+                    // Resolve priority:
+                    // 1. Specific Resource ID
+                    // 2. Explicit String message
+                    // 3. Localized generic fallback
+                    val snackBarText = event.messageResId?.let { @SuppressLint("LocalContextGetResourceValueCall") context.getString(it) }
+                        ?: event.message
+                        ?: unknownErrorString
+
                     snackBarHostState.showSnackbar(
-                        message = event.message,
+                        message = snackBarText,
                         withDismissAction = true,
                     )
                 }
