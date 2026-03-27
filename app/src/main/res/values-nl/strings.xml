@@ -553,7 +553,7 @@
     <string name="suggestion_uninstall_alert_dialog_confirm_action">Akkoord gaan met actie</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">Dit zal de huidige versie van de app verwijderen, maar nog wel de gegevens bewaren, daarna zal het proberen de nieuwe te installeren. NIET gebruiken op systeemapps!</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">Dit zal de huidige versie van de app verwijderen en proberen de nieuwe te installeren. NIET gebruiken op systeemapps!</string>
-    <string name="suggestion_allow_downgrade">Downgraden toestaan</string>
+    <string name="suggestion_allow_downgrade">Downgraden eenmalig toestaan</string>
     <string name="suggestion_allow_downgrade_desc">Tijdelijk downgraden toestaan en het opnieuw proberen</string>
     <string name="suggestion_allow_test_app">Testen toestaan</string>
     <string name="suggestion_allow_test_app_desc">Tijdelijk testen toestaan en het opnieuw proberen</string>
@@ -697,4 +697,13 @@
     <string name="config_apk_choose_all">Selecteer standaard alle APK\'s tijdens het meerdere installeren</string>
     <string name="config_apk_choose_all_desc">Selecteer standaard alle APK\'s voor meerdere bestandssessies.</string>
     <string name="exception_install_parse_failed_bad_shared_user_id">Niet vooraf geïnstalleerde apps kunnen niet de gedeelde UID van het systeem gebruiken</string>
+    <string name="theme_settings_use_apple_floating_bar">Zwevende balk onderaan inschakelen</string>
+    <string name="theme_settings_use_apple_floating_bar_desc">Laat een zwevende navigatiebalk zien aan de onderkant van het scherm</string>
+    <string name="copied_format">Gekopieerd: %1$s</string>
+    <string name="installer_xposed_min_api">Minimum API:</string>
+    <string name="installer_xposed_target_api">Doel API:</string>
+    <string name="error_dialog_install_menu_not_available">Uitgebreid menu niet beschikbaar</string>
+    <string name="error_no_package_to_uninstall">Geen pakket beschikbaar om te verwijderen</string>
+    <string name="lab_tap_icon_to_share">Klik op het icoon om de APK te delen</string>
+    <string name="lab_tap_icon_to_share_desc">Klik het icoon op het voorbereidscherm om de APK te delen</string>
 </resources>
