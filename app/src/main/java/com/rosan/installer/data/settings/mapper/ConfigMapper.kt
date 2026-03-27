@@ -5,7 +5,9 @@ package com.rosan.installer.data.settings.mapper
 import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.domain.settings.model.ConfigModel
 
-// Map Room database entity to pure business domain model
+/**
+ * Map Room database entity to pure business domain model
+ */
 fun ConfigEntity.toDomainModel(): ConfigModel {
     val model = ConfigModel(
         id = this.id,
@@ -14,6 +16,7 @@ fun ConfigEntity.toDomainModel(): ConfigModel {
         authorizer = this.authorizer,
         customizeAuthorizer = this.customizeAuthorizer,
         installMode = this.installMode,
+        showToast = this.showToast,
         enableCustomizeInstallReason = this.enableCustomizeInstallReason,
         installReason = this.installReason,
         enableCustomizePackageSource = this.enableCustomizePackageSource,
@@ -34,6 +37,7 @@ fun ConfigEntity.toDomainModel(): ConfigModel {
         allowDowngrade = this.allowDowngrade,
         bypassLowTargetSdk = this.bypassLowTargetSdk,
         allowAllRequestedPermissions = this.allowAllRequestedPermissions,
+        requestUpdateOwnership = this.requestUpdateOwnership,
         splitChooseAll = this.splitChooseAll,
         apkChooseAll = this.apkChooseAll,
         createdAt = this.createdAt,
@@ -58,6 +62,7 @@ fun ConfigModel.toEntity(): ConfigEntity {
         authorizer = this.authorizer,
         customizeAuthorizer = this.customizeAuthorizer,
         installMode = this.installMode,
+        showToast = this.showToast,
         enableCustomizeInstallReason = this.enableCustomizeInstallReason,
         installReason = this.installReason,
         enableCustomizePackageSource = this.enableCustomizePackageSource,
@@ -78,6 +83,7 @@ fun ConfigModel.toEntity(): ConfigEntity {
         allowDowngrade = this.allowDowngrade,
         bypassLowTargetSdk = this.bypassLowTargetSdk,
         allowAllRequestedPermissions = this.allowAllRequestedPermissions,
+        requestUpdateOwnership = this.requestUpdateOwnership,
         splitChooseAll = this.splitChooseAll,
         apkChooseAll = this.apkChooseAll,
         createdAt = this.createdAt,

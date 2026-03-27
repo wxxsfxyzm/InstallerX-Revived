@@ -15,6 +15,7 @@ import com.rosan.installer.domain.privileged.provider.PermissionProvider
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
+import com.rosan.installer.domain.privileged.usecase.GetAvailableUsersUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
 import org.koin.core.module.dsl.bind
@@ -37,4 +38,5 @@ val privilegedModule = module {
     // UseCases
     factoryOf(::OpenAppUseCase)
     factoryOf(::OpenLSPosedUseCase)
+    factoryOf(::GetAvailableUsersUseCase)
 }

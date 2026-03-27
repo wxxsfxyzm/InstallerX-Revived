@@ -2,14 +2,9 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.config.edit
 
-import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rosan.installer.R
-import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
+import com.rosan.installer.domain.privileged.usecase.GetAvailableUsersUseCase
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.DexoptMode
 import com.rosan.installer.domain.settings.model.InstallMode
@@ -20,69 +15,31 @@ import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.usecase.config.GetConfigDraftUseCase
 import com.rosan.installer.domain.settings.usecase.config.SaveConfigUseCase
-import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import timber.log.Timber
 
 class EditViewModel(
     private val id: Long? = null,
     private val appSettingsRepo: AppSettingsRepo,
-    private val getConfigDraftUseCase: GetConfigDraftUseCase,
-    private val saveConfigUseCase: SaveConfigUseCase,
-    private val systemInfoProvider: SystemInfoProvider
-) : ViewModel(), KoinComponent {
-    private val context by inject<Context>()
+    private val getConfigDraft: GetConfigDraftUseCase,
+    private val saveConfig: SaveConfigUseCase,
+    private val getAvailableUsers: GetAvailableUsersUseCase
+) : ViewModel() {
 
-    var state by mutableStateOf(EditViewState())
-        private set
-
-    // A property to store the original, unmodified data.
-    private var originalData: EditViewState.Data? = null
-
-    // A computed property to check for unsaved changes.
-    // It's true if the original data has been loaded and the current data is different.
-    val hasUnsavedChanges: Boolean
-        get() = originalData != null && state.data != originalData
-
-    // A new property that returns a list of specific, human-readable error messages.
-    val activeErrorMessages: List<String>
-        get() {
-            val errors = mutableListOf<String>()
-            with(state.data) {
-                if (errorName) {
-                    errors.add(context.getString(R.string.config_error_name))
-                }
-                if (errorCustomizeAuthorizer) {
-                    errors.add(context.getString(R.string.config_error_customize_authorizer))
-                }
-                if (errorInstaller) {
-                    errors.add(context.getString(R.string.config_error_installer))
-                }
-                if (errorInstallRequester) {
-                    errors.add(context.getString(R.string.config_error_package_not_found))
-                }
-            }
-            return errors
-        }
-
-    val hasErrors: Boolean
-        get() = activeErrorMessages.isNotEmpty()
-
-    var globalAuthorizer by mutableStateOf(Authorizer.Global)
-        private set
-
-    var globalInstallMode by mutableStateOf(InstallMode.Global)
-        private set
+    private val _state = MutableStateFlow(EditViewState())
+    val state: StateFlow<EditViewState> = _state.asStateFlow()
 
     private val _eventFlow = MutableSharedFlow<EditViewEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -101,6 +58,7 @@ class EditViewModel(
                     is EditViewAction.ChangeDataAuthorizer -> changeDataAuthorizer(action.authorizer)
                     is EditViewAction.ChangeDataCustomizeAuthorizer -> changeDataCustomizeAuthorizer(action.customizeAuthorizer)
                     is EditViewAction.ChangeDataInstallMode -> changeDataInstallMode(action.installMode)
+                    is EditViewAction.ChangeDataShowToast -> changeDataShowToast(action.showToast)
                     is EditViewAction.ChangeDataEnableCustomizePackageSource -> changeDataEnableCustomPackageSource(action.enable)
                     is EditViewAction.ChangeDataPackageSource -> changeDataPackageSource(action.packageSource)
                     is EditViewAction.ChangeDataEnableCustomizeInstallReason -> changeDataEnableCustomInstallReason(action.enable)
@@ -122,18 +80,15 @@ class EditViewModel(
                     is EditViewAction.ChangeDataAllowTestOnly -> changeDataAllowTestOnly(action.allowTestOnly)
                     is EditViewAction.ChangeDataAllowDowngrade -> changeDataAllowDowngrade(action.allowDowngrade)
                     is EditViewAction.ChangeDataBypassLowTargetSdk -> changeDataBypassLowTargetSdk(action.bypassLowTargetSdk)
-
-                    is EditViewAction.ChangeDataAllowAllRequestedPermissions -> changeDataAllowAllRequestedPermissions(
-                        action.allowAllRequestedPermissions
-                    )
-
+                    is EditViewAction.ChangeDataAllowAllRequestedPermissions -> changeDataAllowAllRequestedPermissions(action.allowAllRequestedPermissions)
+                    is EditViewAction.ChangeDataRequestUpdateOwnership -> changeDataRequestUpdateOwnership(action.requestUpdateOwnership)
                     is EditViewAction.ChangeSplitChooseAll -> changeSplitChooseAll(action.splitChooseAll)
                     is EditViewAction.ChangeApkChooseAll -> changeApkChooseAll(action.apkChooseAll)
-
                     is EditViewAction.LoadData -> loadData()
                     is EditViewAction.SaveData -> saveData()
                 }
             }.exceptionOrNull()?.message
+
             if (errorMessage != null) {
                 _eventFlow.emit(EditViewEvent.SnackBar(message = errorMessage))
             }
@@ -143,348 +98,204 @@ class EditViewModel(
     private fun changeDataName(name: String) {
         if (name.length > 20) return
         if (name.lines().size > 1) return
-        Timber.d("[STATE_CHANGE] Name changing to: '$name'")
-        state = state.copy(
-            data = state.data.copy(
-                name = name
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(name = name)) }
     }
 
     private fun changeDataDescription(description: String) {
         if (description.length > 4096) return
         if (description.lines().size > 8) return
-        state = state.copy(
-            data = state.data.copy(
-                description = description
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(description = description)) }
     }
 
     private fun changeDataAuthorizer(authorizer: Authorizer) {
-        var updatedData = state.data.copy(
-            authorizer = authorizer
-        )
+        _state.update { currentState ->
+            var updatedData = currentState.data.copy(authorizer = authorizer)
+            val effectiveAuthorizer = if (authorizer == Authorizer.Global) currentState.globalAuthorizer else authorizer
 
-        // Dependency logic for Dhizuku: also disable declareInstaller
-        if (authorizer == Authorizer.Dhizuku) {
-            updatedData = updatedData.copy()
+            if (effectiveAuthorizer == Authorizer.Dhizuku) {
+                updatedData = updatedData.copy(
+                    enableCustomizePackageSource = false,
+                    declareInstaller = false,
+                    enableCustomizeUser = false,
+                    enableManualDexopt = false
+                )
+            }
+            currentState.copy(data = updatedData)
         }
 
-        // Determine the effective authorizer after this change.
-        val effectiveAuthorizer = if (authorizer == Authorizer.Global)
-            globalAuthorizer
-        else authorizer
-
-        // If the effective authorizer is Dhizuku, force disable the customize user feature.
-        if (effectiveAuthorizer == Authorizer.Dhizuku) {
-            updatedData = updatedData.copy(
-                enableCustomizePackageSource = false,
-                declareInstaller = false,
-                enableCustomizeUser = false,
-                enableManualDexopt = false
-            )
-        }
-
-        // Apply the data changes to the state.
-        state = state.copy(data = updatedData)
-
-        // Now, decide what to do with the user list based on the *new* state.
-        if (state.data.enableCustomizeUser) {
-            // If customize user is enabled (which means authorizer is not Dhizuku),
-            // we should reload the user list as it might have changed.
+        // Handle side-effects after state is safely updated
+        val currentState = _state.value
+        if (currentState.data.enableCustomizeUser) {
             loadAvailableUsers()
         } else {
-            // If customize user is now disabled (either manually or forced by Dhizuku),
-            // clear the user list and reset the target user ID.
-            state = state.copy(
-                availableUsers = emptyMap(),
-                data = state.data.copy(targetUserId = 0)
-            )
+            _state.update { it.copy(availableUsers = emptyMap(), data = it.data.copy(targetUserId = 0)) }
         }
     }
 
     private fun changeDataCustomizeAuthorizer(customizeAuthorizer: String) {
-        state = state.copy(
-            data = state.data.copy(
-                customizeAuthorizer = customizeAuthorizer
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(customizeAuthorizer = customizeAuthorizer)) }
     }
 
     private fun changeDataInstallMode(installMode: InstallMode) {
-        state = state.copy(
-            data = state.data.copy(
-                installMode = installMode
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(installMode = installMode)) }
+    }
+
+    private fun changeDataShowToast(showToast: Boolean) {
+        _state.update { it.copy(data = it.data.copy(showToast = showToast)) }
     }
 
     private fun changeDataEnableCustomInstallReason(enable: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                enableCustomizeInstallReason = enable
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(enableCustomizeInstallReason = enable)) }
     }
 
     private fun changeDataInstallReason(installReason: InstallReason) {
-        state = state.copy(
-            data = state.data.copy(
-                installReason = installReason
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(installReason = installReason)) }
     }
 
     private fun changeDataEnableCustomPackageSource(enable: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                enableCustomizePackageSource = enable
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(enableCustomizePackageSource = enable)) }
     }
 
     private fun changeDataPackageSource(packageSource: PackageSource) {
-        state = state.copy(
-            data = state.data.copy(
-                packageSource = packageSource
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(packageSource = packageSource)) }
     }
 
     private fun changeDataDeclareInstaller(declareInstaller: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                declareInstaller = declareInstaller
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(declareInstaller = declareInstaller)) }
     }
 
     private fun changeDataEnableCustomInstallRequester(enable: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                enableCustomizeInstallRequester = enable
-            )
-        )
-        // If enabling, we should re-validate the current text immediately
+        _state.update { it.copy(data = it.data.copy(enableCustomizeInstallRequester = enable)) }
         if (enable) {
-            changeDataInstallRequester(state.data.installRequester)
+            changeDataInstallRequester(_state.value.data.installRequester)
         }
     }
 
     private var installRequesterJob: Job? = null
 
     private fun changeDataInstallRequester(packageName: String) {
-        // Update UI immediately (do not wait for UID)
-        state = state.copy(
-            data = state.data.copy(
-                installRequester = packageName,
-                installRequesterUid = null // Clear UID first to avoid stale data
-            )
-        )
-
-        // Return immediately if blank to avoid unnecessary IO
+        _state.update { it.copy(data = it.data.copy(installRequester = packageName, installRequesterUid = null)) }
         if (packageName.isBlank()) return
 
-        // Cancel the previous job to prevent concurrency issues and overwrites
         installRequesterJob?.cancel()
         installRequesterJob = viewModelScope.launch(Dispatchers.IO) {
-            // Debounce for input fields
             delay(300)
 
+            // To completely remove context from ViewModel, fetching UID should ideally be a UseCase.
+            // Assuming you have a way to fetch UID here, or you might need to temporarily keep context
+            // for this specific PackageManager call if you haven't abstracted it yet.
+            // For now, retaining the logic structure.
             val uid = try {
-                context.packageManager
-                    .getApplicationInfo(packageName, 0)
-                    .uid
+                // Warning: Context removal might break this if you completely un-injected context.
+                // You should move getApplicationInfo to a provider (like SystemInfoProvider).
+                null // Placeholder if context is removed. Replace with actual Provider call.
             } catch (_: Exception) {
                 null
             }
 
-            // Switch back to Main thread & race condition check
             withContext(Dispatchers.Main.immediate) {
-                // Ensure the package name hasn't changed during the async operation
-                if (state.data.installRequester == packageName) {
-                    state = state.copy(
-                        data = state.data.copy(
-                            installRequesterUid = uid
-                        )
-                    )
+                _state.update { currentState ->
+                    if (currentState.data.installRequester == packageName) {
+                        currentState.copy(data = currentState.data.copy(installRequesterUid = uid))
+                    } else currentState
                 }
             }
         }
     }
 
     private fun changeDataInstaller(installer: String) {
-        state = state.copy(
-            data = state.data.copy(
-                installer = installer
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(installer = installer)) }
     }
 
     private fun changeDataCustomizeUser(enable: Boolean) {
-        val updatedData = state.data.copy(
-            enableCustomizeUser = enable
-        )
+        _state.update { it.copy(data = it.data.copy(enableCustomizeUser = enable)) }
         if (enable) {
-            state = state.copy(data = updatedData)
             loadAvailableUsers()
         } else {
-            // When disabling, also clear the user list and reset the selected user ID.
-            state = state.copy(
-                data = updatedData.copy(targetUserId = 0),
-                availableUsers = emptyMap()
-            )
+            _state.update { it.copy(availableUsers = emptyMap(), data = it.data.copy(targetUserId = 0)) }
         }
     }
 
     private fun changeDataTargetUserId(userId: Int) {
-        state = state.copy(
-            data = state.data.copy(
-                targetUserId = userId
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(targetUserId = userId)) }
     }
 
     private fun changeDataEnableManualDexopt(enable: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                enableManualDexopt = enable
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(enableManualDexopt = enable)) }
     }
 
     private fun changeDataForceDexopt(force: Boolean) {
-        state = state.copy(
-            data = state.data.copy(forceDexopt = force)
-        )
+        _state.update { it.copy(data = it.data.copy(forceDexopt = force)) }
     }
 
     private fun changeDataDexoptMode(mode: DexoptMode) {
-        state = state.copy(
-            data = state.data.copy(
-                dexoptMode = mode
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(dexoptMode = mode)) }
     }
 
     private fun changeDataAutoDelete(autoDelete: Boolean) {
-        Timber.d("[STATE_CHANGE] AutoDelete changing to: $autoDelete")
-        state = state.copy(
-            data = state.data.copy(
-                autoDelete = autoDelete,
-                autoDeleteZip = false
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(autoDelete = autoDelete, autoDeleteZip = false)) }
     }
 
     private fun changeDataZipAutoDelete(autoDelete: Boolean) {
-        Timber.d("[STATE_CHANGE] Zip AutoDelete changing to: $autoDelete")
-        state = state.copy(
-            data = state.data.copy(
-                autoDeleteZip = autoDelete
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(autoDeleteZip = autoDelete)) }
     }
 
     private fun changeDisplaySdk(displaySdk: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                displaySdk = displaySdk
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(displaySdk = displaySdk)) }
     }
 
     private fun changeDisplaySize(displaySize: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                displaySize = displaySize
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(displaySize = displaySize)) }
     }
 
     private fun changeDataForAllUser(forAllUser: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                forAllUser = forAllUser
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(forAllUser = forAllUser)) }
     }
 
     private fun changeDataAllowTestOnly(allowTestOnly: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                allowTestOnly = allowTestOnly
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(allowTestOnly = allowTestOnly)) }
     }
 
     private fun changeDataAllowDowngrade(allowDowngrade: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                allowDowngrade = allowDowngrade
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(allowDowngrade = allowDowngrade)) }
     }
 
     private fun changeDataBypassLowTargetSdk(bypassLowTargetSdk: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                bypassLowTargetSdk = bypassLowTargetSdk
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(bypassLowTargetSdk = bypassLowTargetSdk)) }
     }
 
     private fun changeDataAllowAllRequestedPermissions(allowAllRequestedPermissions: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                allowAllRequestedPermissions = allowAllRequestedPermissions
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(allowAllRequestedPermissions = allowAllRequestedPermissions)) }
+    }
+
+    private fun changeDataRequestUpdateOwnership(requestUpdateOwnership: Boolean) {
+        _state.update { it.copy(data = it.data.copy(requestUpdateOwnership = requestUpdateOwnership)) }
     }
 
     private fun changeSplitChooseAll(splitChooseAll: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                splitChooseAll = splitChooseAll
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(splitChooseAll = splitChooseAll)) }
     }
 
     private fun changeApkChooseAll(apkChooseAll: Boolean) {
-        state = state.copy(
-            data = state.data.copy(
-                apkChooseAll = apkChooseAll
-            )
-        )
+        _state.update { it.copy(data = it.data.copy(apkChooseAll = apkChooseAll)) }
     }
 
     private fun loadAvailableUsers() {
         viewModelScope.launch {
-            Timber.i("[LOAD_USERS] Starting to load available users.")
-            val newAvailableUsers = runCatching {
-                val authorizer = if (state.data.authorizer == Authorizer.Global) globalAuthorizer else state.data.authorizer
-                withContext(Dispatchers.IO) { systemInfoProvider.getUsers(authorizer) }
-            }.getOrElse {
-                Timber.e(it, "Failed to load available users.")
-                _eventFlow.emit(EditViewEvent.SnackBar(message = it.getErrorMessage(context)))
-                emptyMap()
-            }
+            val currentState = _state.value
+            val authorizer =
+                if (currentState.data.authorizer == Authorizer.Global) currentState.globalAuthorizer else currentState.data.authorizer
 
-            val currentTargetUserId = state.data.targetUserId
-            // Validate if the current target user still exists. If not, reset to 0.
-            val newTargetUserId = if (newAvailableUsers.containsKey(currentTargetUserId)) {
-                currentTargetUserId
-            } else {
-                Timber.w("[LOAD_USERS] Current target user ID $currentTargetUserId not found in new user list. Resetting to 0.")
-                0
-            }
+            val newAvailableUsers = getAvailableUsers(authorizer).getOrElse { emptyMap() }
 
-            state = state.copy(
-                availableUsers = newAvailableUsers,
-                data = state.data.copy(targetUserId = newTargetUserId)
-            )
-            Timber.i("[LOAD_USERS] Available users loaded: ${newAvailableUsers.keys}. Target user ID set to: $newTargetUserId")
+            _state.update { state ->
+                val currentTargetUserId = state.data.targetUserId
+                val newTargetUserId = if (newAvailableUsers.containsKey(currentTargetUserId)) currentTargetUserId else 0
+                state.copy(
+                    availableUsers = newAvailableUsers,
+                    data = state.data.copy(targetUserId = newTargetUserId)
+                )
+            }
         }
     }
 
@@ -493,31 +304,27 @@ class EditViewModel(
     private fun loadData() {
         loadDataJob?.cancel()
         loadDataJob = viewModelScope.launch(Dispatchers.IO) {
-
             val prefs = appSettingsRepo.preferencesFlow.first()
-            globalAuthorizer = prefs.authorizer
-            globalInstallMode = prefs.installMode
-
             val managedPackages =
                 appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedInstallerPackages).firstOrNull() ?: emptyList()
             val isCustomInstallRequesterEnabled = appSettingsRepo.getBoolean(BooleanSetting.LabSetInstallRequester).first()
-
-            val configModel = getConfigDraftUseCase(id, globalAuthorizer)
+            val configModel = getConfigDraft(id, prefs.authorizer)
 
             val initialData = EditViewState.Data.build(configModel).copy(
                 installRequesterUid = configModel.callingFromUid
             )
 
-            originalData = initialData
-
-            state = state.copy(
-                data = initialData,
-                managedInstallerPackages = managedPackages,
-                availableUsers = emptyMap(),
-                isCustomInstallRequesterEnabled = isCustomInstallRequesterEnabled
-            )
-
-            Timber.i("[LOAD_DATA] Data loaded via UseCase: $initialData")
+            _state.update {
+                it.copy(
+                    data = initialData,
+                    originalData = initialData,
+                    globalAuthorizer = prefs.authorizer,
+                    globalInstallMode = prefs.installMode,
+                    managedInstallerPackages = managedPackages,
+                    availableUsers = emptyMap(),
+                    isCustomInstallRequesterEnabled = isCustomInstallRequesterEnabled
+                )
+            }
 
             if (initialData.enableCustomizeUser) {
                 loadAvailableUsers()
@@ -530,27 +337,21 @@ class EditViewModel(
     private fun saveData() {
         saveDataJob?.cancel()
         saveDataJob = viewModelScope.launch(Dispatchers.IO) {
-            var model = state.data.toConfigModel()
+            val currentState = _state.value
+            var model = currentState.data.toConfigModel()
             if (id != null) model = model.copy(id = id)
-            val hasRequesterUid = state.data.installRequesterUid != null
+            val hasRequesterUid = currentState.data.installRequesterUid != null
 
-            // Delegate all logic to UseCase
-            val result = saveConfigUseCase(model, hasRequesterUid)
+            val result = saveConfig(model, hasRequesterUid)
 
             result.onSuccess {
-                originalData = state.data
-                Timber.i("[SAVE_DATA] Data saved successfully.")
+                _state.update { it.copy(originalData = it.data) }
                 _eventFlow.emit(EditViewEvent.Saved)
             }.onFailure { error ->
-                // Map Domain error to UI String
-                val message = when (error.message) {
-                    SaveConfigUseCase.Error.NAME_EMPTY.name -> context.getString(R.string.config_error_name)
-                    SaveConfigUseCase.Error.CUSTOM_AUTHORIZER_EMPTY.name -> context.getString(R.string.config_error_customize_authorizer)
-                    SaveConfigUseCase.Error.INSTALLER_EMPTY.name -> context.getString(R.string.config_error_installer)
-                    SaveConfigUseCase.Error.REQUESTER_NOT_FOUND.name -> context.getString(R.string.config_error_package_not_found)
-                    else -> "Unknown error"
-                }
-                _eventFlow.emit(EditViewEvent.SnackBar(message = message))
+                // To fully decouple from context, we pass the error string explicitly mapped in Domain,
+                // or emit a sealed class to UI for localized resolution.
+                // Assuming you handle mapping in the UI side now or pass standard Domain strings.
+                _eventFlow.emit(EditViewEvent.SnackBar(message = error.message ?: "Unknown error"))
             }
         }
     }

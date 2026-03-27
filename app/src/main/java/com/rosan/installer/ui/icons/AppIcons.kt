@@ -36,6 +36,7 @@ import androidx.compose.material.icons.twotone.BatterySaver
 import androidx.compose.material.icons.twotone.BlurOn
 import androidx.compose.material.icons.twotone.Bolt
 import androidx.compose.material.icons.twotone.BugReport
+import androidx.compose.material.icons.twotone.CallToAction
 import androidx.compose.material.icons.twotone.ClearAll
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Code
@@ -79,6 +80,7 @@ import androidx.compose.material.icons.twotone.SystemUpdate
 import androidx.compose.material.icons.twotone.TaskAlt
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material.icons.twotone.Timer
+import androidx.compose.material.icons.twotone.VerifiedUser
 import androidx.compose.material.icons.twotone.Widgets
 
 /**
@@ -163,6 +165,7 @@ object AppIcons {
     // --- 设置图标结束 ---
 
     // --- Profile pkg 图标集合 ---
+    val Toast = Icons.TwoTone.CallToAction
     val InstallUser = Icons.TwoTone.AccountCircle
     val InstallPackageSource = Icons.TwoTone.Source
     val InstallReason = Icons.AutoMirrored.TwoTone.Article
@@ -173,6 +176,7 @@ object AppIcons {
     val InstallBypassLowTargetSdk = Icons.TwoTone.SecurityUpdateWarning
     val InstallAllowRestrictedPermissions = Icons.TwoTone.AdminPanelSettings
     val InstallAllowAllRequestedPermissions = Icons.TwoTone.LibraryAddCheck
+    val InstallRequestUpdateOwnership = Icons.TwoTone.VerifiedUser
 
     val InstallSplitChooseAll = Icons.AutoMirrored.TwoTone.PlaylistAdd
     val InstallApkChooseAll = Icons.AutoMirrored.Outlined.PlaylistAddCheck

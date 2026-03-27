@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.widget.util
 
 import android.content.Intent
@@ -14,12 +16,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.installer.InstallerViewEvent
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
+import com.rosan.installer.ui.page.main.settings.config.edit.EditViewEvent
+import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 import com.rosan.installer.util.toast
@@ -114,6 +119,30 @@ fun ToastEventCollector(viewModel: InstallerViewModel) {
             when (event) {
                 is InstallerViewEvent.ShowToast -> context.toast(event.message)
                 is InstallerViewEvent.ShowToastRes -> context.toast(event.messageResId)
+            }
+        }
+    }
+}
+
+@Composable
+fun EditEventCollector(
+    viewModel: EditViewModel,
+    navController: NavController,
+    snackBarHostState: SnackbarHostState
+) {
+    LaunchedEffect(Unit) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is EditViewEvent.SnackBar -> {
+                    snackBarHostState.showSnackbar(
+                        message = event.message,
+                        withDismissAction = true,
+                    )
+                }
+
+                is EditViewEvent.Saved -> {
+                    navController.navigateUp()
+                }
             }
         }
     }

@@ -18,7 +18,7 @@ import com.rosan.installer.domain.engine.model.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.sourcePath
 import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
-import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
+import com.rosan.installer.domain.privileged.usecase.GetAvailableUsersUseCase
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
@@ -31,7 +31,6 @@ import com.rosan.installer.util.getErrorMessage
 import com.rosan.installer.util.hasFlag
 import com.rosan.installer.util.removeFlag
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -46,7 +45,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -55,7 +53,7 @@ import java.io.File
 class InstallerViewModel(
     private var session: InstallerSessionRepository,
     private val appSettingsRepo: AppSettingsRepo,
-    private val systemInfoProvider: SystemInfoProvider,
+    private val getAvailableUsers: GetAvailableUsersUseCase,
     private val getAppIcon: GetAppIconUseCase,
     private val getAppIconColor: GetAppIconColorUseCase,
 ) : ViewModel(), KoinComponent {
@@ -338,9 +336,8 @@ class InstallerViewModel(
 
                     // Re-calculate seed color from the icon if dynamic color is enabled
                     if (updatedState.viewSettings.useDynColorFollowPkgIcon) {
-                        val targetPackage = newPackageName
 
-                        if (targetPackage.isNullOrEmpty()) {
+                        if (newPackageName.isNullOrEmpty()) {
                             // Empty package scenario: Use cache to avoid recalculating the default icon color
                             if (defaultFallbackSeedColor != null) {
                                 _localState.update { it.copy(seedColor = Color(defaultFallbackSeedColor!!)) }
@@ -360,7 +357,7 @@ class InstallerViewModel(
                             viewModelScope.launch {
                                 val colorInt = getAppIconColor(
                                     sessionId = session.id,
-                                    packageName = targetPackage,
+                                    packageName = newPackageName,
                                     preferSystemIcon = updatedState.viewSettings.preferSystemIconForUpdates
                                 )
                                 _localState.update { it.copy(seedColor = colorInt?.let { c -> Color(c) }) }
@@ -405,24 +402,20 @@ class InstallerViewModel(
 
     private fun loadAvailableUsers(authorizer: Authorizer) {
         viewModelScope.launch {
-            if (authorizer == Authorizer.Dhizuku) {
-                _localState.update { it.copy(availableUsers = emptyMap()) }
-                if (_localState.value.selectedUserId != 0) selectTargetUser(0)
-                return@launch
-            }
+            getAvailableUsers(authorizer)
+                .onSuccess { users ->
+                    _localState.update { it.copy(availableUsers = users) }
+                    // If the currently selected user is not in the available list, reset it to 0 (Owner).
+                    if (!users.containsKey(_localState.value.selectedUserId)) selectTargetUser(0)
+                }
+                .onFailure { error ->
+                    if (error is CancellationException) throw error
+                    Timber.e(error, "Failed to load available users.")
+                    toast(error.getErrorMessage(context))
 
-            runCatching {
-                withContext(Dispatchers.IO) { systemInfoProvider.getUsers(authorizer) }
-            }.onSuccess { users ->
-                _localState.update { it.copy(availableUsers = users) }
-                if (!users.containsKey(_localState.value.selectedUserId)) selectTargetUser(0)
-            }.onFailure { error ->
-                if (error is CancellationException) throw error
-                Timber.e(error, "Failed to load available users.")
-                toast(error.getErrorMessage(context))
-                _localState.update { it.copy(availableUsers = emptyMap()) }
-                if (_localState.value.selectedUserId != 0) selectTargetUser(0)
-            }
+                    _localState.update { it.copy(availableUsers = emptyMap()) }
+                    if (_localState.value.selectedUserId != 0) selectTargetUser(0)
+                }
         }
     }
 

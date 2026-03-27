@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +38,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
@@ -62,16 +62,19 @@ import com.rosan.installer.ui.page.main.widget.setting.DataInstallRequesterWidge
 import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataPackageSourceWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataRequestUpdateOwnershipWidget
+import com.rosan.installer.ui.page.main.widget.setting.DataShowToastWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataSplitChooseAllWidget
 import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
 import com.rosan.installer.ui.page.main.widget.setting.DisplaySizeWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
+import com.rosan.installer.ui.page.main.widget.util.EditEventCollector
 import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.util.isNoneActive
-import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -80,13 +83,15 @@ fun EditPage(
     id: Long? = null,
     viewModel: EditViewModel = koinViewModel { parametersOf(id) }
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val dispatch = viewModel::dispatch
     val listState = rememberLazyListState()
     val snackBarHostState = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showUnsavedDialog by remember { mutableStateOf(false) }
 
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
 
     UnsavedChangesDialog(
         show = showUnsavedDialog,
@@ -98,33 +103,18 @@ fun EditPage(
             navController.navigateUp()
         },
         // Pass the list of active error messages from the ViewModel.
-        errorMessages = viewModel.activeErrorMessages
+        errorMessages = state.activeErrorResIds.map { stringResource(it) }
     )
     // The condition for interception is now expanded to include errors.
     // If there are unsaved changes OR if there are validation errors, we should intercept.
-    val shouldInterceptBackPress = viewModel.hasUnsavedChanges || viewModel.hasErrors
+    val shouldInterceptBackPress = state.hasUnsavedChanges || state.hasErrors
 
     // Use this new combined condition for the BackHandler.
     BackHandler(enabled = shouldInterceptBackPress) {
         showUnsavedDialog = true
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is EditViewEvent.SnackBar -> {
-                    snackBarHostState.showSnackbar(
-                        message = event.message,
-                        withDismissAction = true,
-                    )
-                }
-
-                is EditViewEvent.Saved -> {
-                    navController.navigateUp()
-                }
-            }
-        }
-    }
+    EditEventCollector(viewModel, navController, snackBarHostState)
 
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
@@ -169,38 +159,42 @@ fun EditPage(
                 bottom = paddingValues.calculateBottomPadding() + 80.dp
             )
         ) {
-            item { DataNameWidget(viewModel = viewModel) }
-            item { DataDescriptionWidget(viewModel = viewModel) }
-            item { DataAuthorizerWidget(viewModel = viewModel) }
-            item { DataCustomizeAuthorizerWidget(viewModel = viewModel) }
-            item { DataInstallModeWidget(viewModel = viewModel) }
+            item { DataNameWidget(state = state, dispatch = dispatch) }
+            item { DataDescriptionWidget(state = state, dispatch = dispatch) }
+            item { DataAuthorizerWidget(state = state, dispatch = dispatch) }
+            item { DataCustomizeAuthorizerWidget(state = state, dispatch = dispatch) }
+            item { DataInstallModeWidget(state = state, dispatch = dispatch) }
+            item { DataShowToastWidget(state = state, dispatch = dispatch, isM3E = false) }
+
             if (isNoneActive(stateAuthorizer, globalAuthorizer))
                 item { InfoTipCard(text = stringResource(R.string.config_authorizer_none_tips)) }
 
             item { LabelWidget(label = stringResource(R.string.config_label_installer_settings)) }
-            item { DataUserWidget(viewModel = viewModel, isM3E = false) }
-            item { DataInstallReasonWidget(viewModel = viewModel, isM3E = false) }
+            item { DataUserWidget(state = state, dispatch = dispatch, isM3E = false) }
+            item { DataInstallReasonWidget(state = state, dispatch = dispatch, isM3E = false) }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                item { DataPackageSourceWidget(viewModel, isM3E = false) }
-            if (viewModel.state.isCustomInstallRequesterEnabled)
-                item { DataInstallRequesterWidget(viewModel = viewModel, isM3E = false) }
-            item { DataDeclareInstallerWidget(viewModel = viewModel, isM3E = false) }
-            item { DataManualDexoptWidget(viewModel, isM3E = false) }
-            item { DataAutoDeleteWidget(viewModel = viewModel, isM3E = false) }
-            item { DisplaySdkWidget(viewModel = viewModel, isM3E = false) }
-            item { DisplaySizeWidget(viewModel, isM3E = false) }
+                item { DataPackageSourceWidget(state = state, dispatch = dispatch, isM3E = false) }
+            if (state.isCustomInstallRequesterEnabled)
+                item { DataInstallRequesterWidget(state = state, dispatch = dispatch, isM3E = false) }
+            item { DataDeclareInstallerWidget(state = state, dispatch = dispatch, isM3E = false) }
+            item { DataManualDexoptWidget(state = state, dispatch = dispatch, isM3E = false) }
+            item { DataAutoDeleteWidget(state = state, dispatch = dispatch, isM3E = false) }
+            item { DisplaySdkWidget(state = state, dispatch = dispatch, isM3E = false) }
+            item { DisplaySizeWidget(state = state, dispatch = dispatch, isM3E = false) }
 
             item { LabelWidget(label = stringResource(R.string.config_label_install_options)) }
-            item { DataForAllUserWidget(viewModel = viewModel, isM3E = false) }
-            item { DataAllowTestOnlyWidget(viewModel = viewModel, isM3E = false) }
-            item { DataAllowDowngradeWidget(viewModel = viewModel, isM3E = false) }
+            item { DataForAllUserWidget(state = state, dispatch = dispatch, isM3E = false) }
+            item { DataAllowTestOnlyWidget(state = state, dispatch = dispatch, isM3E = false) }
+            item { DataAllowDowngradeWidget(state = state, dispatch = dispatch, isM3E = false) }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-                item { DataBypassLowTargetSdkWidget(viewModel = viewModel, isM3E = false) }
-            item { DataAllowAllRequestedPermissionsWidget(viewModel = viewModel, isM3E = false) }
+                item { DataBypassLowTargetSdkWidget(state = state, dispatch = dispatch, isM3E = false) }
+            item { DataAllowAllRequestedPermissionsWidget(state = state, dispatch = dispatch, isM3E = false) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                item { DataRequestUpdateOwnershipWidget(state = state, dispatch = dispatch, isM3E = false) }
 
             item { LabelWidget(label = stringResource(R.string.config_label_preferences)) }
-            item { DataSplitChooseAllWidget(viewModel = viewModel, isM3E = false) }
-            item { DataApkChooseAllWidget(viewModel = viewModel, isM3E = false) }
+            item { DataSplitChooseAllWidget(state = state, dispatch = dispatch, isM3E = false) }
+            item { DataApkChooseAllWidget(state = state, dispatch = dispatch, isM3E = false) }
 
             item { Spacer(Modifier.navigationBarsPadding()) }
         }

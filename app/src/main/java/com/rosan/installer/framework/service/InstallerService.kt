@@ -281,6 +281,8 @@ class InstallerService : Service() {
     private fun observeUiEffectsForSession(session: InstallerSessionRepository) {
         serviceScope.launch {
             session.progress.collect { progress ->
+                // Disable toast according to user preference
+                if (!session.config.showToast) return@collect
                 when (progress) {
                     is ProgressEntity.InstallSuccess -> {
                         toast(R.string.installer_install_success)

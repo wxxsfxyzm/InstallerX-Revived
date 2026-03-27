@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.widgets
 
 import androidx.compose.animation.AnimatedVisibility
@@ -24,7 +26,7 @@ import com.rosan.installer.domain.settings.model.InstallReason
 import com.rosan.installer.domain.settings.model.PackageSource
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
-import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
+import com.rosan.installer.ui.page.main.settings.config.edit.EditViewState
 import com.rosan.installer.ui.util.isDhizukuActive
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.SpinnerEntry
@@ -35,14 +37,14 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun MiuixDataNameWidget(
-    viewModel: EditViewModel,
+    state: EditViewState,
+    dispatch: (EditViewAction) -> Unit,
     trailingContent: @Composable (() -> Unit) = {}
 ) {
-    // Replace the old implementation with a call to the new MiuixHintTextField component.
     MiuixHintTextField(
-        value = viewModel.state.data.name,
+        value = state.data.name,
         onValueChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataName(it))
+            dispatch(EditViewAction.ChangeDataName(it))
         },
         labelText = stringResource(id = R.string.config_name),
         modifier = Modifier
@@ -50,18 +52,14 @@ fun MiuixDataNameWidget(
             .padding(vertical = 8.dp, horizontal = 12.dp)
             .focusable()
     )
-
-    // TODO: Implement custom error handling logic if needed,
-    // e.g., display a separate error message Text when viewModel.state.data.errorName is true.
-
     trailingContent()
 }
 
 @Composable
-fun MiuixDataDescriptionWidget(viewModel: EditViewModel) {
+fun MiuixDataDescriptionWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixHintTextField(
-        value = viewModel.state.data.description,
-        onValueChange = { viewModel.dispatch(EditViewAction.ChangeDataDescription(it)) },
+        value = state.data.description,
+        onValueChange = { dispatch(EditViewAction.ChangeDataDescription(it)) },
         labelText = stringResource(id = R.string.config_description),
         modifier = Modifier
             .fillMaxWidth()
@@ -71,10 +69,10 @@ fun MiuixDataDescriptionWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
+fun MiuixDataAuthorizerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
     val isSessionInstallSupported = capabilityProvider.isSessionInstallSupported
     val data = buildMap {
         put(
@@ -97,44 +95,41 @@ fun MiuixDataAuthorizerWidget(viewModel: EditViewModel) {
         put(Authorizer.Dhizuku, stringResource(R.string.config_authorizer_dhizuku))
         put(Authorizer.Customize, stringResource(R.string.config_authorizer_customize))
     }
-    // Convert data Map to List<SpinnerEntry> required by SuperSpinner.
+
     val spinnerEntries = remember(data) {
         data.values.map { authorizerName ->
             SpinnerEntry(title = authorizerName)
         }
     }
 
-    // Calculate the currently selected index based on the stateAuthorizer enum.
     val selectedIndex = remember(stateAuthorizer, data) {
         data.keys.toList().indexOf(stateAuthorizer).coerceAtLeast(0)
     }
 
-    // Replace DropDownMenuWidget with SuperSpinner.
     SuperSpinner(
         title = stringResource(R.string.config_authorizer),
         summary = stringResource(R.string.config_install_authorizer_desc),
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
-            // Convert index back to enum and dispatch the update action.
             data.keys.elementAtOrNull(newIndex)?.let { authorizer ->
-                viewModel.dispatch(EditViewAction.ChangeDataAuthorizer(authorizer))
+                dispatch(EditViewAction.ChangeDataAuthorizer(authorizer))
             }
         }
     )
 }
 
 @Composable
-fun MiuixDataCustomizeAuthorizerWidget(viewModel: EditViewModel) {
-    if (!viewModel.state.data.authorizerCustomize) return
-    val customizeAuthorizer = viewModel.state.data.customizeAuthorizer
+fun MiuixDataCustomizeAuthorizerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    if (!state.data.authorizerCustomize) return
+    val customizeAuthorizer = state.data.customizeAuthorizer
     TextField(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 16.dp)
             .focusable(),
         value = customizeAuthorizer,
-        onValueChange = { viewModel.dispatch(EditViewAction.ChangeDataCustomizeAuthorizer(it)) },
+        onValueChange = { dispatch(EditViewAction.ChangeDataCustomizeAuthorizer(it)) },
         label = stringResource(id = R.string.config_customize_authorizer),
         useLabelAsPlaceholder = true,
         singleLine = false,
@@ -143,9 +138,9 @@ fun MiuixDataCustomizeAuthorizerWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun MiuixDataInstallModeWidget(viewModel: EditViewModel) {
-    val stateInstallMode = viewModel.state.data.installMode
-    val globalInstallMode = viewModel.globalInstallMode
+fun MiuixDataInstallModeWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val stateInstallMode = state.data.installMode
+    val globalInstallMode = state.globalInstallMode
     val data = mapOf(
         InstallMode.Global to stringResource(
             R.string.config_install_mode_global_desc,
@@ -165,38 +160,44 @@ fun MiuixDataInstallModeWidget(viewModel: EditViewModel) {
         InstallMode.Ignore to stringResource(R.string.config_install_mode_ignore),
     )
 
-    // Convert data Map to List<SpinnerEntry> required by SuperSpinner.
-    // In this case, SpinnerEntry only contains the title, as no individual icons are provided per option.
     val spinnerEntries = remember(data) {
         data.values.map { modeName ->
             SpinnerEntry(title = modeName)
         }
     }
 
-    // Calculate the currently selected index based on the stateInstallMode enum.
     val selectedIndex = remember(stateInstallMode, data) {
         data.keys.toList().indexOf(stateInstallMode).coerceAtLeast(0)
     }
 
-    // Replace DropDownMenuWidget with SuperSpinner.
     SuperSpinner(
         title = stringResource(R.string.config_install_mode),
-        // summary = data[stateInstallMode], // Display current selection text
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
-            // Convert index back to enum and dispatch the update action.
             data.keys.elementAtOrNull(newIndex)?.let { mode ->
-                viewModel.dispatch(EditViewAction.ChangeDataInstallMode(mode))
+                dispatch(EditViewAction.ChangeDataInstallMode(mode))
             }
         }
     )
 }
 
 @Composable
-fun MiuixInstallReasonWidget(viewModel: EditViewModel) {
-    val enableCustomizeInstallReason = viewModel.state.data.enableCustomizeInstallReason
-    val currentInstallReason = viewModel.state.data.installReason
+fun MiuixShowToastWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    MiuixSwitchWidget(
+        title = stringResource(id = R.string.config_install_show_toast),
+        description = stringResource(R.string.config_install_show_toast_desc),
+        checked = state.data.showToast,
+        onCheckedChange = {
+            dispatch(EditViewAction.ChangeDataShowToast(it))
+        }
+    )
+}
+
+@Composable
+fun MiuixInstallReasonWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val enableCustomizeInstallReason = state.data.enableCustomizeInstallReason
+    val currentInstallReason = state.data.installReason
 
     val description = stringResource(id = R.string.config_customize_install_reason_desc)
 
@@ -207,7 +208,7 @@ fun MiuixInstallReasonWidget(viewModel: EditViewModel) {
             description = description,
             checked = enableCustomizeInstallReason,
             onCheckedChange = {
-                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizeInstallReason(it))
+                dispatch(EditViewAction.ChangeDataEnableCustomizeInstallReason(it))
             }
         )
 
@@ -216,7 +217,6 @@ fun MiuixInstallReasonWidget(viewModel: EditViewModel) {
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            // A map to associate the enum values with their human-readable string resources.
             val data = mapOf(
                 InstallReason.UNKNOWN to stringResource(R.string.config_install_reason_unknown),
                 InstallReason.POLICY to stringResource(R.string.config_install_reason_policy),
@@ -225,29 +225,21 @@ fun MiuixInstallReasonWidget(viewModel: EditViewModel) {
                 InstallReason.USER to stringResource(R.string.config_install_reason_user)
             )
 
-            // Convert the data Map to the List<SpinnerEntry> required by SuperSpinner.
             val spinnerEntries = remember(data) {
                 data.values.map { sourceName -> SpinnerEntry(title = sourceName) }
             }
 
-            // Find the index of the currently selected package source.
             val selectedIndex = remember(currentInstallReason, data) {
                 data.keys.toList().indexOf(currentInstallReason).coerceAtLeast(0)
             }
 
-            // Get the display name for the currently selected source, with a fallback.
-            // val summary = data[currentSource]
-
-            // This spinner allows the user to select the package source.
             SuperSpinner(
                 title = stringResource(R.string.config_install_reason),
-                // summary = summary,
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,
                 onSelectedIndexChange = { newIndex ->
-                    // When a new source is selected, find the corresponding enum and dispatch an action.
                     data.keys.elementAtOrNull(newIndex)?.let { reason ->
-                        viewModel.dispatch(EditViewAction.ChangeDataInstallReason(reason))
+                        dispatch(EditViewAction.ChangeDataInstallReason(reason))
                     }
                 }
             )
@@ -256,13 +248,12 @@ fun MiuixInstallReasonWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
-    val enableCustomizePackageSource = viewModel.state.data.enableCustomizePackageSource
-    val currentSource = viewModel.state.data.packageSource
+fun MiuixDataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
+    val enableCustomizePackageSource = state.data.enableCustomizePackageSource
+    val currentSource = state.data.packageSource
 
-    // Display a different description when the feature is disabled by Dhizuku.
     val description =
         if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
         else stringResource(id = R.string.config_customize_package_source_desc)
@@ -274,7 +265,7 @@ fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
             checked = enableCustomizePackageSource,
             enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
             onCheckedChange = {
-                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
+                dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
             }
         )
 
@@ -283,7 +274,6 @@ fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            // A map to associate the enum values with their human-readable string resources.
             val data = mapOf(
                 PackageSource.UNSPECIFIED to stringResource(R.string.config_package_source_unspecified),
                 PackageSource.OTHER to stringResource(R.string.config_package_source_other),
@@ -292,29 +282,21 @@ fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
                 PackageSource.DOWNLOADED_FILE to stringResource(R.string.config_package_source_downloaded_file),
             )
 
-            // Convert the data Map to the List<SpinnerEntry> required by SuperSpinner.
             val spinnerEntries = remember(data) {
                 data.values.map { sourceName -> SpinnerEntry(title = sourceName) }
             }
 
-            // Find the index of the currently selected package source.
             val selectedIndex = remember(currentSource, data) {
                 data.keys.toList().indexOf(currentSource).coerceAtLeast(0)
             }
 
-            // Get the display name for the currently selected source, with a fallback.
-            // val summary = data[currentSource]
-
-            // This spinner allows the user to select the package source.
             SuperSpinner(
                 title = stringResource(R.string.config_package_source),
-                // summary = summary,
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,
                 onSelectedIndexChange = { newIndex ->
-                    // When a new source is selected, find the corresponding enum and dispatch an action.
                     data.keys.elementAtOrNull(newIndex)?.let { source ->
-                        viewModel.dispatch(EditViewAction.ChangeDataPackageSource(source))
+                        dispatch(EditViewAction.ChangeDataPackageSource(source))
                     }
                 }
             )
@@ -323,8 +305,8 @@ fun MiuixDataPackageSourceWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun MiuixDataInstallRequesterWidget(viewModel: EditViewModel) {
-    val stateData = viewModel.state.data
+fun MiuixDataInstallRequesterWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val stateData = state.data
     val enableCustomize = stateData.enableCustomizeInstallRequester
     val packageName = stateData.installRequester
     val uid = stateData.installRequesterUid
@@ -339,7 +321,7 @@ fun MiuixDataInstallRequesterWidget(viewModel: EditViewModel) {
         description = description,
         checked = enableCustomize,
         onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizeInstallRequester(it))
+            dispatch(EditViewAction.ChangeDataEnableCustomizeInstallRequester(it))
         }
     )
 
@@ -360,7 +342,7 @@ fun MiuixDataInstallRequesterWidget(viewModel: EditViewModel) {
                     .focusable(),
                 value = packageName,
                 onValueChange = {
-                    viewModel.dispatch(EditViewAction.ChangeDataInstallRequester(it))
+                    dispatch(EditViewAction.ChangeDataInstallRequester(it))
                 },
                 borderColor = if (isError) MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.primary,
                 label = stringResource(id = R.string.config_install_requester),
@@ -390,9 +372,9 @@ fun MiuixDataInstallRequesterWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun MiuixDataDeclareInstallerWidget(viewModel: EditViewModel) {
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
+fun MiuixDataDeclareInstallerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
 
     val description =
         if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_installer_desc)
@@ -400,33 +382,27 @@ fun MiuixDataDeclareInstallerWidget(viewModel: EditViewModel) {
 
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_declare_installer),
-        checked = viewModel.state.data.declareInstaller,
+        checked = state.data.declareInstaller,
         onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataDeclareInstaller(it))
+            dispatch(EditViewAction.ChangeDataDeclareInstaller(it))
         },
         description = description,
         enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
     )
 
     AnimatedVisibility(
-        visible = viewModel.state.data.declareInstaller,
+        visible = state.data.declareInstaller,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()
     ) {
-        MiuixDataInstallerWidget(viewModel)
+        MiuixDataInstallerWidget(state, dispatch)
     }
 }
 
 @Composable
-fun MiuixDataInstallerWidget(viewModel: EditViewModel) {
-    val stateData = viewModel.state.data
-    /*    viewModel.state.managedInstallerPackages*/
+fun MiuixDataInstallerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val stateData = state.data
     val currentInstaller = stateData.installer
-
-    /*    // Keep logic for calculating supporting text content.
-        val matchingPackage = remember(currentInstaller, managedPackages) {
-            managedPackages.find { it.packageName == currentInstaller }
-        }*/
 
     AnimatedVisibility(
         visible = stateData.declareInstaller,
@@ -442,7 +418,7 @@ fun MiuixDataInstallerWidget(viewModel: EditViewModel) {
                     .padding(vertical = 8.dp, horizontal = 16.dp)
                     .focusable(),
                 value = currentInstaller,
-                onValueChange = { viewModel.dispatch(EditViewAction.ChangeDataInstaller(it)) },
+                onValueChange = { dispatch(EditViewAction.ChangeDataInstaller(it)) },
                 label = stringResource(id = R.string.config_installer),
                 useLabelAsPlaceholder = true,
                 singleLine = true
@@ -452,60 +428,48 @@ fun MiuixDataInstallerWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun MiuixDataUserWidget(viewModel: EditViewModel) {
-    // Retrieve all necessary states from the ViewModel.
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
-    val enableCustomizeUser = viewModel.state.data.enableCustomizeUser
-    val targetUserId = viewModel.state.data.targetUserId
-    val availableUsers = viewModel.state.availableUsers
+fun MiuixDataUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
+    val enableCustomizeUser = state.data.enableCustomizeUser
+    val targetUserId = state.data.targetUserId
+    val availableUsers = state.availableUsers
 
-    // Determine the description text based on whether Dhizuku is active.
     val description =
         if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_user_desc)
         else stringResource(id = R.string.config_customize_user_desc)
 
     Column {
-        // This switch controls the visibility of the user selection spinner.
         MiuixSwitchWidget(
             title = stringResource(id = R.string.config_customize_user),
             description = description,
             checked = enableCustomizeUser,
             enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
             onCheckedChange = {
-                viewModel.dispatch(EditViewAction.ChangeDataCustomizeUser(it))
+                dispatch(EditViewAction.ChangeDataCustomizeUser(it))
             }
         )
 
-        // The user selection spinner is only visible when the switch is enabled.
         AnimatedVisibility(
             visible = enableCustomizeUser,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            // Convert the Map of available users into a List<SpinnerEntry> for the spinner.
             val spinnerEntries = remember(availableUsers) {
                 availableUsers.values.map { userName -> SpinnerEntry(title = userName) }
             }
 
-            // Find the index of the currently selected user ID.
             val selectedIndex = remember(targetUserId, availableUsers) {
                 availableUsers.keys.toList().indexOf(targetUserId).coerceAtLeast(0)
             }
 
-            // Get the display name for the currently selected user, with a fallback.
-            // val summary = availableUsers[targetUserId] ?: stringResource(R.string.config_user_not_found)
-
-            // This spinner allows the user to select the target user for installation.
             SuperSpinner(
                 title = stringResource(R.string.config_target_user),
-                // summary = summary,
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,
                 onSelectedIndexChange = { newIndex ->
-                    // When a new user is selected, find the corresponding user ID and dispatch an action.
                     availableUsers.keys.elementAtOrNull(newIndex)?.let { userId ->
-                        viewModel.dispatch(EditViewAction.ChangeDataTargetUserId(userId))
+                        dispatch(EditViewAction.ChangeDataTargetUserId(userId))
                     }
                 }
             )
@@ -514,9 +478,9 @@ fun MiuixDataUserWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
+fun MiuixDataManualDexoptWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
 
     val description =
         if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
@@ -525,19 +489,19 @@ fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_manual_dexopt),
         description = description,
-        checked = viewModel.state.data.enableManualDexopt,
+        checked = state.data.enableManualDexopt,
         enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
         onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))
+            dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))
         }
     )
 
     AnimatedVisibility(
-        visible = viewModel.state.data.enableManualDexopt,
+        visible = state.data.enableManualDexopt,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()
     ) {
-        val currentMode = viewModel.state.data.dexoptMode
+        val currentMode = state.data.dexoptMode
         val data = mapOf(
             DexoptMode.Verify to stringResource(R.string.config_dexopt_mode_verify),
             DexoptMode.SpeedProfile to stringResource(R.string.config_dexopt_mode_speed_profile),
@@ -546,40 +510,31 @@ fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
         )
         Column {
             MiuixSwitchWidget(
-                //icon = AppIcons.Build,
                 title = stringResource(id = R.string.config_force_dexopt),
                 description = stringResource(id = R.string.config_force_dexopt_desc),
-                checked = viewModel.state.data.forceDexopt,
+                checked = state.data.forceDexopt,
                 onCheckedChange = {
-                    viewModel.dispatch(EditViewAction.ChangeDataForceDexopt(it))
+                    dispatch(EditViewAction.ChangeDataForceDexopt(it))
                 }
             )
 
-            // Convert data Map to List<SpinnerEntry> required by SuperSpinner.
-            // Since icons are not provided for dexopt modes in the original code,
-            // we create SpinnerEntry with title only.
             val spinnerEntries = remember(data) {
                 data.values.map { modeName ->
                     SpinnerEntry(title = modeName)
                 }
             }
 
-            // Calculate the currently selected index based on the currentMode enum.
             val selectedIndex = remember(currentMode, data) {
                 data.keys.toList().indexOf(currentMode).coerceAtLeast(0)
             }
 
-            // Replace DropDownMenuWidget with SuperSpinner.
             SuperSpinner(
                 title = stringResource(R.string.config_dexopt_mode),
-                // Display the currently selected mode name as summary.
-                // summary = data[currentMode] ?: spinnerEntries.firstOrNull()?.title ?: "",
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,
                 onSelectedIndexChange = { newIndex ->
-                    // Convert the new index back to the corresponding DexoptMode enum.
                     data.keys.elementAtOrNull(newIndex)?.let { mode ->
-                        viewModel.dispatch(EditViewAction.ChangeDataDexoptMode(mode))
+                        dispatch(EditViewAction.ChangeDataDexoptMode(mode))
                     }
                 }
             )
@@ -588,34 +543,34 @@ fun MiuixDataManualDexoptWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun MiuixDataAutoDeleteWidget(viewModel: EditViewModel) {
+fun MiuixDataAutoDeleteWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_auto_delete),
         description = stringResource(id = R.string.config_auto_delete_desc),
-        checked = viewModel.state.data.autoDelete,
+        checked = state.data.autoDelete,
         onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataAutoDelete(it))
+            dispatch(EditViewAction.ChangeDataAutoDelete(it))
         }
     )
 
     AnimatedVisibility(
-        visible = viewModel.state.data.autoDelete,
+        visible = state.data.autoDelete,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()
     ) {
         MiuixSwitchWidget(
             title = stringResource(id = R.string.config_auto_delete_zip),
             description = stringResource(id = R.string.config_auto_delete_zip_desc),
-            checked = viewModel.state.data.autoDeleteZip,
+            checked = state.data.autoDeleteZip,
             onCheckedChange = {
-                viewModel.dispatch(EditViewAction.ChangeDataZipAutoDelete(it))
+                dispatch(EditViewAction.ChangeDataZipAutoDelete(it))
             }
         )
     }
 }
 
 @Composable
-fun MiuixDisplaySdkWidget(viewModel: EditViewModel) {
+fun MiuixDisplaySdkWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_display_sdk_version),
         description = stringResource(
@@ -623,96 +578,106 @@ fun MiuixDisplaySdkWidget(viewModel: EditViewModel) {
             stringResource(id = R.string.config_display_sdk_version_desc),
             stringResource(id = R.string.config_display_module_extra_info_desc)
         ),
-        checked = viewModel.state.data.displaySdk,
+        checked = state.data.displaySdk,
         onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDisplaySdk(it))
+            dispatch(EditViewAction.ChangeDisplaySdk(it))
         }
     )
 }
 
 @Composable
-fun MiuixDisplaySizeWidget(viewModel: EditViewModel) {
+fun MiuixDisplaySizeWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_display_size),
         description = stringResource(id = R.string.config_display_size_desc),
-        checked = viewModel.state.data.displaySize,
+        checked = state.data.displaySize,
         onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDisplaySize(it))
+            dispatch(EditViewAction.ChangeDisplaySize(it))
         }
     )
 }
 
 @Composable
-fun MiuixDataForAllUserWidget(viewModel: EditViewModel) {
+fun MiuixDataForAllUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_all_users),
         description = stringResource(id = R.string.config_all_users_desc),
-        checked = viewModel.state.data.forAllUser,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataForAllUser(it)) }
+        checked = state.data.forAllUser,
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataForAllUser(it)) }
     )
 }
 
 @Composable
-fun MiuixDataAllowTestOnlyWidget(viewModel: EditViewModel) {
+fun MiuixDataAllowTestOnlyWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_allow_test),
         description = stringResource(id = R.string.config_allow_test_desc),
-        checked = viewModel.state.data.allowTestOnly,
+        checked = state.data.allowTestOnly,
         onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataAllowTestOnly(it))
+            dispatch(EditViewAction.ChangeDataAllowTestOnly(it))
         }
     )
 }
 
 @Composable
-fun MiuixDataAllowDowngradeWidget(viewModel: EditViewModel) {
+fun MiuixDataAllowDowngradeWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_allow_downgrade),
         description = stringResource(id = R.string.config_allow_downgrade_desc),
-        checked = viewModel.state.data.allowDowngrade,
+        checked = state.data.allowDowngrade,
         onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataAllowDowngrade(it))
+            dispatch(EditViewAction.ChangeDataAllowDowngrade(it))
         }
     )
 }
 
 @Composable
-fun MiuixDataBypassLowTargetSdkWidget(viewModel: EditViewModel) {
+fun MiuixDataBypassLowTargetSdkWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         icon = AppIcons.InstallBypassLowTargetSdk,
         title = stringResource(id = R.string.config_bypass_low_target_sdk),
         description = stringResource(id = R.string.config_bypass_low_target_sdk_desc),
-        checked = viewModel.state.data.bypassLowTargetSdk,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataBypassLowTargetSdk(it)) }
+        checked = state.data.bypassLowTargetSdk,
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataBypassLowTargetSdk(it)) }
     )
 }
 
 @Composable
-fun MiuixDataAllowAllRequestedPermissionsWidget(viewModel: EditViewModel) {
+fun MiuixDataAllowAllRequestedPermissionsWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_grant_all_permissions),
         description = stringResource(id = R.string.config_grant_all_permissions_desc),
-        checked = viewModel.state.data.allowAllRequestedPermissions,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowAllRequestedPermissions(it)) }
+        checked = state.data.allowAllRequestedPermissions,
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowAllRequestedPermissions(it)) }
     )
 }
 
 @Composable
-fun MiuixDataSplitChooseAllWidget(viewModel: EditViewModel) {
+fun MiuixRequestUpdateOwnershipWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    MiuixSwitchWidget(
+        title = stringResource(id = R.string.config_request_update_ownership),
+        description = stringResource(id = R.string.config_request_update_ownership_desc),
+        checked = state.data.requestUpdateOwnership,
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataRequestUpdateOwnership(it)) }
+    )
+}
+
+@Composable
+fun MiuixDataSplitChooseAllWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_split_choose_all),
         description = stringResource(id = R.string.config_split_choose_all_desc),
-        checked = viewModel.state.data.splitChooseAll,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeSplitChooseAll(it)) }
+        checked = state.data.splitChooseAll,
+        onCheckedChange = { dispatch(EditViewAction.ChangeSplitChooseAll(it)) }
     )
 }
 
 @Composable
-fun MiuixDataApkChooseAllWidget(viewModel: EditViewModel) {
+fun MiuixDataApkChooseAllWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_apk_choose_all),
         description = stringResource(id = R.string.config_apk_choose_all_desc),
-        checked = viewModel.state.data.apkChooseAll,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeApkChooseAll(it)) }
+        checked = state.data.apkChooseAll,
+        onCheckedChange = { dispatch(EditViewAction.ChangeApkChooseAll(it)) }
     )
 }

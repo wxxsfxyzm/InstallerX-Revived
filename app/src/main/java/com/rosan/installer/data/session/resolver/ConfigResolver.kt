@@ -92,7 +92,8 @@ class ConfigResolver(
             config.allowDowngrade.takeIf { it }?.let { InstallOption.AllowDowngrade.value },
             config.forAllUser.takeIf { it }?.let { InstallOption.AllUsers.value },
             config.bypassLowTargetSdk.takeIf { it }?.let { InstallOption.BypassLowTargetSdkBlock.value },
-            config.allowAllRequestedPermissions.takeIf { it }?.let { InstallOption.GrantAllRequestedPermissions.value }
+            config.allowAllRequestedPermissions.takeIf { it }?.let { InstallOption.GrantAllRequestedPermissions.value },
+            config.requestUpdateOwnership.takeIf { it }?.let { InstallOption.RequestUpdateOwnerShip.value },
         ).fold(0) { acc, flag -> acc or flag }
 
         config = config.copy(

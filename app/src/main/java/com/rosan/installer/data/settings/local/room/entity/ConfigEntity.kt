@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
+// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.data.settings.local.room.entity
 
 import androidx.room.ColumnInfo
@@ -24,6 +24,7 @@ data class ConfigEntity(
     @ColumnInfo(name = "authorizer") var authorizer: Authorizer,
     @ColumnInfo(name = "customize_authorizer") var customizeAuthorizer: String,
     @ColumnInfo(name = "install_mode") var installMode: InstallMode,
+    @ColumnInfo(name = "show_toast", defaultValue = "0") var showToast: Boolean = true,
     @ColumnInfo(name = "enable_customize_install_reason", defaultValue = "0")
     var enableCustomizeInstallReason: Boolean = false,
     @ColumnInfo(
@@ -46,118 +47,33 @@ data class ConfigEntity(
         name = "dexopt_mode",
         defaultValue = "'speed-profile'"
     ) var dexoptMode: DexoptMode = DexoptMode.SpeedProfile,
-    @ColumnInfo(name = "auto_delete") var autoDelete: Boolean,
+    @ColumnInfo(name = "auto_delete", defaultValue = "0") var autoDelete: Boolean,
     @ColumnInfo(name = "auto_delete_zip", defaultValue = "0") var autoDeleteZip: Boolean = false,
     @ColumnInfo(name = "display_size", defaultValue = "0") var displaySize: Boolean = false,
     @ColumnInfo(name = "display_sdk", defaultValue = "0") var displaySdk: Boolean = false,
-    @ColumnInfo(name = "for_all_user") var forAllUser: Boolean,
-    @ColumnInfo(name = "allow_test_only") var allowTestOnly: Boolean,
-    @ColumnInfo(name = "allow_downgrade") var allowDowngrade: Boolean,
-    @ColumnInfo(name = "bypass_low_target_sdk", defaultValue = "0") var bypassLowTargetSdk: Boolean,
-    @ColumnInfo(name = "allow_all_requested_permissions", defaultValue = "0") var allowAllRequestedPermissions: Boolean,
-    @ColumnInfo(name = "split_choose_all", defaultValue = "0") var splitChooseAll: Boolean,
-    @ColumnInfo(name = "apk_choose_all", defaultValue = "0") var apkChooseAll: Boolean,
+    @ColumnInfo(name = "for_all_user", defaultValue = "0") var forAllUser: Boolean = false,
+    @ColumnInfo(name = "allow_test_only", defaultValue = "0") var allowTestOnly: Boolean = false,
+    @ColumnInfo(name = "allow_downgrade", defaultValue = "0") var allowDowngrade: Boolean = false,
+    @ColumnInfo(name = "bypass_low_target_sdk", defaultValue = "0") var bypassLowTargetSdk: Boolean = false,
+    @ColumnInfo(name = "allow_all_requested_permissions", defaultValue = "0") var allowAllRequestedPermissions: Boolean = false,
+    @ColumnInfo(name = "request_update_ownership", defaultValue = "0") var requestUpdateOwnership: Boolean = false,
+    @ColumnInfo(name = "split_choose_all", defaultValue = "0") var splitChooseAll: Boolean = false,
+    @ColumnInfo(name = "apk_choose_all", defaultValue = "0") var apkChooseAll: Boolean = false,
     @ColumnInfo(name = "created_at") var createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "modified_at") var modifiedAt: Long = System.currentTimeMillis(),
 ) {
+    // Variable to store the installation flags
     @Ignore
     var installFlags: Int = 0
 
     @Ignore
     var bypassBlacklistInstallSetByUser: Boolean = false
 
+    // Variable to store the uninstallation flags
     @Ignore
     var uninstallFlags: Int = 0
 
-    /**
-     * 安装/卸载调用的来源方
-     */
+    // Variable to store the calling UID
     @Ignore
     var callingFromUid: Int? = null
-
-    /*    enum class Authorizer(val value: String) {
-            Global("global"),
-            None("none"),
-            Root("root"),
-            Shizuku("shizuku"),
-            Dhizuku("dhizuku"),
-            Customize("customize");
-        }
-
-        enum class InstallMode(val value: String) {
-            Global("global"),
-            Dialog("dialog"),
-            AutoDialog("auto_dialog"),
-            Notification("notification"),
-            AutoNotification("auto_notification"),
-            Ignore("ignore");
-        }
-
-        enum class DexoptMode(val value: String) {
-            Verify("verify"),
-            SpeedProfile("speed-profile"),
-            Speed("speed"),
-            Everything("everything");
-        }
-
-        */
-    /**
-     * Define Install Reasons,
-     * Sync with Android's Install Reason
-     *
-     * @see android.content.pm.PackageInstaller.SessionParams.setInstallReason
-     *//*
-    enum class InstallReason(val value: Int) {
-        */
-    /**
-     * Code indicating that the reason for installing this package is unknown.
-     * @see android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN
-     *//*
-        UNKNOWN(0),
-
-        */
-    /**
-     * Code indicating that this package was installed due to enterprise policy.
-     * @see android.content.pm.PackageManager.INSTALL_REASON_POLICY
-     *//*
-        POLICY(1),
-
-        */
-    /**
-     * Code indicating that this package was installed as part of restoring from another device.
-     * @see android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE
-     *//*
-        DEVICE_RESTORE(2),
-
-        */
-    /**
-     * Code indicating that this package was installed as part of device setup.
-     * @see android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP
-     *//*
-        DEVICE_SETUP(3),
-
-        */
-    /**
-     * Code indicating that the package installation was initiated by the user.
-     * NOTE: this will cause launcher release desktop icon
-     * @see android.content.pm.PackageManager.INSTALL_REASON_USER
-     *//*
-        USER(4);
-
-        companion object {
-            fun fromInt(value: Int) = entries.find { it.value == value } ?: UNKNOWN
-        }
-    }
-
-    enum class PackageSource(val value: Int) {
-        UNSPECIFIED(0),     // Corresponds to PACKAGE_SOURCE_UNSPECIFIED
-        OTHER(1),           // Corresponds to PACKAGE_SOURCE_OTHER
-        STORE(2),           // Corresponds to PACKAGE_SOURCE_STORE
-        LOCAL_FILE(3),      // Corresponds to PACKAGE_SOURCE_LOCAL_FILE
-        DOWNLOADED_FILE(4); // Corresponds to PACKAGE_SOURCE_DOWNLOADED_FILE
-
-        companion object {
-            fun fromInt(value: Int) = entries.find { it.value == value } ?: OTHER
-        }
-    }*/
 }

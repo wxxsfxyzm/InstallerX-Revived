@@ -14,6 +14,7 @@ sealed class EditViewAction {
     data class ChangeDataAuthorizer(val authorizer: Authorizer) : EditViewAction()
     data class ChangeDataCustomizeAuthorizer(val customizeAuthorizer: String) : EditViewAction()
     data class ChangeDataInstallMode(val installMode: InstallMode) : EditViewAction()
+    data class ChangeDataShowToast(val showToast: Boolean) : EditViewAction()
     data class ChangeDataEnableCustomizePackageSource(val enable: Boolean) : EditViewAction()
     data class ChangeDataPackageSource(val packageSource: PackageSource) : EditViewAction()
     data class ChangeDataEnableCustomizeInstallReason(val enable: Boolean) : EditViewAction()
@@ -36,6 +37,7 @@ sealed class EditViewAction {
     data class ChangeDataAllowDowngrade(val allowDowngrade: Boolean) : EditViewAction()
     data class ChangeDataBypassLowTargetSdk(val bypassLowTargetSdk: Boolean) : EditViewAction()
     data class ChangeDataAllowAllRequestedPermissions(val allowAllRequestedPermissions: Boolean) : EditViewAction()
+    data class ChangeDataRequestUpdateOwnership(val requestUpdateOwnership: Boolean) : EditViewAction()
     data class ChangeSplitChooseAll(val splitChooseAll: Boolean) : EditViewAction()
 
     data class ChangeApkChooseAll(val apkChooseAll: Boolean) : EditViewAction()

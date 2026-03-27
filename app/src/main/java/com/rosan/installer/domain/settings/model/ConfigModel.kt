@@ -5,7 +5,9 @@ package com.rosan.installer.domain.settings.model
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
 
-// Represents the complete business object for a configuration
+/**
+ * Represents the complete business object for a configuration
+ */
 data class ConfigModel(
     val id: Long = 0L,
     val name: String = "Default",
@@ -13,6 +15,7 @@ data class ConfigModel(
     val authorizer: Authorizer,
     val customizeAuthorizer: String,
     val installMode: InstallMode,
+    val showToast: Boolean = false,
     val enableCustomizeInstallReason: Boolean = false,
     val installReason: InstallReason = InstallReason.UNKNOWN,
     val enableCustomizePackageSource: Boolean = false,
@@ -24,17 +27,18 @@ data class ConfigModel(
     val enableManualDexopt: Boolean = false,
     val forceDexopt: Boolean = false,
     val dexoptMode: DexoptMode = DexoptMode.SpeedProfile,
-    val autoDelete: Boolean,
+    val autoDelete: Boolean = false,
     val autoDeleteZip: Boolean = false,
     val displaySize: Boolean = false,
     val displaySdk: Boolean = false,
-    val forAllUser: Boolean,
-    val allowTestOnly: Boolean,
-    val allowDowngrade: Boolean,
-    val bypassLowTargetSdk: Boolean,
-    val allowAllRequestedPermissions: Boolean,
-    val splitChooseAll: Boolean,
-    val apkChooseAll: Boolean,
+    val forAllUser: Boolean = false,
+    val allowTestOnly: Boolean = false,
+    val allowDowngrade: Boolean = false,
+    val bypassLowTargetSdk: Boolean = false,
+    val allowAllRequestedPermissions: Boolean = false,
+    val requestUpdateOwnership: Boolean = false,
+    val splitChooseAll: Boolean = false,
+    val apkChooseAll: Boolean = false,
 
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis(),
@@ -51,6 +55,7 @@ data class ConfigModel(
             authorizer = Authorizer.Global,
             customizeAuthorizer = "",
             installMode = InstallMode.Global,
+            showToast = false,
             enableCustomizeInstallReason = false,
             installReason = InstallReason.UNKNOWN,
             enableCustomizePackageSource = false,
@@ -70,6 +75,7 @@ data class ConfigModel(
             allowDowngrade = false,
             bypassLowTargetSdk = false,
             allowAllRequestedPermissions = false,
+            requestUpdateOwnership = false,
             splitChooseAll = false,
             apkChooseAll = false
         )
@@ -79,6 +85,7 @@ data class ConfigModel(
             authorizer = Authorizer.Global,
             customizeAuthorizer = "",
             installMode = InstallMode.Global,
+            showToast = false,
             enableCustomizeInstallReason = false,
             installReason = InstallReason.UNKNOWN,
             enableCustomizePackageSource = false,
@@ -98,6 +105,7 @@ data class ConfigModel(
             allowDowngrade = false,
             bypassLowTargetSdk = false,
             allowAllRequestedPermissions = false,
+            requestUpdateOwnership = false,
             splitChooseAll = false,
             apkChooseAll = false
         )

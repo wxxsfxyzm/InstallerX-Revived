@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.widget.setting
 
 import androidx.compose.animation.AnimatedVisibility
@@ -44,13 +46,14 @@ import com.rosan.installer.domain.settings.model.InstallReason
 import com.rosan.installer.domain.settings.model.PackageSource
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
-import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
+import com.rosan.installer.ui.page.main.settings.config.edit.EditViewState
 import com.rosan.installer.ui.util.isDhizukuActive
 import org.koin.compose.koinInject
 
 @Composable
 fun DataNameWidget(
-    viewModel: EditViewModel,
+    state: EditViewState,
+    dispatch: (EditViewAction) -> Unit,
     trailingContent: @Composable (() -> Unit) = {}
 ) {
     OutlinedTextField(
@@ -64,19 +67,18 @@ fun DataNameWidget(
         label = {
             Text(text = stringResource(id = R.string.config_name))
         },
-        value = viewModel.state.data.name,
+        value = state.data.name,
         onValueChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataName(it))
+            dispatch(EditViewAction.ChangeDataName(it))
         },
         singleLine = true,
-        // TODO do not allow create another Default name
-        isError = viewModel.state.data.errorName
+        isError = state.data.errorName
     )
     trailingContent()
 }
 
 @Composable
-fun DataDescriptionWidget(viewModel: EditViewModel) {
+fun DataDescriptionWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     TextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -88,17 +90,17 @@ fun DataDescriptionWidget(viewModel: EditViewModel) {
         label = {
             Text(text = stringResource(id = R.string.config_description))
         },
-        value = viewModel.state.data.description,
-        onValueChange = { viewModel.dispatch(EditViewAction.ChangeDataDescription(it)) },
+        value = state.data.description,
+        onValueChange = { dispatch(EditViewAction.ChangeDataDescription(it)) },
         maxLines = 8,
     )
 }
 
 @Composable
-fun DataAuthorizerWidget(viewModel: EditViewModel) {
+fun DataAuthorizerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
     val isSessionInstallSupported = capabilityProvider.isSessionInstallSupported
     val data = buildMap {
         put(
@@ -127,17 +129,17 @@ fun DataAuthorizerWidget(viewModel: EditViewModel) {
         description = if (data.containsKey(stateAuthorizer)) data[stateAuthorizer] else null,
         choice = data.keys.toList().indexOf(stateAuthorizer),
         data = data.values.toList(),
-    ) {
-        data.keys.toList().getOrNull(it)?.let {
-            viewModel.dispatch(EditViewAction.ChangeDataAuthorizer(it))
+    ) { index ->
+        data.keys.toList().getOrNull(index)?.let {
+            dispatch(EditViewAction.ChangeDataAuthorizer(it))
         }
     }
 }
 
 @Composable
-fun DataCustomizeAuthorizerWidget(viewModel: EditViewModel) {
-    if (!viewModel.state.data.authorizerCustomize) return
-    val customizeAuthorizer = viewModel.state.data.customizeAuthorizer
+fun DataCustomizeAuthorizerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    if (!state.data.authorizerCustomize) return
+    val customizeAuthorizer = state.data.customizeAuthorizer
     TextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,16 +152,16 @@ fun DataCustomizeAuthorizerWidget(viewModel: EditViewModel) {
             Text(text = stringResource(R.string.config_customize_authorizer))
         },
         value = customizeAuthorizer,
-        onValueChange = { viewModel.dispatch(EditViewAction.ChangeDataCustomizeAuthorizer(it)) },
+        onValueChange = { dispatch(EditViewAction.ChangeDataCustomizeAuthorizer(it)) },
         maxLines = 8,
-        isError = viewModel.state.data.errorCustomizeAuthorizer
+        isError = state.data.errorCustomizeAuthorizer
     )
 }
 
 @Composable
-fun DataInstallModeWidget(viewModel: EditViewModel) {
-    val stateInstallMode = viewModel.state.data.installMode
-    val globalInstallMode = viewModel.globalInstallMode
+fun DataInstallModeWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val stateInstallMode = state.data.installMode
+    val globalInstallMode = state.globalInstallMode
     val data = mapOf(
         InstallMode.Global to stringResource(
             R.string.config_install_mode_global_desc,
@@ -184,29 +186,41 @@ fun DataInstallModeWidget(viewModel: EditViewModel) {
         description = if (data.containsKey(stateInstallMode)) data[stateInstallMode] else null,
         choice = data.keys.toList().indexOf(stateInstallMode),
         data = data.values.toList(),
-    ) {
-        data.keys.toList().getOrNull(it)?.let {
-            viewModel.dispatch(EditViewAction.ChangeDataInstallMode(it))
+    ) { index ->
+        data.keys.toList().getOrNull(index)?.let {
+            dispatch(EditViewAction.ChangeDataInstallMode(it))
         }
     }
 }
 
 @Composable
-fun DataInstallReasonWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
-    val enableCustomizeInstallReason = viewModel.state.data.enableCustomizeInstallReason
-    val currentInstallReason = viewModel.state.data.installReason
+fun DataShowToastWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
+    SwitchWidget(
+        icon = AppIcons.Toast,
+        title = stringResource(id = R.string.config_install_show_toast),
+        description = stringResource(R.string.config_install_show_toast_desc),
+        checked = state.data.showToast,
+        isM3E = isM3E,
+        onCheckedChange = {
+            dispatch(EditViewAction.ChangeDataShowToast(it))
+        }
+    )
+}
 
-    val description = stringResource(id = R.string.config_customize_install_reason_desc)
+@Composable
+fun DataInstallReasonWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
+    val enableCustomizeInstallReason = state.data.enableCustomizeInstallReason
+    val currentInstallReason = state.data.installReason
 
     Column {
         SwitchWidget(
             icon = AppIcons.InstallReason,
             title = stringResource(id = R.string.config_customize_install_reason),
-            description = description,
+            description = stringResource(id = R.string.config_customize_install_reason_desc),
             checked = enableCustomizeInstallReason,
             isM3E = isM3E,
             onCheckedChange = {
-                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizeInstallReason(it))
+                dispatch(EditViewAction.ChangeDataEnableCustomizeInstallReason(it))
             }
         )
 
@@ -215,7 +229,6 @@ fun DataInstallReasonWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            // A map to associate the enum values with their human-readable string resources.
             val data = mapOf(
                 InstallReason.UNKNOWN to stringResource(R.string.config_install_reason_unknown),
                 InstallReason.POLICY to stringResource(R.string.config_install_reason_policy),
@@ -230,9 +243,8 @@ fun DataInstallReasonWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
                 choice = data.keys.toList().indexOf(currentInstallReason),
                 data = data.values.toList(),
             ) { index ->
-                // Dispatch the action to the ViewModel when a new source is selected.
                 data.keys.toList().getOrNull(index)?.let { reason ->
-                    viewModel.dispatch(EditViewAction.ChangeDataInstallReason(reason))
+                    dispatch(EditViewAction.ChangeDataInstallReason(reason))
                 }
             }
         }
@@ -240,13 +252,12 @@ fun DataInstallReasonWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
 }
 
 @Composable
-fun DataPackageSourceWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
-    val enableCustomizePackageSource = viewModel.state.data.enableCustomizePackageSource
-    val currentSource = viewModel.state.data.packageSource
+fun DataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
+    val enableCustomizePackageSource = state.data.enableCustomizePackageSource
+    val currentSource = state.data.packageSource
 
-    // Display a different description when the feature is disabled by Dhizuku.
     val description =
         if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
         else stringResource(id = R.string.config_customize_package_source_desc)
@@ -261,7 +272,7 @@ fun DataPackageSourceWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
             isError = isDhizukuActive(stateAuthorizer, globalAuthorizer),
             isM3E = isM3E,
             onCheckedChange = {
-                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
+                dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
             }
         )
 
@@ -270,24 +281,21 @@ fun DataPackageSourceWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            // A map to associate the enum values with their human-readable string resources.
             val data = mapOf(
                 PackageSource.UNSPECIFIED to stringResource(R.string.config_package_source_unspecified),
                 PackageSource.OTHER to stringResource(R.string.config_package_source_other),
                 PackageSource.STORE to stringResource(R.string.config_package_source_store),
                 PackageSource.LOCAL_FILE to stringResource(R.string.config_package_source_local_file),
                 PackageSource.DOWNLOADED_FILE to stringResource(R.string.config_package_source_downloaded_file),
-
-                )
+            )
             DropDownMenuWidget(
                 title = stringResource(R.string.config_package_source),
                 description = data[currentSource],
                 choice = data.keys.toList().indexOf(currentSource),
                 data = data.values.toList(),
             ) { index ->
-                // Dispatch the action to the ViewModel when a new source is selected.
                 data.keys.toList().getOrNull(index)?.let { source ->
-                    viewModel.dispatch(EditViewAction.ChangeDataPackageSource(source))
+                    dispatch(EditViewAction.ChangeDataPackageSource(source))
                 }
             }
         }
@@ -295,15 +303,12 @@ fun DataPackageSourceWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
 }
 
 @Composable
-fun DataInstallRequesterWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
-    val stateData = viewModel.state.data
+fun DataInstallRequesterWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
+    val stateData = state.data
     val enableCustomize = stateData.enableCustomizeInstallRequester
     val packageName = stateData.installRequester
     val uid = stateData.installRequesterUid
 
-    // Validation state for UI:
-    // It's an error if the field is not empty but no UID was found.
-    // (If it's empty, standard required field error logic applies usually, but here we check existence)
     val isPackageNotFound = packageName.isNotEmpty() && uid == null
     val isError = stateData.errorInstallRequester
 
@@ -313,15 +318,15 @@ fun DataInstallRequesterWidget(viewModel: EditViewModel, isM3E: Boolean = true) 
 
     Column {
         SwitchWidget(
-            icon = AppIcons.InstallSource, // Or an appropriate icon for Requester
+            icon = AppIcons.InstallSource,
             title = stringResource(id = R.string.config_declare_install_requester),
             description = description,
             checked = enableCustomize,
             onCheckedChange = {
-                viewModel.dispatch(EditViewAction.ChangeDataEnableCustomizeInstallRequester(it))
+                dispatch(EditViewAction.ChangeDataEnableCustomizeInstallRequester(it))
             },
             isM3E = isM3E,
-            isError = isError // Highlight the switch if the inner content is invalid when saving
+            isError = isError
         )
 
         AnimatedVisibility(
@@ -336,7 +341,7 @@ fun DataInstallRequesterWidget(viewModel: EditViewModel, isM3E: Boolean = true) 
                     .focusable(),
                 value = packageName,
                 onValueChange = {
-                    viewModel.dispatch(EditViewAction.ChangeDataInstallRequester(it))
+                    dispatch(EditViewAction.ChangeDataInstallRequester(it))
                 },
                 label = { Text(text = stringResource(id = R.string.config_install_requester)) },
                 leadingIcon = {
@@ -365,9 +370,9 @@ fun DataInstallRequesterWidget(viewModel: EditViewModel, isM3E: Boolean = true) 
 }
 
 @Composable
-fun DataDeclareInstallerWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
+fun DataDeclareInstallerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
 
     val description =
         if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_installer_desc)
@@ -376,8 +381,8 @@ fun DataDeclareInstallerWidget(viewModel: EditViewModel, isM3E: Boolean = true) 
     SwitchWidget(
         icon = AppIcons.InstallSource,
         title = stringResource(id = R.string.config_declare_installer),
-        checked = viewModel.state.data.declareInstaller,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataDeclareInstaller(it)) },
+        checked = state.data.declareInstaller,
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataDeclareInstaller(it)) },
         isM3E = isM3E,
         description = description,
         enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
@@ -385,27 +390,26 @@ fun DataDeclareInstallerWidget(viewModel: EditViewModel, isM3E: Boolean = true) 
     )
 
     AnimatedVisibility(
-        visible = viewModel.state.data.declareInstaller,
+        visible = state.data.declareInstaller,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()
     ) {
-        DataInstallerWidget(viewModel)
+        DataInstallerWidget(state, dispatch)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DataInstallerWidget(viewModel: EditViewModel) {
-    val stateData = viewModel.state.data
-    val managedPackages = viewModel.state.managedInstallerPackages
+fun DataInstallerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val stateData = state.data
+    val managedPackages = state.managedInstallerPackages
     val currentInstaller = stateData.installer
     var expanded by remember { mutableStateOf(false) }
-    // Find a matching package to display its friendly name
+
     val matchingPackage = remember(currentInstaller, managedPackages) {
         managedPackages.find { it.packageName == currentInstaller }
     }
 
-    // Use ExposedDropdownMenuBox for the text field with a dropdown menu
     AnimatedVisibility(
         visible = stateData.declareInstaller,
         enter = expandVertically() + fadeIn(),
@@ -425,7 +429,7 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
                 value = currentInstaller,
                 onValueChange = {
-                    viewModel.dispatch(EditViewAction.ChangeDataInstaller(it))
+                    dispatch(EditViewAction.ChangeDataInstaller(it))
                 },
                 label = { Text(text = stringResource(id = R.string.config_installer)) },
                 leadingIcon = {
@@ -435,7 +439,6 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 },
                 supportingText = {
-                    // If a match is found, show the friendly name as supporting text
                     matchingPackage?.let {
                         Text(stringResource(R.string.config_installer_matches, it.name))
                     }
@@ -444,7 +447,6 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
                 isError = stateData.errorInstaller
             )
 
-            // Define the content of the dropdown menu
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
@@ -461,10 +463,9 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
                         DropdownMenuItem(
                             text = { Text("${item.name} (${item.packageName})") },
                             onClick = {
-                                viewModel.dispatch(EditViewAction.ChangeDataInstaller(item.packageName))
+                                dispatch(EditViewAction.ChangeDataInstaller(item.packageName))
                                 expanded = false
                             },
-                            // Highlight the selected pkg
                             colors = if (isSelected) MenuDefaults.itemColors(
                                 textColor = MaterialTheme.colorScheme.primary
                             ) else MenuDefaults.itemColors()
@@ -477,12 +478,12 @@ fun DataInstallerWidget(viewModel: EditViewModel) {
 }
 
 @Composable
-fun DataUserWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
-    val enableCustomizeUser = viewModel.state.data.enableCustomizeUser
-    val targetUserId = viewModel.state.data.targetUserId
-    val availableUsers = viewModel.state.availableUsers
+fun DataUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
+    val enableCustomizeUser = state.data.enableCustomizeUser
+    val targetUserId = state.data.targetUserId
+    val availableUsers = state.availableUsers
 
     val description =
         if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_user_desc)
@@ -498,7 +499,7 @@ fun DataUserWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
             isError = isDhizukuActive(stateAuthorizer, globalAuthorizer),
             isM3E = isM3E,
             onCheckedChange = {
-                viewModel.dispatch(EditViewAction.ChangeDataCustomizeUser(it))
+                dispatch(EditViewAction.ChangeDataCustomizeUser(it))
             }
         )
 
@@ -507,15 +508,15 @@ fun DataUserWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            val description = availableUsers[targetUserId] ?: stringResource(R.string.config_user_not_found)
+            val descriptionUser = availableUsers[targetUserId] ?: stringResource(R.string.config_user_not_found)
             DropDownMenuWidget(
                 title = stringResource(R.string.config_target_user),
-                description = description,
+                description = descriptionUser,
                 choice = availableUsers.keys.toList().indexOf(targetUserId),
                 data = availableUsers.values.toList(),
             ) { index ->
                 availableUsers.keys.toList().getOrNull(index)?.let {
-                    viewModel.dispatch(EditViewAction.ChangeDataTargetUserId(it))
+                    dispatch(EditViewAction.ChangeDataTargetUserId(it))
                 }
             }
         }
@@ -523,9 +524,9 @@ fun DataUserWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
 }
 
 @Composable
-fun DataManualDexoptWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
-    val stateAuthorizer = viewModel.state.data.authorizer
-    val globalAuthorizer = viewModel.globalAuthorizer
+fun DataManualDexoptWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
+    val stateAuthorizer = state.data.authorizer
+    val globalAuthorizer = state.globalAuthorizer
 
     val description =
         if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
@@ -535,21 +536,21 @@ fun DataManualDexoptWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
         icon = Icons.TwoTone.Speed,
         title = stringResource(id = R.string.config_manual_dexopt),
         description = description,
-        checked = viewModel.state.data.enableManualDexopt,
+        checked = state.data.enableManualDexopt,
         enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
         isError = isDhizukuActive(stateAuthorizer, globalAuthorizer),
         isM3E = isM3E,
         onCheckedChange = {
-            viewModel.dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))
+            dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))
         }
     )
 
     AnimatedVisibility(
-        visible = viewModel.state.data.enableManualDexopt,
+        visible = state.data.enableManualDexopt,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()
     ) {
-        val currentMode = viewModel.state.data.dexoptMode
+        val currentMode = state.data.dexoptMode
         val data = mapOf(
             DexoptMode.Verify to stringResource(R.string.config_dexopt_mode_verify),
             DexoptMode.SpeedProfile to stringResource(R.string.config_dexopt_mode_speed_profile),
@@ -558,13 +559,12 @@ fun DataManualDexoptWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
         )
         Column {
             SwitchWidget(
-                //icon = AppIcons.Build,
                 title = stringResource(id = R.string.config_force_dexopt),
                 description = stringResource(id = R.string.config_force_dexopt_desc),
-                checked = viewModel.state.data.forceDexopt,
+                checked = state.data.forceDexopt,
                 isM3E = isM3E,
                 onCheckedChange = {
-                    viewModel.dispatch(EditViewAction.ChangeDataForceDexopt(it))
+                    dispatch(EditViewAction.ChangeDataForceDexopt(it))
                 }
             )
             DropDownMenuWidget(
@@ -572,9 +572,9 @@ fun DataManualDexoptWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
                 description = data[currentMode],
                 choice = data.keys.toList().indexOf(currentMode),
                 data = data.values.toList(),
-            ) {
-                data.keys.toList().getOrNull(it)?.let { mode ->
-                    viewModel.dispatch(EditViewAction.ChangeDataDexoptMode(mode))
+            ) { index ->
+                data.keys.toList().getOrNull(index)?.let { mode ->
+                    dispatch(EditViewAction.ChangeDataDexoptMode(mode))
                 }
             }
         }
@@ -582,137 +582,149 @@ fun DataManualDexoptWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
 }
 
 @Composable
-fun DataAutoDeleteWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+fun DataAutoDeleteWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.Delete,
         title = stringResource(id = R.string.config_auto_delete),
         description = stringResource(id = R.string.config_auto_delete_desc),
-        checked = viewModel.state.data.autoDelete,
+        checked = state.data.autoDelete,
         isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAutoDelete(it)) }
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataAutoDelete(it)) }
     )
 
     AnimatedVisibility(
-        visible = viewModel.state.data.autoDelete,
+        visible = state.data.autoDelete,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()
     ) {
         SwitchWidget(
             title = stringResource(id = R.string.config_auto_delete_zip),
             description = stringResource(id = R.string.config_auto_delete_zip_desc),
-            checked = viewModel.state.data.autoDeleteZip,
+            checked = state.data.autoDeleteZip,
             isM3E = isM3E,
             onCheckedChange = {
-                viewModel.dispatch(EditViewAction.ChangeDataZipAutoDelete(it))
+                dispatch(EditViewAction.ChangeDataZipAutoDelete(it))
             }
         )
     }
 }
 
 @Composable
-fun DisplaySdkWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+fun DisplaySdkWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.Info,
         title = stringResource(id = R.string.config_display_sdk_version),
         description = stringResource(id = R.string.config_display_sdk_version_desc),
-        checked = viewModel.state.data.displaySdk,
+        checked = state.data.displaySdk,
         isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDisplaySdk(it)) }
+        onCheckedChange = { dispatch(EditViewAction.ChangeDisplaySdk(it)) }
     )
 }
 
 @Composable
-fun DisplaySizeWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+fun DisplaySizeWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.ShowSize,
         title = stringResource(id = R.string.config_display_size),
         description = stringResource(id = R.string.config_display_size_desc),
-        checked = viewModel.state.data.displaySize,
+        checked = state.data.displaySize,
         isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDisplaySize(it)) }
+        onCheckedChange = { dispatch(EditViewAction.ChangeDisplaySize(it)) }
     )
 }
 
 @Composable
-fun DataForAllUserWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+fun DataForAllUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.InstallForAllUsers,
         title = stringResource(id = R.string.config_all_users),
         description = stringResource(id = R.string.config_all_users_desc),
-        checked = viewModel.state.data.forAllUser,
+        checked = state.data.forAllUser,
         isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataForAllUser(it)) }
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataForAllUser(it)) }
     )
 }
 
 @Composable
-fun DataAllowTestOnlyWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+fun DataAllowTestOnlyWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.BugReport,
         title = stringResource(id = R.string.config_allow_test),
         description = stringResource(id = R.string.config_allow_test_desc),
-        checked = viewModel.state.data.allowTestOnly,
+        checked = state.data.allowTestOnly,
         isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowTestOnly(it)) }
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowTestOnly(it)) }
     )
 }
 
 @Composable
-fun DataAllowDowngradeWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+fun DataAllowDowngradeWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.InstallAllowDowngrade,
         title = stringResource(id = R.string.config_allow_downgrade),
         description = stringResource(id = R.string.config_allow_downgrade_desc),
-        checked = viewModel.state.data.allowDowngrade,
+        checked = state.data.allowDowngrade,
         isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowDowngrade(it)) }
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowDowngrade(it)) }
     )
 }
 
 @Composable
-fun DataBypassLowTargetSdkWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+fun DataBypassLowTargetSdkWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.InstallBypassLowTargetSdk,
         title = stringResource(id = R.string.config_bypass_low_target_sdk),
         description = stringResource(id = R.string.config_bypass_low_target_sdk_desc),
-        checked = viewModel.state.data.bypassLowTargetSdk,
+        checked = state.data.bypassLowTargetSdk,
         isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataBypassLowTargetSdk(it)) }
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataBypassLowTargetSdk(it)) }
     )
 }
 
 @Composable
-fun DataAllowAllRequestedPermissionsWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+fun DataAllowAllRequestedPermissionsWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.InstallAllowAllRequestedPermissions,
         title = stringResource(id = R.string.config_grant_all_permissions),
         description = stringResource(id = R.string.config_grant_all_permissions_desc),
-        checked = viewModel.state.data.allowAllRequestedPermissions,
+        checked = state.data.allowAllRequestedPermissions,
         isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeDataAllowAllRequestedPermissions(it)) }
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowAllRequestedPermissions(it)) }
     )
 }
 
 @Composable
-fun DataSplitChooseAllWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+fun DataRequestUpdateOwnershipWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
+    SwitchWidget(
+        icon = AppIcons.InstallRequestUpdateOwnership,
+        title = stringResource(id = R.string.config_request_update_ownership),
+        description = stringResource(id = R.string.config_request_update_ownership_desc),
+        checked = state.data.requestUpdateOwnership,
+        isM3E = isM3E,
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataRequestUpdateOwnership(it)) }
+    )
+}
+
+@Composable
+fun DataSplitChooseAllWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.InstallSplitChooseAll,
         title = stringResource(id = R.string.config_split_choose_all),
         description = stringResource(id = R.string.config_split_choose_all_desc),
-        checked = viewModel.state.data.splitChooseAll,
+        checked = state.data.splitChooseAll,
         isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeSplitChooseAll(it)) }
+        onCheckedChange = { dispatch(EditViewAction.ChangeSplitChooseAll(it)) }
     )
 }
 
 @Composable
-fun DataApkChooseAllWidget(viewModel: EditViewModel, isM3E: Boolean = true) {
+fun DataApkChooseAllWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit, isM3E: Boolean = true) {
     SwitchWidget(
         icon = AppIcons.InstallApkChooseAll,
         title = stringResource(id = R.string.config_apk_choose_all),
         description = stringResource(id = R.string.config_apk_choose_all_desc),
-        checked = viewModel.state.data.apkChooseAll,
+        checked = state.data.apkChooseAll,
         isM3E = isM3E,
-        onCheckedChange = { viewModel.dispatch(EditViewAction.ChangeApkChooseAll(it)) }
+        onCheckedChange = { dispatch(EditViewAction.ChangeApkChooseAll(it)) }
     )
 }
