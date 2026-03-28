@@ -44,6 +44,8 @@ sealed class InstallerViewAction {
     data object ShowMiuixPermissionList : InstallerViewAction()
     data object HideMiuixPermissionList : InstallerViewAction()
 
+    data class SetTempShowOPPOSpecial(val show: Boolean) : InstallerViewAction()
+
     /**
      * Toggles the selection state of the current app.
      */

@@ -227,7 +227,7 @@ private fun DataItemWidget(
                         MiuixBadge(
                             text = stringResource(id = R.string.config_status_inactive),
                             textColor = MiuixTheme.colorScheme.error,
-                            containerColor = MiuixTheme.colorScheme.error.copy(alpha = 0.2f) // Matches MIUIX translucent background style
+                            containerColor = MiuixTheme.colorScheme.error.copy(alpha = 0.2f)
                         )
                     }
                 }

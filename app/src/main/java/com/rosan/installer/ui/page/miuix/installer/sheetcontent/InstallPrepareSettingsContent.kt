@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,19 +43,15 @@ fun PrepareSettingsContent(
     val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val settings = uiState.viewSettings
+
+    // Local UI state proxy for session.config since it's not a reactive flow.
+    // We update these directly in the onCheckedChange callbacks.
     var autoDelete by remember { mutableStateOf(session.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(session.config.displaySdk) }
     var displaySize by remember { mutableStateOf(session.config.displaySize) }
-    var showOPPOSpecial by remember { mutableStateOf(settings.showOPPOSpecial) }
 
     BackHandler {
         viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
-    }
-
-    LaunchedEffect(autoDelete, displaySdk) {
-        val currentConfig = session.config
-        if (currentConfig.autoDelete != autoDelete) session.config = session.config.copy(autoDelete = autoDelete)
-        if (currentConfig.displaySdk != displaySdk) session.config = session.config.copy(displaySdk = displaySdk)
     }
 
     Column(
@@ -81,9 +76,10 @@ fun PrepareSettingsContent(
                     stringResource(id = R.string.config_display_module_extra_info_desc)
                 ),
                 checked = displaySdk,
-                onCheckedChange = {
-                    val newValue = !displaySdk
+                onCheckedChange = { newValue ->
+                    // Update local UI state
                     displaySdk = newValue
+                    // Sync immediately to session config
                     session.config = session.config.copy(displaySdk = newValue)
                 }
             )
@@ -91,8 +87,7 @@ fun PrepareSettingsContent(
                 title = stringResource(R.string.config_display_size),
                 description = stringResource(R.string.config_display_size_desc),
                 checked = displaySize,
-                onCheckedChange = {
-                    val newValue = !displaySize
+                onCheckedChange = { newValue ->
                     displaySize = newValue
                     session.config = session.config.copy(displaySize = newValue)
                 }
@@ -100,24 +95,25 @@ fun PrepareSettingsContent(
             MiuixSwitchWidget(
                 title = stringResource(R.string.config_auto_delete),
                 description = stringResource(R.string.config_auto_delete_desc),
-                checked = session.config.autoDelete,
-                onCheckedChange = {
-                    val newValue = !autoDelete
+                checked = autoDelete,
+                onCheckedChange = { newValue ->
                     autoDelete = newValue
                     session.config = session.config.copy(autoDelete = newValue)
                 }
             )
-            if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS)
+
+            if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
                 MiuixSwitchWidget(
                     title = stringResource(R.string.installer_show_oem_special),
                     description = stringResource(R.string.installer_show_oem_special_desc),
-                    checked = showOPPOSpecial,
-                    onCheckedChange = {
-                        val newValue = !showOPPOSpecial
-                        showOPPOSpecial = newValue
-                        settings.copy(showOPPOSpecial = newValue)
+                    // Read the effective value (either the repo setting or the temporary override)
+                    checked = settings.showOPPOSpecial,
+                    onCheckedChange = { newValue ->
+                        // Dispatch action to update the temporary override in ViewModel
+                        viewModel.dispatch(InstallerViewAction.SetTempShowOPPOSpecial(newValue))
                     }
                 )
+            }
         }
         Spacer(
             modifier = Modifier

@@ -92,9 +92,8 @@ fun InstallExtendedMenuContent(
             }
 
             // User selection
-            if ((session.config.authorizer == Authorizer.Root ||
-                        session.config.authorizer == Authorizer.Shizuku
-                        ) && customizeUserEnabled
+            if ((session.config.authorizer == Authorizer.Root || session.config.authorizer == Authorizer.Shizuku) &&
+                customizeUserEnabled
             ) {
                 add(
                     ExtendedMenuEntity(

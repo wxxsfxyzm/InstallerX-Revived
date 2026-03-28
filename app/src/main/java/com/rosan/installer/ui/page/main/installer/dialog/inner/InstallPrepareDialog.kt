@@ -2,7 +2,6 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
-import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -10,7 +9,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,9 +76,7 @@ private fun installPrepareEmptyDialog(
 }
 
 @Composable
-private fun installPrepareTooManyDialog(
-    installer: InstallerSessionRepository, viewModel: InstallerViewModel
-): DialogParams {
+private fun installPrepareTooManyDialog(viewModel: InstallerViewModel): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(
             DialogParamsType.IconPausing.id, pausingIcon
@@ -104,9 +99,6 @@ private fun installPrepareTooManyDialog(
         })
 }
 
-
-@SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun installPrepareDialog(
     session: InstallerSessionRepository, viewModel: InstallerViewModel
@@ -119,7 +111,7 @@ fun installPrepareDialog(
     // If there is no specific package to prepare, show an empty/error dialog.
     if (currentPackage == null) {
         return if (session.analysisResults.size > 1) {
-            installPrepareTooManyDialog(session, viewModel)
+            installPrepareTooManyDialog(viewModel)
         } else {
             installPrepareEmptyDialog(viewModel)
         }
@@ -148,18 +140,12 @@ fun installPrepareDialog(
 
     val isSplitUpdateMode = (isBundleSplitUpdate || isPureSplit) && preInstallAppInfo != null
 
+    // Local UI state proxies for session.config
+    // State sync is handled immediately in onClick callbacks, no LaunchedEffect needed.
     var showChips by remember { mutableStateOf(false) }
     var autoDelete by remember { mutableStateOf(session.config.autoDelete) }
     var displaySdk by remember { mutableStateOf(session.config.displaySdk) }
     var displaySize by remember { mutableStateOf(session.config.displaySize) }
-    var showOPPOSpecial by remember { mutableStateOf(settings.showOPPOSpecial) }
-
-    LaunchedEffect(autoDelete, displaySdk, displaySize) {
-        val currentConfig = session.config
-        if (currentConfig.autoDelete != autoDelete) session.config = session.config.copy(autoDelete = autoDelete)
-        if (currentConfig.displaySdk != displaySdk) session.config = session.config.copy(displaySdk = displaySdk)
-        if (currentConfig.displaySize != displaySize) session.config = session.config.copy(displaySize = displaySize)
-    }
 
     // Call InstallInfoDialog for base structure
     val baseParams = installInfoDialog(
@@ -325,11 +311,12 @@ fun installPrepareDialog(
                             )
                             if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS)
                                 Chip(
-                                    selected = showOPPOSpecial,
+                                    // Read the effective value directly from UDF state
+                                    selected = settings.showOPPOSpecial,
                                     onClick = {
-                                        val newValue = !showOPPOSpecial
-                                        showOPPOSpecial = newValue
-                                        settings.copy(showOPPOSpecial = newValue)
+                                        // Dispatch action to update the temporary override in ViewModel
+                                        val newValue = !settings.showOPPOSpecial
+                                        viewModel.dispatch(InstallerViewAction.SetTempShowOPPOSpecial(newValue))
                                     },
                                     label = stringResource(id = R.string.installer_show_oem_special),
                                     icon = AppIcons.OEMSpecial
@@ -337,9 +324,11 @@ fun installPrepareDialog(
                         }
                     }
                 }
+
                 val isInvalidSplitInstall = currentPackage.installedAppInfo == null &&
                         entityToInstall == null &&
                         selectedEntities.any { it is AppEntity.SplitEntity }
+
                 if (isInvalidSplitInstall)
                     item {
                         WarningTextBlock(listOf(Pair(stringResource(R.string.installer_splits_invalid_tip), MaterialTheme.colorScheme.error)))
@@ -373,6 +362,7 @@ fun installPrepareDialog(
                 } ?: false
 
                 val canInstall = canInstallBaseEntity || canInstallModuleEntity || canInstallSplitEntity
+
                 // only when the entity is a split APK, XAPK, or APKM
                 if (canInstall && settings.showExtendedMenu && isAPK) {
                     add(DialogButton(stringResource(R.string.install_choice), 1f) {
