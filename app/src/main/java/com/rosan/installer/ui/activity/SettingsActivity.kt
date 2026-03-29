@@ -54,13 +54,15 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                 seedColor = uiState.seedColor
             ) {
                 if (uiState.useMiuix) {
-                    MiuixSurface(modifier = Modifier.fillMaxSize()) { MiuixSettingsPage() }
+                    MiuixSurface(modifier = Modifier.fillMaxSize()) {
+                        MiuixSettingsPage(uiState)
+                    }
                 } else {
                     Material3Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = if (uiState.isExpressive) MaterialTheme.colorScheme.surfaceContainer
                         else MaterialTheme.colorScheme.surface
-                    ) { SettingsPage() }
+                    ) { SettingsPage(uiState) }
                 }
             }
         }
