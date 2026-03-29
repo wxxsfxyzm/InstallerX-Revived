@@ -297,10 +297,10 @@ class InstallerViewModel(
                     if (originalAnalysisResults.isEmpty()) {
                         originalAnalysisResults = session.analysisResults
                     }
-                    // Trigger icon loading here, safely outside the pure function
-                    session.analysisResults.forEach { result -> loadDisplayIcon(result.packageName) }
                     // Update state with new results
                     _localState.update { it.copy(analysisResults = session.analysisResults) }
+                    // Trigger icon loading here, safely outside the pure function
+                    session.analysisResults.forEach { result -> loadDisplayIcon(result.packageName) }
                 }
 
                 // Pass the current results to the pure mapper
@@ -345,10 +345,7 @@ class InstallerViewModel(
                     else -> _localState.value.currentPackageName
                 }
 
-                if (newPackageName != null && newPackageName != _localState.value.currentPackageName) {
-                    loadDisplayIcon(newPackageName)
-                }
-
+                val oldPackageName = _localState.value.currentPackageName
                 _localState.update { currentState ->
                     // Latch the uninstall info.
                     // Once we get a non-null info, keep it until the session is explicitly closed.
@@ -357,7 +354,8 @@ class InstallerViewModel(
                     val updatedState = currentState.copy(
                         stage = newStage,
                         currentPackageName = newPackageName ?: currentState.currentPackageName,
-                        uiUninstallInfo = retainedUninstallInfo
+                        uiUninstallInfo = retainedUninstallInfo,
+                        error = session.error
                     )
 
                     // Re-calculate seed color from the icon if dynamic color is enabled
@@ -392,6 +390,10 @@ class InstallerViewModel(
                     }
 
                     updatedState
+                }
+
+                if (newPackageName != null && newPackageName != _localState.value.currentPackageName) {
+                    loadDisplayIcon(newPackageName)
                 }
 
                 autoInstallJob?.cancel()
