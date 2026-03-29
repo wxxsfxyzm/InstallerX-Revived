@@ -493,7 +493,7 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.Installing -> {
                             InstallingContent(
-                                state = stage,
+                                stage = stage,
                                 appInfo = appInfoState,
                                 onButtonClick = {
                                     scope.launch {

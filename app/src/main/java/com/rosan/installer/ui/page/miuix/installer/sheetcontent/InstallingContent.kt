@@ -32,7 +32,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun InstallingContent(
-    state: InstallerStage.Installing,
+    stage: InstallerStage.Installing,
     appInfo: AppInfoState,
     onButtonClick: () -> Unit
 ) {
@@ -41,19 +41,19 @@ fun InstallingContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        val displayLabel = state.appLabel ?: appInfo.label
+        val displayLabel = stage.appLabel ?: appInfo.label
 
         AppInfoSlot(appInfo = appInfo)
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        val progressText = if (state.total > 1) {
+        val progressText = if (stage.total > 1) {
             // Batch install: "Installing AppName (1/5)"
             stringResource(
                 R.string.installing_progress_text,
                 displayLabel,
-                state.current,
-                state.total
+                stage.current,
+                stage.total
             )
         } else null
 
@@ -71,7 +71,7 @@ fun InstallingContent(
 
         // Animate the progress value just like in InstallPreparingContent
         val animatedProgress by animateFloatAsState(
-            targetValue = state.progress,
+            targetValue = stage.progress,
             animationSpec = tween(durationMillis = 300),
             label = "ProgressAnimation"
         )

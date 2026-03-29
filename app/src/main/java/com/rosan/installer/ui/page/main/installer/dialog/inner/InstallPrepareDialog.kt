@@ -76,7 +76,9 @@ private fun installPrepareEmptyDialog(
 }
 
 @Composable
-private fun installPrepareTooManyDialog(viewModel: InstallerViewModel): DialogParams {
+private fun installPrepareTooManyDialog(
+    viewModel: InstallerViewModel
+): DialogParams {
     return DialogParams(
         icon = DialogInnerParams(
             DialogParamsType.IconPausing.id, pausingIcon
@@ -105,12 +107,12 @@ fun installPrepareDialog(
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentPackageName = uiState.currentPackageName
-    val currentPackage = session.analysisResults.find { it.packageName == currentPackageName }
+    val currentPackage = uiState.analysisResults.find { it.packageName == currentPackageName }
     val settings = uiState.viewSettings
 
     // If there is no specific package to prepare, show an empty/error dialog.
     if (currentPackage == null) {
-        return if (session.analysisResults.size > 1) {
+        return if (uiState.analysisResults.size > 1) {
             installPrepareTooManyDialog(viewModel)
         } else {
             installPrepareEmptyDialog(viewModel)

@@ -47,10 +47,10 @@ data class ConfigModel(
     val scopeCount: Int = 0,
 
     // Runtime fields that are not saved in the database but needed for business logic
-    var installFlags: Int = 0,
-    var bypassBlacklistInstallSetByUser: Boolean = false,
-    var uninstallFlags: Int = 0,
-    var callingFromUid: Int? = null
+    val installFlags: Int = 0,
+    val bypassBlacklistInstallSetByUser: Boolean = false,
+    val uninstallFlags: Int = 0,
+    val callingFromUid: Int? = null
 ) {
     companion object {
         var default = ConfigModel(

@@ -80,7 +80,7 @@ fun InstallPrepareContent(
     val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentPackageName = uiState.currentPackageName
-    val currentPackage = session.analysisResults.find { it.packageName == currentPackageName }
+    val currentPackage = uiState.analysisResults.find { it.packageName == currentPackageName }
     val settings = uiState.viewSettings
 
     var isExpanded by remember { mutableStateOf(false) }

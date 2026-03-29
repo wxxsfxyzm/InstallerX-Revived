@@ -81,7 +81,7 @@ fun installExtendedMenuDialog(
     val selectedUserId = uiState.selectedUserId
 
     val containerType =
-        session.analysisResults.find { it.packageName == currentPackageName }?.appEntities?.first()?.app?.sourceType
+        uiState.analysisResults.find { it.packageName == currentPackageName }?.appEntities?.first()?.app?.sourceType
     val installOptions = rememberInstallOptions(session.config.authorizer)
 
     val selectedInstaller = remember(selectedInstallerPackageName, managedPackages) {
@@ -505,7 +505,7 @@ fun installExtendedMenuSubMenuDialog(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentPackageName = uiState.currentPackageName
 
-    val currentPackage = session.analysisResults.find { it.packageName == currentPackageName }
+    val currentPackage = uiState.analysisResults.find { it.packageName == currentPackageName }
 
     val entity = currentPackage?.appEntities
         ?.filter { it.selected }
