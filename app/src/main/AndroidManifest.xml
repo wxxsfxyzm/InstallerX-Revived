@@ -51,11 +51,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Installer"
         android:enableOnBackInvokedCallback="true"
-        tools:targetApi="36">
+        tools:targetApi="37">
 
         <activity
             android:name="com.rosan.installer.ui.activity.SettingsActivity"
             android:exported="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
@@ -76,7 +77,7 @@
 
         <activity
             android:name="com.rosan.installer.ui.activity.InstallerActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:excludeFromRecents="true"
             android:exported="true"
             android:launchMode="singleInstance"
@@ -122,6 +123,7 @@
 
         <activity
             android:name=".ui.activity.UninstallerActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:excludeFromRecents="true"
             android:exported="true"
             android:launchMode="singleInstance"
