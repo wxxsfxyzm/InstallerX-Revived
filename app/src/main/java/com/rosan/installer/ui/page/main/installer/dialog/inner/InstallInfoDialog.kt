@@ -67,7 +67,6 @@ import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstalledAppInfo
 import com.rosan.installer.domain.engine.model.sortedBest
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
@@ -87,17 +86,17 @@ import kotlin.math.abs
  */
 @Composable
 fun installInfoDialog(
-    session: InstallerSessionRepository,
     viewModel: InstallerViewModel,
     onTitleExtraClick: () -> Unit = {}
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val settings = uiState.viewSettings
+    val config = uiState.config
     val iconMap = uiState.displayIcons
     val currentPackageName = uiState.currentPackageName
     val stage = uiState.stage
 
-    val currentPackage = session.analysisResults.find { it.packageName == currentPackageName }
+    val currentPackage = uiState.analysisResults.find { it.packageName == currentPackageName }
     // If there's no current package to display, return empty params.
     if (currentPackage == null) return DialogParams()
 
@@ -361,7 +360,7 @@ fun installInfoDialog(
 
                     else -> {
                         AnimatedVisibility(
-                            visible = session.config.displaySdk
+                            visible = config.displaySdk
                         ) {
                             Box(
                                 modifier = Modifier
@@ -450,7 +449,7 @@ fun installInfoDialog(
                     }
                 }
                 // --- Size Display ---
-                AnimatedVisibility(visible = session.config.displaySize && totalSize > 0L) {
+                AnimatedVisibility(visible = config.displaySize && totalSize > 0L) {
                     Column {
                         Spacer(modifier = Modifier.size(8.dp))
                         SizeInfoDisplay(

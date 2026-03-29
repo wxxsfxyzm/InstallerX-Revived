@@ -53,7 +53,6 @@ import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.sortedBest
 import com.rosan.installer.domain.session.model.ExtendedMenuEntity
 import com.rosan.installer.domain.session.model.ExtendedMenuItemEntity
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.ui.icons.AppIcons
@@ -68,29 +67,28 @@ import com.rosan.installer.util.pm.getBestPermissionLabel
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun installExtendedMenuDialog(
-    session: InstallerSessionRepository,
     viewModel: InstallerViewModel
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     val currentPackageName = uiState.currentPackageName
-    val installFlags = uiState.installFlags
     val managedPackages = uiState.managedInstallerPackages
-    val selectedInstallerPackageName = uiState.selectedInstaller
-    val availableUsers = uiState.availableUsers
-    val selectedUserId = uiState.selectedUserId
+
+    val installFlags = uiState.config.installFlags
+    val selectedInstallerPackageName = uiState.config.installer
+    val selectedUserId = uiState.config.targetUserId
+    val customizeUserEnabled = uiState.config.enableCustomizeUser
+    val authorizer = uiState.config.authorizer
 
     val containerType =
         uiState.analysisResults.find { it.packageName == currentPackageName }?.appEntities?.first()?.app?.sourceType
-    val installOptions = rememberInstallOptions(session.config.authorizer)
+    val installOptions = rememberInstallOptions(uiState.config.authorizer)
 
     val selectedInstaller = remember(selectedInstallerPackageName, managedPackages) {
         managedPackages.find { it.packageName == selectedInstallerPackageName }
     }
-    val customizeUserEnabled = session.config.enableCustomizeUser
     val defaultInstallerHintText = stringResource(id = R.string.config_follow_settings)
 
-    val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, availableUsers) {
+    val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, uiState.availableUsers, authorizer) {
         buildList {
             // Permission List
             if (containerType == DataType.APK)
@@ -108,9 +106,7 @@ fun installExtendedMenuDialog(
                 )
 
             // Installer selection
-            if (session.config.authorizer == Authorizer.Root ||
-                session.config.authorizer == Authorizer.Shizuku
-            ) {
+            if (authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku) {
                 add(
                     ExtendedMenuEntity(
                         action = InstallExtendedMenuAction.CustomizeInstaller,
@@ -125,16 +121,13 @@ fun installExtendedMenuDialog(
             }
 
             // User selection
-            if ((session.config.authorizer == Authorizer.Root ||
-                        session.config.authorizer == Authorizer.Shizuku
-                        ) && customizeUserEnabled
-            ) {
+            if ((authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku) && customizeUserEnabled) {
                 add(
                     ExtendedMenuEntity(
                         action = InstallExtendedMenuAction.CustomizeUser,
                         menuItem = ExtendedMenuItemEntity(
                             nameResourceId = R.string.config_target_user,
-                            description = availableUsers[selectedUserId] ?: "Unknown User",
+                            description = uiState.availableUsers[selectedUserId] ?: "Unknown User",
                             icon = AppIcons.InstallUser,
                             action = null
                         )
@@ -143,9 +136,7 @@ fun installExtendedMenuDialog(
             }
 
             // Dynamic installation options
-            if (session.config.authorizer == Authorizer.Root ||
-                session.config.authorizer == Authorizer.Shizuku
-            ) {
+            if (authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku) {
                 installOptions.forEach { option ->
                     add(
                         ExtendedMenuEntity(
@@ -163,7 +154,6 @@ fun installExtendedMenuDialog(
         }.toMutableStateList()
     }
 
-
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.IconMenu.id, /*menuIcon*/{}),
         title = DialogInnerParams(
@@ -180,8 +170,8 @@ fun installExtendedMenuDialog(
                 viewModel,
                 installFlags,
                 managedPackages,
-                availableUsers,
-                uiState.defaultInstallerFromSettings // Passed directly from state
+                uiState.availableUsers,
+                uiState.defaultInstallerFromSettings
             )
         },
         buttons = dialogButtons(
@@ -499,7 +489,7 @@ fun MenuItemWidget(
 
 @Composable
 fun installExtendedMenuSubMenuDialog(
-    session: InstallerSessionRepository, viewModel: InstallerViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     // Observe the single source of truth
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

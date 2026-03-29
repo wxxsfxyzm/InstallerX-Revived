@@ -44,7 +44,7 @@ fun UninstallPrepareContent(
     val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val info = uiState.uiUninstallInfo ?: return
-    val uninstallFlags = uiState.uninstallFlags
+    val uninstallFlags = uiState.config.uninstallFlags
 
     val deleteKeepData = uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA)
     val deleteAllUsers = uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS)

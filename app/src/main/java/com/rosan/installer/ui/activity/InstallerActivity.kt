@@ -28,7 +28,7 @@ import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.ui.common.auth.BiometricAuthBridge
 import com.rosan.installer.ui.common.permission.PermissionRequester
@@ -52,7 +52,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         private const val ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS"
     }
 
-    private val appSettingsRepo by inject<AppSettingsRepo>()
+    private val appSettingsRepo by inject<AppSettingsRepository>()
     private val themeStateProvider: ThemeStateProvider by inject()
     private var disableNotificationOnDismiss = false
 

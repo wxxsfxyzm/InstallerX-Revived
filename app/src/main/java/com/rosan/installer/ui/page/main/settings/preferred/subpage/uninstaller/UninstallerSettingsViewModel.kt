@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.usecase.settings.ToggleUninstallFlagUseCase
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class UninstallerSettingsViewModel(
-    appSettingsRepo: AppSettingsRepo,
+    appSettingsRepo: AppSettingsRepository,
     private val systemEnvProvider: SystemEnvProvider,
     private val updateSetting: UpdateSettingUseCase,
     private val toggleUninstallFlagUseCase: ToggleUninstallFlagUseCase

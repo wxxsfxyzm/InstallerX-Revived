@@ -19,8 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
@@ -41,11 +41,12 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 @Composable
 fun InstallFailedContent(
     appInfo: AppInfoState,
-    session: InstallerSessionRepository,
     viewModel: InstallerViewModel,
     onClose: () -> Unit
 ) {
     val isDarkMode = InstallerTheme.isDark
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val currentError = uiState.error
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -55,7 +56,7 @@ fun InstallFailedContent(
         AppInfoSlot(appInfo = appInfo)
         Spacer(modifier = Modifier.height(32.dp))
         MiuixErrorTextBlock(
-            error = session.error,
+            error = currentError,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f, fill = false)
@@ -63,9 +64,8 @@ fun InstallFailedContent(
         Spacer(modifier = Modifier.height(16.dp))
         MiuixErrorSuggestions(
             isDarkMode = isDarkMode,
-            error = session.error,
-            viewModel = viewModel,
-            session = session
+            error = currentError,
+            viewModel = viewModel
         )
         Row(
             modifier = Modifier
@@ -91,7 +91,6 @@ private fun MiuixErrorSuggestions(
     isDarkMode: Boolean,
     error: Throwable,
     viewModel: InstallerViewModel,
-    session: InstallerSessionRepository
 ) {
     val showUninstallConfirmDialogState = remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
@@ -99,7 +98,6 @@ private fun MiuixErrorSuggestions(
 
     val visibleSuggestions = rememberErrorSuggestions(
         error = error,
-        session = session,
         viewModel = viewModel,
         onShowUninstallConfirm = { keepData, conflictingPkg ->
             confirmKeepData = keepData

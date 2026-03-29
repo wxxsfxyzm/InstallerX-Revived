@@ -34,7 +34,7 @@ import com.rosan.installer.domain.session.repository.NetworkResolver
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.ConfigModel.Companion.default
 import com.rosan.installer.domain.settings.model.InstallMode
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.ui.common.auth.safeBiometricAuthOrThrow
 import kotlinx.coroutines.CancellationException
@@ -69,7 +69,7 @@ class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) 
     private val sessionId get() = session.id
 
     private val context by inject<Context>()
-    private val appSettingsRepo by inject<AppSettingsRepo>()
+    private val appSettingsRepo by inject<AppSettingsRepository>()
     private val shellExecutionProvider by inject<ShellExecutionProvider>()
     private val deviceCapabilityProvider by inject<DeviceCapabilityProvider>()
     private val autoLockService by inject<AutoLockService>()

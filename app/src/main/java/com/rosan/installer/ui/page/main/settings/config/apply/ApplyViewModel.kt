@@ -12,7 +12,7 @@ import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.settings.model.AppModel
 import com.rosan.installer.domain.settings.provider.SystemAppProvider
 import com.rosan.installer.domain.settings.repository.AppRepository
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.domain.settings.usecase.config.ToggleAppTargetConfigUseCase
@@ -33,7 +33,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class ApplyViewModel(
     private val id: Long,
-    appSettingsRepo: AppSettingsRepo,
+    appSettingsRepo: AppSettingsRepository,
     private val appRepo: AppRepository,
     private val systemAppProvider: SystemAppProvider,
     private val toggleAppTargetConfig: ToggleAppTargetConfigUseCase,

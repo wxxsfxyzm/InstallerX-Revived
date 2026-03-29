@@ -27,7 +27,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.session.model.ExtendedMenuEntity
 import com.rosan.installer.domain.session.model.ExtendedMenuItemEntity
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.ui.icons.AppIcons
@@ -54,31 +53,32 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun InstallExtendedMenuContent(
-    session: InstallerSessionRepository,
     viewModel: InstallerViewModel
 ) {
     val isDarkMode = InstallerTheme.isDark
-    val installOptions = rememberInstallOptions(session.config.authorizer)
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val installFlags = uiState.installFlags
+
+    // Read state from aggregated config model
+    val installFlags = uiState.config.installFlags
+    val selectedInstallerPackageName = uiState.config.installer
+    val selectedUserId = uiState.config.targetUserId
+    val customizeUserEnabled = uiState.config.enableCustomizeUser
+    val authorizer = uiState.config.authorizer
+
     val managedPackages = uiState.managedInstallerPackages
-    val selectedInstallerPackageName = uiState.selectedInstaller
     val defaultInstallerFromSettings = uiState.defaultInstallerFromSettings
     val availableUsers = uiState.availableUsers
-    val selectedUserId = uiState.selectedUserId
+
+    val installOptions = rememberInstallOptions(authorizer)
 
     val selectedInstaller = remember(selectedInstallerPackageName, managedPackages) {
         managedPackages.find { it.packageName == selectedInstallerPackageName }
     }
 
-    val customizeUserEnabled = session.config.enableCustomizeUser
-    val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, availableUsers) {
+    val menuEntities = remember(installOptions, selectedInstaller, customizeUserEnabled, selectedUserId, availableUsers, authorizer) {
         buildList {
             // Installer selection
-            if (session.config.authorizer == Authorizer.Root ||
-                session.config.authorizer == Authorizer.Shizuku
-            ) {
+            if (authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku) {
                 add(
                     ExtendedMenuEntity(
                         action = InstallExtendedMenuAction.CustomizeInstaller,
@@ -92,9 +92,7 @@ fun InstallExtendedMenuContent(
             }
 
             // User selection
-            if ((session.config.authorizer == Authorizer.Root || session.config.authorizer == Authorizer.Shizuku) &&
-                customizeUserEnabled
-            ) {
+            if ((authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku) && customizeUserEnabled) {
                 add(
                     ExtendedMenuEntity(
                         action = InstallExtendedMenuAction.CustomizeUser,
@@ -108,9 +106,7 @@ fun InstallExtendedMenuContent(
             }
 
             // Dynamic install options
-            if (session.config.authorizer == Authorizer.Root ||
-                session.config.authorizer == Authorizer.Shizuku
-            ) {
+            if (authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku) {
                 installOptions.forEach { option ->
                     add(
                         ExtendedMenuEntity(

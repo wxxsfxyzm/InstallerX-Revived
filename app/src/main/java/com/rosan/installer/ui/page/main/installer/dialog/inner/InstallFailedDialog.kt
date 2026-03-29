@@ -22,7 +22,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -36,14 +35,14 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun installFailedDialog(
-    session: InstallerSessionRepository, viewModel: InstallerViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val viewSettings = uiState.viewSettings
+    val currentError = uiState.error
 
     // Call InstallInfoDialog for base structure
     val baseParams = installInfoDialog(
-        session = session,
         viewModel = viewModel,
         onTitleExtraClick = {}
     )
@@ -54,13 +53,12 @@ fun installFailedDialog(
             DialogParamsType.InstallerInstallFailed.id,
             {
                 ErrorTextBlock(
-                    session.error,
+                    currentError,
                     suggestions = {
                         if (viewSettings.showSmartSuggestion)
                             ErrorSuggestions(
-                                error = session.error,
-                                viewModel = viewModel,
-                                session = session
+                                error = currentError,
+                                viewModel = viewModel
                             )
                     }
                 )
@@ -81,8 +79,7 @@ fun installFailedDialog(
 @Composable
 private fun ErrorSuggestions(
     error: Throwable,
-    viewModel: InstallerViewModel,
-    session: InstallerSessionRepository
+    viewModel: InstallerViewModel
 ) {
     var showUninstallConfirmDialog by remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
@@ -90,7 +87,6 @@ private fun ErrorSuggestions(
 
     val visibleSuggestions = rememberErrorSuggestions(
         error = error,
-        session = session,
         viewModel = viewModel,
         onShowUninstallConfirm = { keepData, conflictingPkg ->
             confirmKeepData = keepData

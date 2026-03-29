@@ -23,8 +23,9 @@ import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.model.InstallMode
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.util.addFlag
 import com.rosan.installer.util.getErrorMessage
@@ -52,7 +53,7 @@ import java.io.File
 
 class InstallerViewModel(
     private var session: InstallerSessionRepository,
-    private val appSettingsRepo: AppSettingsRepo,
+    private val appSettingsRepo: AppSettingsRepository,
     private val getAvailableUsers: GetAvailableUsersUseCase,
     private val getAppIcon: GetAppIconUseCase,
     private val getAppIconColor: GetAppIconColorUseCase,
@@ -73,8 +74,9 @@ class InstallerViewModel(
     // Internal mutable state for high-frequency UI changes and progress
     private val _localState = MutableStateFlow(
         InstallerState(
-            defaultInstallerFromSettings = session.config.installer,
-            selectedInstaller = session.config.installer
+            // Use the aggregated ConfigModel
+            config = session.config,
+            error = session.error
         )
     )
 
@@ -138,6 +140,16 @@ class InstallerViewModel(
                 )
             )
         }
+    }
+
+    /**
+     * Centralized helper function to update ConfigModel immutably.
+     * Ensures both UI state and underlying session config are synchronized.
+     */
+    fun updateConfig(updateBlock: (ConfigModel) -> ConfigModel) {
+        val newConfig = updateBlock(_localState.value.config)
+        session.config = newConfig
+        _localState.update { it.copy(config = newConfig) }
     }
 
     fun dispatch(action: InstallerViewAction) {
@@ -244,14 +256,13 @@ class InstallerViewModel(
         this.session = session
         if (session.config.enableCustomizeUser) loadAvailableUsers(session.config.authorizer)
 
-        val initialInstallFlags = session.config.installFlags
-
         _localState.update {
             it.copy(
-                installFlags = initialInstallFlags,
+                config = session.config, // Synchronize the entire ConfigModel to UI state
                 currentPackageName = null,
                 analysisResults = session.analysisResults,
-                displayIcons = it.displayIcons.filterKeys { key -> key in session.analysisResults.map { res -> res.packageName } }
+                displayIcons = it.displayIcons.filterKeys { key -> key in session.analysisResults.map { res -> res.packageName } },
+                error = session.error
             )
         }
 
@@ -395,24 +406,22 @@ class InstallerViewModel(
     }
 
     fun toggleInstallFlag(flag: Int, enable: Boolean) {
-        val currentFlags = _localState.value.installFlags
-        val newFlags = if (enable) currentFlags.addFlag(flag) else currentFlags.removeFlag(flag)
-        _localState.update { it.copy(installFlags = newFlags) }
-        session.config.installFlags = newFlags
+        updateConfig { currentConfig ->
+            val newFlags = if (enable) currentConfig.installFlags.addFlag(flag) else currentConfig.installFlags.removeFlag(flag)
+            currentConfig.copy(installFlags = newFlags)
+        }
     }
 
     fun toggleBypassBlacklist(enable: Boolean) {
-        session.config.bypassBlacklistInstallSetByUser = enable
+        updateConfig { it.copy(bypassBlacklistInstallSetByUser = enable) }
     }
 
     private fun selectInstaller(packageName: String?) {
-        session.config = session.config.copy(installer = packageName)
-        _localState.update { it.copy(selectedInstaller = packageName) }
+        updateConfig { it.copy(installer = packageName) }
     }
 
     private fun selectTargetUser(userId: Int) {
-        session.config = session.config.copy(targetUserId = userId)
-        _localState.update { it.copy(selectedUserId = userId) }
+        updateConfig { it.copy(targetUserId = userId) }
     }
 
     private fun loadAvailableUsers(authorizer: Authorizer) {
@@ -421,7 +430,7 @@ class InstallerViewModel(
                 .onSuccess { users ->
                     _localState.update { it.copy(availableUsers = users) }
                     // If the currently selected user is not in the available list, reset it to 0 (Owner).
-                    if (!users.containsKey(_localState.value.selectedUserId)) selectTargetUser(0)
+                    if (!users.containsKey(_localState.value.config.targetUserId)) selectTargetUser(0)
                 }
                 .onFailure { error ->
                     if (error is CancellationException) throw error
@@ -429,7 +438,7 @@ class InstallerViewModel(
                     toast(error.getErrorMessage(context))
 
                     _localState.update { it.copy(availableUsers = emptyMap()) }
-                    if (_localState.value.selectedUserId != 0) selectTargetUser(0)
+                    if (_localState.value.config.targetUserId != 0) selectTargetUser(0)
                 }
         }
     }
@@ -582,20 +591,19 @@ class InstallerViewModel(
     }
 
     private fun toggleUninstallFlag(flag: Int, enable: Boolean) {
-        val currentFlags = _localState.value.uninstallFlags
-        var newFlags = if (enable) currentFlags.addFlag(flag) else currentFlags.removeFlag(flag)
+        updateConfig { currentConfig ->
+            val currentFlags = currentConfig.uninstallFlags
+            var newFlags = if (enable) currentFlags.addFlag(flag) else currentFlags.removeFlag(flag)
 
-        if (enable && flag == PackageManagerUtil.DELETE_ALL_USERS && currentFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP)) {
-            newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_SYSTEM_APP)
-            toast(R.string.uninstall_system_app_disabled)
-        } else if (enable && flag == PackageManagerUtil.DELETE_SYSTEM_APP && currentFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS)) {
-            newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_ALL_USERS)
-            toast(R.string.uninstall_all_users_disabled)
-        }
+            if (enable && flag == PackageManagerUtil.DELETE_ALL_USERS && currentFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP)) {
+                newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_SYSTEM_APP)
+                toast(R.string.uninstall_system_app_disabled)
+            } else if (enable && flag == PackageManagerUtil.DELETE_SYSTEM_APP && currentFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS)) {
+                newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_ALL_USERS)
+                toast(R.string.uninstall_all_users_disabled)
+            }
 
-        if (newFlags != currentFlags) {
-            _localState.update { it.copy(uninstallFlags = newFlags) }
-            session.config.uninstallFlags = newFlags
+            currentConfig.copy(uninstallFlags = newFlags)
         }
     }
 
@@ -605,7 +613,9 @@ class InstallerViewModel(
             toast(R.string.error_no_package_to_uninstall)
             return
         }
-        session.config.uninstallFlags = if (keepData) PackageManagerUtil.DELETE_KEEP_DATA else 0
+
+        updateConfig { it.copy(uninstallFlags = if (keepData) PackageManagerUtil.DELETE_KEEP_DATA else 0) }
+
         isRetryingInstall = true
         Timber.d("Uninstalling conflicting/old package: $targetPackageName for retry")
         session.uninstall(targetPackageName)

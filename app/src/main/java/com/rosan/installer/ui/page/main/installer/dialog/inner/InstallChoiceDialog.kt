@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.data.engine.parser.getDisplayName
 import com.rosan.installer.data.engine.parser.getSplitDisplayName
@@ -52,7 +53,6 @@ import com.rosan.installer.domain.engine.model.MmzSelectionMode
 import com.rosan.installer.domain.engine.model.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.SessionMode
 import com.rosan.installer.domain.session.model.SelectInstallEntity
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -70,16 +70,18 @@ import com.rosan.installer.ui.util.getSupportTitle
 
 @Composable
 fun installChoiceDialog(
-    session: InstallerSessionRepository, viewModel: InstallerViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
-    val analysisResults = session.analysisResults
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val config = uiState.config
+    val analysisResults = uiState.analysisResults
     val sourceType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
     val currentSessionMode = analysisResults.firstOrNull()?.sessionMode ?: SessionMode.Single
     val isMultiApk = currentSessionMode == SessionMode.Batch
     val isModuleApk = sourceType == DataType.MIXED_MODULE_APK
     val isMixedModuleZip = sourceType == DataType.MIXED_MODULE_ZIP
     var selectionMode by remember(sourceType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
-    val apkChooseAll = session.config.apkChooseAll
+    val apkChooseAll = config.apkChooseAll
 
     val primaryButtonText = if (isMultiApk) R.string.install else R.string.next
     val primaryButtonAction = if (isMultiApk) {
@@ -437,7 +439,6 @@ private fun MultiApkGroupCard(
                         .forEach { item ->
                             SelectableSubCard(
                                 item = item,
-                                isRadio = true,
                                 onClick = {
                                     viewModel.dispatch(
                                         InstallerViewAction.ToggleSelection(
@@ -493,7 +494,11 @@ private fun SingleItemCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SelectableSubCard(item: SelectInstallEntity, isRadio: Boolean, onClick: () -> Unit) {
+private fun SelectableSubCard(
+    item: SelectInstallEntity,
+    isRadio: Boolean = true,
+    onClick: () -> Unit
+) {
     val haptic = LocalHapticFeedback.current
     Card(
         modifier = Modifier.fillMaxWidth(),

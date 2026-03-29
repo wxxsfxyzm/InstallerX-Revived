@@ -23,7 +23,7 @@ import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.InstallMode
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
@@ -72,7 +72,7 @@ class ForegroundInfoHandler(scope: CoroutineScope, session: InstallerSessionRepo
     private var job: Job? = null
     private var sessionStartTime: Long = 0L
     private val context by inject<Context>()
-    private val appSettingsRepo by inject<AppSettingsRepo>()
+    private val appSettingsRepo by inject<AppSettingsRepository>()
     private val appOpsProvider by inject<AppOpsProvider>()
     private val getResolvedConfig by inject<GetResolvedConfigUseCase>()
     private val getAppIcon by inject<GetAppIconUseCase>()

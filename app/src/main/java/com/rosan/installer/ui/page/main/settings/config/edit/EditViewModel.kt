@@ -11,7 +11,7 @@ import com.rosan.installer.domain.settings.model.DexoptMode
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.InstallReason
 import com.rosan.installer.domain.settings.model.PackageSource
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.usecase.config.GetConfigDraftUseCase
@@ -33,7 +33,7 @@ import timber.log.Timber
 
 class EditViewModel(
     private val id: Long? = null,
-    private val appSettingsRepo: AppSettingsRepo,
+    private val appSettingsRepo: AppSettingsRepository,
     private val getConfigDraft: GetConfigDraftUseCase,
     private val saveConfig: SaveConfigUseCase,
     private val getAvailableUsers: GetAvailableUsersUseCase,

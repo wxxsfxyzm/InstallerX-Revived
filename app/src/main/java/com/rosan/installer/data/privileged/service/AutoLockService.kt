@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
 import com.rosan.installer.ui.activity.InstallerActivity
@@ -21,7 +21,7 @@ import timber.log.Timber
 
 class AutoLockService(
     private val context: Context,
-    private val appSettingsRepo: AppSettingsRepo,
+    private val appSettingsRepo: AppSettingsRepository,
     private val appOpsProvider: AppOpsProvider,
     private val configUseCase: GetResolvedConfigUseCase
 ) {

@@ -17,7 +17,7 @@ class GetConfigDraftUseCase(
 
         if (!model.installRequester.isNullOrEmpty()) {
             val uid = systemEnvProvider.getPackageUid(model.installRequester)
-            model.callingFromUid = uid
+            model = model.copy(callingFromUid = uid)
         }
 
         val effectiveAuthorizer = if (model.authorizer == Authorizer.Global) globalAuthorizer else model.authorizer

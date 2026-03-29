@@ -3,12 +3,12 @@
 package com.rosan.installer.domain.settings.usecase.settings
 
 import com.rosan.installer.domain.settings.model.SharedUid
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import kotlinx.coroutines.flow.firstOrNull
 
 class ManageSharedUidListUseCase(
-    private val appSettingsRepo: AppSettingsRepo
+    private val appSettingsRepo: AppSettingsRepository
 ) {
     suspend fun addUid(setting: SharedUidListSetting, uid: SharedUid) {
         val currentList = appSettingsRepo.getSharedUidList(setting).firstOrNull()?.toMutableList() ?: mutableListOf()

@@ -11,7 +11,7 @@ import com.rosan.installer.domain.engine.repository.AppIconRepository.Companion.
 import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import com.rosan.installer.domain.updater.model.UpdateInfo
@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class AboutViewModel(
-    appSettingsRepo: AppSettingsRepo,
+    appSettingsRepo: AppSettingsRepository,
     private val updateRepo: UpdateRepository,
     private val systemEnvProvider: SystemEnvProvider,
     private val updateSetting: UpdateSettingUseCase,

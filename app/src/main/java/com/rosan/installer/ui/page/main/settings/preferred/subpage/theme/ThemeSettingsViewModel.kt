@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ThemeSettingsViewModel(
-    appSettingsRepo: AppSettingsRepo,
+    appSettingsRepo: AppSettingsRepository,
     systemEnvProvider: SystemEnvProvider,
     private val updateSetting: UpdateSettingUseCase,
     private val setLauncherIconUseCase: SetLauncherIconUseCase

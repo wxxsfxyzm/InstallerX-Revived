@@ -1,7 +1,7 @@
 package com.rosan.installer.util.timber
 
 import android.content.Context
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +12,7 @@ import timber.log.Timber
 
 class LogController(
     private val context: Context,
-    private val appSettingsRepo: AppSettingsRepo
+    private val appSettingsRepo: AppSettingsRepository
 ) {
     private var fileLoggingTree: FileLoggingTree? = null
 

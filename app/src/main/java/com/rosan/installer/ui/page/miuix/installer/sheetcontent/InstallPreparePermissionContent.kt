@@ -26,7 +26,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.engine.model.sortedBest
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.miuixSheetCardColorDark
@@ -42,14 +41,13 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun InstallPreparePermissionContent(
-    session: InstallerSessionRepository,
     viewModel: InstallerViewModel,
     onBack: () -> Unit
 ) {
     val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentPackageName = uiState.currentPackageName
-    val currentPackage = session.analysisResults.find { it.packageName == currentPackageName }
+    val currentPackage = uiState.analysisResults.find { it.packageName == currentPackageName }
 
     val entity = currentPackage?.appEntities
         ?.filter { it.selected }

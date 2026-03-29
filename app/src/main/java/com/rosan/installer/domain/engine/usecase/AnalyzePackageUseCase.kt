@@ -9,7 +9,7 @@ import com.rosan.installer.domain.engine.model.PackageAnalysisResult
 import com.rosan.installer.domain.engine.repository.AnalyserRepository
 import com.rosan.installer.domain.engine.repository.AppIconRepository
 import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
@@ -25,7 +25,7 @@ import kotlinx.coroutines.isActive
 class AnalyzePackageUseCase(
     private val analyserRepository: AnalyserRepository,
     private val appIconRepository: AppIconRepository,
-    private val appSettingsRepo: AppSettingsRepo
+    private val appSettingsRepo: AppSettingsRepository
 ) {
     /**
      * Executes the analysis flow.

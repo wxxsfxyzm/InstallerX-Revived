@@ -20,7 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -31,7 +30,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun installingDialog(
-    session: InstallerSessionRepository, viewModel: InstallerViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stage = uiState.stage
@@ -41,7 +40,6 @@ fun installingDialog(
 
     // Call InstallInfoDialog for base structure (icon, title, subtitle with new version)
     val baseParams = installInfoDialog(
-        session = session,
         viewModel = viewModel,
         onTitleExtraClick = {}
     )

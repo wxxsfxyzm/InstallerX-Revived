@@ -14,7 +14,7 @@ import com.rosan.installer.domain.session.exception.ResolveFailedLinkNotValidExc
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.NetworkResolver
 import com.rosan.installer.domain.settings.model.HttpProfile
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.util.ArchiveUtils
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +42,7 @@ import kotlin.math.min
 class OkHttpNetworkResolver(
     private val context: Context,
     private val okHttpClient: OkHttpClient,
-    private val appSettingsRepo: AppSettingsRepo
+    private val appSettingsRepo: AppSettingsRepository
 ) : NetworkResolver {
     // Mutex to ensure thread-safe progress emission
     private val progressMutex = Mutex()

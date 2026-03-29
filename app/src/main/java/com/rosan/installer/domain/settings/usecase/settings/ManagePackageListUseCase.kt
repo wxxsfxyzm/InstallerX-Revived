@@ -3,12 +3,12 @@
 package com.rosan.installer.domain.settings.usecase.settings
 
 import com.rosan.installer.domain.settings.model.NamedPackage
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import kotlinx.coroutines.flow.firstOrNull
 
 class ManagePackageListUseCase(
-    private val appSettingsRepo: AppSettingsRepo
+    private val appSettingsRepo: AppSettingsRepository
 ) {
     suspend fun addPackage(setting: NamedPackageListSetting, pkg: NamedPackage) {
         val currentList = appSettingsRepo.getNamedPackageList(setting).firstOrNull()?.toMutableList() ?: mutableListOf()

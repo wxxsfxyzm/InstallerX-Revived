@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.ModuleInstallCmdInitException
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
 import com.rosan.installer.domain.engine.exception.ModuleInstallFailedIncompatibleAuthorizerException
@@ -75,7 +74,6 @@ import com.rosan.installer.ui.util.getSupportTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -96,7 +94,6 @@ fun MiuixInstallerPage(
     viewModel: InstallerViewModel = koinViewModel { parametersOf(session) }
 ) {
     val context = LocalContext.current
-    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scope = rememberCoroutineScope()
     val showBottomSheet = remember { mutableStateOf(true) }
 
@@ -108,6 +105,7 @@ fun MiuixInstallerPage(
     val temporarySeedColor = uiState.seedColor
     val currentPackageName = uiState.currentPackageName
     val displayIcons = uiState.displayIcons
+    val error = uiState.error
 
     val globalSeedColor = InstallerTheme.seedColor
     val themeMode = InstallerTheme.themeMode
@@ -181,8 +179,6 @@ fun MiuixInstallerPage(
             viewModel.dispatch(InstallerViewAction.Close)
         }
     }
-
-    val isMiInstallerSupported = capabilityProvider.hasMiPackageInstaller
 
     CompositionLocalProvider(
         LocalInstallerColorScheme provides activeMd3ColorScheme
@@ -412,7 +408,6 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.InstallChoice -> {
                             InstallChoiceContent(
-                                session = session,
                                 viewModel = viewModel,
                                 onCancel = closeSheet
                             )
@@ -420,7 +415,6 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.InstallExtendedMenu -> {
                             InstallExtendedMenuContent(
-                                session = session,
                                 viewModel = viewModel
                             )
                         }
@@ -463,7 +457,6 @@ fun MiuixInstallerPage(
 
                                     "permissions" -> {
                                         InstallPreparePermissionContent(
-                                            session = session,
                                             viewModel = viewModel,
                                             onBack = { viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList) }
                                         )
@@ -471,7 +464,6 @@ fun MiuixInstallerPage(
 
                                     else -> { // "prepare"
                                         InstallPrepareContent(
-                                            session = session,
                                             viewModel = viewModel,
                                             appInfo = appInfoState,
                                             onCancel = closeSheet,
@@ -507,7 +499,7 @@ fun MiuixInstallerPage(
                         is InstallerStage.InstallSuccess -> {
                             InstallSuccessContent(
                                 appInfo = appInfoState,
-                                session = session,
+                                viewModel = viewModel,
                                 dhizukuAutoClose = settings.autoCloseCountDown,
                                 onClose = closeSheet
                             )
@@ -521,18 +513,17 @@ fun MiuixInstallerPage(
                         }
 
                         is InstallerStage.InstallFailed -> {
-                            if (session.error is ModuleInstallFailedIncompatibleAuthorizerException ||
-                                session.error is ModuleInstallCmdInitException ||
-                                session.error is ModuleInstallException
+                            if (error is ModuleInstallFailedIncompatibleAuthorizerException ||
+                                error is ModuleInstallCmdInitException ||
+                                error is ModuleInstallException
                             )
                                 NonInstallFailedContent(
-                                    error = session.error,
+                                    error = error,
                                     onClose = closeSheet
                                 )
                             else
                                 InstallFailedContent(
                                     appInfo = appInfoState,
-                                    session = session,
                                     viewModel = viewModel,
                                     onClose = closeSheet
                                 )
@@ -572,7 +563,7 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.AnalyseFailed, is InstallerStage.ResolveFailed -> {
                             NonInstallFailedContent(
-                                error = session.error,
+                                error = error,
                                 onClose = closeSheet
                             )
                         }

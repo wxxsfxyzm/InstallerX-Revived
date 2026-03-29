@@ -43,14 +43,13 @@ fun ConfigEntity.toDomainModel(scopeCount: Int = 0): ConfigModel {
         apkChooseAll = this.apkChooseAll,
         createdAt = this.createdAt,
         modifiedAt = this.modifiedAt,
-        scopeCount = scopeCount
+        scopeCount = scopeCount,
+        // Pass runtime flags directly into the constructor
+        installFlags = this.installFlags,
+        bypassBlacklistInstallSetByUser = this.bypassBlacklistInstallSetByUser,
+        uninstallFlags = this.uninstallFlags,
+        callingFromUid = this.callingFromUid
     )
-
-    // Transfer runtime flags
-    model.installFlags = this.installFlags
-    model.bypassBlacklistInstallSetByUser = this.bypassBlacklistInstallSetByUser
-    model.uninstallFlags = this.uninstallFlags
-    model.callingFromUid = this.callingFromUid
 
     return model
 }

@@ -7,7 +7,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.inner.analyseFailedDialog
@@ -46,31 +45,31 @@ fun dialogInnerWidget(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun dialogGenerateParams(
-    session: InstallerSessionRepository, viewModel: InstallerViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     return when (val stage = uiState.stage) {
         is InstallerStage.Ready -> readyDialog(viewModel)
         is InstallerStage.Resolving -> resolvingDialog(viewModel)
-        is InstallerStage.ResolveFailed -> resolveFailedDialog(session, viewModel)
+        is InstallerStage.ResolveFailed -> resolveFailedDialog(viewModel)
         is InstallerStage.Preparing -> preparingDialog(viewModel)
         is InstallerStage.Analysing -> analysingDialog(viewModel)
-        is InstallerStage.AnalyseFailed -> analyseFailedDialog(session, viewModel)
-        is InstallerStage.InstallChoice -> installChoiceDialog(session, viewModel)
-        is InstallerStage.InstallPrepare -> installPrepareDialog(session, viewModel)
-        is InstallerStage.InstallExtendedMenu -> installExtendedMenuDialog(session, viewModel)
-        is InstallerStage.InstallExtendedSubMenu -> installExtendedMenuSubMenuDialog(session, viewModel)
-        is InstallerStage.Installing -> installingDialog(session, viewModel)
-        is InstallerStage.InstallSuccess -> installSuccessDialog(session, viewModel)
-        is InstallerStage.InstallFailed -> installFailedDialog(session, viewModel)
+        is InstallerStage.AnalyseFailed -> analyseFailedDialog(viewModel)
+        is InstallerStage.InstallChoice -> installChoiceDialog(viewModel)
+        is InstallerStage.InstallPrepare -> installPrepareDialog(viewModel)
+        is InstallerStage.InstallExtendedMenu -> installExtendedMenuDialog(viewModel)
+        is InstallerStage.InstallExtendedSubMenu -> installExtendedMenuSubMenuDialog(viewModel)
+        is InstallerStage.Installing -> installingDialog(viewModel)
+        is InstallerStage.InstallSuccess -> installSuccessDialog(viewModel)
+        is InstallerStage.InstallFailed -> installFailedDialog(viewModel)
         is InstallerStage.InstallCompleted -> installCompletedDialog(viewModel, stage.results)
         is InstallerStage.InstallConfirm -> installConfirmDialog(viewModel)
-        is InstallerStage.InstallRetryDowngradeUsingUninstall -> installingDialog(session, viewModel)
+        is InstallerStage.InstallRetryDowngradeUsingUninstall -> installingDialog(viewModel)
         is InstallerStage.UninstallReady -> uninstallReadyDialog(viewModel)
         is InstallerStage.UninstallSuccess -> uninstallSuccessDialog(viewModel)
-        is InstallerStage.UninstallFailed -> uninstallFailedDialog(session, viewModel)
+        is InstallerStage.UninstallFailed -> uninstallFailedDialog(viewModel)
         is InstallerStage.Uninstalling -> uninstallingDialog(viewModel)
-        is InstallerStage.UninstallResolveFailed -> uninstallFailedDialog(session, viewModel)
+        is InstallerStage.UninstallResolveFailed -> uninstallFailedDialog(viewModel)
         // when is exhaustive, so no need to handle the else case
         else -> readyDialog(viewModel)
     }

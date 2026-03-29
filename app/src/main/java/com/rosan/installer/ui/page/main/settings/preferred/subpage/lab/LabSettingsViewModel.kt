@@ -4,7 +4,7 @@ package com.rosan.installer.ui.page.main.settings.preferred.subpage.lab
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class LabSettingsViewModel(
-    appSettingsRepo: AppSettingsRepo,
+    appSettingsRepo: AppSettingsRepository,
     private val updateSetting: UpdateSettingUseCase
 ) : ViewModel() {
 

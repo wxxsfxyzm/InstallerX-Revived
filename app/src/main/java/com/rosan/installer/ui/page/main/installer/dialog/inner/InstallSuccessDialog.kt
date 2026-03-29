@@ -18,7 +18,6 @@ import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase.Companion.PRIVILEGED_START_TIMEOUT_MS
 import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.isPrivileged
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
@@ -33,11 +32,11 @@ import org.koin.compose.koinInject
 
 @Composable
 fun installSuccessDialog(
-    session: InstallerSessionRepository,
     viewModel: InstallerViewModel
 ): DialogParams {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val config = uiState.config
     val deviceCapabilityProvider: DeviceCapabilityProvider = koinInject()
     val currentPackageName = uiState.currentPackageName
     val coroutineScope = rememberCoroutineScope()
@@ -46,8 +45,8 @@ fun installSuccessDialog(
     val openAppUseCase: OpenAppUseCase = koinInject()
     val openLSPosedUseCase: OpenLSPosedUseCase = koinInject()
 
-    val packageName = currentPackageName ?: session.analysisResults.firstOrNull()?.packageName ?: ""
-    val currentPackage = session.analysisResults.find { it.packageName == packageName }
+    val packageName = currentPackageName ?: uiState.analysisResults.firstOrNull()?.packageName ?: ""
+    val currentPackage = uiState.analysisResults.find { it.packageName == packageName }
 
     val selectedEntities = currentPackage?.appEntities
         ?.filter { it.selected }
@@ -58,7 +57,6 @@ fun installSuccessDialog(
     val isXposedModule = if (effectivePrimaryEntity is AppEntity.BaseEntity) effectivePrimaryEntity.isXposedModule else false
 
     val baseParams = installInfoDialog(
-        session = session,
         viewModel = viewModel,
         onTitleExtraClick = {
             if (packageName.isNotEmpty()) {
@@ -83,10 +81,10 @@ fun installSuccessDialog(
             }
 
             buildList {
-                if (isXposedModule && session.config.isPrivileged(deviceCapabilityProvider)) {
+                if (isXposedModule && config.isPrivileged(deviceCapabilityProvider)) {
                     add(DialogButton(stringResource(R.string.open_lsposed)) {
                         coroutineScope.launch(Dispatchers.IO) {
-                            val success = openLSPosedUseCase(session.config)
+                            val success = openLSPosedUseCase(config)
                             if (success) {
                                 withContext(Dispatchers.Main) {
                                     viewModel.dispatch(InstallerViewAction.Close)
@@ -100,7 +98,7 @@ fun installSuccessDialog(
                     add(DialogButton(stringResource(R.string.open)) {
                         coroutineScope.launch(Dispatchers.IO) {
                             val result = openAppUseCase(
-                                config = session.config,
+                                config = config,
                                 launchIntent = launchIntent
                             )
 
@@ -115,7 +113,7 @@ fun installSuccessDialog(
                                     withContext(Dispatchers.Main) {
                                         context.startActivity(launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
-                                        if (session.config.authorizer == Authorizer.Dhizuku) {
+                                        if (config.authorizer == Authorizer.Dhizuku) {
                                             delay(settings.autoCloseCountDown * 1000L)
                                         } else {
                                             delay(PRIVILEGED_START_TIMEOUT_MS)

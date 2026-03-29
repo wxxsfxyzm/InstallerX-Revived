@@ -116,7 +116,7 @@ fun DialogPage(
             }
             // Handle other non-Ready states: Show standard PositionDialog
             else if (stage !is InstallerStage.Ready) {
-                val params = dialogGenerateParams(session, viewModel)
+                val params = dialogGenerateParams(viewModel)
 
                 PositionDialog(
                     useBlur = useBlur,

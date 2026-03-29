@@ -3,11 +3,11 @@
 package com.rosan.installer.domain.settings.usecase.settings
 
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
-import com.rosan.installer.domain.settings.repository.AppSettingsRepo
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 
 class SetLauncherIconUseCase(
-    private val appSettingsRepo: AppSettingsRepo,
+    private val appSettingsRepo: AppSettingsRepository,
     private val systemEnvProvider: SystemEnvProvider
 ) {
     suspend operator fun invoke(show: Boolean) {

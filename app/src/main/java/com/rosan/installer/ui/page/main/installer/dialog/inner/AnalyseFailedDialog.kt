@@ -4,9 +4,10 @@ package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
@@ -15,8 +16,10 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 
 @Composable
 fun analyseFailedDialog(
-    session: InstallerSessionRepository, viewModel: InstallerViewModel
+    viewModel: InstallerViewModel
 ): DialogParams {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val currentError = uiState.error
     return DialogParams(
         icon = DialogInnerParams(
             DialogParamsType.IconPausing.id, pausingIcon
@@ -25,7 +28,7 @@ fun analyseFailedDialog(
         ) {
             Text(stringResource(R.string.installer_analyse_failed))
         }, text = DialogInnerParams(
-            DialogParamsType.InstallerAnalyseFailed.id, { ErrorTextBlock(session.error) }
+            DialogParamsType.InstallerAnalyseFailed.id, { ErrorTextBlock(currentError) }
         ), buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
