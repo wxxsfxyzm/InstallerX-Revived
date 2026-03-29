@@ -39,7 +39,7 @@ class ThemeStateProvider(private val appSettingsRepo: AppSettingsRepository) {
         appSettingsRepo.getBoolean(BooleanSetting.UiUseAppleFloatingBar, false),
         appSettingsRepo.getInt(IntSetting.ThemeSeedColor, PresetColors.first().color.toArgb())
             .map { Color(it) },
-        appSettingsRepo.getBoolean(BooleanSetting.UiUseBlur, true),
+        appSettingsRepo.getBoolean(BooleanSetting.UiUseBlur, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
         getWallpaperColorsFlow()
     ) { values: Array<Any?> ->
         var idx = 0

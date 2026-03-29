@@ -1,5 +1,6 @@
 package com.rosan.installer.domain.settings.model
 
+import android.os.Build
 import androidx.compose.ui.graphics.Color
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.PresetColors
@@ -20,5 +21,5 @@ data class ThemeState(
     val useMiuixMonet: Boolean = false,
     val useAppleFloatingBar: Boolean = false,
     val seedColor: Color = PresetColors.first().color,
-    val useBlur: Boolean = true
+    val useBlur: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 )
