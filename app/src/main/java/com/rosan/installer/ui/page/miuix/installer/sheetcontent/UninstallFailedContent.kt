@@ -18,7 +18,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
 import com.rosan.installer.ui.util.isGestureNavigation
@@ -29,11 +28,11 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun UninstallFailedContent(
-    session: InstallerSessionRepository,
     viewModel: InstallerViewModel,
     onClose: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val currentError = uiState.error
     val info = uiState.uiUninstallInfo ?: return
 
     Column(
@@ -50,7 +49,7 @@ fun UninstallFailedContent(
         )
         Spacer(modifier = Modifier.height(32.dp))
         MiuixErrorTextBlock(
-            error = session.error,
+            error = currentError,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f, fill = false)

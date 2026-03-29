@@ -271,7 +271,12 @@ class InstallerViewModel(
 
         collectRepoJob = viewModelScope.launch {
             settingsLoadingJob.join()
-            session.progress.collect { progress ->
+
+            // Core fix: Listen to both progress and uninstallInfo flows simultaneously
+            combine(session.progress, session.uninstallInfo) { progress, uninstallInfo ->
+                Pair(progress, uninstallInfo)
+            }.collect { (progress, uninstallInfo) ->
+
                 if (progress is ProgressEntity.InstallResolving || progress is ProgressEntity.InstallPreparing || progress is ProgressEntity.InstallAnalysing) {
                     if (isInstallingModule) {
                         loadingStateJob?.cancel()
@@ -297,9 +302,9 @@ class InstallerViewModel(
                     if (originalAnalysisResults.isEmpty()) {
                         originalAnalysisResults = session.analysisResults
                     }
-                    // Update state with new results
+                    // Update state first
                     _localState.update { it.copy(analysisResults = session.analysisResults) }
-                    // Trigger icon loading here, safely outside the pure function
+                    // Trigger side effects (like loading icons) after the state is fully updated
                     session.analysisResults.forEach { result -> loadDisplayIcon(result.packageName) }
                 }
 
@@ -322,10 +327,10 @@ class InstallerViewModel(
                     }
                 }
 
+                // Optimized package name resolution logic, covering all uninstall stages
                 val newPackageName = when (newStage) {
                     is InstallerStage.Installing -> {
                         if (newStage.total > 1) {
-                            // Read from local state to ensure consistency
                             val selectedEntities = _localState.value.analysisResults.flatMap { it.appEntities }.filter { it.selected }
                             val groupedApps = selectedEntities.groupBy { it.app.packageName }.values.toList()
                             groupedApps.getOrNull(newStage.current - 1)?.firstOrNull()?.app?.packageName ?: _localState.value.currentPackageName
@@ -341,32 +346,32 @@ class InstallerViewModel(
                     }
 
                     is InstallerStage.InstallChoice, is InstallerStage.Ready -> null
-                    is InstallerStage.UninstallReady -> session.uninstallInfo.value?.packageName
+
+                    // All uninstall stages read directly from the latest uninstallInfo
+                    is InstallerStage.UninstallReady,
+                    is InstallerStage.Uninstalling,
+                    is InstallerStage.UninstallSuccess,
+                    is InstallerStage.UninstallFailed -> uninstallInfo?.packageName
+
                     else -> _localState.value.currentPackageName
                 }
 
                 val oldPackageName = _localState.value.currentPackageName
-                _localState.update { currentState ->
-                    // Latch the uninstall info.
-                    // Once we get a non-null info, keep it until the session is explicitly closed.
-                    val retainedUninstallInfo = currentState.uiUninstallInfo ?: session.uninstallInfo.value
 
+                _localState.update { currentState ->
                     val updatedState = currentState.copy(
                         stage = newStage,
-                        currentPackageName = newPackageName ?: currentState.currentPackageName,
-                        uiUninstallInfo = retainedUninstallInfo,
+                        currentPackageName = newPackageName, // Explicitly assign the new value, no fallback needed
+                        uiUninstallInfo = uninstallInfo ?: currentState.uiUninstallInfo, // Synchronize uninstall info in real-time
                         error = session.error
                     )
 
                     // Re-calculate seed color from the icon if dynamic color is enabled
                     if (updatedState.viewSettings.useDynColorFollowPkgIcon) {
-
                         if (newPackageName.isNullOrEmpty()) {
-                            // Empty package scenario: Use cache to avoid recalculating the default icon color
                             if (defaultFallbackSeedColor != null) {
                                 _localState.update { it.copy(seedColor = Color(defaultFallbackSeedColor!!)) }
                             } else {
-                                // Only calculate the color on the first encounter of an empty package name
                                 viewModelScope.launch {
                                     defaultFallbackSeedColor = getAppIconColor(
                                         sessionId = session.id,
@@ -377,7 +382,6 @@ class InstallerViewModel(
                                 }
                             }
                         } else {
-                            // Specific package scenario: Extract the app's color normally
                             viewModelScope.launch {
                                 val colorInt = getAppIconColor(
                                     sessionId = session.id,
@@ -392,7 +396,8 @@ class InstallerViewModel(
                     updatedState
                 }
 
-                if (newPackageName != null && newPackageName != _localState.value.currentPackageName) {
+                // Icon loading logic: load only when the package name changes and is not null/empty
+                if (newPackageName != null && newPackageName != oldPackageName) {
                     loadDisplayIcon(newPackageName)
                 }
 

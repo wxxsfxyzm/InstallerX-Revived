@@ -123,10 +123,11 @@ fun MiuixInstallerPage(
         } ?: globalColorScheme
     }
 
-    val sourceType = session.analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
-    val packageName = currentPackageName ?: session.analysisResults.firstOrNull()?.packageName ?: ""
+    val analysisResults = uiState.analysisResults
+    val sourceType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
+    val packageName = currentPackageName ?: analysisResults.firstOrNull()?.packageName ?: ""
     val appInfoState = rememberAppInfoState(
-        session = session,
+        analysisResults = analysisResults,
         currentPackageName = currentPackageName,
         displayIcons = displayIcons
     )
@@ -450,7 +451,6 @@ fun MiuixInstallerPage(
                                 when (subState) {
                                     "settings" -> {
                                         PrepareSettingsContent(
-                                            session = session,
                                             viewModel = viewModel
                                         )
                                     }
@@ -555,7 +555,6 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.UninstallFailed -> {
                             UninstallFailedContent(
-                                session = session,
                                 viewModel = viewModel,
                                 onClose = closeSheet
                             )

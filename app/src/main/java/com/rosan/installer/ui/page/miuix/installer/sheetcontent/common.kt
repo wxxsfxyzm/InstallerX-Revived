@@ -28,8 +28,8 @@ import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.sortedBest
-import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
@@ -54,14 +54,14 @@ data class AppInfoState(
  */
 @Composable
 fun rememberAppInfoState(
-    session: InstallerSessionRepository,
+    analysisResults: List<PackageAnalysisResult>,
     currentPackageName: String?,
     displayIcons: Map<String, ImageBitmap?>
-): AppInfoState = remember(session, currentPackageName, displayIcons) {
+): AppInfoState = remember(analysisResults, currentPackageName, displayIcons) {
     val currentPackage = if (currentPackageName != null) {
-        session.analysisResults.find { it.packageName == currentPackageName }
+        analysisResults.find { it.packageName == currentPackageName }
     } else {
-        session.analysisResults.firstOrNull()
+        analysisResults.firstOrNull()
     }
 
     // Default fallback values
