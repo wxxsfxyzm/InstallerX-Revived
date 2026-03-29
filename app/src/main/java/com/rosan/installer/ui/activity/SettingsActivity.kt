@@ -40,9 +40,6 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
         setContent {
             val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
             isThemeLoaded = uiState.isLoaded
-            /*CompositionLocalProvider(
-                LocalSessionInstallSupported provides capabilityProvider.isSessionInstallSupported
-            ) {*/
             InstallerTheme(
                 isExpressive = uiState.isExpressive,
                 useMiuix = uiState.useMiuix,
