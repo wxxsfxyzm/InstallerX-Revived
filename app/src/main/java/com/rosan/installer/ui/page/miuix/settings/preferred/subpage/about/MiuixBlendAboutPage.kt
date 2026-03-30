@@ -57,6 +57,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -363,14 +364,12 @@ private fun AboutContentBody(
 
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
-    // 采用与 Demo 一致的 Padding 组合逻辑
     val listContentPadding = PaddingValues(
         start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
         top = padding.calculateTopPadding(),
         end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
     )
 
-    // Logo 区域的 padding 处理也对齐原代码，增加顶部的占位
     val logoPadding = PaddingValues(
         top = padding.calculateTopPadding() + 40.dp,
         start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
@@ -414,15 +413,25 @@ private fun AboutContentBody(
                         iconY = y + size.height
                     },
             ) {
-                if (uiState.appIcon != null) {
-                    Image(
-                        bitmap = uiState.appIcon,
-                        modifier = Modifier.fillMaxSize(),
-                        contentDescription = stringResource(id = R.string.app_name)
-                    )
-                } else {
-                    Box(modifier = Modifier.fillMaxSize())
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_monochrome),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            scaleX = 2.0f
+                            scaleY = 2.0f
+                        }
+                        .textureBlur(
+                            backdrop = backdrop,
+                            shape = RoundedRectangle(16.dp),
+                            blurRadius = 200f,
+                            noiseCoefficient = BlurDefaults.NoiseCoefficient,
+                            colors = BlurColors(blendColors = logoBlend),
+                            contentBlendMode = BlendMode.DstIn,
+                            enabled = blurEnable,
+                        ),
+                    contentDescription = null
+                )
             }
 
             Text(
@@ -490,7 +499,6 @@ private fun AboutContentBody(
         // Scrollable content area
         LazyColumn(
             state = lazyListState,
-            // 显式拼接这三个必须的修饰符，不使用包装函数
             modifier = Modifier
                 .fillMaxSize()
                 .scrollEndHaptic()
@@ -524,7 +532,6 @@ private fun AboutContentBody(
                 )
             }
 
-            // 核心内容区使用 fillParentMaxHeight 撑起，保证滑动行程充分
             item(key = "about_content") {
                 Column(
                     modifier = Modifier
