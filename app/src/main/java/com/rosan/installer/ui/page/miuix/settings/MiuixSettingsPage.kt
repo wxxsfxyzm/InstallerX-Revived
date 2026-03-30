@@ -71,6 +71,7 @@ import com.rosan.installer.ui.page.miuix.settings.config.apply.MiuixApplyPage
 import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPreferredPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.about.MiuixAboutPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.about.MiuixBlendAboutPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.about.ossLicensePage.MiuixOpenSourceLicensePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.MiuixInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.lab.MiuixLabPage
@@ -245,7 +246,9 @@ fun MiuixSettingsPage(
             )
         }
         composable(route = MiuixSettingsScreen.MiuixAbout.route) {
-            MiuixAboutPage(navController = navController)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                MiuixBlendAboutPage(navController = navController)
+            else MiuixAboutPage(navController = navController)
         }
         composable(route = MiuixSettingsScreen.MiuixOpenSourceLicense.route) {
             MiuixOpenSourceLicensePage(navController = navController)

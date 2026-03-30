@@ -10,7 +10,7 @@ import kotlin.time.TimeSource
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class BgEffectPainter {
-    val shaderCode by lazy { OS2_BG_FRAG }
+    val shaderCode by lazy { OS3_BG_FRAG }
     private var bound: FloatArray = FloatArray(4)
     val runtimeShader by lazy { RuntimeShader(shaderCode) }
     private var uResolution: FloatArray = floatArrayOf(0f, 0f)

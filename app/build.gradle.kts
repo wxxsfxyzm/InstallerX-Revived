@@ -243,6 +243,7 @@ dependencies {
     implementation(libs.miuix.blur)
     implementation(libs.miuix.preference)
     implementation(libs.miuix.icons)
+    implementation(libs.shapes)
     implementation(libs.capsule)
     implementation(libs.backdrop)
     // haze
