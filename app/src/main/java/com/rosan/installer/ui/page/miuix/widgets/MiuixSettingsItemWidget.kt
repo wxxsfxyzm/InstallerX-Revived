@@ -67,10 +67,10 @@ import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperSpinner
-import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 data class AuthorizerInfo(
     @param:StringRes val labelResId: Int,
@@ -116,7 +116,7 @@ fun MiuixDataAuthorizerWidget(
     }
 
     // Convert the authorizerOptions Map into a List<SpinnerEntry>
-    // which is required by the SuperSpinner component.
+    // which is required by the WindowSpinnerPreference component.
     // This is done once and remembered.
     val spinnerEntries = remember(authorizerOptions) {
         authorizerOptions.values.map { authorizerInfo ->
@@ -127,13 +127,13 @@ fun MiuixDataAuthorizerWidget(
         }
     }
 
-    // SuperSpinner requires an integer index for the selected item.
+    // WindowSpinnerPreference requires an integer index for the selected item.
     // Find the index of the currentAuthorizer from the map's keys.
     val selectedIndex = remember(currentAuthorizer, authorizerOptions) {
         authorizerOptions.keys.indexOf(currentAuthorizer).coerceAtLeast(0)
     }
 
-    SuperSpinner(
+    WindowSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.config_authorizer),
         summary = stringResource(R.string.config_app_authorizer_desc),
@@ -186,7 +186,7 @@ fun MiuixDataInstallModeWidget(
     }
 
     // Convert the installModeOptions Map into a List<SpinnerEntry>
-    // for the SuperSpinner component.
+    // for the WindowSpinnerPreference component.
     val spinnerEntries = remember(installModeOptions) {
         installModeOptions.values.map { modeInfo ->
             SpinnerEntry(title = context.getString(modeInfo.labelResId))
@@ -198,7 +198,7 @@ fun MiuixDataInstallModeWidget(
         installModeOptions.keys.indexOf(currentInstallMode).coerceAtLeast(0)
     }
 
-    SuperSpinner(
+    WindowSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.config_install_mode),
         summary = stringResource(R.string.config_install_mode_desc),
@@ -241,7 +241,7 @@ fun MiuixAutoClearNotificationTimeWidget(
         options.indexOf(currentValue).coerceAtLeast(0)
     }
 
-    SuperSpinner(
+    WindowSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.installer_settings_auto_clear_success_notification),
         summary = stringResource(id = R.string.installer_settings_auto_clear_success_notification_desc),
@@ -365,7 +365,7 @@ fun MiuixNavigationItemWidget(
     onClick: () -> Unit
 ) {
     // Call the BaseWidget and pass the parameters accordingly.
-    SuperArrow(
+    ArrowPreference(
         title = title,
         summary = description,
         insideMargin = insideMargin,
@@ -374,7 +374,7 @@ fun MiuixNavigationItemWidget(
 }
 
 /**
- * Theme Engine selection widget using SuperSpinner, following the provided pattern.
+ * Theme Engine selection widget using WindowSpinnerPreference, following the provided pattern.
  * Simplified version without data class and icons.
  *
  * @param currentThemeIsMiuix True if MIUIX theme is selected, false if Google theme is selected.
@@ -395,7 +395,7 @@ fun MiuixThemeEngineWidget(
         )
     }
 
-    // Convert map entries to List<SpinnerEntry> for SuperSpinner.
+    // Convert map entries to List<SpinnerEntry> for WindowSpinnerPreference.
     // Ensure the order matches the keys: index 0 = true, index 1 = false.
     val spinnerEntries = remember(themeOptions) {
         themeOptions.entries.sortedByDescending { it.key }.map { entry ->
@@ -411,7 +411,7 @@ fun MiuixThemeEngineWidget(
         if (currentThemeIsMiuix) 0 else 1
     }
 
-    SuperSpinner(
+    WindowSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_ui_engine),
         // summary = spinnerEntries[selectedIndex].title,
@@ -549,9 +549,9 @@ fun MiuixManagedPackagesWidget(
 }
 
 /**
- * A SuperSpinner widget for selecting the application's theme mode (Light, Dark, or System).
+ * A WindowSpinnerPreference widget for selecting the application's theme mode (Light, Dark, or System).
  *
- * @param modifier The modifier to be applied to the SuperSpinner.
+ * @param modifier The modifier to be applied to the WindowSpinnerPreference.
  * @param currentThemeMode The currently selected ThemeMode.
  * @param onThemeModeChange A callback that is invoked when the theme mode selection changes.
  */
@@ -573,7 +573,7 @@ fun MiuixThemeModeWidget(
         )
     }
 
-    // Convert the map of options to a list of SpinnerEntry for the SuperSpinner component.
+    // Convert the map of options to a list of SpinnerEntry for the WindowSpinnerPreference component.
     // The order of items in the list is important for index mapping.
     val spinnerEntries = remember(themeModeOptions) {
         themeModeOptions.entries.map { entry ->
@@ -587,7 +587,7 @@ fun MiuixThemeModeWidget(
         themeModeOptions.keys.indexOf(currentThemeMode).coerceAtLeast(0)
     }
 
-    SuperSpinner(
+    WindowSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_theme_mode),
         items = spinnerEntries,
@@ -604,7 +604,7 @@ fun MiuixThemeModeWidget(
 }
 
 /**
- * SuperSpinner widget for selecting the Palette Style.
+ * WindowSpinnerPreference widget for selecting the Palette Style.
  */
 @Composable
 fun MiuixPaletteStyleWidget(
@@ -620,7 +620,7 @@ fun MiuixPaletteStyleWidget(
         options.indexOf(currentPaletteStyle).coerceAtLeast(0)
     }
 
-    SuperSpinner(
+    WindowSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_palette_style),
         items = spinnerEntries,
@@ -635,7 +635,7 @@ fun MiuixPaletteStyleWidget(
 }
 
 /**
- * SuperSpinner widget for selecting the Theme Color Spec.
+ * WindowSpinnerPreference widget for selecting the Theme Color Spec.
  * Includes fallback logic to gracefully handle styles that do not support SPEC_2025.
  */
 @Composable
@@ -676,7 +676,7 @@ fun MiuixColorSpecWidget(
         availableSpecs.indexOf(activeSpec).coerceAtLeast(0)
     }
 
-    SuperSpinner(
+    WindowSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_color_spec),
         summary = descriptionText,

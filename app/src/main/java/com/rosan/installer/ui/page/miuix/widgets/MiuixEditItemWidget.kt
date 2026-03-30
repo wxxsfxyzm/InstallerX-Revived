@@ -32,7 +32,7 @@ import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.extra.SuperSpinner
+import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -106,7 +106,7 @@ fun MiuixDataAuthorizerWidget(state: EditViewState, dispatch: (EditViewAction) -
         data.keys.toList().indexOf(stateAuthorizer).coerceAtLeast(0)
     }
 
-    SuperSpinner(
+    WindowSpinnerPreference(
         title = stringResource(R.string.config_authorizer),
         summary = stringResource(R.string.config_install_authorizer_desc),
         items = spinnerEntries,
@@ -170,7 +170,7 @@ fun MiuixDataInstallModeWidget(state: EditViewState, dispatch: (EditViewAction) 
         data.keys.toList().indexOf(stateInstallMode).coerceAtLeast(0)
     }
 
-    SuperSpinner(
+    WindowSpinnerPreference(
         title = stringResource(R.string.config_install_mode),
         items = spinnerEntries,
         selectedIndex = selectedIndex,
@@ -233,7 +233,7 @@ fun MiuixInstallReasonWidget(state: EditViewState, dispatch: (EditViewAction) ->
                 data.keys.toList().indexOf(currentInstallReason).coerceAtLeast(0)
             }
 
-            SuperSpinner(
+            WindowSpinnerPreference(
                 title = stringResource(R.string.config_install_reason),
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,
@@ -290,7 +290,7 @@ fun MiuixDataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction
                 data.keys.toList().indexOf(currentSource).coerceAtLeast(0)
             }
 
-            SuperSpinner(
+            WindowSpinnerPreference(
                 title = stringResource(R.string.config_package_source),
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,
@@ -463,7 +463,7 @@ fun MiuixDataUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
                 availableUsers.keys.toList().indexOf(targetUserId).coerceAtLeast(0)
             }
 
-            SuperSpinner(
+            WindowSpinnerPreference(
                 title = stringResource(R.string.config_target_user),
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,
@@ -528,7 +528,7 @@ fun MiuixDataManualDexoptWidget(state: EditViewState, dispatch: (EditViewAction)
                 data.keys.toList().indexOf(currentMode).coerceAtLeast(0)
             }
 
-            SuperSpinner(
+            WindowSpinnerPreference(
                 title = stringResource(R.string.config_dexopt_mode),
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,

@@ -59,7 +59,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperSpinner
+import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -164,7 +164,7 @@ fun MiuixLabPage(
                         }
 
                         Column {
-                            SuperSpinner(
+                            WindowSpinnerPreference(
                                 title = stringResource(R.string.lab_module_select_root_impl),
                                 items = spinnerEntries,
                                 selectedIndex = selectedIndex,
@@ -265,7 +265,7 @@ fun MiuixLabPage(
                             profileData.keys.toList().indexOf(currentProfile).coerceAtLeast(0)
                         }
 
-                        SuperSpinner(
+                        WindowSpinnerPreference(
                             title = stringResource(R.string.lab_http_profile),
                             items = profileEntries,
                             selectedIndex = profileIndex,

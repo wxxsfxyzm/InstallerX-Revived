@@ -40,7 +40,14 @@
 
     <uses-permission android:name="com.rosan.dhizuku.permission.API" />
 
-    <uses-sdk tools:overrideLibrary="rikka.shizuku.api, rikka.shizuku.provider, rikka.shizuku.shared, rikka.shizuku.aidl, com.xzakota.hyper.notification.focus" />
+    <uses-sdk tools:overrideLibrary="
+        rikka.shizuku.api,
+        rikka.shizuku.provider,
+        rikka.shizuku.shared,
+        rikka.shizuku.aidl,
+        com.xzakota.hyper.notification.focus,
+        top.yukonga.miuix.kmp.blur
+    " />
 
     <application
         android:name=".App"

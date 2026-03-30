@@ -39,12 +39,12 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
-import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Check
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowBottomSheet
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 /**
  * A dialog to confirm an action, dynamically showing specific errors or a generic message.
@@ -298,7 +298,7 @@ fun ErrorDisplaySheet(
     onRetry: (() -> Unit)? = null,
     title: String
 ) {
-    SuperBottomSheet(
+    WindowBottomSheet(
         show = showState.value,
         onDismissRequest = onDismissRequest,
         title = title,
