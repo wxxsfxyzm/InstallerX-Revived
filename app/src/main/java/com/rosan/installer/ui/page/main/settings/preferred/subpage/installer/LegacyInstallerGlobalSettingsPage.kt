@@ -44,7 +44,6 @@ import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.ui.icons.AppIcons
@@ -59,7 +58,6 @@ import com.rosan.installer.ui.page.main.widget.setting.ManagedUidsWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.none
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,7 +67,6 @@ fun LegacyInstallerGlobalSettingsPage(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val layoutDirection = LocalLayoutDirection.current
@@ -132,8 +129,7 @@ fun LegacyInstallerGlobalSettingsPage(
                             value = uiState.dhizukuAutoCloseCountDown,
                             startInt = 1,
                             endInt = 10,
-                            showTooltip = false
-                        ) {
+                        showTooltip = false) {
                             viewModel.dispatch(
                                 InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown(it)
                             )
