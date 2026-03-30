@@ -11,6 +11,12 @@ on:
       - 'gradle.properties'
       - 'gradle/**'
       - '.github/workflows/auto-preview-release.yml'
+  workflow_dispatch:
+    inputs:
+      app_id:
+        description: 'Custom Application ID (Package Name)'
+        required: false
+        default: ''
 
 jobs:
   build_and_prerelease:
@@ -76,7 +82,13 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease
+        run: |
+          if [ -n "${{ inputs.app_id }}" ]; then
+            echo "Building with custom APP_ID: ${{ inputs.app_id }}"
+            ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease -PAPP_ID="${{ inputs.app_id }}"
+          else
+            ./gradlew assembleOnlinePreviewRelease assembleOfflinePreviewRelease
+          fi
 
       - name: Find and Rename Preview APKs
         id: rename_apks
@@ -189,6 +201,9 @@ jobs:
             
             **更新日志（Changelog）:**
             ${{ steps.changelog.outputs.changelog_body }}${{ steps.changelog.outputs.changelog_full_link }}
+
+            **Build Info:**
+            - Package Name: ${{ inputs.app_id || 'default' }}
           prerelease: true
           files: |
             ${{ steps.rename_apks.outputs.online_apk }}

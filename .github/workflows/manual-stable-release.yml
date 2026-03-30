@@ -6,6 +6,10 @@ on:
       version_tag:
         description: 'Input version tag exactly (e.g. 26.03 or 26.03.01)'
         required: true
+      app_id:
+        description: 'Custom Application ID (Package Name)'
+        required: false
+        default: ''
 
 jobs:
   build_and_release:
@@ -68,7 +72,13 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # Explicitly pass the user input to override the dynamic date version in Gradle
-        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease -PVERSION_NAME="${{ inputs.version_tag }}"
+        run: |
+          if [ -n "${{ inputs.app_id }}" ]; then
+            echo "Building with custom APP_ID: ${{ inputs.app_id }}"
+            ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease -PVERSION_NAME="${{ inputs.version_tag }}" -PAPP_ID="${{ inputs.app_id }}"
+          else
+            ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease -PVERSION_NAME="${{ inputs.version_tag }}"
+          fi
 
       - name: Find and Rename Universal APKs
         id: rename_apk

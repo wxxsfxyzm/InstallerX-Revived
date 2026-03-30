@@ -12,6 +12,12 @@ on:
       - 'gradle.properties'
       - 'gradle/**'
       - '.github/workflows/auto-preview-dev.yml'
+  workflow_dispatch:
+    inputs:
+      app_id:
+        description: 'Custom Application ID (Package Name)'
+        required: false
+        default: ''
 
 jobs:
   pre_job:
@@ -94,7 +100,13 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease
+        run: |
+          if [ -n "${{ inputs.app_id }}" ]; then
+            echo "Building with custom APP_ID: ${{ inputs.app_id }}"
+            ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease -PAPP_ID="${{ inputs.app_id }}"
+          else
+            ./gradlew assembleOnlineUnstableRelease assembleOfflineUnstableRelease
+          fi
 
       # Upload the online variant unzipped APK
       - name: Upload Online APK
