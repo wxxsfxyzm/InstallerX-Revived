@@ -386,13 +386,13 @@
     <string name="split_name_language">Divisão de idioma: %1$s</string>
     <string name="split_name_architecture">Divisão de arquitetura: %1$s</string>
     <string name="split_name_density">Densidade da tela: %1$s</string>
-    <string name="split_dpi_ldpi">Baixa (~120dpi)</string>
-    <string name="split_dpi_mdpi">Média (~160dpi)</string>
-    <string name="split_dpi_hdpi">Alta (~240dpi)</string>
-    <string name="split_dpi_xhdpi">Muito alta (~320dpi)</string>
-    <string name="split_dpi_xxhdpi">Extremamente Alta (~480dpi)</string>
-    <string name="split_dpi_xxxhdpi">Máxima (~640dpi)</string>
-    <string name="split_dpi_tvdpi">TV (~213dpi)</string>
+    <string name="split_dpi_ldpi">Baixa (~120 DPI)</string>
+    <string name="split_dpi_mdpi">Média (~160 DPI)</string>
+    <string name="split_dpi_hdpi">Alta (~240 DPI)</string>
+    <string name="split_dpi_xhdpi">Muito Alta (~320 DPI)</string>
+    <string name="split_dpi_xxhdpi">Extremamente Alta (~480 DPI)</string>
+    <string name="split_dpi_xxxhdpi">Máxima (~640 DPI)</string>
+    <string name="split_dpi_tvdpi">TV (~213 DPI)</string>
     <string name="split_dpi_nodpi">Sem escala</string>
     <string name="split_dpi_anydpi">Qualquer densidade</string>
     <string name="suggestion_uninstall_and_retry">Desinstale o antigo e tente novamente</string>
@@ -400,7 +400,7 @@
     <string name="suggestion_uninstall_alert_dialog_confirm_action">Confirme a ação</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">Isto irá desinstalar a versão atual do app mas vai manter seus dados, e então tentar uma nova instalação. NÃO USE em apps de sistema!</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">Isto irá desinstalar a versão atual do app e fará nova tentativa de instalação. NÃO USE em apps de sistema!</string>
-    <string name="suggestion_allow_downgrade">Permitir Downgrade</string>
+    <string name="suggestion_allow_downgrade">Permitir downgrade uma vez</string>
     <string name="suggestion_allow_test_app">Permitir Teste</string>
     <string name="suggestion_mi_isolation">Tente um instalador válido</string>
     <string name="suggestion_user_restricted">Permitir instalações via USB</string>
@@ -701,4 +701,11 @@
     <string name="error_no_package_to_uninstall">Não há pacotes disponíveis para desinstalação</string>
     <string name="lab_tap_icon_to_share">Toque no ícone para compartilhar o APK</string>
     <string name="lab_tap_icon_to_share_desc">Toque no ícone na página de preparação para compartilhar o APK</string>
+    <string name="theme_settings_use_apple_floating_bar">Ativar barra inferior flutuante</string>
+    <string name="theme_settings_use_apple_floating_bar_desc">Exibir uma barra de navegação flutuante na parte inferior da tela</string>
+    <string name="config_status_inactive">Inativo</string>
+    <string name="config_install_show_toast">Mostrar mensagem de aviso</string>
+    <string name="config_install_show_toast_desc">Mostrar mensagem de notificação após a instalação</string>
+    <string name="copied_format">Copiado: %1$s</string>
+    <string name="batch_install_result_message">Instalação em lote: %1$d de %2$d concluídos com sucesso</string>
 </resources>

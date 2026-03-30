@@ -349,13 +349,13 @@
     <string name="split_name_language">Idioma: %1$s</string>
     <string name="split_name_architecture">Arquitectura: %1$s</string>
     <string name="split_name_density">Densidad de pantalla: %1$s</string>
-    <string name="split_dpi_ldpi">Baja (~120dpi)</string>
-    <string name="split_dpi_mdpi">Media (~160dpi)</string>
-    <string name="split_dpi_hdpi">Alta (~240dpi)</string>
-    <string name="split_dpi_xhdpi">Muy alta (~320dpi)</string>
-    <string name="split_dpi_xxhdpi">Extremadamente alta (~480dpi)</string>
-    <string name="split_dpi_xxxhdpi">Máxima (~640dpi)</string>
-    <string name="split_dpi_tvdpi">TV (~213dpi)</string>
+    <string name="split_dpi_ldpi">(~120dpi) Baja</string>
+    <string name="split_dpi_mdpi">(~160dpi) Media</string>
+    <string name="split_dpi_hdpi">(~240dpi) Alta</string>
+    <string name="split_dpi_xhdpi">(~320dpi) Muy alta</string>
+    <string name="split_dpi_xxhdpi">(~480dpi) Extremadamente alta</string>
+    <string name="split_dpi_xxxhdpi">(~640dpi) Máxima</string>
+    <string name="split_dpi_tvdpi">(~213dpi) TV</string>
     <string name="split_dpi_nodpi">Sin escalado</string>
     <string name="split_dpi_anydpi">Cualquier densidad</string>
     <!-- SplitNameUtil End -->
@@ -365,7 +365,7 @@
     <string name="suggestion_uninstall_alert_dialog_confirm_action">Confirmar Acción</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">Esto desinstalará la versión actual de la app manteniendo sus datos, y luego intentará instalar la nueva. ¡NO usar en apps del sistema!</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">Esto desinstalará la versión actual de la app e intentará instalar la nueva. ¡NO usar en apps del sistema!</string>
-    <string name="suggestion_allow_downgrade">Permitir degradación</string>
+    <string name="suggestion_allow_downgrade">Permitir degradación solo esta vez</string>
     <string name="suggestion_allow_test_app">Permitir prueba</string>
     <string name="suggestion_mi_isolation">Intentar con un instalador valido</string>
     <string name="suggestion_user_restricted">Activar instalación mediante USB</string>
@@ -705,4 +705,17 @@
     <string name="lab_mi_island_desc">Estilo de notificación global. La verificación de firma del sistema solo puede ser evitada cuando el autenticador de aplicación personalizado está configurado en Shizuku. Los usuarios de root pueden habilitar esto directamente tras desactivar manualmente las restricciones de firma</string>
     <string name="config_label_preferences">Preferencias</string>
     <string name="exception_install_parse_failed_bad_shared_user_id">Las aplicaciones no preinstaladas tienen prohibido usar el UID compartido del sistema</string>
+    <string name="theme_settings_use_apple_floating_bar">Activar barra inferior flotante</string>
+    <string name="theme_settings_use_apple_floating_bar_desc">Muestra una barra de navegación flotante en la parte inferior de la pantalla</string>
+    <string name="config_status_inactive">Inactivo</string>
+    <string name="config_install_show_toast">Mostrar Toast</string>
+    <string name="config_install_show_toast_desc">Mostrar tosast tras la instalación</string>
+    <string name="copied_format">Copiado: %1$s</string>
+    <string name="installer_xposed_min_api">Api Mínimo:</string>
+    <string name="installer_xposed_target_api">API objetivo:</string>
+    <string name="batch_install_result_message">Instalación por lotes: %1$d/%2$d exitosa</string>
+    <string name="error_dialog_install_menu_not_available">No hay menú ampliado disponible</string>
+    <string name="error_no_package_to_uninstall">No hay ningún paquete disponible para desinstalar</string>
+    <string name="lab_tap_icon_to_share">Toca el icono para compartir apk</string>
+    <string name="lab_tap_icon_to_share_desc">Toca el icono en la página de preparación para compartir apk</string>
 </resources>

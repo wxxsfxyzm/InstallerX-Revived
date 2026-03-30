@@ -373,7 +373,7 @@
     <string name="sort_by_package_name">Tên gói</string>
     <string name="sort_by_install_time">Thời gian cài đặt</string>
     <string name="sort_by_reverse_order">Đảo thứ tự</string>
-    <string name="sort_by_show_system_app">Hiển thị ud hệ thống</string>
+    <string name="sort_by_show_system_app">Hiển thị ứ.d hệ thống</string>
     <string name="sort_by_show_package_name">Hiển thị tên gói</string>
     <string name="auth_to_continue_work">Vui lòng xác thực để xác nhận thao tác này</string>
     <string name="auth_summary_install">Bạn đang thực hiện một thao tác cài đặt. Để tiếp tục, vui lòng xác nhận hành động này bằng cách sử dụng xác thực thiết bị của bạn</string>
@@ -436,7 +436,7 @@
     <string name="tag_downgrade">Hạ cấp</string>
     <string name="tag_signature">Chữ ký</string>
     <string name="tag_arch_emulated">Kiến trúc được Giả lập</string>
-    <string name="installer_prepare_arch_32_notice">Ứng dụng sẽ chạy chế độ 32-bit. Điều này làm tăng mức dùng bộ nhớ hoặc giảm hiệu năng trên máy 64-bit</string>
+    <string name="installer_prepare_arch_32_notice">Ứng dụng này sẽ chạy ở chế độ 32-bit. Điều này có thể làm tăng mức sử dụng bộ nhớ hoặc giảm hiệu năng trên các thiết bị 64-bit</string>
     <string name="installer_prepare_arch_mismatch_notice">Kiến trúc ứng dụng (%1$s) không khớp với thiết bị của bạn (%2$s). Nó sẽ chạy thông qua biên dịch. Việc cài đặt hoặc thực thi không được đảm bảo, và các sự cố như quá nhiệt hoặc crash có thể xảy ra</string>
     <string name="installer_prepare_sdk_incompatible">SDK hệ thống thấp hơn yêu cầu ứng dụng</string>
     <string name="installer_prepare_type_new_install">Chuẩn bị cài ứng dụng mới</string>
@@ -704,4 +704,8 @@
     <string name="split_name_architecture">Chia tách kiến trúc: %1$s</string>
     <string name="split_name_density">Mật độ màn hình: %1$s</string>
     <string name="split_dpi_ldpi">Thấp (~120 DPI)</string>
+    <string name="config_install_show_toast">Hiện Toast</string>
+    <string name="config_install_show_toast_desc">Hiện toast sau khi cài đặt</string>
+    <string name="batch_install_result_message">Cài đặt hàng loạt: %1$d/%2$d thành công</string>
+    <string name="config_status_inactive">Không hoạt động</string>
 </resources>

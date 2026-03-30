@@ -300,7 +300,7 @@
     <string name="show_intelligent_suggestion">Показывать подсказки</string>
     <string name="show_intelligent_suggestion_desc">Показывать полезные советы при сбоях установки</string>
     <string name="sort">Сортировать</string>
-    <string name="sort_by_install_time">Дата установки</string>
+    <string name="sort_by_install_time">Дата</string>
     <string name="sort_by_label">Название</string>
     <string name="sort_by_package_name">Имя пакета</string>
     <string name="sort_by_reverse_order">Обратный порядок</string>
@@ -308,14 +308,14 @@
     <string name="sort_by_show_package_name">Отображать имена пакетов</string>
     <string name="sort_by_show_system_app">Показывать системные приложения</string>
     <string name="split_dpi_anydpi">Любая плотность</string>
-    <string name="split_dpi_hdpi">Высокая (~240dpi)</string>
-    <string name="split_dpi_ldpi">Низкая (~120dpi)</string>
-    <string name="split_dpi_mdpi">Средняя (~160dpi)</string>
+    <string name="split_dpi_hdpi">Высокая (~240 DPI)</string>
+    <string name="split_dpi_ldpi">Низкая (~120 DPI)</string>
+    <string name="split_dpi_mdpi">Средняя (~160 DPI)</string>
     <string name="split_dpi_nodpi">Без масштабирования</string>
-    <string name="split_dpi_tvdpi">ТВ (~213dpi)</string>
-    <string name="split_dpi_xhdpi">Очень высокая (~320dpi)</string>
-    <string name="split_dpi_xxhdpi">Сверхвысокая (~480dpi)</string>
-    <string name="split_dpi_xxxhdpi">Максимальная (~640dpi)</string>
+    <string name="split_dpi_tvdpi">ТВ (~213 DPI)</string>
+    <string name="split_dpi_xhdpi">Очень высокая (~320 DPI)</string>
+    <string name="split_dpi_xxhdpi">Сверхвысокая (~480 DPI)</string>
+    <string name="split_dpi_xxxhdpi">Максимальная (~640 DPI)</string>
     <string name="split_name_architecture">Архитектура split: %1$s</string>
     <string name="split_name_density">Плотность экрана: %1$s</string>
     <string name="split_name_language">Язык split: %1$s</string>
@@ -702,4 +702,8 @@
     <string name="theme_settings_use_apple_floating_bar_desc">Отображать плавающую панель навигации в нижней части экрана</string>
     <string name="theme_settings_use_apple_floating_bar">Плавающая панель снизу</string>
     <string name="copied_format">Скопировано: %1$s</string>
+    <string name="config_install_show_toast_desc">Показывать всплывающее сообщение после установки</string>
+    <string name="config_install_show_toast">Всплывающее сообщение</string>
+    <string name="batch_install_result_message">Пакетная установка: %1$d/%2$d выполнена</string>
+    <string name="config_status_inactive">Неактивный</string>
 </resources>

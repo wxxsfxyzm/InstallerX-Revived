@@ -199,7 +199,7 @@
     <string name="lab_module_select_root_impl">ルートソリューションの選択</string>
     <string name="suggestion_retry_install_desc">再度インストールしてください</string>
     <string name="suggestion_allow_test_app">テストを許可</string>
-    <string name="suggestion_allow_downgrade">ダウングレードを許可</string>
+    <string name="suggestion_allow_downgrade">一度だけダウングレードを許可</string>
     <string name="lab_unstable_features">不安定な機能</string>
     <string name="lab_http_profile">HTTP セキュリティポリシー</string>
     <string name="lab_set_install_requester">インストールリクエスターの設定</string>
@@ -522,7 +522,7 @@
     <string name="exception_uninstall_failed_internal_error">パッケージマネージャー内部エラー</string>
     <string name="exception_uninstall_failed_aborted">アンインストールはユーザーによってキャンセルされました</string>
     <string name="exception_package_manager_name_not_found">パッケージ名が見つかりません</string>
-    <string name="exception_shizuku_not_work">SuiまたはShizukuを起動して許可を与えてください</string>
+    <string name="exception_shizuku_not_work">Sui または Shizuku を起動して権限を付与してください</string>
     <string name="exception_dhizuku_not_work">Dhizuku を有効化して許可を与えてください</string>
     <string name="exception_dhizuku_dead_service">Dhizuku リモートサービスが停止しています</string>
     <string name="exception_root_not_work">Root 権限にアクセスできませんでした</string>
@@ -572,13 +572,13 @@
     <string name="from_adb_desc">インストール要求が ADB によって行われたことをシステムに通知します</string>
     <string name="config_all_users_desc">指定されたユーザーまたはデフォルトのユーザーだけでなく、システム上のすべてのユーザーにパッケージをインストールします</string>
     <string name="config_allow_downgrade_desc">現在インストールされているパッケージのバージョンをダウングレードしようとします（Android 15 以降では ROOT が必要です）</string>
-    <string name="split_dpi_ldpi">低 (~120dpi)</string>
-    <string name="split_dpi_mdpi">中 (~160dpi)</string>
-    <string name="split_dpi_hdpi">高 (~240dpi)</string>
-    <string name="split_dpi_xhdpi">超高 (~320dpi)</string>
-    <string name="split_dpi_xxhdpi">超超高 (~480dpi)</string>
-    <string name="split_dpi_xxxhdpi">最大 (~640dpi)</string>
-    <string name="split_dpi_tvdpi">テレビ (~213dpi)</string>
+    <string name="split_dpi_ldpi">低 (~120 DPI)</string>
+    <string name="split_dpi_mdpi">中 (~160 DPI)</string>
+    <string name="split_dpi_hdpi">高 (~240 DPI)</string>
+    <string name="split_dpi_xhdpi">超高 (~320 DPI)</string>
+    <string name="split_dpi_xxhdpi">超超高 (~480 DPI)</string>
+    <string name="split_dpi_xxxhdpi">最大 (~640 DPI)</string>
+    <string name="split_dpi_tvdpi">TV (~213 DPI)</string>
     <string name="split_dpi_nodpi">スケーリングなし</string>
     <string name="split_dpi_anydpi">任意のdpi</string>
     <string name="split_name_base_group_title">ベースアプリケーション</string>
@@ -688,4 +688,17 @@
     <string name="split_name_language">言語分割: %1$s</string>
     <string name="split_name_architecture">アーキテクチャー分割: %1$s</string>
     <string name="split_name_density">ピクセル密度: %1$s</string>
+    <string name="theme_settings_use_apple_floating_bar">フローティングボトムバーを有効化</string>
+    <string name="theme_settings_use_apple_floating_bar_desc">画面下部にフローティングスタイルのナビゲーションバーを表示します</string>
+    <string name="config_status_inactive">非アクティブ</string>
+    <string name="config_install_show_toast">トーストを表示</string>
+    <string name="config_install_show_toast_desc">インストール後にトーストを表示します</string>
+    <string name="copied_format">コピー済み: %1$s</string>
+    <string name="installer_xposed_min_api">最小 API:</string>
+    <string name="installer_xposed_target_api">対象 API:</string>
+    <string name="batch_install_result_message">バッチインストール: %1$d/%2$d 成功</string>
+    <string name="error_dialog_install_menu_not_available">拡張メニューは利用できません</string>
+    <string name="error_no_package_to_uninstall">アンインストールできるパッケージがありません</string>
+    <string name="lab_tap_icon_to_share">アイコンをタップして APK を共有</string>
+    <string name="lab_tap_icon_to_share_desc">準備ページでアイコンをタップして APK を共有します</string>
 </resources>

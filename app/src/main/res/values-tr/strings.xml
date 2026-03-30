@@ -703,4 +703,8 @@
     <string name="error_no_package_to_uninstall">Kaldırılacak paket yok</string>
     <string name="lab_tap_icon_to_share">APK\'yı paylaşmak için simgeye dokunun</string>
     <string name="lab_tap_icon_to_share_desc">APK\'yı paylaşmak için hazırlık sayfasındaki simgeye dokunun</string>
+    <string name="config_status_inactive">Etkin değil</string>
+    <string name="config_install_show_toast">Tost göster</string>
+    <string name="config_install_show_toast_desc">Yüklemeden sonra bildirim mesajı göster</string>
+    <string name="copied_format">Kopyalandı: %1$s</string>
 </resources>
