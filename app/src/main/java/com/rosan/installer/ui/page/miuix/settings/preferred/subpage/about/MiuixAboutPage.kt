@@ -44,16 +44,16 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.Level
+import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutAction
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 import com.rosan.installer.ui.page.main.widget.util.LogEventCollector
-import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
@@ -80,9 +80,9 @@ import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun MiuixAboutPage(
-    navController: NavController,
     viewModel: AboutViewModel = koinViewModel()
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -151,7 +151,7 @@ fun MiuixAboutPage(
                 color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(id = R.string.about),
                 scrollBehavior = scrollBehavior,
-                navigationIcon = { MiuixBackButton(onClick = { navController.navigateUp() }) }
+                navigationIcon = { MiuixBackButton(onClick = { navigator.pop() }) }
             )
         },
     ) { paddingValues ->
@@ -220,7 +220,7 @@ fun MiuixAboutPage(
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.open_source_license),
                         description = stringResource(R.string.open_source_license_settings_description),
-                        onClick = { navController.navigate(MiuixSettingsScreen.MiuixOpenSourceLicense.route) }
+                        onClick = { navigator.push(Route.OpenSourceLicense) }
                     )
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.get_update),

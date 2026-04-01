@@ -44,12 +44,12 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.SettingsScreen
+import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.card.StatusWidget
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
@@ -69,9 +69,9 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewAboutPage(
-    navController: NavController,
     viewModel: AboutViewModel = koinViewModel()
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
@@ -102,7 +102,7 @@ fun NewAboutPage(
                 navigationIcon = {
                     Row {
                         AppBackButton(
-                            onClick = { navController.navigateUp() },
+                            onClick = { navigator.pop() },
                             icon = Icons.AutoMirrored.TwoTone.ArrowBack,
                             modifier = Modifier.size(36.dp),
                             containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
@@ -156,7 +156,7 @@ fun NewAboutPage(
                             icon = AppIcons.OpenSourceLicense,
                             title = stringResource(R.string.open_source_license),
                             description = stringResource(R.string.open_source_license_settings_description),
-                            onClick = { navController.navigate(SettingsScreen.OpenSourceLicense.route) }
+                            onClick = { navigator.push(Route.OpenSourceLicense) }
                         )
                     }
                     item {

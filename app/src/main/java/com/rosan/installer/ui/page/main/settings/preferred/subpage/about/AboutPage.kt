@@ -42,12 +42,12 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.SettingsScreen
+import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.card.StatusWidget
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
@@ -64,9 +64,9 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AboutPage(
-    navController: NavController,
     viewModel: AboutViewModel = koinViewModel()
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val hazeState = remember { HazeState() }
@@ -90,7 +90,7 @@ fun AboutPage(
                     Text(text = stringResource(id = R.string.about))
                 },
                 scrollBehavior = scrollBehavior,
-                navigationIcon = { AppBackButton(onClick = { navController.navigateUp() }) }
+                navigationIcon = { AppBackButton(onClick = { navigator.pop() }) }
             )
         },
     ) { paddingValues ->
@@ -127,7 +127,7 @@ fun AboutPage(
                     imageVector = AppIcons.OpenSourceLicense,
                     headlineContentText = stringResource(R.string.open_source_license),
                     supportingContentText = stringResource(R.string.open_source_license_settings_description),
-                    onClick = { navController.navigate(SettingsScreen.OpenSourceLicense.route) }
+                    onClick = { navigator.push(Route.OpenSourceLicense) }
                 )
             }
             item {

@@ -19,9 +19,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.rosan.installer.R
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
@@ -38,9 +38,9 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixOpenSourceLicensePage(
-    navController: NavController,
     viewModel: AboutViewModel = koinViewModel()
 ) {
+    val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val libraries by produceLibraries(R.raw.aboutlibraries)
     val scrollBehavior = MiuixScrollBehavior()
@@ -58,7 +58,7 @@ fun MiuixOpenSourceLicensePage(
                 title = stringResource(id = R.string.open_source_license),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
-                    MiuixBackButton(onClick = { navController.navigateUp() })
+                    MiuixBackButton(onClick = { navigator.pop() })
                 }
             )
         },

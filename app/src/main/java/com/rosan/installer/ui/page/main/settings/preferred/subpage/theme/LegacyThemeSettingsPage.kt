@@ -55,9 +55,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
@@ -74,10 +74,10 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LegacyThemeSettingsPage(
-    navController: NavController,
     viewModel: ThemeSettingsViewModel = koinViewModel(),
     sharedViewModel: SettingsSharedViewModel = koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
 ) {
+    val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showHideLauncherIconDialog by remember { mutableStateOf(false) }
@@ -125,7 +125,7 @@ fun LegacyThemeSettingsPage(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.theme_settings)) },
-                navigationIcon = { AppBackButton(onClick = { navController.navigateUp() }) },
+                navigationIcon = { AppBackButton(onClick = { navigator.pop() }) },
                 scrollBehavior = scrollBehavior
             )
         }
@@ -161,7 +161,6 @@ fun LegacyThemeSettingsPage(
                         selected = uiState.showMiuixUI,
                         onClick = {
                             if (!uiState.showMiuixUI) { // Only dispatch if changing state
-                                sharedViewModel.markPendingNavigateToTheme(true)
                                 viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(true))
                             }
                         }

@@ -41,14 +41,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.SettingsScreen
+import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.main.widget.setting.AutoLockInstaller
@@ -67,10 +67,10 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PreferredPage(
-    navController: NavController,
     viewModel: PreferredViewModel = koinViewModel(),
     outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
@@ -161,8 +161,7 @@ fun PreferredPage(
                     title = stringResource(R.string.theme_settings),
                     description = stringResource(R.string.theme_settings_desc),
                     onClick = {
-                        // Navigate using NavController instead of changing state
-                        navController.navigate(SettingsScreen.Theme.route)
+                        navigator.push(Route.Theme)
                     }
                 )
             }
@@ -172,8 +171,7 @@ fun PreferredPage(
                     title = stringResource(R.string.installer_settings),
                     description = stringResource(R.string.installer_settings_desc),
                     onClick = {
-                        // Navigate using NavController
-                        navController.navigate(SettingsScreen.InstallerGlobal.route)
+                        navigator.push(Route.InstallerGlobal)
                     }
                 )
             }
@@ -183,7 +181,7 @@ fun PreferredPage(
                     title = stringResource(R.string.uninstaller_settings),
                     description = stringResource(R.string.uninstaller_settings_desc),
                     onClick = {
-                        navController.navigate(SettingsScreen.UninstallerGlobal.route)
+                        navigator.push(Route.UninstallerGlobal)
                     }
                 )
             }
@@ -240,7 +238,9 @@ fun PreferredPage(
                     imageVector = AppIcons.Lab,
                     headlineContentText = stringResource(R.string.lab),
                     supportingContentText = stringResource(R.string.lab_desc),
-                    onClick = { navController.navigate(SettingsScreen.Lab.route) }
+                    onClick = {
+                        navigator.push(Route.Lab)
+                    }
                 )
             }
             item {
@@ -252,7 +252,9 @@ fun PreferredPage(
                         uiState.remoteVersion
                     ) else "$revLevel ${AppConfig.VERSION_NAME}",
                     supportingContentColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    onClick = { navController.navigate(SettingsScreen.About.route) }
+                    onClick = {
+                        navigator.push(Route.About)
+                    }
                 )
             }
             item { Spacer(Modifier.navigationBarsPadding()) }

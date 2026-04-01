@@ -10,6 +10,5 @@ sealed class AllViewAction {
     data class DeleteDataConfig(val configModel: ConfigModel) : AllViewAction()
     data class RestoreDataConfig(val configModel: ConfigModel) : AllViewAction()
     data class EditDataConfig(val configModel: ConfigModel) : AllViewAction()
-    data class MiuixEditDataConfig(val configModel: ConfigModel) : AllViewAction()
     data class ApplyConfig(val configModel: ConfigModel) : AllViewAction()
 }

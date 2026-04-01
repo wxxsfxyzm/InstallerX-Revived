@@ -55,7 +55,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
@@ -77,7 +76,6 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MainPage(
-    navController: NavController,
     sharedViewModel: SettingsSharedViewModel = koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
 ) {
     val scope = rememberCoroutineScope()
@@ -94,21 +92,24 @@ fun MainPage(
     val configLabel = stringResource(R.string.config)
     val preferredLabel = stringResource(R.string.preferred)
 
-    val data = remember(showExpressiveUI, configLabel, preferredLabel, navController) {
+    val data = remember(showExpressiveUI, configLabel, preferredLabel) {
         arrayOf(
             NavigationData(
                 icon = AppIcons.RoomPreferences,
                 label = configLabel
             ) { outerPadding, hazeState ->
-                if (showExpressiveUI) NewAllPage(navController, outerPadding = outerPadding, hazeState = hazeState)
-                else AllPage(navController, outerPadding = outerPadding)
+                if (showExpressiveUI) NewAllPage(outerPadding = outerPadding, hazeState = hazeState)
+                else AllPage(outerPadding = outerPadding)
             },
             NavigationData(
                 icon = AppIcons.SettingsSuggest,
                 label = preferredLabel
             ) { outerPadding, hazeState ->
-                if (showExpressiveUI) NewPreferredPage(navController, outerPadding = outerPadding, hazeState = hazeState)
-                else PreferredPage(navController, outerPadding = outerPadding)
+                if (showExpressiveUI) NewPreferredPage(
+                    outerPadding = outerPadding,
+                    hazeState = hazeState
+                )
+                else PreferredPage(outerPadding = outerPadding)
             }
         )
     }

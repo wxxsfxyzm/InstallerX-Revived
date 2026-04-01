@@ -32,8 +32,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewEvent
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
@@ -89,11 +89,11 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixEditPage(
-    navController: NavController,
     id: Long? = null,
     viewModel: EditViewModel = koinViewModel { parametersOf(id) },
     useBlur: Boolean
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dispatch = viewModel::dispatch
@@ -111,7 +111,7 @@ fun MiuixEditPage(
         },
         onConfirm = {
             showUnsavedDialogState.value = false
-            navController.navigateUp()
+            navigator.pop()
         },
         errorMessages = state.activeErrorResIds.map { stringResource(it) }
     )
@@ -145,7 +145,7 @@ fun MiuixEditPage(
                 }
 
                 is EditViewEvent.Saved -> {
-                    navController.navigateUp()
+                    navigator.pop()
                 }
             }
         }
@@ -165,7 +165,7 @@ fun MiuixEditPage(
                 navigationIcon = {
                     MiuixBackButton(
                         icon = MiuixIcons.Regular.Close,
-                        onClick = { navController.navigateUp() }
+                        onClick = { navigator.pop() }
                     )
                 },
                 actions = {

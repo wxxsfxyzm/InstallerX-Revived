@@ -57,9 +57,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewAction
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewApp
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
@@ -101,12 +101,12 @@ import top.yukonga.miuix.kmp.window.WindowListPopup
 
 @Composable
 fun MiuixApplyPage(
-    navController: NavController,
     id: Long,
     viewModel: ApplyViewModel = koinViewModel {
         parametersOf(id)
     }
 ) {
+    val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
@@ -138,7 +138,7 @@ fun MiuixApplyPage(
                     navigationIcon = {
                         MiuixBackButton(
                             icon = MiuixIcons.Regular.Close,
-                            onClick = { navController.navigateUp() })
+                            onClick = { navigator.pop() })
                     },
                     actions = { TopAppBarActions(viewModel = viewModel, uiState = uiState) }
                 )
@@ -147,7 +147,9 @@ fun MiuixApplyPage(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            start = 16.dp + horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                            start = 16.dp + horizontalSafeInsets.calculateStartPadding(
+                                layoutDirection
+                            ),
                             end = 16.dp + horizontalSafeInsets.calculateEndPadding(layoutDirection)
                         )
                         .padding(bottom = 8.dp),
@@ -175,7 +177,9 @@ fun MiuixApplyPage(
                 Box(
                     modifier = Modifier
                         .padding(
-                            start = 6.dp + horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                            start = 6.dp + horizontalSafeInsets.calculateStartPadding(
+                                layoutDirection
+                            ),
                             end = 6.dp + horizontalSafeInsets.calculateEndPadding(layoutDirection)
                         )
                         .padding(bottom = 6.dp)

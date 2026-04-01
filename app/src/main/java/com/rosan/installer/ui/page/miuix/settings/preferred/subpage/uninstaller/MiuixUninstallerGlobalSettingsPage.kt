@@ -29,9 +29,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.activity.UninstallerActivity
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsEvent
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
@@ -59,9 +59,9 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixUninstallerGlobalSettingsPage(
-    navController: NavController,
     viewModel: UninstallerSettingsViewModel = koinViewModel()
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
@@ -99,7 +99,7 @@ fun MiuixUninstallerGlobalSettingsPage(
                 color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(R.string.uninstaller_settings),
                 navigationIcon = {
-                    MiuixBackButton(onClick = { navController.navigateUp() })
+                    MiuixBackButton(onClick = { navigator.pop() })
                 },
                 scrollBehavior = scrollBehavior
             )

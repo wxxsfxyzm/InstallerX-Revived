@@ -39,7 +39,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
@@ -47,6 +46,7 @@ import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.InstallerSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.InstallerSettingsViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixAutoClearNotificationTimeWidget
@@ -75,9 +75,9 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixInstallerGlobalSettingsPage(
-    navController: NavController,
     viewModel: InstallerSettingsViewModel = koinViewModel(),
 ) {
+    val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scrollBehavior = MiuixScrollBehavior()
@@ -99,7 +99,7 @@ fun MiuixInstallerGlobalSettingsPage(
                 color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(R.string.installer_settings),
                 navigationIcon = {
-                    MiuixBackButton(onClick = { navController.navigateUp() })
+                    MiuixBackButton(onClick = { navigator.pop() })
                 },
                 scrollBehavior = scrollBehavior
             )

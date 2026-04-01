@@ -43,8 +43,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.ThemeSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.ThemeSettingsViewModel
@@ -74,10 +74,10 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixThemeSettingsPage(
-    navController: NavController,
     viewModel: ThemeSettingsViewModel = koinViewModel(),
     sharedViewModel: SettingsSharedViewModel = koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
 ) {
+    val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
     val hazeState = if (uiState.useBlur) remember { HazeState() } else null
@@ -113,7 +113,7 @@ fun MiuixThemeSettingsPage(
                 color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(R.string.theme_settings),
                 navigationIcon = {
-                    MiuixBackButton(onClick = { navController.navigateUp() })
+                    MiuixBackButton(onClick = { navigator.pop() })
                 },
                 scrollBehavior = scrollBehavior
             )
@@ -144,7 +144,6 @@ fun MiuixThemeSettingsPage(
                     MiuixThemeEngineWidget(
                         currentThemeIsMiuix = uiState.showMiuixUI,
                         onThemeChange = { useMiuix ->
-                            sharedViewModel.markPendingNavigateToTheme(true)
                             viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(useMiuix))
                         }
                     )

@@ -65,7 +65,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.kyant.shapes.RoundedRectangle
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
@@ -73,11 +72,12 @@ import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.ui.library.blend.ColorBlendToken
 import com.rosan.installer.ui.library.effect.BgEffectBackground
+import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutAction
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 import com.rosan.installer.ui.page.main.widget.util.LogEventCollector
-import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
@@ -115,9 +115,9 @@ import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun MiuixBlendAboutPage(
-    navController: NavController,
     viewModel: AboutViewModel = koinViewModel()
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -192,7 +192,7 @@ fun MiuixBlendAboutPage(
                 scrollBehavior = topAppBarScrollBehavior,
                 color = MiuixTheme.colorScheme.surface.copy(alpha = if (scrollProgress == 1f) 1f else 0f),
                 titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress),
-                navigationIcon = { MiuixBackButton(onClick = { navController.navigateUp() }) }
+                navigationIcon = { MiuixBackButton(onClick = { navigator.pop() }) }
             )
         },
     ) { innerPadding ->
@@ -206,7 +206,7 @@ fun MiuixBlendAboutPage(
             onLogoHeightChanged = { logoHeightPx = it },
             onGetUpdateClicked = { showUpdateDialog.value = true },
             onDirectUpdateClicked = { viewModel.dispatch(AboutAction.PerformUpdate) },
-            onLicenseClicked = { navController.navigate(MiuixSettingsScreen.MiuixOpenSourceLicense.route) },
+            onLicenseClicked = { navigator.push(Route.OpenSourceLicense) },
             onLogToggle = { viewModel.dispatch(AboutAction.SetEnableFileLogging(it)) },
             onLogExport = { viewModel.dispatch(AboutAction.ShareLog) },
             uriHandler = uriHandler,

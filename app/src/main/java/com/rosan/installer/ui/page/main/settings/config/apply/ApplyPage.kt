@@ -89,9 +89,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.ApplyItemWidget
@@ -104,12 +104,12 @@ import org.koin.core.parameter.parametersOf
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ApplyPage(
-    navController: NavController,
     id: Long,
     viewModel: ApplyViewModel = koinViewModel {
         parametersOf(id)
     }
 ) {
+    val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
@@ -172,7 +172,7 @@ fun ApplyPage(
                     }
                 },
                 navigationIcon = {
-                    AppBackButton(onClick = { navController.navigateUp() })
+                    AppBackButton(onClick = { navigator.pop() })
                 },
                 actions = {
                     AnimatedVisibility(visible = !searchBarActivated) {

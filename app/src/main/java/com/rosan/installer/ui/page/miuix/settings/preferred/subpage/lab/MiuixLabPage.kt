@@ -32,13 +32,13 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.HttpProfile
 import com.rosan.installer.domain.settings.model.RootMode
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.LabSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.LabSettingsViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
@@ -65,9 +65,9 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixLabPage(
-    navController: NavHostController,
     viewModel: LabSettingsViewModel = koinViewModel()
 ) {
+    val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scrollBehavior = MiuixScrollBehavior()
@@ -98,7 +98,7 @@ fun MiuixLabPage(
                 color = hazeState.getMiuixAppBarColor(),
                 title = stringResource(R.string.lab),
                 navigationIcon = {
-                    MiuixBackButton(onClick = { navController.navigateUp() })
+                    MiuixBackButton(onClick = { navigator.pop() })
                 },
                 scrollBehavior = scrollBehavior
             )

@@ -17,8 +17,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.installer.InstallerViewEvent
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
@@ -128,9 +128,9 @@ fun ToastEventCollector(viewModel: InstallerViewModel) {
 @Composable
 fun EditEventCollector(
     viewModel: EditViewModel,
-    navController: NavController,
     snackBarHostState: SnackbarHostState
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val unknownErrorString = stringResource(R.string.installer_unknown_error)
     LaunchedEffect(Unit) {
@@ -152,7 +152,7 @@ fun EditEventCollector(
                 }
 
                 is EditViewEvent.Saved -> {
-                    navController.navigateUp()
+                    navigator.pop()
                 }
             }
         }

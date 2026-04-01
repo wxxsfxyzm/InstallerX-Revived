@@ -31,10 +31,10 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.activity.UninstallerActivity
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UninstallPackageDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
@@ -51,9 +51,9 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LegacyUninstallerGlobalSettingsPage(
-    navController: NavController,
     viewModel: UninstallerSettingsViewModel = koinViewModel(),
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showUninstallInputDialog by remember { mutableStateOf(false) }
@@ -88,7 +88,7 @@ fun LegacyUninstallerGlobalSettingsPage(
             TopAppBar(
                 title = { Text(stringResource(R.string.uninstaller_settings)) },
                 navigationIcon = {
-                    AppBackButton(onClick = { navController.navigateUp() })
+                    AppBackButton(onClick = { navigator.pop() })
                 },
                 scrollBehavior = scrollBehavior
             )

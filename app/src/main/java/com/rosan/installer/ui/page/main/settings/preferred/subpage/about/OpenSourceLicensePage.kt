@@ -53,7 +53,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.navigation.NavController
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
@@ -62,6 +61,7 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.chipColors
 import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.theme.getM3TopBarColor
@@ -73,10 +73,10 @@ import dev.chrisbanes.haze.hazeSource
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OpenSourceLicensePage(
-    navController: NavController,
     isM3E: Boolean,
     useBlur: Boolean,
 ) {
+    val navigator = LocalNavigator.current
     val topAppBarState = rememberTopAppBarState()
     val hazeState = if (useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMaterial3HazeStyle()
@@ -107,7 +107,7 @@ fun OpenSourceLicensePage(
                     navigationIcon = {
                         Row {
                             AppBackButton(
-                                onClick = { navController.navigateUp() },
+                                onClick = { navigator.pop() },
                                 icon = Icons.AutoMirrored.TwoTone.ArrowBack,
                                 modifier = Modifier.size(36.dp),
                                 containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
@@ -129,7 +129,7 @@ fun OpenSourceLicensePage(
                         Text(text = stringResource(id = R.string.open_source_license))
                     },
                     scrollBehavior = scrollBehavior,
-                    navigationIcon = { AppBackButton(onClick = { navController.navigateUp() }) }
+                    navigationIcon = { AppBackButton(onClick = { navigator.pop() }) }
                 )
             }
         },
