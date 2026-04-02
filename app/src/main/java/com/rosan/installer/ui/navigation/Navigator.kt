@@ -76,6 +76,8 @@ class Navigator(
         }
 
         if (backStackSize() <= 1) return
+
+        lastPopTime = System.currentTimeMillis()
         backStack.removeLastOrNull()
     }
 
