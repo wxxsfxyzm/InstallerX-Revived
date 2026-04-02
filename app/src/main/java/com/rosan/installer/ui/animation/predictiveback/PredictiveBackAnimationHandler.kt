@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.animation.predictiveback
+package com.rosan.installer.ui.animation.predictiveback
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform

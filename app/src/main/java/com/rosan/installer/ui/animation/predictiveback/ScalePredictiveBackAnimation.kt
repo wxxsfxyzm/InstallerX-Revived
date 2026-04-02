@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.animation.predictiveback
+package com.rosan.installer.ui.animation.predictiveback
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
@@ -14,32 +14,29 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigationevent.NavigationEvent.Companion.EDGE_LEFT
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.NavigationEventTransitionState.InProgress
-import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import androidx.compose.material3.Surface as Material3Surface
-import top.yukonga.miuix.kmp.basic.Surface as MiuixSurface
 
 class ScalePredictiveBackAnimation : PredictiveBackAnimationHandler, KoinComponent {
     private val themeStateProvider by inject<ThemeStateProvider>()
@@ -70,7 +67,6 @@ class ScalePredictiveBackAnimation : PredictiveBackAnimationHandler, KoinCompone
         currentPageKey: NavKey?,
         content: @Composable (() -> Unit)
     ) {
-        val uiState by themeStateProvider.themeStateFlow.collectAsStateWithLifecycle(initialValue = ThemeState())
 
         val windowInfo = LocalWindowInfo.current
         val navContent = LocalNavAnimatedContentScope.current
@@ -173,21 +169,11 @@ class ScalePredictiveBackAnimation : PredictiveBackAnimationHandler, KoinCompone
                 Pair(modifier, 0.dp)
             }
 
-        if (uiState.useMiuix) {
-            MiuixSurface(
-                modifier = tripe.first,
-                shape = RoundedCornerShape(tripe.second),
-            ) {
-                content()
-            }
-        } else {
-            Material3Surface(
-                modifier = tripe.first,
-                color = if (uiState.isExpressive) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(tripe.second),
-            ) {
-                content()
-            }
+        Box(
+            modifier = tripe.first
+                .clip(RoundedCornerShape(tripe.second)),
+        ) {
+            content()
         }
     }
 

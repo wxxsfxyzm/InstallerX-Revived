@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
 import androidx.navigationevent.NavigationEventTransitionState
-import com.resukisu.resukisu.ui.animation.predictiveback.PredictiveBackAnimationHandler
 
 // TODO Add an config page for user to select predictiveBack implement
 class KernelSUClassicPredictiveBackAnimation : PredictiveBackAnimationHandler {

@@ -8,14 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.rememberPagerState
@@ -34,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -48,11 +41,11 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.resukisu.resukisu.ui.animation.predictiveback.PredictiveBackAnimationHandler
-import com.resukisu.resukisu.ui.animation.predictiveback.ScalePredictiveBackAnimation
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
+import com.rosan.installer.ui.animation.predictiveback.PredictiveBackAnimationHandler
+import com.rosan.installer.ui.animation.predictiveback.ScalePredictiveBackAnimation
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.navigation.rememberNavigator
@@ -95,8 +88,6 @@ import org.koin.core.component.inject
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import androidx.compose.material3.Surface as Material3Surface
-import top.yukonga.miuix.kmp.basic.Surface as MiuixSurface
 
 class SettingsActivity : ComponentActivity(), KoinComponent {
     private val themeStateProvider by inject<ThemeStateProvider>()
@@ -161,26 +152,198 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                                         content.contentKey,
                                         navigator.current()
                                     ) {
-                                        if (uiState.useMiuix) {
-                                            MiuixSurface(modifier = Modifier.fillMaxSize()) {
-                                                content.Content()
-                                            }
-                                        } else {
-                                            Material3Surface(
-                                                modifier = Modifier.fillMaxSize(),
-                                                color = if (uiState.isExpressive) MaterialTheme.colorScheme.surfaceContainer
-                                                else MaterialTheme.colorScheme.surface
-                                            ) {
-                                                content.Content()
-                                            }
+                                        val backgroundColor = if (uiState.useMiuix)
+                                            MiuixTheme.colorScheme.surface
+                                        else if (uiState.isExpressive)
+                                            MaterialTheme.colorScheme.surfaceContainer
+                                        else
+                                            MaterialTheme.colorScheme.surface
+
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(backgroundColor)
+                                        ) {
+                                            content.Content()
                                         }
                                     }
                                 }
                             ),
-                            entryProvider = if (uiState.useMiuix) miuixEntryProvider(uiState) else materialEntryProvider(
-                                isExpressive,
-                                useBlur
-                            ),
+                            entryProvider = entryProvider {
+                                entry<Route.Main> {
+                                    if (uiState.useMiuix) {
+                                        val sharedViewModel: SettingsSharedViewModel =
+                                            koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
+                                        val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
+                                        val useBlur = uiState.useBlur
+                                        val useFloatingBottomBar = uiState.useAppleFloatingBar
+                                        val useFloatingBottomBarBlur =
+                                            useBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
+                                        val navigationItems = listOf(
+                                            NavigationItem(
+                                                label = stringResource(R.string.config),
+                                                icon = Icons.Rounded.RoomPreferences
+                                            ),
+                                            NavigationItem(
+                                                label = stringResource(R.string.preferred),
+                                                icon = Icons.Rounded.Settings
+                                            )
+                                        )
+
+                                        val pagerState = rememberPagerState(
+                                            initialPage = sharedState.lastMainPageIndex,
+                                            pageCount = { navigationItems.size }
+                                        )
+
+                                        LaunchedEffect(pagerState.currentPage) {
+                                            if (sharedState.lastMainPageIndex != pagerState.currentPage) {
+                                                sharedViewModel.updateLastMainPageIndex(pagerState.currentPage)
+                                            }
+                                        }
+
+                                        val snackbarHostState = remember { SnackbarHostState() }
+                                        val hazeState =
+                                            if (useBlur) remember { HazeState() } else null
+                                        val hazeStyle = rememberMiuixHazeStyle()
+                                        val surfaceColor = MiuixTheme.colorScheme.surface
+                                        val backdrop = rememberLayerBackdrop {
+                                            drawRect(surfaceColor)
+                                            drawContent()
+                                        }
+
+                                        // --- Layout Decision Logic ---
+                                        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                                            val isDefinitelyWide =
+                                                maxWidth > UIConstants.WIDE_SCREEN_THRESHOLD
+                                            val isWideByShape =
+                                                maxWidth > UIConstants.MEDIUM_WIDTH_THRESHOLD && (maxHeight.value / maxWidth.value < UIConstants.PORTRAIT_ASPECT_RATIO_THRESHOLD)
+                                            val isWideScreen = isDefinitelyWide || isWideByShape
+
+                                            if (isWideScreen)
+                                                SettingsWideScreenLayout(
+                                                    pagerState = pagerState,
+                                                    navigationItems = navigationItems,
+                                                    snackbarHostState = snackbarHostState,
+                                                    useFloatingBottomBar = useFloatingBottomBar,
+                                                    useFloatingBottomBarBlur = useFloatingBottomBarBlur,
+                                                    hazeState = hazeState,
+                                                    hazeStyle = hazeStyle,
+                                                    backdrop = backdrop
+                                                )
+                                            else
+                                                SettingsCompactLayout(
+                                                    pagerState = pagerState,
+                                                    navigationItems = navigationItems,
+                                                    snackbarHostState = snackbarHostState,
+                                                    useFloatingBottomBar = useFloatingBottomBar,
+                                                    useFloatingBottomBarBlur = useFloatingBottomBarBlur,
+                                                    hazeState = hazeState,
+                                                    hazeStyle = hazeStyle,
+                                                    backdrop = backdrop,
+                                                )
+                                        }
+                                    } else {
+                                        MainPage()
+                                    }
+                                }
+                                entry<Route.EditConfig> { key ->
+                                    if (uiState.useMiuix) {
+                                        val useBlur = uiState.useBlur
+                                        val id = key.id
+                                        MiuixEditPage(
+                                            id = if (id != -1L) id else null,
+                                            useBlur = useBlur
+                                        )
+                                    } else {
+                                        val id = key.id
+                                        if (isExpressive)
+                                            NewEditPage(
+                                                id = if (id != -1L) id else null,
+                                                useBlur = useBlur
+                                            ) else
+                                            EditPage(
+                                                id = if (id != -1L) id
+                                                else null
+                                            )
+                                    }
+                                }
+                                entry<Route.ApplyConfig> { key ->
+                                    if (uiState.useMiuix) {
+                                        val id = key.id
+                                        MiuixApplyPage(id)
+                                    } else {
+                                        val id = key.id
+                                        if (isExpressive)
+                                            NewApplyPage(id)
+                                        else
+                                            ApplyPage(id)
+                                    }
+                                }
+                                entry<Route.About> {
+                                    if (uiState.useMiuix) {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                                            MiuixBlendAboutPage()
+                                        else MiuixAboutPage()
+                                    } else {
+                                        if (isExpressive)
+                                            NewAboutPage()
+                                        else
+                                            AboutPage()
+                                    }
+                                }
+                                entry<Route.OpenSourceLicense> {
+                                    if (uiState.useMiuix) {
+                                        MiuixOpenSourceLicensePage()
+                                    } else {
+                                        OpenSourceLicensePage(isExpressive, useBlur)
+                                    }
+                                }
+                                entry<Route.Theme> {
+                                    if (uiState.useMiuix) {
+                                        MiuixThemeSettingsPage()
+                                    } else {
+                                        if (isExpressive) {
+                                            NewThemeSettingsPage()
+                                        } else {
+                                            LegacyThemeSettingsPage()
+                                        }
+                                    }
+                                }
+                                entry<Route.InstallerGlobal> {
+                                    if (uiState.useMiuix) {
+                                        MiuixInstallerGlobalSettingsPage()
+                                    } else {
+                                        if (isExpressive) {
+                                            NewInstallerGlobalSettingsPage()
+                                        } else {
+                                            LegacyInstallerGlobalSettingsPage()
+                                        }
+                                    }
+                                }
+                                entry<Route.UninstallerGlobal> {
+                                    if (uiState.useMiuix) {
+                                        MiuixUninstallerGlobalSettingsPage()
+                                    } else {
+                                        if (isExpressive) {
+                                            NewUninstallerGlobalSettingsPage()
+                                        } else {
+                                            LegacyUninstallerGlobalSettingsPage()
+                                        }
+                                    }
+                                }
+                                entry<Route.Lab> {
+                                    if (uiState.useMiuix) {
+                                        MiuixLabPage()
+                                    } else {
+                                        if (isExpressive) {
+                                            NewLabPage()
+                                        } else {
+                                            LegacyLabPage()
+                                        }
+                                    }
+                                }
+                            },
                         )
 
                     val sceneState =
@@ -219,198 +382,23 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                         navigationEventState = gestureState,
                         contentAlignment = Alignment.TopStart,
                         sizeTransform = null,
-                        predictivePopTransitionSpec = {
-                            ContentTransform(
-                                targetContentEnter = EnterTransition.None,
-                                initialContentExit = ExitTransition.None,
-                                sizeTransform = null
-                            )
+                        predictivePopTransitionSpec = { swipeEdge ->
+                            with(predictiveBackAnimationHandler) {
+                                onPredictivePopTransitionSpec(swipeEdge = swipeEdge)
+                            }
                         },
                         popTransitionSpec = {
-                            ContentTransform(
-                                targetContentEnter = slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn(),
-                                initialContentExit = scaleOut(targetScale = 0.9f) + fadeOut(),
-                                sizeTransform = null
-                            )
+                            with(predictiveBackAnimationHandler) {
+                                onPopTransitionSpec()
+                            }
                         },
                         transitionSpec = {
-                            ContentTransform(
-                                targetContentEnter = slideInHorizontally(initialOffsetX = { it }),
-                                initialContentExit = slideOutHorizontally(targetOffsetX = { -it / 4 }) + fadeOut(),
-                                sizeTransform = null
-                            )
+                            with(predictiveBackAnimationHandler) {
+                                onTransitionSpec()
+                            }
                         }
                     )
                 }
-            }
-        }
-    }
-
-    fun miuixEntryProvider(uiState: ThemeState): (key: NavKey) -> NavEntry<NavKey> = entryProvider {
-        entry<Route.Main> {
-            val sharedViewModel: SettingsSharedViewModel =
-                koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
-            val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
-            val useBlur = uiState.useBlur
-            val useFloatingBottomBar = uiState.useAppleFloatingBar
-            val useFloatingBottomBarBlur =
-                useBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-
-            val navigationItems = listOf(
-                NavigationItem(
-                    label = stringResource(R.string.config),
-                    icon = Icons.Rounded.RoomPreferences
-                ),
-                NavigationItem(
-                    label = stringResource(R.string.preferred),
-                    icon = Icons.Rounded.Settings
-                )
-            )
-
-            val pagerState = rememberPagerState(
-                initialPage = sharedState.lastMainPageIndex,
-                pageCount = { navigationItems.size }
-            )
-
-            LaunchedEffect(pagerState.currentPage) {
-                if (sharedState.lastMainPageIndex != pagerState.currentPage) {
-                    sharedViewModel.updateLastMainPageIndex(pagerState.currentPage)
-                }
-            }
-
-            val snackbarHostState = remember { SnackbarHostState() }
-            val hazeState = if (useBlur) remember { HazeState() } else null
-            val hazeStyle = rememberMiuixHazeStyle()
-            val surfaceColor = MiuixTheme.colorScheme.surface
-            val backdrop = rememberLayerBackdrop {
-                drawRect(surfaceColor)
-                drawContent()
-            }
-
-            // --- Layout Decision Logic ---
-            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                val isDefinitelyWide = maxWidth > UIConstants.WIDE_SCREEN_THRESHOLD
-                val isWideByShape =
-                    maxWidth > UIConstants.MEDIUM_WIDTH_THRESHOLD && (maxHeight.value / maxWidth.value < UIConstants.PORTRAIT_ASPECT_RATIO_THRESHOLD)
-                val isWideScreen = isDefinitelyWide || isWideByShape
-
-                if (isWideScreen)
-                    SettingsWideScreenLayout(
-                        pagerState = pagerState,
-                        navigationItems = navigationItems,
-                        snackbarHostState = snackbarHostState,
-                        useFloatingBottomBar = useFloatingBottomBar,
-                        useFloatingBottomBarBlur = useFloatingBottomBarBlur,
-                        hazeState = hazeState,
-                        hazeStyle = hazeStyle,
-                        backdrop = backdrop
-                    )
-                else
-                    SettingsCompactLayout(
-                        pagerState = pagerState,
-                        navigationItems = navigationItems,
-                        snackbarHostState = snackbarHostState,
-                        useFloatingBottomBar = useFloatingBottomBar,
-                        useFloatingBottomBarBlur = useFloatingBottomBarBlur,
-                        hazeState = hazeState,
-                        hazeStyle = hazeStyle,
-                        backdrop = backdrop,
-                    )
-            }
-        }
-        entry<Route.EditConfig> { key ->
-            val useBlur = uiState.useBlur
-            val id = key.id
-            MiuixEditPage(
-                id = if (id != -1L) id else null,
-                useBlur = useBlur
-            )
-        }
-        entry<Route.ApplyConfig> { key ->
-            val id = key.id
-            MiuixApplyPage(id)
-        }
-        entry<Route.About> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                MiuixBlendAboutPage()
-            else MiuixAboutPage()
-        }
-        entry<Route.OpenSourceLicense> {
-            MiuixOpenSourceLicensePage()
-        }
-        entry<Route.Theme> {
-            MiuixThemeSettingsPage()
-        }
-        entry<Route.InstallerGlobal> {
-            MiuixInstallerGlobalSettingsPage()
-        }
-        entry<Route.UninstallerGlobal> {
-            MiuixUninstallerGlobalSettingsPage()
-        }
-        entry<Route.Lab> {
-            MiuixLabPage()
-        }
-    }
-
-    fun materialEntryProvider(
-        isExpressive: Boolean,
-        useBlur: Boolean
-    ): (key: NavKey) -> NavEntry<NavKey> = entryProvider {
-        entry<Route.Main> { MainPage() }
-        entry<Route.EditConfig> { key ->
-            val id = key.id
-            if (isExpressive)
-                NewEditPage(
-                    id = if (id != -1L) id else null,
-                    useBlur = useBlur
-                ) else
-                EditPage(
-                    id = if (id != -1L) id
-                    else null
-                )
-        }
-        entry<Route.ApplyConfig> { key ->
-            val id = key.id
-            if (isExpressive)
-                NewApplyPage(id)
-            else
-                ApplyPage(id)
-        }
-        entry<Route.About> {
-            if (isExpressive)
-                NewAboutPage()
-            else
-                AboutPage()
-        }
-        entry<Route.OpenSourceLicense> {
-            OpenSourceLicensePage(isExpressive, useBlur)
-        }
-        entry<Route.Theme> {
-            if (isExpressive) {
-                NewThemeSettingsPage()
-            } else {
-                LegacyThemeSettingsPage()
-            }
-        }
-        entry<Route.InstallerGlobal> {
-            if (isExpressive) {
-                NewInstallerGlobalSettingsPage()
-            } else {
-                LegacyInstallerGlobalSettingsPage()
-            }
-        }
-        entry<Route.UninstallerGlobal> {
-            if (isExpressive) {
-                NewUninstallerGlobalSettingsPage()
-            } else {
-                LegacyUninstallerGlobalSettingsPage()
-            }
-        }
-        entry<Route.Lab> {
-            if (isExpressive) {
-                NewLabPage()
-            } else {
-                LegacyLabPage()
             }
         }
     }

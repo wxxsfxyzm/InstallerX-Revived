@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
 import androidx.navigationevent.NavigationEventTransitionState
+import com.rosan.installer.ui.animation.predictiveback.PredictiveBackAnimationHandler
 import com.rosan.installer.ui.navigation.LocalNavigator
 
 // TODO Add an config page for user to select predictiveBack implement
