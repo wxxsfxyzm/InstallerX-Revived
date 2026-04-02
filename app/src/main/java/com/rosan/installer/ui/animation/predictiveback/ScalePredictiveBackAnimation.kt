@@ -121,6 +121,9 @@ class ScalePredictiveBackAnimation : PredictiveBackAnimationHandler {
             ) {
                 // calculate the corner shape
                 val roundedCornerSize by transition.animateDp(
+                    transitionSpec = {
+                        tween(300)
+                    },
                     label = "DynamicCornerShape"
                 ) { state ->
                     when (state) {
@@ -131,6 +134,9 @@ class ScalePredictiveBackAnimation : PredictiveBackAnimationHandler {
 
                 // calculate the page scale
                 val animatedScale by transition.animateFloat(
+                    transitionSpec = {
+                        tween(300)
+                    },
                     label = "PredictiveScale"
                 ) { state ->
                     when (state) {
@@ -157,6 +163,10 @@ class ScalePredictiveBackAnimation : PredictiveBackAnimationHandler {
 
                 val directionMultiplier =
                     if (edge == EDGE_LEFT) 1f else -1f
+
+                // take some space to the screen edge
+                // currentPivotX is 0.0f-1.0f,
+                // We use 0.2f for the card in left, 0.8f for the card in right
                 val currentPivotX =
                     if (edge == EDGE_LEFT) 0.8f else 0.2f
 
