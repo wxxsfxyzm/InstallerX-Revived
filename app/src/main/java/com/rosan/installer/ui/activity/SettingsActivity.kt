@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -28,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -89,8 +90,6 @@ import org.koin.core.component.inject
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import androidx.compose.material3.Surface as Material3Surface
-import top.yukonga.miuix.kmp.basic.Surface as MiuixSurface
 
 // Define screen layout types to prevent dynamic Subcompose delays
 enum class WindowLayoutType {
@@ -152,18 +151,19 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                 useMiuixMonet = uiState.useMiuixMonet,
                 seedColor = uiState.seedColor
             ) {
-                if (uiState.useMiuix) {
-                    MiuixSurface(modifier = Modifier.fillMaxSize()) {
-                        InstallerNavContainer(uiState, layoutType, predictiveBackAnimationHandler)
-                    }
-                } else {
-                    Material3Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = if (uiState.isExpressive) MaterialTheme.colorScheme.surfaceContainer
-                        else MaterialTheme.colorScheme.surface
-                    ) {
-                        InstallerNavContainer(uiState, layoutType, predictiveBackAnimationHandler)
-                    }
+                val backgroundColor =
+                    if (uiState.useMiuix)
+                        MiuixTheme.colorScheme.surface
+                    else if (uiState.isExpressive)
+                        MaterialTheme.colorScheme.surfaceContainer
+                    else
+                        MaterialTheme.colorScheme.surface
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(backgroundColor)
+                ) {
+                    InstallerNavContainer(uiState, layoutType, predictiveBackAnimationHandler)
                 }
             }
         }
@@ -212,8 +212,110 @@ fun InstallerNavContainer(
                         }
                     }
                 ),
-                entryProvider = if (uiState.useMiuix) miuixEntryProvider(uiState, layoutType)
-                else materialEntryProvider(isExpressive, useBlur),
+                entryProvider = entryProvider {
+                    entry<Route.Main> {
+                        if (uiState.useMiuix) {
+                            MiuixMainPageWrapper(uiState, layoutType)
+                        } else {
+                            MainPage()
+                        }
+                    }
+                    entry<Route.EditConfig> { key ->
+                        val id = key.id
+                        if (uiState.useMiuix) {
+                            val useBlur = uiState.useBlur
+                            MiuixEditPage(
+                                id = if (id != -1L) id else null,
+                                useBlur = useBlur
+                            )
+                        } else if (isExpressive) {
+                            NewEditPage(
+                                id = if (id != -1L) id else null,
+                                useBlur = useBlur
+                            )
+                        } else {
+                            EditPage(
+                                id = if (id != -1L) id
+                                else null
+                            )
+                        }
+                    }
+                    entry<Route.ApplyConfig> { key ->
+                        if (uiState.useMiuix) {
+                            val id = key.id
+                            MiuixApplyPage(id)
+                        } else {
+                            val id = key.id
+                            if (isExpressive)
+                                NewApplyPage(id)
+                            else
+                                ApplyPage(id)
+                        }
+                    }
+                    entry<Route.About> {
+                        if (uiState.useMiuix) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                                MiuixBlendAboutPage()
+                            else MiuixAboutPage()
+                        } else {
+                            if (isExpressive)
+                                NewAboutPage()
+                            else
+                                AboutPage()
+                        }
+                    }
+                    entry<Route.OpenSourceLicense> {
+                        if (uiState.useMiuix) {
+                            MiuixOpenSourceLicensePage()
+                        } else {
+                            OpenSourceLicensePage(isExpressive, useBlur)
+                        }
+                    }
+                    entry<Route.Theme> {
+                        if (uiState.useMiuix) {
+                            MiuixThemeSettingsPage()
+                        } else {
+                            if (isExpressive) {
+                                NewThemeSettingsPage()
+                            } else {
+                                LegacyThemeSettingsPage()
+                            }
+                        }
+                    }
+                    entry<Route.InstallerGlobal> {
+                        if (uiState.useMiuix) {
+                            MiuixInstallerGlobalSettingsPage()
+                        } else {
+                            if (isExpressive) {
+                                NewInstallerGlobalSettingsPage()
+                            } else {
+                                LegacyInstallerGlobalSettingsPage()
+                            }
+                        }
+                    }
+                    entry<Route.UninstallerGlobal> {
+                        if (uiState.useMiuix) {
+                            MiuixUninstallerGlobalSettingsPage()
+                        } else {
+                            if (isExpressive) {
+                                NewUninstallerGlobalSettingsPage()
+                            } else {
+                                LegacyUninstallerGlobalSettingsPage()
+                            }
+                        }
+                    }
+                    entry<Route.Lab> {
+                        if (uiState.useMiuix) {
+                            MiuixLabPage()
+                        } else {
+                            if (isExpressive) {
+                                NewLabPage()
+                            } else {
+                                LegacyLabPage()
+                            }
+                        }
+                    }
+                },
             )
 
         val sceneState =
@@ -331,109 +433,5 @@ fun MiuixMainPageWrapper(uiState: ThemeState, layoutType: WindowLayoutType) {
             hazeStyle = hazeStyle,
             backdrop = backdrop,
         )
-    }
-}
-
-fun miuixEntryProvider(
-    uiState: ThemeState,
-    layoutType: WindowLayoutType
-): (key: NavKey) -> NavEntry<NavKey> = entryProvider {
-    entry<Route.Main> { MiuixMainPageWrapper(uiState, layoutType) }
-
-    entry<Route.EditConfig> { key ->
-        val useBlur = uiState.useBlur
-        val id = key.id
-        MiuixEditPage(
-            id = if (id != -1L) id else null,
-            useBlur = useBlur
-        )
-    }
-    entry<Route.ApplyConfig> { key ->
-        val id = key.id
-        MiuixApplyPage(id)
-    }
-    entry<Route.About> {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-            MiuixBlendAboutPage()
-        else MiuixAboutPage()
-    }
-    entry<Route.OpenSourceLicense> {
-        MiuixOpenSourceLicensePage()
-    }
-    entry<Route.Theme> {
-        MiuixThemeSettingsPage()
-    }
-    entry<Route.InstallerGlobal> {
-        MiuixInstallerGlobalSettingsPage()
-    }
-    entry<Route.UninstallerGlobal> {
-        MiuixUninstallerGlobalSettingsPage()
-    }
-    entry<Route.Lab> {
-        MiuixLabPage()
-    }
-}
-
-fun materialEntryProvider(
-    isExpressive: Boolean,
-    useBlur: Boolean
-): (key: NavKey) -> NavEntry<NavKey> = entryProvider {
-    entry<Route.Main> { MainPage() }
-
-    entry<Route.EditConfig> { key ->
-        val id = key.id
-        if (isExpressive)
-            NewEditPage(
-                id = if (id != -1L) id else null,
-                useBlur = useBlur
-            ) else
-            EditPage(
-                id = if (id != -1L) id
-                else null
-            )
-    }
-    entry<Route.ApplyConfig> { key ->
-        val id = key.id
-        if (isExpressive)
-            NewApplyPage(id)
-        else
-            ApplyPage(id)
-    }
-    entry<Route.About> {
-        if (isExpressive)
-            NewAboutPage()
-        else
-            AboutPage()
-    }
-    entry<Route.OpenSourceLicense> {
-        OpenSourceLicensePage(isExpressive, useBlur)
-    }
-    entry<Route.Theme> {
-        if (isExpressive) {
-            NewThemeSettingsPage()
-        } else {
-            LegacyThemeSettingsPage()
-        }
-    }
-    entry<Route.InstallerGlobal> {
-        if (isExpressive) {
-            NewInstallerGlobalSettingsPage()
-        } else {
-            LegacyInstallerGlobalSettingsPage()
-        }
-    }
-    entry<Route.UninstallerGlobal> {
-        if (isExpressive) {
-            NewUninstallerGlobalSettingsPage()
-        } else {
-            LegacyUninstallerGlobalSettingsPage()
-        }
-    }
-    entry<Route.Lab> {
-        if (isExpressive) {
-            NewLabPage()
-        } else {
-            LegacyLabPage()
-        }
     }
 }
