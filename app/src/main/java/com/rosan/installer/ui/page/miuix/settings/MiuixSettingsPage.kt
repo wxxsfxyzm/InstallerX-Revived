@@ -3,8 +3,11 @@
 package com.rosan.installer.ui.page.miuix.settings
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -37,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.rosan.installer.R
@@ -144,6 +148,7 @@ fun SettingsCompactLayout(
     hazeStyle: HazeStyle,
     backdrop: LayerBackdrop
 ) {
+    val transition = LocalNavAnimatedContentScope.current.transition
     val navigator = LocalNavigator.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -153,29 +158,35 @@ fun SettingsCompactLayout(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            if (useFloatingBottomBar) {
-                SettingsFloatingBottomBar(
-                    pagerState = pagerState,
-                    navigationItems = navigationItems,
-                    useFloatingBottomBarBlur = useFloatingBottomBarBlur,
-                    backdrop = backdrop
-                )
-            } else {
-                NavigationBar(
-                    modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
-                    color = hazeState.getMiuixAppBarColor()
-                ) {
-                    navigationItems.forEachIndexed { index, item ->
-                        NavigationBarItem(
-                            selected = pagerState.currentPage == index,
-                            onClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
-                            icon = item.icon,
-                            label = item.label
-                        )
+            transition.AnimatedVisibility(
+                visible = { it == EnterExitState.Visible },
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it })
+            ) {
+                if (useFloatingBottomBar) {
+                    SettingsFloatingBottomBar(
+                        pagerState = pagerState,
+                        navigationItems = navigationItems,
+                        useFloatingBottomBarBlur = useFloatingBottomBarBlur,
+                        backdrop = backdrop
+                    )
+                } else {
+                    NavigationBar(
+                        modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
+                        color = hazeState.getMiuixAppBarColor()
+                    ) {
+                        navigationItems.forEachIndexed { index, item ->
+                            NavigationBarItem(
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
+                                icon = item.icon,
+                                label = item.label
+                            )
+                        }
                     }
                 }
             }
