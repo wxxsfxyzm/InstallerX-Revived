@@ -12,6 +12,8 @@ import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.HttpProfile
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.RootMode
 import com.rosan.installer.domain.settings.model.SharedUid
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
@@ -93,7 +95,9 @@ class AppSettingsRepositoryImpl(
             appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb()),
             appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false),
             appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false),
-            appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+            appDataStore.getString(AppDataStore.PREDICTIVE_BACK_ANIMATION, PredictiveBackAnimation.Scale.value),
+            appDataStore.getString(AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION, PredictiveBackExitDirection.AlwaysRight.value)
         )
     ) { values: Array<Any?> ->
         var idx = 0
@@ -157,7 +161,17 @@ class AppSettingsRepositoryImpl(
             seedColorInt = values[idx++] as Int,
             useDynColorFollowPkgIcon = values[idx++] as Boolean,
             useDynColorFollowPkgIconForLiveActivity = values[idx++] as Boolean,
-            useBlur = values[idx++] as Boolean
+            useBlur = values[idx++] as Boolean,
+            predictiveBackAnimation = run {
+                val value = values[idx++] as String
+                PredictiveBackAnimation.entries.find { it.value == value }
+                    ?: PredictiveBackAnimation.Scale
+            },
+            predictiveBackExitDirection = run {
+                val value = values[idx++] as String
+                PredictiveBackExitDirection.entries.find { it.value == value }
+                    ?: PredictiveBackExitDirection.AlwaysRight
+            }
         )
     }.shareIn(
         scope = appScope,
@@ -215,6 +229,8 @@ class AppSettingsRepositoryImpl(
             StringSetting.ApplyOrderType -> AppDataStore.APPLY_ORDER_TYPE
             StringSetting.LabRootImplementation -> AppDataStore.LAB_ROOT_IMPLEMENTATION
             StringSetting.LabHttpProfile -> AppDataStore.LAB_HTTP_PROFILE
+            StringSetting.PredictiveBackAnimation -> AppDataStore.PREDICTIVE_BACK_ANIMATION
+            StringSetting.PredictiveBackExitDirection -> AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION
         }
 
     private fun intKey(setting: IntSetting): Preferences.Key<Int> =

@@ -42,10 +42,14 @@ import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.rosan.installer.R
+import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
+import com.rosan.installer.ui.animation.predictiveback.KernelSUClassicPredictiveBackAnimation
 import com.rosan.installer.ui.animation.predictiveback.KernelSUOfficialPredictiveBackAnimation
-import com.rosan.installer.ui.animation.predictiveback.PredictiveBackAnimationHandler
+import com.rosan.installer.ui.animation.predictiveback.NoPredictiveBackAnimation
+import com.rosan.installer.ui.animation.predictiveback.ScalePredictiveBackAnimation
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.navigation.rememberNavigator
@@ -89,12 +93,10 @@ import org.koin.core.component.inject
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.rosan.installer.ui.animation.predictiveback.PredictiveExitDirection as UiPredictiveExitDirection
 
 class SettingsActivity : ComponentActivity(), KoinComponent {
     private val themeStateProvider by inject<ThemeStateProvider>()
-
-    val predictiveBackAnimationHandler: PredictiveBackAnimationHandler =
-        KernelSUOfficialPredictiveBackAnimation()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -140,7 +142,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                         .fillMaxSize()
                         .background(backgroundColor)
                 ) {
-                    InstallerNavContainer(uiState, layoutType, predictiveBackAnimationHandler)
+                    InstallerNavContainer(uiState, layoutType)
                 }
             }
         }
@@ -150,9 +152,24 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
 @Composable
 fun InstallerNavContainer(
     uiState: ThemeState,
-    layoutType: WindowLayoutType,
-    predictiveBackAnimationHandler: PredictiveBackAnimationHandler
+    layoutType: WindowLayoutType
 ) {
+    val predictiveBackAnimationHandler = remember(uiState.predictiveBackAnimation, uiState.predictiveBackExitDirection) {
+        when (uiState.predictiveBackAnimation) {
+            PredictiveBackAnimation.None -> NoPredictiveBackAnimation()
+            PredictiveBackAnimation.Scale -> {
+                val uiExitDirection = when (uiState.predictiveBackExitDirection) {
+                    PredictiveBackExitDirection.FollowGesture -> UiPredictiveExitDirection.FOLLOW_GESTURE
+                    PredictiveBackExitDirection.AlwaysRight -> UiPredictiveExitDirection.ALWAYS_RIGHT
+                    PredictiveBackExitDirection.AlwaysLeft -> UiPredictiveExitDirection.ALWAYS_LEFT
+                }
+                ScalePredictiveBackAnimation(uiExitDirection)
+            }
+
+            PredictiveBackAnimation.KernelSUClassic -> KernelSUClassicPredictiveBackAnimation()
+            PredictiveBackAnimation.KernelSUOfficial -> KernelSUOfficialPredictiveBackAnimation()
+        }
+    }
     val navigator = rememberNavigator(Route.Main)
     val useBlur = uiState.useBlur
     val isExpressive = uiState.isExpressive

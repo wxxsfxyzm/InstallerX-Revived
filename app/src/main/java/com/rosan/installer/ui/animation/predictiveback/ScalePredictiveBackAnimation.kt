@@ -16,8 +16,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -37,7 +35,7 @@ import com.rosan.installer.ui.util.rememberDeviceCornerRadius
 class ScalePredictiveBackAnimation(
     private val exitDirection: PredictiveExitDirection = PredictiveExitDirection.ALWAYS_RIGHT
 ) : PredictiveBackAnimationHandler {
-    private var exitingPageKey by mutableStateOf<String?>(null)
+    private var exitingPageKey: String? = null
     private val exitAnimatable = Animatable(0f)
 
     override suspend fun onBackPressed(

@@ -3,6 +3,8 @@
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
 import androidx.compose.ui.graphics.Color
+import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
 import com.rosan.installer.ui.theme.material.ThemeMode
@@ -22,4 +24,6 @@ sealed class ThemeSettingsAction {
     data class SetSeedColor(val color: Color) : ThemeSettingsAction()
     data class ChangePreferSystemIcon(val preferSystemIcon: Boolean) : ThemeSettingsAction()
     data class ChangeShowLauncherIcon(val showLauncherIcon: Boolean) : ThemeSettingsAction()
+    data class SetPredictiveBackAnimation(val animation: PredictiveBackAnimation) : ThemeSettingsAction()
+    data class SetPredictiveBackExitDirection(val direction: PredictiveBackExitDirection) : ThemeSettingsAction()
 }

@@ -4,6 +4,8 @@ package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
 import android.os.Build
 import androidx.compose.ui.graphics.Color
+import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.material.RawColor
@@ -26,5 +28,7 @@ data class ThemeSettingsState(
     val useDynColorFollowPkgIconForLiveActivity: Boolean = false,
     val preferSystemIcon: Boolean = false,
     val showLauncherIcon: Boolean = true,
-    val showLiveActivity: Boolean = false
+    val showLiveActivity: Boolean = false,
+    val predictiveBackAnimation: PredictiveBackAnimation = PredictiveBackAnimation.None,
+    val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.FollowGesture
 )

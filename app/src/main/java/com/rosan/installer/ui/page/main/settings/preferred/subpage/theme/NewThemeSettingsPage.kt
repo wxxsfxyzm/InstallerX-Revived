@@ -69,6 +69,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
@@ -108,6 +110,30 @@ fun NewThemeSettingsPage(
     var showPaletteDialog by remember { mutableStateOf(false) }
     var showThemeModeDialog by remember { mutableStateOf(false) }
     var showBlurWarningDialog by remember { mutableStateOf(false) }
+    var showPredictiveBackAnimationDialog by remember { mutableStateOf(false) }
+    var showPredictiveBackExitDirectionDialog by remember { mutableStateOf(false) }
+
+    if (showPredictiveBackAnimationDialog) {
+        PredictiveBackAnimationDialog(
+            currentAnimation = uiState.predictiveBackAnimation,
+            onDismiss = { showPredictiveBackAnimationDialog = false },
+            onSelect = { animation ->
+                viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackAnimation(animation))
+                showPredictiveBackAnimationDialog = false
+            }
+        )
+    }
+
+    if (showPredictiveBackExitDirectionDialog) {
+        PredictiveBackExitDirectionDialog(
+            currentDirection = uiState.predictiveBackExitDirection,
+            onDismiss = { showPredictiveBackExitDirectionDialog = false },
+            onSelect = { direction ->
+                viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackExitDirection(direction))
+                showPredictiveBackExitDirectionDialog = false
+            }
+        )
+    }
 
     if (showPaletteDialog) {
         PaletteStyleDialog(
@@ -426,6 +452,39 @@ fun NewThemeSettingsPage(
                 }
             }
 
+            // --- Group 6: Predictive Back ---
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.theme_settings_predictive_back)
+                ) {
+                    item {
+                        BaseWidget(
+                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                            title = stringResource(R.string.theme_settings_predictive_back_animation),
+                            description = when (uiState.predictiveBackAnimation) {
+                                PredictiveBackAnimation.None -> stringResource(R.string.theme_settings_predictive_back_animation_none)
+                                PredictiveBackAnimation.Scale -> stringResource(R.string.theme_settings_predictive_back_animation_scale)
+                                PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
+                                PredictiveBackAnimation.KernelSUOfficial -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_official)
+                            },
+                            onClick = { showPredictiveBackAnimationDialog = true }
+                        ) {}
+                    }
+                    item(visible = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale) {
+                        BaseWidget(
+                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                            title = stringResource(R.string.theme_settings_predictive_back_exit_direction),
+                            description = when (uiState.predictiveBackExitDirection) {
+                                PredictiveBackExitDirection.FollowGesture -> stringResource(R.string.theme_settings_predictive_back_exit_direction_follow_gesture)
+                                PredictiveBackExitDirection.AlwaysRight -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_right)
+                                PredictiveBackExitDirection.AlwaysLeft -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_left)
+                            },
+                            onClick = { showPredictiveBackExitDirectionDialog = true }
+                        ) {}
+                    }
+                }
+            }
+
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
@@ -456,6 +515,91 @@ fun PaletteStyleDialog(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(style.displayName)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    )
+}
+
+@Composable
+fun PredictiveBackAnimationDialog(
+    currentAnimation: PredictiveBackAnimation,
+    onDismiss: () -> Unit,
+    onSelect: (PredictiveBackAnimation) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.theme_settings_predictive_back_animation_desc)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                PredictiveBackAnimation.entries.forEach { animation ->
+                    val animationText = when (animation) {
+                        PredictiveBackAnimation.None -> stringResource(R.string.theme_settings_predictive_back_animation_none)
+                        PredictiveBackAnimation.Scale -> stringResource(R.string.theme_settings_predictive_back_animation_scale)
+                        PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
+                        PredictiveBackAnimation.KernelSUOfficial -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_official)
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(animation) }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (animation == currentAnimation),
+                            onClick = { onSelect(animation) }
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(animationText)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    )
+}
+
+@Composable
+fun PredictiveBackExitDirectionDialog(
+    currentDirection: PredictiveBackExitDirection,
+    onDismiss: () -> Unit,
+    onSelect: (PredictiveBackExitDirection) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.theme_settings_predictive_back_exit_direction_desc)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                PredictiveBackExitDirection.entries.forEach { direction ->
+                    val directionText = when (direction) {
+                        PredictiveBackExitDirection.FollowGesture -> stringResource(R.string.theme_settings_predictive_back_exit_direction_follow_gesture)
+                        PredictiveBackExitDirection.AlwaysRight -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_right)
+                        PredictiveBackExitDirection.AlwaysLeft -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_left)
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(direction) }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (direction == currentDirection),
+                            onClick = { onSelect(direction) }
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(directionText)
                     }
                 }
             }

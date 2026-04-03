@@ -56,5 +56,8 @@ data class AppPreferences(
     val seedColorInt: Int, // Stored as raw Int from DataStore
     val useDynColorFollowPkgIcon: Boolean,
     val useDynColorFollowPkgIconForLiveActivity: Boolean,
-    val useBlur: Boolean
+    val useBlur: Boolean,
+    // Predictive Back Settings
+    val predictiveBackAnimation: PredictiveBackAnimation,
+    val predictiveBackExitDirection: PredictiveBackExitDirection
 )

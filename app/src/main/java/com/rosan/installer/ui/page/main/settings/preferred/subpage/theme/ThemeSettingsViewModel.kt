@@ -69,7 +69,9 @@ class ThemeSettingsViewModel(
             useDynColorFollowPkgIconForLiveActivity = prefs.useDynColorFollowPkgIconForLiveActivity,
             preferSystemIcon = prefs.preferSystemIcon,
             showLauncherIcon = prefs.showLauncherIcon,
-            showLiveActivity = prefs.showLiveActivity
+            showLiveActivity = prefs.showLiveActivity,
+            predictiveBackAnimation = prefs.predictiveBackAnimation,
+            predictiveBackExitDirection = prefs.predictiveBackExitDirection
         )
     }.stateIn(
         scope = viewModelScope,
@@ -123,6 +125,8 @@ class ThemeSettingsViewModel(
             }
 
             is ThemeSettingsAction.ChangeShowLauncherIcon -> viewModelScope.launch { setLauncherIconUseCase(action.showLauncherIcon) }
+            is ThemeSettingsAction.SetPredictiveBackAnimation -> viewModelScope.launch { updateSetting(StringSetting.PredictiveBackAnimation, action.animation.value) }
+            is ThemeSettingsAction.SetPredictiveBackExitDirection -> viewModelScope.launch { updateSetting(StringSetting.PredictiveBackExitDirection, action.direction.value) }
         }
     }
 }

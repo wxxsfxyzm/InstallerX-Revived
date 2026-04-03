@@ -16,7 +16,9 @@ enum class StringSetting {
     InstallMode,
     ApplyOrderType,
     LabRootImplementation,
-    LabHttpProfile
+    LabHttpProfile,
+    PredictiveBackAnimation,
+    PredictiveBackExitDirection
 }
 
 enum class IntSetting {
