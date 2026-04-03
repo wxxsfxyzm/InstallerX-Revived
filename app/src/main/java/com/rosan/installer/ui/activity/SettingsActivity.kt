@@ -44,8 +44,8 @@ import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
+import com.rosan.installer.ui.animation.predictiveback.KernelSUOfficialPredictiveBackAnimation
 import com.rosan.installer.ui.animation.predictiveback.PredictiveBackAnimationHandler
-import com.rosan.installer.ui.animation.predictiveback.ScalePredictiveBackAnimation
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.navigation.rememberNavigator
@@ -94,7 +94,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
     private val themeStateProvider by inject<ThemeStateProvider>()
 
     val predictiveBackAnimationHandler: PredictiveBackAnimationHandler =
-        ScalePredictiveBackAnimation()
+        KernelSUOfficialPredictiveBackAnimation()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
