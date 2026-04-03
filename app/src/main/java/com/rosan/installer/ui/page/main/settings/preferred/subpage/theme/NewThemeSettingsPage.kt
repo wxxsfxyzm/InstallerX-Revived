@@ -56,7 +56,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -104,7 +103,7 @@ fun NewThemeSettingsPage(
 ) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val topAppBarState = rememberTopAppBarState()
+    val topAppBarState = rememberTopAppBarState(-154f, -154f) // from debugger
     val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMaterial3HazeStyle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
@@ -169,10 +168,6 @@ fun NewThemeSettingsPage(
                 showThemeModeDialog = false
             }
         )
-    }
-
-    LaunchedEffect(Unit) {
-        topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
     }
 
     HideLauncherIconWarningDialog(
