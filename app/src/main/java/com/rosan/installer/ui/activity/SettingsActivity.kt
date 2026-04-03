@@ -24,8 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -81,7 +79,8 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixT
 import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.uninstaller.MiuixUninstallerGlobalSettingsPage
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
-import com.rosan.installer.ui.util.UIConstants
+import com.rosan.installer.ui.util.WindowLayoutType
+import com.rosan.installer.ui.util.calculateWindowLayoutType
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -90,28 +89,6 @@ import org.koin.core.component.inject
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-
-// Define screen layout types to prevent dynamic Subcompose delays
-enum class WindowLayoutType {
-    COMPACT,
-    EXPANDED
-}
-
-// Statically calculate layout based on accurate window info
-@Composable
-fun calculateWindowLayoutType(): WindowLayoutType {
-    val containerSize = LocalWindowInfo.current.containerSize
-    val density = LocalDensity.current
-    val screenWidthDp = with(density) { containerSize.width.toDp() }
-    val screenHeightDp = with(density) { containerSize.height.toDp() }
-
-    val isDefinitelyWide = screenWidthDp > UIConstants.WIDE_SCREEN_THRESHOLD
-    val aspectRatio = screenHeightDp.value / screenWidthDp.value
-    val isWideByShape = screenWidthDp > UIConstants.MEDIUM_WIDTH_THRESHOLD &&
-            aspectRatio < UIConstants.PORTRAIT_ASPECT_RATIO_THRESHOLD
-
-    return if (isDefinitelyWide || isWideByShape) WindowLayoutType.EXPANDED else WindowLayoutType.COMPACT
-}
 
 class SettingsActivity : ComponentActivity(), KoinComponent {
     private val themeStateProvider by inject<ThemeStateProvider>()
