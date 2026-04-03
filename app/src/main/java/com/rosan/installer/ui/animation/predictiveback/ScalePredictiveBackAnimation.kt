@@ -70,7 +70,7 @@ class ScalePredictiveBackAnimation(
         val transition = navContent.transition
         val deviceCornerRadius = rememberDeviceCornerRadius()
 
-        val tripe =
+        val (modifier, cardCorner) =
             if (pageKey == currentPageKey.toString() || exitingPageKey == pageKey) {
                 // Calculate the page scale
                 val animatedScale by transition.animateFloat(
@@ -131,7 +131,8 @@ class ScalePredictiveBackAnimation(
                 Pair(modifier, 0.dp)
             }
 
-        return tripe.first.clip(RoundedCornerShape(tripe.second))
+        return modifier
+            .clip(RoundedCornerShape(cardCorner))
     }
 
     override fun AnimatedContentTransitionScope<Scene<NavKey>>.onPredictivePopTransitionSpec(
