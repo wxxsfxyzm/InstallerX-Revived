@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.subpage.theme
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
@@ -68,6 +69,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
@@ -93,6 +95,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.koin.androidx.compose.koinViewModel
 
+@SuppressLint("RestrictedApi")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewThemeSettingsPage(
@@ -112,12 +115,23 @@ fun NewThemeSettingsPage(
     var showBlurWarningDialog by remember { mutableStateOf(false) }
     var showPredictiveBackAnimationDialog by remember { mutableStateOf(false) }
     var showPredictiveBackExitDirectionDialog by remember { mutableStateOf(false) }
+    val transition = LocalNavAnimatedContentScope.current.transition
 
     if (showPredictiveBackAnimationDialog) {
         PredictiveBackAnimationDialog(
             currentAnimation = uiState.predictiveBackAnimation,
             onDismiss = { showPredictiveBackAnimationDialog = false },
             onSelect = { animation ->
+                // Hey Google
+                // Why you keep playing the animation even we are already play completed?
+
+                // This is very dirty, We are using RestrictedApi, but we don't have other choice
+                transition.setPlaytimeAfterInitialAndTargetStateEstablished(
+                    transition.targetState,
+                    transition.targetState,
+                    transition.playTimeNanos
+                )
+
                 viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackAnimation(animation))
                 showPredictiveBackAnimationDialog = false
             }
