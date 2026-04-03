@@ -8,7 +8,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,12 +41,11 @@ class KernelSUOfficialPredictiveBackAnimation : PredictiveBackAnimationHandler {
     }
 
     @Composable
-    override fun PredictiveBackAnimationDecorator(
+    override fun Modifier.predictiveBackAnimationDecorator(
         transitionState: NavigationEventTransitionState?,
         contentPageKey: Any,
         currentPageKey: NavKey?,
-        content: @Composable (() -> Unit)
-    ) {
+    ): Modifier {
         val navContent = LocalNavAnimatedContentScope.current
         val transition = navContent.transition
         val pageKey = contentPageKey.toString()
@@ -80,19 +78,15 @@ class KernelSUOfficialPredictiveBackAnimation : PredictiveBackAnimationHandler {
             }
         }
 
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(cornerRadius))
-                .drawWithContent {
-                    drawContent()
-                    // Render the physical dimming scrim over the fully opaque content
-                    if (dimAlpha > 0f) {
-                        drawRect(color = Color.Black, alpha = dimAlpha)
-                    }
+        return this
+            .clip(RoundedCornerShape(cornerRadius))
+            .drawWithContent {
+                drawContent()
+                // Render the physical dimming scrim over the fully opaque content
+                if (dimAlpha > 0f) {
+                    drawRect(color = Color.Black, alpha = dimAlpha)
                 }
-        ) {
-            content()
-        }
+            }
     }
 
     override fun AnimatedContentTransitionScope<Scene<NavKey>>.onPredictivePopTransitionSpec(

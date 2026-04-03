@@ -180,12 +180,16 @@ fun InstallerNavContainer(
                     rememberSaveableStateHolderNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator(),
                     NavEntryDecorator { content ->
-                        predictiveBackAnimationHandler.PredictiveBackAnimationDecorator(
-                            gestureState?.transitionState,
-                            content.contentKey,
-                            navigator.current()
-                        ) {
-                            content.Content()
+                        with(predictiveBackAnimationHandler) {
+                            Box(
+                                modifier = Modifier.predictiveBackAnimationDecorator(
+                                    gestureState?.transitionState,
+                                    content.contentKey,
+                                    navigator.current()
+                                )
+                            ) {
+                                content.Content()
+                            }
                         }
                     }
                 ),

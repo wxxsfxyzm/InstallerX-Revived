@@ -13,7 +13,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,12 +58,11 @@ class ScalePredictiveBackAnimation(
     }
 
     @Composable
-    override fun PredictiveBackAnimationDecorator(
+    override fun Modifier.predictiveBackAnimationDecorator(
         transitionState: NavigationEventTransitionState?,
         contentPageKey: Any,
         currentPageKey: NavKey?,
-        content: @Composable (() -> Unit)
-    ) {
+    ): Modifier {
         val windowInfo = LocalWindowInfo.current
         val navContent = LocalNavAnimatedContentScope.current
 
@@ -110,7 +108,7 @@ class ScalePredictiveBackAnimation(
                 val exitProgress = if (pageKey != currentPageKey.toString()) 1f else exitAnimatable.value
                 val animatedTranslationX = containerWidthPx * exitProgress * directionMultiplier
 
-                val modifier = Modifier.graphicsLayer {
+                val modifier = this.graphicsLayer {
                     scaleX = animatedScale
                     scaleY = animatedScale
                     translationX = animatedTranslationX
@@ -124,7 +122,7 @@ class ScalePredictiveBackAnimation(
                     val progress = exitAnimatable.value
                     val dynamicAlpha = 0.5f * (1f - progress)
 
-                    Modifier
+                    this
                         .graphicsLayer()
                         .drawWithContent {
                             drawContent()
@@ -135,11 +133,7 @@ class ScalePredictiveBackAnimation(
                 Pair(modifier, 0.dp)
             }
 
-        Box(
-            modifier = tripe.first.clip(RoundedCornerShape(tripe.second)),
-        ) {
-            content()
-        }
+        return tripe.first.clip(RoundedCornerShape(tripe.second))
     }
 
     override fun AnimatedContentTransitionScope<Scene<NavKey>>.onPredictivePopTransitionSpec(

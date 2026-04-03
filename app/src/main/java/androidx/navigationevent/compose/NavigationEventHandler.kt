@@ -72,12 +72,20 @@ fun NavigationEventHandler(
     state: NavigationEventState<out NavigationEventInfo>,
     // ---- Forward Events ----
     isForwardEnabled: Boolean = true,
-    onForwardCancelled: () -> Unit = {},
-    onForwardCompleted: () -> Unit = {},
+    onForwardCancelled: (() -> Unit) -> Unit = { callBack ->
+        callBack()
+    },
+    onForwardCompleted: (() -> Unit) -> Unit = { callBack ->
+        callBack()
+    },
     // ---- Back Events ----
     isBackEnabled: Boolean = true,
-    onBackCancelled: (() -> Unit) -> Unit = {},
-    onBackCompleted: (() -> Unit) -> Unit = {},
+    onBackCancelled: (() -> Unit) -> Unit = { callBack ->
+        callBack()
+    },
+    onBackCompleted: (() -> Unit) -> Unit = { callBack ->
+        callBack()
+    },
 ) {
     if (LocalInspectionMode.current) {
         // TODO(b/462365661): Return early to prevent Preview crashes. Future work should implement
@@ -149,12 +157,16 @@ fun NavigationEventHandler(
 fun NavigationBackHandler(
     state: NavigationEventState<out NavigationEventInfo>,
     isBackEnabled: Boolean = true,
-    onBackCancelled: (() -> Unit) -> Unit = {},
+    onBackCancelled: (() -> Unit) -> Unit = { callback ->
+        callback()
+    },
     onBackCompleted: (() -> Unit) -> Unit,
 ) {
     NavigationEventHandler(
         state = state,
-        onForwardCancelled = {},
+        onForwardCancelled = {
+
+        },
         onForwardCompleted = {},
         isForwardEnabled = false, // disable forward
         onBackCancelled = onBackCancelled,
@@ -184,16 +196,18 @@ fun NavigationBackHandler(
 fun NavigationForwardHandler(
     state: NavigationEventState<out NavigationEventInfo>,
     isForwardEnabled: Boolean = true,
-    onForwardCancelled: () -> Unit = {},
-    onForwardCompleted: () -> Unit,
+    onForwardCancelled: (() -> Unit) -> Unit = { callBack ->
+        callBack()
+    },
+    onForwardCompleted: (() -> Unit) -> Unit,
 ) {
     NavigationEventHandler(
         state = state,
         onForwardCancelled = onForwardCancelled,
         onForwardCompleted = onForwardCompleted,
         isForwardEnabled = isForwardEnabled,
-        onBackCancelled = { _ -> },
-        onBackCompleted = { _ -> },
+        onBackCancelled = { callBack -> callBack() },
+        onBackCompleted = { callBack -> callBack() },
         isBackEnabled = false, // disable back
     )
 }
@@ -209,8 +223,8 @@ private class ComposeNavigationEventHandler<T : NavigationEventInfo>(
         isForwardEnabled = false,
     ) {
 
-    var currentOnForwardCancelled: () -> Unit = {}
-    var currentOnForwardCompleted: () -> Unit = {}
+    var currentOnForwardCancelled: (() -> Unit) -> Unit = {}
+    var currentOnForwardCompleted: (() -> Unit) -> Unit = {}
     var currentOnBackCancelled: (() -> Unit) -> Unit = {}
     var currentOnBackCompleted: (() -> Unit) -> Unit = {}
 
@@ -223,13 +237,15 @@ private class ComposeNavigationEventHandler<T : NavigationEventInfo>(
     }
 
     override fun onForwardCancelled() {
-        onTransitionStateChanged(transitionState)
-        currentOnForwardCancelled.invoke()
+        currentOnForwardCancelled.invoke {
+            onTransitionStateChanged(transitionState)
+        }
     }
 
     override fun onForwardCompleted() {
-        onTransitionStateChanged(transitionState)
-        currentOnForwardCompleted.invoke()
+        currentOnForwardCompleted.invoke {
+            onTransitionStateChanged(transitionState)
+        }
     }
 
     override fun onBackStarted(event: NavigationEvent) {
@@ -241,7 +257,6 @@ private class ComposeNavigationEventHandler<T : NavigationEventInfo>(
     }
 
     override fun onBackCancelled() {
-        onTransitionStateChanged(transitionState)
         currentOnBackCancelled.invoke {
             onTransitionStateChanged(transitionState)
         }
@@ -354,8 +369,14 @@ fun NavigationEventHandler(
     NavigationEventHandler(
         state,
         isForwardEnabled,
-        onForwardCancelled,
-        onForwardCompleted,
+        onForwardCancelled = { callBack ->
+            callBack()
+            onForwardCancelled()
+        },
+        onForwardCompleted = { callBack ->
+            callBack()
+            onForwardCompleted()
+        },
         isBackEnabled,
         onBackCancelled = { callBack ->
             callBack()
@@ -365,5 +386,46 @@ fun NavigationEventHandler(
             callBack()
             onBackCompleted()
         }
+    )
+}
+
+/**
+ * A composable that handles only forward navigation gestures, driven by a manually hoisted
+ * [NavigationEventState].
+ *
+ * This is a convenience wrapper around the core [NavigationEventHandler] overload for cases where
+ * back navigation is not relevant. Use this overload when hoisting state.
+ *
+ * Refer to the primary [NavigationEventHandler] KDoc for details on precedence, unconditional
+ * usage, and timing considerations.
+ *
+ * @param state The hoisted [NavigationEventState] (returned from [rememberNavigationEventState]) to
+ *   be registered.
+ * @param isForwardEnabled Controls whether forward navigation gestures are handled.
+ * @param onForwardCancelled Called if a forward navigation gesture is cancelled.
+ * @param onForwardCompleted Called when a forward navigation gesture completes and navigation
+ *   occurs.
+ */
+@Composable
+fun NavigationForwardHandler(
+    state: NavigationEventState<out NavigationEventInfo>,
+    isForwardEnabled: Boolean = true,
+    onForwardCancelled: () -> Unit = {},
+    onForwardCompleted: () -> Unit,
+) {
+    NavigationEventHandler(
+        state = state,
+        onForwardCancelled = { callBack ->
+            callBack()
+            onForwardCancelled()
+        },
+        onForwardCompleted = { callBack ->
+            callBack()
+            onForwardCompleted()
+        },
+        isForwardEnabled = isForwardEnabled,
+        onBackCancelled = { callBack -> callBack() },
+        onBackCompleted = { callBack -> callBack() },
+        isBackEnabled = false, // disable back
     )
 }

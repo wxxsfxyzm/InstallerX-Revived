@@ -7,6 +7,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
 import androidx.navigationevent.NavigationEventTransitionState
@@ -21,13 +22,12 @@ class KernelSUClassicPredictiveBackAnimation : PredictiveBackAnimationHandler {
     }
 
     @Composable
-    override fun PredictiveBackAnimationDecorator(
+    override fun Modifier.predictiveBackAnimationDecorator(
         transitionState: NavigationEventTransitionState?,
         contentPageKey: Any,
         currentPageKey: NavKey?,
-        content: @Composable (() -> Unit)
-    ) {
-        content()
+    ): Modifier {
+        return this
     }
 
     override fun AnimatedContentTransitionScope<Scene<NavKey>>.onPredictivePopTransitionSpec(
