@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -62,7 +61,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.rosan.installer.R
-import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.ConfigRepository
@@ -164,28 +162,9 @@ fun MainPage(
                     val transition = LocalNavAnimatedContentScope.current.transition
 
                     transition.AnimatedVisibility(
-                        visible = {
-                            val animation = uiState.predictiveBackAnimation
-                            if (animation == PredictiveBackAnimation.Scale || animation == PredictiveBackAnimation.None) {
-                                true
-                            } else {
-                                it == EnterExitState.Visible
-                            }
-                        },
-                        enter = slideInVertically(
-                            animationSpec = tween(
-                                durationMillis = 400,
-                                delayMillis = 300
-                            ),
-                            initialOffsetY = { it }
-                        ),
-                        exit = slideOutVertically(
-                            animationSpec = tween(
-                                durationMillis = 400,
-                                delayMillis = 300
-                            ),
-                            targetOffsetY = { it }
-                        )
+                        visible = { it == EnterExitState.Visible },
+                        enter = slideInVertically(initialOffsetY = { it }),
+                        exit = slideOutVertically(targetOffsetY = { it })
                     ) {
                         RowNavigation(
                             modifier = Modifier
