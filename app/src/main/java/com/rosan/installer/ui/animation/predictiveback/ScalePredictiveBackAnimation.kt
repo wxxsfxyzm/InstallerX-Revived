@@ -83,29 +83,35 @@ class ScalePredictiveBackAnimation(
                     }
                 }
 
+                // calculate WHERE is the scaled page
                 val progressInProgress = (transitionState as? InProgress)
                 val edge = progressInProgress?.latestEvent?.swipeEdge ?: 0
                 val touchY = progressInProgress?.latestEvent?.touchY
 
-                // Pivot Y calculation based on touch point
+                // scaled card Y calculation based on touch point
                 val currentPivotY = if (touchY != null && containerHeightPx > 0) {
                     (touchY / containerHeightPx).coerceIn(0.1f, 0.9f)
                 } else 0.5f
 
-                // Pivot X follows the gesture to ensure scaling feels attached to the finger
+                // if the navigation gesture originates from the left edge, we let it scale to right
+                // otherwise, scale to left
                 val currentPivotX = if (edge == EDGE_LEFT) 0.8f else 0.2f
 
-                // Determine the translation direction multiplier based on the provided parameter
+                // From the user settings, we use follow_gesture/right/left for the card's exit animation?
                 val directionMultiplier = when (exitDirection) {
+                    // When user choice follow_gesture, we use this logic for calc them
+                    // navigation gesture left -> exit to right
+                    // navigation gesture right -> exit to left
                     PredictiveExitDirection.FOLLOW_GESTURE -> if (edge == EDGE_LEFT) 1f else -1f
                     PredictiveExitDirection.ALWAYS_RIGHT -> 1f
                     PredictiveExitDirection.ALWAYS_LEFT -> -1f
                 }
 
-                // Apply translation during the final exit phase
+                // if we are playing the exit animation, calculate the scaled Page's TranslationX in here
                 val exitProgress = if (pageKey != currentPageKey.toString()) 1f else exitAnimatable.value
                 val animatedTranslationX = containerWidthPx * exitProgress * directionMultiplier
 
+                // render animation
                 val modifier = this.graphicsLayer {
                     scaleX = animatedScale
                     scaleY = animatedScale
@@ -115,7 +121,11 @@ class ScalePredictiveBackAnimation(
 
                 Pair(modifier, deviceCornerRadius)
             } else {
-                // Dimming logic for the background page
+                // We calculate the new page's black dim alpha in here
+                // If we are in PredictiveBackAnimation, always 0.5f dim
+                // If we are playing the exit animation, dynamic calculate the dim with exit animation's progress
+                // alpha = 0.5 * (1f - animationProgress) (decrease alpha when increase progress)
+                // so, alpha will always in 0 - 0.5f
                 val modifier = if (transitionState is InProgress) {
                     val progress = exitAnimatable.value
                     val dynamicAlpha = 0.5f * (1f - progress)
