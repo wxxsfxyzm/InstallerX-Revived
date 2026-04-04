@@ -4,14 +4,10 @@ package com.rosan.installer.ui.page.main.settings.main
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -59,7 +55,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
@@ -159,26 +154,17 @@ fun MainPage(
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 bottomBar = {
-                    val transition = LocalNavAnimatedContentScope.current.transition
-
-                    transition.AnimatedVisibility(
-                        visible = { it == EnterExitState.Visible },
-                        enter = slideInVertically(initialOffsetY = { it }),
-                        exit = slideOutVertically(targetOffsetY = { it })
-                    ) {
-                        RowNavigation(
-                            modifier = Modifier
-                                .installerHazeEffect(hazeState, hazeStyle),
-                            isM3e = showExpressiveUI,
-                            windowInsets = navigationWindowInsets,
-                            data = data,
-                            currentPage = currentPage,
-                            onPageChanged = { onPageChanged(it) },
-                            configCount = configCount,
-                            containerColor = if (useBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
-                            isMedium = isMedium
-                        )
-                    }
+                    RowNavigation(
+                        modifier = Modifier.installerHazeEffect(hazeState, hazeStyle),
+                        isM3e = showExpressiveUI,
+                        windowInsets = navigationWindowInsets,
+                        data = data,
+                        currentPage = currentPage,
+                        onPageChanged = { onPageChanged(it) },
+                        configCount = configCount,
+                        containerColor = if (useBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
+                        isMedium = isMedium // Pass layout state
+                    )
                 }
             ) { paddingValues ->
                 HorizontalPager(
