@@ -472,6 +472,7 @@ fun NewThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_predictive_back_animation),
                             description = when (uiState.predictiveBackAnimation) {
                                 PredictiveBackAnimation.None -> stringResource(R.string.theme_settings_predictive_back_animation_none)
+                                PredictiveBackAnimation.AOSP -> stringResource(R.string.theme_settings_predictive_back_animation_aosp)
                                 PredictiveBackAnimation.Scale -> stringResource(R.string.theme_settings_predictive_back_animation_scale)
                                 PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
                                 PredictiveBackAnimation.KernelSUOfficial -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_official)
@@ -484,9 +485,9 @@ fun NewThemeSettingsPage(
                             icon = Icons.AutoMirrored.TwoTone.ArrowBack,
                             title = stringResource(R.string.theme_settings_predictive_back_exit_direction),
                             description = when (uiState.predictiveBackExitDirection) {
-                                PredictiveBackExitDirection.FollowGesture -> stringResource(R.string.theme_settings_predictive_back_exit_direction_follow_gesture)
-                                PredictiveBackExitDirection.AlwaysRight -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_right)
-                                PredictiveBackExitDirection.AlwaysLeft -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_left)
+                                PredictiveBackExitDirection.FOLLOW_GESTURE -> stringResource(R.string.theme_settings_predictive_back_exit_direction_follow_gesture)
+                                PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_right)
+                                PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_left)
                             },
                             onClick = { showPredictiveBackExitDirectionDialog = true }
                         ) {}
@@ -550,6 +551,7 @@ fun PredictiveBackAnimationDialog(
                 PredictiveBackAnimation.entries.forEach { animation ->
                     val animationText = when (animation) {
                         PredictiveBackAnimation.None -> stringResource(R.string.theme_settings_predictive_back_animation_none)
+                        PredictiveBackAnimation.AOSP -> stringResource(R.string.theme_settings_predictive_back_animation_aosp)
                         PredictiveBackAnimation.Scale -> stringResource(R.string.theme_settings_predictive_back_animation_scale)
                         PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
                         PredictiveBackAnimation.KernelSUOfficial -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_official)
@@ -592,9 +594,9 @@ fun PredictiveBackExitDirectionDialog(
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 PredictiveBackExitDirection.entries.forEach { direction ->
                     val directionText = when (direction) {
-                        PredictiveBackExitDirection.FollowGesture -> stringResource(R.string.theme_settings_predictive_back_exit_direction_follow_gesture)
-                        PredictiveBackExitDirection.AlwaysRight -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_right)
-                        PredictiveBackExitDirection.AlwaysLeft -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_left)
+                        PredictiveBackExitDirection.FOLLOW_GESTURE -> stringResource(R.string.theme_settings_predictive_back_exit_direction_follow_gesture)
+                        PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_right)
+                        PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_left)
                     }
                     Row(
                         Modifier

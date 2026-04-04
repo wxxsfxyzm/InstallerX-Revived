@@ -43,9 +43,9 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
-import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
+import com.rosan.installer.ui.animation.predictiveback.AOSPCrossActivityAnimation
 import com.rosan.installer.ui.animation.predictiveback.KernelSUClassicPredictiveBackAnimation
 import com.rosan.installer.ui.animation.predictiveback.KernelSUOfficialPredictiveBackAnimation
 import com.rosan.installer.ui.animation.predictiveback.NoPredictiveBackAnimation
@@ -93,7 +93,6 @@ import org.koin.core.component.inject
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import com.rosan.installer.ui.animation.predictiveback.PredictiveExitDirection as UiPredictiveExitDirection
 
 class SettingsActivity : ComponentActivity(), KoinComponent {
     private val themeStateProvider by inject<ThemeStateProvider>()
@@ -157,15 +156,8 @@ fun InstallerNavContainer(
     val predictiveBackAnimationHandler = remember(uiState.predictiveBackAnimation, uiState.predictiveBackExitDirection) {
         when (uiState.predictiveBackAnimation) {
             PredictiveBackAnimation.None -> NoPredictiveBackAnimation()
-            PredictiveBackAnimation.Scale -> {
-                val uiExitDirection = when (uiState.predictiveBackExitDirection) {
-                    PredictiveBackExitDirection.FollowGesture -> UiPredictiveExitDirection.FOLLOW_GESTURE
-                    PredictiveBackExitDirection.AlwaysRight -> UiPredictiveExitDirection.ALWAYS_RIGHT
-                    PredictiveBackExitDirection.AlwaysLeft -> UiPredictiveExitDirection.ALWAYS_LEFT
-                }
-                ScalePredictiveBackAnimation(uiExitDirection)
-            }
-
+            PredictiveBackAnimation.AOSP -> AOSPCrossActivityAnimation(uiState.predictiveBackExitDirection)
+            PredictiveBackAnimation.Scale -> ScalePredictiveBackAnimation(uiState.predictiveBackExitDirection)
             PredictiveBackAnimation.KernelSUClassic -> KernelSUClassicPredictiveBackAnimation()
             PredictiveBackAnimation.KernelSUOfficial -> KernelSUOfficialPredictiveBackAnimation()
         }

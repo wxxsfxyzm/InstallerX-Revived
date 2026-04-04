@@ -116,6 +116,7 @@
     <string name="theme_settings_predictive_back_exit_direction">Exit Direction</string>
     <string name="theme_settings_predictive_back_exit_direction_desc">Select the exit direction for predictive back (Scale animation only)</string>
     <string name="theme_settings_predictive_back_animation_none">None</string>
+    <string name="theme_settings_predictive_back_animation_aosp">AOSP</string>
     <string name="theme_settings_predictive_back_animation_scale">Scale</string>
     <string name="theme_settings_predictive_back_animation_ksu_classic">KernelSU Classic</string>
     <string name="theme_settings_predictive_back_animation_ksu_official">KernelSU Official</string>

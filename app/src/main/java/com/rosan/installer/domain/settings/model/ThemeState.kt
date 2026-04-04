@@ -23,5 +23,5 @@ data class ThemeState(
     val seedColor: Color = PresetColors.first().color,
     val useBlur: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
     val predictiveBackAnimation: PredictiveBackAnimation = PredictiveBackAnimation.Scale,
-    val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.FollowGesture
+    val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.FOLLOW_GESTURE
 )

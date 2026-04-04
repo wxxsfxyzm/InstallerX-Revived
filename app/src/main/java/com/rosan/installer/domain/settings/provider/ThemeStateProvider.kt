@@ -43,8 +43,8 @@ class ThemeStateProvider(appSettingsRepo: AppSettingsRepository) {
         appSettingsRepo.getBoolean(BooleanSetting.UiUseBlur, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
         appSettingsRepo.getString(StringSetting.PredictiveBackAnimation, PredictiveBackAnimation.Scale.value)
             .map { PredictiveBackAnimation.entries.find { e -> e.value == it } ?: PredictiveBackAnimation.Scale },
-        appSettingsRepo.getString(StringSetting.PredictiveBackExitDirection, PredictiveBackExitDirection.AlwaysRight.value)
-            .map { PredictiveBackExitDirection.entries.find { e -> e.value == it } ?: PredictiveBackExitDirection.AlwaysRight },
+        appSettingsRepo.getString(StringSetting.PredictiveBackExitDirection, PredictiveBackExitDirection.ALWAYS_RIGHT.value)
+            .map { PredictiveBackExitDirection.entries.find { e -> e.value == it } ?: PredictiveBackExitDirection.ALWAYS_RIGHT },
         getWallpaperColorsFlow()
     ) { values: Array<Any?> ->
         var idx = 0

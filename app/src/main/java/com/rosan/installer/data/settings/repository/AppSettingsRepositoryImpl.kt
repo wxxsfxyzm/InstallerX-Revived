@@ -97,7 +97,7 @@ class AppSettingsRepositoryImpl(
             appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false),
             appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
             appDataStore.getString(AppDataStore.PREDICTIVE_BACK_ANIMATION, PredictiveBackAnimation.Scale.value),
-            appDataStore.getString(AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION, PredictiveBackExitDirection.AlwaysRight.value)
+            appDataStore.getString(AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION, PredictiveBackExitDirection.ALWAYS_RIGHT.value)
         )
     ) { values: Array<Any?> ->
         var idx = 0
@@ -170,7 +170,7 @@ class AppSettingsRepositoryImpl(
             predictiveBackExitDirection = run {
                 val value = values[idx++] as String
                 PredictiveBackExitDirection.entries.find { it.value == value }
-                    ?: PredictiveBackExitDirection.AlwaysRight
+                    ?: PredictiveBackExitDirection.ALWAYS_RIGHT
             }
         )
     }.shareIn(

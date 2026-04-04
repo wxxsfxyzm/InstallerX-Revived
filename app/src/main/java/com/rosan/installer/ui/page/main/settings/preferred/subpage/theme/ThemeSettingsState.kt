@@ -30,5 +30,5 @@ data class ThemeSettingsState(
     val showLauncherIcon: Boolean = true,
     val showLiveActivity: Boolean = false,
     val predictiveBackAnimation: PredictiveBackAnimation = PredictiveBackAnimation.None,
-    val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.FollowGesture
+    val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.FOLLOW_GESTURE
 )

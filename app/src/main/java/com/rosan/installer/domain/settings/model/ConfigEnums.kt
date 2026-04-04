@@ -105,22 +105,3 @@ enum class PackageSource(val value: Int) {
         fun fromInt(value: Int) = entries.find { it.value == value } ?: OTHER
     }
 }
-
-/**
- * Define Predictive Back Animation types
- */
-enum class PredictiveBackAnimation(val value: String) {
-    None("none"),
-    Scale("scale"),
-    KernelSUClassic("ksu_classic"),
-    KernelSUOfficial("ksu_official");
-}
-
-/**
- * Define Predictive Back Exit Direction types
- */
-enum class PredictiveBackExitDirection(val value: String) {
-    FollowGesture("follow_gesture"),
-    AlwaysRight("always_right"),
-    AlwaysLeft("always_left");
-}
