@@ -3,8 +3,6 @@
 package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme
 
 import android.os.Build
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -45,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.ThemeSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.ThemeSettingsViewModel
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
@@ -74,8 +71,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixThemeSettingsPage(
-    viewModel: ThemeSettingsViewModel = koinViewModel(),
-    sharedViewModel: SettingsSharedViewModel = koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
+    viewModel: ThemeSettingsViewModel = koinViewModel()
 ) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
