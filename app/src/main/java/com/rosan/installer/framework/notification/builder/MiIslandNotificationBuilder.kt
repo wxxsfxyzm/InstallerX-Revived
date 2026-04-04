@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2025-2026 InstallerX Revived contributors
-package com.rosan.installer.data.session.notification
+package com.rosan.installer.framework.notification.builder
 
 import android.app.Notification
 import android.app.PendingIntent
@@ -14,6 +14,7 @@ import com.rosan.installer.domain.engine.model.getInfo
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.framework.notification.NotificationHelper
 import com.rosan.installer.util.getErrorMessage
 import com.xzakota.hyper.notification.focus.FocusNotification
 

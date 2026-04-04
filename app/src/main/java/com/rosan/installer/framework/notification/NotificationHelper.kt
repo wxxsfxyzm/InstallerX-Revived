@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
-// Copyright (C) 2025-2026 InstallerX Revived contributors
-package com.rosan.installer.data.session.notification
+package com.rosan.installer.framework.notification
 
 import android.app.PendingIntent
 import android.content.Context
@@ -31,11 +29,11 @@ class NotificationHelper(
         Pausing(R.drawable.round_hourglass_disabled_24)
     }
 
-    val openIntent: PendingIntent = BroadcastHandler.openIntent(context, session)
-    val analyseIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Analyse)
-    val installIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Install)
-    val cancelIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Cancel)
-    val finishIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Finish)
+    val openIntent: PendingIntent = BroadcastHandler.Companion.openIntent(context, session)
+    val analyseIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Analyse)
+    val installIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Install)
+    val cancelIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Cancel)
+    val finishIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Finish)
 
     // Resolve specific launch intent considering privileged access
     fun getLaunchPendingIntent(packageName: String?): PendingIntent? {
@@ -50,9 +48,9 @@ class NotificationHelper(
         )
 
         return if (supportsPrivileged) {
-            BroadcastHandler.privilegedLaunchAndFinishIntent(context, session)
+            BroadcastHandler.Companion.privilegedLaunchAndFinishIntent(context, session)
         } else {
-            BroadcastHandler.launchIntent(context, session, launchIntent)
+            BroadcastHandler.Companion.launchIntent(context, session, launchIntent)
         }
     }
 
