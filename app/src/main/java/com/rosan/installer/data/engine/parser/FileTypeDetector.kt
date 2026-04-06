@@ -7,7 +7,7 @@ import com.rosan.installer.domain.engine.exception.AnalyseFailedCorruptedArchive
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.DataEntity
 import com.rosan.installer.domain.engine.model.DataType
-import com.rosan.installer.util.ArchiveUtils
+import com.rosan.installer.util.isZipArchive
 import dalvik.system.ZipPathValidator
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -39,7 +39,7 @@ class FileTypeDetector(
 
     fun detect(data: DataEntity, extra: AnalyseExtraEntity): DataType {
         val fileEntity = data as? DataEntity.FileEntity ?: return DataType.NONE
-        val isZip = ArchiveUtils.isZipArchive(File(fileEntity.path))
+        val isZip = File(fileEntity.path).isZipArchive()
 
         return try {
             ZipFile(fileEntity.path).use { zip ->

@@ -206,6 +206,7 @@ class MiIslandNotificationBuilder(
             updatable = true
             ticker = title
             tickerPic = lightLogoKey
+            outEffectSrc = "outer_glow"
 
             // 1. 小米岛 摘要态 (组合4：左侧 App 图标 + App 名称，右侧纯文本状态)
             island {

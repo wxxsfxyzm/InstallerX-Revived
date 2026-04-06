@@ -16,7 +16,7 @@ import com.rosan.installer.domain.session.repository.NetworkResolver
 import com.rosan.installer.domain.settings.model.HttpProfile
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.util.ArchiveUtils
+import com.rosan.installer.util.isZipMagicNumber
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -379,7 +379,7 @@ class OkHttpNetworkResolver(
                 }
 
                 if (bytesRead >= 4) {
-                    ArchiveUtils.isZipMagicNumber(buffer)
+                    buffer.isZipMagicNumber()
                 } else {
                     false
                 }

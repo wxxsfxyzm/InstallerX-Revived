@@ -43,7 +43,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
 import timber.log.Timber
 import kotlin.reflect.KClass
 
@@ -54,7 +53,7 @@ class SessionNotifierImpl(
     private val appOps: AppOpsProvider,
     private val capabilityProvider: DeviceCapabilityProvider,
     getAppIcon: GetAppIconUseCase
-) : SessionNotifier, KoinComponent {
+) : SessionNotifier {
 
     companion object {
         private const val MINIMUM_VISIBILITY_DURATION_MS = 400L
@@ -239,7 +238,6 @@ class SessionNotifierImpl(
         blockInterval: Int,
         requiresAnimation: Boolean = false
     ) {
-        // [原样保留了你神级的节流逻辑]
         if (notification == null) {
             setNotificationImmediate(null)
             lastProgressValue = -1f
@@ -300,7 +298,6 @@ class SessionNotifierImpl(
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun notifyWithXiaomiMagic(notificationId: Int, notification: Notification, blockInterval: Int) {
-        // [原样保留了你的小米魔法逻辑]
         val currentShizukuMode = capabilityProvider.shizukuModeFlow.value
         val isShizukuShell = currentShizukuMode == ShizukuMode.SHELL
         val shouldExecuteMagic = globalAuthorizer == Authorizer.Shizuku && isShizukuShell
