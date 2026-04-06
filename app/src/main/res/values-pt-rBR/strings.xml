@@ -708,4 +708,10 @@
     <string name="config_install_show_toast_desc">Mostrar mensagem de notificação após a instalação</string>
     <string name="copied_format">Copiado: %1$s</string>
     <string name="batch_install_result_message">Instalação em lote: %1$d de %2$d concluídos com sucesso</string>
+    <string name="config_always_use_root_in_system">Usar root para executar operações privilegiadas</string>
+    <string name="config_always_use_root_in_system_desc">Ao executar o programa como instalador do sistema, utilize sempre o usuário root para operações que exijam privilégios, como atualizar módulos e excluir arquivos</string>
+    <string name="lab_mi_island_countdown">Duração do bloqueio XMSF (Apenas Shizuku)</string>
+    <string name="lab_mi_island_countdown_desc">Define por quanto tempo o acesso à rede do XMSF fica bloqueado pelo Shizuku; não funcionará se o Shizuku estiver ativado com privilégios de root. Altere apenas se compreender as consequências!</string>
+    <string name="exception_uninstall_failed_device_policy">Desinstalação bloqueada pela política do dispositivo</string>
+    <string name="exception_uninstall_failed_owner_blocked">Desinstalação bloqueada pelo proprietário</string>
 </resources>

@@ -706,4 +706,12 @@
     <string name="config_install_show_toast">Всплывающее сообщение</string>
     <string name="batch_install_result_message">Пакетная установка: %1$d/%2$d выполнена</string>
     <string name="config_status_inactive">Неактивный</string>
+    <string name="config_always_use_root_in_system">Root-права для привилегированных операций</string>
+    <string name="config_always_use_root_in_system_desc">При запуске от имени системного установщика использовать root для привилегированных операций, таких как перепрошивка модулей и удаление файлов</string>
+    <string name="lab_mi_island_countdown">Период блока XMSF (только для Shizuku)</string>
+    <string name="lab_mi_island_countdown_desc">Период отключения XMSF от сети при использовании Shizuku, но не вступит в силу при использовании root для активации Shizuku. Изменяйте только в том случае, если вы понимаете последствия！</string>
+    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="version_with_prefix_format">%1$s %2$s</string>
+    <string name="exception_uninstall_failed_device_policy">Удаление заблокировано политикой устройства</string>
+    <string name="exception_uninstall_failed_owner_blocked">Удаление заблокировано владельцем</string>
 </resources>

@@ -708,4 +708,8 @@
     <string name="config_install_show_toast_desc">Hiện toast sau khi cài đặt</string>
     <string name="batch_install_result_message">Cài đặt hàng loạt: %1$d/%2$d thành công</string>
     <string name="config_status_inactive">Không hoạt động</string>
+    <string name="config_always_use_root_in_system">Sử dụng root cho các thao tác có đặc quyền</string>
+    <string name="config_always_use_root_in_system_desc">Khi chạy như trình cài đặt hệ thống, luôn sử dụng root cho các thao tác có đặc quyền, chẳng hạn như flash mô-đun và xóa tệp</string>
+    <string name="lab_mi_island_countdown">Thời lượng chặn XMSF (Chỉ Shizuku)</string>
+    <string name="lab_mi_island_countdown_desc">Đặt thời gian bao lâu truy cập mạng XMSF bị chặn bằng Shizuku. Chỉ thay đổi nếu bạn hiểu rõ tác động của nó!</string>
 </resources>

@@ -531,13 +531,13 @@
     <string name="split_name_language">Taalafsplitsing: %1$s</string>
     <string name="split_name_architecture">Architectuurafsplitsing: %1$s</string>
     <string name="split_name_density">Schermdichtheid: %1$s</string>
-    <string name="split_dpi_ldpi">Laag (~120dpi)</string>
-    <string name="split_dpi_mdpi">Middel (~160dpi)</string>
-    <string name="split_dpi_hdpi">Hoog (~240dpi)</string>
-    <string name="split_dpi_xhdpi">Heel hoog (~320dpi)</string>
-    <string name="split_dpi_xxhdpi">Extreem hoog (~480dpi)</string>
-    <string name="split_dpi_xxxhdpi">Maximum (~640dpi)</string>
-    <string name="split_dpi_tvdpi">TV (~213dpi)</string>
+    <string name="split_dpi_ldpi">Laag (~120 DPI)</string>
+    <string name="split_dpi_mdpi">Middel (~160 DPI)</string>
+    <string name="split_dpi_hdpi">Hoog (~240 DPI)</string>
+    <string name="split_dpi_xhdpi">Heel hoog (~320 DPI)</string>
+    <string name="split_dpi_xxhdpi">Extreem hoog (~480 DPI)</string>
+    <string name="split_dpi_xxxhdpi">Maximum (~640 DPI)</string>
+    <string name="split_dpi_tvdpi">TV (~213 DPI)</string>
     <string name="split_dpi_nodpi">Geen schaling</string>
     <string name="split_dpi_anydpi">Elke dichtheid</string>
     <string name="split_name_base_group_title">Basisapplicatie</string>
@@ -704,4 +704,14 @@
     <string name="error_no_package_to_uninstall">Geen pakket beschikbaar om te verwijderen</string>
     <string name="lab_tap_icon_to_share">Klik op het icoon om de APK te delen</string>
     <string name="lab_tap_icon_to_share_desc">Klik het icoon op het voorbereidscherm om de APK te delen</string>
+    <string name="config_status_inactive">Inactief</string>
+    <string name="config_always_use_root_in_system">Root gebruiken voor gemachtigde functies</string>
+    <string name="config_always_use_root_in_system_desc">Bij uitvoeren als een systeeminstallateur, altijd root gebruiken voor gemachtigde functies, zoals het flashen van modules en het verwijderen van bestanden</string>
+    <string name="config_install_show_toast">Laat toast zien</string>
+    <string name="config_install_show_toast_desc">Laat een toastbericht zien na installatie</string>
+    <string name="batch_install_result_message">Meerdere installeren: %1$d/%2$d succesvol</string>
+    <string name="lab_mi_island_countdown">XMSF-blokkeringsduur (alleen Shizuku)</string>
+    <string name="lab_mi_island_countdown_desc">Stelt in hoe lang XMSF-netwerktoegang wordt geblokkeerd met Shizuku, werkt niet als Shizuku is geactiveerd met root. Verander dit alleen als je de gevolgen begrijpt!</string>
+    <string name="exception_uninstall_failed_device_policy">Verwijderen geblokkeerd door apparaatbeleid</string>
+    <string name="exception_uninstall_failed_owner_blocked">Verwijderen geblokkeerd door eigenaar</string>
 </resources>
