@@ -741,9 +741,9 @@
     <string name="lab_set_install_requester">Set Install Requester</string>
     <string name="lab_set_install_requester_desc">Fill OriginatingUid field with caller package to match system behavior</string>
     <string name="lab_mi_island">Mi Super Island</string>
-    <string name="lab_mi_island_desc">Global notification style. System signature verification can only be bypassed when the custom app-authenticator is set to Shizuku. Root users can enable this directly after manually disabling signature restrictions</string>
-    <string name="lab_mi_island_countdown">XMSF block duration (Only Shizuku)</string>
-    <string name="lab_mi_island_countdown_desc">Sets how long XMSF network access is blocked using Shizuku, will not work if Shizuku is activated using root. Change only if you understand the impact！</string>
+    <string name="lab_mi_island_desc">Global notification style. System restrictions are automatically bypassed only when using ADB-activated Shizuku. Root users (including Root-activated Shizuku) must manually disable the restrictions</string>
+    <string name="lab_mi_island_countdown">XMSF block duration (ADB Shizuku only)</string>
+    <string name="lab_mi_island_countdown_desc">Sets the XMSF network block duration. Only applies to ADB-activated Shizuku; ineffective under Root environments. Modify only if you understand the consequences!</string>
     <string name="lab_tap_icon_to_share">Tap icon to share apk</string>
     <string name="lab_tap_icon_to_share_desc">Tap icon on the prepare page to share apk</string>
 </resources>

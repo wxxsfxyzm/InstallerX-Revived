@@ -49,6 +49,7 @@ class MiIslandNotificationBuilder(
 
         var title = context.getString(R.string.installer_ready)
         var contentText = ""
+        var shortText = context.getString(R.string.installer_ready)
         var progressValue = -1
         var isError = false
         var isSuccess = false
@@ -58,25 +59,28 @@ class MiIslandNotificationBuilder(
         when (progress) {
             is ProgressEntity.InstallResolving -> {
                 title = context.getString(R.string.installer_resolving)
+                shortText = context.getString(R.string.installer_live_channel_short_text_resolving)
                 isOngoing = true
                 actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
             }
 
             is ProgressEntity.InstallResolveSuccess -> {
                 title = context.getString(R.string.installer_resolve_success)
+                shortText = context.getString(R.string.installer_live_channel_short_text_resolving)
                 actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
             }
 
             is ProgressEntity.InstallPreparing -> {
                 title = context.getString(R.string.installer_preparing)
+                shortText = context.getString(R.string.installer_live_channel_short_text_preparing)
                 contentText = context.getString(R.string.installer_preparing_desc)
                 progressValue = (progress.progress * 100).toInt()
                 isOngoing = true
-                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.cancelIntent))
             }
 
             is ProgressEntity.InstallResolvedFailed -> {
                 title = context.getString(R.string.installer_resolve_failed)
+                shortText = context.getString(R.string.installer_live_channel_short_text_resolve_failed)
                 contentText = session.error.getErrorMessage(context)
                 isError = true
                 actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
@@ -84,6 +88,7 @@ class MiIslandNotificationBuilder(
 
             is ProgressEntity.InstallAnalysing -> {
                 title = context.getString(R.string.installer_analysing)
+                shortText = context.getString(R.string.installer_live_channel_short_text_analysing)
                 isOngoing = true
                 actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
             }
@@ -94,6 +99,12 @@ class MiIslandNotificationBuilder(
                 val hasComplexType =
                     allEntities.any { it.app.sourceType == DataType.MIXED_MODULE_APK || it.app.sourceType == DataType.MIXED_MODULE_ZIP }
                 val isMultiPackage = selectedApps.groupBy { it.packageName }.size > 1
+
+                shortText = if (hasComplexType || isMultiPackage) {
+                    context.getString(R.string.installer_live_channel_short_text_pending)
+                } else {
+                    context.getString(R.string.installer_live_channel_short_text_pending_install)
+                }
 
                 if (hasComplexType) {
                     title = context.getString(R.string.installer_prepare_install)
@@ -114,6 +125,7 @@ class MiIslandNotificationBuilder(
 
             is ProgressEntity.InstallAnalysedFailed -> {
                 title = context.getString(R.string.installer_analyse_failed)
+                shortText = context.getString(R.string.installer_live_channel_short_text_analyse_failed)
                 contentText = session.error.getErrorMessage(context)
                 isError = true
                 actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
@@ -123,25 +135,25 @@ class MiIslandNotificationBuilder(
             is ProgressEntity.Installing -> {
                 val appLabel = progress.appLabel ?: context.getString(R.string.installer_installing)
                 title = context.getString(R.string.installer_installing)
+                shortText = context.getString(R.string.installer_live_channel_short_text_installing)
                 contentText = if (progress.total > 1) "(${(progress.current)}/${progress.total}) $appLabel" else appLabel
                 isOngoing = true
                 val total = progress.total.coerceAtLeast(1).toFloat()
                 val currentBase = (progress.current - 1).coerceAtLeast(0).toFloat()
                 val batchFraction = (currentBase + fakeItemProgress).coerceIn(0f, total) / total
                 progressValue = (100 * batchFraction).toInt()
-
-                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.cancelIntent))
             }
 
             is ProgressEntity.InstallingModule -> {
                 title = context.getString(R.string.installer_installing)
+                shortText = context.getString(R.string.installer_live_channel_short_text_installing)
                 isOngoing = true
                 contentText = progress.output.lastOrNull() ?: context.getString(R.string.installer_installing)
-                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.cancelIntent))
             }
 
             is ProgressEntity.InstallSuccess -> {
                 title = context.getString(R.string.installer_install_success)
+                shortText = context.getString(R.string.installer_live_channel_short_text_success)
                 contentText = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context).title
                 isSuccess = true
 
@@ -156,8 +168,13 @@ class MiIslandNotificationBuilder(
 
             is ProgressEntity.InstallCompleted -> {
                 val successCount = progress.results.count { it.success }
+                val totalCount = progress.results.size
                 title =
-                    if (successCount == progress.results.size) context.getString(R.string.installer_install_success) else "${context.getString(R.string.installer_install_success)}: $successCount/${progress.results.size}"
+                    if (successCount == totalCount) context.getString(R.string.installer_install_success) else "${context.getString(R.string.installer_install_success)}: $successCount/$totalCount"
+                shortText =
+                    if (successCount == totalCount) context.getString(R.string.installer_live_channel_short_text_success) else "$successCount/$totalCount ${
+                        context.getString(R.string.installer_live_channel_short_text_success)
+                    }"
                 contentText = context.getString(R.string.installer_live_channel_short_text_success)
                 isSuccess = true
                 actionsList.add(IslandAction("miui_action_finish", context.getString(R.string.finish), helper.finishIntent))
@@ -165,6 +182,7 @@ class MiIslandNotificationBuilder(
 
             is ProgressEntity.InstallFailed -> {
                 title = context.getString(R.string.installer_install_failed)
+                shortText = context.getString(R.string.installer_live_channel_short_text_install_failed)
                 contentText = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context).title
                 isError = true
                 actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
@@ -196,6 +214,16 @@ class MiIslandNotificationBuilder(
 
             val appIconKey = appIconBitmap?.let { createPicture("key_app_icon", Icon.createWithBitmap(it)) } ?: lightLogoKey
 
+            val displayIconKey = if (progress is ProgressEntity.InstallPreparing ||
+                progress is ProgressEntity.InstallResolving ||
+                progress is ProgressEntity.InstallResolveSuccess ||
+                progress is ProgressEntity.InstallAnalysing
+            ) {
+                darkLogoKey
+            } else {
+                appIconKey
+            }
+
             if (isAutoMode) {
                 islandFirstFloat = false
                 enableFloat = false
@@ -208,39 +236,84 @@ class MiIslandNotificationBuilder(
             tickerPic = lightLogoKey
             outEffectSrc = "outer_glow"
 
-            // 1. 小米岛 摘要态 (组合4：左侧 App 图标 + App 名称，右侧纯文本状态)
+            // 1. Xiaomi Island configuration (includes capsule summary state and large island expanded state)
             island {
                 islandProperty = 1
+
                 bigIslandArea {
                     imageTextInfoLeft {
                         type = 1
                         picInfo {
                             type = 1
-                            pic = appIconKey
+                            pic = displayIconKey
                         }
                     }
-                    imageTextInfoRight {
-                        type = 3 // 官方文档中用于展示: 正文大字 + 图标 的合法组件
-                        textInfo {
-                            this.title = title
+
+                    if (progress is ProgressEntity.InstallPreparing) {
+                        progressTextInfo {
+                            progressInfo {
+                                isCCW = true
+                                this.progress = progressValue.coerceAtLeast(0)
+                            }
+                            textInfo {
+                                this.title = shortText.ifEmpty { title }
+                                content = contentText.ifEmpty { " " }
+                            }
+                        }
+                    } else {
+                        imageTextInfoRight {
+                            type = 3
+                            textInfo {
+                                this.title = shortText.ifEmpty { title }
+                            }
                         }
                     }
                 }
+
                 smallIslandArea {
                     picInfo {
                         type = 1
-                        pic = appIconKey
+                        pic = displayIconKey
                     }
                 }
             }
 
-            // 2. 焦点通知 展开态 (模板17)
-            iconTextInfo {
-                this.title = title
-                content = contentText.ifEmpty { " " }
-                animIconInfo {
-                    type = 0
-                    src = appIconKey
+            // 2. Focus notification dropdown expanded state configuration
+            var displayTitle = title
+            var displayContent = contentText
+
+            if (progress is ProgressEntity.InstallAnalysedSuccess) {
+                displayTitle = contentText
+                displayContent = title
+            }
+
+            if (progress is ProgressEntity.InstallPreparing ||
+                progress is ProgressEntity.InstallResolving ||
+                progress is ProgressEntity.InstallResolveSuccess ||
+                progress is ProgressEntity.InstallAnalysing
+            ) {
+                // Apply official template [No. 19]: Text component 2 (baseInfo type=2) + Progress component 3 (multiProgressInfo)
+                baseInfo {
+                    type = 2
+                    this.title = displayTitle
+                    content = displayContent.ifEmpty { " " }
+                }
+
+                // Use multiProgressInfo during the Preparing stage to avoid progressInfo parsing bugs
+                if (progress is ProgressEntity.InstallPreparing) {
+                    multiProgressInfo {
+                        this.progress = progressValue.coerceAtLeast(0)
+                    }
+                }
+            } else {
+                // Standard template with icon for other stages
+                iconTextInfo {
+                    this.title = displayTitle
+                    content = displayContent.ifEmpty { " " }
+                    animIconInfo {
+                        type = 0
+                        src = displayIconKey
+                    }
                 }
             }
 
