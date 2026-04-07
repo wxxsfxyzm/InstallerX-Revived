@@ -25,6 +25,9 @@ class ForegroundInfoHandler(
 ) : Handler(scope, session), KoinComponent {
 
     private var job: Job? = null
+
+    // Track the auto-close job to allow cancellation if state changes
+    private var autoCloseJob: Job? = null
     private val appSettingsRepo by inject<AppSettingsRepository>()
     private val notifier: SessionNotifier by inject { parametersOf(session) }
 
@@ -54,18 +57,27 @@ class ForegroundInfoHandler(
                         (progress is ProgressEntity.InstallCompleted && progress.results.all { it.success })
 
                 if (background && isSuccess) {
-                    val autoCloseSeconds = appSettingsRepo.getInt(IntSetting.NotificationSuccessAutoClearSeconds, 0).first()
-                    if (autoCloseSeconds > 0) {
-                        delay(autoCloseSeconds * 1000L)
-                        notifier.cancel()
-                        session.close()
+                    // Start the countdown in a separate coroutine to avoid blocking the collect stream
+                    if (autoCloseJob?.isActive != true) {
+                        autoCloseJob = launch {
+                            val autoCloseSeconds = appSettingsRepo.getInt(IntSetting.NotificationSuccessAutoClearSeconds, 0).first()
+                            if (autoCloseSeconds > 0) {
+                                delay(autoCloseSeconds * 1000L)
+                                notifier.cancel()
+                                session.close()
+                            }
+                        }
                     }
+                } else {
+                    // Abort the auto-close if the app returns to the foreground or state is no longer success
+                    autoCloseJob?.cancel()
                 }
             }
         }
     }
 
     override suspend fun onFinish() {
+        autoCloseJob?.cancel()
         job?.cancel()
         notifier.cleanup()
     }
