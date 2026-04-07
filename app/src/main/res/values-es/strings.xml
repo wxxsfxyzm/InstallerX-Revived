@@ -581,7 +581,7 @@
     <string name="config_declare_install_requester_desc">Por defecto se recurre a la app de solicitud cuando está apagada</string>
     <string name="config_declare_install_requester_error_desc">El nombre del paquete introducido debe estar instalado</string>
     <string name="config_install_requester">Instalación solicitada por (nombre del paquete)</string>
-    <string name="config_declare_installer_desc">Por defecto esta app cuando está apagada</string>
+    <string name="config_declare_installer_desc">Por defecto el nombre del paquete de esta app</string>
     <string name="config_display_module_extra_info_desc">Mostrar información extra si es un módulo</string>
     <string name="config_display_size">Mostrar tamaño del Paquete</string>
     <string name="config_display_size_desc">Mostrar el tamaño del paquete en la interfaz de instalación</string>
@@ -718,4 +718,13 @@
     <string name="error_no_package_to_uninstall">No hay ningún paquete disponible para desinstalar</string>
     <string name="lab_tap_icon_to_share">Toca el icono para compartir apk</string>
     <string name="lab_tap_icon_to_share_desc">Toca el icono en la página de preparación para compartir apk</string>
+    <string name="config_always_use_root_in_system">Usar root para operaciones privilegiadas</string>
+    <string name="config_always_use_root_in_system_desc">Cuando se ejecute como instalador del sistema, usa siempre root para operaciones privilegiadas, como flashear módulos y eliminar archivos</string>
+    <string name="config_installer_mode_self">Por defecto</string>
+    <string name="config_installer_mode_initiator">Iniciando app</string>
+    <string name="config_installer_mode_custom">Personalizado</string>
+    <string name="exception_uninstall_failed_device_policy">Desinstalación bloqueada por la política de dispositivos</string>
+    <string name="exception_uninstall_failed_owner_blocked">Desinstalación bloqueada por el propietario</string>
+    <string name="lab_mi_island_countdown">Duración del bloque XMSF (Solo Shizuku)</string>
+    <string name="lab_mi_island_countdown_desc">Establece cuánto tiempo se bloquea el acceso a la red XMSF usando Shizuku, no funcionará si Shizuku se activa usando root. ¡Cambia solo si entiendes el impacto!</string>
 </resources>

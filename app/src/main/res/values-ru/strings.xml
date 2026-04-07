@@ -714,4 +714,7 @@
     <string name="version_with_prefix_format">%1$s %2$s</string>
     <string name="exception_uninstall_failed_device_policy">Удаление заблокировано политикой устройства</string>
     <string name="exception_uninstall_failed_owner_blocked">Удаление заблокировано владельцем</string>
+    <string name="config_installer_mode_self">По умолчанию</string>
+    <string name="config_installer_mode_initiator">Запуск приложения</string>
+    <string name="config_installer_mode_custom">Пользовательский</string>
 </resources>
