@@ -591,7 +591,7 @@
     <string name="config_declare_install_requester_desc">По умолчанию используется приложение, инициировавшее установку, если выключено</string>
     <string name="config_declare_install_requester_error_desc">Пакет с указанным именем должен быть установлен</string>
     <string name="config_install_requester">Установка запрошена (имя пакета)</string>
-    <string name="config_declare_installer_desc">По умолчанию используется это приложение, если выключено</string>
+    <string name="config_declare_installer_desc">По умолчанию используется имя пакета этого приложения</string>
     <string name="config_display_module_extra_info_desc">Показывать больше инфо, если это модуль</string>
     <string name="config_display_size">Показывать размер пакета</string>
     <string name="config_display_size_desc">Отображать размер пакета в интерфейсе установки</string>
@@ -678,7 +678,7 @@
     <string name="exception_zip_exception">Не удалось открыть zip-архив как файл</string>
     <string name="installer_notification_desc">Уведомление фоновой службы</string>
     <string name="installer_live_channel_short_text_pending_install">В ожидании</string>
-    <string name="lab_mi_island_desc">Переопределение общего стиля уведомлений. Эта функция для обхода ограничений системной подписи сработает правильно, если авторизатором установлен Shizuku. Пользователи с root-правами могут включить её только после отключения проверки системной подписи</string>
+    <string name="lab_mi_island_desc">Общий стиль уведомлений. Системные ограничения автоматически обходятся только при использовании Shizuku, активированного через ADB. Пользователям с правами root (включая Shizuku с активацией root) необходимо вручную отключить ограничения.</string>
     <string name="lab_mi_island">Xiaomi Super Island</string>
     <string name="config_label_preferences">Дополнительные опции</string>
     <string name="config_apk_choose_all">Выбирать все APK по умолчанию</string>
@@ -708,8 +708,8 @@
     <string name="config_status_inactive">Неактивный</string>
     <string name="config_always_use_root_in_system">Root-права для привилегированных операций</string>
     <string name="config_always_use_root_in_system_desc">При запуске от имени системного установщика использовать root для привилегированных операций, таких как перепрошивка модулей и удаление файлов</string>
-    <string name="lab_mi_island_countdown">Период блока XMSF (только для Shizuku)</string>
-    <string name="lab_mi_island_countdown_desc">Период отключения XMSF от сети при использовании Shizuku, но не вступит в силу при использовании root для активации Shizuku. Изменяйте только в том случае, если вы понимаете последствия！</string>
+    <string name="lab_mi_island_countdown">Период блока XMSF (только для Shizuku через ADB)</string>
+    <string name="lab_mi_island_countdown_desc">Период отключения XMSF от сети. Применяется только с Shizuku, активированному через ADB; неэффективно с правами root. Изменяйте только в том случае, если вы понимаете последствия！</string>
     <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
     <string name="version_with_prefix_format">%1$s %2$s</string>
     <string name="exception_uninstall_failed_device_policy">Удаление заблокировано политикой устройства</string>
@@ -717,4 +717,5 @@
     <string name="config_installer_mode_self">По умолчанию</string>
     <string name="config_installer_mode_initiator">Запуск приложения</string>
     <string name="config_installer_mode_custom">Пользовательский</string>
+    <string name="installer_resolving_desc">Анализ устанавливаемого контента из входных данных…</string>
 </resources>

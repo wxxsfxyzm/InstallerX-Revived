@@ -622,7 +622,7 @@
     <string name="config_declare_install_requester_error_desc">De ingevoerde pakketnaam moet reeds geïnstalleerd zijn</string>
     <string name="config_install_requester">Installatie aangevraagd door (pakketnaam)</string>
     <string name="config_declare_install_requester">Installatieaanvrager aanpassen</string>
-    <string name="config_declare_installer_desc">Gebruikt standaard deze app wanneer uitgeschakeld</string>
+    <string name="config_declare_installer_desc">Gebruikt standaard dep pakketnaam van deze app</string>
     <string name="performance">Prestatie</string>
     <string name="uninstaller_settings">Verwijderaarsinstellingen</string>
     <string name="uninstaller_settings_desc">Verander de globale instellingen van de verwijderaar</string>
@@ -685,7 +685,7 @@
     <string name="exception_resolve_failed_link_not_valid">Deze link bevat geen geldig bestand</string>
     <string name="app_version_info_format">%1$s%2$s %3$s (%4$s)</string>
     <string name="lab_mi_island">Xiaomi Super Island</string>
-    <string name="lab_mi_island_desc">Globale meldingsstijl. Verificatie van systeemondertekening kan alleen omzeilt worden wanneer de autorisatiegever is ingesteld op Shizuku. Root-gebruikers kunnen dit meteen inschakelen nadat ze manueel de ondertekeningsrestricties hebben uitgeschakeld</string>
+    <string name="lab_mi_island_desc">Globale meldingsstijl. Systeemrestricties worden alleen omzeilt wanneer ADB-geactiveerde Shizuku wordt gebruikt. Root-gebruikers (inclusief ADB-geactiveerde Shizuku) moeten de restricties manueel uitschakelen</string>
     <string name="theme_settings_color_spec">Kleurspecificatie</string>
     <string name="theme_settings_color_spec_only_2021">De huidige palletstijl ondersteund alleen de 2021 specificatie</string>
     <string name="config_label_preferences">Voorkeuren</string>
@@ -710,8 +710,11 @@
     <string name="config_install_show_toast">Laat toast zien</string>
     <string name="config_install_show_toast_desc">Laat een toastbericht zien na installatie</string>
     <string name="batch_install_result_message">Meerdere installeren: %1$d/%2$d succesvol</string>
-    <string name="lab_mi_island_countdown">XMSF-blokkeringsduur (alleen Shizuku)</string>
-    <string name="lab_mi_island_countdown_desc">Stelt in hoe lang XMSF-netwerktoegang wordt geblokkeerd met Shizuku, werkt niet als Shizuku is geactiveerd met root. Verander dit alleen als je de gevolgen begrijpt!</string>
+    <string name="lab_mi_island_countdown">XMSF-blokkeringsduur (alleen ADB Shizuku)</string>
+    <string name="lab_mi_island_countdown_desc">Stelt de blokkeerduur van de XMSF-netwerktoegang in. Geldt alleen voor ADB-geactiveerde Shizuku; ineffectief bij Root-omgevingen. Verander dit alleen als je de gevolgen begrijpt!</string>
     <string name="exception_uninstall_failed_device_policy">Verwijderen geblokkeerd door apparaatbeleid</string>
     <string name="exception_uninstall_failed_owner_blocked">Verwijderen geblokkeerd door eigenaar</string>
+    <string name="config_installer_mode_self">Standaard</string>
+    <string name="config_installer_mode_initiator">App initialiseren</string>
+    <string name="config_installer_mode_custom">Aangepast</string>
 </resources>

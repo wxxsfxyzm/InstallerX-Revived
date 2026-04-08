@@ -20,7 +20,7 @@
     <string name="get_update">Güncellemeleri al</string>
     <string name="get_update_detail">Yazılım güncellemelerini ve yeni özellikleri kontrol edin</string>
     <string name="get_source_code">Kaynak kodunu kontrol et</string>
-    <string name="get_source_code_detail">Kaynak kodunu GitHub\'da kontrol et</string>
+    <string name="get_source_code_detail">GitHub\'ta kaynak kodunu kontrol edin</string>
     <string name="internet_access_enabled">Çevrimiçi</string>
     <string name="internet_access_disabled">Çevrimdışı</string>
     <string name="stable">Stabil sürüm</string>
@@ -32,8 +32,8 @@
     <string name="telegram_group">Telegram grubu</string>
     <string name="telegram_group_desc">Gruba katılın!</string>
     <string name="telegram_channel">Telegram Kanalı</string>
-    <string name="telegram_channel_desc">Haberler ve güncellemeler için kanala katıl!</string>
-    <string name="theme_settings">Tema ayarları</string>
+    <string name="telegram_channel_desc">Haberler ve güncellemeler için kanala katılın!</string>
+    <string name="theme_settings">Tema Ayarları</string>
     <string name="theme_settings_ui_style">Arayüz Stili</string>
     <string name="theme_settings_desc">Uygulamanın temasını değiştirin</string>
     <string name="theme_settings_miuix_ui">Miuix</string>
@@ -42,7 +42,7 @@
     <string name="theme_settings_google_ui">Google Materyal 3</string>
     <string name="theme_settings_ui_engine">Arayüz Motoru</string>
     <string name="theme_settings_use_expressive_ui">Etkileyici arayüzü kullan</string>
-    <string name="theme_settings_use_expressive_ui_desc">Yeni M3 etkileyici stilini kullan</string>
+    <string name="theme_settings_use_expressive_ui_desc">Yeni M3 Etkileyici stilini kullanın</string>
     <string name="theme_settings_google_ui_style">Google Kullanıcı Arayüzü stili</string>
     <string name="theme_settings_use_live_activity">Canlı Aktivite</string>
     <string name="theme_settings_use_live_activity_desc">Bildirimler yerine Canlı Aktivite kullanın, özel ROM\'larda desteklenmeyebilir</string>
@@ -510,7 +510,7 @@
     <string name="suggestion_bypass_low_target_sdk_desc">Geçici olarak kısıtlamaları atlatmaya izin ver ve yeniden dene</string>
     <string name="suggestion_bypass_blacklist_set_by_user_desc">Geçici olarak bir kez yüklemeye izin ver</string>
     <string name="suggestion_retry_install_desc">Tekrar yüklemeyi deneyin</string>
-    <string name="lab">Deneysel Özellikler</string>
+    <string name="lab">Laboratuvar</string>
     <string name="lab_desc">Deneysel ve geliştirici özelliklerine erişin</string>
     <string name="installer_install_module">Modülü Yükle</string>
     <string name="installer_installing_module">Modül Yükleniyor</string>
@@ -714,4 +714,7 @@
     <string name="lab_mi_island_countdown_desc">Shizuku kullanarak XMSF ağ erişiminin ne kadar süreyle engelleneceğini ayarlar. Sadece etkisini anlıyorsanız değiştirin!</string>
     <string name="exception_uninstall_failed_device_policy">Cihaz politikası nedeniyle kaldırma işlemi engellendi</string>
     <string name="exception_uninstall_failed_owner_blocked">Kullanıcı tarafından kaldırma işlemi engellendi</string>
+    <string name="config_installer_mode_self">Varsayılan</string>
+    <string name="config_installer_mode_initiator">Uygulama başlatılıyor</string>
+    <string name="config_installer_mode_custom">Özel</string>
 </resources>
