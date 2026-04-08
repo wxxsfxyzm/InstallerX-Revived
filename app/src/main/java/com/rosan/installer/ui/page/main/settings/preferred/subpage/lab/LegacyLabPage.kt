@@ -39,12 +39,12 @@ import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.page.main.settings.preferred.LabHttpProfileWidget
+import com.rosan.installer.ui.page.main.settings.preferred.LabRootImplementationWidget
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.RootImplementationSelectionDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
-import com.rosan.installer.ui.page.main.widget.setting.LabHttpProfileWidget
-import com.rosan.installer.ui.page.main.widget.setting.LabRootImplementationWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import org.koin.androidx.compose.koinViewModel

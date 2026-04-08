@@ -54,9 +54,9 @@ import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutAc
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
 import com.rosan.installer.ui.page.main.widget.util.LogEventCollector
+import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUpdateDialog
 import com.rosan.installer.ui.theme.getMiuixAppBarColor

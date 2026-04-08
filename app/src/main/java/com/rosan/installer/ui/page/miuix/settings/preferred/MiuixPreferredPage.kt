@@ -43,12 +43,6 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
-import com.rosan.installer.ui.page.miuix.widgets.MiuixAutoLockInstaller
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDefaultInstaller
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDisableAdbVerify
-import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationSetting
-import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect

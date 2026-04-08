@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2023-2026 InstallerX Revived contributors
-package com.rosan.installer.ui.page.main.widget.setting
+package com.rosan.installer.ui.page.main.settings.config.apply
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -38,7 +38,6 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewApp
 
 /**
  * A reusable item widget for displaying app information with a toggle switch.

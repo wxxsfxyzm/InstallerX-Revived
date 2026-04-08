@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2025-2026 InstallerX Revived contributors
-package com.rosan.installer.ui.page.miuix.widgets
+package com.rosan.installer.ui.page.miuix.settings.config.edit
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -28,6 +28,8 @@ import com.rosan.installer.domain.settings.model.PackageSource
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewState
+import com.rosan.installer.ui.page.miuix.widgets.MiuixHintTextField
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.util.isDhizukuActive
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.SpinnerEntry

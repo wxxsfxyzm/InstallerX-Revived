@@ -48,12 +48,12 @@ import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
+import com.rosan.installer.ui.page.main.settings.preferred.BottomSheetContent
+import com.rosan.installer.ui.page.main.settings.preferred.ExportLogsWidget
+import com.rosan.installer.ui.page.main.settings.preferred.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.card.StatusWidget
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
-import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
-import com.rosan.installer.ui.page.main.widget.setting.ExportLogsWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
-import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
 import com.rosan.installer.ui.page.main.widget.util.LogEventCollector

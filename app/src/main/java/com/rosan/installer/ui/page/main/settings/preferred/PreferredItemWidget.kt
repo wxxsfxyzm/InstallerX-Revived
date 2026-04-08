@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
-package com.rosan.installer.ui.page.main.widget.setting
+package com.rosan.installer.ui.page.main.settings.preferred
 
 import androidx.annotation.StringRes
 import androidx.biometric.BiometricManager
@@ -82,6 +82,9 @@ import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.ThemeSe
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.ThemeSettingsViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsViewModel
+import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
+import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
+import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
 import com.rosan.installer.util.hasFlag
