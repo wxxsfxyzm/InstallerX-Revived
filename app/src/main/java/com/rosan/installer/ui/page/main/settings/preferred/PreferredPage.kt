@@ -24,9 +24,12 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -139,10 +142,20 @@ fun PreferredPage(
             )
         },
         snackbarHost = {
-            SnackbarHost(
-                modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding()),
-                hostState = snackBarHostState
-            )
+            val state = rememberSwipeToDismissBoxState()
+            LaunchedEffect(snackBarHostState.currentSnackbarData) {
+                state.snapTo(SwipeToDismissBoxValue.Settled)
+            }
+
+            SwipeToDismissBox(
+                state = state,
+                backgroundContent = {}
+            ) {
+                SnackbarHost(
+                    modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding()),
+                    hostState = snackBarHostState
+                )
+            }
         },
     ) { paddingValues ->
         LazyColumn(
