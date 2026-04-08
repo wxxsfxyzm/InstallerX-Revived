@@ -26,8 +26,8 @@ import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewEvent
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.about.AboutEvent
+import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.flow.collectLatest
 

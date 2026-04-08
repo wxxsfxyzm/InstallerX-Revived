@@ -59,28 +59,31 @@ import com.rosan.installer.ui.page.main.settings.config.apply.NewApplyPage
 import com.rosan.installer.ui.page.main.settings.config.edit.EditPage
 import com.rosan.installer.ui.page.main.settings.config.edit.NewEditPage
 import com.rosan.installer.ui.page.main.settings.main.MainPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.NewAboutPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.OpenSourceLicensePage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.LegacyInstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.installer.NewInstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.LegacyLabPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.lab.NewLabPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.LegacyThemeSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.theme.NewThemeSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.LegacyUninstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.NewUninstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.about.AboutPage
+import com.rosan.installer.ui.page.main.settings.preferred.about.NewAboutPage
+import com.rosan.installer.ui.page.main.settings.preferred.about.OpenSourceLicensePage
+import com.rosan.installer.ui.page.main.settings.preferred.installer.LegacyInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.installer.NewInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NewNotificationSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.lab.LegacyLabPage
+import com.rosan.installer.ui.page.main.settings.preferred.lab.NewLabPage
+import com.rosan.installer.ui.page.main.settings.preferred.theme.LegacyThemeSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.theme.NewThemeSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.LegacyUninstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.NewUninstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.SettingsCompactLayout
 import com.rosan.installer.ui.page.miuix.settings.SettingsWideScreenLayout
 import com.rosan.installer.ui.page.miuix.settings.config.apply.MiuixApplyPage
 import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.about.MiuixAboutPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.about.MiuixBlendAboutPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.about.ossLicensePage.MiuixOpenSourceLicensePage
-import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.installer.MiuixInstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.lab.MiuixLabPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.theme.MiuixThemeSettingsPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.subpage.uninstaller.MiuixUninstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.about.MiuixAboutPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.about.MiuixBlendAboutPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.about.ossLicensePage.MiuixOpenSourceLicensePage
+import com.rosan.installer.ui.page.miuix.settings.preferred.installer.MiuixInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.installer.notification.MiuixNotificationSettingsPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.lab.MiuixLabPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.theme.MiuixThemeSettingsPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.uninstaller.MiuixUninstallerGlobalSettingsPage
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import com.rosan.installer.ui.util.WindowLayoutType
@@ -280,6 +283,17 @@ fun InstallerNavContainer(
                                 NewInstallerGlobalSettingsPage()
                             } else {
                                 LegacyInstallerGlobalSettingsPage()
+                            }
+                        }
+                    }
+                    entry<Route.NotificationSettings> {
+                        if (uiState.useMiuix) {
+                            MiuixNotificationSettingsPage()
+                        } else {
+                            if (isExpressive) {
+                                NewNotificationSettingsPage()
+                            } else {
+                                NotificationSettingsPage()
                             }
                         }
                     }

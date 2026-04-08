@@ -50,8 +50,8 @@ import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.SharedUid
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsAction
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.uninstaller.UninstallerSettingsViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.UninstallerSettingsAction
+import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.UninstallerSettingsViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeColorSpec

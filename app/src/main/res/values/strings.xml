@@ -760,4 +760,12 @@
     <string name="lab_mi_island_countdown_desc">Sets the XMSF network block duration. Only applies to ADB-activated Shizuku; ineffective under Root environments. Modify only if you understand the consequences!</string>
     <string name="lab_tap_icon_to_share">Tap icon to share apk</string>
     <string name="lab_tap_icon_to_share_desc">Tap icon on the prepare page to share apk</string>
+    <string name="notification_settings">Notification Settings</string>
+    <string name="notification_settings_desc">Customize the appearance of installation progress notifications</string>
+    <string name="notification_style">Notification Style</string>
+    <string name="notification_style_desc">Select the display style for progress notifications</string>
+    <string name="notification_style_standard">Android Notification</string>
+    <string name="notification_style_live_activity">Android Live Activity</string>
+    <string name="notification_style_mi_island">Xiaomi Mi Island</string>
+    <string name="notification_style_unsupported_desc">Your Android version does not support advanced notification styles.</string>
 </resources>

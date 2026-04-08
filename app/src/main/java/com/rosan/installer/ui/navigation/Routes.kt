@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.ui.navigation
 
 import android.os.Parcelable
@@ -29,6 +31,10 @@ sealed interface Route : NavKey, Parcelable {
     @Parcelize
     @Serializable
     data object InstallerGlobal : Route
+
+    @Parcelize
+    @Serializable
+    data object NotificationSettings : Route
 
     @Parcelize
     @Serializable

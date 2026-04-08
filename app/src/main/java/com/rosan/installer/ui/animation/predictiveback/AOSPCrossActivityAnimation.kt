@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 wxxsfxyzm
 package com.rosan.installer.ui.animation.predictiveback
 
 import androidx.compose.animation.AnimatedContentTransitionScope
