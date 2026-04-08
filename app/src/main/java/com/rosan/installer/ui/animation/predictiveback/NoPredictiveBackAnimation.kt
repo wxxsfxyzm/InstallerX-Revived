@@ -36,7 +36,12 @@ class NoPredictiveBackAnimation : PredictiveBackAnimationHandler {
     ): Modifier {
         val navigator = LocalNavigator.current
 
-        BackHandler {
+        // Determine if there are pages to pop.
+        val canPop = navigator.backStack.size > 1
+
+        // Only intercept the back button when we can actually pop.
+        // If enabled is false, the system handles the back press (e.g., exits the Activity).
+        BackHandler(enabled = canPop) {
             navigator.pop()
         }
 
