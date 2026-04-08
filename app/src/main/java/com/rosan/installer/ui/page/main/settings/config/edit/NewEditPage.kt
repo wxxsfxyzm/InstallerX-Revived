@@ -208,7 +208,10 @@ fun NewEditPage(
 
             SwipeToDismissBox(
                 state = state,
-                backgroundContent = {}
+                backgroundContent = {},
+                onDismiss = {
+                    snackBarHostState.currentSnackbarData?.dismiss()
+                }
             ) {
                 SnackbarHost(hostState = snackBarHostState)
             }

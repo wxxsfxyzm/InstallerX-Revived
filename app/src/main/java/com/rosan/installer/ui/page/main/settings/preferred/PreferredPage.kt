@@ -149,7 +149,10 @@ fun PreferredPage(
 
             SwipeToDismissBox(
                 state = state,
-                backgroundContent = {}
+                backgroundContent = {},
+                onDismiss = {
+                    snackBarHostState.currentSnackbarData?.dismiss()
+                }
             ) {
                 SnackbarHost(
                     modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding()),

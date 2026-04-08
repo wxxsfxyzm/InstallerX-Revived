@@ -165,7 +165,10 @@ fun NewAllPage(
 
             SwipeToDismissBox(
                 state = state,
-                backgroundContent = {}
+                backgroundContent = {},
+                onDismiss = {
+                    snackBarHostState.currentSnackbarData?.dismiss()
+                }
             ) {
                 SnackbarHost(hostState = snackBarHostState)
             }
