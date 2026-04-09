@@ -33,7 +33,7 @@ okhttp = "5.3.2"
 monetcompat = "0.4.1"
 materialKolor = "5.0.0-alpha07"
 backdrop = "1.0.6"
-navigation3 = "1.1.0-rc01"
+navigation3 = "1.1.0"
 navigationevent = "1.0.2"
 lifecycle = "2.10.0"
 
