@@ -737,9 +737,8 @@
     <string name="lab_set_install_requester">设置安装请求方</string>
     <string name="lab_set_install_requester_desc">向安装会话填写 OriginatingUid 字段来记录发起安装的应用，匹配系统包管理器行为</string>
     <string name="lab_mi_island">小米超级岛</string>
-    <string name="lab_mi_island_desc">覆盖全局通知样式。仅 ADB 激活的 Shizuku 可自动绕过系统限制；使用 Root（含 Root 激活的 Shizuku）需自行解除限制</string>
-    <string name="lab_mi_island_countdown">XMSF 断网时长（仅限 ADB Shizuku）</string>
-    <string name="lab_mi_island_countdown_desc">设置 XMSF 断网时长。仅对 ADB 激活的 Shizuku 生效，Root 环境下无效。请仅在明确影响时修改！</string>
+    <string name="lab_mi_island_countdown">XMSF 断网时长</string>
+    <string name="lab_mi_island_countdown_desc">设置 XMSF 断网时长。仅对 Shizuku 生效。请仅在明确影响时修改！</string>
     <string name="lab_tap_icon_to_share">点击图标分享安装包</string>
     <string name="lab_tap_icon_to_share_desc">在安装准备界面点击应用图标即可分享安装包</string>
     <string name="notification_settings">通知设置</string>
@@ -750,4 +749,8 @@
     <string name="notification_style_live_activity">实时活动通知</string>
     <string name="notification_style_mi_island">小米超级岛</string>
     <string name="notification_style_unsupported_desc">仅支持标准通知样式</string>
+    <string name="lab_mi_island_bypass_restriction">绕过超级岛限制（仅 Shizuku）</string>
+    <string name="lab_mi_island_bypass_restriction_desc">绕过超级岛系统签名验证限制</string>
+    <string name="lab_mi_island_outer_glow">外发光效果</string>
+    <string name="lab_mi_island_outer_glow_desc">为灵动岛边缘添加类似系统应用的外发光特效</string>
 </resources>

@@ -133,18 +133,20 @@ fun NotificationSettingsPage(
                     exit = fadeOut() + shrinkVertically()
                 ) {
                     SwitchWidget(
-                        icon = AppIcons.BugReport,
-                        title = "Bypass Mi Island Restriction",
-                        description = "Bypass verification restriction for Mi Island",
-                        checked = true,
+                        icon = AppIcons.Bypass,
+                        title = stringResource(id = R.string.lab_mi_island_bypass_restriction),
+                        description = stringResource(id = R.string.lab_mi_island_bypass_restriction_desc),
+                        checked = uiState.miIslandBypassRestriction,
                         isM3E = false,
-                        onCheckedChange = {}
+                        onCheckedChange = {
+                            viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBypassRestriction(it))
+                        }
                     )
                 }
             }
             item {
                 AnimatedVisibility(
-                    visible = activeStyle == NotificationStyle.MI_ISLAND,
+                    visible = activeStyle == NotificationStyle.MI_ISLAND && uiState.miIslandBypassRestriction,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
@@ -168,12 +170,14 @@ fun NotificationSettingsPage(
                     exit = fadeOut() + shrinkVertically()
                 ) {
                     SwitchWidget(
-                        icon = AppIcons.BugReport,
-                        title = "Outer Glow",
-                        description = "Add a system-app-style glow effect to the edge of Super Island",
-                        checked = true,
+                        icon = AppIcons.Glow,
+                        title = stringResource(id = R.string.lab_mi_island_outer_glow),
+                        description = stringResource(id = R.string.lab_mi_island_outer_glow_desc),
+                        checked = uiState.miIslandOuterGlow,
                         isM3E = false,
-                        onCheckedChange = {}
+                        onCheckedChange = {
+                            viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandOuterGlow(it))
+                        }
                     )
                 }
             }

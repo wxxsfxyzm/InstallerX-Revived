@@ -167,14 +167,16 @@ fun NewNotificationSettingsPage(
                     }
                     item(visible = activeStyle == NotificationStyle.MI_ISLAND) {
                         SwitchWidget(
-                            icon = AppIcons.BugReport,
-                            title = "Bypass Mi Island Restriction",
-                            description = "Bypass verification restriction for Mi Island",
-                            checked = true,
-                            onCheckedChange = {}
+                            icon = AppIcons.Bypass,
+                            title = stringResource(id = R.string.lab_mi_island_bypass_restriction),
+                            description = stringResource(id = R.string.lab_mi_island_bypass_restriction_desc),
+                            checked = uiState.miIslandBypassRestriction,
+                            onCheckedChange = {
+                                viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBypassRestriction(it))
+                            }
                         )
                     }
-                    item(visible = activeStyle == NotificationStyle.MI_ISLAND) {
+                    item(visible = activeStyle == NotificationStyle.MI_ISLAND && uiState.miIslandBypassRestriction) {
                         IntNumberPickerWidget(
                             icon = AppIcons.StopWatch,
                             title = stringResource(R.string.lab_mi_island_countdown),
@@ -189,11 +191,13 @@ fun NewNotificationSettingsPage(
                     }
                     item(visible = activeStyle == NotificationStyle.MI_ISLAND) {
                         SwitchWidget(
-                            icon = AppIcons.BugReport,
-                            title = "Falshing Lights",
-                            description = "Add a system-app-style glow effect to the edge of Super Island",
-                            checked = true,
-                            onCheckedChange = {}
+                            icon = AppIcons.Glow,
+                            title = stringResource(id = R.string.lab_mi_island_outer_glow),
+                            description = stringResource(id = R.string.lab_mi_island_outer_glow_desc),
+                            checked = uiState.miIslandOuterGlow,
+                            onCheckedChange = {
+                                viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandOuterGlow(it))
+                            }
                         )
                     }
                 }

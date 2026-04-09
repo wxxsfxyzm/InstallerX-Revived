@@ -597,7 +597,6 @@
     <string name="exception_http_not_allowed">HTTP dạng văn bản thuần không được phép</string>
     <string name="lab_set_install_requester_desc">Điền vào trường OriginatingUid với gói gọi để khớp với hành vi hệ thống</string>
     <string name="lab_mi_island">Siêu Đảo Mi</string>
-    <string name="lab_mi_island_desc">Kiểu thông báo toàn cầu. Xác minh chữ ký hệ thống chỉ có thể được bỏ qua khi ứng dụng xác thực tùy chỉnh được đặt thành Shizuku. Người dùng root có thể bật cái này trực tiếp sau khi tắt thủ công các hạn chế chữ ký</string>
     <string name="lab_tap_icon_to_share">Nhấn vào biểu tượng để chia sẻ apk</string>
     <string name="lab_tap_icon_to_share_desc">Nhấn vào biểu tượng trên trang chuẩn bị để chia sẻ apk</string>
     <string name="error_no_package_to_uninstall">Không có gói nào để gỡ cài đặt</string>

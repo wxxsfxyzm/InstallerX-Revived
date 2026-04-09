@@ -60,6 +60,8 @@ class AppSettingsRepositoryImpl(
             appDataStore.getBoolean(AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH, false),
             appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false),
             appDataStore.getBoolean(AppDataStore.SHOW_MI_ISLAND, false),
+            appDataStore.getBoolean(AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION, false),
+            appDataStore.getBoolean(AppDataStore.SHOW_MI_ISLAND_OUTER_GLOW, true),
             appDataStore.getInt(AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS, 100),
             appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER, false),
             appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false),
@@ -130,6 +132,8 @@ class AppSettingsRepositoryImpl(
             uninstallerRequireBiometricAuth = values[idx++] as Boolean,
             showLiveActivity = values[idx++] as Boolean,
             useMiIsland = values[idx++] as Boolean,
+            useMiIslandBypassRestriction = values[idx++] as Boolean,
+            useMiIslandOuterGlow = values[idx++] as Boolean,
             useMiIslandBlockingIntervalMs = values[idx++] as Int,
             autoLockInstaller = values[idx++] as Boolean,
             autoSilentInstall = values[idx++] as Boolean,
@@ -254,6 +258,8 @@ class AppSettingsRepositoryImpl(
             BooleanSetting.LiveActivityDynColorFollowPkgIcon -> AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON
             BooleanSetting.ShowLiveActivity -> AppDataStore.SHOW_LIVE_ACTIVITY
             BooleanSetting.ShowMiIsland -> AppDataStore.SHOW_MI_ISLAND
+            BooleanSetting.ShowMiIslandBypassRestriction -> AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION
+            BooleanSetting.ShowMiIslandOuterGlow -> AppDataStore.SHOW_MI_ISLAND_OUTER_GLOW
             BooleanSetting.AlwaysUseRootInSystem -> AppDataStore.ALWAYS_USE_ROOT_IN_SYSTEM
             BooleanSetting.InstallerRequireBiometricAuth -> AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH
             BooleanSetting.UninstallerRequireBiometricAuth -> AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH

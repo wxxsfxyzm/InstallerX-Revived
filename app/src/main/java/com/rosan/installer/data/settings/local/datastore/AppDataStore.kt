@@ -41,6 +41,8 @@ class AppDataStore(
 
         // Show Mi Island
         val SHOW_MI_ISLAND = booleanPreferencesKey("show_mi_island")
+        val SHOW_MI_ISLAND_BYPASS_RESTRICTION = booleanPreferencesKey("show_mi_island_bypass_restriction")
+        val SHOW_MI_ISLAND_OUTER_GLOW = booleanPreferencesKey("show_mi_island_outer_glow")
 
         // The duration to keep the network blocked to bypass Xiaomi's notification scanner
         val SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS = intPreferencesKey("show_mi_island_blocking_interval")

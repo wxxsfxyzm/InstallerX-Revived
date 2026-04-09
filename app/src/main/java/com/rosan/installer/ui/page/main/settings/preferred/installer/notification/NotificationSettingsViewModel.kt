@@ -23,6 +23,8 @@ class NotificationSettingsViewModel(
         NotificationSettingsState(
             showLiveActivity = prefs.showLiveActivity,
             showMiIsland = prefs.useMiIsland,
+            miIslandBypassRestriction = prefs.useMiIslandBypassRestriction,
+            miIslandOuterGlow = prefs.useMiIslandOuterGlow,
             successAutoClearSeconds = prefs.notificationSuccessAutoClearSeconds,
             showDialogOnPress = prefs.showDialogWhenPressingNotification,
             miIslandBlockingInterval = prefs.useMiIslandBlockingIntervalMs
@@ -60,6 +62,14 @@ class NotificationSettingsViewModel(
 
             is NotificationSettingsAction.ChangeShowDialogOnPress -> viewModelScope.launch {
                 updateSetting(BooleanSetting.ShowDialogWhenPressingNotification, action.show)
+            }
+
+            is NotificationSettingsAction.ChangeMiIslandBypassRestriction -> viewModelScope.launch {
+                updateSetting(BooleanSetting.ShowMiIslandBypassRestriction, action.bypass)
+            }
+
+            is NotificationSettingsAction.ChangeMiIslandOuterGlow -> viewModelScope.launch {
+                updateSetting(BooleanSetting.ShowMiIslandOuterGlow, action.glow)
             }
 
             is NotificationSettingsAction.ChangeMiIslandBlockingInterval -> viewModelScope.launch {

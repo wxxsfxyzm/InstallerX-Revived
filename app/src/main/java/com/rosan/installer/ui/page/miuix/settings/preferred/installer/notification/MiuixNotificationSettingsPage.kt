@@ -152,10 +152,24 @@ fun MiuixNotificationSettingsPage(
                             viewModel.dispatch(NotificationSettingsAction.ChangeStyle(selectedStyle))
                         }
                     )
-
-                    // 2. Mi Island network blocking duration (animated visibility)
+                    // 2. Mi Island bypass restriction (animated visibility)
                     AnimatedVisibility(
                         visible = activeStyle == NotificationStyle.MI_ISLAND,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(id = R.string.lab_mi_island_bypass_restriction),
+                            description = stringResource(id = R.string.lab_mi_island_bypass_restriction_desc),
+                            checked = uiState.miIslandBypassRestriction,
+                            onCheckedChange = {
+                                viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBypassRestriction(it))
+                            }
+                        )
+                    }
+                    // 3. Mi Island network blocking duration (animated visibility)
+                    AnimatedVisibility(
+                        visible = activeStyle == NotificationStyle.MI_ISLAND && uiState.miIslandBypassRestriction,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
@@ -168,6 +182,21 @@ fun MiuixNotificationSettingsPage(
                         ) {
                             viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBlockingInterval(it))
                         }
+                    }
+                    // 4. Mi Island outer glow (animated visibility)
+                    AnimatedVisibility(
+                        visible = activeStyle == NotificationStyle.MI_ISLAND,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(id = R.string.lab_mi_island_outer_glow),
+                            description = stringResource(id = R.string.lab_mi_island_outer_glow_desc),
+                            checked = uiState.miIslandOuterGlow,
+                            onCheckedChange = {
+                                viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandOuterGlow(it))
+                            }
+                        )
                     }
                 }
             }

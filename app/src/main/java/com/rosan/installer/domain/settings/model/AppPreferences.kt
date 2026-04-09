@@ -26,6 +26,8 @@ data class AppPreferences(
     val uninstallerRequireBiometricAuth: Boolean,
     val showLiveActivity: Boolean,
     val useMiIsland: Boolean,
+    val useMiIslandBypassRestriction: Boolean,
+    val useMiIslandOuterGlow: Boolean,
     val useMiIslandBlockingIntervalMs: Int,
     val autoLockInstaller: Boolean,
     val autoSilentInstall: Boolean,

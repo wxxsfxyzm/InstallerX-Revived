@@ -5,6 +5,8 @@ package com.rosan.installer.ui.page.main.settings.preferred.installer.notificati
 data class NotificationSettingsState(
     val showLiveActivity: Boolean = false,
     val showMiIsland: Boolean = false,
+    val miIslandBypassRestriction: Boolean = false,
+    val miIslandOuterGlow: Boolean = true,
     val successAutoClearSeconds: Int = 10,
     val showDialogOnPress: Boolean = false,
     val miIslandBlockingInterval: Int = 100

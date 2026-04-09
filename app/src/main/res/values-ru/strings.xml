@@ -678,7 +678,6 @@
     <string name="exception_zip_exception">Не удалось открыть zip-архив как файл</string>
     <string name="installer_notification_desc">Уведомление фоновой службы</string>
     <string name="installer_live_channel_short_text_pending_install">В ожидании</string>
-    <string name="lab_mi_island_desc">Переопределение общего стиля уведомлений. Эта функция для обхода ограничений системной подписи сработает правильно, если авторизатором установлен Shizuku. Пользователи с root-правами могут включить её только после отключения проверки системной подписи</string>
     <string name="lab_mi_island">Xiaomi Super Island</string>
     <string name="config_label_preferences">Дополнительные опции</string>
     <string name="config_apk_choose_all">Выбирать все APK по умолчанию</string>

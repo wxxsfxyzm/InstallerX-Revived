@@ -40,6 +40,8 @@ enum class BooleanSetting {
     LiveActivityDynColorFollowPkgIcon,
     ShowLiveActivity,
     ShowMiIsland,
+    ShowMiIslandBypassRestriction,
+    ShowMiIslandOuterGlow,
     AlwaysUseRootInSystem,
     InstallerRequireBiometricAuth,
     UninstallerRequireBiometricAuth,

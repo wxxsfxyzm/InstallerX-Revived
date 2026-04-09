@@ -53,6 +53,7 @@ import androidx.compose.material.icons.twotone.Face
 import androidx.compose.material.icons.twotone.Favorite
 import androidx.compose.material.icons.twotone.FavoriteBorder
 import androidx.compose.material.icons.twotone.FindInPage
+import androidx.compose.material.icons.twotone.Flare
 import androidx.compose.material.icons.twotone.History
 import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
@@ -61,6 +62,7 @@ import androidx.compose.material.icons.twotone.KeyboardArrowDown
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.LocalPolice
 import androidx.compose.material.icons.twotone.Memory
+import androidx.compose.material.icons.twotone.NoEncryption
 import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.PermDeviceInformation
 import androidx.compose.material.icons.twotone.Refresh
@@ -161,6 +163,8 @@ object AppIcons {
     val Silent = Icons.TwoTone.DoNotDisturbOnTotalSilence
     val OEMSpecial = Icons.TwoTone.FindInPage
     val ShowSize = Icons.AutoMirrored.Filled.CompareArrows
+    val Bypass = Icons.TwoTone.NoEncryption
+    val Glow = Icons.TwoTone.Flare
     // --- 设置图标结束 ---
 
     // --- Profile pkg 图标集合 ---
