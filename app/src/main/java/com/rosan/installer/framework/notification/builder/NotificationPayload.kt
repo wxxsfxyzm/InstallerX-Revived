@@ -23,7 +23,8 @@ data class InstallState(
 data class UserSettings(
     val showDialog: Boolean,
     val preferSystemIcon: Boolean,
-    val preferDynamicColor: Boolean
+    val preferDynamicColor: Boolean,
+    val miIslandOuterGlow: Boolean
 )
 
 data class AnimationContext(

@@ -693,7 +693,6 @@
     <string name="config_apk_choose_all">Selecionar todos os APKs por padrão durante uma instalação em lote</string>
     <string name="config_apk_choose_all_desc">Selecionar todos os APKs por padrão para sessões com vários arquivos.</string>
     <string name="lab_mi_island">Mi Super Island</string>
-    <string name="lab_mi_island_desc">Estilo de notificação global. A verificação da assinatura do sistema só pode ser ignorada quando o autenticador de aplicativos personalizado estiver definido como Shizuku. Os usuários root podem ativar isso diretamente após desativar manualmente as restrições de assinatura</string>
     <string name="exception_install_parse_failed_bad_shared_user_id">Apps não pré-carregados são proibidos de usar o UID compartilhado do sistema</string>
     <string name="installer_xposed_min_api">API Mín:</string>
     <string name="installer_xposed_target_api">API Alvo:</string>

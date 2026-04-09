@@ -12,6 +12,8 @@ import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.HttpProfile
 import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage
+import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.RootMode
 import com.rosan.installer.domain.settings.model.SharedUid
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
@@ -57,6 +59,10 @@ class AppSettingsRepositoryImpl(
             appDataStore.getBoolean(AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH, false),
             appDataStore.getBoolean(AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH, false),
             appDataStore.getBoolean(AppDataStore.SHOW_LIVE_ACTIVITY, false),
+            appDataStore.getBoolean(AppDataStore.SHOW_MI_ISLAND, false),
+            appDataStore.getBoolean(AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION, false),
+            appDataStore.getBoolean(AppDataStore.SHOW_MI_ISLAND_OUTER_GLOW, true),
+            appDataStore.getInt(AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS, 100),
             appDataStore.getBoolean(AppDataStore.AUTO_LOCK_INSTALLER, false),
             appDataStore.getBoolean(AppDataStore.DIALOG_AUTO_SILENT_INSTALL, false),
             appDataStore.getBoolean(AppDataStore.UI_USE_MIUIX, false),
@@ -75,8 +81,6 @@ class AppSettingsRepositoryImpl(
             appDataStore.getBoolean(AppDataStore.LAB_ENABLE_MODULE_FLASH, false),
             appDataStore.getBoolean(AppDataStore.LAB_MODULE_FLASH_SHOW_ART, true),
             appDataStore.getString(AppDataStore.LAB_ROOT_IMPLEMENTATION, "Default"),
-            appDataStore.getBoolean(AppDataStore.SHOW_MI_ISLAND, false),
-            appDataStore.getInt(AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS, 100),
             appDataStore.getString(AppDataStore.LAB_HTTP_PROFILE, "Default"),
             appDataStore.getBoolean(AppDataStore.LAB_HTTP_SAVE_FILE, false),
             appDataStore.getBoolean(AppDataStore.LAB_SET_INSTALL_REQUESTER, false),
@@ -93,7 +97,9 @@ class AppSettingsRepositoryImpl(
             appDataStore.getInt(AppDataStore.THEME_SEED_COLOR, PresetColors.first().color.toArgb()),
             appDataStore.getBoolean(AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON, false),
             appDataStore.getBoolean(AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON, false),
-            appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            appDataStore.getBoolean(AppDataStore.UI_USE_BLUR, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+            appDataStore.getString(AppDataStore.PREDICTIVE_BACK_ANIMATION, PredictiveBackAnimation.Scale.value),
+            appDataStore.getString(AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION, PredictiveBackExitDirection.ALWAYS_RIGHT.value)
         )
     ) { values: Array<Any?> ->
         var idx = 0
@@ -125,6 +131,10 @@ class AppSettingsRepositoryImpl(
             installerRequireBiometricAuth = values[idx++] as Boolean,
             uninstallerRequireBiometricAuth = values[idx++] as Boolean,
             showLiveActivity = values[idx++] as Boolean,
+            useMiIsland = values[idx++] as Boolean,
+            useMiIslandBypassRestriction = values[idx++] as Boolean,
+            useMiIslandOuterGlow = values[idx++] as Boolean,
+            useMiIslandBlockingIntervalMs = values[idx++] as Int,
             autoLockInstaller = values[idx++] as Boolean,
             autoSilentInstall = values[idx++] as Boolean,
             showMiuixUI = values[idx++] as Boolean,
@@ -140,8 +150,6 @@ class AppSettingsRepositoryImpl(
             labRootEnableModuleFlash = values[idx++] as Boolean,
             labRootShowModuleArt = values[idx++] as Boolean,
             labRootMode = RootMode.fromString(values[idx++] as String),
-            labUseMiIsland = values[idx++] as Boolean,
-            labUseMiIslandBlockingIntervalMs = values[idx++] as Int,
             labHttpProfile = HttpProfile.fromString(values[idx++] as String),
             labHttpSaveFile = values[idx++] as Boolean,
             labSetInstallRequester = values[idx++] as Boolean,
@@ -157,7 +165,17 @@ class AppSettingsRepositoryImpl(
             seedColorInt = values[idx++] as Int,
             useDynColorFollowPkgIcon = values[idx++] as Boolean,
             useDynColorFollowPkgIconForLiveActivity = values[idx++] as Boolean,
-            useBlur = values[idx++] as Boolean
+            useBlur = values[idx++] as Boolean,
+            predictiveBackAnimation = run {
+                val value = values[idx++] as String
+                PredictiveBackAnimation.entries.find { it.value == value }
+                    ?: PredictiveBackAnimation.Scale
+            },
+            predictiveBackExitDirection = run {
+                val value = values[idx++] as String
+                PredictiveBackExitDirection.entries.find { it.value == value }
+                    ?: PredictiveBackExitDirection.ALWAYS_RIGHT
+            }
         )
     }.shareIn(
         scope = appScope,
@@ -215,6 +233,8 @@ class AppSettingsRepositoryImpl(
             StringSetting.ApplyOrderType -> AppDataStore.APPLY_ORDER_TYPE
             StringSetting.LabRootImplementation -> AppDataStore.LAB_ROOT_IMPLEMENTATION
             StringSetting.LabHttpProfile -> AppDataStore.LAB_HTTP_PROFILE
+            StringSetting.PredictiveBackAnimation -> AppDataStore.PREDICTIVE_BACK_ANIMATION
+            StringSetting.PredictiveBackExitDirection -> AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION
         }
 
     private fun intKey(setting: IntSetting): Preferences.Key<Int> =
@@ -238,6 +258,8 @@ class AppSettingsRepositoryImpl(
             BooleanSetting.LiveActivityDynColorFollowPkgIcon -> AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON
             BooleanSetting.ShowLiveActivity -> AppDataStore.SHOW_LIVE_ACTIVITY
             BooleanSetting.ShowMiIsland -> AppDataStore.SHOW_MI_ISLAND
+            BooleanSetting.ShowMiIslandBypassRestriction -> AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION
+            BooleanSetting.ShowMiIslandOuterGlow -> AppDataStore.SHOW_MI_ISLAND_OUTER_GLOW
             BooleanSetting.AlwaysUseRootInSystem -> AppDataStore.ALWAYS_USE_ROOT_IN_SYSTEM
             BooleanSetting.InstallerRequireBiometricAuth -> AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH
             BooleanSetting.UninstallerRequireBiometricAuth -> AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH

@@ -46,22 +46,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.SettingsScreen
+import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
-import com.rosan.installer.ui.page.main.widget.setting.AutoLockInstaller
-import com.rosan.installer.ui.page.main.widget.setting.DefaultInstaller
-import com.rosan.installer.ui.page.main.widget.setting.DisableAdbVerify
-import com.rosan.installer.ui.page.main.widget.setting.IgnoreBatteryOptimizationSetting
-import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
-import com.rosan.installer.ui.page.main.widget.setting.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.theme.getM3TopBarColor
@@ -77,11 +71,11 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewPreferredPage(
-    navController: NavController,
     viewModel: PreferredViewModel = koinViewModel(),
     outerPadding: PaddingValues = PaddingValues(0.dp),
     hazeState: HazeState? = null
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
@@ -192,7 +186,9 @@ fun NewPreferredPage(
                             icon = AppIcons.Theme,
                             title = stringResource(R.string.theme_settings),
                             description = stringResource(R.string.theme_settings_desc),
-                            onClick = { navController.navigate(SettingsScreen.Theme.route) }
+                            onClick = {
+                                navigator.push(Route.Theme)
+                            }
                         )
                     }
                     item {
@@ -200,7 +196,9 @@ fun NewPreferredPage(
                             icon = AppIcons.InstallMode,
                             title = stringResource(R.string.installer_settings),
                             description = stringResource(R.string.installer_settings_desc),
-                            onClick = { navController.navigate(SettingsScreen.InstallerGlobal.route) }
+                            onClick = {
+                                navigator.push(Route.InstallerGlobal)
+                            }
                         )
                     }
                     item {
@@ -208,7 +206,9 @@ fun NewPreferredPage(
                             icon = AppIcons.Delete,
                             title = stringResource(R.string.uninstaller_settings),
                             description = stringResource(R.string.uninstaller_settings_desc),
-                            onClick = { navController.navigate(SettingsScreen.UninstallerGlobal.route) }
+                            onClick = {
+                                navigator.push(Route.UninstallerGlobal)
+                            }
                         )
                     }
                 }
@@ -273,7 +273,9 @@ fun NewPreferredPage(
                             imageVector = AppIcons.Lab,
                             headlineContentText = stringResource(R.string.lab),
                             supportingContentText = stringResource(R.string.lab_desc),
-                            onClick = { navController.navigate(SettingsScreen.Lab.route) }
+                            onClick = {
+                                navigator.push(Route.Lab)
+                            }
                         )
                     }
                     item {
@@ -285,7 +287,9 @@ fun NewPreferredPage(
                                 uiState.remoteVersion
                             ) else "$revLevel ${AppConfig.VERSION_NAME}",
                             supportingContentColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            onClick = { navController.navigate(SettingsScreen.About.route) }
+                            onClick = {
+                                navigator.push(Route.About)
+                            }
                         )
                     }
                 }

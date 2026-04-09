@@ -6,6 +6,5 @@ package com.rosan.installer.ui.page.main.settings
  * Data class to hold the state of the settings page.
  */
 data class SettingsSharedState(
-    val pendingNavigateToTheme: Boolean = false,
     val lastMainPageIndex: Int = 0
 )

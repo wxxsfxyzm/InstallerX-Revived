@@ -685,7 +685,6 @@
     <string name="version_with_prefix_format">%1$s %2$s</string>
     <string name="exception_resolve_failed_link_not_valid">Bu link geçerli bir dosya içermiyor</string>
     <string name="lab_mi_island">Mi Süper Ada</string>
-    <string name="lab_mi_island_desc">Global bildirim stili. Sistem imza doğrulaması yalnızca özel uygulama kimlik doğrulayıcısı Shizuku olarak ayarlandığında atlanabilir. Root kullanıcıları, imza kısıtlamalarını manuel olarak devre dışı bıraktıktan sonra bunu doğrudan etkinleştirebilir</string>
     <string name="theme_settings_color_spec">Renk Özelliği</string>
     <string name="theme_settings_color_spec_only_2021">Mevcut palet stili yalnızca Özellik 2021\'i destekler</string>
     <string name="config_label_preferences">Tercihler</string>

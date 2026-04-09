@@ -49,10 +49,11 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.SettingsScreen
+import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Navigator
+import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.card.ShowDataWidget
 import com.rosan.installer.ui.page.main.widget.util.DeleteEventCollector
 import com.rosan.installer.ui.theme.getM3TopBarColor
@@ -67,13 +68,13 @@ import org.koin.core.parameter.parametersOf
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewAllPage(
-    navController: NavController,
-    viewModel: AllViewModel = koinViewModel { parametersOf(navController) },
+    navigator: Navigator = LocalNavigator.current,
+    viewModel: AllViewModel = koinViewModel { parametersOf(navigator) },
     outerPadding: PaddingValues = PaddingValues(0.dp),
     hazeState: HazeState? = null
 ) {
     LaunchedEffect(Unit) {
-        viewModel.navController = navController
+        viewModel.navigator = navigator
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -152,7 +153,7 @@ fun NewAllPage(
                         Text(text = stringResource(id = R.string.add))
                     },
                     onClick = {
-                        navController.navigate(SettingsScreen.Builder.EditConfig(null).route)
+                        navigator.push(Route.EditConfig(-1))
                     }
                 )
             }

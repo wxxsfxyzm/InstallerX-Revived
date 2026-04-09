@@ -30,8 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.about.AboutEvent
+import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint

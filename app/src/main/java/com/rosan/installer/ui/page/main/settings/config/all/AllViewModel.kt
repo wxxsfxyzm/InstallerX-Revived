@@ -4,14 +4,13 @@ package com.rosan.installer.ui.page.main.settings.config.all
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 import com.rosan.installer.domain.settings.util.ConfigOrder
-import com.rosan.installer.ui.page.main.settings.SettingsScreen
-import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
+import com.rosan.installer.ui.navigation.Navigator
+import com.rosan.installer.ui.navigation.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,7 +24,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
 class AllViewModel(
-    var navController: NavController,
+    var navigator: Navigator,
     private val repo: ConfigRepository,
     private val appSettingsRepo: AppSettingsRepository
 ) : ViewModel(), KoinComponent {
@@ -55,7 +54,6 @@ class AllViewModel(
             is AllViewAction.DeleteDataConfig -> deleteDataConfig(action.configModel)
             is AllViewAction.RestoreDataConfig -> restoreDataConfig(action.configModel)
             is AllViewAction.EditDataConfig -> editDataConfig(action.configModel)
-            is AllViewAction.MiuixEditDataConfig -> editMiuixDataConfig(action.configModel)
             is AllViewAction.ApplyConfig -> applyConfig(action.configModel)
         }
     }
@@ -105,20 +103,10 @@ class AllViewModel(
 
     private fun editDataConfig(configModel: ConfigModel) {
         viewModelScope.launch {
-            navController.navigate(
-                SettingsScreen.Builder.EditConfig(
+            navigator.push(
+                Route.EditConfig(
                     configModel.id
-                ).route
-            )
-        }
-    }
-
-    private fun editMiuixDataConfig(configModel: ConfigModel) {
-        viewModelScope.launch {
-            navController.navigate(
-                MiuixSettingsScreen.Builder.MiuixEditConfig(
-                    configModel.id
-                ).route
+                )
             )
         }
     }
@@ -138,10 +126,10 @@ class AllViewModel(
 
     private fun applyConfig(configModel: ConfigModel) {
         viewModelScope.launch {
-            navController.navigate(
-                SettingsScreen.Builder.ApplyConfig(
+            navigator.push(
+                Route.ApplyConfig(
                     configModel.id
-                ).route
+                )
             )
         }
     }

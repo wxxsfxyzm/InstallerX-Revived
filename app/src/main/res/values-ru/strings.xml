@@ -678,7 +678,6 @@
     <string name="exception_zip_exception">Не удалось открыть zip-архив как файл</string>
     <string name="installer_notification_desc">Уведомление фоновой службы</string>
     <string name="installer_live_channel_short_text_pending_install">В ожидании</string>
-    <string name="lab_mi_island_desc">Общий стиль уведомлений. Системные ограничения автоматически обходятся только при использовании Shizuku, активированного через ADB. Пользователям с правами root (включая Shizuku с активацией root) необходимо вручную отключить ограничения.</string>
     <string name="lab_mi_island">Xiaomi Super Island</string>
     <string name="config_label_preferences">Дополнительные опции</string>
     <string name="config_apk_choose_all">Выбирать все APK по умолчанию</string>

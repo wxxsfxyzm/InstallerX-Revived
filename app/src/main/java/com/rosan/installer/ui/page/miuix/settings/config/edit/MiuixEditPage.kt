@@ -32,36 +32,13 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewEvent
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowAllRequestedPermissionsWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowDowngradeWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAllowTestOnlyWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataApkChooseAllWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAuthorizerWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataAutoDeleteWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataBypassLowTargetSdkWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataCustomizeAuthorizerWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataDeclareInstallerWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataDescriptionWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataForAllUserWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallModeWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataInstallRequesterWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataManualDexoptWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataNameWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataPackageSourceWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataSplitChooseAllWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDataUserWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySdkWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDisplaySizeWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallReasonWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixRequestUpdateOwnershipWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
-import com.rosan.installer.ui.page.miuix.widgets.MiuixShowToastWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
@@ -89,11 +66,11 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun MiuixEditPage(
-    navController: NavController,
     id: Long? = null,
     viewModel: EditViewModel = koinViewModel { parametersOf(id) },
     useBlur: Boolean
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dispatch = viewModel::dispatch
@@ -111,7 +88,7 @@ fun MiuixEditPage(
         },
         onConfirm = {
             showUnsavedDialogState.value = false
-            navController.navigateUp()
+            navigator.pop()
         },
         errorMessages = state.activeErrorResIds.map { stringResource(it) }
     )
@@ -145,7 +122,7 @@ fun MiuixEditPage(
                 }
 
                 is EditViewEvent.Saved -> {
-                    navController.navigateUp()
+                    navigator.pop()
                 }
             }
         }
@@ -165,7 +142,7 @@ fun MiuixEditPage(
                 navigationIcon = {
                     MiuixBackButton(
                         icon = MiuixIcons.Regular.Close,
-                        onClick = { navController.navigateUp() }
+                        onClick = { navigator.pop() }
                     )
                 },
                 actions = {

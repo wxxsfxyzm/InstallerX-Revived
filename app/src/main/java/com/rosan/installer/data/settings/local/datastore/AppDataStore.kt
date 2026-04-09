@@ -33,12 +33,16 @@ class AppDataStore(
         val UI_USE_APPLE_FLOATING_BAR = booleanPreferencesKey("ui_use_apple_floating_bar")
         val UI_DYN_COLOR_FOLLOW_PKG_ICON = booleanPreferencesKey("ui_dyn_color_follow_pkg_icon")
         val LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON = booleanPreferencesKey("live_activity_dyn_color_follow_pkg_icon")
+        val PREDICTIVE_BACK_ANIMATION = stringPreferencesKey("predictive_back_animation")
+        val PREDICTIVE_BACK_EXIT_DIRECTION = stringPreferencesKey("predictive_back_exit_direction")
 
         // Show Live Activity
         val SHOW_LIVE_ACTIVITY = booleanPreferencesKey("show_live_activity")
 
         // Show Mi Island
         val SHOW_MI_ISLAND = booleanPreferencesKey("show_mi_island")
+        val SHOW_MI_ISLAND_BYPASS_RESTRICTION = booleanPreferencesKey("show_mi_island_bypass_restriction")
+        val SHOW_MI_ISLAND_OUTER_GLOW = booleanPreferencesKey("show_mi_island_outer_glow")
 
         // The duration to keep the network blocked to bypass Xiaomi's notification scanner
         val SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS = intPreferencesKey("show_mi_island_blocking_interval")

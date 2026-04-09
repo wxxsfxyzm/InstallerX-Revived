@@ -22,6 +22,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.aboutLibraries)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -173,6 +174,10 @@ kotlin {
     jvmToolchain(25)
 }
 
+configurations.all {
+    exclude(group = "androidx.navigationevent", module = "navigationevent-compose")
+}
+
 aboutLibraries {
     library {
         // Enable the duplication mode, allows to merge, or link dependencies which relate
@@ -200,7 +205,14 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
-    implementation(libs.compose.navigation)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigationevent) {
+        exclude(group = "androidx.navigation", module = "navigationevent-compose")
+    }
+
     implementation(libs.compose.materialIcons)
     // Preview support only for debug builds
     debugImplementation(libs.compose.ui.tooling)

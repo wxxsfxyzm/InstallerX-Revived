@@ -13,12 +13,6 @@ class SettingsSharedViewModel : ViewModel() {
     private val _state = MutableStateFlow(SettingsSharedState())
     val state: StateFlow<SettingsSharedState> = _state.asStateFlow()
 
-    fun markPendingNavigateToTheme(pending: Boolean) {
-        _state.update { currentState ->
-            currentState.copy(pendingNavigateToTheme = pending)
-        }
-    }
-
     fun updateLastMainPageIndex(index: Int) {
         _state.update { currentState ->
             currentState.copy(lastMainPageIndex = index)

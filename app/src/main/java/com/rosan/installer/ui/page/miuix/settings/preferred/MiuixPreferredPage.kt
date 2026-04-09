@@ -30,26 +30,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.SettingsScreen
+import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
-import com.rosan.installer.ui.page.miuix.settings.MiuixSettingsScreen
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
-import com.rosan.installer.ui.page.miuix.widgets.MiuixAutoLockInstaller
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDefaultInstaller
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDisableAdbVerify
-import com.rosan.installer.ui.page.miuix.widgets.MiuixIgnoreBatteryOptimizationSetting
-import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsAboutItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
@@ -76,13 +69,13 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun MiuixPreferredPage(
-    navController: NavController,
     viewModel: PreferredViewModel = koinViewModel(),
     hazeState: HazeState?,
     title: String,
     outerPadding: PaddingValues,
     snackbarHostState: SnackbarHostState
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
@@ -170,7 +163,7 @@ fun MiuixPreferredPage(
                         title = stringResource(R.string.theme_settings),
                         description = stringResource(R.string.theme_settings_desc),
                         onClick = {
-                            navController.navigate(MiuixSettingsScreen.MiuixTheme.route)
+                            navigator.push(Route.Theme)
                         }
                     )
                     MiuixNavigationItemWidget(
@@ -178,7 +171,7 @@ fun MiuixPreferredPage(
                         title = stringResource(R.string.installer_settings),
                         description = stringResource(R.string.installer_settings_desc),
                         onClick = {
-                            navController.navigate(MiuixSettingsScreen.MiuixInstallerGlobal.route)
+                            navigator.push(Route.InstallerGlobal)
                         }
                     )
                     MiuixNavigationItemWidget(
@@ -186,7 +179,7 @@ fun MiuixPreferredPage(
                         title = stringResource(R.string.uninstaller_settings),
                         description = stringResource(R.string.uninstaller_settings_desc),
                         onClick = {
-                            navController.navigate(MiuixSettingsScreen.MiuixUninstallerGlobal.route)
+                            navigator.push(Route.UninstallerGlobal)
                         }
                     )
                 }
@@ -243,7 +236,9 @@ fun MiuixPreferredPage(
                     MiuixSettingsAboutItemWidget(
                         title = stringResource(R.string.lab),
                         summary = stringResource(R.string.lab_desc)
-                    ) { navController.navigate(SettingsScreen.Lab.route) }
+                    ) {
+                        navigator.push(Route.Lab)
+                    }
                     MiuixSettingsAboutItemWidget(
                         title = stringResource(R.string.about_detail),
                         summary = if (uiState.hasUpdate) stringResource(
@@ -254,7 +249,9 @@ fun MiuixPreferredPage(
                             color = if (uiState.hasUpdate) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant
                         )
-                    ) { navController.navigate(MiuixSettingsScreen.MiuixAbout.route) }
+                    ) {
+                        navigator.push(Route.About)
+                    }
                 }
             }
         }

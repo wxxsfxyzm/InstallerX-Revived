@@ -226,7 +226,9 @@ class MiIslandNotificationBuilder(
             updatable = true
             ticker = title
             tickerPic = lightLogoKey
-            outEffectSrc = "outer_glow"
+            if (payload.settings.miIslandOuterGlow) { // Control the outer glow
+                outEffectSrc = "outer_glow"
+            }
 
             // 1. Xiaomi Island configuration (includes capsule summary state and large island expanded state)
             island {

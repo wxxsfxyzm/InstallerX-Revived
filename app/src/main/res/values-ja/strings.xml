@@ -670,7 +670,6 @@
     <string name="exception_install_failed_package_changed">呼び出し元のプログラムは、呼び出しのラッパーが変更されることを想定しています</string>
     <string name="config_request_update_ownership">所有権の更新をリクエスト</string>
     <string name="lab_mi_island">Xiaomi HyperIsland</string>
-    <string name="lab_mi_island_desc">グローバル通知スタイルを上書きします。カスタムアプリ認証が Shizuku に設定されている場合のみ、システム署名検証をバイパスできます。Root ユーザーは、署名制限を手動で無効にした後、これを直接有効にできます</string>
     <string name="suggestion_bypass_low_target_sdk">制限の回避を許可</string>
     <string name="suggestion_bypass_low_target_sdk_desc">一時的に制限を回避して再試行します</string>
     <string name="suggestion_bypass_blacklist_set_by_user">一度限りのインストールを許可</string>

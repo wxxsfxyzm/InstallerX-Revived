@@ -38,9 +38,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
@@ -77,15 +78,15 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun MiuixAllPage(
-    navController: NavController,
-    viewModel: AllViewModel = koinViewModel { parametersOf(navController) },
+    navigator: Navigator = LocalNavigator.current,
+    viewModel: AllViewModel = koinViewModel { parametersOf(navigator) },
     hazeState: HazeState?,
     title: String,
     outerPadding: PaddingValues,
     snackbarHostState: SnackbarHostState
 ) {
     LaunchedEffect(Unit) {
-        viewModel.navController = navController
+        viewModel.navigator = navigator
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -257,7 +258,7 @@ private fun DataItemWidget(
                 minHeight = 35.dp,
                 minWidth = 35.dp,
                 backgroundColor = MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
-                onClick = { viewModel.dispatch(AllViewAction.MiuixEditDataConfig(entity)) }) {
+                onClick = { viewModel.dispatch(AllViewAction.EditDataConfig(entity)) }) {
                 Icon(
                     modifier = Modifier.size(20.dp),
                     imageVector = MiuixIcons.Regular.Edit,

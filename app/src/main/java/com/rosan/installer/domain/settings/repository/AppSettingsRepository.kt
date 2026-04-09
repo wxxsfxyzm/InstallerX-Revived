@@ -16,7 +16,9 @@ enum class StringSetting {
     InstallMode,
     ApplyOrderType,
     LabRootImplementation,
-    LabHttpProfile
+    LabHttpProfile,
+    PredictiveBackAnimation,
+    PredictiveBackExitDirection
 }
 
 enum class IntSetting {
@@ -38,6 +40,8 @@ enum class BooleanSetting {
     LiveActivityDynColorFollowPkgIcon,
     ShowLiveActivity,
     ShowMiIsland,
+    ShowMiIslandBypassRestriction,
+    ShowMiIslandOuterGlow,
     AlwaysUseRootInSystem,
     InstallerRequireBiometricAuth,
     UninstallerRequireBiometricAuth,

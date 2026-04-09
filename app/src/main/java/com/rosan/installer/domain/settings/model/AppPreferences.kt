@@ -25,6 +25,10 @@ data class AppPreferences(
     val installerRequireBiometricAuth: Boolean,
     val uninstallerRequireBiometricAuth: Boolean,
     val showLiveActivity: Boolean,
+    val useMiIsland: Boolean,
+    val useMiIslandBypassRestriction: Boolean,
+    val useMiIslandOuterGlow: Boolean,
+    val useMiIslandBlockingIntervalMs: Int,
     val autoLockInstaller: Boolean,
     val autoSilentInstall: Boolean,
     val showMiuixUI: Boolean,
@@ -39,8 +43,6 @@ data class AppPreferences(
     val labRootEnableModuleFlash: Boolean,
     val labRootShowModuleArt: Boolean,
     val labRootMode: RootMode,
-    val labUseMiIsland: Boolean,
-    val labUseMiIslandBlockingIntervalMs: Int,
     val labHttpProfile: HttpProfile,
     val labHttpSaveFile: Boolean,
     val labSetInstallRequester: Boolean,
@@ -56,5 +58,8 @@ data class AppPreferences(
     val seedColorInt: Int, // Stored as raw Int from DataStore
     val useDynColorFollowPkgIcon: Boolean,
     val useDynColorFollowPkgIconForLiveActivity: Boolean,
-    val useBlur: Boolean
+    val useBlur: Boolean,
+    // Predictive Back Settings
+    val predictiveBackAnimation: PredictiveBackAnimation,
+    val predictiveBackExitDirection: PredictiveBackExitDirection
 )

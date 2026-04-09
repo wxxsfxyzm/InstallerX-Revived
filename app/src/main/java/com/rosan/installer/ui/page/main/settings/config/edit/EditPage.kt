@@ -43,35 +43,12 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
-import com.rosan.installer.ui.page.main.widget.setting.DataAllowAllRequestedPermissionsWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataAllowDowngradeWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataAllowTestOnlyWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataApkChooseAllWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataAuthorizerWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataAutoDeleteWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataBypassLowTargetSdkWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataCustomizeAuthorizerWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataDeclareInstallerWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataDescriptionWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataForAllUserWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataInstallModeWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataInstallReasonWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataInstallRequesterWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataManualDexoptWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataNameWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataPackageSourceWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataRequestUpdateOwnershipWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataShowToastWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataSplitChooseAllWidget
-import com.rosan.installer.ui.page.main.widget.setting.DataUserWidget
-import com.rosan.installer.ui.page.main.widget.setting.DisplaySdkWidget
-import com.rosan.installer.ui.page.main.widget.setting.DisplaySizeWidget
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.util.EditEventCollector
 import com.rosan.installer.ui.theme.none
@@ -83,10 +60,10 @@ import org.koin.core.parameter.parametersOf
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun EditPage(
-    navController: NavController,
     id: Long? = null,
     viewModel: EditViewModel = koinViewModel { parametersOf(id) }
 ) {
+    val navigator = LocalNavigator.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dispatch = viewModel::dispatch
     val listState = rememberLazyListState()
@@ -104,7 +81,7 @@ fun EditPage(
         },
         onConfirm = {
             showUnsavedDialog = false
-            navController.navigateUp()
+            navigator.pop()
         },
         // Pass the list of active error messages from the ViewModel.
         errorMessages = state.activeErrorResIds.map { stringResource(it) }
@@ -118,7 +95,7 @@ fun EditPage(
         showUnsavedDialog = true
     }
 
-    EditEventCollector(viewModel, navController, snackBarHostState)
+    EditEventCollector(viewModel, snackBarHostState)
 
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
@@ -132,7 +109,7 @@ fun EditPage(
             TopAppBar(
                 scrollBehavior = scrollBehavior,
                 title = { Text(text = stringResource(id = if (id == null) R.string.add else R.string.update)) },
-                navigationIcon = { AppBackButton(onClick = { navController.navigateUp() }) },
+                navigationIcon = { AppBackButton(onClick = { navigator.pop() }) },
             )
         },
         floatingActionButton = {

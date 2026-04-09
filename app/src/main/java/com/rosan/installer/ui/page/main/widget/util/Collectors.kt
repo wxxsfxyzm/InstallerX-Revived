@@ -17,8 +17,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.navigation.NavController
 import com.rosan.installer.R
+import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.installer.InstallerViewEvent
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
@@ -26,8 +26,8 @@ import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewEvent
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutEvent
-import com.rosan.installer.ui.page.main.settings.preferred.subpage.about.AboutViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.about.AboutEvent
+import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.flow.collectLatest
 
@@ -128,9 +128,9 @@ fun ToastEventCollector(viewModel: InstallerViewModel) {
 @Composable
 fun EditEventCollector(
     viewModel: EditViewModel,
-    navController: NavController,
     snackBarHostState: SnackbarHostState
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val unknownErrorString = stringResource(R.string.installer_unknown_error)
     LaunchedEffect(Unit) {
@@ -152,7 +152,7 @@ fun EditEventCollector(
                 }
 
                 is EditViewEvent.Saved -> {
-                    navController.navigateUp()
+                    navigator.pop()
                 }
             }
         }
