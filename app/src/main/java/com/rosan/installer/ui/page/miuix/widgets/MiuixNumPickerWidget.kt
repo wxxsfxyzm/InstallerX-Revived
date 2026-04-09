@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.widgets
 
 import androidx.compose.foundation.layout.Arrangement
@@ -30,16 +32,20 @@ fun MiuixIntNumberPickerWidget(
     endInt: Int,
     onValueChange: (Int) -> Unit
 ) {
-    // The main Column now fills width instead of the whole screen, which is more typical for a settings item.
-    Column(modifier = Modifier.fillMaxWidth()) {
+    // Apply padding to the parent container for uniform spacing on all sides.
+    // Use verticalArrangement to define a consistent gap between the text and the slider.
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // This Box contains the title and description text.
+            // Container for title and optional description
             Box(modifier = Modifier.weight(1f)) {
                 Column {
                     Text(
@@ -50,16 +56,17 @@ fun MiuixIntNumberPickerWidget(
                     description?.let {
                         Text(
                             text = it,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary, // Use a slightly different color for description
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
             }
         }
+
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             val steps = (endInt - startInt - 1).coerceAtLeast(0)
 
@@ -72,8 +79,10 @@ fun MiuixIntNumberPickerWidget(
                 steps = steps,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step
             )
+
             Spacer(modifier = Modifier.width(16.dp))
-            // The current integer value is displayed next to the slider.
+
+            // Display the current integer value dynamically
             Text(
                 text = value.toString(),
                 modifier = Modifier.defaultMinSize(minWidth = 36.dp),

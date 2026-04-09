@@ -81,7 +81,6 @@ fun NewNotificationSettingsPage(
     val isModernEligible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
     val isMiIslandSupported = remember { capabilityProvider.isSupportMiIsland }
 
-    // 动态构建下拉菜单选项
     val styleOptions = remember(isModernEligible, isMiIslandSupported) {
         val list = mutableListOf(NotificationStyle.STANDARD)
         if (isModernEligible) {
@@ -150,11 +149,11 @@ fun NewNotificationSettingsPage(
         ) {
             item {
                 SplicedColumnGroup(
-                    title = stringResource(R.string.notification_settings)
+                    title = stringResource(R.string.notification_style)
                 ) {
                     item {
                         DropDownMenuWidget(
-                            icon = AppIcons.BugReport,
+                            icon = AppIcons.Palette,
                             title = stringResource(R.string.notification_style),
                             description = if (isModernEligible) styleNames[selectedIndex] else stringResource(R.string.notification_style_unsupported_desc),
                             enabled = isModernEligible,
@@ -166,9 +165,16 @@ fun NewNotificationSettingsPage(
                             }
                         )
                     }
-
                     item(visible = activeStyle == NotificationStyle.MI_ISLAND) {
-
+                        SwitchWidget(
+                            icon = AppIcons.BugReport,
+                            title = "Bypass Mi Island Restriction",
+                            description = "Bypass verification restriction for Mi Island",
+                            checked = true,
+                            onCheckedChange = {}
+                        )
+                    }
+                    item(visible = activeStyle == NotificationStyle.MI_ISLAND) {
                         IntNumberPickerWidget(
                             icon = AppIcons.StopWatch,
                             title = stringResource(R.string.lab_mi_island_countdown),
@@ -176,13 +182,26 @@ fun NewNotificationSettingsPage(
                             value = uiState.miIslandBlockingInterval,
                             startInt = 50,
                             endInt = 350,
-                            stepSize = 10,
                             onValueChange = {
                                 viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBlockingInterval(it))
                             }
                         )
                     }
-
+                    item(visible = activeStyle == NotificationStyle.MI_ISLAND) {
+                        SwitchWidget(
+                            icon = AppIcons.BugReport,
+                            title = "Falshing Lights",
+                            description = "Add a system-app-style glow effect to the edge of Super Island",
+                            checked = true,
+                            onCheckedChange = {}
+                        )
+                    }
+                }
+            }
+            item {
+                SplicedColumnGroup(
+                    title = stringResource(R.string.config_label_preferences)
+                ) {
                     item {
                         SwitchWidget(
                             icon = AppIcons.Dialog,

@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.twotone.Colorize
 import androidx.compose.material.icons.twotone.InvertColors
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -190,7 +189,7 @@ fun LegacyThemeSettingsPage(
             }
             item {
                 BaseWidget(
-                    icon = Icons.Default.Style,
+                    icon = AppIcons.Palette,
                     title = stringResource(R.string.theme_settings_palette_style),
                     description = uiState.paletteStyle.displayName,
                     onClick = { showPaletteDialog = true }

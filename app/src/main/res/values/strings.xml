@@ -764,8 +764,8 @@
     <string name="notification_settings_desc">Customize the appearance of installation progress notifications</string>
     <string name="notification_style">Notification Style</string>
     <string name="notification_style_desc">Select the display style for progress notifications</string>
-    <string name="notification_style_standard">Android Notification</string>
-    <string name="notification_style_live_activity">Android Live Activity</string>
+    <string name="notification_style_standard">Standard Notification</string>
+    <string name="notification_style_live_activity">Live Activity</string>
     <string name="notification_style_mi_island">Xiaomi Mi Island</string>
-    <string name="notification_style_unsupported_desc">Your Android version does not support advanced notification styles.</string>
+    <string name="notification_style_unsupported_desc">Only support standard notification style</string>
 </resources>

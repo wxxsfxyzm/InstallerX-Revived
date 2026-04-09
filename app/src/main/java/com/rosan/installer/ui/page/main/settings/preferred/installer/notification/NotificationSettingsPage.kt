@@ -41,6 +41,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.AutoClearNotification
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
+import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.none
 import org.koin.androidx.compose.koinViewModel
@@ -108,9 +109,10 @@ fun NotificationSettingsPage(
             )
         ) {
             // 1. Notification Style Dropdown
+            item { LabelWidget(stringResource(R.string.notification_style)) }
             item {
                 DropDownMenuWidget(
-                    icon = AppIcons.BugReport, // Or any appropriate icon
+                    icon = AppIcons.Palette,
                     title = stringResource(R.string.notification_style),
                     description = if (isModernEligible) styleNames[selectedIndex] else stringResource(R.string.notification_style_unsupported_desc),
                     enabled = isModernEligible, // Disable interaction if SDK < Baklava
@@ -130,6 +132,22 @@ fun NotificationSettingsPage(
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
+                    SwitchWidget(
+                        icon = AppIcons.BugReport,
+                        title = "Bypass Mi Island Restriction",
+                        description = "Bypass verification restriction for Mi Island",
+                        checked = true,
+                        isM3E = false,
+                        onCheckedChange = {}
+                    )
+                }
+            }
+            item {
+                AnimatedVisibility(
+                    visible = activeStyle == NotificationStyle.MI_ISLAND,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
                     IntNumberPickerWidget(
                         icon = AppIcons.StopWatch,
                         title = stringResource(R.string.lab_mi_island_countdown),
@@ -143,6 +161,24 @@ fun NotificationSettingsPage(
                 }
             }
 
+            item {
+                AnimatedVisibility(
+                    visible = activeStyle == NotificationStyle.MI_ISLAND,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    SwitchWidget(
+                        icon = AppIcons.BugReport,
+                        title = "Outer Glow",
+                        description = "Add a system-app-style glow effect to the edge of Super Island",
+                        checked = true,
+                        isM3E = false,
+                        onCheckedChange = {}
+                    )
+                }
+            }
+
+            item { LabelWidget(stringResource(R.string.config_label_preferences)) }
             // 3. Migrated Setting: Auto Clear Seconds
             item {
                 AutoClearNotificationTimeWidget(

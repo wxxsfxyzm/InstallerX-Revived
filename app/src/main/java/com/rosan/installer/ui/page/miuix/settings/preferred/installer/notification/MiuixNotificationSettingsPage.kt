@@ -132,7 +132,7 @@ fun MiuixNotificationSettingsPage(
             overscrollEffect = null
         ) {
             item { Spacer(modifier = Modifier.size(12.dp)) }
-            item { SmallTitle(stringResource(R.string.notification_settings)) }
+            item { SmallTitle(stringResource(R.string.notification_style)) }
 
             item {
                 Card(
@@ -169,7 +169,15 @@ fun MiuixNotificationSettingsPage(
                             viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBlockingInterval(it))
                         }
                     }
-
+                }
+            }
+            item { SmallTitle(stringResource(R.string.config_label_preferences)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
                     // 3. Show dialog when pressing notification
                     MiuixSwitchWidget(
                         title = stringResource(id = R.string.show_dialog_when_pressing_notification),

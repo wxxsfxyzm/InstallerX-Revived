@@ -746,8 +746,8 @@
     <string name="notification_settings_desc">自定义安装进度通知的展示效果</string>
     <string name="notification_style">通知样式</string>
     <string name="notification_style_desc">选择安装进度通知的展示样式</string>
-    <string name="notification_style_standard">安卓通知</string>
-    <string name="notification_style_live_activity">安卓实时活动通知</string>
+    <string name="notification_style_standard">标准通知</string>
+    <string name="notification_style_live_activity">实时活动通知</string>
     <string name="notification_style_mi_island">小米超级岛</string>
-    <string name="notification_style_unsupported_desc">当前安卓版本不支持高级通知样式</string>
+    <string name="notification_style_unsupported_desc">仅支持标准通知样式</string>
 </resources>

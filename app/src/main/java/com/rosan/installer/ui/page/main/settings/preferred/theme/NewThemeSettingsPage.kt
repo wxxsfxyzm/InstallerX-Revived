@@ -39,7 +39,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.twotone.Colorize
 import androidx.compose.material.icons.twotone.InvertColors
 import androidx.compose.material3.AlertDialog
@@ -308,7 +307,7 @@ fun NewThemeSettingsPage(
                     }
                     item {
                         BaseWidget(
-                            icon = Icons.Default.Style,
+                            icon = AppIcons.Palette,
                             title = stringResource(R.string.theme_settings_palette_style),
                             description = uiState.paletteStyle.displayName,
                             onClick = { showPaletteDialog = true }
