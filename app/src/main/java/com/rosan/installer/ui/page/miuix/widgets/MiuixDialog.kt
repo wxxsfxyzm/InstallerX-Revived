@@ -28,8 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.domain.device.model.Manufacturer
 import com.rosan.installer.domain.settings.model.RootMode
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -110,52 +108,6 @@ fun MiuixUnsavedChangesDialog(
                         modifier = Modifier.weight(1f),
                         onClick = onConfirm,
                         text = stringResource(R.string.discard), // Use text parameter directly
-                        colors = ButtonDefaults.textButtonColorsPrimary() // Apply primary color style
-                    )
-                }
-            }
-        }
-    )
-}
-
-@Composable
-fun MiuixHideLauncherIconWarningDialog(
-    showState: MutableState<Boolean>,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    WindowDialog(
-        show = showState.value,
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.warning),
-        content = {
-            // Custom content layout with body text and action buttons
-            Column {
-                // Warning message
-                Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
-                if (DeviceConfig.currentManufacturer == Manufacturer.XIAOMI)
-                    Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi))
-                Spacer(modifier = Modifier.height(24.dp)) // Spacing before buttons
-
-                // Action buttons row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Dismiss button
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = onDismiss,
-                        text = stringResource(R.string.cancel)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Confirm button with primary color styling
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = onConfirm,
-                        text = stringResource(R.string.confirm),
                         colors = ButtonDefaults.textButtonColorsPrimary() // Apply primary color style
                     )
                 }
@@ -503,49 +455,6 @@ fun MiuixUninstallPackageDialog(
                             packageName = ""
                         },
                         enabled = isConfirmEnabled,
-                        colors = ButtonDefaults.textButtonColorsPrimary()
-                    )
-                }
-            }
-        }
-    )
-}
-
-/**
- * A miuix-style dialog to warn the user about unstable blur effects on Android 11 and below.
- */
-@Composable
-fun MiuixBlurWarningDialog(
-    showState: MutableState<Boolean>,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    WindowDialog(
-        show = showState.value,
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.warning),
-        content = {
-            Column {
-                Text(stringResource(R.string.theme_settings_use_blur_warning))
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = onDismiss,
-                        text = stringResource(R.string.cancel)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = onConfirm,
-                        text = stringResource(R.string.confirm),
                         colors = ButtonDefaults.textButtonColorsPrimary()
                     )
                 }

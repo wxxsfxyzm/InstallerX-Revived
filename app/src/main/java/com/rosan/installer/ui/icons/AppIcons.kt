@@ -26,6 +26,7 @@ import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.AdminPanelSettings
 import androidx.compose.material.icons.twotone.Android
+import androidx.compose.material.icons.twotone.Animation
 import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.ArrowUpward
 import androidx.compose.material.icons.twotone.AutoAwesome
@@ -77,6 +78,7 @@ import androidx.compose.material.icons.twotone.SettingsSuggest
 import androidx.compose.material.icons.twotone.Share
 import androidx.compose.material.icons.twotone.Source
 import androidx.compose.material.icons.twotone.Style
+import androidx.compose.material.icons.twotone.SwapHoriz
 import androidx.compose.material.icons.twotone.SystemUpdate
 import androidx.compose.material.icons.twotone.TaskAlt
 import androidx.compose.material.icons.twotone.Terminal
@@ -165,6 +167,8 @@ object AppIcons {
     val ShowSize = Icons.AutoMirrored.Filled.CompareArrows
     val Bypass = Icons.TwoTone.NoEncryption
     val Glow = Icons.TwoTone.Flare
+    val PredictiveBack = Icons.TwoTone.Animation
+    val PredictiveBackDirection = Icons.TwoTone.SwapHoriz
     // --- 设置图标结束 ---
 
     // --- Profile pkg 图标集合 ---

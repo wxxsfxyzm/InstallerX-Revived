@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.settings.preferred.theme
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -24,13 +25,16 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,7 +45,12 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.rosan.installer.R
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.model.Manufacturer
+import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsViewModel
@@ -51,8 +60,6 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPaletteStyleWid
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixThemeEngineWidget
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixThemeModeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBlurWarningDialog
-import com.rosan.installer.ui.page.miuix.widgets.MiuixHideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerHazeEffect
@@ -60,15 +67,22 @@ import com.rosan.installer.ui.theme.rememberMiuixHazeStyle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.koin.androidx.compose.koinViewModel
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.SpinnerEntry
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.window.WindowDialog
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun MiuixThemeSettingsPage(
     viewModel: ThemeSettingsViewModel = koinViewModel()
@@ -78,6 +92,8 @@ fun MiuixThemeSettingsPage(
     val scrollBehavior = MiuixScrollBehavior()
     val hazeState = if (uiState.useBlur) remember { HazeState() } else null
     val hazeStyle = rememberMiuixHazeStyle()
+    val transition = LocalNavAnimatedContentScope.current.transition
+
     val showHideLauncherIconDialog = remember { mutableStateOf(false) }
     val showBlurWarningDialog = remember { mutableStateOf(false) }
 
@@ -321,6 +337,46 @@ fun MiuixThemeSettingsPage(
                     }
                 }
             }
+
+            // Predictive Back Section
+            item { SmallTitle(stringResource(R.string.theme_settings_predictive_back)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixPredictiveBackAnimationWidget(
+                        currentAnimation = uiState.predictiveBackAnimation,
+                        onAnimationChange = { newAnim ->
+                            // Hey Google
+                            // Why you keep playing the animation even we are already play completed?
+                            // This is very dirty, We are using RestrictedApi, but we don't have other choice
+                            transition.setPlaytimeAfterInitialAndTargetStateEstablished(
+                                transition.targetState,
+                                transition.targetState,
+                                transition.playTimeNanos
+                            )
+
+                            viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackAnimation(newAnim))
+                        }
+                    )
+
+                    AnimatedVisibility(
+                        visible = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixPredictiveBackExitDirectionWidget(
+                            currentDirection = uiState.predictiveBackExitDirection,
+                            onDirectionChange = {
+                                viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackExitDirection(it))
+                            }
+                        )
+                    }
+                }
+            }
+
             item { SmallTitle(stringResource(R.string.theme_settings_package_icons)) }
             item {
                 Card(
@@ -364,4 +420,173 @@ fun MiuixThemeSettingsPage(
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
+}
+
+/**
+ * WindowSpinnerPreference widget for selecting Predictive Back Animation
+ */
+@Composable
+private fun MiuixPredictiveBackAnimationWidget(
+    modifier: Modifier = Modifier,
+    currentAnimation: PredictiveBackAnimation,
+    onAnimationChange: (PredictiveBackAnimation) -> Unit
+) {
+    val options = remember { PredictiveBackAnimation.entries }
+
+    // Map entries to their string resources within the Composable context
+    val spinnerEntries = options.map { anim ->
+        val title = when (anim) {
+            PredictiveBackAnimation.None -> stringResource(R.string.theme_settings_predictive_back_animation_none)
+            PredictiveBackAnimation.AOSP -> stringResource(R.string.theme_settings_predictive_back_animation_aosp)
+            PredictiveBackAnimation.Scale -> stringResource(R.string.theme_settings_predictive_back_animation_scale)
+            PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
+            PredictiveBackAnimation.KernelSUOfficial -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_official)
+        }
+        SpinnerEntry(title = title)
+    }
+
+    val selectedIndex = remember(currentAnimation, options) {
+        options.indexOf(currentAnimation).coerceAtLeast(0)
+    }
+
+    WindowSpinnerPreference(
+        modifier = modifier,
+        title = stringResource(id = R.string.theme_settings_predictive_back_animation),
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            val newAnim = options[newIndex]
+            if (currentAnimation != newAnim) {
+                onAnimationChange(newAnim)
+            }
+        }
+    )
+}
+
+/**
+ * WindowSpinnerPreference widget for selecting Predictive Back Exit Direction
+ */
+@Composable
+private fun MiuixPredictiveBackExitDirectionWidget(
+    modifier: Modifier = Modifier,
+    currentDirection: PredictiveBackExitDirection,
+    onDirectionChange: (PredictiveBackExitDirection) -> Unit
+) {
+    val options = remember { PredictiveBackExitDirection.entries }
+
+    // Map entries to their string resources within the Composable context
+    val spinnerEntries = options.map { dir ->
+        val title = when (dir) {
+            PredictiveBackExitDirection.FOLLOW_GESTURE -> stringResource(R.string.theme_settings_predictive_back_exit_direction_follow_gesture)
+            PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_right)
+            PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_left)
+        }
+        SpinnerEntry(title = title)
+    }
+
+    val selectedIndex = remember(currentDirection, options) {
+        options.indexOf(currentDirection).coerceAtLeast(0)
+    }
+
+    WindowSpinnerPreference(
+        modifier = modifier,
+        title = stringResource(id = R.string.theme_settings_predictive_back_exit_direction),
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            val newDir = options[newIndex]
+            if (currentDirection != newDir) {
+                onDirectionChange(newDir)
+            }
+        }
+    )
+}
+
+@Composable
+private fun MiuixHideLauncherIconWarningDialog(
+    showState: MutableState<Boolean>,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    WindowDialog(
+        show = showState.value,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.warning),
+        content = {
+            // Custom content layout with body text and action buttons
+            Column {
+                // Warning message
+                Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
+                if (DeviceConfig.currentManufacturer == Manufacturer.XIAOMI)
+                    Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi))
+                Spacer(modifier = Modifier.height(24.dp)) // Spacing before buttons
+
+                // Action buttons row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Dismiss button
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss,
+                        text = stringResource(R.string.cancel)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Confirm button with primary color styling
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onConfirm,
+                        text = stringResource(R.string.confirm),
+                        colors = ButtonDefaults.textButtonColorsPrimary() // Apply primary color style
+                    )
+                }
+            }
+        }
+    )
+}
+
+/**
+ * A miuix-style dialog to warn the user about unstable blur effects on Android 11 and below.
+ */
+@Composable
+fun MiuixBlurWarningDialog(
+    showState: MutableState<Boolean>,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    WindowDialog(
+        show = showState.value,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.warning),
+        content = {
+            Column {
+                Text(stringResource(R.string.theme_settings_use_blur_warning))
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss,
+                        text = stringResource(R.string.cancel)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onConfirm,
+                        text = stringResource(R.string.confirm),
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
+                }
+            }
+        }
+    )
 }

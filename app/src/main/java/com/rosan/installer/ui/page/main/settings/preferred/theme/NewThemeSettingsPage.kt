@@ -461,31 +461,9 @@ fun NewThemeSettingsPage(
                 SplicedColumnGroup(
                     title = stringResource(R.string.theme_settings_predictive_back)
                 ) {
-                    item {
-                        BaseWidget(
-                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                            title = stringResource(R.string.theme_settings_predictive_back_animation),
-                            description = when (uiState.predictiveBackAnimation) {
-                                PredictiveBackAnimation.None -> stringResource(R.string.theme_settings_predictive_back_animation_none)
-                                PredictiveBackAnimation.AOSP -> stringResource(R.string.theme_settings_predictive_back_animation_aosp)
-                                PredictiveBackAnimation.Scale -> stringResource(R.string.theme_settings_predictive_back_animation_scale)
-                                PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
-                                PredictiveBackAnimation.KernelSUOfficial -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_official)
-                            },
-                            onClick = { showPredictiveBackAnimationDialog = true }
-                        ) {}
-                    }
+                    item { PredictiveBackAnimationWidget(uiState) { showPredictiveBackAnimationDialog = true } }
                     item(visible = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale) {
-                        BaseWidget(
-                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                            title = stringResource(R.string.theme_settings_predictive_back_exit_direction),
-                            description = when (uiState.predictiveBackExitDirection) {
-                                PredictiveBackExitDirection.FOLLOW_GESTURE -> stringResource(R.string.theme_settings_predictive_back_exit_direction_follow_gesture)
-                                PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_right)
-                                PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_left)
-                            },
-                            onClick = { showPredictiveBackExitDirectionDialog = true }
-                        ) {}
+                        PredictiveBackAnimationDirectionWidget(uiState) { showPredictiveBackExitDirectionDialog = true }
                     }
                 }
             }
