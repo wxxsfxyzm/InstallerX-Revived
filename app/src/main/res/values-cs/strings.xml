@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agreement_title">Policy</string>
+    <string name="user_terms">Zásady pro uživatele</string>
+    <string name="privacy_policy">Zásady ochrany osobních údajů</string>
+    <string name="agree">Souhlasit</string>
+    <string name="warning">Varování</string>
+    <string name="open_source_license">Licence pro otevřený zdrojový kód</string>
+    <string name="open_source_license_settings_description">Zobrazit knihovny s otevřeným zdrojovým kódem třetích stran a jejich licence</string>
+    <string name="back">Zpět</string>
+    <string name="home">Domů</string>
+    <string name="config">Profily</string>
+    <string name="app">Aplikace</string>
+    <string name="preferred">Nastavení</string>
+    <string name="personalization">Personalizace</string>
+    <string name="search">Hledat</string>
+    <string name="menu">Menu</string>
+    <string name="about">O nás</string>
+    <string name="other">Ostatní</string>
+    <string name="performance">Výkon</string>
+    <string name="lab">Laboratoř</string>
+    <string name="lab_desc">Přístup k experimentálním a vývojářským funkcím</string>
+    <string name="debug">Debugger</string>
+    <string name="about_detail">O InstallerX Čeština</string>
+</resources>
