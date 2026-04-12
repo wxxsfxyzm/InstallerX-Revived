@@ -94,7 +94,7 @@ jobs:
           done
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: "InstallerX Revived stable ${{ inputs.version_tag }}"
           # Use the exact input as the tag name

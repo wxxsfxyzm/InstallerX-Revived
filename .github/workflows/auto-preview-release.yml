@@ -173,7 +173,7 @@ jobs:
           echo -e "${CHANGELOG_BODY_OUTPUT}${CHANGELOG_LINK_OUTPUT}"
 
       - name: Create Latest Preview Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: "InstallerX Revived Preview (${{ steps.vars.outputs.SHORT_SHA }})"
           tag_name: "${{ steps.rename_apks.outputs.version_tag }}"
