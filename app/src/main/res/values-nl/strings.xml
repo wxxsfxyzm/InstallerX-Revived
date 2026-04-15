@@ -716,4 +716,6 @@
     <string name="config_installer_mode_self">Standaard</string>
     <string name="config_installer_mode_initiator">App initialiseren</string>
     <string name="config_installer_mode_custom">Aangepast</string>
+    <string name="theme_settings_predictive_back">Voorspelbare terug</string>
+    <string name="theme_settings_predictive_back_animation">Voorspelbare teruganimatie</string>
 </resources>

@@ -251,7 +251,7 @@
     <string name="uninstaller_settings_desc">Thay đổi cài đặt toàn cầu của trình gỡ cài đặt</string>
     <string name="installer_settings_global_installer">Toàn cầu</string>
     <string name="installer_settings_require_biometric_auth">Yêu cầu Xác thực Sinh trắc học để Cài đặt</string>
-    <string name="installer_settings_require_biometric_auth_desc">Yêu cầu xác thực sinh trắc học khi cài đặt</string>
+    <string name="installer_settings_require_biometric_auth_desc">Yêu cầu xác thực sinh trắc học khi cài đặt các gói</string>
     <string name="uninstaller_settings_require_biometric_auth">Yêu cầu Xác thực Sinh trắc học để Gỡ cài đặt</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">Yêu cầu xác thực sinh trắc học khi gỡ cài đặt</string>
     <string name="use_biometric_confirm_change_auth_settings">Bạn có chắc mình muốn thay đổi cài đặt này không</string>
@@ -715,7 +715,7 @@
     <string name="theme_settings_predictive_back_animation">Hoạt ảnh Quay lại Dự đoán</string>
     <string name="theme_settings_predictive_back_animation_desc">Chọn hiệu ứng hoạt ảnh cho quay lại dự đoán</string>
     <string name="theme_settings_predictive_back_exit_direction">Hướng Thoát</string>
-    <string name="theme_settings_predictive_back_exit_direction_desc">Chọn hướng thoát cho quay lại dự đoán (Chỉ chia tỷ lệ hoạt ảnh)</string>
+    <string name="theme_settings_predictive_back_exit_direction_desc">Chọn hướng thoát cho quay lại dự đoán</string>
     <string name="theme_settings_predictive_back_animation_none">Không có</string>
     <string name="theme_settings_predictive_back_animation_aosp">AOSP</string>
     <string name="theme_settings_predictive_back_animation_scale">Chia tỷ lệ</string>
@@ -747,4 +747,12 @@
     <string name="lab_update_github_proxy_custom">GHProxy Tùy chỉnh</string>
     <string name="lab_update_github_proxy_url">URL Tùy chỉnh</string>
     <string name="lab_update_github_proxy_url_desc">URL Proxy</string>
+    <string name="installer_biometric_auth_mode_disable">Tắt Xác thực Sinh trắc học</string>
+    <string name="installer_biometric_auth_mode_enable">Bật Xác thực Sinh trắc học</string>
+    <string name="installer_biometric_auth_mode_follow_config">Theo Hồ sơ</string>
+    <string name="installer_biometric_auth_mode_disable_desc">Tắt hoàn toàn xác thực sinh trắc học cho mọi lần cài đặt</string>
+    <string name="installer_biometric_auth_mode_enable_desc">Bật và cho phép sử dụng xác thực sinh trắc học cho mọi lần cài đặt</string>
+    <string name="installer_biometric_auth_mode_follow_config_desc">Theo các cài đặt hồ sơ đã thiết lập cho từng ứng dụng</string>
+    <string name="dialog_settings">Cài đặt Hộp thoại</string>
+    <string name="dialog_settings_desc">Tùy chỉnh giao diện và hành vi của hộp thoại cài đặt</string>
 </resources>

@@ -636,7 +636,7 @@
     <string name="config_declare_install_requester_desc">Kapalıyken varsayılan olarak isteği gönderen uygulamayı kullanır</string>
     <string name="config_declare_install_requester_error_desc">Girilen paket adı yüklü olmalıdır</string>
     <string name="config_install_requester">Yükleme (paket adı) tarafından talep edildi</string>
-    <string name="config_declare_installer_desc">Kapalıyken varsayılan olarak bu uygulamayı kullanır</string>
+    <string name="config_declare_installer_desc">Varsayılan olarak bu uygulamanın paket adı kullanılır</string>
     <string name="config_auto_delete_zip">Zip dosyalarını otomatik olarak sil</string>
     <string name="config_auto_delete_zip_desc">Yükleme paketini silmenin yanı sıra, yükleme paketini içeren sıkıştırılmış dosyada silinir.</string>
     <string name="config_error_package_not_found">Paket bulunamadı</string>
@@ -659,7 +659,7 @@
     <string name="installer_progress_channel_name_desc">Yükleme sürecini gösterir</string>
     <string name="installer_notification_desc">Arka plan servis bildirimi, işe yaramaz</string>
     <string name="installer_live_channel_name_desc">Yükleme ilerlemesini canlı güncelleme olarak gösterir</string>
-    <string name="installer_live_channel_short_text_pending_install">Askıda</string>
+    <string name="installer_live_channel_short_text_pending_install">Beklemede</string>
     <string name="uninstall_authorizer_tip">Kaldırıcı her zaman varsayılan profilde ayarlanmış yetkilendiriciyi kullanır</string>
     <string name="uninstall_all_users_disabled">Tüm kullanıcılar için kaldırma devre dışı bırakıldı</string>
     <string name="uninstall_system_app_disabled">Sistem uygulaması kaldırma devre dışı bırakıldı</string>
@@ -709,10 +709,10 @@
     <string name="config_always_use_root_in_system">Ayrıcalıklı işlemler için root yetkisini kullan</string>
     <string name="config_always_use_root_in_system_desc">Sistem yükleyicisi olarak çalışırken, modül yükleme ve dosya silme gibi ayrıcalıklı işlemler için her zaman root yetkisini kullanılır</string>
     <string name="batch_install_result_message">Toplu yükleme: %1$d/%2$d başarılı</string>
-    <string name="lab_mi_island_countdown">XMSF blok süresi (Sadece Shizuku)</string>
-    <string name="lab_mi_island_countdown_desc">Shizuku kullanarak XMSF ağ erişiminin ne kadar süreyle engelleneceğini ayarlar. Sadece etkisini anlıyorsanız değiştirin!</string>
+    <string name="lab_mi_island_countdown">XMSF blok süresi</string>
+    <string name="lab_mi_island_countdown_desc">XMSF ağ engelleme süresini ayarlar. Sadece Shizuku için geçerlidir. Sonuçlarını anlıyorsanız değiştirin!</string>
     <string name="exception_uninstall_failed_device_policy">Cihaz politikası nedeniyle kaldırma işlemi engellendi</string>
-    <string name="exception_uninstall_failed_owner_blocked">Kullanıcı tarafından kaldırma işlemi engellendi</string>
+    <string name="exception_uninstall_failed_owner_blocked">Kaldırma işlemi kullanıcı tarafından engellendi</string>
     <string name="config_installer_mode_self">Varsayılan</string>
     <string name="config_installer_mode_initiator">Uygulama başlatılıyor</string>
     <string name="config_installer_mode_custom">Özel</string>
@@ -720,7 +720,7 @@
     <string name="theme_settings_predictive_back_animation">Tahminli Geri Animasyonu</string>
     <string name="theme_settings_predictive_back_animation_desc">Tahminli geri için animasyon efektini seçin</string>
     <string name="theme_settings_predictive_back_exit_direction">Çıkış Yönü</string>
-    <string name="theme_settings_predictive_back_exit_direction_desc">Tahminli geri için çıkış yönünü seçin (Sadece ölçeklendirme animasyonu)</string>
+    <string name="theme_settings_predictive_back_exit_direction_desc">Tahminli geri dönüş için çıkış yönünü seçin</string>
     <string name="theme_settings_predictive_back_animation_none">Hiçbiri</string>
     <string name="theme_settings_predictive_back_animation_aosp">AOSP</string>
     <string name="theme_settings_predictive_back_animation_scale">Ölçek</string>
@@ -741,4 +741,10 @@
     <string name="lab_mi_island_bypass_restriction">Mi Ada Kısıtlamasını Atla (Sadece Shizuku)</string>
     <string name="lab_mi_island_bypass_restriction_desc">Mi Ada için doğrulama kısıtlamasını atlayın</string>
     <string name="lab_mi_island_outer_glow_desc">Süper Ada\'nın kenarına sistem uygulaması tarzında bir parlama efekti ekleyin</string>
+    <string name="lab_update_github_proxy">GitHub Güncelleme Kanalı</string>
+    <string name="lab_update_github_proxy_official">Resmi</string>
+    <string name="lab_update_github_proxy_7ed">7ED Proxy</string>
+    <string name="lab_update_github_proxy_custom">Özel GHProxy</string>
+    <string name="lab_update_github_proxy_url">Özel URL</string>
+    <string name="lab_update_github_proxy_url_desc">Proxy URL</string>
 </resources>
