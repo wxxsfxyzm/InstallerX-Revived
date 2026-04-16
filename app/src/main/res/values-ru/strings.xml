@@ -747,4 +747,13 @@
     <string name="lab_update_github_proxy_url">Пользовательский URL</string>
     <string name="lab_update_github_proxy_url_desc">URL прокси</string>
     <string name="lab_update_github_proxy_7ed">7ED Proxy</string>
+    <string name="installer_biometric_auth_mode_disable">Отключить биометрию</string>
+    <string name="installer_biometric_auth_mode_enable">Включить биометрию</string>
+    <string name="installer_biometric_auth_mode_follow_config">Согласно настроек</string>
+    <string name="installer_biometric_auth_mode_disable_desc">Отключить биометрическую аутентификацию для всех установок</string>
+    <string name="installer_biometric_auth_mode_enable_desc">Использовать биометрическую аутентификацию при установках</string>
+    <string name="installer_biometric_auth_mode_follow_config_desc">Используются настройки профиля для каждого приложения</string>
+    <string name="dialog_settings">Настройки диалогового окна</string>
+    <string name="dialog_settings_desc">Настройте внешний вид и поведение диалоговых окон при установке</string>
+    <string name="reboot_soft_reboot">Мягкая перезагрузка</string>
 </resources>

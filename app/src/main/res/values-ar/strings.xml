@@ -457,4 +457,6 @@
     <string name="pull_to_refresh_hint2">الإصدار للتحديث</string>
     <string name="pull_to_refresh_hint3">جارٍ الإنعاش…</string>
     <string name="pull_to_refresh_hint4">تم تحديثه بنجاح</string>
+    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="theme_settings_use_apple_floating_bar">تفعيل الشريط السفلي العائم</string>
 </resources>

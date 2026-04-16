@@ -747,4 +747,12 @@
     <string name="lab_update_github_proxy_custom">Özel GHProxy</string>
     <string name="lab_update_github_proxy_url">Özel URL</string>
     <string name="lab_update_github_proxy_url_desc">Proxy URL</string>
+    <string name="installer_biometric_auth_mode_disable">Biyometrik Kimlik Doğrulamasını Devre Dışı Bırak</string>
+    <string name="installer_biometric_auth_mode_enable">Biyometrik Kimlik Doğrulamasını Etkinleştir</string>
+    <string name="installer_biometric_auth_mode_follow_config">Profili İzle</string>
+    <string name="installer_biometric_auth_mode_disable_desc">Tüm yüklemeler için biyometrik kimlik doğrulamayı tamamen devre dışı bırakır</string>
+    <string name="installer_biometric_auth_mode_enable_desc">Her yükleme için biyometrik kimlik doğrulamayı etkinleştirir ve kullanımına izin verir</string>
+    <string name="installer_biometric_auth_mode_follow_config_desc">Her uygulama için belirlenen profil ayarlarını takip eder</string>
+    <string name="dialog_settings">Diyalog Ayarları</string>
+    <string name="dialog_settings_desc">Yükleme diyaloğu görünümünü ve davranışını özelleştirir</string>
 </resources>

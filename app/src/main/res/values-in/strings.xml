@@ -700,4 +700,9 @@
     <string name="lab_mi_island">Pulau Mi Super</string>
     <string name="lab_tap_icon_to_share">Ketuk ikon untuk membagikan apk</string>
     <string name="lab_tap_icon_to_share_desc">Ketuk ikon di halaman persiapan untuk membagikan apk</string>
+    <string name="theme_settings_use_apple_floating_bar">Aktifkan bilah bawah mengambang</string>
+    <string name="theme_settings_use_apple_floating_bar_desc">Tampilkan bilah navigasi bergaya mengambang di bagian bawah layar</string>
+    <string name="theme_settings_predictive_back">Prediktif Kembali</string>
+    <string name="theme_settings_predictive_back_animation">Animasi Kembali Prediktif</string>
+    <string name="theme_settings_predictive_back_animation_desc">Pilih efek animasi untuk tombol kembali prediktif</string>
 </resources>
