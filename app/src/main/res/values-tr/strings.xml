@@ -217,7 +217,7 @@
     <string name="installer_background_channel_name">Arka Plan Bildirimi</string>
     <string name="uninstall_keep_data">Verileri Sakla</string>
     <string name="uninstall_all_users">Tüm Kullanıcılar İçin</string>
-    <string name="uninstall_delete_system_app">SystemApp\'i Sil</string>
+    <string name="uninstall_delete_system_app">Sistem Uygulamalarını Sil</string>
     <string name="uninstall_success_message">Kaldırma Başarılı</string>
     <string name="permission_read_external_storage">Harici depolamayı oku</string>
     <string name="permission_write_external_storage">Harici depolama alanına yaz</string>
@@ -576,7 +576,7 @@
     <string name="permission_manage_external_storage">Harici depolama alanını yönet</string>
     <string name="config_display_size">Paket boyutunu göster</string>
     <string name="config_display_size_desc">Yükleme arayüzünde paket boyutunu gösterir</string>
-    <string name="config_label_app_bundle_settings">APK Paketlerini Böl</string>
+    <string name="config_label_app_bundle_settings">Bölünmüş APK Paketleri</string>
     <string name="installer_package_size_label">Boyut:</string>
     <string name="exception_http_not_allowed">Açık metin HTTP\'ye izin verilmiyor</string>
     <string name="exception_http_restricted_for_localhost">Yerel ana bilgisayarla sınırlı açık metin HTTP</string>
@@ -595,7 +595,7 @@
     <string name="reboot_userspace">Kullanıcı alanını yeniden başlat</string>
     <string name="reboot_recovery">Kurtarma için Yeniden Başlat</string>
     <string name="reboot_bootloader">Önyükleyiciyi Yeniden Başlat</string>
-    <string name="reboot_edl">EDL\'ye Yeniden Başlat</string>
+    <string name="reboot_edl">EDL\'e Yeniden Başlat</string>
     <string name="reboot_download">İndirmeyi Yeniden Başlat</string>
     <string name="installer_multi_apk_description_notification">Lütfen yüklenecek öğeleri seçmek için bildirime tıklayın</string>
     <string name="installer_error_mixed_selection">Uygulamalar ve modüller aynı anda toplu olarak yüklenemez</string>
@@ -645,7 +645,7 @@
     <string name="license">Lisans: %s</string>
     <string name="no_license_text">Lisans metni mevcut değil.</string>
     <string name="open_lsposed">LSPosed\'ı Aç</string>
-    <string name="auth_to_continue_work">Lütfen bu işlemi onaylamak için kimliğinizi doğrulayın</string>
+    <string name="auth_to_continue_work">Lütfen bu işlemi onaylamak için kimlik doğrulaması yapın</string>
     <string name="auth_summary_install">Yükleme işlemi gerçekleştiriyorsunuz. Devam etmek için lütfen cihaz kimlik doğrulamanızı kullanarak bu işlemi onaylayın</string>
     <string name="auth_summary_uninstall">Kaldırma işlemi gerçekleştiriyorsunuz. Devam etmek için lütfen cihaz kimlik doğrulamanızı kullanarak bu işlemi onaylayın</string>
     <string name="tag_downgrade">Sürüm Düşürme</string>
@@ -728,7 +728,7 @@
     <string name="theme_settings_predictive_back_exit_direction_follow_gesture">Hareketi İzle</string>
     <string name="theme_settings_predictive_back_exit_direction_always_left">Her zaman Sol</string>
     <string name="theme_settings_predictive_back_exit_direction_always_right">Her zaman Sağ</string>
-    <string name="installer_resolving_desc">Girdiden yüklenebilir içeriği ayrıştırma…</string>
+    <string name="installer_resolving_desc">Girdiden yüklenebilir içerik ayrıştırılıyor…</string>
     <string name="notification_settings">Bildirim Ayarları</string>
     <string name="notification_settings_desc">Yükleme ilerleme bildirimlerinin görünümünü özelleştirin</string>
     <string name="notification_style">Bildirim Stili</string>
@@ -747,12 +747,21 @@
     <string name="lab_update_github_proxy_custom">Özel GHProxy</string>
     <string name="lab_update_github_proxy_url">Özel URL</string>
     <string name="lab_update_github_proxy_url_desc">Proxy URL</string>
-    <string name="installer_biometric_auth_mode_disable">Biyometrik Kimlik Doğrulamasını Devre Dışı Bırak</string>
-    <string name="installer_biometric_auth_mode_enable">Biyometrik Kimlik Doğrulamasını Etkinleştir</string>
+    <string name="installer_biometric_auth_mode_disable">Biyometrik Kimlik Doğrulamayı Devre Dışı Bırak</string>
+    <string name="installer_biometric_auth_mode_enable">Biyometrik Kimlik Doğrulamayı Etkinleştir</string>
     <string name="installer_biometric_auth_mode_follow_config">Profili İzle</string>
     <string name="installer_biometric_auth_mode_disable_desc">Tüm yüklemeler için biyometrik kimlik doğrulamayı tamamen devre dışı bırakır</string>
     <string name="installer_biometric_auth_mode_enable_desc">Her yükleme için biyometrik kimlik doğrulamayı etkinleştirir ve kullanımına izin verir</string>
     <string name="installer_biometric_auth_mode_follow_config_desc">Her uygulama için belirlenen profil ayarlarını takip eder</string>
     <string name="dialog_settings">Diyalog Ayarları</string>
     <string name="dialog_settings_desc">Yükleme diyaloğu görünümünü ve davranışını özelleştirir</string>
+    <string name="reboot_soft_reboot">Yumuşak Yeniden Başlatma</string>
+    <string name="exception_install_failed_permission_model_downgrade">İzin modelinin düşürülmesine izin verilmiyor</string>
+    <string name="exception_install_failed_sandbox_version_downgrade">Sandbox sürümünün düşürülmesine izin verilmiyor</string>
+    <string name="exception_install_failed_oem_frp_locked">Lütfen orijinal Google hesabına giriş yapın</string>
+    <string name="exception_install_parse_failed_manifest_empty">Manifestoda uygulama veya izleme etiketleri bulunmamaktadır</string>
+    <string name="exception_install_failed_duplicate_permission_group">İzin grubu zaten başka bir paket tarafından tanımlanmış</string>
+    <string name="exception_install_failed_bad_permission_group">Geçersiz izin grubu veya uyumsuz sertifika</string>
+    <string name="exception_install_failed_pre_approval_not_available">Kullanıcı ön onayı isteme şu anda mümkün değil</string>
+    <string name="exception_install_failed_multi_arch_not_match_all_native_abis">Paketlenmiş yerel kod, sistem tarafından desteklenen tüm yerel ABI\'lerle eşleşmiyor</string>
 </resources>

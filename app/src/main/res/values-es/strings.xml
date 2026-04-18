@@ -572,7 +572,7 @@
     <string name="config_customize_install_reason">Personalizar motivo de instalación</string>
     <string name="config_customize_install_reason_desc">Especifica el motivo de la instalación. Para nuevas instalaciones. Seleccionar Usuario suele hacer que el lanzador cree un icono de escritorio</string>
     <string name="config_install_reason">Motivo de Instalación</string>
-    <string name="config_install_reason_unknown">Desconocido</string>
+    <string name="config_install_reason_unknown">Motivo desconocido</string>
     <string name="config_install_reason_policy">Política de dispositivos</string>
     <string name="config_install_reason_device_restore">Restauración del dispositivo</string>
     <string name="config_install_reason_device_setup">Configuración del dispositivo</string>
@@ -726,4 +726,23 @@
     <string name="exception_uninstall_failed_owner_blocked">Desinstalación bloqueada por el propietario</string>
     <string name="lab_mi_island_countdown">Duración del bloque XMSF (Solo Shizuku)</string>
     <string name="lab_mi_island_countdown_desc">Establece cuánto tiempo se bloquea el acceso a la red XMSF usando Shizuku, no funcionará si Shizuku se activa usando root. ¡Cambia solo si entiendes el impacto!</string>
+    <string name="theme_settings_predictive_back">Volver predictivo</string>
+    <string name="theme_settings_predictive_back_animation">Animación Predictiva de volver</string>
+    <string name="theme_settings_predictive_back_animation_desc">Selecciona el efecto de animación para el volver predictivo</string>
+    <string name="theme_settings_predictive_back_exit_direction">Dirección de salida</string>
+    <string name="theme_settings_predictive_back_exit_direction_desc">Selecciona la dirección de salida para el volver predictivo</string>
+    <string name="theme_settings_predictive_back_animation_none">Ninguno</string>
+    <string name="theme_settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="theme_settings_predictive_back_animation_scale">Escala</string>
+    <string name="theme_settings_predictive_back_animation_ksu_classic">Clásico KernelSU</string>
+    <string name="theme_settings_predictive_back_exit_direction_follow_gesture">Seguir el gesto</string>
+    <string name="theme_settings_predictive_back_exit_direction_always_right">Siempre a la derecha</string>
+    <string name="theme_settings_predictive_back_exit_direction_always_left">Siempre a la Izquierda</string>
+    <string name="installer_biometric_auth_mode_disable">Desactivar la autenticación biométrica</string>
+    <string name="installer_biometric_auth_mode_enable">Habilitar la autenticación biométrica</string>
+    <string name="installer_biometric_auth_mode_follow_config">Seguir perfil</string>
+    <string name="installer_biometric_auth_mode_disable_desc">Desactiva completamente la autenticación biométrica en cada instalación</string>
+    <string name="installer_biometric_auth_mode_enable_desc">Habilitar y permitir el uso de la autenticación biométrica para cada instalación</string>
+    <string name="installer_biometric_auth_mode_follow_config_desc">Sigue la configuración del perfil para cada app</string>
+    <string name="installer_temp_settings_tip">Estos ajustes son temporales para esta sesión. Para conservarlos, ve a Configuración</string>
 </resources>

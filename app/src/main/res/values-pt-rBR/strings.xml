@@ -640,7 +640,7 @@
     <string name="lab_module_flashing_show_art">Exibir arte ASCII</string>
     <string name="lab_module_flashing_show_art_desc">Exibir arte ASCII do InstallerX quando a instalação começar</string>
     <string name="installer_settings_require_biometric_auth">Exigir Autenticação Biométrica para Instalar</string>
-    <string name="installer_settings_require_biometric_auth_desc">Exigir autenticação biométrica durante a instalação</string>
+    <string name="installer_settings_require_biometric_auth_desc">Exigir autenticação biométrica ao instalar pacotes</string>
     <string name="uninstaller_settings_require_biometric_auth">Exigir Autenticação Biométrica para Desinstalar</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">Exigir autenticação biométrica ao desinstalar</string>
     <string name="use_biometric_confirm_change_auth_settings">Tem certeza de que deseja alterar essa configuração?</string>
@@ -755,4 +755,13 @@
     <string name="lab_mi_island_outer_glow_desc">Adicione um efeito de brilho estilo aplicativo de sistema à borda da Super Ilha</string>
     <string name="dialog_settings">Configurações de caixa de diálogo</string>
     <string name="dialog_settings_desc">Personalize a aparência e o comportamento da caixa de diálogo de instalação</string>
+    <string name="exception_install_failed_permission_model_downgrade">Não é permitido rebaixar o nível do modelo de permissões</string>
+    <string name="exception_install_failed_sandbox_version_downgrade">Não é permitido fazer o downgrade da versão Sandbox</string>
+    <string name="exception_install_failed_oem_frp_locked">Faça login na conta original do Google</string>
+    <string name="exception_install_parse_failed_manifest_empty">O Manifest não contém tags de app ou de instrumentação</string>
+    <string name="exception_install_failed_duplicate_permission_group">Grupo de permissões já definido por outro pacote</string>
+    <string name="exception_install_failed_bad_permission_group">Grupo de permissões inválido ou certificado incompatível</string>
+    <string name="exception_install_failed_pre_approval_not_available">O recurso de solicitação de aprovação prévia do usuário não está disponível no momento</string>
+    <string name="exception_install_failed_multi_arch_not_match_all_native_abis">O código nativo empacotado não bate com todas as ABIs nativas suportadas pelo sistema</string>
+    <string name="reboot_soft_reboot">Reinicialização Suave</string>
 </resources>
