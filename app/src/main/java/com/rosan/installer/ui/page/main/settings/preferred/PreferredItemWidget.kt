@@ -1,21 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.rosan.installer.ui.page.main.settings.preferred
 
-import androidx.annotation.StringRes
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,22 +24,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.twotone.DesignServices
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.InputChip
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -66,11 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
-import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.BiometricAuthMode
 import com.rosan.installer.domain.settings.model.HttpProfile
-import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.RootMode
 import com.rosan.installer.domain.settings.model.SharedUid
@@ -79,180 +64,13 @@ import com.rosan.installer.ui.page.main.settings.preferred.about.AboutAction
 import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.lab.LabSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.lab.LabSettingsViewModel
-import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsAction
-import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.UninstallerSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.UninstallerSettingsViewModel
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
+import com.rosan.installer.ui.page.main.widget.setting.DraggableManagedList
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
-import com.rosan.installer.ui.theme.material.PaletteStyle
-import com.rosan.installer.ui.theme.material.ThemeColorSpec
 import com.rosan.installer.util.hasFlag
-import org.koin.compose.koinInject
-
-data class AuthorizerInfo(
-    @param:StringRes val labelResId: Int,
-    val icon: ImageVector
-)
-
-/**
- * @author wxxsfxyzm
- */
-@Composable
-fun DataAuthorizerWidget(
-    modifier: Modifier = Modifier, // modifier to be applied to FlowRow
-    currentAuthorizer: Authorizer,
-    changeAuthorizer: (Authorizer) -> Unit,
-    enabled: Boolean = true,
-    onClick: () -> Unit = {},
-    trailingContent: @Composable () -> Unit = {},
-) {
-    val haptic = LocalHapticFeedback.current
-    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
-    val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
-
-    val isSessionInstallSupported = capabilityProvider.isSessionInstallSupported
-    val authorizerOptions = mapOf(
-        Authorizer.None to AuthorizerInfo(
-            R.string.config_authorizer_none,
-            AppIcons.None
-        ),
-        Authorizer.Root to AuthorizerInfo(
-            R.string.config_authorizer_root,
-            AppIcons.Root
-        ),
-        Authorizer.Shizuku to AuthorizerInfo(
-            R.string.config_authorizer_shizuku,
-            shizukuIcon
-        ),
-        Authorizer.Dhizuku to AuthorizerInfo(
-            R.string.config_authorizer_dhizuku,
-            AppIcons.InstallAllowRestrictedPermissions
-        ),
-        /* Authorizer.Customize to AuthorizerInfo(
-                    R.string.config_authorizer_customize,
-                    AppIcons.Customize
-                ),*/
-    )
-
-    Column {
-        BaseWidget(
-            icon = AppIcons.Authorizer,
-            title = stringResource(R.string.config_authorizer),
-            description = stringResource(R.string.config_app_authorizer_desc),
-            enabled = enabled,
-            onClick = onClick,
-            content = { }
-        )
-
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-            modifier = modifier
-                .padding(start = 56.dp, end = 16.dp, bottom = 16.dp)
-        ) {
-            authorizerOptions.forEach { (authorizerType, authorizerInfo) ->
-                InputChip(
-                    enabled = when (authorizerType) {
-                        Authorizer.None -> isSessionInstallSupported
-                        else -> true
-                    } && enabled,
-                    selected = currentAuthorizer == authorizerType,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        if (currentAuthorizer != authorizerType) {
-                            changeAuthorizer(authorizerType)
-                        }
-                    },
-                    label = { Text(text = stringResource(authorizerInfo.labelResId)) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = authorizerInfo.icon,
-                            contentDescription = null,
-                            modifier = Modifier.size(AssistChipDefaults.IconSize)
-                        )
-                    }
-                )
-            }
-        }
-
-        trailingContent()
-    }
-}
-
-data class InstallModeInfo(
-    @param:StringRes val labelResId: Int,
-    val icon: ImageVector
-)
-
-/**
- * @author wxxsfxyzm
- */
-@Composable
-fun DataInstallModeWidget(
-    modifier: Modifier = Modifier,
-    currentInstallMode: InstallMode,
-    changeInstallMode: (InstallMode) -> Unit,
-    trailingContent: @Composable () -> Unit = {}
-) {
-    val haptic = LocalHapticFeedback.current
-
-    val installModeOptions = mapOf(
-        InstallMode.Dialog to InstallModeInfo(
-            R.string.config_install_mode_dialog,
-            AppIcons.Dialog
-        ),
-        InstallMode.AutoDialog to InstallModeInfo(
-            R.string.config_install_mode_auto_dialog,
-            AppIcons.AutoDialog
-        ),
-        InstallMode.Notification to InstallModeInfo(
-            R.string.config_install_mode_notification,
-            AppIcons.Notification
-        ),
-        InstallMode.AutoNotification to InstallModeInfo(
-            R.string.config_install_mode_auto_notification,
-            AppIcons.AutoNotification
-        )
-    )
-
-    Column {
-        BaseWidget(
-            icon = AppIcons.InstallMode,
-            title = stringResource(R.string.config_install_mode),
-            description = stringResource(R.string.config_install_mode_desc),
-            content = {}
-        )
-
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-            modifier = modifier
-                .padding(start = 56.dp, end = 16.dp, bottom = 16.dp)
-        ) {
-            installModeOptions.forEach { (modeType, modeInfo) ->
-                InputChip(
-                    selected = currentInstallMode == modeType,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        if (currentInstallMode != modeType) {
-                            changeInstallMode(modeType)
-                        }
-                    },
-                    label = { Text(text = stringResource(modeInfo.labelResId)) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = modeInfo.icon,
-                            contentDescription = null,
-                            modifier = Modifier.size(AssistChipDefaults.IconSize)
-                        )
-                    }
-                )
-            }
-        }
-        trailingContent()
-    }
-}
-
 
 /**
  * A DropDownMenuWidget for selecting the auto-clear time for success notifications.
@@ -306,7 +124,6 @@ fun DisableAdbVerify(
     checked: Boolean,
     isError: Boolean,
     enabled: Boolean,
-    isM3E: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
     SwitchWidget(
@@ -317,7 +134,6 @@ fun DisableAdbVerify(
         isError = isError,
         checked = checked,
         enabled = enabled,
-        isM3E = isM3E,
         onCheckedChange = onCheckedChange
     )
 }
@@ -332,7 +148,6 @@ fun DisableAdbVerify(
 fun IgnoreBatteryOptimizationSetting(
     checked: Boolean,
     enabled: Boolean,
-    isM3E: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
     SwitchWidget(
@@ -342,7 +157,6 @@ fun IgnoreBatteryOptimizationSetting(
         else stringResource(R.string.ignore_battery_optimizations_desc_disabled),
         checked = checked,
         enabled = enabled,
-        isM3E = isM3E,
         onCheckedChange = onCheckedChange
     )
 }
@@ -351,7 +165,6 @@ fun IgnoreBatteryOptimizationSetting(
 fun AutoLockInstaller(
     checked: Boolean,
     enabled: Boolean,
-    isM3E: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
     SwitchWidget(
@@ -360,7 +173,6 @@ fun AutoLockInstaller(
         description = stringResource(R.string.auto_lock_default_installer_desc),
         checked = checked,
         enabled = enabled,
-        isM3E = isM3E,
         onCheckedChange = onCheckedChange
     )
 }
@@ -435,86 +247,6 @@ fun SettingsNavigationItemWidget(
             contentDescription = null
         )
     }
-}
-
-/**
- * A custom composable for radio-button-like selection within a setting list.
- * Mimics the appearance of SwitchWidget but provides selection behavior.
- */
-@Composable
-fun SelectableSettingItem(
-    title: String,
-    description: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium) // Ensure consistent shape for click feedback
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp), // Adjust padding to match SwitchWidget
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        RadioButton(
-            selected = selected,
-            onClick = onClick,
-            colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
-        )
-    }
-}
-
-@Composable
-fun ColorSpecSelector(viewModel: ThemeSettingsViewModel) {
-    val uiState by viewModel.state.collectAsStateWithLifecycle()
-
-    // Check if the current PaletteStyle supports SPEC_2025
-    val isSpec2025Supported = uiState.paletteStyle in listOf(
-        PaletteStyle.TonalSpot,
-        PaletteStyle.Neutral,
-        PaletteStyle.Vibrant,
-        PaletteStyle.Expressive
-    )
-
-    // Filter available specs based on support
-    val availableSpecs = if (isSpec2025Supported) {
-        ThemeColorSpec.entries
-    } else {
-        listOf(ThemeColorSpec.SPEC_2021)
-    }
-
-    // Determine the actual spec being applied to match the fallback logic
-    val activeSpec = if (!isSpec2025Supported) ThemeColorSpec.SPEC_2021 else uiState.colorSpec
-
-    // Use a static localized string for the unsupported state
-    val descriptionText = if (!isSpec2025Supported) {
-        stringResource(id = R.string.theme_settings_color_spec_only_2021)
-    } else {
-        activeSpec.displayName
-    }
-
-    DropDownMenuWidget(
-        icon = Icons.TwoTone.DesignServices,
-        title = stringResource(id = R.string.theme_settings_color_spec),
-        description = descriptionText,
-        enabled = isSpec2025Supported, // Disable interaction if not supported
-        choice = availableSpecs.indexOf(activeSpec).coerceAtLeast(0),
-        data = availableSpecs.map { it.displayName },
-        onChoiceChange = { index ->
-            val selectedSpec = availableSpecs[index]
-            viewModel.dispatch(ThemeSettingsAction.SetColorSpec(selectedSpec))
-        }
-    )
 }
 
 @Composable
@@ -592,249 +324,111 @@ fun BottomSheetContent(
     }
 }
 
-
-/**
- * A reusable widget to display and manage a list of NamedPackage items.
- * It is stateless and relies on callbacks to handle data modifications.
- *
- * @param noContentTitle The title if no packages are available.
- * @param packages The list of NamedPackage items to display.
- * @param onAddPackage A callback invoked when a new package should be added.
- * @param onRemovePackage A callback invoked when an existing package should be removed.
- * @param modifier The modifier to be applied to the widget's container.
- */
 @Composable
 fun ManagedPackagesWidget(
     modifier: Modifier = Modifier,
     noContentTitle: String,
-    noContentDescription: String = stringResource(R.string.config_add_one_to_get_started),
     packages: List<NamedPackage>,
     infoText: String? = null,
     isInfoVisible: Boolean = false,
     infoColor: Color = MaterialTheme.colorScheme.primary,
     onAddPackage: (NamedPackage) -> Unit,
     onRemovePackage: (NamedPackage) -> Unit,
+    onMovePackage: (fromIndex: Int, toIndex: Int) -> Unit
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
-    var showDeleteConfirmation by remember { mutableStateOf<NamedPackage?>(null) }
 
-    // Main container for the widget
-    Column(modifier = modifier.padding(vertical = 8.dp)) {
-        // Display each package in the list
-        if (packages.isEmpty()) {
-            ListItem(
-                headlineContent = { Text(noContentTitle) },
-                supportingContent = { Text(noContentDescription) },
-                leadingContent = {
-                    Icon(
-                        // imageVector = AppIcons.Info,
-                        imageVector = Icons.Default.Info, // Placeholder icon
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-            )
-        } else {
-            packages.forEach { item ->
-                ListItem(
-                    headlineContent = { Text(item.name) },
-                    supportingContent = { Text(item.packageName) },
-                    leadingContent = {
-                        Icon(
-                            imageVector = AppIcons.Android, // Placeholder icon
-                            contentDescription = "Icon Placeholder",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    trailingContent = {
-                        IconButton(onClick = { showDeleteConfirmation = item }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.delete),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                )
-            }
-        }
-
-        // "Add New Package" button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically // 垂直居中对齐
-        ) {
-            // 1. 左侧新增的 AnimatedVisibility 文本区域
-            AnimatedVisibility(
-                visible = isInfoVisible && !infoText.isNullOrBlank(),
-                enter = fadeIn(),
-                exit = fadeOut()
+    DraggableManagedList(
+        modifier = modifier,
+        items = packages,
+        itemKey = { it.packageName },
+        itemName = { it.name },
+        itemDescription = { it.packageName },
+        leadingIcon = AppIcons.Android,
+        onMove = onMovePackage,
+        onRemove = onRemovePackage,
+        noContentTitle = noContentTitle,
+        bottomBarContent = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // 使用一个 Box 来应用背景和圆角
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50)) // 50%的圆角使其成为胶囊形状
-                        .background(infoColor.copy(alpha = 0.1f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = infoText!!, // 确定不为空时才显示
-                        color = infoColor,
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                AnimatedVisibility(visible = isInfoVisible && !infoText.isNullOrBlank()) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(infoColor.copy(alpha = 0.1f))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(text = infoText ?: "", color = infoColor, style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                TextButton(onClick = { showAddDialog = true }) {
+                    Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.add))
                 }
             }
-
-            // 2. 一个带权重的 Spacer，它会“推开”两边的元素，占据所有可用空间
-            Spacer(modifier = Modifier.weight(1f))
-
-            // 3. 右侧原有的 "添加" 按钮
-            TextButton(onClick = { showAddDialog = true }) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp)) // 使用 width 比 size 更精确
-                Text(stringResource(R.string.add))
-            }
         }
-    }
+    )
 
-    // --- Dialogs ---
-
-    // Dialog for adding a new package
     if (showAddDialog) {
         AddPackageDialog(
             onDismiss = { showAddDialog = false },
-            onConfirm = { newItem ->
-                onAddPackage(newItem) // Use the callback
-                showAddDialog = false
-            }
-        )
-    }
-
-    // Dialog for confirming deletion
-    showDeleteConfirmation?.let { itemToDelete ->
-        DeleteNamedPackageConfirmationDialog(
-            item = itemToDelete,
-            onDismiss = { showDeleteConfirmation = null },
             onConfirm = {
-                onRemovePackage(itemToDelete) // Use the callback
-                showDeleteConfirmation = null
+                onAddPackage(it)
+                showAddDialog = false
             }
         )
     }
 }
 
-/**
- * A reusable widget to display and manage a list of NamedPackage items.
- * It is stateless and relies on callbacks to handle data modifications.
- *
- * @param noContentTitle The title if no packages are available.
- * @param uids The list of SharedUid items to display.
- * @param onAddUid A callback invoked when a new uid should be added.
- * @param onRemoveUid A callback invoked when an existing uid should be removed.
- * @param modifier The modifier to be applied to the widget's container.
- */
 @Composable
 fun ManagedUidsWidget(
+    modifier: Modifier = Modifier,
     noContentTitle: String,
     uids: List<SharedUid>,
     onAddUid: (SharedUid) -> Unit,
     onRemoveUid: (SharedUid) -> Unit,
-    modifier: Modifier = Modifier
+    onMoveUid: (fromIndex: Int, toIndex: Int) -> Unit
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
-    var showDeleteConfirmation by remember { mutableStateOf<SharedUid?>(null) }
 
-    // Main container for the widget
-    Column(modifier = modifier.padding(vertical = 8.dp)) {
-        // Display each package in the list
-        if (uids.isEmpty()) {
-            ListItem(
-                headlineContent = { Text(noContentTitle) },
-                supportingContent = { Text(stringResource(R.string.config_add_one_to_get_started)) },
-                leadingContent = {
-                    Icon(
-                        // imageVector = AppIcons.Info,
-                        imageVector = Icons.Default.Info, // Placeholder icon
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-            )
-        } else {
-            uids.forEach { item ->
-                ListItem(
-                    headlineContent = { Text(item.uidName) },
-                    supportingContent = { Text("UID: ${item.uidValue}") },
-                    leadingContent = {
-                        Icon(
-                            imageVector = AppIcons.BugReport, // Placeholder icon
-                            contentDescription = "Icon Placeholder",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    trailingContent = {
-                        IconButton(onClick = { showDeleteConfirmation = item }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.delete),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                )
+    DraggableManagedList(
+        modifier = modifier,
+        items = uids,
+        itemKey = { it.uidValue },
+        itemName = { it.uidName },
+        itemDescription = { "UID: ${it.uidValue}" },
+        leadingIcon = AppIcons.BugReport,
+        onMove = onMoveUid,
+        onRemove = onRemoveUid,
+        noContentTitle = noContentTitle,
+        bottomBarContent = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = { showAddDialog = true }) {
+                    Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.add))
+                }
             }
         }
+    )
 
-        // "Add New Package" button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.End
-        ) {
-            TextButton(onClick = { showAddDialog = true }) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(stringResource(R.string.add))
-            }
-        }
-    }
-
-    // --- Dialogs ---
-
-    // Dialog for adding a new package
     if (showAddDialog) {
         AddUidDialog(
             onDismiss = { showAddDialog = false },
-            onConfirm = { newUID ->
-                onAddUid(newUID)
+            onConfirm = { uid ->
+                onAddUid(uid)
                 showAddDialog = false
-            }
-        )
-    }
-
-    // Dialog for confirming deletion
-    showDeleteConfirmation?.let { uidToDelete ->
-        DeleteSharedUidConfirmationDialog(
-            item = uidToDelete,
-            onDismiss = { showDeleteConfirmation = null },
-            onConfirm = {
-                onRemoveUid(uidToDelete) // Use the callback
-                showDeleteConfirmation = null
             }
         )
     }
@@ -1064,7 +658,7 @@ private fun DeleteSharedUidConfirmationDialog(
 }
 
 @Composable
-fun UninstallKeepDataWidget(viewModel: UninstallerSettingsViewModel, isM3E: Boolean = true) {
+fun UninstallKeepDataWidget(viewModel: UninstallerSettingsViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     SwitchWidget(
         icon = AppIcons.Save,
@@ -1073,13 +667,12 @@ fun UninstallKeepDataWidget(viewModel: UninstallerSettingsViewModel, isM3E: Bool
         checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA),
         onCheckedChange = {
             viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_KEEP_DATA, it))
-        },
-        isM3E = isM3E
+        }
     )
 }
 
 @Composable
-fun UninstallForAllUsersWidget(viewModel: UninstallerSettingsViewModel, isM3E: Boolean = true) {
+fun UninstallForAllUsersWidget(viewModel: UninstallerSettingsViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     SwitchWidget(
         icon = AppIcons.InstallForAllUsers,
@@ -1088,13 +681,12 @@ fun UninstallForAllUsersWidget(viewModel: UninstallerSettingsViewModel, isM3E: B
         checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS),
         onCheckedChange = {
             viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_ALL_USERS, it))
-        },
-        isM3E = isM3E
+        }
     )
 }
 
 @Composable
-fun UninstallSystemAppWidget(viewModel: UninstallerSettingsViewModel, isM3E: Boolean = true) {
+fun UninstallSystemAppWidget(viewModel: UninstallerSettingsViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     SwitchWidget(
         icon = AppIcons.BugReport,
@@ -1108,8 +700,7 @@ fun UninstallSystemAppWidget(viewModel: UninstallerSettingsViewModel, isM3E: Boo
                     it
                 )
             )
-        },
-        isM3E = isM3E
+        }
     )
 }
 
@@ -1157,7 +748,7 @@ fun DataInstallerBiometricAuthWidget(
 }
 
 @Composable
-fun UninstallRequireBiometricAuthWidget(viewModel: UninstallerSettingsViewModel, isM3E: Boolean = true) {
+fun UninstallRequireBiometricAuthWidget(viewModel: UninstallerSettingsViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     if (BiometricManager
             .from(LocalContext.current)
@@ -1168,7 +759,6 @@ fun UninstallRequireBiometricAuthWidget(viewModel: UninstallerSettingsViewModel,
             title = stringResource(R.string.uninstaller_settings_require_biometric_auth),
             description = stringResource(R.string.uninstaller_settings_require_biometric_auth_desc),
             checked = uiState.uninstallerRequireBiometricAuth,
-            isM3E = isM3E,
             onCheckedChange = {
                 viewModel.dispatch(UninstallerSettingsAction.ChangeBiometricAuth(it))
             }

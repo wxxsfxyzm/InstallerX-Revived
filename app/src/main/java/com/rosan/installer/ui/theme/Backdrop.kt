@@ -18,7 +18,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
  * Remember a LayerBackdrop with a solid background to prevent alpha-blending artifacts.
- * * @param enableBlur Whether the blur effect is globally enabled.
+ * @param enableBlur Whether the blur effect is globally enabled.
  * @return A LayerBackdrop instance if supported and enabled, null otherwise.
  */
 @Composable
@@ -83,7 +83,6 @@ fun Modifier.installerMiuixBlurEffect(
 @Composable
 fun rememberMaterial3BlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
     if (!enableBlur || !isRenderEffectSupported()) return null
-    // Match the exact color used in your previous M3 Haze style
     val surfaceColor = MaterialTheme.colorScheme.surfaceContainer
     return rememberLayerBackdrop {
         drawRect(surfaceColor)

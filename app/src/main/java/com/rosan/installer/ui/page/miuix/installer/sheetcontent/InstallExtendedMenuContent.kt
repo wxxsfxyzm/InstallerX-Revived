@@ -44,7 +44,7 @@ import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -222,12 +222,12 @@ private fun ExtendedMenuLazyList(
 
                         val unifiedEntries = remember(modeSelf, modeInitiator, installerFollowSettingsText, managedPackages) {
                             val list = mutableListOf(
-                                SpinnerEntry(title = modeSelf),
-                                SpinnerEntry(title = modeInitiator),
-                                SpinnerEntry(title = installerFollowSettingsText)
+                                DropdownItem(title = modeSelf),
+                                DropdownItem(title = modeInitiator),
+                                DropdownItem(title = installerFollowSettingsText)
                             )
                             managedPackages.forEach { pkg ->
-                                list.add(SpinnerEntry(title = pkg.name))
+                                list.add(DropdownItem(title = pkg.name))
                             }
                             list
                         }
@@ -276,7 +276,7 @@ private fun ExtendedMenuLazyList(
                         val userEntries = remember(availableUsers) {
                             // Ensure consistent order, e.g., sort by ID
                             availableUsers.entries.sortedBy { it.key }.map { (id, name) ->
-                                SpinnerEntry(title = "$name ($id)")
+                                DropdownItem(title = "$name ($id)")
                             }
                         }
                         val userKeysSorted = remember(availableUsers) {

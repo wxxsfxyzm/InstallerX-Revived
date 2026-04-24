@@ -132,7 +132,6 @@ class InstallerViewModel(
         _localState.update { state ->
             state.copy(
                 viewSettings = state.viewSettings.copy(
-                    uiExpressive = appSettingsRepo.getBoolean(BooleanSetting.UiExpressiveSwitch, true).first(),
                     preferSystemIconForUpdates = appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first(),
                     enableModuleInstall = appSettingsRepo.getBoolean(BooleanSetting.LabEnableModuleFlash, false).first(),
                     useDynColorFollowPkgIcon = appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first()

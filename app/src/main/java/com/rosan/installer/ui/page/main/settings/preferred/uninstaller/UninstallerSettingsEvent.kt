@@ -4,6 +4,6 @@ package com.rosan.installer.ui.page.main.settings.preferred.uninstaller
 
 import androidx.annotation.StringRes
 
-sealed class UninstallerSettingsEvent {
-    data class ShowMessage(@param:StringRes val resId: Int) : UninstallerSettingsEvent()
+sealed interface UninstallerSettingsEvent {
+    data class ShowMessage(@param:StringRes val resId: Int) : UninstallerSettingsEvent
 }

@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -136,7 +137,6 @@ import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.overlay.OverlayListPopup
-import top.yukonga.miuix.kmp.shapes.SmoothRoundedCornerShape
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -290,7 +290,7 @@ private fun MiuixAboutPageLegacyInternal(
                 ) {
                     if (uiState.appIcon != null) {
                         Image(
-                            bitmap = uiState.appIcon!!,
+                            bitmap = uiState.appIcon,
                             modifier = Modifier.size(80.dp),
                             contentDescription = stringResource(id = R.string.app_name)
                         )
@@ -666,7 +666,7 @@ private fun AboutContentBody(
                     }
                     .textureBlur(
                         backdrop = backdrop,
-                        shape = SmoothRoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(16.dp),
                         blurRadius = 150f,
                         noiseCoefficient = noiseCoefficient,
                         colors = BlurColors(blendColors = logoBlend),
@@ -762,7 +762,7 @@ private fun AboutContentBody(
                             .padding(bottom = 12.dp)
                             .textureBlur(
                                 backdrop = backdrop,
-                                shape = SmoothRoundedCornerShape(16.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 blurRadius = blurRadius,
                                 noiseCoefficient = noiseCoefficient,
                                 colors = BlurColors(
@@ -810,7 +810,7 @@ private fun AboutContentBody(
                                 .padding(bottom = 12.dp)
                                 .textureBlur(
                                     backdrop = backdrop,
-                                    shape = SmoothRoundedCornerShape(16.dp),
+                                    shape = RoundedCornerShape(16.dp),
                                     blurRadius = blurRadius,
                                     noiseCoefficient = noiseCoefficient,
                                     colors = BlurColors(

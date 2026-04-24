@@ -38,7 +38,7 @@ fun DialogPage(
     val stage = uiState.stage
     val viewSettings = uiState.viewSettings
     val temporarySeedColor = uiState.seedColor
-    val useBlur = viewSettings.useBlur && viewSettings.uiExpressive
+    val useBlur = viewSettings.useBlur
 
     val globalColorScheme = InstallerTheme.colorScheme
     val isDark = InstallerTheme.isDark

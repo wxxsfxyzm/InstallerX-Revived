@@ -55,7 +55,6 @@ class ThemeSettingsViewModel(
 
         ThemeSettingsState(
             showMiuixUI = prefs.showMiuixUI,
-            showExpressiveUI = prefs.showExpressiveUI,
             useBlur = prefs.useBlur,
             themeMode = prefs.themeMode,
             paletteStyle = prefs.paletteStyle,
@@ -82,13 +81,6 @@ class ThemeSettingsViewModel(
     fun dispatch(action: ThemeSettingsAction) {
         when (action) {
             is ThemeSettingsAction.ChangeUseMiuix -> viewModelScope.launch { updateSetting(BooleanSetting.UiUseMiuix, action.useMiuix) }
-            is ThemeSettingsAction.ChangeShowExpressiveUI -> viewModelScope.launch {
-                updateSetting(
-                    BooleanSetting.UiExpressiveSwitch,
-                    action.showRefreshedUI
-                )
-            }
-
             is ThemeSettingsAction.SetUseBlur -> viewModelScope.launch { updateSetting(BooleanSetting.UiUseBlur, action.enable) }
             is ThemeSettingsAction.SetThemeMode -> viewModelScope.launch { updateSetting(StringSetting.ThemeMode, action.mode.name) }
             is ThemeSettingsAction.SetPaletteStyle -> viewModelScope.launch { updateSetting(StringSetting.ThemePaletteStyle, action.style.name) }

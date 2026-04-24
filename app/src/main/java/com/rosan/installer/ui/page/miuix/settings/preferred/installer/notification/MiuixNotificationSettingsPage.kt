@@ -47,10 +47,10 @@ import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
@@ -90,9 +90,9 @@ fun MiuixNotificationSettingsPage(
         }
     }
 
-    // Convert the string list to SpinnerEntry list for WindowSpinnerPreference
+    // Convert the string list to DropdownItem list for WindowSpinnerPreference
     val spinnerEntries = remember(styleNames) {
-        styleNames.map { SpinnerEntry(title = it) }
+        styleNames.map { DropdownItem(title = it) }
     }
 
     val activeStyle = if (styleOptions.contains(uiState.currentStyle)) {

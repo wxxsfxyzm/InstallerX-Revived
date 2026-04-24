@@ -13,6 +13,7 @@ import com.rosan.installer.data.settings.local.room.InstallerRoom
 import com.rosan.installer.data.settings.provider.PrivilegedProviderImpl
 import com.rosan.installer.data.settings.provider.SystemAppProviderImpl
 import com.rosan.installer.data.settings.provider.SystemEnvProviderImpl
+import com.rosan.installer.data.settings.provider.ThemeStateProviderImpl
 import com.rosan.installer.data.settings.repository.AppRepositoryImpl
 import com.rosan.installer.data.settings.repository.AppSettingsRepositoryImpl
 import com.rosan.installer.data.settings.repository.ConfigRepositoryImpl
@@ -82,10 +83,9 @@ val settingsModule = module {
     singleOf(::SystemEnvProviderImpl) { bind<SystemEnvProvider>() }
     singleOf(::SystemAppProviderImpl) { bind<SystemAppProvider>() }
     singleOf(::PrivilegedProviderImpl) { bind<PrivilegedProvider>() }
-
-    single {
-        ThemeStateProvider(
-            appSettingsRepo = get(),
+    single<ThemeStateProvider> {
+        ThemeStateProviderImpl(
+            appSettingsRepo = get<AppSettingsRepository>(),
             appScope = get(named("AppScope"))
         )
     }

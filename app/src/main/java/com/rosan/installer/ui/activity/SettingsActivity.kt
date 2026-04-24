@@ -55,7 +55,6 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                 LocalWindowLayoutInfo provides layoutInfo
             ) {
                 InstallerTheme(
-                    isExpressive = uiState.isExpressive,
                     useMiuix = uiState.useMiuix,
                     themeMode = uiState.themeMode,
                     paletteStyle = uiState.paletteStyle,
@@ -67,10 +66,8 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     val backgroundColor =
                         if (uiState.useMiuix)
                             MiuixTheme.colorScheme.surface
-                        else if (uiState.isExpressive)
-                            MaterialTheme.colorScheme.surfaceContainer
                         else
-                            MaterialTheme.colorScheme.surface
+                            MaterialTheme.colorScheme.surfaceContainer
                     Box(
                         modifier = Modifier
                             .fillMaxSize()

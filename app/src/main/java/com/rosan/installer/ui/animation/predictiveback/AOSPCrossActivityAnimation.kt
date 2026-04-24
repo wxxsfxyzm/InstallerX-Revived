@@ -4,17 +4,20 @@ package com.rosan.installer.ui.animation.predictiveback
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
@@ -25,6 +28,8 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import androidx.navigation3.ui.defaultTransitionSpec
 import androidx.navigationevent.NavigationEvent.Companion.EDGE_LEFT
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.NavigationEventTransitionState.InProgress
@@ -38,17 +43,22 @@ class AOSPCrossActivityAnimation(
 ) : PredictiveBackAnimationHandler {
     private var exitingPageKey: String? = null
     private val exitAnimatable = Animatable(0f)
+    private var inPredictiveBackAnimation = false
 
     override suspend fun onBackPressed(
         transitionState: NavigationEventTransitionState?,
         currentPageKey: NavKey?,
     ) {
-        exitingPageKey = currentPageKey.toString()
+        // Block the exit animation if we are actively interrupting an enter gesture
+        val isInterruptingEnter = transitionState is InProgress && !inPredictiveBackAnimation
+        if (!isInterruptingEnter) {
+            exitingPageKey = currentPageKey.toString()
 
-        exitAnimatable.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 150, easing = LinearEasing)
-        )
+            exitAnimatable.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 150, easing = LinearEasing)
+            )
+        }
     }
 
     override fun onPagePop(contentPageKey: Any, animationScope: CoroutineScope) {
@@ -67,6 +77,9 @@ class AOSPCrossActivityAnimation(
         currentPageKey: NavKey?,
     ): Modifier = composed {
         val windowInfo = LocalWindowInfo.current
+        val navContent = LocalNavAnimatedContentScope.current
+        val transition = navContent.transition
+
         val containerHeightPx = windowInfo.containerSize.height
         val pageKey = contentPageKey.toString()
         val deviceCornerRadius = rememberDeviceCornerRadius()
@@ -80,6 +93,22 @@ class AOSPCrossActivityAnimation(
         val edge = progressInProgress?.latestEvent?.swipeEdge ?: 0
         val touchY = progressInProgress?.latestEvent?.touchY
         val gestureProgress = progressInProgress?.latestEvent?.progress ?: 0f
+
+        // Calculate the page scale to determine if we are genuinely in predictive back
+        val animatedScale by transition.animateFloat(
+            transitionSpec = { tween(300) },
+            label = "PredictiveScale"
+        ) { state ->
+            when (state) {
+                EnterExitState.PostExit -> 0.85f
+                else -> 1f
+            }
+        }
+
+        // Sync status
+        if (pageKey == currentPageKey.toString()) {
+            inPredictiveBackAnimation = animatedScale != 1f
+        }
 
         val directionMultiplier = when (exitDirection) {
             PredictiveBackExitDirection.FOLLOW_GESTURE -> if (edge == EDGE_LEFT) 1f else -1f
@@ -98,8 +127,22 @@ class AOSPCrossActivityAnimation(
         } else 0.5f
         val currentPivotX = if (edge == EDGE_LEFT) 0.8f else 0.2f
 
+        // Determine if we need to apply corner clipping.
+        // Clipping should ONLY be applied when the page is being scaled down:
+        // 1. During an active predictive back gesture.
+        // 2. During the exit animation after the back gesture is committed.
+        val isGestureActive = transitionState is InProgress && inPredictiveBackAnimation
+        val isExitAnimationRunning = exitingPageKey != null
+        val needsClip = isGestureActive || isExitAnimationRunning
+
         this
             .graphicsLayer {
+                // Block AOSP manual predictive back transforms during an interrupted enter.
+                // Let the Miuix default transition seamlessly handle the gesture reversal.
+                if (transitionState is InProgress && !inPredictiveBackAnimation && exitingPageKey == null) {
+                    return@graphicsLayer
+                }
+
                 if (transitionState is InProgress)
                     transformOrigin = TransformOrigin(currentPivotX, currentPivotY)
 
@@ -143,7 +186,7 @@ class AOSPCrossActivityAnimation(
                 }
             }
             .clip(
-                if (isExitingPage || isCurrentNavTarget) RoundedCornerShape(deviceCornerRadius)
+                if (needsClip) RoundedCornerShape(deviceCornerRadius)
                 else RoundedCornerShape(0.dp)
             )
     }
@@ -164,9 +207,5 @@ class AOSPCrossActivityAnimation(
         )
 
     override fun AnimatedContentTransitionScope<Scene<NavKey>>.onTransitionSpec(): ContentTransform =
-        ContentTransform(
-            targetContentEnter = slideInHorizontally(initialOffsetX = { it }),
-            initialContentExit = ExitTransition.None,
-            sizeTransform = null
-        )
+        defaultTransitionSpec<NavKey>().invoke(this)
 }

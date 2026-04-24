@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.config.all
 
 import androidx.compose.animation.AnimatedVisibility
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -19,18 +20,18 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,28 +53,33 @@ import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.card.ShowDataWidget
 import com.rosan.installer.ui.page.main.widget.snackbar.SwipeableSnackbarHost
 import com.rosan.installer.ui.page.main.widget.util.DeleteEventCollector
-import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AllPage(
     navigator: Navigator = LocalNavigator.current,
+    useBlur: Boolean,
     viewModel: AllViewModel = koinViewModel { parametersOf(navigator) },
-    outerPadding: PaddingValues = PaddingValues(0.dp),
+    title: String,
+    outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     LaunchedEffect(Unit) {
         viewModel.navigator = navigator
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val showFloatingState = remember { mutableStateOf(true) }
-    val showFloating by showFloatingState
     val listState = rememberLazyGridState()
     val snackBarHostState = remember { SnackbarHostState() }
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val showFloatingState = remember { mutableStateOf(true) }
+    val showFloating by showFloatingState
 
     LaunchedEffect(listState) {
         var previousIndex = listState.firstVisibleItemIndex
@@ -102,16 +108,24 @@ fun AllPage(
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
+    val backdrop = rememberMaterial3BlurBackdrop(useBlur)
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentWindowInsets = WindowInsets.none,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(id = R.string.config))
-                }
+            LargeFlexibleTopAppBar(
+                modifier = Modifier.installerMaterial3BlurEffect(backdrop),
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                title = { Text(title) },
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = backdrop.getMaterial3AppBarColor(),
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
+                )
             )
         },
         floatingActionButton = {
@@ -163,8 +177,9 @@ fun AllPage(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            LoadingIndicator(
-                                color = MaterialTheme.colorScheme.primary
+                            ContainedLoadingIndicator(
+                                indicatorColor = MaterialTheme.colorScheme.primary,
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer
                             )
                             Text(
                                 text = stringResource(id = R.string.loading),
@@ -183,6 +198,7 @@ fun AllPage(
                     ShowDataWidget(
                         viewModel = viewModel,
                         listState = listState,
+                        backdrop = backdrop,
                         contentPadding = PaddingValues(
                             top = innerPadding.calculateTopPadding() + 16.dp,
                             bottom = outerPadding.calculateBottomPadding() + 16.dp,

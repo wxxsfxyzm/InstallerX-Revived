@@ -3,7 +3,6 @@
 package com.rosan.installer.ui.page.main.installer.dialog
 
 import android.annotation.SuppressLint
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -42,7 +41,6 @@ fun dialogInnerWidget(
         }
     }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun dialogGenerateParams(
     viewModel: InstallerViewModel
@@ -53,7 +51,7 @@ fun dialogGenerateParams(
         is InstallerStage.Resolving -> resolvingDialog(viewModel)
         is InstallerStage.ResolveFailed -> resolveFailedDialog(viewModel)
         is InstallerStage.Preparing -> preparingDialog(viewModel)
-        is InstallerStage.Analysing -> analysingDialog(viewModel)
+        is InstallerStage.Analysing -> analysingDialog()
         is InstallerStage.AnalyseFailed -> analyseFailedDialog(viewModel)
         is InstallerStage.InstallChoice -> installChoiceDialog(viewModel)
         is InstallerStage.InstallPrepare -> installPrepareDialog(viewModel)

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.config.apply
 
 import androidx.compose.animation.AnimatedContent
@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -28,20 +29,22 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Sort
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Shield
 import androidx.compose.material.icons.twotone.Visibility
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
@@ -95,18 +98,24 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
-import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.theme.bottomShape
+import com.rosan.installer.ui.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.theme.middleShape
+import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.theme.singleShape
+import com.rosan.installer.ui.theme.topShape
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApplyPage(
     id: Long,
-    viewModel: ApplyViewModel = koinViewModel {
-        parametersOf(id)
-    }
+    useBlur: Boolean,
+    viewModel: ApplyViewModel = koinViewModel { parametersOf(id) }
 ) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -123,16 +132,23 @@ fun ApplyPage(
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
+    val backdrop = rememberMaterial3BlurBackdrop(useBlur)
+
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets.none,
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             var searchBarActivated by remember { mutableStateOf(false) }
             TopAppBar(
+                modifier = Modifier.installerMaterial3BlurEffect(backdrop),
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 scrollBehavior = scrollBehavior,
                 title = {
                     AnimatedContent(targetState = searchBarActivated) {
-                        if (!it) Text(stringResource(R.string.config_scope))
+                        if (!it)
+                            Text(stringResource(R.string.config_scope))
                         else {
                             val focusRequester = remember { FocusRequester() }
                             OutlinedTextField(
@@ -170,8 +186,21 @@ fun ApplyPage(
                         }
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = backdrop.getMaterial3AppBarColor(),
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
+                ),
                 navigationIcon = {
-                    AppBackButton(onClick = { navigator.pop() })
+                    Row {
+                        AppBackButton(
+                            onClick = { navigator.pop() },
+                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                            modifier = Modifier.size(36.dp),
+                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                        )
+                        Spacer(modifier = Modifier.size(16.dp))
+                    }
                 },
                 actions = {
                     AnimatedVisibility(visible = !searchBarActivated) {
@@ -225,7 +254,7 @@ fun ApplyPage(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            CircularProgressIndicator()
+                            ContainedLoadingIndicator()
                             Text(
                                 text = stringResource(id = R.string.loading),
                                 style = MaterialTheme.typography.titleLarge
@@ -237,27 +266,28 @@ fun ApplyPage(
                 else -> {
                     val refreshing = uiState.apps.progress is ViewContent.Progress.Loading
                     val pullToRefreshState = rememberPullToRefreshState()
+
                     PullToRefreshBox(
                         state = pullToRefreshState,
                         isRefreshing = refreshing,
                         onRefresh = { viewModel.dispatch(ApplyViewAction.LoadApps) },
                         modifier = Modifier.fillMaxSize(),
                         indicator = {
-                            PullToRefreshDefaults.Indicator(
+                            PullToRefreshDefaults.LoadingIndicator(
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
                                     .padding(top = paddingValues.calculateTopPadding()),
                                 state = pullToRefreshState,
                                 isRefreshing = refreshing,
                                 color = MaterialTheme.colorScheme.primary,
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer
                             )
                         }
                     ) {
                         ItemsWidget(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .nestedScroll(scrollBehavior.nestedScrollConnection),
+                                .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
                             uiState = uiState,
                             viewModel = viewModel,
                             lazyListState = lazyListState,
@@ -266,7 +296,6 @@ fun ApplyPage(
                             startPadding = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                             endPadding = horizontalSafeInsets.calculateEndPadding(layoutDirection)
                         )
-                        Spacer(modifier = Modifier.navigationBarsPadding())
                     }
                 }
             }
@@ -289,8 +318,6 @@ private fun ItemsWidget(
     startPadding: Dp = 0.dp,
     endPadding: Dp = 0.dp
 ) {
-    // Optimize lookup performance by converting the list to a Set.
-    // Use derivedStateOf to ensure it only recalculates when the data actually changes.
     val appliedPackageSet by remember(uiState.appEntities.data) {
         derivedStateOf {
             uiState.appEntities.data.map { it.packageName }.toHashSet()
@@ -300,41 +327,49 @@ private fun ItemsWidget(
     LazyColumn(
         modifier = modifier,
         state = lazyListState,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
         contentPadding = PaddingValues(
-            start = startPadding + 8.dp,
+            start = startPadding + 16.dp,
             top = topPadding + 8.dp,
-            end = endPadding + 8.dp,
+            end = endPadding + 16.dp,
             bottom = bottomPadding + 88.dp
         )
     ) {
-        items(
-            items = uiState.checkedApps,
-            key = { it.packageName },
-            contentType = { "app_item" } // Help Compose recycle items more efficiently
-        ) { app ->
+        val apps = uiState.checkedApps
+        itemsIndexed(
+            items = apps,
+            key = { _, app -> app.packageName },
+            contentType = { _, _ -> "app_item" }
+        ) { index, app ->
+            val shape = when {
+                apps.size == 1 -> singleShape
+                index == 0 -> topShape
+                index == apps.lastIndex -> bottomShape
+                else -> middleShape
+            }
+
             val isApplied = appliedPackageSet.contains(app.packageName)
 
-            // Dispatch action to load the icon when the item becomes visible
+            // Dispatch action to load the icon dynamically when the item becomes visible
             LaunchedEffect(app.packageName) {
                 viewModel.dispatch(ApplyViewAction.LoadIcon(app.packageName))
             }
 
-            // Retrieve the dynamically loaded icon from the state
+            // Retrieve the dynamically loaded icon from the managed state
             val iconBitmap = uiState.displayIcons[app.packageName]
 
             ApplyItemWidget(
                 modifier = Modifier.animateItem(
-                    // Handle reordering animations with a spring effect
                     placementSpec = spring(
                         stiffness = Spring.StiffnessMediumLow,
                         visibilityThreshold = IntOffset.VisibilityThreshold
                     )
                 ),
                 app = app,
-                icon = iconBitmap, // Pass the managed state
+                icon = iconBitmap,
                 isApplied = isApplied,
-                isM3e = false,
+                shape = shape,
+                containerColor = MaterialTheme.colorScheme.surfaceBright,
                 showPackageName = uiState.showPackageName,
                 onToggle = { isChecked ->
                     viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, isChecked))
@@ -344,11 +379,15 @@ private fun ItemsWidget(
                 }
             )
         }
+        item { Spacer(modifier = Modifier.navigationBarsPadding()) }
     }
 }
 
 @Composable
-private fun BottomSheetContent(uiState: ApplyViewState, viewModel: ApplyViewModel) {
+private fun BottomSheetContent(
+    uiState: ApplyViewState,
+    viewModel: ApplyViewModel
+) {
     Box(modifier = Modifier.fillMaxWidth()) {
         CompositionLocalProvider(LocalContentColor provides AlertDialogDefaults.titleContentColor) {
             ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
@@ -356,7 +395,6 @@ private fun BottomSheetContent(uiState: ApplyViewState, viewModel: ApplyViewMode
             }
         }
     }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -369,6 +407,37 @@ private fun BottomSheetContent(uiState: ApplyViewState, viewModel: ApplyViewMode
     }
 }
 
+/*@Composable
+private fun LabelWidget(text: String) {
+    CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.titleMedium) {
+        Text(text)
+    }
+}*/
+
+/*@Composable
+private fun OrderWidget(viewModel: ApplyViewModel) {
+    LabelWidget(stringResource(R.string.sort))
+
+    data class OrderData(val labelResId: Int, val type: ApplyViewState.OrderType)
+
+    val map = listOf(
+        OrderData(R.string.sort_by_label, ApplyViewState.OrderType.Label),
+        OrderData(R.string.sort_by_package_name, ApplyViewState.OrderType.PackageName),
+        OrderData(R.string.sort_by_install_time, ApplyViewState.OrderType.FirstInstallTime)
+    )
+
+    val selectedIndex = map.map { it.type }.indexOf(uiState.orderType)
+    ToggleRow(selectedIndex = selectedIndex) {
+        val a = mutableListOf<String>()
+        map.forEachIndexed { index, value ->
+            Toggle(selected = selectedIndex == index, onSelected = {
+                viewModel.dispatch(ApplyViewAction.Order(value.type))
+            }) {
+                Text(stringResource(value.labelResId))
+            }
+        }
+    }
+}*/
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun OrderWidget(

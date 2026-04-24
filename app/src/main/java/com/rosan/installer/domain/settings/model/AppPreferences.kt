@@ -6,7 +6,9 @@ import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
 import com.rosan.installer.ui.theme.material.ThemeMode
 
-// Represents the aggregated state of all application preferences.
+/**
+ * The aggregated state of all application preferences.
+ */
 data class AppPreferences(
     val authorizer: Authorizer,
     val alwaysUseRootInSystem: Boolean,
@@ -20,7 +22,6 @@ data class AppPreferences(
     val versionCompareInSingleLine: Boolean,
     val sdkCompareInMultiLine: Boolean,
     val showOPPOSpecial: Boolean,
-    val showExpressiveUI: Boolean,
     val installerRequireBiometricAuth: BiometricAuthMode,
     val uninstallerRequireBiometricAuth: Boolean,
     val showLiveActivity: Boolean,
@@ -33,6 +34,7 @@ data class AppPreferences(
     val showMiuixUI: Boolean,
     val preferSystemIcon: Boolean,
     val showLauncherIcon: Boolean,
+    val userSetLSPosedActive: Boolean,
     val managedInstallerPackages: List<NamedPackage>,
     val managedBlacklistPackages: List<NamedPackage>,
     val managedSharedUserIdBlacklist: List<SharedUid>,

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.NonRestartableComposable
@@ -28,7 +29,6 @@ import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.miuixShape
 
 /**
  * A [ProgressButton] component with Miuix style that can show progress.
@@ -67,8 +67,7 @@ fun ProgressButton(
     // Coerce progress value to be between 0.0 and 1.0
     val progressCoerced = progress.coerceIn(0f, 1f)
 
-    // Sync with the standard Button: Use miuixShape
-    val shape = miuixShape(cornerRadius)
+    val shape = RoundedCornerShape(cornerRadius)
 
     val trackColor = if (enabled) colors.trackColor else colors.disabledTrackColor
     val progressColor = if (enabled) colors.progressColor else colors.disabledProgressColor

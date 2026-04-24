@@ -210,7 +210,6 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
             }
 
             InstallerTheme(
-                isExpressive = uiState.isExpressive,
                 useMiuix = uiState.useMiuix,
                 themeMode = uiState.themeMode,
                 paletteStyle = uiState.paletteStyle,

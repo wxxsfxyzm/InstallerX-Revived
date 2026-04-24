@@ -246,7 +246,8 @@ fun rememberErrorSuggestions(
                 )
             }
 
-            if (error.hasErrorType(InstallErrorType.MISSING_INSTALL_PERMISSION)) {
+            val isNoneSystemAppMode = config.authorizer == Authorizer.None && !capabilityProvider.isSystemApp
+            if (error.hasErrorType(InstallErrorType.MISSING_INSTALL_PERMISSION) && isNoneSystemAppMode) {
                 add(
                     ErrorSuggestion(
                         labelRes = R.string.retry,

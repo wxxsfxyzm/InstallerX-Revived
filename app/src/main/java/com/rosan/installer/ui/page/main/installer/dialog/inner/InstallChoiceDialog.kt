@@ -21,11 +21,12 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -61,7 +61,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 import com.rosan.installer.ui.page.main.settings.preferred.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
-import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.theme.bottomShape
 import com.rosan.installer.ui.theme.middleShape
 import com.rosan.installer.ui.theme.singleShape
@@ -113,8 +113,6 @@ fun installChoiceDialog(
 
     val cancelOrBackAction: () -> Unit = {
         if (isMmzBack) {
-            // Logic synced from MIUIX: Clear selected APK entities when going back to initial choice.
-            // This prevents "Mixed Selection" errors.
             analysisResults.flatMap { it.appEntities }
                 .filter { it.selected && it.app !is AppEntity.ModuleEntity }
                 .forEach { entity ->
@@ -122,7 +120,7 @@ fun installChoiceDialog(
                         InstallerViewAction.ToggleSelection(
                             packageName = entity.app.packageName,
                             entity = entity,
-                            isMultiSelect = true // Toggle acts as unselect here since they are currently selected
+                            isMultiSelect = true
                         )
                     )
                 }
@@ -190,7 +188,7 @@ private fun ChoiceContent(
             val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
             val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }
 
-            SplicedColumnGroup {
+            SegmentedColumn {
                 baseSelectableEntity?.let { entity ->
                     item {
                         val baseEntityInfo = entity.app as AppEntity.BaseEntity
@@ -257,7 +255,7 @@ private fun ChoiceContent(
             val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }
             val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
 
-            SplicedColumnGroup {
+            SegmentedColumn {
                 moduleSelectableEntity?.let { entity ->
                     item {
                         val moduleEntityInfo = entity.app as AppEntity.ModuleEntity
@@ -480,8 +478,9 @@ private fun MultiApkGroupCard(
                         packageResult.packageName,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
-                            .alpha(0.7f)
-                            .basicMarquee()
+                            .basicMarquee(),
+                        // Apply dynamic transparent color directly instead of alpha modifier
+                        color = LocalContentColor.current.copy(alpha = 0.7f)
                     )
                 }
                 Icon(
@@ -525,6 +524,11 @@ private fun SingleItemCard(
     onClick: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
+
+    // Resolve dynamic container color and content color
+    val containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer
+    val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
+
     Card(
         // Padding is now handled by the parent LazyColumn's contentPadding.
         modifier = Modifier.fillMaxWidth(),
@@ -533,8 +537,11 @@ private fun SingleItemCard(
             onClick()
         },
         shape = shape,
-        colors = CardDefaults.cardColors(containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp/*defaultElevation = if (pkg.selected) 2.dp else 1.dp*/)
+        colors = CardDefaults.cardColors(
+            containerColor = containerColor,
+            contentColor = contentColor
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -560,14 +567,22 @@ private fun SelectableSubCard(
     onClick: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
+
+    // Resolve dynamic container color and content color
+    val containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer
+    val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
             onClick()
         },
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp/*defaultElevation = if (pkg.selected) 1.dp else 2.dp*/),
-        colors = CardDefaults.cardColors(containerColor = if (item.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = containerColor,
+            contentColor = contentColor
+        )
     ) {
         Row(
             modifier = Modifier
@@ -592,6 +607,10 @@ private fun SelectableSubCard(
 
 @Composable
 private fun ItemContent(app: AppEntity) {
+    // Utilize the contextual content color generated by the parent Card
+    val contentColor = LocalContentColor.current
+    val variantContentColor = contentColor.copy(alpha = 0.7f)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -602,19 +621,19 @@ private fun ItemContent(app: AppEntity) {
                 Text(
                     app.label ?: app.packageName,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = contentColor
                 )
                 Text(
                     app.packageName,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .alpha(0.7f)
-                        .basicMarquee()
+                    modifier = Modifier.basicMarquee(),
+                    color = variantContentColor
                 )
                 Text(
                     text = stringResource(R.string.installer_version, app.versionName, app.versionCode),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = variantContentColor
                 )
             }
 
@@ -626,23 +645,28 @@ private fun ItemContent(app: AppEntity) {
                         fallbackName = app.splitName
                     ),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = contentColor
                 )
                 Text(
                     text = stringResource(R.string.installer_file_name, app.name),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = variantContentColor
                 )
             }
 
             is AppEntity.DexMetadataEntity -> {
-                Text(app.dmName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    app.dmName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = contentColor
+                )
                 Text(
                     app.packageName,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .alpha(0.7f)
-                        .basicMarquee()
+                    modifier = Modifier.basicMarquee(),
+                    color = variantContentColor
                 )
             }
 
@@ -650,19 +674,19 @@ private fun ItemContent(app: AppEntity) {
                 Text(
                     app.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = contentColor
                 )
                 Text(
                     stringResource(R.string.installer_module_id, app.id),
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .alpha(0.7f)
-                        .basicMarquee()
+                    modifier = Modifier.basicMarquee(),
+                    color = variantContentColor
                 )
                 Text(
                     text = stringResource(R.string.installer_version_code_label) + app.versionCode,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = variantContentColor
                 )
             }
         }
@@ -673,9 +697,12 @@ private fun ItemContent(app: AppEntity) {
  * A composable for displaying an item in a multi-APK selection list.
  * Shows version information and the source file name.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun MultiApkItemContent(app: AppEntity.BaseEntity) {
+    // Utilize the contextual content color generated by the parent Card
+    val contentColor = LocalContentColor.current
+    val variantContentColor = contentColor.copy(alpha = 0.7f)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -686,15 +713,15 @@ private fun MultiApkItemContent(app: AppEntity.BaseEntity) {
         Text(
             text = stringResource(R.string.installer_version, app.versionName, app.versionCode),
             style = MaterialTheme.typography.titleSmallEmphasized,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = contentColor
         )
         // Filename (styled as a smaller body text with marquee)
         Text(
-            text = app.data.getSourceTop().toString().removeSuffix("/").substringAfterLast('/'), // The original filename
+            text = app.data.getSourceTop().toString().removeSuffix("/").substringAfterLast('/'),
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier
-                .alpha(0.7f)
-                .basicMarquee()
+            modifier = Modifier.basicMarquee(),
+            color = variantContentColor
         )
     }
 }

@@ -33,7 +33,6 @@ enum class IntSetting {
 
 enum class BooleanSetting {
     UiUseBlur,
-    UiExpressiveSwitch,
     ThemeUseDynamicColor,
     UiUseMiuix,
     UiUseMiuixMonet,
@@ -70,7 +69,8 @@ enum class BooleanSetting {
     LabShowFilePath,
     LabShowInstallInitiator,
     LabInstallWithoutUserAction,
-    EnableFileLogging
+    EnableFileLogging,
+    UserSetLSPosedActive
 }
 
 enum class NamedPackageListSetting {

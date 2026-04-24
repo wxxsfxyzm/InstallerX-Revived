@@ -4,14 +4,14 @@ package com.rosan.installer.ui.page.main.settings.preferred
 
 import androidx.annotation.StringRes
 
-sealed class PreferredViewEvent {
+sealed interface PreferredViewEvent {
     data class ShowDefaultInstallerResult(
         @param:StringRes val messageResId: Int
-    ) : PreferredViewEvent()
+    ) : PreferredViewEvent
 
     data class ShowDefaultInstallerErrorDetail(
         @param:StringRes val titleResId: Int,
         val exception: Throwable,
         val retryAction: PreferredViewAction
-    ) : PreferredViewEvent()
+    ) : PreferredViewEvent
 }

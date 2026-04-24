@@ -5,7 +5,7 @@ package com.rosan.installer.ui.theme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 
-// Define shapes for the spliced list style.
+// Define shapes for the segmented list style.
 val CornerRadius = 16.dp
 val ConnectionRadius = 5.dp
 

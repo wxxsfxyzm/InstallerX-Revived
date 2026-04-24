@@ -10,7 +10,7 @@ enum class PredictiveBackAnimation(val value: String) {
     AOSP("aosp"),
     MIUIX("miuix"),
     Scale("scale"),
-    KernelSUClassic("ksu_classic");
+    Classic("ksu_classic");
 
     companion object {
         fun fromValueOrDefault(value: String) = entries.find { it.value == value } ?: MIUIX

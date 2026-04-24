@@ -11,6 +11,34 @@
     <string name="open_source_license_settings_description">View third-party open-source libraries and their licenses</string>
     <string name="back">Back</string>
     <string name="home">Home</string>
+    <string name="inactivate">Inactivate</string>
+    <string name="activate">Activate</string>
+    <string name="available">Available</string>
+    <string name="unavailable">Unavailable</string>
+    <string name="running">Running</string>
+    <string name="working_status_default_installer">Working as default installer</string>
+    <string name="working_status_not_default_installer">Not set as default installer</string>
+    <string name="working_status_default_installer_desc">The app is currently the default package installer</string>
+    <string name="working_status_system_installer">Working as System Package Installer</string>
+    <string name="working_status_system_installer_desc">The app is running as the system package installer</string>
+    <string name="working_status_none_authorizer_desc">Do not make use of any privilege, Unknown Sources permission is required to install apps</string>
+    <string name="working_status_not_default_installer_click_details">Click to view details</string>
+    <string name="working_status_default_installer_tip">Set this app as the default package installer to take over most installation requests. Note that the following cases cannot be intercepted:\n- OEM restricts modifying the default installer\n- The initiator specifies a target Component\n- The initiator uses a Session Install</string>
+    <string name="setting_lsposed_module_title">LSPosed Module Enabled</string>
+    <string name="setting_lsposed_module_desc">Enable this if you have forced the default installer takeover via a third-party LSPosed module. This disables internal status checking, and the home page will constantly show as "Activated"</string>
+    <string name="home_stat_authorizers">Available Privileges</string>
+    <string name="home_stat_profiles">Profiles</string>
+    <string name="home_root_mode">Root: %s</string>
+    <string name="home_label_lsp" translatable="false">LSPosed</string>
+    <string name="home_label_lsp_link">Looking for a module?</string>
+    <string name="home_lsp_inxlocker_title" translatable="false">InxLocker</string>
+    <string name="home_system_app">System App</string>
+    <string name="activate_mode">Activate mode: %s</string>
+    <string name="shizuku_working_mode">Shizuku working mode: %s</string>
+    <string name="shizuku_not_authorized">Please grant permission to access Sui or Shizuku</string>
+    <string name="shizuku_not_available">Please activate Sui or Shizuku</string>
+    <string name="dhizuku_not_authorized">Please grant permission to access Dhizuku</string>
+    <string name="dhizuku_not_available">Please activate Dhizuku</string>
     <string name="config">Profiles</string>
     <string name="app">App</string>
     <string name="preferred">Preferences</string>
@@ -118,7 +146,7 @@
     <string name="theme_settings_predictive_back_animation_none">None</string>
     <string name="theme_settings_predictive_back_animation_aosp">AOSP</string>
     <string name="theme_settings_predictive_back_animation_scale">Scale</string>
-    <string name="theme_settings_predictive_back_animation_ksu_classic">KernelSU Classic</string>
+    <string name="theme_settings_predictive_back_animation_ksu_classic">Classic</string>
     <string name="theme_settings_predictive_back_animation_miuix" translatable="false">Miuix</string>
     <string name="theme_settings_predictive_back_exit_direction_follow_gesture">Follow Gesture</string>
     <string name="theme_settings_predictive_back_exit_direction_always_right">Always Right</string>
@@ -160,6 +188,7 @@
     <string name="ignore_battery_optimizations">Ignore Battery Optimization</string>
     <string name="ignore_battery_optimizations_desc">Useful on ROMs with strict background policies. If the notification gets stuck, try ignoring battery optimization</string>
     <string name="ignore_battery_optimizations_desc_disabled">Already Ignored</string>
+    <string name="default_installer">Default Installer</string>
     <string name="auto_lock_default_installer">Auto set as default installer</string>
     <string name="auto_lock_default_installer_desc">Automatically set this app as installer when starting a new install</string>
     <string name="lock_default_installer">Set as default installer</string>
@@ -200,16 +229,16 @@
     <string name="config_install_authorizer_desc">Authorizer to install apps</string>
     <string name="config_authorizer_global">Global</string>
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
-    <string name="config_authorizer_none">None</string>
-    <string name="config_authorizer_none_system_app_tips">Running as system installer, most of the options here are not needed.</string>
-    <string name="config_authorizer_none_tips">When using system installer, most of the options here are invalid.</string>
+    <string name="config_authorizer_none">No Privilege</string>
+    <string name="config_authorizer_none_system_app_tips">Running as system package installer, most of the options are not needed.</string>
+    <string name="config_authorizer_none_tips">When not using privileges, most of the options are invalid.</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">Custom</string>
     <string name="config_customize_authorizer">Custom authorizer</string>
     <string name="config_always_use_root_in_system">Use root for privileged operations</string>
-    <string name="config_always_use_root_in_system_desc">When running as the system installer, always use root for privileged operations, such as flashing modules and deleting files</string>
+    <string name="config_always_use_root_in_system_desc">When running as system package installer, always use root for some privileged operations, such as flashing modules and deleting files</string>
     <string name="config_install_mode">Install mode</string>
     <string name="config_install_mode_desc">Default Install Mode and related settings</string>
     <string name="config_install_mode_global">Global</string>
@@ -807,4 +836,13 @@
     <string name="lab_mi_island_outer_glow_desc">Add a system-app-style glow effect to the edge of Super Island</string>
     <string name="dialog_settings">Dialog Settings</string>
     <string name="dialog_settings_desc">Customize the appearance and behavior of installation dialog</string>
+    <string name="priv_page_what_is_this_title">What is this?</string>
+    <string name="priv_page_what_is_this_desc">This section detects all available authorization methods on your device. Please select one for the app to use for privileged operations. The features displayed in the app will change based on your selection.</string>
+    <string name="priv_page_notice_title">Difference from installation profiles</string>
+    <string name="priv_page_notice_desc">In installation profiles, you can override this global setting and choose a specific authorizer. Therefore, this section detects the availability of all authorization methods for you.</string>
+    <string name="home_device_info_title">Device Information</string>
+    <string name="home_device_info_model">Model</string>
+    <string name="home_device_info_system">System</string>
+    <string name="home_device_info_active_authorizer">Authorizer in use</string>
+    <string name="home_device_info_default_installer">Default Installer Activity</string>
 </resources>

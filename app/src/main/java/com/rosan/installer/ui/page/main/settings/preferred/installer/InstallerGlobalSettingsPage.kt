@@ -6,11 +6,6 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -55,26 +49,24 @@ import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
-import com.rosan.installer.ui.page.main.settings.preferred.DataAuthorizerWidget
 import com.rosan.installer.ui.page.main.settings.preferred.DataInstallerBiometricAuthWidget
 import com.rosan.installer.ui.page.main.settings.preferred.ManagedPackagesWidget
 import com.rosan.installer.ui.page.main.settings.preferred.ManagedUidsWidget
 import com.rosan.installer.ui.page.main.settings.preferred.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
-import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun NewInstallerGlobalSettingsPage(
+fun InstallerGlobalSettingsPage(
     useBlur: Boolean,
     viewModel: InstallerSettingsViewModel = koinViewModel()
 ) {
@@ -98,7 +90,6 @@ fun NewInstallerGlobalSettingsPage(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
-        contentWindowInsets = WindowInsets.none,
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
@@ -145,48 +136,32 @@ fun NewInstallerGlobalSettingsPage(
                         .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
                 }
 
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.installer_settings_global_installer)
                 ) {
-                    item {
-                        DataAuthorizerWidget(
-                            currentAuthorizer = uiState.authorizer,
-                            changeAuthorizer = {
-                                viewModel.dispatch(InstallerSettingsAction.ChangeGlobalAuthorizer(it))
+                    item(visible = uiState.authorizer == Authorizer.None && capabilityProvider.isSystemApp) {
+                        SwitchWidget(
+                            icon = AppIcons.FlashPreferRoot,
+                            title = stringResource(R.string.config_always_use_root_in_system),
+                            description = stringResource(R.string.config_always_use_root_in_system_desc),
+                            checked = uiState.alwaysUseRootInSystem,
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeAlwaysUseRootInSystem(it)) }
+                        )
+                    }
+
+                    item(visible = uiState.authorizer == Authorizer.Dhizuku) {
+                        IntNumberPickerWidget(
+                            icon = AppIcons.Working,
+                            title = stringResource(R.string.set_countdown),
+                            description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
+                            value = uiState.dhizukuAutoCloseCountDown,
+                            startInt = 1,
+                            endInt = 10,
+                            stepSize = 1,
+                            onValueChange = {
+                                viewModel.dispatch(InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown(it))
                             }
-                        ) {
-                            AnimatedVisibility(
-                                visible = uiState.authorizer == Authorizer.None && capabilityProvider.isSystemApp,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                SwitchWidget(
-                                    icon = AppIcons.FlashPreferRoot,
-                                    title = stringResource(R.string.config_always_use_root_in_system),
-                                    description = stringResource(R.string.config_always_use_root_in_system_desc),
-                                    checked = uiState.alwaysUseRootInSystem,
-                                    onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeAlwaysUseRootInSystem(it)) }
-                                )
-                            }
-                            AnimatedVisibility(
-                                visible = uiState.authorizer == Authorizer.Dhizuku,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                IntNumberPickerWidget(
-                                    icon = AppIcons.Working,
-                                    title = stringResource(R.string.set_countdown),
-                                    description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                                    value = uiState.dhizukuAutoCloseCountDown,
-                                    startInt = 1,
-                                    endInt = 10,
-                                    stepSize = 1,
-                                    onValueChange = {
-                                        viewModel.dispatch(InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown(it))
-                                    }
-                                )
-                            }
-                        }
+                        )
                     }
 
                     item {
@@ -221,7 +196,7 @@ fun NewInstallerGlobalSettingsPage(
             // --- Group 2: OPPO Related ---
             if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
                 item {
-                    SplicedColumnGroup(
+                    SegmentedColumn(
                         title = stringResource(R.string.installer_oppo_related)
                     ) {
                         item {
@@ -237,17 +212,21 @@ fun NewInstallerGlobalSettingsPage(
                 }
             }
 
-            // --- Group 3: Managed Installer Packages ---
+            // --- Group 3: Preset Installer Packages ---
             item {
-                SplicedColumnGroup(
-                    title = stringResource(id = R.string.config_managed_installer_packages_title)
+                SegmentedColumn(
+                    title = stringResource(id = R.string.config_managed_installer_packages_title),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
                     item {
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_preset_install_sources),
                             packages = uiState.managedInstallerPackages,
                             onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedInstallerPackage(it)) },
-                            onRemovePackage = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedInstallerPackage(it)) }
+                            onRemovePackage = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedInstallerPackage(it)) },
+                            onMovePackage = { fromIndex, toIndex ->
+                                viewModel.dispatch(InstallerSettingsAction.MoveManagedInstallerPackage(fromIndex, toIndex))
+                            }
                         )
                     }
                 }
@@ -255,7 +234,7 @@ fun NewInstallerGlobalSettingsPage(
 
             // --- Group 4: Managed Blacklist ---
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(id = R.string.config_managed_blacklist_by_package_name_title)
                 ) {
                     item {
@@ -263,7 +242,10 @@ fun NewInstallerGlobalSettingsPage(
                             noContentTitle = stringResource(R.string.config_no_managed_blacklist),
                             packages = uiState.managedBlacklistPackages,
                             onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedBlacklistPackage(it)) },
-                            onRemovePackage = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedBlacklistPackage(it)) }
+                            onRemovePackage = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedBlacklistPackage(it)) },
+                            onMovePackage = { fromIndex, toIndex ->
+                                viewModel.dispatch(InstallerSettingsAction.MoveManagedBlacklistPackage(fromIndex, toIndex))
+                            }
                         )
                     }
                 }
@@ -271,7 +253,7 @@ fun NewInstallerGlobalSettingsPage(
 
             // --- Group 5: Managed Shared User IDs ---
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.config_managed_blacklist_by_shared_user_id_title)
                 ) {
                     item {
@@ -279,7 +261,10 @@ fun NewInstallerGlobalSettingsPage(
                             noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
                             uids = uiState.managedSharedUserIdBlacklist,
                             onAddUid = { viewModel.dispatch(InstallerSettingsAction.AddManagedSharedUserIdBlacklist(it)) },
-                            onRemoveUid = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist(it)) }
+                            onRemoveUid = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist(it)) },
+                            onMoveUid = { from, to ->
+                                viewModel.dispatch(InstallerSettingsAction.MoveManagedSharedUserIdBlacklist(from, to))
+                            }
                         )
                     }
 
@@ -287,7 +272,6 @@ fun NewInstallerGlobalSettingsPage(
                     item(visible = uiState.managedSharedUserIdBlacklist.isNotEmpty()) {
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
-                            noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
                             packages = uiState.managedSharedUserIdExemptedPackages,
                             infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
                             isInfoVisible = uiState.managedSharedUserIdExemptedPackages.isNotEmpty(),
@@ -298,6 +282,9 @@ fun NewInstallerGlobalSettingsPage(
                                         it
                                     )
                                 )
+                            },
+                            onMovePackage = { fromIndex, toIndex ->
+                                viewModel.dispatch(InstallerSettingsAction.MoveManagedSharedUserIdExemptedPackages(fromIndex, toIndex))
                             }
                         )
                     }

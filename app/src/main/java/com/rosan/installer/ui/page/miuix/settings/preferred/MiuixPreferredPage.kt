@@ -37,6 +37,7 @@ import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
@@ -63,16 +64,16 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
-@SuppressLint("LocalContextGetResourceValueCall")
+
 @Composable
 fun MiuixPreferredPage(
     enableBlur: Boolean,
+    navigator: Navigator = LocalNavigator.current,
     viewModel: PreferredViewModel = koinViewModel(),
     title: String,
     outerPadding: PaddingValues,
     snackbarHostState: SnackbarHostState
 ) {
-    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
@@ -92,7 +93,7 @@ fun MiuixPreferredPage(
     val showErrorSheetState = remember { mutableStateOf(false) }
 
     val defaultInstallerErrorDetailActionLabel = stringResource(R.string.details)
-    LaunchedEffect(Unit) {
+    @SuppressLint("LocalContextGetResourceValueCall") LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             //snackBarHostState.newestSnackbarData()?.dismiss()
             when (event) {
@@ -211,18 +212,6 @@ fun MiuixPreferredPage(
                         checked = uiState.isIgnoringBatteryOptimizations,
                         enabled = !uiState.isIgnoringBatteryOptimizations,
                     ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
-                    MiuixAutoLockInstaller(
-                        checked = uiState.autoLockInstaller,
-                        enabled = uiState.authorizer != Authorizer.None,
-                    ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!uiState.autoLockInstaller)) }
-                    MiuixDefaultInstaller(
-                        lock = true,
-                        enabled = uiState.authorizer != Authorizer.None,
-                    ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
-                    MiuixDefaultInstaller(
-                        lock = false,
-                        enabled = uiState.authorizer != Authorizer.None,
-                    ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
                 }
             }
             item { SmallTitle(stringResource(R.string.other)) }

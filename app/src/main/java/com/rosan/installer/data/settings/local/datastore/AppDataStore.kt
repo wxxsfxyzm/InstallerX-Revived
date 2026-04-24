@@ -19,10 +19,12 @@ class AppDataStore(
     private val dataStore: DataStore<Preferences>,
     private val json: Json
 ) {
+    // Expose the raw data flow for synchronous mapping in the repository layer
+    val data: Flow<Preferences> = dataStore.data
+
     companion object {
         // UI Related
         val UI_USE_BLUR = booleanPreferencesKey("ui_use_blur")
-        val UI_EXPRESSIVE_SWITCH = booleanPreferencesKey("ui_fresh_switch")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val THEME_PALETTE_STYLE = stringPreferencesKey("theme_palette_style")
         val THEME_COLOR_SPEC = stringPreferencesKey("theme_color_spec")
@@ -70,6 +72,7 @@ class AppDataStore(
         val AUTHORIZER = stringPreferencesKey("authorizer")
         val CUSTOMIZE_AUTHORIZER = stringPreferencesKey("customize_authorizer")
         val UNINSTALL_FLAGS = intPreferencesKey("uninstall_flags")
+        val USER_SET_LSPOSED_ACTIVE = booleanPreferencesKey("is_lsposed_active")
 
         // ApplyViewModel
         val USER_READ_SCOPE_TIPS = booleanPreferencesKey("user_read_scope_tips")
@@ -158,19 +161,13 @@ class AppDataStore(
      * Saves a list of NamedPackage objects to DataStore after converting it to a JSON string.
      * @param key The Preferences.Key<String> to save the list under.
      * @param packages The list of packages to save.
-     * @return A Flow emitting the list of packages. Returns an empty list if no data or on error.
      */
     suspend fun putNamedPackageList(key: Preferences.Key<String>, packages: List<NamedPackage>) =
-        // Use json.encodeToString to serialize the list
         putString(key, json.encodeToString(packages))
 
     /**
      * Retrieves a Flow of a list of NamedPackage objects from DataStore.
      * It reads the JSON string and deserializes it.
-     *
-     * @param key The Preferences.Key<String> to read from DataStore.
-     * @param default The default list of packages to return if no data is found.
-     * @return A Flow emitting the list of packages. Returns an empty list if no data or on error.
      */
     fun getNamedPackageList(
         key: Preferences.Key<String>,
@@ -178,10 +175,8 @@ class AppDataStore(
     ): Flow<List<NamedPackage>> =
         getString(key, json.encodeToString(default)).map { jsonString ->
             try {
-                // Use json.decodeFromString to deserialize the string back into a list
                 json.decodeFromString<List<NamedPackage>>(jsonString)
             } catch (e: Exception) {
-                // In case of a parsing error, return an empty list
                 Timber.e(
                     e,
                     "Failed to decode NamedPackage list from DataStore. Returning empty list."
@@ -191,19 +186,38 @@ class AppDataStore(
         }
 
     /**
+     * Synchronously parses a list of NamedPackage objects from a given Preferences snapshot.
+     * This avoids Flow creation and is ideal for use inside map { } operations.
+     *
+     * @param prefs The raw Preferences object snapshot.
+     * @param key The Preferences.Key<String> to read.
+     * @param default The default list to return if missing or on error.
+     */
+    fun parseNamedPackageList(
+        prefs: Preferences,
+        key: Preferences.Key<String>,
+        default: List<NamedPackage> = emptyList()
+    ): List<NamedPackage> {
+        val jsonString = prefs[key] ?: return default
+        return try {
+            json.decodeFromString<List<NamedPackage>>(jsonString)
+        } catch (e: Exception) {
+            Timber.e(
+                e,
+                "Failed to synchronously decode NamedPackage list. Returning default list."
+            )
+            default
+        }
+    }
+
+    /**
      * Saves a list of SharedUid objects to DataStore after converting it to a JSON string.
-     * @param uids The list of Shared UIDs to save.
-     * @param key The Preferences.Key<String> to save the list under.
-     * @return A Flow emitting the list of packages. Returns an empty list if no data or on error.
      */
     suspend fun putSharedUidList(key: Preferences.Key<String>, uids: List<SharedUid>) =
         putString(key, json.encodeToString(uids))
 
     /**
      * Retrieves a Flow of a list of SharedUid objects from DataStore.
-     * It reads the JSON string and deserializes it.
-     * @param key The Preferences.Key<String> to read from DataStore.
-     * @return A Flow emitting the list of packages. Returns an empty list if no data or on error.
      */
     fun getSharedUidList(
         key: Preferences.Key<String>,
@@ -219,9 +233,28 @@ class AppDataStore(
         }
 
     /**
+     * Synchronously parses a list of SharedUid objects from a given Preferences snapshot.
+     *
+     * @param prefs The raw Preferences object snapshot.
+     * @param key The Preferences.Key<String> to read.
+     * @param default The default list to return if missing or on error.
+     */
+    fun parseSharedUidList(
+        prefs: Preferences,
+        key: Preferences.Key<String>,
+        default: List<SharedUid> = emptyList()
+    ): List<SharedUid> {
+        val jsonString = prefs[key] ?: return default
+        return try {
+            json.decodeFromString<List<SharedUid>>(jsonString)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to synchronously decode SharedUid list. Returning default list.")
+            default
+        }
+    }
+
+    /**
      * Updates the uninstall flags in DataStore using the provided transform function.
-     * @param transform A function that takes the current uninstall flags and returns a new set of flags.
-     * @return A Flow emitting the updated uninstall flags.
      */
     suspend fun updateUninstallFlags(transform: (Int) -> Int) {
         dataStore.edit { preferences ->

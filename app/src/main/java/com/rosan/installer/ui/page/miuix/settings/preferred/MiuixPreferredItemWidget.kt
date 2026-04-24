@@ -63,8 +63,8 @@ import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
@@ -116,12 +116,12 @@ fun MiuixDataAuthorizerWidget(
         }
     }
 
-    // Convert the authorizerOptions Map into a List<SpinnerEntry>
+    // Convert the authorizerOptions Map into a List<DropdownItem>
     // which is required by the WindowSpinnerPreference component.
     // This is done once and remembered.
     val spinnerEntries = remember(authorizerOptions) {
         authorizerOptions.values.map { authorizerInfo ->
-            SpinnerEntry(
+            DropdownItem(
                 // icon = { Icon(imageVector = authorizerInfo.icon, contentDescription = null) },
                 title = context.getString(authorizerInfo.labelResId)
             )
@@ -186,11 +186,11 @@ fun MiuixDataInstallModeWidget(
         )
     }
 
-    // Convert the installModeOptions Map into a List<SpinnerEntry>
+    // Convert the installModeOptions Map into a List<DropdownItem>
     // for the WindowSpinnerPreference component.
     val spinnerEntries = remember(installModeOptions) {
         installModeOptions.values.map { modeInfo ->
-            SpinnerEntry(title = context.getString(modeInfo.labelResId))
+            DropdownItem(title = context.getString(modeInfo.labelResId))
         }
     }
 
@@ -234,7 +234,7 @@ fun MiuixAutoClearNotificationTimeWidget(
             } else {
                 context.getString(R.string.installer_settings_auto_clear_time_seconds_format, time)
             }
-            SpinnerEntry(title = text)
+            DropdownItem(title = text)
         }
     }
 
@@ -293,39 +293,6 @@ fun MiuixIgnoreBatteryOptimizationSetting(
         checked = checked,
         enabled = enabled,
         onCheckedChange = onCheckedChange
-    )
-}
-
-@Composable
-fun MiuixAutoLockInstaller(
-    checked: Boolean,
-    enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    MiuixSwitchWidget(
-        title = stringResource(R.string.auto_lock_default_installer),
-        description = stringResource(R.string.auto_lock_default_installer_desc),
-        checked = checked,
-        enabled = enabled,
-        onCheckedChange = onCheckedChange
-    )
-}
-
-@Composable
-fun MiuixDefaultInstaller(
-    lock: Boolean,
-    enabled: Boolean,
-    onClick: () -> Unit
-) {
-    BasicComponent(
-        title = stringResource(
-            if (lock) R.string.lock_default_installer else R.string.unlock_default_installer
-        ),
-        summary = stringResource(
-            if (lock) R.string.lock_default_installer_desc else R.string.unlock_default_installer_desc
-        ),
-        enabled = enabled,
-        onClick = onClick
     )
 }
 
@@ -396,11 +363,11 @@ fun MiuixThemeEngineWidget(
         )
     }
 
-    // Convert map entries to List<SpinnerEntry> for WindowSpinnerPreference.
+    // Convert map entries to List<DropdownItem> for WindowSpinnerPreference.
     // Ensure the order matches the keys: index 0 = true, index 1 = false.
     val spinnerEntries = remember(themeOptions) {
         themeOptions.entries.sortedByDescending { it.key }.map { entry ->
-            SpinnerEntry(
+            DropdownItem(
                 title = context.getString(entry.value)
             )
         }
@@ -574,11 +541,11 @@ fun MiuixThemeModeWidget(
         )
     }
 
-    // Convert the map of options to a list of SpinnerEntry for the WindowSpinnerPreference component.
+    // Convert the map of options to a list of DropdownItem for the WindowSpinnerPreference component.
     // The order of items in the list is important for index mapping.
     val spinnerEntries = remember(themeModeOptions) {
         themeModeOptions.entries.map { entry ->
-            SpinnerEntry(title = context.getString(entry.value))
+            DropdownItem(title = context.getString(entry.value))
         }
     }
 
@@ -615,7 +582,7 @@ fun MiuixPaletteStyleWidget(
 ) {
     val options = remember { PaletteStyle.entries }
     val spinnerEntries = remember(options) {
-        options.map { SpinnerEntry(title = it.displayName) }
+        options.map { DropdownItem(title = it.displayName) }
     }
     val selectedIndex = remember(currentPaletteStyle, options) {
         options.indexOf(currentPaletteStyle).coerceAtLeast(0)
@@ -670,7 +637,7 @@ fun MiuixColorSpecWidget(
     } else null
 
     val spinnerEntries = remember(availableSpecs) {
-        availableSpecs.map { SpinnerEntry(title = it.displayName) }
+        availableSpecs.map { DropdownItem(title = it.displayName) }
     }
 
     val selectedIndex = remember(activeSpec, availableSpecs) {

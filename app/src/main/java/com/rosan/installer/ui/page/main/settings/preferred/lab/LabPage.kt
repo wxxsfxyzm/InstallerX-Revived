@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -52,19 +51,18 @@ import com.rosan.installer.ui.page.main.widget.dialog.GithubUpdateChannelSelecti
 import com.rosan.installer.ui.page.main.widget.dialog.RootImplementationSelectionDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
-import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun NewLabPage(
+fun LabPage(
     useBlur: Boolean,
     viewModel: LabSettingsViewModel = koinViewModel()
 ) {
@@ -132,7 +130,6 @@ fun NewLabPage(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
-        contentWindowInsets = WindowInsets.none,
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
@@ -174,7 +171,7 @@ fun NewLabPage(
         ) {
             item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.config_authorizer_root)
                 ) {
                     item {
@@ -213,7 +210,7 @@ fun NewLabPage(
                 }
             }
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.lab_unstable_features)
                 ) {
                     item {
@@ -260,7 +257,7 @@ fun NewLabPage(
 
             if (AppConfig.isInternetAccessEnabled)
                 item {
-                    SplicedColumnGroup(
+                    SegmentedColumn(
                         title = stringResource(R.string.internet_access_enabled)
                     ) {
                         /*item {

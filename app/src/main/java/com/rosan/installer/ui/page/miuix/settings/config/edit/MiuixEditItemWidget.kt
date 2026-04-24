@@ -32,7 +32,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixHintTextField
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.util.isDhizukuActive
 import org.koin.compose.koinInject
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
@@ -72,41 +72,53 @@ fun MiuixDataDescriptionWidget(state: EditViewState, dispatch: (EditViewAction) 
 }
 
 @Composable
-fun MiuixDataAuthorizerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+fun MiuixDataAuthorizerWidget(
+    state: EditViewState,
+    dispatch: (EditViewAction) -> Unit,
+) {
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
+
     val stateAuthorizer = state.data.authorizer
     val globalAuthorizer = state.globalAuthorizer
-    val isSessionInstallSupported = capabilityProvider.isSessionInstallSupported
-    val data = buildMap {
-        put(
-            Authorizer.Global, stringResource(
-                R.string.config_authorizer_global_desc,
-                when (globalAuthorizer) {
-                    Authorizer.None -> stringResource(R.string.config_authorizer_none)
-                    Authorizer.Root -> stringResource(R.string.config_authorizer_root)
-                    Authorizer.Shizuku -> stringResource(R.string.config_authorizer_shizuku)
-                    Authorizer.Dhizuku -> stringResource(R.string.config_authorizer_dhizuku)
-                    Authorizer.Customize -> stringResource(R.string.config_authorizer_customize)
-                    else -> stringResource(R.string.config_authorizer_global)
-                }
-            )
-        )
-        if (isSessionInstallSupported)
-            put(Authorizer.None, stringResource(R.string.config_authorizer_none))
-        put(Authorizer.Root, stringResource(R.string.config_authorizer_root))
-        put(Authorizer.Shizuku, stringResource(R.string.config_authorizer_shizuku))
-        put(Authorizer.Dhizuku, stringResource(R.string.config_authorizer_dhizuku))
-        put(Authorizer.Customize, stringResource(R.string.config_authorizer_customize))
-    }
 
-    val spinnerEntries = remember(data) {
-        data.values.map { authorizerName ->
-            SpinnerEntry(title = authorizerName)
+    val authorizers = remember(capabilityProvider.isSessionInstallSupported) {
+        buildList {
+            add(Authorizer.Global)
+
+            if (capabilityProvider.isSessionInstallSupported) {
+                add(Authorizer.None)
+            }
+
+            addAll(
+                listOf(
+                    Authorizer.Root,
+                    Authorizer.Shizuku,
+                    Authorizer.Dhizuku,
+                    Authorizer.Customize,
+                )
+            )
         }
     }
 
-    val selectedIndex = remember(stateAuthorizer, data) {
-        data.keys.toList().indexOf(stateAuthorizer).coerceAtLeast(0)
+    val authorizerNames = authorizers.map { authorizer ->
+        when (authorizer) {
+            Authorizer.Global -> stringResource(
+                R.string.config_authorizer_global_desc,
+                stringResource(globalAuthorizer.displayNameRes)
+            )
+
+            else -> stringResource(authorizer.displayNameRes)
+        }
+    }
+
+    val spinnerEntries = remember(authorizerNames) {
+        authorizerNames.map { authorizerName ->
+            DropdownItem(title = authorizerName)
+        }
+    }
+
+    val selectedIndex = remember(stateAuthorizer, authorizers) {
+        authorizers.indexOf(stateAuthorizer).coerceAtLeast(0)
     }
 
     WindowSpinnerPreference(
@@ -115,7 +127,7 @@ fun MiuixDataAuthorizerWidget(state: EditViewState, dispatch: (EditViewAction) -
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
-            data.keys.elementAtOrNull(newIndex)?.let { authorizer ->
+            authorizers.getOrNull(newIndex)?.let { authorizer ->
                 dispatch(EditViewAction.ChangeDataAuthorizer(authorizer))
             }
         }
@@ -153,7 +165,7 @@ fun MiuixDataInstallModeWidget(state: EditViewState, dispatch: (EditViewAction) 
 
     val spinnerEntries = remember(data) {
         data.values.map { modeName ->
-            SpinnerEntry(title = modeName)
+            DropdownItem(title = modeName)
         }
     }
 
@@ -217,7 +229,7 @@ fun MiuixInstallReasonWidget(state: EditViewState, dispatch: (EditViewAction) ->
             )
 
             val spinnerEntries = remember(data) {
-                data.values.map { sourceName -> SpinnerEntry(title = sourceName) }
+                data.values.map { sourceName -> DropdownItem(title = sourceName) }
             }
 
             val selectedIndex = remember(currentInstallReason, data) {
@@ -274,7 +286,7 @@ fun MiuixDataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction
             )
 
             val spinnerEntries = remember(data) {
-                data.values.map { sourceName -> SpinnerEntry(title = sourceName) }
+                data.values.map { sourceName -> DropdownItem(title = sourceName) }
             }
 
             val selectedIndex = remember(currentSource, data) {
@@ -384,7 +396,7 @@ fun MiuixDataDeclareInstallerWidget(state: EditViewState, dispatch: (EditViewAct
         )
 
         val spinnerEntries = remember(data) {
-            data.values.map { modeName -> SpinnerEntry(title = modeName) }
+            data.values.map { modeName -> DropdownItem(title = modeName) }
         }
 
         val selectedIndex = remember(currentMode, data) {
@@ -480,7 +492,7 @@ fun MiuixDataUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
             exit = shrinkVertically() + fadeOut()
         ) {
             val spinnerEntries = remember(availableUsers) {
-                availableUsers.values.map { userName -> SpinnerEntry(title = userName) }
+                availableUsers.values.map { userName -> DropdownItem(title = userName) }
             }
 
             val selectedIndex = remember(targetUserId, availableUsers) {
@@ -544,7 +556,7 @@ fun MiuixDataManualDexoptWidget(state: EditViewState, dispatch: (EditViewAction)
 
             val spinnerEntries = remember(data) {
                 data.values.map { modeName ->
-                    SpinnerEntry(title = modeName)
+                    DropdownItem(title = modeName)
                 }
             }
 

@@ -25,9 +25,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import androidx.navigation3.ui.defaultTransitionSpec
 import androidx.navigationevent.NavigationEvent.Companion.EDGE_LEFT
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.NavigationEventTransitionState.InProgress
@@ -129,18 +131,22 @@ class ScalePredictiveBackAnimation(
                 val exitProgress =
                     if (pageKey != currentPageKey.toString()) 1f else exitAnimatable.value
                 val animatedTranslationX = containerWidthPx * exitProgress * directionMultiplier
+                val needsClip = inPredictiveBackAnimation || exitingPageKey != null
 
                 // render animation
-                val modifier = this
+                val renderModifier = this
                     .graphicsLayer {
                         scaleX = animatedScale
                         scaleY = animatedScale
                         translationX = animatedTranslationX
                         transformOrigin = TransformOrigin(currentPivotX, currentPivotY)
                     }
-                    .clip(RoundedCornerShape(deviceCornerRadius))
+                    .clip(
+                        if (needsClip) RoundedCornerShape(deviceCornerRadius)
+                        else RoundedCornerShape(0.dp)
+                    )
 
-                modifier
+                renderModifier
             } else {
                 // We calculate the new page's black dim alpha in here
                 // If we are in PredictiveBackAnimation, always 0.5f dim
@@ -149,7 +155,7 @@ class ScalePredictiveBackAnimation(
                 // Place 1f here to let dynamicAlpha calced with 0f
                 // alpha = 0.5 * (1f - animationProgress) (decrease alpha when increase progress)
                 // so, alpha will always in 0 - 0.5f
-                val modifier = if (transitionState is InProgress) {
+                val renderModifier = if (transitionState is InProgress) {
                     val progress = if (!inPredictiveBackAnimation) 1f else exitAnimatable.value
                     val dynamicAlpha = 0.5f * (1f - progress)
 
@@ -161,7 +167,7 @@ class ScalePredictiveBackAnimation(
                         }
                 } else Modifier
 
-                modifier
+                renderModifier
             }
 
         return modifier
@@ -183,9 +189,5 @@ class ScalePredictiveBackAnimation(
         )
 
     override fun AnimatedContentTransitionScope<Scene<NavKey>>.onTransitionSpec(): ContentTransform =
-        ContentTransform(
-            targetContentEnter = slideInHorizontally(initialOffsetX = { it }),
-            initialContentExit = fadeOut(),
-            sizeTransform = null
-        )
+        defaultTransitionSpec<NavKey>().invoke(this)
 }

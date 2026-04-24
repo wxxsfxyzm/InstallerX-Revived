@@ -36,7 +36,6 @@ fun installingDialog(
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stage = uiState.stage
-    val viewSettings = uiState.viewSettings
 
     val installingStage = stage as? InstallerStage.Installing
 
@@ -83,19 +82,12 @@ fun installingDialog(
                         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
                         label = "ProgressBarAnimation"
                     )
-                    if (viewSettings.uiExpressive)
-                        LinearWavyProgressIndicator(
-                            progress = { animatedProgress },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp),
-                        )
-                    else
-                        LinearWavyProgressIndicator(
-                            progress = { animatedProgress },
-                            modifier = Modifier.fillMaxWidth(),
-                            amplitude = { 0f }
-                        )
+                    LinearWavyProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp),
+                    )
                 } else {
                     // other method have unspecified progress
                     LinearWavyProgressIndicator(

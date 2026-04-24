@@ -2,6 +2,8 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.ui.navigation
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -27,30 +29,23 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.ThemeState
 import com.rosan.installer.ui.animation.predictiveback.AOSPCrossActivityAnimation
-import com.rosan.installer.ui.animation.predictiveback.KernelSUClassicPredictiveBackAnimation
+import com.rosan.installer.ui.animation.predictiveback.ClassicPredictiveBackAnimation
 import com.rosan.installer.ui.animation.predictiveback.MiuixPredictiveBackAnimation
 import com.rosan.installer.ui.animation.predictiveback.NoPredictiveBackAnimation
 import com.rosan.installer.ui.animation.predictiveback.ScalePredictiveBackAnimation
+import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyPage
-import com.rosan.installer.ui.page.main.settings.config.apply.NewApplyPage
 import com.rosan.installer.ui.page.main.settings.config.edit.EditPage
-import com.rosan.installer.ui.page.main.settings.config.edit.NewEditPage
-import com.rosan.installer.ui.page.main.settings.main.MainPage
+import com.rosan.installer.ui.page.main.settings.home.installer.DefaultInstallerPage
+import com.rosan.installer.ui.page.main.settings.home.priv.PrivPage
 import com.rosan.installer.ui.page.main.settings.preferred.about.AboutPage
-import com.rosan.installer.ui.page.main.settings.preferred.about.NewAboutPage
 import com.rosan.installer.ui.page.main.settings.preferred.about.OpenSourceLicensePage
-import com.rosan.installer.ui.page.main.settings.preferred.installer.LegacyInstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.installer.NewInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.installer.InstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.installer.dialog.DialogSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.installer.dialog.NewDialogSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NewNotificationSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.lab.LegacyLabPage
-import com.rosan.installer.ui.page.main.settings.preferred.lab.NewLabPage
-import com.rosan.installer.ui.page.main.settings.preferred.theme.LegacyThemeSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.theme.NewThemeSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.LegacyUninstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.NewUninstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.lab.LabPage
+import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.UninstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.config.apply.MiuixApplyPage
 import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.about.MiuixAboutPage
@@ -61,18 +56,23 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.installer.notificati
 import com.rosan.installer.ui.page.miuix.settings.preferred.lab.MiuixLabPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.uninstaller.MiuixUninstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.miuix.settings.home.installer.MiuixDefaultInstallerPage
+import com.rosan.installer.ui.page.miuix.settings.home.priv.MiuixPrivPage
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun InstallerNavContainer(
-    uiState: ThemeState
-) {
+fun InstallerNavContainer(uiState: ThemeState) {
+    val sharedViewModel: SettingsSharedViewModel = koinViewModel(
+        viewModelStoreOwner = LocalActivity.current as ComponentActivity
+    )
+
     val predictiveBackAnimationHandler = remember(uiState.predictiveBackAnimation, uiState.predictiveBackExitDirection) {
         when (uiState.predictiveBackAnimation) {
             PredictiveBackAnimation.None -> NoPredictiveBackAnimation()
             PredictiveBackAnimation.AOSP -> AOSPCrossActivityAnimation(uiState.predictiveBackExitDirection)
             PredictiveBackAnimation.Scale -> ScalePredictiveBackAnimation(uiState.predictiveBackExitDirection)
-            PredictiveBackAnimation.KernelSUClassic -> KernelSUClassicPredictiveBackAnimation()
+            PredictiveBackAnimation.Classic -> ClassicPredictiveBackAnimation()
             PredictiveBackAnimation.MIUIX -> MiuixPredictiveBackAnimation()
         }
     }
@@ -83,7 +83,6 @@ fun InstallerNavContainer(
     // Pass the managed back stack to the Navigator
     val navigator = remember(backStack) { Navigator(backStack) }
     val useBlur = uiState.useBlur
-    val isExpressive = uiState.isExpressive
 
     CompositionLocalProvider(
         LocalNavigator provides navigator,
@@ -131,9 +130,9 @@ fun InstallerNavContainer(
                 entryProvider = entryProvider {
                     entry<Route.Main> {
                         if (uiState.useMiuix) {
-                            MiuixMainPageWrapper(uiState)
+                            MiuixMainPageWrapper(uiState, sharedViewModel)
                         } else {
-                            MainPage(uiState)
+                            Material3MainPageWrapper(uiState, sharedViewModel)
                         }
                     }
                     entry<Route.EditConfig> { key ->
@@ -144,112 +143,90 @@ fun InstallerNavContainer(
                                 id = if (id != -1L) id else null,
                                 useBlur = useBlur
                             )
-                        } else if (isExpressive) {
-                            NewEditPage(
-                                id = if (id != -1L) id else null,
-                                useBlur = useBlur
-                            )
                         } else {
                             EditPage(
-                                id = if (id != -1L) id
-                                else null
+                                id = if (id != -1L) id else null,
+                                useBlur = useBlur
                             )
                         }
                     }
                     entry<Route.ApplyConfig> { key ->
+                        val id = key.id
                         if (uiState.useMiuix) {
-                            val id = key.id
                             MiuixApplyPage(id, useBlur)
                         } else {
-                            val id = key.id
-                            if (isExpressive)
-                                NewApplyPage(id, useBlur)
-                            else
-                                ApplyPage(id)
+                            ApplyPage(id, useBlur)
                         }
                     }
                     entry<Route.About> {
                         if (uiState.useMiuix) {
                             MiuixAboutPage(useBlur)
                         } else {
-                            if (isExpressive)
-                                NewAboutPage(useBlur)
-                            else
-                                AboutPage()
+                            AboutPage(useBlur)
                         }
                     }
                     entry<Route.OpenSourceLicense> {
                         if (uiState.useMiuix) {
                             MiuixOpenSourceLicensePage(useBlur)
                         } else {
-                            OpenSourceLicensePage(isExpressive, useBlur)
+                            OpenSourceLicensePage(useBlur)
                         }
                     }
                     entry<Route.Theme> {
                         if (uiState.useMiuix) {
                             MiuixThemeSettingsPage()
                         } else {
-                            if (isExpressive) {
-                                NewThemeSettingsPage()
-                            } else {
-                                LegacyThemeSettingsPage()
-                            }
+                            ThemeSettingsPage()
+
                         }
                     }
                     entry<Route.InstallerGlobal> {
                         if (uiState.useMiuix) {
                             MiuixInstallerGlobalSettingsPage(useBlur)
                         } else {
-                            if (isExpressive) {
-                                NewInstallerGlobalSettingsPage(useBlur)
-                            } else {
-                                LegacyInstallerGlobalSettingsPage()
-                            }
+                            InstallerGlobalSettingsPage(useBlur)
                         }
                     }
                     entry<Route.DialogSettings> {
                         if (uiState.useMiuix) {
                             MiuixDialogSettingsPage(useBlur)
                         } else {
-                            if (isExpressive) {
-                                NewDialogSettingsPage(useBlur)
-                            } else {
-                                DialogSettingsPage()
-
-                            }
+                            DialogSettingsPage(useBlur)
                         }
                     }
                     entry<Route.NotificationSettings> {
                         if (uiState.useMiuix) {
                             MiuixNotificationSettingsPage(useBlur)
                         } else {
-                            if (isExpressive) {
-                                NewNotificationSettingsPage(useBlur)
-                            } else {
-                                NotificationSettingsPage()
-                            }
+                            NotificationSettingsPage(useBlur)
                         }
                     }
                     entry<Route.UninstallerGlobal> {
                         if (uiState.useMiuix) {
                             MiuixUninstallerGlobalSettingsPage(useBlur)
                         } else {
-                            if (isExpressive) {
-                                NewUninstallerGlobalSettingsPage(useBlur)
-                            } else {
-                                LegacyUninstallerGlobalSettingsPage()
-                            }
+                            UninstallerGlobalSettingsPage(useBlur)
                         }
                     }
                     entry<Route.Lab> {
                         if (uiState.useMiuix) {
                             MiuixLabPage(useBlur)
                         } else {
-                            if (isExpressive) {
-                                NewLabPage(useBlur)
-                            } else {
-                                LegacyLabPage()
-                            }
+                            LabPage(useBlur)
+                        }
+                    }
+                    entry<Route.DefaultInstaller> {
+                        if (uiState.useMiuix) {
+                            MiuixDefaultInstallerPage(useBlur)
+                        } else {
+                            DefaultInstallerPage(useBlur)
+                        }
+                    }
+                    entry<Route.Priv> {
+                        if (uiState.useMiuix) {
+                            MiuixPrivPage(useBlur)
+                        } else {
+                            PrivPage(useBlur)
                         }
                     }
                 },

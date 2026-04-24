@@ -8,7 +8,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -39,7 +38,6 @@ private val LocalSeedColor = staticCompositionLocalOf { Color.Unspecified }
 private val LocalThemeMode = staticCompositionLocalOf { ThemeMode.SYSTEM }
 private val LocalUseMiuixMonet = staticCompositionLocalOf { false }
 private val LocalUseDynamicColor = staticCompositionLocalOf { false }
-private val LocalIsExpressive = staticCompositionLocalOf { true }
 
 val LocalInstallerColorScheme = staticCompositionLocalOf<ColorScheme> { error("No ColorScheme provided") }
 
@@ -67,15 +65,11 @@ object InstallerTheme {
 
     val useDynamicColor: Boolean
         @Composable @ReadOnlyComposable get() = LocalUseDynamicColor.current
-
-    val isExpressive: Boolean
-        @Composable @ReadOnlyComposable get() = LocalIsExpressive.current
 }
 
 @Composable
 fun InstallerTheme(
     useMiuix: Boolean,
-    isExpressive: Boolean, // Added explicit parameter to drive standard vs expressive branching
     themeMode: ThemeMode,
     paletteStyle: PaletteStyle,
     colorSpec: ThemeColorSpec,
@@ -121,70 +115,30 @@ fun InstallerTheme(
         LocalThemeMode provides themeMode,
         LocalUseMiuixMonet provides useMiuixMonet,
         LocalUseDynamicColor provides useDynamicColor,
-        LocalThemeColorSpec provides colorSpec,
-        LocalIsExpressive provides isExpressive // Expose to the tree
+        LocalThemeColorSpec provides colorSpec
     ) {
-        // Strict branching for the base design system prevents standard Material Design pages
-        // from being polluted by Expressive's MotionScheme or Typography.
-        when {
-            useMiuix -> {
-                InstallerMiuixTheme(
-                    darkTheme = isDark,
-                    themeMode = themeMode,
-                    useDynamicColor = useDynamicColor,
-                    useMiuixMonet = useMiuixMonet,
-                    seedColor = seedColor,
-                    paletteStyle = paletteStyle,
-                    colorSpec = colorSpec
-                ) {
-                    preservedContent(content)
-                }
-            }
 
-            isExpressive -> {
-                InstallerMaterialExpressiveTheme(
-                    darkTheme = isDark,
-                    colorScheme = animatedColorScheme
-                ) {
-                    preservedContent(content)
-                }
+        if (useMiuix)
+            InstallerMiuixTheme(
+                darkTheme = isDark,
+                themeMode = themeMode,
+                useDynamicColor = useDynamicColor,
+                useMiuixMonet = useMiuixMonet,
+                seedColor = seedColor,
+                paletteStyle = paletteStyle,
+                colorSpec = colorSpec
+            ) {
+                preservedContent(content)
             }
-
-            else -> {
-                InstallerMaterialTheme(
-                    darkTheme = isDark,
-                    colorScheme = animatedColorScheme
-                ) {
-                    preservedContent(content)
-                }
+        else {
+            InstallerMaterialExpressiveTheme(
+                darkTheme = isDark,
+                colorScheme = animatedColorScheme
+            ) {
+                preservedContent(content)
             }
         }
     }
-}
-
-@Composable
-fun InstallerMaterialTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    colorScheme: ColorScheme,
-    compatStatusBarColor: Boolean = true,
-    content: @Composable () -> Unit
-) {
-    if (compatStatusBarColor) {
-        val view = LocalView.current
-        if (!view.isInEditMode) {
-            SideEffect {
-                val window = (view.context as ComponentActivity).window
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            }
-        }
-    }
-
-    // Uses the standard Material Design 3 theme baseline
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

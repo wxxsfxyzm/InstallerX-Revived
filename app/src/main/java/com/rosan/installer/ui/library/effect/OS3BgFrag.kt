@@ -9,10 +9,10 @@ const val OS3_BG_FRAG = """
     uniform vec4 uBound;
     uniform float uTranslateY;
     uniform vec3 uPoints[4];
+    uniform vec2 uPointsAnim[4];
     uniform vec4 uColors[4];
     uniform float uAlphaMulti;
     uniform float uNoiseScale;
-    uniform float uPointOffset;
     uniform float uPointRadiusMulti;
     uniform float uSaturateOffset;
     uniform float uLightOffset;
@@ -40,8 +40,10 @@ const val OS3_BG_FRAG = """
 
     float perlin(vec2 x) {
         vec2 i = floor(x); vec2 f = fract(x);
+
         float a = hash(i); float b = hash(i + vec2(1.0, 0.0));
         float c = hash(i + vec2(0.0, 1.0)); float d = hash(i + vec2(1.0, 1.0));
+
         vec2 u = f * f * (3.0 - 2.0 * f);
         return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
     }
@@ -58,33 +60,24 @@ const val OS3_BG_FRAG = """
         uv.xy -= uBound.xy;
         uv.xy /= uBound.zw;
 
-        vec3 hsv;
         vec4 color = vec4(0.0);
         float noiseValue = perlin(vUv * uNoiseScale + vec2(-uAnimTime, -uAnimTime));
 
         for (int i = 0; i < 4; i++){
             vec4 pointColor = uColors[i];
             pointColor.rgb *= pointColor.a;
-            vec2 point = uPoints[i].xy;
+            vec2 point = uPointsAnim[i];
             float rad = uPoints[i].z * uPointRadiusMulti;
-
-            point.x += sin(uAnimTime + point.y) * uPointOffset;
-            point.y += cos(uAnimTime + point.x) * uPointOffset;
 
             float d = distance(uv, point);
             float pct = smoothstep(rad, 0., d);
-
             color.rgb = mix(color.rgb, pointColor.rgb, pct);
             color.a = mix(color.a, pointColor.a, pct);
         }
 
         float oppositeNoise = smoothstep(0., 1., noiseValue);
-        if (color.a > 0.001) {
-            color.rgb /= color.a;
-        } else {
-            color.rgb = vec3(0.0);
-        }
-        hsv = rgb2hsv(color.rgb);
+        color.rgb /= color.a;
+        vec3 hsv = rgb2hsv(color.rgb);
         hsv.y = mix(hsv.y, 0.0, oppositeNoise * uSaturateOffset);
         color.rgb = hsv2rgb(hsv);
         color.rgb += oppositeNoise * uLightOffset;
@@ -92,7 +85,7 @@ const val OS3_BG_FRAG = """
         color.a = clamp(color.a, 0., 1.);
         color.a *= uAlphaMulti;
 
-        color.rgb += (1.0 / 255.0) * gradientNoise(fragCoord.xy) - (0.5 / 255.0);
-        return vec4(color.rgb*color.a, color.a);
+        color += (10.0 / 255.0) * gradientNoise(fragCoord.xy) - (5.0 / 255.0);
+        return vec4(color.rgb * color.a, color.a);
     }
 """

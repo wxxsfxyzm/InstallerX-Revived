@@ -7,14 +7,14 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
+import androidx.navigation3.ui.defaultTransitionSpec
 import androidx.navigationevent.NavigationEventTransitionState
 
-class KernelSUClassicPredictiveBackAnimation : PredictiveBackAnimationHandler {
+class ClassicPredictiveBackAnimation : PredictiveBackAnimationHandler {
     override suspend fun onBackPressed(
         transitionState: NavigationEventTransitionState?,
         currentPageKey: NavKey?
@@ -48,9 +48,5 @@ class KernelSUClassicPredictiveBackAnimation : PredictiveBackAnimationHandler {
         )
 
     override fun AnimatedContentTransitionScope<Scene<NavKey>>.onTransitionSpec(): ContentTransform =
-        ContentTransform(
-            targetContentEnter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }),
-            initialContentExit = slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth }),
-            sizeTransform = null
-        )
+        defaultTransitionSpec<NavKey>().invoke(this)
 }

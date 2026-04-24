@@ -2,16 +2,13 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.about
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -20,14 +17,19 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,13 +52,15 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.preferred.BottomSheetContent
 import com.rosan.installer.ui.page.main.settings.preferred.ExportLogsWidget
-import com.rosan.installer.ui.page.main.settings.preferred.SettingsAboutItemWidget
+import com.rosan.installer.ui.page.main.settings.preferred.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.card.StatusWidget
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
-import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
+import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
 import com.rosan.installer.ui.page.main.widget.util.LogEventCollector
+import com.rosan.installer.ui.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -64,12 +68,14 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AboutPage(
+    useBlur: Boolean,
     viewModel: AboutViewModel = koinViewModel()
 ) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val uriHandler = LocalUriHandler.current
     var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -78,25 +84,44 @@ fun AboutPage(
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
-    val upgradeIndicatorBackdrop = rememberMaterial3BlurBackdrop(true)
+    val topBarBackdrop = rememberMaterial3BlurBackdrop(useBlur)
+    val upgradeIndicatorBackdrop = rememberMaterial3BlurBackdrop(useBlur)
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .then(upgradeIndicatorBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(id = R.string.about))
-                },
+            LargeFlexibleTopAppBar(
+                modifier = Modifier.installerMaterial3BlurEffect(topBarBackdrop),
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                title = { Text(text = stringResource(id = R.string.about)) },
                 scrollBehavior = scrollBehavior,
-                navigationIcon = { AppBackButton(onClick = { navigator.pop() }) }
+                navigationIcon = {
+                    Row {
+                        AppBackButton(
+                            onClick = { navigator.pop() },
+                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                            modifier = Modifier.size(36.dp),
+                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                        )
+                        Spacer(modifier = Modifier.size(16.dp))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = topBarBackdrop.getMaterial3AppBarColor(),
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    scrolledContainerColor = topBarBackdrop.getMaterial3AppBarColor()
+                )
             )
         },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
@@ -114,64 +139,67 @@ fun AboutPage(
                     StatusWidget(viewModel)
                 }
             }
-            item { LabelWidget(stringResource(R.string.about)) }
             item {
-                SettingsAboutItemWidget(
-                    imageVector = AppIcons.ViewSourceCode,
-                    headlineContentText = stringResource(R.string.get_source_code),
-                    supportingContentText = stringResource(R.string.get_source_code_detail),
-                    onClick = { uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived") }
-                )
-            }
-            item {
-                SettingsAboutItemWidget(
-                    imageVector = AppIcons.OpenSourceLicense,
-                    headlineContentText = stringResource(R.string.open_source_license),
-                    supportingContentText = stringResource(R.string.open_source_license_settings_description),
-                    onClick = { navigator.push(Route.OpenSourceLicense) }
-                )
-            }
-            item {
-                SettingsAboutItemWidget(
-                    imageVector = AppIcons.Update,
-                    headlineContentText = stringResource(R.string.get_update),
-                    supportingContentText = stringResource(R.string.get_update_detail),
-                    onClick = { showBottomSheet = true }
-                )
-            }
-            if (uiState.hasUpdate)
-                item {
-                    SettingsAboutItemWidget(
-                        imageVector = AppIcons.Download,
-                        headlineContentText = stringResource(R.string.get_update_directly),
-                        supportingContentText = stringResource(R.string.get_update_directly_desc),
-                        onClick = { viewModel.dispatch(AboutAction.PerformUpdate) }
-                    )
-                }
-            if (AppConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID) {
-                item { LabelWidget(stringResource(R.string.debug)) }
-                item {
-                    SwitchWidget(
-                        icon = AppIcons.BugReport,
-                        title = stringResource(R.string.save_logs),
-                        description = stringResource(R.string.save_logs_desc),
-                        checked = uiState.enableFileLogging,
-                        onCheckedChange = { viewModel.dispatch(AboutAction.SetEnableFileLogging(it)) }
-                    )
-                }
-                item {
-                    AnimatedVisibility(
-                        visible = uiState.enableFileLogging,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) { ExportLogsWidget(viewModel) }
+                SegmentedColumn(
+                    title = stringResource(R.string.about)
+                ) {
+                    item {
+                        SettingsNavigationItemWidget(
+                            icon = AppIcons.ViewSourceCode,
+                            title = stringResource(R.string.get_source_code),
+                            description = stringResource(R.string.get_source_code_detail),
+                            onClick = { uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived") }
+                        )
+                    }
+                    item {
+                        SettingsNavigationItemWidget(
+                            icon = AppIcons.OpenSourceLicense,
+                            title = stringResource(R.string.open_source_license),
+                            description = stringResource(R.string.open_source_license_settings_description),
+                            onClick = { navigator.push(Route.OpenSourceLicense) }
+                        )
+                    }
+                    item {
+                        SettingsNavigationItemWidget(
+                            icon = AppIcons.Update,
+                            title = stringResource(R.string.get_update),
+                            description = stringResource(R.string.get_update_detail),
+                            onClick = { showBottomSheet = true }
+                        )
+                    }
+                    if (uiState.hasUpdate)
+                        item {
+                            SettingsNavigationItemWidget(
+                                icon = AppIcons.Download,
+                                title = stringResource(R.string.get_update_directly),
+                                description = stringResource(R.string.get_update_directly_desc),
+                                onClick = { viewModel.dispatch(AboutAction.PerformUpdate) }
+                            )
+                        }
                 }
             }
+            if (AppConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID)
+                item {
+                    SegmentedColumn(
+                        title = stringResource(R.string.debug)
+                    ) {
+                        item {
+                            SwitchWidget(
+                                icon = AppIcons.BugReport,
+                                title = stringResource(R.string.save_logs),
+                                description = stringResource(R.string.save_logs_desc),
+                                checked = uiState.enableFileLogging,
+                                onCheckedChange = { viewModel.dispatch(AboutAction.SetEnableFileLogging(it)) }
+                            )
+                        }
+                        item(visible = uiState.enableFileLogging) {
+                            ExportLogsWidget(viewModel)
+                        }
+                    }
+                }
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
-
     }
-
     if (showBottomSheet) {
         ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
             BottomSheetContent(

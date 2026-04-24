@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred
 
 import android.annotation.SuppressLint
@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -16,16 +17,16 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,28 +48,34 @@ import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.navigation.Route
-import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
-import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
+import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.snackbar.SwipeableSnackbarHost
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
-import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @SuppressLint("LocalContextGetResourceValueCall")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PreferredPage(
+    navigator: Navigator = LocalNavigator.current,
+    useBlur: Boolean,
     viewModel: PreferredViewModel = koinViewModel(),
-    outerPadding: PaddingValues = PaddingValues(0.dp)
+    title: String,
+    outerPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
 
     OnLifecycleEvent(Lifecycle.Event.ON_RESUME) {
         viewModel.dispatch(PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus)
@@ -82,9 +89,7 @@ fun PreferredPage(
 
     val snackBarHostState = remember { SnackbarHostState() }
     var errorDialogInfo by remember {
-        mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(
-            null
-        )
+        mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(null)
     }
 
     val detailLabel = stringResource(id = R.string.details)
@@ -114,22 +119,24 @@ fun PreferredPage(
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
+    val backdrop = rememberMaterial3BlurBackdrop(useBlur)
+
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
-        contentWindowInsets = WindowInsets.none,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
-            TopAppBar(
+            LargeFlexibleTopAppBar(
+                modifier = Modifier.installerMaterial3BlurEffect(backdrop),
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                title = { Text(title) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
-                title = {
-                    Text(text = stringResource(id = R.string.preferred))
-                }
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
+                )
             )
         },
         snackbarHost = {
@@ -140,7 +147,9 @@ fun PreferredPage(
         },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
@@ -148,108 +157,98 @@ fun PreferredPage(
                 bottom = outerPadding.calculateBottomPadding()
             )
         ) {
-            item { LabelWidget(stringResource(R.string.global)) }
+            // --- Global Settings Group ---
             item {
-                SettingsNavigationItemWidget(
-                    icon = AppIcons.Theme,
-                    title = stringResource(R.string.theme_settings),
-                    description = stringResource(R.string.theme_settings_desc),
-                    onClick = {
-                        navigator.push(Route.Theme)
-                    }
-                )
-            }
-            item {
-                SettingsNavigationItemWidget(
-                    icon = AppIcons.InstallMode,
-                    title = stringResource(R.string.installer_settings),
-                    description = stringResource(R.string.installer_settings_desc),
-                    onClick = {
-                        navigator.push(Route.InstallerGlobal)
-                    }
-                )
-            }
-            item {
-                SettingsNavigationItemWidget(
-                    icon = AppIcons.Delete,
-                    title = stringResource(R.string.uninstaller_settings),
-                    description = stringResource(R.string.uninstaller_settings_desc),
-                    onClick = {
-                        navigator.push(Route.UninstallerGlobal)
-                    }
-                )
-            }
-            if (uiState.authorizer == Authorizer.None)
-                item {
-                    val tip = if (capabilityProvider.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
-                    else stringResource(R.string.config_authorizer_none_tips)
-                    InfoTipCard(text = tip)
-                }
-            item { LabelWidget(stringResource(R.string.basic)) }
-            item {
-                DisableAdbVerify(
-                    checked = !uiState.adbVerifyEnabled,
-                    isError = uiState.authorizer == Authorizer.Dhizuku,
-                    enabled = uiState.authorizer != Authorizer.Dhizuku &&
-                            uiState.authorizer != Authorizer.None,
-                    isM3E = false,
-                    onCheckedChange = { isDisabled ->
-                        viewModel.dispatch(
-                            PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled)
+                SegmentedColumn(
+                    title = stringResource(R.string.personalization)
+                ) {
+                    item {
+                        SettingsNavigationItemWidget(
+                            icon = AppIcons.Theme,
+                            title = stringResource(R.string.theme_settings),
+                            description = stringResource(R.string.theme_settings_desc),
+                            onClick = {
+                                navigator.push(Route.Theme)
+                            }
                         )
                     }
-                )
-            }
-            item {
-                IgnoreBatteryOptimizationSetting(
-                    checked = uiState.isIgnoringBatteryOptimizations,
-                    enabled = !uiState.isIgnoringBatteryOptimizations,
-                    isM3E = false,
-                ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
-            }
-            item {
-                AutoLockInstaller(
-                    checked = uiState.autoLockInstaller,
-                    enabled = uiState.authorizer != Authorizer.None,
-                    isM3E = false
-                ) { viewModel.dispatch(PreferredViewAction.ChangeAutoLockInstaller(!uiState.autoLockInstaller)) }
-            }
-            item {
-                DefaultInstaller(
-                    lock = true,
-                    enabled = uiState.authorizer != Authorizer.None
-                ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(true)) }
-            }
-            item {
-                DefaultInstaller(
-                    lock = false,
-                    enabled = uiState.authorizer != Authorizer.None
-                ) { viewModel.dispatch(PreferredViewAction.SetDefaultInstaller(false)) }
-            }
-            item { LabelWidget(stringResource(R.string.other)) }
-            item {
-                SettingsAboutItemWidget(
-                    imageVector = AppIcons.Lab,
-                    headlineContentText = stringResource(R.string.lab),
-                    supportingContentText = stringResource(R.string.lab_desc),
-                    onClick = {
-                        navigator.push(Route.Lab)
+                    item {
+                        SettingsNavigationItemWidget(
+                            icon = AppIcons.InstallMode,
+                            title = stringResource(R.string.installer_settings),
+                            description = stringResource(R.string.installer_settings_desc),
+                            onClick = {
+                                navigator.push(Route.InstallerGlobal)
+                            }
+                        )
                     }
-                )
-            }
-            item {
-                SettingsAboutItemWidget(
-                    imageVector = AppIcons.Info,
-                    headlineContentText = stringResource(R.string.about_detail),
-                    supportingContentText = if (uiState.hasUpdate) stringResource(
-                        R.string.update_available,
-                        uiState.remoteVersion
-                    ) else "$revLevel ${AppConfig.VERSION_NAME}",
-                    supportingContentColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    onClick = {
-                        navigator.push(Route.About)
+                    item {
+                        SettingsNavigationItemWidget(
+                            icon = AppIcons.Delete,
+                            title = stringResource(R.string.uninstaller_settings),
+                            description = stringResource(R.string.uninstaller_settings_desc),
+                            onClick = {
+                                navigator.push(Route.UninstallerGlobal)
+                            }
+                        )
                     }
-                )
+                }
+            }
+
+            // --- Basic Settings Group ---
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.basic)
+                ) {
+                    item {
+                        DisableAdbVerify(
+                            checked = !uiState.adbVerifyEnabled,
+                            isError = uiState.authorizer == Authorizer.Dhizuku,
+                            enabled = uiState.authorizer != Authorizer.Dhizuku &&
+                                    uiState.authorizer != Authorizer.None,
+                            onCheckedChange = { isDisabled ->
+                                viewModel.dispatch(PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled))
+                            }
+                        )
+                    }
+                    item {
+                        IgnoreBatteryOptimizationSetting(
+                            checked = uiState.isIgnoringBatteryOptimizations,
+                            enabled = !uiState.isIgnoringBatteryOptimizations,
+                        ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
+                    }
+                }
+            }
+            // --- Other Settings Group ---
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.other)
+                ) {
+                    item {
+                        SettingsAboutItemWidget(
+                            imageVector = AppIcons.Lab,
+                            headlineContentText = stringResource(R.string.lab),
+                            supportingContentText = stringResource(R.string.lab_desc),
+                            onClick = {
+                                navigator.push(Route.Lab)
+                            }
+                        )
+                    }
+                    item {
+                        SettingsAboutItemWidget(
+                            imageVector = AppIcons.Info,
+                            headlineContentText = stringResource(R.string.about_detail),
+                            supportingContentText = if (uiState.hasUpdate) stringResource(
+                                R.string.update_available,
+                                uiState.remoteVersion
+                            ) else "$revLevel ${AppConfig.VERSION_NAME}",
+                            supportingContentColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            onClick = {
+                                navigator.push(Route.About)
+                            }
+                        )
+                    }
+                }
             }
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
@@ -260,8 +259,8 @@ fun PreferredPage(
             exception = dialogInfo.exception,
             onDismissRequest = { errorDialogInfo = null },
             onRetry = {
-                errorDialogInfo = null // Dismiss dialog
-                viewModel.dispatch(dialogInfo.retryAction) // Dispatch the retry action
+                errorDialogInfo = null
+                viewModel.dispatch(dialogInfo.retryAction)
             },
             title = stringResource(dialogInfo.titleResId)
         )

@@ -75,6 +75,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 @Composable
 fun MiuixAllPage(
+    enableBlur: Boolean,
     navigator: Navigator = LocalNavigator.current,
     viewModel: AllViewModel = koinViewModel { parametersOf(navigator) },
     title: String,
@@ -114,7 +115,7 @@ fun MiuixAllPage(
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
-    val topBarBackdrop = rememberMiuixBlurBackdrop(uiState.useBlur)
+    val topBarBackdrop = rememberMiuixBlurBackdrop(enableBlur)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

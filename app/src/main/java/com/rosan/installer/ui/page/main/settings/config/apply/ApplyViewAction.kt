@@ -1,16 +1,16 @@
 package com.rosan.installer.ui.page.main.settings.config.apply
 
-sealed class ApplyViewAction {
-    data object LoadApps : ApplyViewAction()
-    data object LoadAppEntities : ApplyViewAction()
-    data class LoadIcon(val packageName: String) : ApplyViewAction()
-    data class ApplyPackageName(val packageName: String?, val applied: Boolean) : ApplyViewAction()
+sealed interface ApplyViewAction {
+    data object LoadApps : ApplyViewAction
+    data object LoadAppEntities : ApplyViewAction
+    data class LoadIcon(val packageName: String) : ApplyViewAction
+    data class ApplyPackageName(val packageName: String?, val applied: Boolean) : ApplyViewAction
 
-    data class Order(val type: ApplyViewState.OrderType) : ApplyViewAction()
-    data class OrderInReverse(val enabled: Boolean) : ApplyViewAction()
-    data class SelectedFirst(val enabled: Boolean) : ApplyViewAction()
-    data class ShowSystemApp(val enabled: Boolean) : ApplyViewAction()
-    data class ShowPackageName(val enabled: Boolean) : ApplyViewAction()
+    data class Order(val type: ApplyViewState.OrderType) : ApplyViewAction
+    data class OrderInReverse(val enabled: Boolean) : ApplyViewAction
+    data class SelectedFirst(val enabled: Boolean) : ApplyViewAction
+    data class ShowSystemApp(val enabled: Boolean) : ApplyViewAction
+    data class ShowPackageName(val enabled: Boolean) : ApplyViewAction
 
-    data class Search(val text: String) : ApplyViewAction()
+    data class Search(val text: String) : ApplyViewAction
 }

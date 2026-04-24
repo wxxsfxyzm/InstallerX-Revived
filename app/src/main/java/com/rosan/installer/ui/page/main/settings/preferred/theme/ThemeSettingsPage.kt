@@ -42,11 +42,11 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.twotone.Colorize
 import androidx.compose.material.icons.twotone.InvertColors
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -71,28 +71,26 @@ import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.settings.preferred.ColorSpecSelector
-import com.rosan.installer.ui.page.main.settings.preferred.SelectableSettingItem
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.main.widget.dialog.BlurWarningDialog
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
-import com.rosan.installer.ui.page.main.widget.setting.SplicedColumnGroup
+import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeMode
-import com.rosan.installer.ui.theme.none
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @SuppressLint("RestrictedApi")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun NewThemeSettingsPage(
+fun ThemeSettingsPage(
     viewModel: ThemeSettingsViewModel = koinViewModel()
 ) {
     val navigator = LocalNavigator.current
@@ -189,7 +187,6 @@ fun NewThemeSettingsPage(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
-        contentWindowInsets = WindowInsets.none,
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
@@ -231,52 +228,63 @@ fun NewThemeSettingsPage(
         ) {
             // --- Group 1: UI Style Selection ---
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.theme_settings_ui_style)
                 ) {
                     // Option 1: Google UI
                     item {
-                        SelectableSettingItem(
+                        val selected = !uiState.showMiuixUI
+                        val onClick = {
+                            if (uiState.showMiuixUI) {
+                                viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(false))
+                            }
+                        }
+                        BaseWidget(
+                            icon = null,
+                            iconPlaceholder = false, // Force text alignment to the start edge
                             title = stringResource(R.string.theme_settings_google_ui),
                             description = stringResource(R.string.theme_settings_google_ui_desc),
-                            selected = !uiState.showMiuixUI,
-                            onClick = {
-                                if (uiState.showMiuixUI) {
-                                    viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(false))
-                                }
-                            }
-                        )
+                            selected = selected,
+                            onClick = onClick
+                        ) {
+                            RadioButton(
+                                selected = selected,
+                                onClick = onClick,
+                                colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
+                            )
+                        }
                     }
                     // Option 2: MIUIX UI
                     item {
-                        SelectableSettingItem(
+                        val selected = uiState.showMiuixUI
+                        val onClick = {
+                            if (!uiState.showMiuixUI) {
+                                viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(true))
+                            }
+                        }
+                        BaseWidget(
+                            icon = null,
+                            iconPlaceholder = false, // Force text alignment to the start edge
                             title = stringResource(R.string.theme_settings_miuix_ui),
                             description = stringResource(R.string.theme_settings_miuix_ui_desc),
-                            selected = uiState.showMiuixUI,
-                            onClick = {
-                                if (!uiState.showMiuixUI) {
-                                    viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(true))
-                                }
-                            }
-                        )
+                            selected = selected,
+                            onClick = onClick
+                        ) {
+                            RadioButton(
+                                selected = selected,
+                                onClick = onClick,
+                                colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
+                            )
+                        }
                     }
                 }
             }
 
             // --- Group 2: Google UI Options ---
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.theme_settings_google_ui)
                 ) {
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.Theme,
-                            title = stringResource(R.string.theme_settings_use_expressive_ui),
-                            description = stringResource(R.string.theme_settings_use_expressive_ui_desc),
-                            checked = uiState.showExpressiveUI,
-                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.ChangeShowExpressiveUI(it)) }
-                        )
-                    }
                     item {
                         SwitchWidget(
                             icon = AppIcons.Blur,
@@ -359,51 +367,53 @@ fun NewThemeSettingsPage(
                     exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
                             shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
                 ) {
-                    SplicedColumnGroup(
+                    SegmentedColumn(
                         title = stringResource(R.string.theme_settings_theme_color)
                     ) {
                         item {
-                            BoxWithConstraints(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 16.dp)
-                            ) {
-                                val itemMinWidth = 88.dp
-                                val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
-                                val chunkedColors = uiState.availableColors.chunked(columns)
-
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                            BaseItemContainer {
+                                BoxWithConstraints(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 16.dp)
                                 ) {
-                                    chunkedColors.forEach { rowItems ->
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.Center
-                                        ) {
-                                            rowItems.forEach { rawColor ->
-                                                Box(
-                                                    modifier = Modifier.weight(1f),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    ColorSwatchPreview(
-                                                        rawColor = rawColor,
-                                                        currentStyle = uiState.paletteStyle,
-                                                        colorSpec = uiState.colorSpec,
-                                                        textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
-                                                        textColor = MaterialTheme.colorScheme.onSurface,
-                                                        isSelected = uiState.seedColor == rawColor.color &&
-                                                                !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+                                    val itemMinWidth = 88.dp
+                                    val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
+                                    val chunkedColors = uiState.availableColors.chunked(columns)
+
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        chunkedColors.forEach { rowItems ->
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.Center
+                                            ) {
+                                                rowItems.forEach { rawColor ->
+                                                    Box(
+                                                        modifier = Modifier.weight(1f),
+                                                        contentAlignment = Alignment.Center
                                                     ) {
-                                                        viewModel.dispatch(ThemeSettingsAction.SetSeedColor(rawColor.color))
+                                                        ColorSwatchPreview(
+                                                            rawColor = rawColor,
+                                                            currentStyle = uiState.paletteStyle,
+                                                            colorSpec = uiState.colorSpec,
+                                                            textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
+                                                            textColor = MaterialTheme.colorScheme.onSurface,
+                                                            isSelected = uiState.seedColor == rawColor.color &&
+                                                                    !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+                                                        ) {
+                                                            viewModel.dispatch(ThemeSettingsAction.SetSeedColor(rawColor.color))
+                                                        }
                                                     }
                                                 }
-                                            }
 
-                                            val remaining = columns - rowItems.size
-                                            if (remaining > 0) {
-                                                repeat(remaining) {
-                                                    Spacer(Modifier.weight(1f))
+                                                val remaining = columns - rowItems.size
+                                                if (remaining > 0) {
+                                                    repeat(remaining) {
+                                                        Spacer(Modifier.weight(1f))
+                                                    }
                                                 }
                                             }
                                         }
@@ -417,7 +427,7 @@ fun NewThemeSettingsPage(
 
             // --- Group 4: Predictive Back ---
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.theme_settings_predictive_back)
                 ) {
                     item { PredictiveBackAnimationWidget(uiState) { showPredictiveBackAnimationDialog = true } }
@@ -432,7 +442,7 @@ fun NewThemeSettingsPage(
 
             // --- Group 5: Package Icons ---
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.theme_settings_package_icons)
                 ) {
                     item {
@@ -449,7 +459,7 @@ fun NewThemeSettingsPage(
 
             // --- Group 6: Launcher Icons ---
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.theme_settings_launcher_icons)
                 ) {
                     item {
@@ -529,7 +539,7 @@ fun PredictiveBackAnimationDialog(
                         PredictiveBackAnimation.AOSP -> stringResource(R.string.theme_settings_predictive_back_animation_aosp)
                         PredictiveBackAnimation.MIUIX -> stringResource(R.string.theme_settings_predictive_back_animation_miuix)
                         PredictiveBackAnimation.Scale -> stringResource(R.string.theme_settings_predictive_back_animation_scale)
-                        PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
+                        PredictiveBackAnimation.Classic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
                     }
                     Row(
                         Modifier

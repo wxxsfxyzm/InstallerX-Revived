@@ -48,7 +48,6 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.preferred.installer.InstallerSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.installer.InstallerSettingsViewModel
-import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixDataAuthorizerWidget
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixManagedPackagesWidget
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixManagedUidsWidget
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixNavigationItemWidget
@@ -61,11 +60,11 @@ import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
@@ -124,40 +123,34 @@ fun MiuixInstallerGlobalSettingsPage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 12.dp)
                 ) {
-                    MiuixDataAuthorizerWidget(
-                        currentAuthorizer = uiState.authorizer,
-                        changeAuthorizer = { newAuthorizer ->
-                            viewModel.dispatch(InstallerSettingsAction.ChangeGlobalAuthorizer(newAuthorizer))
-                        }
+
+                    AnimatedVisibility(
+                        visible = uiState.authorizer == Authorizer.None && capabilityProvider.isSystemApp,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
                     ) {
-                        AnimatedVisibility(
-                            visible = uiState.authorizer == Authorizer.None && capabilityProvider.isSystemApp,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.config_always_use_root_in_system),
+                            description = stringResource(R.string.config_always_use_root_in_system_desc),
+                            checked = uiState.alwaysUseRootInSystem,
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeAlwaysUseRootInSystem(it)) }
+                        )
+                    }
+                    AnimatedVisibility(
+                        visible = uiState.authorizer == Authorizer.Dhizuku,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixIntNumberPickerWidget(
+                            title = stringResource(R.string.set_countdown),
+                            description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
+                            value = uiState.dhizukuAutoCloseCountDown,
+                            startInt = 1,
+                            endInt = 10
                         ) {
-                            MiuixSwitchWidget(
-                                title = stringResource(R.string.config_always_use_root_in_system),
-                                description = stringResource(R.string.config_always_use_root_in_system_desc),
-                                checked = uiState.alwaysUseRootInSystem,
-                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeAlwaysUseRootInSystem(it)) }
+                            viewModel.dispatch(
+                                InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown(it)
                             )
-                        }
-                        AnimatedVisibility(
-                            visible = uiState.authorizer == Authorizer.Dhizuku,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
-                            MiuixIntNumberPickerWidget(
-                                title = stringResource(R.string.set_countdown),
-                                description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                                value = uiState.dhizukuAutoCloseCountDown,
-                                startInt = 1,
-                                endInt = 10
-                            ) {
-                                viewModel.dispatch(
-                                    InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown(it)
-                                )
-                            }
                         }
                     }
                     MiuixNavigationItemWidget(
@@ -190,7 +183,7 @@ fun MiuixInstallerGlobalSettingsPage(
                                     BiometricAuthMode.Enable -> context.getString(R.string.installer_biometric_auth_mode_enable)
                                     BiometricAuthMode.FollowConfig -> context.getString(R.string.installer_biometric_auth_mode_follow_config)
                                 }
-                                SpinnerEntry(title = text)
+                                DropdownItem(title = text)
                             }
                         }
 

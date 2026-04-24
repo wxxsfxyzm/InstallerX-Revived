@@ -13,7 +13,6 @@ import com.rosan.installer.ui.theme.material.ThemeMode
 data class ThemeState(
     val isLoaded: Boolean = false,
     val useMiuix: Boolean = false,
-    val isExpressive: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val colorSpec: ThemeColorSpec = ThemeColorSpec.SPEC_2025,

@@ -10,3 +10,6 @@ val primaryDark = Color(0xFFAFD18C)
 val miuixSheetColorLight = Color(0xFFF7F7F7)
 val miuixSheetColorDark = Color(0xFF242424)
 val miuixSheetCardColorDark = Color(0xFF434343)
+
+val miuixHomeStatusCardColorActivated = Color(0xFF36D167)
+val miuixHomeStatusCardColorDeactivated = Color(0xFFD13636)

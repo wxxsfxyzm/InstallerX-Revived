@@ -55,10 +55,10 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
@@ -189,7 +189,7 @@ fun MiuixLabPage(
 
                         val spinnerEntries = remember(data) {
                             data.values.map { modeName ->
-                                SpinnerEntry(title = modeName)
+                                DropdownItem(title = modeName)
                             }
                         }
 
@@ -289,7 +289,7 @@ fun MiuixLabPage(
 
                         val profileEntries = remember(profileData) {
                             profileData.values.map { name ->
-                                SpinnerEntry(title = name)
+                                DropdownItem(title = name)
                             }
                         }
 

@@ -37,7 +37,6 @@ fun preparingDialog(
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stage = uiState.stage
-    val viewSettings = uiState.viewSettings
 
     // Extract progress via Smart Cast from the stage
     val progress = if (stage is InstallerStage.Preparing) {
@@ -84,20 +83,12 @@ fun preparingDialog(
                         label = "PreparingProgressAnimation"
                     )
 
-                    // Use viewSettings from uiState
-                    if (viewSettings.uiExpressive)
-                        LinearWavyProgressIndicator(
-                            progress = { animatedProgress },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp),
-                        )
-                    else
-                        LinearWavyProgressIndicator(
-                            progress = { animatedProgress },
-                            modifier = Modifier.fillMaxWidth(),
-                            amplitude = { 0f }
-                        )
+                    LinearWavyProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp),
+                    )
                 }
             }
         },

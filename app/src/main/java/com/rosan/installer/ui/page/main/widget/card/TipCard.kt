@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,7 +37,6 @@ import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
  * It's within a ColumnScope, so modifiers like `align` are allowed.
  * @param noPadding Don't add more padding in internal
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TipCard(
     modifier: Modifier = Modifier,
@@ -75,7 +73,6 @@ private fun TipCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ScopeTipCard(
     viewModel: AllViewModel,
@@ -118,7 +115,6 @@ fun ScopeTipCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InfoTipCard(
     text: String,
@@ -144,6 +140,48 @@ fun InfoTipCard(
                 Text(
                     text = text,
                     style = MaterialTheme.typography.bodyMediumEmphasized,
+                    color = MaterialTheme.colorScheme.onTertiary
+                )
+            }
+        }
+    ) {
+        Spacer(modifier = Modifier.size(16.dp))
+    }
+}
+
+@Composable
+fun TitleTipCard(
+    title: String,
+    text: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = AppIcons.Tip,
+    noPadding: Boolean = false
+) {
+    TipCard(
+        modifier = modifier,
+        noPadding = noPadding,
+        tipContent = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    icon?.let {
+                        Icon(
+                            imageVector = it,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiary
+                        )
+                    }
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onTertiary
+                    )
+                }
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onTertiary
                 )
             }

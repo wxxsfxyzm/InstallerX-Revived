@@ -36,7 +36,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTopAppBarState
@@ -71,10 +70,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun OpenSourceLicensePage(
-    isM3E: Boolean,
-    useBlur: Boolean,
-) {
+fun OpenSourceLicensePage(useBlur: Boolean) {
     val navigator = LocalNavigator.current
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
@@ -97,40 +93,30 @@ fun OpenSourceLicensePage(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
-            if (isM3E) {
-                LargeFlexibleTopAppBar(
-                    modifier = Modifier.installerMaterial3BlurEffect(backdrop),
-                    windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                    title = { Text(text = stringResource(id = R.string.open_source_license)) },
-                    scrollBehavior = scrollBehavior,
-                    navigationIcon = {
-                        Row {
-                            AppBackButton(
-                                onClick = { navigator.pop() },
-                                icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                                modifier = Modifier.size(36.dp),
-                                containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                    alpha = 0.1f
-                                )
+            LargeFlexibleTopAppBar(
+                modifier = Modifier.installerMaterial3BlurEffect(backdrop),
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                title = { Text(text = stringResource(id = R.string.open_source_license)) },
+                scrollBehavior = scrollBehavior,
+                navigationIcon = {
+                    Row {
+                        AppBackButton(
+                            onClick = { navigator.pop() },
+                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                            modifier = Modifier.size(36.dp),
+                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                alpha = 0.1f
                             )
-                            Spacer(modifier = Modifier.size(16.dp))
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = backdrop.getMaterial3AppBarColor(),
-                        titleContentColor = MaterialTheme.colorScheme.onBackground,
-                        scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                    )
+                        )
+                        Spacer(modifier = Modifier.size(16.dp))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = backdrop.getMaterial3AppBarColor(),
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
                 )
-            } else {
-                TopAppBar(
-                    title = {
-                        Text(text = stringResource(id = R.string.open_source_license))
-                    },
-                    scrollBehavior = scrollBehavior,
-                    navigationIcon = { AppBackButton(onClick = { navigator.pop() }) }
-                )
-            }
+            )
         },
     ) { paddingValues ->
         val cornerRadius = 16.dp

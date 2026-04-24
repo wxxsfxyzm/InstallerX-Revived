@@ -7,13 +7,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.rosan.installer.ui.theme.InstallerTheme
@@ -41,16 +40,19 @@ fun BgEffectBackground(
         Box(modifier = modifier, content = content)
         return
     }
-    Box(modifier = modifier) {
+    Box(
+        modifier = modifier,
+    ) {
         val surface = MiuixTheme.colorScheme.surface
-        val animTime = rememberFrameTimeSeconds(dynamicBackground)
+
         val windowLayoutInfo = LocalWindowLayoutInfo.current
         val deviceType = if (windowLayoutInfo.showNavigationRail) DeviceType.PAD else DeviceType.PHONE
-        val isInDarkTheme = InstallerTheme.isDark
+        val isDarkTheme = InstallerTheme.isDark
+
         val painter = remember(isOs3Effect) { BgEffectPainter(isOs3Effect) }
 
-        val preset = remember(deviceType, isInDarkTheme, isOs3Effect) {
-            BgEffectConfig.get(deviceType, isInDarkTheme, isOs3Effect)
+        val preset = remember(deviceType, isDarkTheme, isOs3Effect) {
+            BgEffectConfig.get(deviceType, isDarkTheme, isOs3Effect)
         }
 
         val colorStage = remember { Animatable(0f) }
@@ -71,26 +73,23 @@ fun BgEffectBackground(
             }
         }
 
-        key(isOs3Effect) {
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(bgModifier),
-            ) {
-                drawRect(surface)
-                if (effectBackground) {
-                    val drawHeight = if (isFullSize) size.height else size.height * 0.78f
-
-                    painter.updateResolution(size.width, size.height)
-                    painter.updateBoundIfNeeded(drawHeight, size.height, size.width)
-                    painter.updatePresetIfNeeded(deviceType, isInDarkTheme)
-                    painter.updateColors(preset, colorStage.value)
-                    painter.updateAnimTime(animTime())
-
-                    drawRect(painter.brush, alpha = alpha())
-                }
-            }
-        }
+        Spacer(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(bgModifier)
+                .bgEffectDraw(
+                    painter = painter,
+                    preset = preset,
+                    deviceType = deviceType,
+                    isDarkTheme = isDarkTheme,
+                    surface = surface,
+                    effectBackground = effectBackground,
+                    isFullSize = isFullSize,
+                    playing = dynamicBackground,
+                    colorStage = { colorStage.value },
+                    alpha = alpha,
+                ),
+        )
         content()
     }
 }

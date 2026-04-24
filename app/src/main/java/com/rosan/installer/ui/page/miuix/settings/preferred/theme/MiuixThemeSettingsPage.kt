@@ -67,10 +67,10 @@ import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
@@ -445,9 +445,9 @@ private fun MiuixPredictiveBackAnimationWidget(
             PredictiveBackAnimation.AOSP -> stringResource(R.string.theme_settings_predictive_back_animation_aosp)
             PredictiveBackAnimation.MIUIX -> stringResource(R.string.theme_settings_predictive_back_animation_miuix)
             PredictiveBackAnimation.Scale -> stringResource(R.string.theme_settings_predictive_back_animation_scale)
-            PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
+            PredictiveBackAnimation.Classic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
         }
-        SpinnerEntry(title = title)
+        DropdownItem(title = title)
     }
 
     val selectedIndex = remember(currentAnimation, options) {
@@ -486,7 +486,7 @@ private fun MiuixPredictiveBackExitDirectionWidget(
             PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_right)
             PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_left)
         }
-        SpinnerEntry(title = title)
+        DropdownItem(title = title)
     }
 
     val selectedIndex = remember(currentDirection, options) {

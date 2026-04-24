@@ -3,11 +3,13 @@
 package com.rosan.installer.domain.device.provider
 
 import com.rosan.installer.domain.device.model.ShizukuMode
+import com.rosan.installer.domain.settings.model.RootMode
 import kotlinx.coroutines.flow.StateFlow
 
 interface DeviceCapabilityProvider {
     val isSessionInstallSupported: Boolean
     val hasMiPackageInstaller: Boolean
+    val isDefaultInstaller: Boolean
 
     val isSystemApp: Boolean
     val isHyperOS: Boolean
@@ -15,22 +17,43 @@ interface DeviceCapabilityProvider {
     val isSupportMiIsland: Boolean
     val oplusOSdkVersion: String?
 
+    var isLSPosedActive: Boolean
+
     /**
      * Flow emitting the current Shizuku running mode.
      * Can change dynamically during runtime.
      */
     val shizukuModeFlow: StateFlow<ShizukuMode>
 
-    /*    */
     /**
-     * Detected local root implementation.
-     * Static during the app's lifecycle.
-     *//*
-    var rootMode: RootMode*/
+     * Flow emitting whether Shizuku has been granted permission.
+     */
+    val shizukuAuthorizedFlow: StateFlow<Boolean>
 
     /**
-     * Refreshes both Shizuku and Root detection states.
+     * Flow emitting whether Dhizuku is installed, active, and binder is received.
+     */
+    val dhizukuAvailableFlow: StateFlow<Boolean>
+
+    /**
+     * Flow emitting whether Dhizuku has been granted permission.
+     */
+    val dhizukuAuthorizedFlow: StateFlow<Boolean>
+
+    /**
+     * Flow emitting the detected local root implementation.
+     * Static during the app's lifecycle but detected asynchronously.
+     */
+    val rootModeFlow: StateFlow<RootMode>
+
+    /**
+     * Flow emitting the current system default installer activity.
+     */
+    val defaultInstallerFlow: StateFlow<String>
+
+    /**
+     * Refreshes both Shizuku, Dhizuku, and Root detection states.
      * This should be called early in the app lifecycle (e.g., Application.onCreate).
      */
-    // suspend fun refreshPrivilegeStatus()
+    fun refreshPrivilegeStatus()
 }

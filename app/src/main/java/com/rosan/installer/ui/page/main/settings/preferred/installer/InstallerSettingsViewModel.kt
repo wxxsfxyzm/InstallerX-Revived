@@ -107,6 +107,30 @@ class InstallerSettingsViewModel(
             is InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist -> viewModelScope.launch {
                 manageSharedUidListUseCase.removeUid(SharedUidListSetting.ManagedSharedUserIdBlacklist, action.uid)
             }
+
+            is InstallerSettingsAction.MoveManagedInstallerPackage -> viewModelScope.launch {
+                managePackageListUseCase.movePackage(NamedPackageListSetting.ManagedInstallerPackages, action.fromIndex, action.toIndex)
+            }
+
+            is InstallerSettingsAction.MoveManagedBlacklistPackage -> viewModelScope.launch {
+                managePackageListUseCase.movePackage(NamedPackageListSetting.ManagedBlacklistPackages, action.fromIndex, action.toIndex)
+            }
+
+            is InstallerSettingsAction.MoveManagedSharedUserIdBlacklist -> viewModelScope.launch {
+                manageSharedUidListUseCase.moveUid(
+                    SharedUidListSetting.ManagedSharedUserIdBlacklist,
+                    action.fromIndex,
+                    action.toIndex
+                )
+            }
+
+            is InstallerSettingsAction.MoveManagedSharedUserIdExemptedPackages -> viewModelScope.launch {
+                managePackageListUseCase.movePackage(
+                    NamedPackageListSetting.ManagedSharedUserIdExemptedPackages,
+                    action.fromIndex,
+                    action.toIndex
+                )
+            }
         }
     }
 

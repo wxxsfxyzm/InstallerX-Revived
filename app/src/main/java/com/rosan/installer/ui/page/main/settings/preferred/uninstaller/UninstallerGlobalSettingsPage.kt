@@ -4,9 +4,11 @@ package com.rosan.installer.ui.page.main.settings.preferred.uninstaller
 
 import android.content.Intent
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -14,12 +16,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,6 +39,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.ui.activity.UninstallerActivity
 import com.rosan.installer.ui.icons.AppIcons
@@ -43,19 +53,30 @@ import com.rosan.installer.ui.page.main.settings.preferred.UninstallSystemAppWid
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UninstallPackageDialog
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
-import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
-import com.rosan.installer.ui.theme.none
+import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
+import com.rosan.installer.ui.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import com.rosan.installer.util.toast
 import org.koin.androidx.compose.koinViewModel
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LegacyUninstallerGlobalSettingsPage(
-    viewModel: UninstallerSettingsViewModel = koinViewModel(),
+fun UninstallerGlobalSettingsPage(
+    useBlur: Boolean,
+    viewModel: UninstallerSettingsViewModel = koinViewModel()
 ) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+
+    LaunchedEffect(Unit) {
+        topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
+    }
+
     var showUninstallInputDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -81,22 +102,44 @@ fun LegacyUninstallerGlobalSettingsPage(
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
+    val backdrop = rememberMaterial3BlurBackdrop(useBlur)
+
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentWindowInsets = WindowInsets.none,
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.uninstaller_settings)) },
-                navigationIcon = {
-                    AppBackButton(onClick = { navigator.pop() })
+            LargeFlexibleTopAppBar(
+                modifier = Modifier.installerMaterial3BlurEffect(backdrop),
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                title = {
+                    Text(stringResource(R.string.uninstaller_settings))
                 },
-                scrollBehavior = scrollBehavior
+                navigationIcon = {
+                    Row {
+                        AppBackButton(
+                            onClick = { navigator.pop() },
+                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
+                            modifier = Modifier.size(36.dp),
+                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                        )
+                        Spacer(modifier = Modifier.size(16.dp))
+                    }
+                },
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = backdrop.getMaterial3AppBarColor(),
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
+                )
             )
         }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
@@ -105,21 +148,35 @@ fun LegacyUninstallerGlobalSettingsPage(
             )
         ) {
             item { InfoTipCard(text = stringResource(R.string.uninstall_authorizer_tip)) }
-            item { LabelWidget(label = stringResource(R.string.global)) }
-            item { UninstallKeepDataWidget(viewModel, isM3E = false) }
-            item { UninstallForAllUsersWidget(viewModel, isM3E = false) }
-            item { UninstallSystemAppWidget(viewModel, isM3E = false) }
-            item { UninstallRequireBiometricAuthWidget(viewModel, false) }
-            item { LabelWidget(label = stringResource(R.string.uninstall_call_uninstaller)) }
+            // --- Group 1: Global Settings ---
             item {
-                SettingsNavigationItemWidget(
-                    icon = AppIcons.Delete,
-                    title = stringResource(R.string.uninstall_call_uninstaller_manually),
-                    description = stringResource(R.string.uninstall_call_uninstaller_manually_desc)
+                SegmentedColumn(
+                    title = stringResource(R.string.global)
                 ) {
-                    showUninstallInputDialog = true
+                    item { UninstallKeepDataWidget(viewModel) }
+                    item { UninstallForAllUsersWidget(viewModel) }
+                    item { UninstallSystemAppWidget(viewModel) }
+                    item { UninstallRequireBiometricAuthWidget(viewModel) }
                 }
             }
+
+            // --- Group 2: Manual Uninstaller Call ---
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.uninstall_call_uninstaller)
+                ) {
+                    item {
+                        SettingsNavigationItemWidget(
+                            icon = AppIcons.Delete,
+                            title = stringResource(R.string.uninstall_call_uninstaller_manually),
+                            description = stringResource(R.string.uninstall_call_uninstaller_manually_desc)
+                        ) {
+                            showUninstallInputDialog = true
+                        }
+                    }
+                }
+            }
+
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
