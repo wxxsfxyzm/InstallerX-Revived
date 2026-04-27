@@ -112,6 +112,7 @@
     <string name="theme_settings_predictive_back_exit_direction">退出方向</string>
     <string name="theme_settings_predictive_back_exit_direction_desc">选择预测性返回的退出方向</string>
     <string name="theme_settings_predictive_back_animation_none">无</string>
+    <string name="theme_settings_predictive_back_animation_aosp">AOSP</string>
     <string name="theme_settings_predictive_back_animation_scale">缩放</string>
     <string name="theme_settings_predictive_back_animation_ksu_classic">KernelSU 经典</string>
     <string name="theme_settings_predictive_back_exit_direction_follow_gesture">跟随手势</string>

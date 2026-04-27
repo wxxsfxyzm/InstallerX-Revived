@@ -774,4 +774,6 @@
     <string name="lab_show_install_initiator">Yükleme başlatıcısını göster</string>
     <string name="install_confirm_question_update_owner_reminder">Bu uygulama genellikle %1$s tarafından güncellenir. Başka bir kaynaktan güncellerseniz, telefonunuz gelecekte herhangi bir kaynaktan güncelleme alabilir. Uygulama işlevselliği değişebilir.</string>
     <string name="install_confirm_external_request_tip">%1$s\'den gelen yükleme isteğini onaylansın mı?</string>
+    <string name="lab_install_without_user_action">Kullanıcı onayı olmadan güncelleme</string>
+    <string name="lab_install_without_user_action_desc">Uygulamaları kullanıcı onayı olmadan güncellemeyi dener. Bu özellik yalnızca yetkilendirici Hiçbiri olarak ayarlandığında etkilidir</string>
 </resources>
