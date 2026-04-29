@@ -46,7 +46,7 @@ class ScalePredictiveBackAnimation(
         transitionState: NavigationEventTransitionState?,
         currentPageKey: NavKey?,
     ) {
-        if (inPredictiveBackAnimation && transitionState is InProgress) {
+        if (transitionState is InProgress) {
             exitingPageKey = currentPageKey.toString()
             exitAnimatable.animateTo(
                 targetValue = 1f,
