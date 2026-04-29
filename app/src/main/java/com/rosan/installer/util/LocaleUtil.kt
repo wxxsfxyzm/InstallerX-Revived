@@ -1,5 +1,11 @@
 package com.rosan.installer.util
 
+import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import com.rosan.installer.R
+import java.util.Locale
+
 /**
  * Converts legacy Android language codes to their modern equivalents.
  * This ensures compatibility with older and non-standard APK splits.
@@ -21,3 +27,57 @@ fun String.convertLegacyLanguageCode(): String =
         "tl" -> "fil" // Tagalog -> Filipino
         else -> this
     }
+
+object AppLanguageManager {
+    const val FOLLOW_SYSTEM = ""
+
+    val supportedLanguageTags = listOf(
+        FOLLOW_SYSTEM,
+        "en",
+        "ar",
+        "de",
+        "es",
+        "fr",
+        "hu",
+        "id",
+        "ja",
+        "nl",
+        "pt-BR",
+        "ru",
+        "th",
+        "tr",
+        "uk",
+        "vi",
+        "zh-CN",
+        "zh-TW"
+    )
+
+    fun getSelectedLanguageTag(): String =
+        normalizeLanguageTag(
+            AppCompatDelegate.getApplicationLocales()
+                .toLanguageTags()
+                .substringBefore(',')
+        )
+
+    fun setSelectedLanguageTag(languageTag: String) {
+        val normalizedTag = normalizeLanguageTag(languageTag)
+        val locales = if (normalizedTag == FOLLOW_SYSTEM) {
+            LocaleListCompat.getEmptyLocaleList()
+        } else {
+            LocaleListCompat.forLanguageTags(normalizedTag)
+        }
+        AppCompatDelegate.setApplicationLocales(locales)
+    }
+
+    fun displayName(context: Context, languageTag: String): String {
+        if (languageTag == FOLLOW_SYSTEM) return context.getString(R.string.app_language_follow_system)
+
+        val locale = Locale.forLanguageTag(languageTag)
+        return locale.getDisplayName(locale).replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(locale) else it.toString()
+        }
+    }
+
+    private fun normalizeLanguageTag(languageTag: String): String =
+        supportedLanguageTags.firstOrNull { it.equals(languageTag, ignoreCase = true) } ?: FOLLOW_SYSTEM
+}

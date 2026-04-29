@@ -179,6 +179,7 @@ fun PreferredPage(
                     }
                 )
             }
+            item { AppLanguageWidget() }
             if (uiState.authorizer == Authorizer.None)
                 item {
                     val tip = if (capabilityProvider.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)

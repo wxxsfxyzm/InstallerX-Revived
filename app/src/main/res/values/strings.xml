@@ -131,6 +131,8 @@
     <string name="installer_settings_desc">Change the global settings of the installer</string>
     <string name="uninstaller_settings">Uninstaller Settings</string>
     <string name="uninstaller_settings_desc">Change the global settings of the uninstaller</string>
+    <string name="app_language">Language</string>
+    <string name="app_language_follow_system">Follow system language</string>
     <string name="installer_settings_global_installer">Global</string>
     <string name="installer_settings_require_biometric_auth">Require Biometric Auth to Install</string>
     <string name="installer_settings_require_biometric_auth_desc">Require biometric auth when installing packages</string>

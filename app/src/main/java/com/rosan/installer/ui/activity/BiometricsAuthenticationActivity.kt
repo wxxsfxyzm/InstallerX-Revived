@@ -3,14 +3,14 @@
 package com.rosan.installer.ui.activity
 
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import com.rosan.installer.ui.common.auth.BiometricAuthBridge
 import timber.log.Timber
 
-class BiometricsAuthenticationActivity : FragmentActivity() {
+class BiometricsAuthenticationActivity : AppCompatActivity() {
     private var isResultSent = false
 
     override fun onCreate(savedInstanceState: Bundle?) {

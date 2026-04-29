@@ -61,6 +61,7 @@ import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
+import androidx.compose.material.icons.twotone.Language
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.LocalPolice
 import androidx.compose.material.icons.twotone.Memory
@@ -124,6 +125,7 @@ object AppIcons {
     val ViewSourceCode = Icons.TwoTone.Code
     val OpenSourceLicense = Icons.TwoTone.Copyright
     val Blur = Icons.TwoTone.BlurOn
+    val Language = Icons.TwoTone.Language
 
     // --- 导航图标集合 ---
     val RoomPreferences = Icons.TwoTone.RoomPreferences

@@ -181,6 +181,7 @@ fun MiuixPreferredPage(
                             navigator.push(Route.UninstallerGlobal)
                         }
                     )
+                    MiuixAppLanguageWidget()
                 }
             }
             if (uiState.authorizer == Authorizer.None)

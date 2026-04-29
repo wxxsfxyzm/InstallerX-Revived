@@ -588,6 +588,8 @@
     <string name="get_update_directly_desc">直接從 GitHub 下載並安裝更新，不會留下任何快取</string>
     <string name="uninstaller_settings">卸載器設定</string>
     <string name="uninstaller_settings_desc">變更解除安裝器的全域設定</string>
+    <string name="app_language">語言</string>
+    <string name="app_language_follow_system">跟隨系統語言</string>
     <string name="config_customize_install_reason">自訂安裝原因</string>
     <string name="config_customize_install_reason_desc">指定安裝原因。對於新安裝的應用程式，選擇「使用者」通常會觸發啟動器自動建立桌面圖示</string>
     <string name="config_install_reason">安裝原因</string>

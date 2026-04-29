@@ -125,6 +125,8 @@
     <string name="installer_settings_desc">更改安装器的全局设置</string>
     <string name="uninstaller_settings">卸载器设置</string>
     <string name="uninstaller_settings_desc">更改卸载器的全局设置</string>
+    <string name="app_language">语言</string>
+    <string name="app_language_follow_system">跟随系统语言</string>
     <string name="installer_settings_global_installer">全局</string>
     <string name="installer_settings_require_biometric_auth">安装需要通过设备生物认证</string>
     <string name="installer_settings_require_biometric_auth_desc">在安装时请求系统进行生物识别认证</string>

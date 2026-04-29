@@ -195,6 +195,7 @@ fun NewPreferredPage(
                             }
                         )
                     }
+                    item { AppLanguageWidget() }
                 }
             }
 

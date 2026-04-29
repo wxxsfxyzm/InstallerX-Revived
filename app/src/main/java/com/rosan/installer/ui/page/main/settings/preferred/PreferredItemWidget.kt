@@ -88,6 +88,7 @@ import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.material.PaletteStyle
 import com.rosan.installer.ui.theme.material.ThemeColorSpec
+import com.rosan.installer.util.AppLanguageManager
 import com.rosan.installer.util.hasFlag
 import org.koin.compose.koinInject
 
@@ -435,6 +436,30 @@ fun SettingsNavigationItemWidget(
             contentDescription = null
         )
     }
+}
+
+@Composable
+fun AppLanguageWidget() {
+    val context = LocalContext.current
+    var selectedLanguageTag by remember { mutableStateOf(AppLanguageManager.getSelectedLanguageTag()) }
+    val languageTags = AppLanguageManager.supportedLanguageTags
+    val labels = languageTags.map { AppLanguageManager.displayName(context, it) }
+    val selectedIndex = languageTags.indexOf(selectedLanguageTag).coerceAtLeast(0)
+
+    DropDownMenuWidget(
+        icon = AppIcons.Language,
+        title = stringResource(R.string.app_language),
+        description = labels[selectedIndex],
+        choice = selectedIndex,
+        data = labels,
+        onChoiceChange = { index ->
+            val languageTag = languageTags[index]
+            if (selectedLanguageTag != languageTag) {
+                AppLanguageManager.setSelectedLanguageTag(languageTag)
+                selectedLanguageTag = languageTag
+            }
+        }
+    )
 }
 
 /**
