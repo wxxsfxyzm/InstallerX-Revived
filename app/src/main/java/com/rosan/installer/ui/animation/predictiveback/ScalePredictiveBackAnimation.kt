@@ -46,7 +46,7 @@ class ScalePredictiveBackAnimation(
         transitionState: NavigationEventTransitionState?,
         currentPageKey: NavKey?,
     ) {
-        if (transitionState is InProgress) {
+        if (inPredictiveBackAnimation && transitionState is InProgress) {
             exitingPageKey = currentPageKey.toString()
             exitAnimatable.animateTo(
                 targetValue = 1f,
@@ -130,7 +130,7 @@ class ScalePredictiveBackAnimation(
                 // When we are not playing predictiveBackAnimation, we shouldn't play exitAnimation
                 // Place 0f here to let animatedTranslationX calced with 0f
                 val exitProgress =
-                    if (pageKey != currentPageKey.toString()) 1f else if (!inPredictiveBackAnimation) 0f else exitAnimatable.value
+                    if (pageKey != currentPageKey.toString()) 1f else exitAnimatable.value
                 val animatedTranslationX = containerWidthPx * exitProgress * directionMultiplier
 
                 // render animation
