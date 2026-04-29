@@ -126,7 +126,6 @@ class ScalePredictiveBackAnimation(
                 }
 
                 // if we are playing the exit animation, calculate the scaled Page's TranslationX in here
-                // when animatedScale == 1f, mean navigation 3 doesn't want our play backAnimation
                 val exitProgress =
                     if (pageKey != currentPageKey.toString()) 1f else exitAnimatable.value
                 val animatedTranslationX = containerWidthPx * exitProgress * directionMultiplier
