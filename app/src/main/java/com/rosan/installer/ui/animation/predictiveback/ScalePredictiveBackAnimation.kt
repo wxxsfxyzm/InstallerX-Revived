@@ -93,6 +93,12 @@ class ScalePredictiveBackAnimation(
                     }
                 }
 
+                // navigation 3 break transition.targetState
+                // its state management is fully shit
+                // racing racing racing
+                // fuck fuck fuck
+                // so, We can't use LaunchedEffect to process that
+                // Just check transition.animateFloat's result to know currentStatus
                 inPredictiveBackAnimation = animatedScale != 1f
 
                 // calculate WHERE is the scaled page
@@ -121,6 +127,8 @@ class ScalePredictiveBackAnimation(
 
                 // if we are playing the exit animation, calculate the scaled Page's TranslationX in here
                 // when animatedScale == 1f, mean navigation 3 doesn't want our play backAnimation
+                // When we are not playing predictiveBackAnimation, we shouldn't play exitAnimation
+                // Place 0f here to let animatedTranslationX calced with 0f
                 val exitProgress =
                     if (pageKey != currentPageKey.toString()) 1f else if (!inPredictiveBackAnimation) 0f else exitAnimatable.value
                 val animatedTranslationX = containerWidthPx * exitProgress * directionMultiplier
@@ -140,6 +148,8 @@ class ScalePredictiveBackAnimation(
                 // We calculate the new page's black dim alpha in here
                 // If we are in PredictiveBackAnimation, always 0.5f dim
                 // If we are playing the exit animation, dynamic calculate the dim with exit animation's progress
+                // If we are in interrupting animation(have backState but not rendering predictiveBackAnimation) we shouldn't play dim
+                // Place 1f here to let dynamicAlpha calced with 0f
                 // alpha = 0.5 * (1f - animationProgress) (decrease alpha when increase progress)
                 // so, alpha will always in 0 - 0.5f
                 val modifier = if (transitionState is InProgress) {
