@@ -131,6 +131,30 @@
     <string name="installer_settings_desc">Change the global settings of the installer</string>
     <string name="uninstaller_settings">Uninstaller Settings</string>
     <string name="uninstaller_settings_desc">Change the global settings of the uninstaller</string>
+    <string name="auxiliary_install_settings">Auxiliary Install Settings</string>
+    <string name="auxiliary_install_settings_desc">Automate extra system installation prompts</string>
+    <string name="auxiliary_install_auto_confirm">Auto Confirm</string>
+    <string name="auxiliary_install_auto_confirm_tip">This feature requires Accessibility. The service only handles the HyperOS USB install confirmation activity and taps Continue Install.</string>
+    <string name="auxiliary_install_accessibility_service">Accessibility service</string>
+    <string name="auxiliary_install_accessibility_service_desc">Used to detect and confirm USB installation prompts</string>
+    <string name="auxiliary_install_accessibility_service_enabled">Enabled</string>
+    <string name="auxiliary_install_accessibility_service_disabled">Tap to enable in system Accessibility settings</string>
+    <string name="auxiliary_install_accessibility_required">Please enable Accessibility service first</string>
+    <string name="auxiliary_install_auto_confirm_usb">Auto confirm USB install prompt</string>
+    <string name="auxiliary_install_auto_confirm_usb_desc">When the USB installation confirmation page is detected, “Continue installation” will be clicked automatically.</string>
+    <string name="auxiliary_install_behavior">Behavior</string>
+    <string name="auxiliary_install_show_toast">Show Toast</string>
+    <string name="auxiliary_install_show_toast_desc">Show “Auto confirmed” after automatically tapping the confirmation button</string>
+    <string name="auxiliary_install_auto_confirmed_toast">Auto confirmed</string>
+    <string-array name="auxiliary_install_continue_install_labels" translatable="false">
+        <item>Install</item>
+        <item>继续安装</item>
+        <item>繼續安裝</item>
+    </string-array>
+    <string name="auxiliary_install_delayed_retry">Delayed retry</string>
+    <string name="auxiliary_install_delayed_retry_desc">Try again after the window settles if the confirmation button is not ready yet</string>
+    <string name="auxiliary_install_require_screen_on">Only when screen is on</string>
+    <string name="auxiliary_install_require_screen_on_desc">Skip automatic confirmation while the screen is off</string>
     <string name="installer_settings_global_installer">Global</string>
     <string name="installer_settings_require_biometric_auth">Require Biometric Auth to Install</string>
     <string name="installer_settings_require_biometric_auth_desc">Require biometric auth when installing packages</string>

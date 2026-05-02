@@ -66,6 +66,16 @@ class AppDataStore(
         // Auto Lock Installer
         val AUTO_LOCK_INSTALLER = booleanPreferencesKey("auto_lock_installer")
 
+        // Auxiliary Install
+        val AUXILIARY_INSTALL_AUTO_CONFIRM_USB =
+            booleanPreferencesKey("auxiliary_install_auto_confirm_usb")
+        val AUXILIARY_INSTALL_SHOW_TOAST =
+            booleanPreferencesKey("auxiliary_install_show_toast")
+        val AUXILIARY_INSTALL_DELAYED_RETRY =
+            booleanPreferencesKey("auxiliary_install_delayed_retry")
+        val AUXILIARY_INSTALL_REQUIRE_SCREEN_ON =
+            booleanPreferencesKey("auxiliary_install_require_screen_on")
+
         // ConfigUtil
         val AUTHORIZER = stringPreferencesKey("authorizer")
         val CUSTOMIZE_AUTHORIZER = stringPreferencesKey("customize_authorizer")

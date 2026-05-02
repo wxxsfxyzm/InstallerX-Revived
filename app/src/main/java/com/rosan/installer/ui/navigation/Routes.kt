@@ -35,6 +35,9 @@ sealed interface Route : NavKey {
     data object UninstallerGlobal : Route
 
     @Serializable
+    data object AuxiliaryInstall : Route
+
+    @Serializable
     data object Lab : Route
 
     @Serializable

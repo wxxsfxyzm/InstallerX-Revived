@@ -159,6 +159,21 @@
         </service>
 
         <service
+            android:name=".framework.accessibility.AuxiliaryInstallAccessibilityService"
+            android:description="@string/auxiliary_install_accessibility_service_desc"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/auxiliary_install_accessibility_service" />
+        </service>
+
+        <service
             android:label="@string/app_name"
             android:icon="@drawable/ic_tile_icon"
             android:name="com.rosan.installer.framework.tile.SettingsTileService"

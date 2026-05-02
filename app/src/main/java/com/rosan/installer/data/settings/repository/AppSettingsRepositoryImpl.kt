@@ -334,6 +334,10 @@ class AppSettingsRepositoryImpl(
             BooleanSetting.PreferSystemIconForInstall -> AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL
             BooleanSetting.ShowDialogWhenPressingNotification -> AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION
             BooleanSetting.AutoLockInstaller -> AppDataStore.AUTO_LOCK_INSTALLER
+            BooleanSetting.AuxiliaryInstallAutoConfirmUsb -> AppDataStore.AUXILIARY_INSTALL_AUTO_CONFIRM_USB
+            BooleanSetting.AuxiliaryInstallShowToast -> AppDataStore.AUXILIARY_INSTALL_SHOW_TOAST
+            BooleanSetting.AuxiliaryInstallDelayedRetry -> AppDataStore.AUXILIARY_INSTALL_DELAYED_RETRY
+            BooleanSetting.AuxiliaryInstallRequireScreenOn -> AppDataStore.AUXILIARY_INSTALL_REQUIRE_SCREEN_ON
             BooleanSetting.UserReadScopeTips -> AppDataStore.USER_READ_SCOPE_TIPS
             BooleanSetting.ApplyOrderInReverse -> AppDataStore.APPLY_ORDER_IN_REVERSE
             BooleanSetting.ApplySelectedFirst -> AppDataStore.APPLY_SELECTED_FIRST

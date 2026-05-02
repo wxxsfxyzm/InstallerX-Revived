@@ -61,6 +61,26 @@ class SystemEnvProviderImpl(private val context: Context) : SystemEnvProvider {
         context.startActivity(intent)
     }
 
+    override fun isAccessibilityServiceEnabled(serviceClassName: String): Boolean {
+        val targetComponent = ComponentName(context, serviceClassName)
+        val enabledServices = Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ).orEmpty()
+
+        return enabledServices
+            .split(':')
+            .mapNotNull { ComponentName.unflattenFromString(it) }
+            .any { it == targetComponent }
+    }
+
+    override fun openAccessibilitySettings() {
+        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    }
+
     override suspend fun authenticateBiometric(isInstaller: Boolean): Boolean {
         return context.safeBiometricAuth(
             title = context.getString(R.string.use_biometric_confirm_change_auth_settings),

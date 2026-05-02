@@ -179,6 +179,16 @@ fun PreferredPage(
                     }
                 )
             }
+            item {
+                SettingsNavigationItemWidget(
+                    icon = AppIcons.AutoFixHigh,
+                    title = stringResource(R.string.auxiliary_install_settings),
+                    description = stringResource(R.string.auxiliary_install_settings_desc),
+                    onClick = {
+                        navigator.push(Route.AuxiliaryInstall)
+                    }
+                )
+            }
             if (uiState.authorizer == Authorizer.None)
                 item {
                     val tip = if (capabilityProvider.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)

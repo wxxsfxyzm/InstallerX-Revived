@@ -39,6 +39,8 @@ import com.rosan.installer.ui.page.main.settings.main.MainPage
 import com.rosan.installer.ui.page.main.settings.preferred.about.AboutPage
 import com.rosan.installer.ui.page.main.settings.preferred.about.NewAboutPage
 import com.rosan.installer.ui.page.main.settings.preferred.about.OpenSourceLicensePage
+import com.rosan.installer.ui.page.main.settings.preferred.auxiliaryinstall.LegacyAuxiliaryInstallSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.auxiliaryinstall.NewAuxiliaryInstallSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.installer.LegacyInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.installer.NewInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.installer.dialog.DialogSettingsPage
@@ -55,6 +57,7 @@ import com.rosan.installer.ui.page.miuix.settings.config.apply.MiuixApplyPage
 import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.about.MiuixAboutPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.about.ossLicensePage.MiuixOpenSourceLicensePage
+import com.rosan.installer.ui.page.miuix.settings.preferred.auxiliaryinstall.MiuixAuxiliaryInstallSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.installer.MiuixInstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.installer.dialog.MiuixDialogSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.installer.notification.MiuixNotificationSettingsPage
@@ -238,6 +241,17 @@ fun InstallerNavContainer(
                                 NewUninstallerGlobalSettingsPage(useBlur)
                             } else {
                                 LegacyUninstallerGlobalSettingsPage()
+                            }
+                        }
+                    }
+                    entry<Route.AuxiliaryInstall> {
+                        if (uiState.useMiuix) {
+                            MiuixAuxiliaryInstallSettingsPage(useBlur)
+                        } else {
+                            if (isExpressive) {
+                                NewAuxiliaryInstallSettingsPage(useBlur)
+                            } else {
+                                LegacyAuxiliaryInstallSettingsPage()
                             }
                         }
                     }

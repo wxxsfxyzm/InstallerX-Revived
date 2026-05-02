@@ -181,6 +181,14 @@ fun MiuixPreferredPage(
                             navigator.push(Route.UninstallerGlobal)
                         }
                     )
+                    MiuixNavigationItemWidget(
+                        icon = AppIcons.AutoFixHigh,
+                        title = stringResource(R.string.auxiliary_install_settings),
+                        description = stringResource(R.string.auxiliary_install_settings_desc),
+                        onClick = {
+                            navigator.push(Route.AuxiliaryInstall)
+                        }
+                    )
                 }
             }
             if (uiState.authorizer == Authorizer.None)
