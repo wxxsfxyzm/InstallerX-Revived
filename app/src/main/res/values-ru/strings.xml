@@ -611,7 +611,7 @@
     <string name="uninstall_call_uninstaller">Вызвать деинсталлятор</string>
     <string name="uninstall_call_uninstaller_manually">Вызвать деинсталлятор вручную</string>
     <string name="uninstall_call_uninstaller_manually_desc">Удалить приложение по имени пакета</string>
-    <string name="uninstall_progress_text">Удаление...</string>
+    <string name="uninstall_progress_text">Удаление…</string>
     <string name="uninstall_enter_package_name">Введите имя пакета для удаления</string>
     <string name="permission_flashlight">Управление фонариком</string>
     <string name="permission_manage_external_storage">Управление внешним хранилищем</string>
@@ -772,4 +772,8 @@
     <string name="lab_show_install_initiator">Показывать инициатора установки</string>
     <string name="lab_show_install_initiator_label">Инициатор установки</string>
     <string name="lab_show_install_initiator_desc">Отображать, какое приложение инициировало установку</string>
+    <string name="install_confirm_question_update_owner_reminder">Это приложение обычно обновляется из %1$s. При его смене обновления станут возможны из любого источника. Функциональность приложения может измениться.</string>
+    <string name="install_confirm_external_request_tip">Подтвердить запрос на установку из %1$s?</string>
+    <string name="lab_install_without_user_action">Установка без участия пользователя</string>
+    <string name="lab_install_without_user_action_desc">Попытка обновления приложений без подтверждения пользователя. Работает только, если авторизатор не указан</string>
 </resources>
