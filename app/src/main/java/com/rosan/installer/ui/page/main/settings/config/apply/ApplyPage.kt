@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2025-2026 InstallerX Revived contributors
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.rosan.installer.ui.page.main.settings.config.apply
 
 import androidx.compose.animation.AnimatedContent
