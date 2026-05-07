@@ -125,7 +125,7 @@
     <string name="config_customize_install_reason">Tùy chỉnh Lý do Cài đặt</string>
     <string name="config_customize_install_reason_desc">Chỉ định lý do cài đặt. Đối với các cài đặt mới, việc chọn Người dùng thường kích hoạt trình khởi chạy tạo một biểu tượng desktop</string>
     <string name="config_install_reason">Lý do Cài đặt</string>
-    <string name="config_install_reason_unknown">Không xác định</string>
+    <string name="config_install_reason_unknown">Lý do Không xác định</string>
     <string name="config_install_reason_policy">Chính sách Thiết bị</string>
     <string name="config_install_reason_device_restore">Khôi phục Thiết bị</string>
     <string name="config_install_reason_device_setup">Thiết lập Thiết bị</string>
@@ -228,7 +228,7 @@
     <string name="uninstall_call_uninstaller">Gọi trình gỡ cài đặt</string>
     <string name="uninstall_call_uninstaller_manually">Gọi trình gỡ cài đặt thủ công</string>
     <string name="uninstall_call_uninstaller_manually_desc">Gỡ cài đặt ứng dụng theo tên gói đã cho</string>
-    <string name="uninstall_progress_text">Trình gỡ cài đặt...</string>
+    <string name="uninstall_progress_text">Đang gỡ cài đặt…</string>
     <string name="uninstall_enter_package_name">Nhập tên gói để gỡ cài đặt</string>
     <string name="theme_settings_use_apple_floating_bar">Bật thanh phía dưới nổi</string>
     <string name="theme_settings_use_apple_floating_bar_desc">Hiển thị một thanh điều hướng kiểu nổi ở phía dưới màn hình</string>
@@ -598,7 +598,7 @@
     <string name="lab_set_install_requester_desc">Điền vào trường OriginatingUid với gói gọi để khớp với hành vi hệ thống</string>
     <string name="lab_mi_island">Mi Super Island</string>
     <string name="lab_tap_icon_to_share">Nhấn vào biểu tượng để chia sẻ apk</string>
-    <string name="lab_tap_icon_to_share_desc">Nhấn vào biểu tượng trên trang chuẩn bị để chia sẻ apk</string>
+    <string name="lab_tap_icon_to_share_desc">Nhấn vào biểu tượng trên trang chuẩn bị để chia sẻ gói cài đặt</string>
     <string name="error_no_package_to_uninstall">Không có gói nào để gỡ cài đặt</string>
     <string name="old_version_prefix">Hiện tại</string>
     <string name="old_version_archived">Lưu trữ</string>
@@ -756,4 +756,24 @@
     <string name="dialog_settings">Cài đặt Hộp thoại</string>
     <string name="dialog_settings_desc">Tùy chỉnh giao diện và hành vi của hộp thoại cài đặt</string>
     <string name="reboot_soft_reboot">Khởi động lại Mềm</string>
+    <string name="exception_install_failed_bad_permission_group">Nhóm quyền không hợp lệ hoặc chứng chỉ không tương thích</string>
+    <string name="exception_install_failed_duplicate_permission_group">Nhóm quyền đã được gói khác định nghĩa</string>
+    <string name="exception_install_failed_multi_arch_not_match_all_native_abis">Mã native trong gói không khớp với tất cả ABI native được hệ thống hỗ trợ</string>
+    <string name="exception_install_failed_oem_frp_locked">Vui lòng đăng nhập bằng tài khoản Google gốc</string>
+    <string name="exception_install_failed_permission_model_downgrade">Không cho phép hạ cấp mô hình quyền</string>
+    <string name="exception_install_failed_pre_approval_not_available">Tính năng yêu cầu người dùng phê duyệt trước hiện không khả dụng</string>
+    <string name="exception_install_failed_sandbox_version_downgrade">Không cho phép hạ cấp phiên bản sandbox</string>
+    <string name="exception_install_parse_failed_manifest_empty">Manifest không có thẻ application hoặc instrumentation</string>
+    <string name="install_confirm_external_request_tip">Phê duyệt yêu cầu cài đặt từ %1$s?</string>
+    <string name="install_confirm_question_update_owner_reminder">Ứng dụng này thường được cập nhật qua %1$s. Nếu bạn cập nhật từ nguồn khác, điện thoại có thể nhận các bản cập nhật sau này từ bất kỳ nguồn nào. Chức năng của ứng dụng có thể thay đổi.</string>
+    <string name="installer_temp_settings_tip">Các cài đặt này chỉ tạm thời cho phiên này. Để giữ lại, hãy vào Cài đặt</string>
+    <string name="lab_install_without_user_action">Cập nhật không cần xác nhận của người dùng</string>
+    <string name="lab_install_without_user_action_desc">Thử cập nhật ứng dụng mà không cần người dùng xác nhận. Tính năng này chỉ có hiệu lực khi trình uỷ quyền được đặt là Không có</string>
+    <string name="lab_show_apk_path">Hiển thị đường dẫn tệp</string>
+    <string name="lab_show_apk_path_desc">Hiển thị đường dẫn tệp trong chi tiết ứng dụng</string>
+    <string name="lab_show_apk_path_label">Đường dẫn tệp</string>
+    <string name="lab_show_install_initiator">Hiển thị ứng dụng khởi tạo cài đặt</string>
+    <string name="lab_show_install_initiator_desc">Hiển thị ứng dụng nào đã bắt đầu quá trình cài đặt</string>
+    <string name="lab_show_install_initiator_label">Ứng dụng khởi tạo cài đặt</string>
+    <string name="lab_ui_settings">Tính năng giao diện thử nghiệm</string>
 </resources>

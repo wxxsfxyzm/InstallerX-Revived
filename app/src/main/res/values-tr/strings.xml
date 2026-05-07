@@ -92,7 +92,7 @@
     <string name="config_scope">Kapsam</string>
     <string name="config_description">Profil açıklaması</string>
     <string name="config_authorizer">Yetkilendirici</string>
-    <string name="config_authorizer_none">Hiçbiri</string>
+    <string name="config_authorizer_none">Yok</string>
     <string name="config_authorizer_customize">Özel</string>
     <string name="config_customize_authorizer">Özel yetkilendirici</string>
     <string name="config_install_mode">Yükleme modu</string>
@@ -645,7 +645,7 @@
     <string name="license">Lisans: %s</string>
     <string name="no_license_text">Lisans metni mevcut değil.</string>
     <string name="open_lsposed">LSPosed\'ı Aç</string>
-    <string name="auth_to_continue_work">Lütfen bu işlemi onaylamak için kimliğinizi doğrulayın</string>
+    <string name="auth_to_continue_work">Lütfen bu işlemi onaylamak için kimlik doğrulaması yapın</string>
     <string name="auth_summary_install">Yükleme işlemi gerçekleştiriyorsunuz. Devam etmek için lütfen cihaz kimlik doğrulamanızı kullanarak bu işlemi onaylayın</string>
     <string name="auth_summary_uninstall">Kaldırma işlemi gerçekleştiriyorsunuz. Devam etmek için lütfen cihaz kimlik doğrulamanızı kullanarak bu işlemi onaylayın</string>
     <string name="tag_downgrade">Sürüm Düşürme</string>
@@ -666,7 +666,7 @@
     <string name="uninstall_call_uninstaller">Kaldırıcıyı çağır</string>
     <string name="uninstall_call_uninstaller_manually">Kaldırıcıyı manuel olarak çağır</string>
     <string name="uninstall_call_uninstaller_manually_desc">Uygulamayı verilen paket adına göre kaldırır</string>
-    <string name="uninstall_progress_text">Kaldırılıyor...</string>
+    <string name="uninstall_progress_text">Kaldırılıyor…</string>
     <string name="uninstall_enter_package_name">Kaldırmak için paket adını girin</string>
     <string name="installer_author">Yazar: %1$s</string>
     <string name="exception_authentication_failed">Kullanıcı kimlik doğrulaması başarısız oldu</string>
@@ -701,7 +701,7 @@
     <string name="error_dialog_install_menu_not_available">Genişletilmiş menü mevcut değil</string>
     <string name="error_no_package_to_uninstall">Kaldırılacak paket yok</string>
     <string name="lab_tap_icon_to_share">APK\'yı paylaşmak için simgeye dokunun</string>
-    <string name="lab_tap_icon_to_share_desc">APK\'yı paylaşmak için hazırlık sayfasındaki simgeye dokunun</string>
+    <string name="lab_tap_icon_to_share_desc">Yükleme paketlerini paylaşmak için hazırlık sayfasındaki simgeye dokunun</string>
     <string name="config_status_inactive">Etkin değil</string>
     <string name="config_install_show_toast">Durum mesajı göster</string>
     <string name="config_install_show_toast_desc">Yüklemeden sonra durum mesajı göster</string>
@@ -721,7 +721,7 @@
     <string name="theme_settings_predictive_back_animation_desc">Tahminli geri için animasyon efektini seçin</string>
     <string name="theme_settings_predictive_back_exit_direction">Çıkış Yönü</string>
     <string name="theme_settings_predictive_back_exit_direction_desc">Tahminli geri dönüş için çıkış yönünü seçin</string>
-    <string name="theme_settings_predictive_back_animation_none">Hiçbiri</string>
+    <string name="theme_settings_predictive_back_animation_none">Yok</string>
     <string name="theme_settings_predictive_back_animation_aosp">AOSP</string>
     <string name="theme_settings_predictive_back_animation_scale">Ölçek</string>
     <string name="theme_settings_predictive_back_animation_ksu_classic">Klasik KernelSU</string>
@@ -774,4 +774,6 @@
     <string name="lab_show_install_initiator">Yükleme başlatıcısını göster</string>
     <string name="install_confirm_question_update_owner_reminder">Bu uygulama genellikle %1$s tarafından güncellenir. Başka bir kaynaktan güncellerseniz, telefonunuz gelecekte herhangi bir kaynaktan güncelleme alabilir. Uygulama işlevselliği değişebilir.</string>
     <string name="install_confirm_external_request_tip">%1$s\'den gelen yükleme isteğini onaylansın mı?</string>
+    <string name="lab_install_without_user_action_desc">Kullanıcı onayı olmadan uygulamaları güncellemeye çalışın. Bu özellik yalnızca yetkilendirici \"Yok\" olarak ayarlandığında etkilidir</string>
+    <string name="lab_install_without_user_action">Kullanıcı müdahalesi olmadan yükle</string>
 </resources>

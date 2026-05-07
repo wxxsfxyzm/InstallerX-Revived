@@ -610,7 +610,7 @@
     <string name="lab_set_install_requester_desc">Vult het OriginatingUid veld met het oproeppakket om systeemgedrag te volgen</string>
     <string name="config_error_package_not_found">Pakket niet gevonden</string>
     <string name="config_customize_install_reason_desc">Stel de installatiereden in. Voor nieuwe installaties zal het selecteren van de gebruiker er normaal voor zorgen dat er een icoon op het startscherm komt</string>
-    <string name="config_install_reason_unknown">Onbekend</string>
+    <string name="config_install_reason_unknown">Onbekende reden</string>
     <string name="config_install_reason_policy">Systeembeleid</string>
     <string name="config_install_reason">Installatiereden</string>
     <string name="config_error_package_name_empty">Pakketnaam kan niet leeg zijn</string>
@@ -635,7 +635,7 @@
     <string name="uninstall_call_uninstaller">Verwijderaar aanroepen</string>
     <string name="uninstall_call_uninstaller_manually">Roep manueel de verwijderaar aan</string>
     <string name="uninstall_call_uninstaller_manually_desc">Verwijder app met gegeven pakketnaam</string>
-    <string name="uninstall_progress_text">Verwijderen...</string>
+    <string name="uninstall_progress_text">Verwijderen…</string>
     <string name="uninstall_enter_package_name">Voer pakketnaam in om te verwijderen</string>
     <string name="lab_module_flashing_show_art">ASCII-kunst weergeven</string>
     <string name="lab_module_flashing_show_art_desc">InstallerX ASCII-kunst weergeven bij start installatie</string>
@@ -702,7 +702,7 @@
     <string name="error_dialog_install_menu_not_available">Uitgebreid menu niet beschikbaar</string>
     <string name="error_no_package_to_uninstall">Geen pakket beschikbaar om te verwijderen</string>
     <string name="lab_tap_icon_to_share">Klik op het icoon om de APK te delen</string>
-    <string name="lab_tap_icon_to_share_desc">Klik het icoon op het voorbereidscherm om de APK te delen</string>
+    <string name="lab_tap_icon_to_share_desc">Klik het icoon op het voorbereidscherm om de installatiepakketten te delen</string>
     <string name="config_status_inactive">Inactief</string>
     <string name="config_always_use_root_in_system">Root gebruiken voor gemachtigde functies</string>
     <string name="config_always_use_root_in_system_desc">Bij uitvoeren als een systeeminstallateur, altijd root gebruiken voor gemachtigde functies, zoals het flashen van modules en het verwijderen van bestanden</string>
@@ -764,4 +764,16 @@
     <string name="lab_mi_island_outer_glow_desc">Voeg een gloedeffect toe aan de rand van de Super Island</string>
     <string name="dialog_settings">Dialooginstellingen</string>
     <string name="dialog_settings_desc">Het uiterlijk en gedrag van installatiedialogen aanpassen</string>
+    <string name="install_confirm_external_request_tip">Installatieverzoek van %1$s goedkeuren?</string>
+    <string name="install_confirm_question_update_owner_reminder">Deze app wordt doorgaans bijgewerkt via %1$s. Als je de app vanuit een andere bron bijwerkt, kan je telefoon toekomstige updates uit elke bron accepteren. De werking van de app kan veranderen.</string>
+    <string name="installer_temp_settings_tip">Deze instellingen zijn tijdelijk voor deze sessie. Ga naar Instellingen om ze te behouden</string>
+    <string name="lab_install_without_user_action">Bijwerken zonder gebruikersbevestiging</string>
+    <string name="lab_install_without_user_action_desc">Probeer apps bij te werken zonder gebruikersbevestiging. Deze functie werkt alleen wanneer de autorisatiegever is ingesteld op Geen</string>
+    <string name="lab_show_apk_path">Bestandspad tonen</string>
+    <string name="lab_show_apk_path_desc">Toon het bestandspad in de appdetails</string>
+    <string name="lab_show_apk_path_label">Bestandspad</string>
+    <string name="lab_show_install_initiator">Installatie-initiator tonen</string>
+    <string name="lab_show_install_initiator_desc">Toon welke app de installatie heeft gestart</string>
+    <string name="lab_show_install_initiator_label">Installatie-initiator</string>
+    <string name="lab_ui_settings">Experimentele UI-functie</string>
 </resources>

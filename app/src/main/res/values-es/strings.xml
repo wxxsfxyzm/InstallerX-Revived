@@ -78,7 +78,7 @@
     <string name="config_authorizer_none">Ninguno</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
-    <string name="config_authorizer_dhizuku">Dhizuku.</string>
+    <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">Personalizado</string>
     <string name="config_customize_authorizer">Autorizador personalizado</string>
     <string name="config_install_mode">Modo de instalación</string>
@@ -92,7 +92,7 @@
     <string name="config_declare_installer">Establecer fuente de instalación</string>
     <string name="config_installer">instalado por (nombre del paquete)</string>
     <string name="config_auto_delete">Eliminación automática</string>
-    <string name="config_auto_delete_desc">Elimina automáticamente el APK después de instalarlo</string>
+    <string name="config_auto_delete_desc">Eliminar automáticamente el APK después de instalarlo</string>
     <string name="config_display_sdk_version">Mostrar información del SDK</string>
     <string name="config_display_sdk_version_desc">Mostrar información de destino y mínima en la interfaz de instalación</string>
     <string name="config_label_main_settings">Configuración Principal</string>
@@ -496,7 +496,7 @@
     <string name="dhizuku_cannot_set_dexopt_desc">¡El modo Dhizuku no admite la configuración de dexopt!</string>
     <string name="installer_oppo_related">Relacionado con OPPO</string>
     <string name="installer_show_oem_special">Mostrar información adicional del OEM</string>
-    <string name="installer_show_oem_special_desc">Analizar y mostrar algún valor específico para los archivos APK OEM en el cuadro de diálogo de instalación</string>
+    <string name="installer_show_oem_special_desc">Analizar y mostrar algún valor específico para los APKs de OEM en el diálogo de instalación</string>
     <string name="config_request_update_ownership">Solicitar actualización de propiedad</string>
     <string name="config_request_update_ownership_desc">Establecer este instalador como fuente para futuras actualizaciones</string>
     <string name="installer_select_multi_apk">Instalación en lotes</string>
@@ -599,7 +599,7 @@
     <string name="uninstall_call_uninstaller">Llamar al desinstalador</string>
     <string name="uninstall_call_uninstaller_manually">Llamar a desinstalador manualmente</string>
     <string name="uninstall_call_uninstaller_manually_desc">Desinstalar la app por nombre de paquete</string>
-    <string name="uninstall_progress_text">Desinstalando...</string>
+    <string name="uninstall_progress_text">Desinstalando…</string>
     <string name="uninstall_enter_package_name">Introduce el nombre del paquete para desinstalar</string>
     <string name="permission_flashlight">Controlar linterna</string>
     <string name="permission_write_secure_settings">Escribe configuraciones seguras</string>
@@ -782,4 +782,8 @@
     <string name="lab_mi_island_outer_glow_desc">Añade un efecto de resplandor al estilo de una app de sistema en el borde de Super Island</string>
     <string name="dialog_settings">Configuración de diálogo</string>
     <string name="dialog_settings_desc">Personalizar la apariencia y el comportamiento del diálogo de instalación</string>
+    <string name="install_confirm_question_update_owner_reminder">Esta aplicación suele ser actualizada por %1$s. Si la actualizas desde otra fuente, tu teléfono podría recibir futuras actualizaciones desde cualquier origen. La funcionalidad de la aplicación podría cambiar.</string>
+    <string name="install_confirm_external_request_tip">¿Aprobar la solicitud de instalación de %1$s?</string>
+    <string name="lab_install_without_user_action">Instalar sin intervención del usuario</string>
+    <string name="lab_install_without_user_action_desc">Intentar actualizar aplicaciones sin confirmación del usuario. Esta función solo es efectiva cuando el autorizador está configurado en Ninguno</string>
 </resources>
