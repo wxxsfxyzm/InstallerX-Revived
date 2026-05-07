@@ -213,7 +213,7 @@ class DeviceCapabilityProviderImpl(
     private suspend fun detectRootMode(): RootMode = withContext(Dispatchers.IO) {
         if (checkBinaryViaSu("ksud -V")) return@withContext RootMode.KernelSU
         if (checkBinaryViaSu("magisk -v")) return@withContext RootMode.Magisk
-        if (checkBinaryViaSu("apd -v")) return@withContext RootMode.APatch
+        if (checkBinaryViaSu("apd -V")) return@withContext RootMode.APatch
 
         RootMode.None
     }

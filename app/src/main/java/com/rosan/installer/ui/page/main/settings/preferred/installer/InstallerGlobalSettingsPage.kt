@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -215,8 +216,9 @@ fun InstallerGlobalSettingsPage(
             // --- Group 3: Preset Installer Packages ---
             item {
                 SegmentedColumn(
+                    modifier = Modifier.padding(top = 8.dp),
                     title = stringResource(id = R.string.config_managed_installer_packages_title),
-                    contentPadding = PaddingValues(0.dp)
+                    contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
                     item {
                         ManagedPackagesWidget(
@@ -235,7 +237,8 @@ fun InstallerGlobalSettingsPage(
             // --- Group 4: Managed Blacklist ---
             item {
                 SegmentedColumn(
-                    title = stringResource(id = R.string.config_managed_blacklist_by_package_name_title)
+                    title = stringResource(id = R.string.config_managed_blacklist_by_package_name_title),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
                     item {
                         ManagedPackagesWidget(
@@ -254,7 +257,8 @@ fun InstallerGlobalSettingsPage(
             // --- Group 5: Managed Shared User IDs ---
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.config_managed_blacklist_by_shared_user_id_title)
+                    title = stringResource(R.string.config_managed_blacklist_by_shared_user_id_title),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
                     item {
                         ManagedUidsWidget(
