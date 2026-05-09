@@ -32,7 +32,7 @@
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_global">Глобальный</string>
     <string name="config_authorizer_global_desc">Глобальный (%1$s)</string>
-    <string name="config_authorizer_none">Нет</string>
+    <string name="config_authorizer_none">Без привилегий</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_auto_delete">Автоматическое удаление</string>
@@ -428,7 +428,7 @@
     <string name="cache_size">Размер кэша: %1$s</string>
     <string name="config_global_default">Глобальный по умолчанию</string>
     <string name="config_scope">Область действия</string>
-    <string name="config_authorizer_none_tips">При использовании системного установщика, большинство этих настроек неприменимы.</string>
+    <string name="config_authorizer_none_tips">При отсутствии привилегий большинство параметров становятся недействительными.</string>
     <string name="config_install_mode_desc">Установщик по умолчанию и связанные параметры</string>
     <string name="config_customize_package_source">Источник пакетов</string>
     <string name="config_customize_package_source_desc">Укажите источник пакетов. Локальный или скачанный файл имеют больше ограничений</string>
@@ -658,7 +658,7 @@
     <string name="theme_settings_use_blur">Эффект размытия</string>
     <string name="theme_settings_use_blur_desc">Включить эффект размытия в приложении</string>
     <string name="theme_settings_use_blur_warning">Эффект размытия может работать нестабильно и вызывать проблемы на Android 11 и более ранних версиях. При возникновении проблем может потребоваться очистка данных приложения. Продолжить?</string>
-    <string name="config_authorizer_none_system_app_tips">При использовании в качестве системного установщика большинство указанных здесь опций не требуются.</string>
+    <string name="config_authorizer_none_system_app_tips">При использовании в качестве системного установщика большинство указанных опций не требуются.</string>
     <string name="config_auto_delete_zip">Автоудаление zip-файлов</string>
     <string name="config_auto_delete_zip_desc">Удалить архив с содержащимся в нем установочным пакетом.</string>
     <string name="visit_home_page">Перейти на главную страницу</string>
@@ -706,7 +706,7 @@
     <string name="batch_install_result_message">Пакетная установка: %1$d/%2$d выполнена</string>
     <string name="config_status_inactive">Неактивный</string>
     <string name="config_always_use_root_in_system">Root-права для привилегированных операций</string>
-    <string name="config_always_use_root_in_system_desc">При запуске от имени системного установщика использовать root для привилегированных операций, таких как перепрошивка модулей и удаление файлов</string>
+    <string name="config_always_use_root_in_system_desc">При запуске от имени системного установщика всегда используйте root для привилегированных операций, таких как прошивка модулей и удаление файлов</string>
     <string name="lab_mi_island_countdown">Период блокирования XMSF</string>
     <string name="lab_mi_island_countdown_desc">Период отключения XMSF от сети. Применяется только с Shizuku. Изменяйте только в том случае, если вы понимаете последствия！</string>
     <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
@@ -736,7 +736,7 @@
     <string name="lab_mi_island_outer_glow_desc">Добавить эффект свечения по краям в стиле системных уведомлений</string>
     <string name="theme_settings_predictive_back_exit_direction">Направление перехода</string>
     <string name="theme_settings_predictive_back_exit_direction_desc">Выберите направление перехода для жеста назад</string>
-    <string name="theme_settings_predictive_back_animation_ksu_classic">Классический KernelSU</string>
+    <string name="theme_settings_predictive_back_animation_ksu_classic">Классический</string>
     <string name="theme_settings_predictive_back_exit_direction_follow_gesture">По направлению жеста</string>
     <string name="theme_settings_predictive_back">Эффекты перехода назад</string>
     <string name="theme_settings_predictive_back_animation">Стиль анимации</string>
@@ -782,7 +782,7 @@
     <string name="unavailable">Недоступно</string>
     <string name="running">Запущено</string>
     <string name="working_status_default_installer">Работает как установщик по умолчанию</string>
-    <string name="working_status_not_default_installer">Не установлен установщиком по умолчанию</string>
+    <string name="working_status_not_default_installer">Не назначен установщиком по умолчанию</string>
     <string name="working_status_default_installer_desc">В данный момент это приложение является установщиком пакетов по умолчанию</string>
     <string name="working_status_system_installer">Установщик системных пакетов</string>
     <string name="working_status_system_installer_desc">Приложение является установщиком системных пакетов</string>
