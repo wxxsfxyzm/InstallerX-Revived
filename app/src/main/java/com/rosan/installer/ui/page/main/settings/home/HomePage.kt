@@ -7,10 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -31,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -70,12 +67,12 @@ fun HomePage(
     title: String,
     outerPadding: PaddingValues,
     configCount: Int = 0,
-    onNavigateToProfiles: () -> Unit = {}
+    onNavigateToProfiles: () -> Unit = {},
+    windowInsetsSides: WindowInsetsSides? = null
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
     OnLifecycleEvent(event = Lifecycle.Event.ON_RESUME) {
@@ -87,11 +84,19 @@ fun HomePage(
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentWindowInsets = windowInsetsSides?.let { ScaffoldDefaults.contentWindowInsets.only(it) }
+            ?: ScaffoldDefaults.contentWindowInsets,
         topBar = {
             LargeFlexibleTopAppBar(
                 modifier = Modifier.installerMaterial3BlurEffect(backdrop),
-                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                title = { Text(title) },
+                windowInsets = windowInsetsSides?.let { TopAppBarDefaults.windowInsets.only(it) }
+                    ?: TopAppBarDefaults.windowInsets,
+                title = {
+                    Text(
+                        text = title,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
@@ -106,9 +111,13 @@ fun HomePage(
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
             contentPadding = PaddingValues(
-                start = 16.dp + horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                start = 16.dp + paddingValues.calculateStartPadding(layoutDirection) + outerPadding.calculateStartPadding(
+                    layoutDirection
+                ),
                 top = paddingValues.calculateTopPadding() + 16.dp,
-                end = 16.dp + horizontalSafeInsets.calculateEndPadding(layoutDirection),
+                end = 16.dp + paddingValues.calculateEndPadding(layoutDirection) + outerPadding.calculateEndPadding(
+                    layoutDirection
+                ),
                 bottom = outerPadding.calculateBottomPadding()
             )
         ) {

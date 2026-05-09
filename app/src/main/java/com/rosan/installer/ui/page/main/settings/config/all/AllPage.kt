@@ -11,14 +11,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -26,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -67,7 +67,8 @@ fun AllPage(
     useBlur: Boolean,
     viewModel: AllViewModel = koinViewModel { parametersOf(navigator) },
     title: String,
-    outerPadding: PaddingValues = PaddingValues(0.dp)
+    outerPadding: PaddingValues = PaddingValues(0.dp),
+    windowInsetsSides: WindowInsetsSides? = null
 ) {
     LaunchedEffect(Unit) {
         viewModel.navigator = navigator
@@ -106,7 +107,6 @@ fun AllPage(
     DeleteEventCollector(viewModel, snackBarHostState)
 
     val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
@@ -115,11 +115,19 @@ fun AllPage(
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentWindowInsets = windowInsetsSides?.let { ScaffoldDefaults.contentWindowInsets.only(it) }
+            ?: ScaffoldDefaults.contentWindowInsets,
         topBar = {
             LargeFlexibleTopAppBar(
                 modifier = Modifier.installerMaterial3BlurEffect(backdrop),
-                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                title = { Text(title) },
+                windowInsets = windowInsetsSides?.let { TopAppBarDefaults.windowInsets.only(it) }
+                    ?: TopAppBarDefaults.windowInsets,
+                title = {
+                    Text(
+                        text = title,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
@@ -130,10 +138,11 @@ fun AllPage(
         },
         floatingActionButton = {
             AnimatedVisibility(
-                modifier = Modifier.padding(
-                    end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-                    bottom = outerPadding.calculateBottomPadding()
-                ),
+                modifier = Modifier
+                    .padding(
+                        bottom = outerPadding.calculateBottomPadding()
+                    )
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.End)),
                 visible = showFloating,
                 enter = scaleIn(),
                 exit = scaleOut()
@@ -202,8 +211,12 @@ fun AllPage(
                         contentPadding = PaddingValues(
                             top = innerPadding.calculateTopPadding() + 16.dp,
                             bottom = outerPadding.calculateBottomPadding() + 16.dp,
-                            start = 16.dp + horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                            end = 16.dp + horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                            start = 16.dp + innerPadding.calculateStartPadding(layoutDirection) + outerPadding.calculateStartPadding(
+                                layoutDirection
+                            ),
+                            end = 16.dp + innerPadding.calculateEndPadding(layoutDirection) + outerPadding.calculateEndPadding(
+                                layoutDirection
+                            )
                         )
                     )
                 }

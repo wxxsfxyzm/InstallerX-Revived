@@ -5,15 +5,10 @@ package com.rosan.installer.ui.page.miuix.settings.preferred
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -89,7 +84,11 @@ fun MiuixPreferredPage(
     }
     val scrollBehavior = MiuixScrollBehavior()
 
-    var errorDialogInfo by remember { mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(null) }
+    var errorDialogInfo by remember {
+        mutableStateOf<PreferredViewEvent.ShowDefaultInstallerErrorDetail?>(
+            null
+        )
+    }
     val showErrorSheetState = remember { mutableStateOf(false) }
 
     val defaultInstallerErrorDetailActionLabel = stringResource(R.string.details)
@@ -118,7 +117,6 @@ fun MiuixPreferredPage(
 
     // Capture layout direction and horizontal safe insets for display cutouts in landscape
     val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
     val topBarBackdrop = rememberMiuixBlurBackdrop(enableBlur)
 
@@ -143,9 +141,9 @@ fun MiuixPreferredPage(
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             contentPadding = PaddingValues(
                 // Safely add horizontal paddings to avoid notches in landscape
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                start = innerPadding.calculateStartPadding(layoutDirection),
                 top = innerPadding.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
+                end = innerPadding.calculateEndPadding(layoutDirection),
                 bottom = outerPadding.calculateBottomPadding()
             ),
             overscrollEffect = null
@@ -186,8 +184,9 @@ fun MiuixPreferredPage(
             }
             if (uiState.authorizer == Authorizer.None)
                 item {
-                    val tip = if (capabilityProvider.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
-                    else stringResource(R.string.config_authorizer_none_tips)
+                    val tip =
+                        if (capabilityProvider.isSystemApp) stringResource(R.string.config_authorizer_none_system_app_tips)
+                        else stringResource(R.string.config_authorizer_none_tips)
                     MiuixSettingsTipCard(text = tip)
                 }
             item { SmallTitle(stringResource(R.string.basic)) }

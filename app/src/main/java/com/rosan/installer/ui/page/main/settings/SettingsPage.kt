@@ -133,7 +133,8 @@ fun Material3SettingsWideScreenLayout(
             mainPagerState = mainPagerState,
             tabs = tabs,
             useBlur = useBlur,
-            outerPadding = PaddingValues(0.dp) // Rail navigation doesn't overlay bottom content
+            outerPadding = PaddingValues(0.dp), // Rail navigation doesn't overlay bottom content
+            windowInsetsSides = WindowInsetsSides.Vertical + WindowInsetsSides.End
         )
     }
 }
@@ -148,7 +149,8 @@ private fun Material3SettingsPagerContent(
     mainPagerState: MainPagerState,
     tabs: List<NavigationTab>,
     useBlur: Boolean,
-    outerPadding: PaddingValues
+    outerPadding: PaddingValues,
+    windowInsetsSides: WindowInsetsSides? = null
 ) {
     HorizontalPager(
         state = mainPagerState.pagerState,
@@ -162,19 +164,22 @@ private fun Material3SettingsPagerContent(
                 title = tabs[page].label,
                 outerPadding = outerPadding,
                 configCount = configCount,
-                onNavigateToProfiles = { mainPagerState.animateToPage(1) }
+                onNavigateToProfiles = { mainPagerState.animateToPage(1) },
+                windowInsetsSides = windowInsetsSides
             )
 
             1 -> AllPage(
                 useBlur = useBlur,
                 title = tabs[page].label,
-                outerPadding = outerPadding
+                outerPadding = outerPadding,
+                windowInsetsSides = windowInsetsSides
             )
 
             2 -> PreferredPage(
                 useBlur = useBlur,
                 title = tabs[page].label,
-                outerPadding = outerPadding
+                outerPadding = outerPadding,
+                windowInsetsSides = windowInsetsSides
             )
         }
     }
