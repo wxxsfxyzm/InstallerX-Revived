@@ -92,7 +92,7 @@
     <string name="config_declare_installer">Establecer fuente de instalación</string>
     <string name="config_installer">instalado por (nombre del paquete)</string>
     <string name="config_auto_delete">Eliminación automática</string>
-    <string name="config_auto_delete_desc">Eliminar automáticamente el APK después de instalarlo</string>
+    <string name="config_auto_delete_desc">Eliminar automáticamente el APK después de que haya sido instalado</string>
     <string name="config_display_sdk_version">Mostrar información del SDK</string>
     <string name="config_display_sdk_version_desc">Mostrar información de destino y mínima en la interfaz de instalación</string>
     <string name="config_label_main_settings">Configuración Principal</string>
@@ -336,7 +336,7 @@
 
     <!-- MultiApkZip Installer -->
     <string name="installer_file_name">Archivo: %1$s</string>
-    <string name="installer_select_from_zip">Seleccionar desde archivo ZIP</string>
+    <string name="installer_select_from_zip">Seleccionar desde un archivo ZIP</string>
     <string name="installer_multi_apk_zip_description">Este archivo contiene múltiples aplicaciones, selecciona las que deseas procesar</string>
     <string name="installer_multi_apk_description">Por favor, selecciona las aplicaciones que quieres instalar</string>
     <string name="installing_progress_text">Instalando %1$s (%2$d/%3$d)</string>
@@ -649,8 +649,8 @@
     <string name="installer_notification_tap_to_disable">Notificación de servicio en primer plano, toca para desactivar</string>
     <string name="lab_module_flashing_show_art">Mostrar arte ASCII</string>
     <string name="lab_module_flashing_show_art_desc">Mostrar arte ASCII de InstallerX cuando comience la instalación</string>
-    <string name="installer_settings_require_biometric_auth">Requiere autenticación biométrica para instalar</string>
-    <string name="installer_settings_require_biometric_auth_desc">Requiere autenticación biométrica al instalar</string>
+    <string name="installer_settings_require_biometric_auth">Requerir autenticación biométrica para instalar</string>
+    <string name="installer_settings_require_biometric_auth_desc">Requiere autenticación biométrica al instalar paquetes</string>
     <string name="uninstaller_settings_require_biometric_auth">Requiere autenticación biométrica para desinstalar</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">Requiere autenticación biométrica al desinstalar</string>
     <string name="use_biometric_confirm_change_auth_settings">¿Estás seguro de que quieres cambiar esta configuración?</string>
@@ -734,7 +734,7 @@
     <string name="theme_settings_predictive_back_animation_none">Ninguno</string>
     <string name="theme_settings_predictive_back_animation_aosp">AOSP</string>
     <string name="theme_settings_predictive_back_animation_scale">Escala</string>
-    <string name="theme_settings_predictive_back_animation_ksu_classic">Clásico KernelSU</string>
+    <string name="theme_settings_predictive_back_animation_ksu_classic">Clásico</string>
     <string name="theme_settings_predictive_back_exit_direction_follow_gesture">Seguir el gesto</string>
     <string name="theme_settings_predictive_back_exit_direction_always_right">Siempre a la derecha</string>
     <string name="theme_settings_predictive_back_exit_direction_always_left">Siempre a la Izquierda</string>
