@@ -37,6 +37,8 @@ sealed interface EditViewAction {
     data class ChangeDataAllowTestOnly(val allowTestOnly: Boolean) : EditViewAction
     data class ChangeDataAllowDowngrade(val allowDowngrade: Boolean) : EditViewAction
     data class ChangeDataBypassLowTargetSdk(val bypassLowTargetSdk: Boolean) : EditViewAction
+    data class ChangeDataAllowSigMismatch(val allowSigMismatch: Boolean) : EditViewAction
+    data class ChangeDataAllowSigUnknown(val allowSigUnknown: Boolean) : EditViewAction
     data class ChangeDataAllowAllRequestedPermissions(val allowAllRequestedPermissions: Boolean) : EditViewAction
     data class ChangeDataRequestUpdateOwnership(val requestUpdateOwnership: Boolean) : EditViewAction
     data class ChangeSplitChooseAll(val splitChooseAll: Boolean) : EditViewAction

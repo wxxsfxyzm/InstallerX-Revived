@@ -61,6 +61,7 @@ enum class InstallErrorType(val legacyCode: Int, @param:StringRes val stringResI
     // --- Custom Internal Errors (Positive Codes) ---
     BLACKLISTED_PACKAGE(1, R.string.exception_install_failed_blacklisted_package),
     MISSING_INSTALL_PERMISSION(2, R.string.exception_install_failed_missing_install_permission),
+    BLOCKED_BY_PROFILE(3, R.string.exception_install_failed_blocked_by_profile),
 
     // --- Fallback for unknown status codes ---
     UNKNOWN(Int.MAX_VALUE, R.string.exception_install_failed_unknown);

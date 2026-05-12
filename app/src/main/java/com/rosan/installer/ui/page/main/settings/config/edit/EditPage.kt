@@ -234,6 +234,8 @@ fun EditPage(
                     item { DataForAllUserWidget(state, dispatch) }
                     item { DataAllowTestOnlyWidget(state, dispatch) }
                     item { DataAllowDowngradeWidget(state, dispatch) }
+                    item { DataAllowSigMismatchWidget(state, dispatch) }
+                    item { DataAllowSigUnknownWidget(state, dispatch) }
                     if (isHigherThanU) item { DataBypassLowTargetSdkWidget(state, dispatch) }
                     item { DataAllowAllRequestedPermissionsWidget(state, dispatch) }
                     if (isHigherThanU) item { DataRequestUpdateOwnershipWidget(state, dispatch) }

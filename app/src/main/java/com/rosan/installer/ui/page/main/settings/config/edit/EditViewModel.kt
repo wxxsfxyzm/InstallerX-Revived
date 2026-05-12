@@ -115,6 +115,8 @@ class EditViewModel(
                     is EditViewAction.ChangeDataAllowTestOnly -> changeDataAllowTestOnly(action.allowTestOnly)
                     is EditViewAction.ChangeDataAllowDowngrade -> changeDataAllowDowngrade(action.allowDowngrade)
                     is EditViewAction.ChangeDataBypassLowTargetSdk -> changeDataBypassLowTargetSdk(action.bypassLowTargetSdk)
+                    is EditViewAction.ChangeDataAllowSigMismatch -> changeDataAllowSigMismatch(action.allowSigMismatch)
+                    is EditViewAction.ChangeDataAllowSigUnknown -> changeDataAllowSigUnknown(action.allowSigUnknown)
                     is EditViewAction.ChangeDataAllowAllRequestedPermissions -> changeDataAllowAllRequestedPermissions(action.allowAllRequestedPermissions)
                     is EditViewAction.ChangeDataRequestUpdateOwnership -> changeDataRequestUpdateOwnership(action.requestUpdateOwnership)
                     is EditViewAction.ChangeSplitChooseAll -> changeSplitChooseAll(action.splitChooseAll)
@@ -290,6 +292,14 @@ class EditViewModel(
 
     private fun changeDataBypassLowTargetSdk(bypassLowTargetSdk: Boolean) {
         _data.update { it.copy(bypassLowTargetSdk = bypassLowTargetSdk) }
+    }
+
+    private fun changeDataAllowSigMismatch(allow: Boolean) {
+        _data.update { it.copy(allowSigMismatch = allow) }
+    }
+
+    private fun changeDataAllowSigUnknown(allow: Boolean) {
+        _data.update { it.copy(allowSigUnknown = allow) }
     }
 
     private fun changeDataAllowAllRequestedPermissions(allowAllRequestedPermissions: Boolean) {

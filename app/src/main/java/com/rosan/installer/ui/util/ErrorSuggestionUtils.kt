@@ -246,6 +246,20 @@ fun rememberErrorSuggestions(
                 )
             }
 
+            if (error.hasErrorType(InstallErrorType.BLOCKED_BY_PROFILE)) {
+                add(
+                    ErrorSuggestion(
+                        labelRes = R.string.suggestion_install_anyway,
+                        descriptionRes = R.string.suggestion_install_anyway_desc,
+                        icon = AppIcons.InstallMode,
+                        onClick = {
+                            viewModel.updateConfig { it.copy(bypassProfileRestriction = true) }
+                            viewModel.dispatch(InstallerViewAction.Install(false))
+                        }
+                    )
+                )
+            }
+
             val isNoneSystemAppMode = config.authorizer == Authorizer.None && !capabilityProvider.isSystemApp
             if (error.hasErrorType(InstallErrorType.MISSING_INSTALL_PERMISSION) && isNoneSystemAppMode) {
                 add(

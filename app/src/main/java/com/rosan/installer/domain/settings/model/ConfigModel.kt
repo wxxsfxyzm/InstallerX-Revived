@@ -37,6 +37,8 @@ data class ConfigModel(
     val allowDowngrade: Boolean = false,
     val bypassLowTargetSdk: Boolean = false,
     val allowAllRequestedPermissions: Boolean = false,
+    val allowSigMismatch: Boolean = false,
+    val allowSigUnknown: Boolean = false,
     val requestUpdateOwnership: Boolean = false,
     val splitChooseAll: Boolean = false,
     val apkChooseAll: Boolean = false,
@@ -51,6 +53,7 @@ data class ConfigModel(
     // Runtime fields that are not saved in the database but needed for business logic
     val installFlags: Int = 0,
     val bypassBlacklistInstallSetByUser: Boolean = false,
+    val bypassProfileRestriction: Boolean = false,
     val uninstallFlags: Int = 0,
     val callingFromUid: Int? = null,
     val initiatorPackageName: String? = null,
@@ -85,7 +88,9 @@ data class ConfigModel(
             allowAllRequestedPermissions = false,
             requestUpdateOwnership = false,
             splitChooseAll = false,
-            apkChooseAll = false
+            apkChooseAll = false,
+            allowSigMismatch = false,
+            allowSigUnknown = false
         )
 
         val XiaomiDefault = ConfigModel(
@@ -116,7 +121,9 @@ data class ConfigModel(
             allowAllRequestedPermissions = false,
             requestUpdateOwnership = false,
             splitChooseAll = false,
-            apkChooseAll = false
+            apkChooseAll = false,
+            allowSigMismatch = false,
+            allowSigUnknown = false
         )
 
         fun generateOptimalDefault(): ConfigModel =

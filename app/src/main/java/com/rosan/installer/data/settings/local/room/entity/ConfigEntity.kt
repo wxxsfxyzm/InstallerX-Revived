@@ -58,6 +58,8 @@ data class ConfigEntity(
     @ColumnInfo(name = "allow_downgrade", defaultValue = "0") var allowDowngrade: Boolean = false,
     @ColumnInfo(name = "bypass_low_target_sdk", defaultValue = "0") var bypassLowTargetSdk: Boolean = false,
     @ColumnInfo(name = "allow_all_requested_permissions", defaultValue = "0") var allowAllRequestedPermissions: Boolean = false,
+    @ColumnInfo(name = "allow_sig_mismatch", defaultValue = "0") var allowSigMismatch: Boolean = false,
+    @ColumnInfo(name = "allow_sig_unknown", defaultValue = "0") var allowSigUnknown: Boolean = false,
     @ColumnInfo(name = "request_update_ownership", defaultValue = "0") var requestUpdateOwnership: Boolean = false,
     @ColumnInfo(name = "split_choose_all", defaultValue = "0") var splitChooseAll: Boolean = false,
     @ColumnInfo(name = "apk_choose_all", defaultValue = "0") var apkChooseAll: Boolean = false,
@@ -71,6 +73,9 @@ data class ConfigEntity(
 
     @Ignore
     var bypassBlacklistInstallSetByUser: Boolean = false
+
+    @Ignore
+    var bypassProfileRestriction: Boolean = false
 
     // Variable to store the uninstallation flags
     @Ignore

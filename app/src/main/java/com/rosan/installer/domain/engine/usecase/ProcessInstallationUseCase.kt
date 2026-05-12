@@ -4,8 +4,12 @@ package com.rosan.installer.domain.engine.usecase
 
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.exception.InstallException
+import com.rosan.installer.domain.engine.model.DataType
 import com.rosan.installer.domain.engine.model.InstallEntity
+import com.rosan.installer.domain.engine.model.InstallErrorType
 import com.rosan.installer.domain.engine.model.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.SignatureMatchStatus
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.session.model.ProgressEntity
@@ -74,7 +78,10 @@ class ProcessInstallationUseCase(
                 (it as? AppEntity.BaseEntity)?.label ?: it.packageName
             }
 
-            // 2. Emit the 'Installing' state BEFORE blocking the thread
+            // 2. Check profile policy before proceeding
+            checkBlockedByProfile(config, analysisResults)
+
+            // 3. Emit the 'Installing' state BEFORE blocking the thread
             Timber.d("installApp: Starting. AppLabel=$appLabel ($current/$total)")
             emit(
                 ProgressEntity.Installing(
@@ -84,10 +91,10 @@ class ProcessInstallationUseCase(
                 )
             )
 
-            // 3. Now perform the heavy, blocking installation work
+            // 4. Now perform the heavy, blocking installation work
             installApp(config, selected)
 
-            // 4. Emit success if it is a single task or the last task in a batch
+            // 5. Emit success if it is a single task or the last task in a batch
             if (total <= 1) {
                 emit(ProgressEntity.InstallSuccess)
             }
@@ -130,6 +137,49 @@ class ProcessInstallationUseCase(
 
         Timber.d("installModule: Succeeded.")
         emit(ProgressEntity.InstallSuccess)
+    }
+
+    /**
+     * Checks the profile's policy toggles against the analysis results.
+     * Throws [InstallException] if a restriction is violated and not bypassed.
+     */
+    private fun checkBlockedByProfile(config: ConfigModel, results: List<PackageAnalysisResult>) {
+        if (config.bypassProfileRestriction) return
+
+        val selectedResults = results.filter { result -> result.appEntities.any { it.selected } }
+
+        for (result in selectedResults) {
+            if (!shouldApplySignaturePolicy(result)) continue
+
+            if (!config.allowSigMismatch &&
+                result.signatureMatchStatus == SignatureMatchStatus.MISMATCH
+            ) {
+                throw InstallException(
+                    InstallErrorType.BLOCKED_BY_PROFILE,
+                    "Installing with a different signature is not allowed by this profile"
+                )
+            }
+
+            if (!config.allowSigUnknown &&
+                result.signatureMatchStatus == SignatureMatchStatus.UNKNOWN_ERROR
+            ) {
+                throw InstallException(
+                    InstallErrorType.BLOCKED_BY_PROFILE,
+                    "Installing with an unverifiable signature is not allowed by this profile"
+                )
+            }
+        }
+    }
+
+    private fun shouldApplySignaturePolicy(result: PackageAnalysisResult): Boolean {
+        val selectedApps = result.appEntities.filter { it.selected }.map { it.app }
+        val containerType = selectedApps.firstOrNull()?.sourceType ?: return false
+        val hasInstalledApp = result.installedAppInfo != null
+        val hasSelectedBase = selectedApps.any { it is AppEntity.BaseEntity }
+        val hasSelectedSplit = selectedApps.any { it is AppEntity.SplitEntity }
+        val isSplitUpdateMode = hasInstalledApp && hasSelectedSplit && !hasSelectedBase
+
+        return !isSplitUpdateMode && (containerType == DataType.APK || containerType == DataType.APKS)
     }
 
     private suspend fun installApp(

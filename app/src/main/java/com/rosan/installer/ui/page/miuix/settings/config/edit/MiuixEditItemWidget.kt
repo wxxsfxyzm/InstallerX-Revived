@@ -693,6 +693,28 @@ fun MiuixDataBypassLowTargetSdkWidget(state: EditViewState, dispatch: (EditViewA
 }
 
 @Composable
+fun MiuixDataAllowSigMismatchWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    MiuixSwitchWidget(
+        icon = AppIcons.InstallAllowRestrictedPermissions,
+        title = stringResource(id = R.string.config_allow_sig_mismatch),
+        description = stringResource(id = R.string.config_allow_sig_mismatch_desc),
+        checked = state.data.allowSigMismatch,
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowSigMismatch(it)) }
+    )
+}
+
+@Composable
+fun MiuixDataAllowSigUnknownWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    MiuixSwitchWidget(
+        icon = AppIcons.InstallAllowRestrictedPermissions,
+        title = stringResource(id = R.string.config_allow_sig_unknown),
+        description = stringResource(id = R.string.config_allow_sig_unknown_desc),
+        checked = state.data.allowSigUnknown,
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowSigUnknown(it)) }
+    )
+}
+
+@Composable
 fun MiuixDataAllowAllRequestedPermissionsWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_grant_all_permissions),
