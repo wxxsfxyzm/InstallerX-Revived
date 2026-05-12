@@ -808,4 +808,9 @@
     <string name="home_device_info_system">Sistem</string>
     <string name="home_device_info_active_authorizer">Kullanımdaki yetkilendirici</string>
     <string name="home_device_info_default_installer">Varsayılan Yükleyici Etkinliği</string>
+    <string name="priv_page_notice_title">Yükleme profilinden farkı</string>
+    <string name="priv_page_notice_desc">Yükleme profillerinde, bu global ayarı geçersiz kılabilir ve belirli bir yetkilendirici seçebilirsiniz. Bu nedenle, bu bölüm sizin için tüm yetkilendirme yöntemlerinin kullanılabilirliğini algılar.</string>
+    <string name="setting_lsposed_module_desc">Üçüncü taraf bir LSPosed modülü aracılığıyla varsayılan yükleyiciyi zorladıysanız bunu etkinleştirin. Bu, dahili durum kontrolünü devre dışı bırakır ve ana sayfa sürekli Etkin olarak görünür</string>
+    <string name="priv_page_what_is_this_desc">Bu bölüm, cihazınızda bulunan tüm yetkilendirme yöntemlerini algılar. Lütfen uygulamanın ayrıcalıklı işlemler için kullanacağı yöntemlerden birini seçin. Uygulamada görüntülenen özellikler, seçiminize bağlı olarak değişecektir.</string>
+    <string name="exception_initiator_not_visible">Paket görünürlük kısıtlamaları nedeniyle izin reddedildi. Yüklemeyi talep eden uygulama InstallerX\'ten gizlenmiştir. \'Hide My Applist\' gibi modüller kullanıyorsanız, lütfen InstallerX\'i izin verilenler listesine ekleyin</string>
 </resources>

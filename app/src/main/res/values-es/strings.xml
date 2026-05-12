@@ -822,4 +822,5 @@
     <string name="shizuku_working_mode">Modo de funcionamiento de Shizuku: %s</string>
     <string name="shizuku_not_authorized">Por favor, conceded permiso para acceder a Sui o Shizuku</string>
     <string name="shizuku_not_available">Por favor, activa a Sui o Shizuku</string>
+    <string name="exception_initiator_not_visible">Permiso denegado debido a restricciones de visibilidad de paquetes. La aplicación que solicita la instalación está oculta para InstallerX. Si estás usando módulos como \'Hide My Applist\', añade InstallerX a la lista de permitidos</string>
 </resources>

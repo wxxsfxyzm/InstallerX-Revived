@@ -812,4 +812,5 @@
     <string name="home_device_info_system">Система</string>
     <string name="home_device_info_active_authorizer">Используется авторизатор</string>
     <string name="home_device_info_default_installer">Действия установщика по умолчанию</string>
+    <string name="exception_initiator_not_visible">Доступ запрещен из-за ограничений видимости пакета. Приложение, запрашивающее установку, скрыто от InstallerX. Если вы используете такие модули, как \'Скрыть мой список приложений\', добавьте InstallerX в список разрешенных</string>
 </resources>
