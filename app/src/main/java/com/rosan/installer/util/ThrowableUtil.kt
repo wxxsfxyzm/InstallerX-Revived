@@ -15,6 +15,8 @@ import com.rosan.installer.domain.engine.exception.ModuleInstallException
 import com.rosan.installer.domain.engine.model.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.InstallErrorType
 import com.rosan.installer.domain.engine.model.ModuleInstallErrorType
+import com.rosan.installer.domain.privileged.exception.PrivilegedException
+import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
 import java.util.zip.ZipException
 
 /**
@@ -93,3 +95,11 @@ fun Throwable.hasErrorType(vararg types: ModuleInstallErrorType): Boolean =
  */
 fun Throwable.hasErrorType(vararg types: AnalyseErrorType): Boolean =
     this is AnalyseException && this.errorType in types
+
+/**
+ * Returns a [Boolean] indicating whether this [Throwable]
+ * has a specific [PrivilegedErrorType].
+ *
+ */
+fun Throwable.hasErrorType(vararg types: PrivilegedErrorType): Boolean =
+    this is PrivilegedException && this.errorType in types

@@ -75,6 +75,14 @@ class AppInstallerRepositoryImpl(
                     cause = e
                 )
             }
+            // Check if Dhizuku service connection is lost
+            if (repo is DhizukuAppInstallerRepoImpl && e.message?.contains("KoinApplication has not been started") == true) {
+                throw PrivilegedException(
+                    errorType = PrivilegedErrorType.DHIZUKU_NOT_WORK,
+                    message = "Dhizuku service connection lost during operation.",
+                    cause = e
+                )
+            }
             // Throw other exceptions as-is
             throw e
         }
