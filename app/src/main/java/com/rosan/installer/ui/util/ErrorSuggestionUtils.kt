@@ -249,7 +249,7 @@ fun rememberErrorSuggestions(
             if (error.hasErrorType(InstallErrorType.BLOCKED_BY_PROFILE)) {
                 add(
                     ErrorSuggestion(
-                        labelRes = R.string.suggestion_install_anyway,
+                        labelRes = R.string.install_anyway,
                         descriptionRes = R.string.suggestion_install_anyway_desc,
                         icon = AppIcons.InstallMode,
                         onClick = {

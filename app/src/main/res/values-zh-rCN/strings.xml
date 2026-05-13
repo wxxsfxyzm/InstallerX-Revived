@@ -535,6 +535,7 @@
     <string name="exception_authentication_failed">用户认证失败</string>
     <string name="exception_install_failed_already_exists">应用已安装（包名相同、版本相同），请先卸载再安装</string>
     <string name="exception_install_failed_blacklisted_package">你不允许该应用的安装！</string>
+    <string name="exception_install_failed_blocked_by_profile">根据配置文件设定，不允许安装</string>
     <string name="exception_install_failed_invalid_apk">无效的 APK（安装包已损坏），请重新下载安装包</string>
     <string name="exception_install_failed_invalid_uri">无效的 URI</string>
     <string name="exception_install_failed_insufficient_storage">存储空间不足，请先清理空间或卸载无用应用</string>
@@ -688,6 +689,10 @@
     <string name="disable_allowed_apex_update_check_desc">不要检查是否可以更新已安装的 APEX</string>
     <string name="config_bypass_low_target_sdk">绕过低目标 SDK 限制</string>
     <string name="config_bypass_low_target_sdk_desc">允许针对旧的 SDK 版本的应用安装</string>
+    <string name="config_allow_sig_mismatch">允许安装签名不匹配的应用</string>
+    <string name="config_allow_sig_mismatch_desc">允许安装与已安装版本签名不同的应用（需要核心破解）</string>
+    <string name="config_allow_sig_unknown">允许安装未知签名的应用</string>
+    <string name="config_allow_sig_unknown_desc">允许安装无法验证签名的应用（需要核心破解）</string>
     <string name="dry_run">试运行</string>
     <string name="dry_run_desc">验证包，但不要安装</string>
     <string name="config_request_update_ownership">请求更新所有权</string>
@@ -762,6 +767,7 @@
     <string name="suggestion_bypass_low_target_sdk_desc">临时允许绕过限制并重试</string>
     <string name="suggestion_bypass_blacklist_set_by_user">本次允许安装</string>
     <string name="suggestion_bypass_blacklist_set_by_user_desc">本次允许黑名单内应用安装</string>
+    <string name="suggestion_install_anyway_desc">本次允许绕过限制安装</string>
     <string name="suggestion_retry_install_desc">重新尝试安装</string>
     <string name="lab_tip">实验室中的功能可能不稳定或存在风险，随时可能被修改或移除，请自行承担使用风险</string>
     <string name="lab_use_hook_mode">使用 BinderWrapper 模式</string>

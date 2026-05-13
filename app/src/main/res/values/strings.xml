@@ -789,7 +789,6 @@
     <string name="suggestion_bypass_low_target_sdk_desc">Temporarily allow bypassing restrictions and retry</string>
     <string name="suggestion_bypass_blacklist_set_by_user">Allow install once</string>
     <string name="suggestion_bypass_blacklist_set_by_user_desc">Temporarily allow install once</string>
-    <string name="suggestion_install_anyway">Install anyway</string>
     <string name="suggestion_install_anyway_desc">Temporarily bypass profile restriction and retry</string>
     <string name="suggestion_retry_install_desc">Try install again</string>
     <string name="lab_tip">Experimental features in the lab may be unstable or risky and could change or be removed at any time. Use at your own risk</string>
