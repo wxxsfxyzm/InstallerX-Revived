@@ -2,7 +2,6 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.navigation
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,9 +74,10 @@ fun Material3MainPageWrapper(
             sharedViewModel.updateLastMainPageIndex(settledPage)
         }
     }
-    BackHandler(enabled = mainPagerState.selectedPage != 0) {
-        mainPagerState.animateToPage(0)
-    }
+    MainScreenBackHandler(
+        mainPagerState = mainPagerState,
+        navController = LocalNavigator.current,
+    )
 
     val layoutInfo = LocalWindowLayoutInfo.current
     val showRail = layoutInfo.showNavigationRail

@@ -3,7 +3,6 @@
 package com.rosan.installer.ui.navigation
 
 import android.os.Build
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.RoomPreferences
@@ -80,9 +79,10 @@ fun MiuixMainPageWrapper(
             sharedViewModel.updateLastMainPageIndex(settledPage)
         }
     }
-    BackHandler(enabled = mainPagerState.selectedPage != 0) {
-        mainPagerState.animateToPage(0)
-    }
+    MainScreenBackHandler(
+        mainPagerState = mainPagerState,
+        navController = LocalNavigator.current,
+    )
 
     val snackbarHostState = remember { SnackbarHostState() }
 
