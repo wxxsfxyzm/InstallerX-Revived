@@ -660,14 +660,27 @@ class InstallerViewModel(
         }
     }
 
-    private fun uninstallAndRetryInstall(keepData: Boolean, conflictingPackage: String?) {
-        val targetPackageName = conflictingPackage ?: _localState.value.currentPackageName
+    private fun uninstallAndRetryInstall(
+        keepData: Boolean,
+        conflictingPackage: String?
+    ) {
+        val targetPackageName =
+            conflictingPackage ?: _localState.value.currentPackageName
+
         if (targetPackageName == null) {
             toast(R.string.error_no_package_to_uninstall)
             return
         }
 
-        updateConfig { it.copy(uninstallFlags = if (keepData) PackageManagerUtil.DELETE_KEEP_DATA else 0) }
+        updateConfig {
+            var flags = if (keepData) {
+                PackageManagerUtil.DELETE_KEEP_DATA
+            } else {
+                0
+            }
+            flags = flags.addFlag(PackageManagerUtil.DELETE_ALL_USERS)
+            it.copy(uninstallFlags = flags)
+        }
 
         isRetryingInstall = true
         Timber.d("Uninstalling conflicting/old package: $targetPackageName for retry")
