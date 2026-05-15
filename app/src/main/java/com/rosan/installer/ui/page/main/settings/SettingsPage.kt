@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.library.FloatingBottomBar
+import com.rosan.installer.ui.library.FloatingBottomBarDefaults
 import com.rosan.installer.ui.library.FloatingBottomBarItem
 import com.rosan.installer.ui.navigation.MainPagerState
 import com.rosan.installer.ui.navigation.NavigationTab
@@ -68,6 +69,7 @@ import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+
 
 /**
  * Compact Screen Layout (Portrait/Phone)
@@ -222,8 +224,11 @@ private fun Material3FloatingBottomBar(
             backdrop = floatingBackdrop,
             tabsCount = tabs.size,
             isBlurEnabled = false,
-            baseContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-            indicatorColor = MaterialTheme.colorScheme.primary
+            colors = FloatingBottomBarDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                indicatorColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
         ) {
             tabs.forEachIndexed { index, tab ->
                 FloatingBottomBarItem(
@@ -236,20 +241,19 @@ private fun Material3FloatingBottomBar(
 
                     BadgedBox(
                         badge = {
+                            // Badge keeps its own colors defined in ConfigBadge
                             ConfigBadge(showBadge = showBadge, configCount = configCount)
                         }
                     ) {
                         Icon(
                             imageVector = tab.icon,
                             contentDescription = tab.label,
-                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Text(
                         text = tab.label,
                         fontSize = 11.sp,
                         lineHeight = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         softWrap = false,
                         overflow = TextOverflow.Visible

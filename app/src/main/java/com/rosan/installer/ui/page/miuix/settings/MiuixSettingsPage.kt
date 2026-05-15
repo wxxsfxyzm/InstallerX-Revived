@@ -107,14 +107,12 @@ private fun SettingsFloatingBottomBar(
                 ) {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = item.label,
-                        tint = MiuixTheme.colorScheme.onSurface
+                        contentDescription = item.label
                     )
                     Text(
                         text = item.label,
                         fontSize = 11.sp,
                         lineHeight = 14.sp,
-                        color = MiuixTheme.colorScheme.onSurface,
                         maxLines = 1,
                         softWrap = false,
                         overflow = TextOverflow.Visible
